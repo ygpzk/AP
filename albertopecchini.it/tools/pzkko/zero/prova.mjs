@@ -10,6 +10,8 @@
 //                                                  salvato a ogni passo, angoli, margini, glifi, errori; vedi REGOLE.md)
 //   … --suoni                                      coi suoni accesi: il collaudo vuole anche il bip a ogni tasto
 //   … --server-finto --economia [--lavaggio=gira|pronto]   sporchi, lavatrice e decifratore installati, wallet nello zaino
+//   … --tasti3d                                    (9.11) OK e INDIETRO 3D col mouse, poi INDIETRO tenuto: si spegne e si chiude
+//   … --chiudi-aprendo                             (9.11) un clic fuori mentre si apre: si chiude appena aperto
 //   … --tasti=ok,aspetta@3000,…                    aspetta@<ms>: fermo senza tasti (il quiz che va avanti da solo)
 // Serve puppeteer-core in tools/catture e un browser (tools/pzkko/browser.mjs). Niente server vero: il wallet e lo zaino
 // restano nel browser (le richieste alle api falliscono, e il sito sta in piedi lo stesso).
@@ -40,7 +42,10 @@ const turni = process.argv.includes('--rider') ? ['strada'] : turniArg ? (turniA
 // PZKKO_BANCA) coi file IN MEMORIA, come tools/dev.mjs: i dati veri non si toccano. La pagina entra da sola col conto pzkko
 // (games/pzk.js, in locale). `metti` cambia il conto a mano, per preparare una prova; `rnd` è il caso della banca.
 // --giocate (con --banca --app=profilo): nel libro del conto le giocate di Bighurra del 4.11 (un blackjack vinto nella chat,
-// tre slot perse) e qualche mano ai giochi grandi, per vedere la riga «nella chat» della pagina dei giochi
+// tre slot perse) e qualche mano ai giochi grandi, per vedere la riga «nella chat» della pagina dei giochi.
+// --rivali (con --banca --app=giocatori o profilo; 6.11, Alberto: «le classifiche dicono cose diverse da dentro i profili
+// singoli»): altri tre conti nella banca in memoria, due dei quali PARI MERITO con pzkko in esperienza, pescati, sfide e
+// acquisti, per vedere che la classifica, la scheda e i rivali dicano lo stesso posto («1° pari»)
 const conBanca = process.argv.includes('--banca') || turni.length > 0
 let bancaVera = null
 if (conBanca) {
@@ -55,7 +60,7 @@ if (conBanca) {
   bancaVera = {
     gestisci: b.gestisci, accesso: () => w.accessoLocale('pzkko'), rnd: motore.rnd,
     conto: async () => (await (await store()).read()).db.conti.find((c) => c.nome === 'pzkko') ?? null,
-    metti: async (fn) => arch.aggiorna(await store(), (db) => { const c = db.conti.find((x) => x.nome === 'pzkko'); c.zaino ??= { v: 1, t: 0, xp: 0, mestiere: null, turni: 0, oggetti: {}, attese: {}, effetti: {}, serie: {}, stat: {}, rapidi: [] }; fn(c, db); c.agg = (c.agg ?? 0) + 1 }),
+    metti: async (fn, nome = 'pzkko') => arch.aggiorna(await store(), (db) => { const c = db.conti.find((x) => x.nome === nome); c.zaino ??= { v: 1, t: 0, xp: 0, mestiere: null, turni: 0, oggetti: {}, attese: {}, effetti: {}, serie: {}, stat: {}, rapidi: [] }; fn(c, db); c.agg = (c.agg ?? 0) + 1 }),
   }
 }
 const senzaConto = process.argv.includes('--senzaconto') // nessun conto: il cercapersone chiuso, l'account
@@ -266,6 +271,20 @@ try {
   if (process.argv.includes('--debug')) console.log('apri:', await page.evaluate(() => import('/telefono/telefono.js').then((t) => t.apri(null, { da: document.querySelector('.chat-tasto') })).then(() => 'ok', (e) => 'ERRORE ' + (e.stack || e))))
   else { await page.mouse.down(); await page.mouse.up() }
   await page.waitForFunction(() => document.querySelector('.tel.zero')?.open, { timeout: 30000 })
+  // --chiudi-aprendo (9.11): un clic fuori mentre vola ancora verso lo schermo: prima non faceva niente, ora si chiude
+  // appena aperto (col ciao) e il tasto torna sul muro
+  if (process.argv.includes('--chiudi-aprendo')) {
+    await dorm(120)
+    const inVolo = await page.evaluate(() => { window.__fuori = 0; const z = window.pzkkoZero, f = z.onFuori; z.onFuori = () => { window.__fuori++; f() }; addEventListener('pointerdown', (e) => { window.__giu = String(e.target.className || e.target.tagName) }, true); return document.querySelector('.tel.zero')?.classList.contains('zoom') })
+    await page.mouse.move(30, 30); await page.mouse.down(); await page.mouse.up()
+    const t1 = Date.now()
+    await page.waitForFunction(() => !document.querySelector('.tel.zero')?.open, { timeout: 10000 }).catch(() => {})
+    const ok = await page.evaluate(() => !document.querySelector('.tel.zero')?.open && document.querySelector('.chat-tasto')?.style.visibility !== 'hidden')
+    if (!ok) console.log('  stato:', await page.evaluate(() => import('/telefono/zero/os/os.js').then((o) => JSON.stringify({ fuori: window.__fuori, giu: window.__giu, cls: document.querySelector('.tel.zero')?.className, vista: o.corrente()?.nome, rig: window.pzkkoZero?.debug?.() }))))
+    console.log(`CHIUDI APRENDO: ${inVolo ? 'in volo' : 'già aperto (prova non valida)'}, ${ok ? `chiuso dopo ${Date.now() - t1} ms, tasto sul muro` : 'NON SI È CHIUSO'}`)
+    await page.screenshot({ path: join(LAVORO, 'prova-chiudi-aprendo.png') })
+    await aperto.close(); server.close(); process.exit(ok ? 0 : 1)
+  }
   // il volo: a metà strada (il modello è già in cache: parte subito)
   await page.waitForFunction(() => !document.querySelector('.tel.zero')?.classList.contains('zoom-nascosto') || document.querySelector('.z-tela')?.classList.contains('ombra') === false, { timeout: 30000 }).catch(() => {})
   await dorm(150)
@@ -488,6 +507,13 @@ try {
   }
   if (app && bancaVera) {
     await page.waitForFunction(() => import('/games/pzk.js').then((p) => p.conto()?.nome === 'pzkko'), { timeout: 20000 }).catch(() => console.log('  (il conto pzkko della banca in memoria non è entrato)'))
+    if (process.argv.includes('--rivali')) {
+      const pari = (c) => { c.zaino.xp = 1200; c.zaino.mestiere = 'rider'; c.zaino.stat = { ...c.zaino.stat, pescati: 2, sfideFatte: 2, acquisti: 7, comandi: 16, quizGiusti: 13, quizTotali: 20 }; c.libro = { ...c.libro, lav: 3000, g: { blackjack: [5, 2, 865, 130, 50], 'chat-blackjack': [1, 1, 400, 800, 400] } } }
+      for (const [i, nome] of ['Bighurra', 'nutria92', 'Bartolomeo Pecchinix'].entries()) await bancaVera.gestisci('wallet', { m: 'POST', ip: `10.1.1.${i + 1}`, corpo: JSON.stringify({ a: 'crea', nome, pin: '1234' }) })
+      await bancaVera.metti(pari); await bancaVera.metti(pari, 'Bighurra')
+      await bancaVera.metti((c) => { c.zaino.xp = 4000; c.zaino.stat = { pescati: 31, sfideFatte: 9, acquisti: 12, comandi: 80 }; c.pzk = 52340; c.libro = { lav: 60000, spe: 9000, g: { roulette: [12, 5, 5000, 6200, 900] } } }, 'nutria92')
+      await page.evaluate(() => import('/games/pzk.js').then((p) => p.sincronizza())); await dorm(600)
+    }
     if (process.argv.includes('--giocate')) {
       await bancaVera.metti((c) => { c.libro = { ...c.libro, lav: 10292.5, pre: 1160, spe: 10580, g: { 'chat-slot': [3, 0, 60, 0, 0], 'chat-blackjack': [1, 1, 400, 800, 400], blackjack: [5, 2, 865, 130, 50], roulette: [2, 2, 5000, 6000, 500] } } })
       await page.evaluate(() => import('/games/pzk.js').then((p) => p.sincronizza())); await dorm(600)
@@ -558,11 +584,59 @@ try {
     await page.screenshot({ path: join(LAVORO, `prova-app-${app}.png`) })
     console.log(errori.length ? `COLLAUDO ${app}: ${errori.length} problemi\n  - ` + errori.join('\n  - ') : `COLLAUDO ${app}: tutto a posto`)
   }
+  // --tasti3d (9.11, Alberto: «aggiusta tasti fisici… non si spegne e quindi non si chiude»): OK e INDIETRO col mouse (dentro
+  // la finestra, mandano il loro nome), poi INDIETRO TENUTO tre secondi: il cercapersone deve spegnersi e chiudersi da solo
+  if (process.argv.includes('--tasti3d')) {
+    await page.evaluate(() => { window.__tasti = []; const z = window.pzkkoZero, f = z.onTasto; z.onTasto = (n, v) => { window.__tasti.push(n); return f(n, v) } })
+    const male = []
+    for (const nome of ['ok', 'indietro']) {
+      const p = await page.evaluate((n) => window.pzkkoZero.dove(n), nome)
+      const vp = page.viewport(), dentroFinestra = p.x > 4 && p.y > 4 && p.x < vp.width - 4 && p.y < vp.height - 4
+      await page.mouse.move(p.x, p.y); await page.mouse.down(); await dorm(90); await page.mouse.up(); await dorm(350)
+      const preso = await page.evaluate(() => window.__tasti.pop() ?? '-')
+      console.log(`  ${nome.padEnd(8)} a (${Math.round(p.x)}, ${Math.round(p.y)})${dentroFinestra ? '' : ' FUORI DALLA FINESTRA'} → pzk os riceve ${preso}`)
+      if (!dentroFinestra) male.push(`${nome} fuori dalla finestra`)
+      if (preso !== nome) male.push(`${nome}: manda ${preso}`)
+    }
+    const p = await page.evaluate(() => window.pzkkoZero.dove('indietro'))
+    // (9.11) la barra dello spegnimento: tenuto 1,2 s e lasciato, la barra c'era, sparisce, e resta acceso
+    const lcdPng = (nome) => page.evaluate(() => import('/telefono/zero/os/os.js').then((o) => o.lcd.canvas.toDataURL('image/png'))).then((u) => writeFile(join(LAVORO, nome), Buffer.from(u.split(',')[1], 'base64')))
+    await page.mouse.move(p.x, p.y); await page.mouse.down(); await dorm(1200)
+    await lcdPng('prova-spegni-meta.png'); await page.screenshot({ path: join(LAVORO, 'prova-spegni-meta-3d.png') })
+    await page.mouse.up(); await dorm(300)
+    const ancoraAperto = await page.evaluate(() => !!document.querySelector('.tel.zero')?.open)
+    await lcdPng('prova-spegni-lasciato.png')
+    console.log(`  INDIETRO tenuto 1,2 s e lasciato: ${ancoraAperto ? 'resta acceso' : 'SI È CHIUSO'} (la barra: prova-spegni-meta.png, prova-spegni-quasi.png, prova-spegni-lasciato.png)`)
+    if (!ancoraAperto) male.push('lasciato a metà si chiude')
+    await dorm(400)
+    await page.mouse.move(p.x, p.y); await page.mouse.down()
+    const t0 = Date.now()
+    await dorm(2700); await lcdPng('prova-spegni-quasi.png')
+    await page.waitForFunction(() => window.__tasti.includes('spegni'), { timeout: 4500 }).catch(() => {})
+    const spento = Date.now() - t0
+    await page.mouse.up()
+    if (!(await page.evaluate(() => window.__tasti.includes('spegni')))) male.push('INDIETRO tenuto non spegne')
+    await page.waitForFunction(() => !document.querySelector('.tel.zero')?.open, { timeout: 6000 }).catch(() => {})
+    const chiuso = Date.now() - t0
+    const aperto = await page.evaluate(() => !!document.querySelector('.tel.zero')?.open)
+    console.log(`  INDIETRO tenuto: spegne dopo ${spento} ms, chiuso dopo ${chiuso} ms${aperto ? ' — È ANCORA APERTO' : ''}`)
+    if (aperto) male.push('dopo lo spegnimento resta aperto')
+    console.log(male.length ? `TASTI: ${male.join(' · ')}` : 'TASTI: tutto a posto')
+  }
   // la chiusura: fuori dal cercapersone (un clic sulla tela dove non c'è il cercapersone); sul cellulare, CHIUDI nella barra
-  if (telefono) await page.click('.t-nav [data-t="chiudi"]'); else await page.mouse.click(30, 30)
-  await dorm(1000)
-  await page.screenshot({ path: join(LAVORO, 'prova-saluto.png') })
-  await dorm(2600)
+  // (9.11) il ciao a tutto schermo deve partire alla PRESSIONE e durare un secondo; chiuso in meno di due
+  if (await page.evaluate(() => !!document.querySelector('.tel.zero')?.open)) {
+    const t0 = Date.now()
+    if (telefono) await page.click('.t-nav [data-t="chiudi"]'); else { await page.mouse.move(30, 30); await page.mouse.down() }
+    const ciao = await page.evaluate(() => import('/telefono/zero/os/os.js').then((o) => o.corrente()?.nome))
+    if (!telefono) { await dorm(60); await page.mouse.up() }
+    await dorm(450)
+    await page.screenshot({ path: join(LAVORO, 'prova-saluto.png') })
+    await page.waitForFunction(() => !document.querySelector('.tel.zero')?.open, { timeout: 8000 }).catch(() => {})
+    const dt = Date.now() - t0
+    console.log(`CHIUSURA: ${ciao === 'ciao' ? 'il ciao subito' : `alla pressione c'è «${ciao}», non il ciao`}, chiuso dopo ${dt} ms${dt > 2000 ? ' — TROPPO LENTA' : ''}`)
+    await dorm(400)
+  }
   await page.screenshot({ path: join(LAVORO, 'prova-chiuso.png') })
   console.log('foto in', LAVORO)
 } finally {

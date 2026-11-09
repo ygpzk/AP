@@ -642,16 +642,24 @@ Con la [[La banca sul server|banca sul server]] è <code>banca\\libro.mjs</code>
   },
 
   'Le classifiche': {
-    data: '2026-10-29',
-    fonti: ['albertopecchini.it/pzkko/api/giocatori.mjs', 'albertopecchini.it/pzkko/api/giocatori.mjs', 'albertopecchini.it/pzkko/chat/db.js', G + 'libro.mjs', README],
+    data: '2026-11-06',
+    fonti: ['albertopecchini.it/pzkko/api/giocatori.mjs', 'albertopecchini.it/pzkko/chat/db.js', G + 'libro.mjs', 'albertopecchini.it/tools/pzkko/giocatori.mjs', README],
     testo: `[[File:app-giocatori.webp|thumb|le classifiche nell'app Giocatori del cercapersone zero: il podio coi numeri rovesciati]]
-'''Le classifiche''' di [[pzkko.it]] ordinano i giocatori col conto per diciassette metriche: i $pzk, il livello, i vinti ai giochi, i guadagnati in tutto, i pescati, i cacciati, gli scavati, i comandi, i turni di lavoro, i quiz giusti, le sfide, le quest, le mani ai giochi grandi, il colpo migliore, i giorni di fila… Si vedono in [[Giocatori (app)]] del [[Il cercapersone zero|cercapersone zero]] (il podio coi numeri rovesciati, la faccia, il nome, il valore) e con il comando <code>classifica [metrica]</code> della [[La chat col bot|chat col bot]]; <code>rivale</code> mostra chi hai davanti e dietro.
+'''Le classifiche''' di [[pzkko.it]] ordinano i giocatori col conto per diciannove metriche: i $pzk, il livello, i vinti ai giochi, i guadagnati in tutto, i pescati, i cacciati, gli scavati, i comandi, i turni di lavoro, i quiz giusti, le sfide, le quest, le mani ai giochi grandi, il colpo migliore, i giorni di fila… Si vedono in [[Giocatori (app)]] del [[Il cercapersone zero|cercapersone zero]] (il podio coi numeri rovesciati, la faccia, il nome, il valore) e con il comando <code>classifica [metrica]</code> della [[La chat col bot|chat col bot]]; <code>rivale</code> mostra chi hai davanti e dietro.
 
 == Da dove vengono i numeri ==
 Dal [[Il database dei giocatori|database dei giocatori]] (<code>pzkko/giocatori.json</code>: la riga pubblica di ogni giocatore, aggiornata a ogni salvataggio dello zaino e unita ai conti del wallet a ogni richiesta, così i $pzk sono sempre quelli veri) e, dal 29.10.2026, dal [[Il libro dei conti|libro dei conti]] di ogni conto: i vinti ai giochi sono il netto, i guadagnati in tutto la somma vera. Prima li contava il browser nello zaino e si potevano falsare.
 
 == L'API ==
 <code>GET /api/giocatori/?top=&lt;metrica&gt;</code> la classifica, <code>?cerca=</code> la ricerca, <code>?ind=pzk123456</code> il profilo con la posizione in ogni classifica, <code>?stats=1</code> i numeri della banca, <code>?notizie=1</code> le [[Le notizie della banca|notizie]]; <code>POST { token, vicini }</code> per il proprio profilo e i rivali. Mai il PIN né gli oggetti uno per uno. Nel profilo pubblico vanno anche la faccia, il colore e il motto ([[Le facce del profilo]]) e i giochi grandi (<code>gi</code>).
+
+== Una fonte sola, dal 6 novembre ==
+{{Citazione|le classifiche dicono cose diverse da dentro i profili singoli, devi aggiornare tutto questo sistema|Alberto, 6.11.2026}}
+Aveva ragione, e coi dati veri di quel giorno le differenze erano cinque. '''Il posto''': la classifica metteva in fila i pari merito per anzianità (1°, 2°), la scheda contava solo chi aveva di più (1°, 1°); Bighurra era 2° in «pescati», «sfide» e «pezzi comprati» in classifica e 1° nella sua scheda. '''Le mani''': il profilo le contava dal [[Il libro dei conti|libro dei conti]] (tutti i giochi), la scheda e la classifica dallo zaino (solo i sei grandi): 17 contro 23 per pzkko, 4 contro 0 per Bighurra. '''I numeri della chat''': le classifiche leggevano la riga di <code>giocatori.json</code>, una copia dello zaino scritta al più una volta ogni 20 secondi, e l'ultima mossa di una seduta poteva non arrivarci mai. '''Il tempo''': la classifica restava in memoria fino a due minuti e mezzo, la scheda venti secondi. '''Le colonne''': il comando <code>classifica</code> nella chat a 8 bit incollava le celle, e «2pzkko liv. 52» voleva dire 2°, livello 5, valore 2.
+
+Adesso la [[La banca sul server|banca]] (<code>giocatori-dati.mjs</code>) legge lo zaino dal conto, vivo, e le mani e i soldi dal libro; il posto lo dà '''una funzione sola''' (<code>posto</code>: 1 + quanti hanno di più) per la classifica, la scheda e i rivali. I pari merito hanno lo stesso posto e lo si dice: «2° pari». La memoria è una, di dieci secondi, e il browser chiede con la versione del proprio conto (<code>&amp;v=</code>): dopo una mossa sua arriva tutto nuovo. La scheda di un giocatore scrive il valore accanto a ogni posto («1° pari in pescati: 2»), così si confronta a occhio.
+
+Le prove: <code>banca\prove\giocatori.mjs</code> (257, in memoria; col codice di prima ne fallivano 123) e <code>node tools/pzkko/giocatori.mjs</code>, lo sguardo da fuori sul sito vero: tutte le classifiche contro tutte le schede, e deve dire «classifiche e schede dicono le stesse cose».
 
 == Nel profilo ==
 Col conto, [[Profilo (app)]] mostra le posizioni in classifica nella sesta pagina; senza conto, o col server che non risponde, lo dice. Sullo zero le classifiche arrivano da <code>chat/db.js</code>, e nel collaudo c'è un database finto (<code>--server-finto</code>).

@@ -107,9 +107,11 @@ serio ma è un progetto Vercel a parte.
   salvano) o il conto (vedi «Il wallet e la borsa», sotto).
 - `barra/` — la barra in alto (26.10, Alberto: «una topbar con sezioni: la storia del sito, i gadget,
   elenchi di oggetti, achievement, account, info e copyright»): `barra.js` la mette in cima a ogni pagina che lo carica
-  (la home, e quindi la storia e la 404 che si generano da lei, e le pagine nuove), `barra.css` (niente sfondo: dall'alto
-  colano pixel scuri, qualcuno colorato si stacca e cade; le voci sono pezzi di carta strappati col nastro, in fila al
-  centro, ognuno con la sua carta e il suo carattere; i bordi e i pixel vengono da un caso col seme fisso, sempre uguali;
+  (la home, e quindi la storia e la 404 che si generano da lei, e le pagine nuove), `barra.css` (niente sfondo; rifatta il 6.11, «rifallo stra figo»: dall'alto
+  cola vernice a pixel, una tela che disegna `barra.js` e che si muove solo all'apertura e sotto il puntatore; le voci
+  sono pezzi di carta veri, in fila al centro: lo scontrino col codice a barre, il cartone pinzato, il post-it con l'angolo
+  alzato, il biglietto rosa con la puntina, la pagina di quaderno, lo strappo bianco, il cartellino appeso allo spago,
+  ognuno col suo carattere; tutto in CSS, niente immagini; strappi e gocce da un caso col seme fisso, sempre uguali;
   `--barra` è l'altezza), `pagina.css` (il foglio
   col nastro delle pagine nuove). Le voci: **storia**, **gadget** (`gadget/`: il wallet, il cercapersone e le sue 17 app,
   i giochi, coi link che li aprono), **oggetti** (`oggetti/`: lo shop per reparto, il bottino con quanto spesso esce, le
@@ -117,7 +119,7 @@ serio ma è un progetto Vercel a parte.
   **traguardi** (`traguardi/`: gli achievement, `chat/traguardi.js`: ventisei, ognuno una funzione che legge lo zaino e
   dice a che punto sei, quindi valgono anche quelli fatti prima), **account** (nella home apre il cercapersone
   sull'account; dalle altre pagine porta a `/#account`, che fa lo stesso), **info** (`info/`: cos'è, i soldi finti, chi
-  l'ha fatto, cosa si salva, i crediti, il copyright) e **wiki**, spenta con «presto» finché non c'è. Fuori dalla home, prima di tutte, **← indietro** (carta rossa): porta sempre alla home pulita (`/`), non
+  l'ha fatto, cosa si salva, i crediti, il copyright) e **wiki**, spenta con «presto» finché non c'è. Fuori dalla home, prima di tutte, **indietro** (una freccia di cartoncino rosso; sul telefono resta ferma a sinistra): porta sempre alla home pulita (`/`), non
   alla pagina di prima (che poteva essere `/#account`). La home, usato `#account`, lo toglie dall'indirizzo.
 - `wallet/` — il wallet dei $pzk (22.10 notte), il portafoglio di pelle alla Fallout (dal 26.10 il banner è un pezzo del muro):
   `wallet.js` (gli schermi, la batteria, la borsa; dal 26.10 il conto è nell'app Account del cercapersone) e `wallet.css`; la foto del
@@ -2204,8 +2206,17 @@ che cercapersone zero è predefinito e quello attuale si elimina per sempre»). 
 led rosso lampeggia piano quando c'è qualcosa da riscuotere e **sfarfalla come la spia del disco di un PC** quando il
 sistema lavora (`chat/led.js`: ogni richiesta al server, il bot che pensa e scrive). Al clic il cercapersone si apre
 (`telefono/telefono.js`: vola la telecamera dal tasto allo schermo, la retroilluminazione si accende in 400 ms, sotto c'è
-già pzk os con l'app chiesta, l'ultima aperta o il desktop); chiudendo la chiocciolina saluta (`tomodachi.saluta`) e il
-cercapersone torna nel tasto. La barra di stato è vera (29.10, Alberto: «metti dati veri tipo quelli del pc tipo wifi»: la
+già pzk os con l'app chiesta, l'ultima aperta o il desktop); chiudendo (dal 9.11, Alberto: «non si spegne e quindi non si
+chiude… velocizza l'uscita anche premendo fuori istantaneamente con un ciao da 1 secondo full schermo») la chiocciolina che
+saluta (`tomodachi.saluta`) riempie TUTTO l'lcd per un secondo (`os.saluta`: le sue 32 × 16 celle a 8 × 8 pixel), subito,
+alla pressione (il clic fuori non aspetta più il rilascio; chiesto mentre si sta ancora aprendo, chiude appena aperto), poi
+la retroilluminazione si spegne davvero (180 ms) e la telecamera torna sul tasto (400 ms), dove lo schermo si riaccende sul
+desktop: 1,6 s in tutto, prima 3,3 (la luce calava e RISALIVA, poi 2,3 s di saluto piccolo). INDIETRO tenuto tre secondi
+fa lo stesso; mentre lo si tiene (col mouse o con Backspace), dopo 250 ms compare sull'lcd la barra dello spegnimento
+(`os.spegnendo`; Alberto: «crea una barra di avanzamento per spegnerlo così uno capisce che sta avanzando»): un riquadro
+smussato, «tieni premuto: si spegne», venti blocchetti che si riempiono in tre secondi e «2 s · lascia per restare»;
+lasciando prima sparisce e resta acceso. L'inquadratura aperta tiene sempre dentro lo schermo e TUTTI i tasti (prima a 1440 × 900 INDIETRO usciva a
+metà, e sotto i 1100 px non si vedeva più); collaudo: `prova.mjs --tasti3d` e `--chiudi-aprendo`. La barra di stato è vera (29.10, Alberto: «metti dati veri tipo quelli del pc tipo wifi»: la
 rete di chi guarda col **ping vero**, una HEAD a `/favicon.png` all'apertura e ogni 30 secondi, e la **batteria vera**
 dove il browser la dice, se no quella del gioco come nel wallet).
 
@@ -2964,6 +2975,27 @@ apre la banca, e nel collaudo la banca non c'era.
   `--turni` (i tredici minigiochi, uno per mestiere, giocati coi sei tasti, con le foto `prova-turno-<gioco>-*.png`; la
   banca deve aver pagato il turno intero), `--sbaglia` e `--scade` (la risposta sbagliata e il tempo scaduto),
   `--giocate` (le giocate di Bighurra nel profilo). `--rider` adesso è `--turni=strada`.
+
+**Classifiche e schede, una fonte sola** (6.11, Alberto: «le classifiche dicono cose diverse da dentro i profili singoli,
+devi aggiornare tutto questo sistema»). Coi dati veri di quel giorno le differenze erano cinque:
+- **il posto**: la classifica metteva in fila i pari merito per anzianità (1°, 2°), la scheda contava solo chi aveva di più
+  (1°, 1°). Bighurra era 2° in «pescati», «sfide» e «pezzi comprati» in classifica e 1° nella sua scheda;
+- **le mani**: il profilo le contava dal libro dei conti (tutti i giochi), la scheda e la classifica dallo zaino (solo i sei
+  grandi): 17 contro 23 per pzkko, 4 contro 0 per Bighurra;
+- **i numeri della chat**: le classifiche leggevano la riga di `giocatori.json`, una copia dello zaino scritta al più ogni
+  20 secondi: l'ultima mossa di una seduta poteva non arrivarci mai;
+- **il tempo**: la classifica restava in memoria fino a due minuti e mezzo, la scheda venti secondi;
+- **le colonne**: «classifica» nella chat a 8 bit incollava le celle della tabella, e «2pzkko liv. 52» voleva dire 2°,
+  livello 5, valore 2.
+
+Adesso, nella banca (`C:\pzkko-server\banca\giocatori-dati.mjs`): lo zaino è quello del conto, vivo; le mani e i soldi
+vengono dal libro; **il posto lo dà una funzione sola** (`posto`: 1 + quanti hanno di più) per la classifica, la scheda e i
+rivali, e i pari merito hanno lo stesso posto e lo si dice («2° pari»); una memoria sola di dieci secondi. Nel browser:
+`chat/db.js` chiede con la versione del proprio conto (dopo una mossa arriva tutto nuovo) e ha la classifica «mani ai
+giochi»; la scheda di `os/giocatori.js` scrive il valore accanto a ogni posto e ha i soldi e le mani; `os/profilo.js` dice
+«(pari)»; `os/chat.js` stacca le celle delle tabelle con « · ». Le prove: `banca\prove\giocatori.mjs` (257, in memoria:
+col codice di prima ne fallivano 123), `node tools/pzkko/giocatori.mjs` (lo sguardo da fuori sul sito vero: tutte le
+classifiche contro tutte le schede) e `prova.mjs --app=giocatori --banca --rivali` (tre conti in più, due pari merito).
 
 ## Il bot dei bug (../tools/pzkko/bot/, 6.11)
 

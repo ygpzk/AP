@@ -4,7 +4,8 @@
 // cruscotto.mjs.
 //
 // Dall'alto: lo stato (lavora, tocca a te, ti aspetta), la richiesta di Alberto, la nota di
-// Claude, lo strumento in corso o la fine del turno; le altre sessioni; il piano dei passi; le
+// Claude, lo strumento in corso o la fine del turno; gli agenti (sessioni e i loro agenti, con la
+// richiesta e da quanto vanno); il piano dei passi; le
 // barre (download, siti della macchina del tempo, barre qualsiasi); sistema, server di casa, git,
 // sessione; il log in diretta.
 
@@ -119,15 +120,34 @@ function statiDa(cartella) {
   return out
 }
 
+// Le ultime n righe, ognuna col suo momento intero: nel file c'è solo l'ora, e dopo mezzanotte le
+// 00:43 finivano prima delle 23:06 e il log sembrava fermo (9.11.2026). Si parte dall'ultima
+// modifica del file e si va indietro: quando l'ora risale, è il giorno prima.
 function coda(file, n) {
   if (!existsSync(file)) return []
   const fd = openSync(file, 'r')
   try {
-    const size = fstatSync(fd).size
+    const st = fstatSync(fd)
+    const size = st.size
     const quanto = Math.min(size, 160 * 1024)
     const buf = Buffer.alloc(quanto)
     readSync(fd, buf, 0, quanto, size - quanto)
-    return buf.toString('utf8').split('\n').filter(Boolean).slice(-n)
+    const righe = buf.toString('utf8').split('\n').filter(Boolean).slice(-n)
+    const secondi = (r) => {
+      const m = r.match(/^(\d\d):(\d\d):(\d\d)/)
+      return m ? Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3]) : null
+    }
+    const fine = new Date(st.mtimeMs)
+    let giorno = new Date(fine.getFullYear(), fine.getMonth(), fine.getDate()).getTime()
+    let dopo = fine.getHours() * 3600 + fine.getMinutes() * 60 + fine.getSeconds() + 60
+    const out = []
+    for (let i = righe.length - 1; i >= 0; i--) {
+      const s = secondi(righe[i]) ?? dopo
+      if (s > dopo + 60) giorno -= 86400 * 1000
+      dopo = s
+      out.push({ r: righe[i], t: giorno + s * 1000 })
+    }
+    return out.reverse()
   } finally {
     closeSync(fd)
   }
@@ -143,7 +163,7 @@ export function raccogli() {
     const m = f.match(/^piano(?:-(\w+))?\.json$/)
     if (m) piani[m[1] || ''] = leggi(join(CARTELLA, f))
   }
-  const righe = [...coda(LOG, 400), ...coda(join(VECCHIA, 'log.txt'), 200).filter((r) => !r.includes('\tclaude\t'))].sort((a, b) => a.slice(0, 8).localeCompare(b.slice(0, 8)))
+  const righe = [...coda(LOG, 400), ...coda(join(VECCHIA, 'log.txt'), 200).filter((x) => !x.r.includes('\tclaude\t'))].sort((a, b) => a.t - b.t).map((x) => x.r)
   const tutte = statiDa(SESSIONI)
   // le sessioni dell'ultimo giorno; quelle chiuse restano un minuto, perché si veda che sono chiuse
   const sessioni = tutte.filter((s) => Date.now() - (s.agg || 0) < 86400 * 1000 && !(s.stato === 'chiusa' && Date.now() - (s.chiusa || 0) > 60 * 1000)).sort((a, b) => b.agg - a.agg)
@@ -224,7 +244,7 @@ export function disegna({ W, H, giro, dati, sistema, server, git, sito, pubblici
   righe.push(scuro('─'.repeat(W)))
 
   // la richiesta di Alberto, la nota di Claude, lo strumento in corso
-  if (cl.richiesta?.testo) {
+  if (cl.richiesta?.testo && !cl.richiesta.testo.trimStart().startsWith('<')) {
     const r = aCapo(cl.richiesta.testo, W - 26, 2)
     righe.push(` ${c(GIALLO, 'Alberto ►')}  ${r[0]}${r.length === 1 ? '  ' + scuro(fra(cl.richiesta.da) + ' fa') : ''}`)
     if (r[1]) righe.push(`            ${r[1]}  ${scuro(fra(cl.richiesta.da) + ' fa')}`)
@@ -244,14 +264,39 @@ export function disegna({ W, H, giro, dati, sistema, server, git, sito, pubblici
     if (r?.testo) for (const riga of aCapo(r.testo, W - 16, 2)) righe.push(`            ${c(252, riga)}`)
   } else if (cl.adesso) righe.push(` ${c(VERDE, 'Adesso  ►')}  ${c(STRUMENTO[cl.adesso.tool] ?? 81, pad(cl.adesso.tool, 10))} ${cl.adesso.testo}  ${scuro(fra(cl.adesso.da))}${cl.turno > 1 ? scuro(` · ${cl.turno}° strumento del turno`) : ''}`)
 
-  // le altre sessioni di Claude aperte (al massimo quattro): progetto, stato, cosa fanno
-  const altre = sessioni.filter((s) => s !== cl && adesso - (s.agg || 0) < 3 * 3600 * 1000).slice(0, 4)
-  altre.forEach((s, i) => {
+  // GLI AGENTI (9.11.2026, Alberto: «fai che veda tutti gli agenti che lavorano e le mie richieste
+  // ad ognuno e da quanto tempo stanno andando»): ogni sessione di Claude che lavora, aspetta o ha
+  // finito da poco, con la richiesta di Alberto e da quanto va; sotto, gli agenti che ha mandato a
+  // lavorare (Agent), con cosa gli è stato chiesto. Il ► è la sessione in cima.
+  righe.push('')
+  const vera = (r) => (r?.testo && !r.testo.trimStart().startsWith('<') ? r.testo : '—')
+  const daQuando = (s) => s.inizioLavoro || s.richiesta?.da || s.agg
+  const ORDINE = { aspetta: 0, lavora: 1, fermo: 2, chiusa: 3 }
+  const agentiDi = (s) => (s.agenti || []).filter((a) => (a.fine ? adesso - a.fine < 10 * 60 * 1000 : adesso - a.da < 6 * 3600 * 1000)).sort((a, b) => a.da - b.da)
+  const elenco = sessioni
+    .filter((s) => s.stato === 'lavora' || s.stato === 'aspetta' || adesso - (s.agg || 0) < 3 * 3600 * 1000)
+    .sort((a, b) => (ORDINE[a.stato] ?? 2) - (ORDINE[b.stato] ?? 2) || daQuando(a) - daQuando(b))
+  const inCorso = elenco.filter((s) => s.stato === 'lavora' || s.stato === 'aspetta').length + elenco.reduce((n, s) => n + agentiDi(s).filter((a) => !a.fine).length, 0)
+  const RW = Math.max(30, Math.min(72, Math.floor((W - 80) * 0.5)))
+  righe.push(` ${forte('AGENTI')}  ${inCorso ? c(VERDE, `${inCorso} al lavoro`) : grigio('nessuno al lavoro')}${elenco.length > inCorso ? grigio(` · ${elenco.length} sessioni nelle ultime 3 ore`) : ''}`)
+  let messe = 0
+  for (const s of elenco) {
+    if (messe >= 10) break
     const st = s.stato === 'chiusa' ? scuro('chiusa    ') : s.stato === 'aspetta' ? sf(ROSSO, c(231, 'TI ASPETTA')) : s.stato === 'lavora' ? c(VERDE, pad(`${gira} lavora`, 10)) : c(GIALLO, 'tocca a te')
-    const cosa = s.stato === 'aspetta' ? forte(corto(s.avviso, 60)) : s.stato === 'lavora' && s.adesso ? `${c(STRUMENTO[s.adesso.tool] ?? 81, s.adesso.tool)} ${grigio(corto(s.adesso.testo, 50))}` : grigio(corto(s.risposta?.testo, 60))
-    const testa = i ? '         ' : c(250, 'Altre   ►')
-    righe.push(` ${testa}  ${c(tinta(s.sigla), '▌')}${pad(forte(progettoDi(s)), 18)} ${scuro(pad('#' + s.sigla, 6))} ${st}  ${c(GIALLO, '«' + corto(s.richiesta?.testo || '—', 44) + '»')}  ${cosa}  ${scuro(fra(s.agg) + ' fa')}`)
-  })
+    const tempo = s.stato === 'lavora' || s.stato === 'aspetta' ? forte(`da ${fra(daQuando(s))}`) : s.stato === 'chiusa' ? scuro(`${fra(s.chiusa || s.agg)} fa`) : grigio(`ferma ${fra(s.fineTurno || s.agg)}`)
+    const cosa = s.stato === 'aspetta' ? forte(corto(s.avviso, 60)) : s.stato === 'lavora' && s.adesso ? `${c(STRUMENTO[s.adesso.tool] ?? 81, s.adesso.tool)} ${grigio(corto(s.adesso.testo, 60))} ${scuro(fra(s.adesso.da))}` : grigio(corto(s.risposta?.testo, 70))
+    const segno = s === cl ? c(GIALLO, '►') : ' '
+    righe.push(` ${segno}${c(tinta(s.sigla), '▌')}${pad(forte(progettoDi(s)), 13)} ${scuro(pad('#' + s.sigla, 6))} ${st}  ${pad(tempo, 14)} ${c(GIALLO, pad('«' + corto(vera(s.richiesta), RW - 2) + '»', RW))}  ${cosa}`)
+    messe++
+    for (const a of agentiDi(s)) {
+      if (messe >= 12) break
+      const sa = a.fine ? c(VERDE, pad(`${OK} finito`, 10)) : c(VERDE, pad(`${gira} lavora`, 10))
+      const ta = a.fine ? grigio(`in ${durata((a.fine - a.da) / 1000)}`) : forte(`da ${fra(a.da)}`)
+      const ca = !a.fine && a.adesso ? `${c(STRUMENTO[a.adesso.tool] ?? 81, a.adesso.tool)} ${grigio(corto(a.adesso.testo, 60))}` : a.fine ? grigio(corto(a.risposta, 70)) : scuro(a.sfondo ? 'in background' : '')
+      righe.push(`   ${scuro('└─')} ${pad(c(141, a.tipo || 'agente'), 17)} ${sa}  ${pad(ta, 14)} ${c(250, pad('«' + corto(a.descr || '—', RW - 2) + '»', RW))}  ${ca}`)
+      messe++
+    }
+  }
   righe.push('')
 
   // il piano

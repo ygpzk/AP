@@ -166,7 +166,9 @@ function pClassifiche(l, k, t) {
     destra(l, 50, y, `${f(v.pos)}°`) // (la colonna larga 40: «1.000°» passava il margine, ora al più «999,9K°»)
     const val = corto(db.valoreHtml(m, v.valore).replace(/<[^>]+>/g, ''), 12)
     destra(l, 245, y, val)
-    l.testo(56, y, corto(db.METRICHE[m][0], Math.floor((245 - Lcd.larghezza(val) - 6 - 56) / 6)))
+    // (6.11: i pari merito hanno lo stesso posto, come in classifica, e lo si dice; «(pari)» resta intero, si accorcia il nome)
+    const posti = Math.floor((245 - Lcd.larghezza(val) - 6 - 56) / 6), coda = v.pari ? ' (pari)' : ''
+    l.testo(56, y, corto(db.METRICHE[m][0], posti - coda.length) + coda)
   })
 }
 const PAGINE = [

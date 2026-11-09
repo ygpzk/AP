@@ -17,13 +17,14 @@
 //   l'ha aperto, se no l'ultima aperta, se no il desktop con la chiocciolina.
 // - I TASTI SONO QUELLI VERI: la croce e OK muovono pzk os, INDIETRO è una mossa indietro, tenuto tre secondi spegne
 //   (Alberto: «indietro premo una volta, spegni 3 secondi premuto indietro»). Dalla tastiera: le frecce, Invio, Backspace,
-//   Esc. Chiudendo, la chiocciolina saluta sull'lcd e la telecamera torna sul tasto del muro.
+//   Esc. Chiudendo (anche col clic fuori, subito alla pressione) la chiocciolina saluta a tutto schermo per un secondo, lo
+//   schermo si spegne e la telecamera torna sul tasto del muro (9.11).
 // - LA BARRA DI STATO VERA (29.10, Alberto: «nella topbar del cercapersone metti dati veri tipo quelli del pc tipo wifi»).
 // Sul cellulare la tela prende tutta la finestra e sotto c'è una barra coi due tasti (indietro, chiudi), perché i tasti 3D
 // sono piccoli da toccare. (Il nome «telefono» è rimasto dalla prima versione, che era un telefono.)
 //
 //   apri(app?, opz?)   apre il cercapersone (sull'app, se chiesta); opz.da: il tasto da cui si apre (vola da lì)
-//   chiudi()           spegne, saluta e torna nel tasto
+//   chiudi()           il ciao a tutto schermo (1 s), spegne e torna nel tasto
 //   home()             il desktop di pzk os
 //   indietro()         una mossa indietro
 //   vai(app, opz?)     cambia app (opz.comando: per la chat, un comando da mandare appena aperta)
@@ -82,6 +83,7 @@ let orologio = 0
 let dentro = false // acceso: da quando si apre a quando si chiude
 let giro = 0 // cresce a ogni apertura e chiusura: un'apertura vecchia non apre niente
 let chiudendo = null, sveglia = null // la chiusura in corso, e come accorciarla (un secondo «chiudi»)
+let chiudiDopo = false // chiuso mentre si apriva: si chiude appena aperto
 let origine = null // il tasto da cui si è aperto
 
 const ora = () => new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
@@ -131,6 +133,7 @@ async function costruisci() {
   zero.onTasto = (nome, verso) => { if (!dentro || chiudendo) return; if (nome === 'lcd') { if (os.tocca(verso.x, verso.y)) led.colpo(40); return } led.colpo(60); if (nome === 'spegni') chiudi(); else os.tasto(nome === 'croce' ? verso : nome) } // (lcd: il clic del mouse sullo schermo)
   zero.cliccabile = (x, y) => dentro && !chiudendo && os.cliccabile(x, y)
   zero.onFuori = () => chiudi()
+  zero.onTenuta = (si) => barraSpegni(si) // INDIETRO tenuto col mouse: la barra dello spegnimento
 
   dlg.addEventListener('cancel', (e) => { e.preventDefault(); if (chiudendo || !dentro || !os.tasto('indietro')) chiudi() }) // Esc: prima indietro, dal desktop si chiude
   dlg.addEventListener('click', (e) => {
@@ -149,7 +152,7 @@ async function costruisci() {
   }).catch(() => {})
   // chiuso da fuori (Esc che il browser non lascia fermare, un altro script): si rimette a posto quello che il volo di
   // ritorno avrebbe fatto (il tasto sul muro, il 3D fermo, pzk os al desktop)
-  dlg.addEventListener('close', () => { if (chiudendo || !dentro) return; dentro = false; giro++; clearInterval(orologio); clearInterval(timerPing); if (origine) origine.style.visibility = ''; dlg.classList.remove('fermo', 'zoom', 'zoom-nascosto', 'zoom-sfondo'); zero.cavo(false); zero.ferma(); os.home() })
+  dlg.addEventListener('close', () => { if (chiudendo || !dentro) return; dentro = false; chiudiDopo = false; barraSpegni(false); giro++; clearInterval(orologio); clearInterval(timerPing); if (origine) origine.style.visibility = ''; dlg.classList.remove('fermo', 'zoom', 'zoom-nascosto', 'zoom-sfondo'); zero.cavo(false); zero.ferma(); os.home() })
   new ResizeObserver(adatta).observe(dlg)
   PIENO.addEventListener('change', adatta)
   adatta()
@@ -168,13 +171,31 @@ function tieniIndietro() {
   if (tenutaIndietro) return
   spentoDaIndietro = false
   zero.premi('indietro', null, { tieni: true })
+  barraSpegni(true)
   tenutaIndietro = setTimeout(() => { tenutaIndietro = 0; spentoDaIndietro = true; zero.lascia('indietro'); chiudi() }, 3000)
 }
 function lasciaIndietro() {
   zero.lascia('indietro')
   if (!tenutaIndietro) return
+  barraSpegni(false)
   clearTimeout(tenutaIndietro); tenutaIndietro = 0
   if (!spentoDaIndietro) { led.colpo(60); os.tasto('indietro') }
+}
+/** La barra dello spegnimento sull'lcd (os.spegnendo; 9.11, Alberto: «crea una barra di avanzamento per spegnerlo così
+ *  uno capisce che sta avanzando»): con true parte e si riempie nei tre secondi della tenuta, con false sparisce. Compare
+ *  dopo 250 ms, così una pressione corta (una mossa indietro) non la fa lampeggiare; arrivata in fondo, chiudi() la toglie
+ *  col ciao. */
+let barraT = 0
+function barraSpegni(si) {
+  clearInterval(barraT); barraT = 0
+  if (!si || !dentro || chiudendo) { os?.spegnendo(null); return }
+  const t0 = performance.now()
+  barraT = setInterval(() => {
+    const ms = performance.now() - t0
+    if (ms < 250) return
+    os.spegnendo(ms / 3000)
+    if (ms >= 3000) { clearInterval(barraT); barraT = 0 }
+  }, 50)
 }
 function tastiera() {
   dlg.addEventListener('keydown', (e) => {
@@ -244,8 +265,8 @@ async function aggiornaLed() {
 // ── l'apertura: la tela 3D a tutta finestra disegna il cercapersone esattamente sopra il tasto del muro (la stessa posa della
 // foto, storto uguale), il tasto si nasconde e la telecamera vola alla posa zoomata sullo schermo (420 ms) con pzk os acceso
 // sull'lcd (lo stesso del muro: il desktop con la chiocciolina); arrivata, l'accensione: la retroilluminazione cala e risale
-// (400 ms) e sotto c'è già l'app chiesta. Chiudendo, al contrario: la luce cala, pzk os torna al desktop, la chiocciolina
-// saluta e la telecamera torna sul tasto ──
+// (400 ms) e sotto c'è già l'app chiesta. Chiudendo: il ciao della chiocciolina a tutto schermo (1 s), la luce si spegne,
+// la telecamera torna sul tasto (400 ms) e lì lo schermo si riaccende sul desktop (chiudi, qui sotto) ──
 async function ingrandisci(prepara) {
   const r0 = origine?.getBoundingClientRect()
   const volo = !RIDOTTO.matches && visibile(r0)
@@ -276,21 +297,13 @@ async function rimpicciolisci() {
   const r0 = origine?.getBoundingClientRect()
   if (RIDOTTO.matches || !visibile(r0)) return false
   dlg.classList.add('zoom', 'zoom-nascosto')
-  await zero.chiudi(origine)
+  await zero.chiudi(origine, { ms: 400 })
   origine.style.visibility = ''
   dlg.close()
   dlg.classList.remove('zoom', 'zoom-nascosto')
   zero.cavo(false); zero.ferma()
   return true
 }
-/** Lo spegnimento: la retroilluminazione cala, pzk os torna al desktop e la luce risale sulla chiocciolina. */
-async function spegni() {
-  musichetta('spegni')
-  await zero.luce(0.2, 300)
-  os.home()
-  await zero.luce(1, 200)
-}
-
 // ── apri, chiudi, vai ──
 export async function apri(app = null, opz = {}) {
   await stile()
@@ -299,7 +312,7 @@ export async function apri(app = null, opz = {}) {
   if (dlg.open) { if (app) await vai(app, opz); else home(); return }
   if (opz.da) origine = opz.da
   const mio = ++giro
-  dentro = true
+  dentro = true; chiudiDopo = false
   dlg.classList.remove('chiude')
   aggiornaStato()
   aggiornaLed()
@@ -310,24 +323,41 @@ export async function apri(app = null, opz = {}) {
   const a = app ?? (ultima && APP.some((x) => x.id === ultima) && (!zaino.pagerRotto() || ultima === 'chat') ? ultima : null)
   await ingrandisci(async () => { if (a) await vai(a, { ...opz, muto: true }); else home() })
   if (mio !== giro) return // chiuso mentre si accendeva
+  if (chiudiDopo) { chiudiDopo = false; chiudi(); return } // (un clic fuori, o INDIETRO tenuto, durante l'apertura)
   clearInterval(orologio); clearInterval(timerPing)
   orologio = setInterval(() => { if (dlg.open) aggiornaStato() }, 15_000)
   timerPing = setInterval(() => { if (dlg.open && !document.hidden) misuraPing() }, 30_000)
 }
-/** Spegne lo schermo, la chiocciolina saluta, e il cercapersone torna nel tasto da solo. */
+/** Il «ciao» a tutto schermo per un secondo, lo schermo che si spegne, e il cercapersone torna nel tasto da solo.
+ *  (9.11, Alberto: «non si spegne e quindi non si chiude… velocizza l'uscita anche premendo fuori istantaneamente con un
+ *  ciao da 1 secondo full schermo»): prima la luce calava a 0,2 e RISALIVA sul desktop, la chiocciolina salutava piccola
+ *  per 2,3 s e solo dopo partiva il volo, 3,3 s in tutto; ora il ciao parte subito (nello stesso clic), dura un secondo,
+ *  la retroilluminazione si spegne davvero (180 ms) e la telecamera torna sul tasto (400 ms), dove lo schermo si riaccende
+ *  sul desktop. Chiesta mentre si sta ancora aprendo, la chiusura parte appena il cercapersone è aperto. */
 export async function chiudi() {
   if (!dlg?.open) return
   if (chiudendo) { sveglia?.(); return chiudendo } // un secondo «chiudi» mentre saluta: si chiude subito
-  if (dlg.classList.contains('zoom')) return
+  if (dlg.classList.contains('zoom')) { chiudiDopo = true; return } // (si sta aprendo: apri() chiude appena finito)
   chiudendo = (async () => {
     giro++
     clearInterval(orologio); clearInterval(timerPing)
-    if (dentro) { led.colpo(400); await spegni() } else os.home()
+    clearTimeout(tenutaIndietro); tenutaIndietro = 0
+    barraSpegni(false)
+    const acceso = dentro
     dentro = false
-    tomodachi.saluta?.(2600)
-    await aspetta(RIDOTTO.matches ? 1200 : 2300)
-    sveglia = null
-    if (!(await rimpicciolisci())) {
+    if (acceso) {
+      led.colpo(400); musichetta('spegni')
+      tomodachi.saluta?.(1600)
+      os.saluta()
+      zero.luce(1)
+      await aspetta(1000)
+      sveglia = null
+      await zero.luce(0, 180) // lo schermo si spegne davvero
+    }
+    os.home()
+    if (await rimpicciolisci()) zero.luce(1, 220) // (sul muro lo schermo si riaccende: è lo stesso lcd)
+    else {
+      zero.luce(1)
       if (origine) origine.style.visibility = ''
       if (!RIDOTTO.matches) {
         dlg.classList.add('chiude')

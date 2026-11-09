@@ -12,10 +12,11 @@ const giorni = (ms) => { const g = Math.floor((Date.now() - ms) / 86400000); ret
 export function schedaGiocatore(ctx, p) {
   const s = p.s ?? {}
   const pos = p.posizioni ?? {}
-  const classifiche = ['pzk', 'xp', 'pescati', 'quiz', 'guadagnati'].filter((m) => pos[m]).map((m) => `${db.METRICHE[m][0]}: <b>${pos[m].pos}°</b>`)
+  // (6.11) il posto col suo valore, gli stessi della classifica (la banca li calcola con una funzione sola; «pari» se altri hanno lo stesso)
+  const classifiche = ['pzk', 'xp', 'guadagnati', 'pescati', 'quiz', 'giri'].filter((m) => pos[m]).map((m) => `${db.METRICHE[m][0]}: <b>${db.postoTesto(pos[m])}</b> (${db.valoreHtml(m, pos[m].valore)})`)
   ctx.dì({
     colore: 'blu', t: `:${p.mest ?? 'bot'}: ${p.nome}`, d: `<i>${p.titolo}</i> · livello <b>${p.liv}</b>${p.mest ? ` · ${nomeDi(p.mest)}` : ''}\n<small>${p.ind} · in banca da ${giorni(p.creato).replace(' fa', '')}${p.ult ? ` · visto ${giorni(p.ult)}` : ''}</small>`,
-    campi: [['$pzk liberi', ctx.pzkHtml(p.pzk)], ['esperienza', `${p.xp} xp`], ['pescati', String(s.pescati ?? 0)], ['cacciati', String(s.cacciati ?? 0)], ['scavati', String(s.scavati ?? 0)], ['quiz giusti', `${s.quizGiusti ?? 0}/${s.quizTotali ?? 0}`], ['sfide fatte', String(s.sfideFatte ?? 0)], ['side quest', String(s.missioniFatte ?? 0)], ['morti', `:teschio: ${s.morti ?? 0}`], ['serie', `${p.serie ?? 0} giorni`], ...(classifiche.length ? [['in classifica', classifiche.join(' · '), true]] : [])],
+    campi: [['$pzk liberi', ctx.pzkHtml(p.pzk)], ['esperienza', `${p.xp} xp`], ['guadagnati in tutto', ctx.pzkHtml(s.guadagnati ?? 0)], [s.persi ? 'persi ai giochi' : 'vinti ai giochi', ctx.pzkHtml(s.persi || s.vinti || 0)], ['mani ai giochi', String(s.giri ?? 0)], ['pescati', String(s.pescati ?? 0)], ['cacciati', String(s.cacciati ?? 0)], ['scavati', String(s.scavati ?? 0)], ['quiz giusti', `${s.quizGiusti ?? 0}/${s.quizTotali ?? 0}`], ['sfide fatte', String(s.sfideFatte ?? 0)], ['side quest', String(s.missioniFatte ?? 0)], ['morti', `:teschio: ${s.morti ?? 0}`], ['serie', `${p.serie ?? 0} giorni`], ...(classifiche.length ? [['in classifica', classifiche.join(' · '), true]] : [])],
     azioni: [[`manda ${p.ind} `, ':pzk: manda $pzk'], ['classifica', ':trofeo: classifica']],
   })
 }
@@ -33,7 +34,7 @@ export const GIOCATORI = [
       if (!d.ok) return fuori(ctx)
       if (!d.top.length) return ctx.dì({ colore: 'grigio', d: 'nessuno ha ancora niente qui: sii il primo.' })
       const [nome, , ico] = db.METRICHE[id]
-      ctx.dì({ colore: 'oro', t: `:${ico}: ${nome}`, html: `<table><tr><th>#</th><th>giocatore</th><th>valore</th></tr>${d.top.map((c) => `<tr data-cmd="giocatore ${c.ind}" class="cliccabile"><td>${c.pos}</td><td>${c.nome} <small>liv. ${c.liv}</small></td><td>${db.valoreHtml(id, c.valore)}</td></tr>`).join('')}</table>`, pie: `${d.giocatori} giocatori in banca · tocca un nome per la sua scheda · <code>classifica lista</code>` })
+      ctx.dì({ colore: 'oro', t: `:${ico}: ${nome}`, html: `<table><tr><th>#</th><th>giocatore</th><th>valore</th></tr>${d.top.map((c) => `<tr data-cmd="giocatore ${c.ind}" class="cliccabile"><td>${db.postoTesto(c)}</td><td>${c.nome} <small>(liv. ${c.liv})</small></td><td>${db.valoreHtml(id, c.valore)}</td></tr>`).join('')}</table>`, pie: `${d.giocatori} giocatori in banca · tocca un nome per la sua scheda · <code>classifica lista</code>` })
     },
   },
   {
@@ -78,8 +79,8 @@ export const GIOCATORI = [
       if (!v) return ctx.dì({ colore: 'grigio', d: 'nessuna classifica con te dentro, per questa cosa: comincia a farla.' })
       const [nome, , ico] = db.METRICHE[m]
       const riga = (c, verso) => c ? `<li data-cmd="giocatore ${c.ind}" class="cliccabile">${verso} <b>${c.nome}</b> (${c.pos}°): ${db.valoreHtml(m, c.valore)}</li>` : ''
-      ctx.dì({ colore: 'rosso', av: 'bot-arrabbiato', t: `:${ico}: rivale: ${nome}`, d: `sei <b>${v.pos}°</b> su ${v.totale} con ${db.valoreHtml(m, v.io)}.`, html: `<ul>${riga(v.su, '↑ da superare:')}${riga(v.giu, '↓ ti insegue:')}</ul>`,
-        pie: v.su ? `ti mancano ${Number(v.su.valore - v.io).toLocaleString('it-IT')} per superare ${v.su.nome}` : 'sei il primo. Adesso tutti ti vogliono battere.' })
+      ctx.dì({ colore: 'rosso', av: 'bot-arrabbiato', t: `:${ico}: rivale: ${nome}`, d: `sei <b>${db.postoTesto(v)}</b> su ${v.totale} con ${db.valoreHtml(m, v.io)}.`, html: `<ul>${riga(v.su, '↑ da superare:')}${riga(v.giu, '↓ ti insegue:')}</ul>`,
+        pie: v.su ? `ti mancano ${Number(v.su.valore - v.io).toLocaleString('it-IT')} per superare ${v.su.nome}` : v.pari ? 'nessuno ne ha più di te, ma non sei solo lassù.' : 'sei il primo. Adesso tutti ti vogliono battere.' })
     },
   },
   {

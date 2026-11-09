@@ -1040,8 +1040,8 @@ Ogni voce ha <code>cosa</code> (il Palazzo Ducale, la Sala dei Giganti di Palazz
   },
 
   'Il database dei giocatori': {
-    data: '2026-10-29',
-    fonti: ['albertopecchini.it/pzkko/api/giocatori.mjs', 'albertopecchini.it/pzkko/api/giocatori.mjs', C('db.js'), C('comandi/giocatori.js'), O('giocatori.js'), R],
+    data: '2026-11-06',
+    fonti: ['albertopecchini.it/pzkko/api/giocatori.mjs', C('db.js'), C('comandi/giocatori.js'), O('giocatori.js'), R],
     testo: `[[File:app-giocatori.webp|thumb|l'app giocatori: le classifiche col podio]]
 '''Il database dei giocatori''' (23.10.2026, <code>api/_giocatori.mjs</code>, <code>api/giocatori.mjs</code>, <code>chat/db.js</code>) è un file (fino al 28.10 <code>pzkko/giocatori.json</code> su Vercel Blob, poi sul [[Il server dei dati in casa|server in casa]]) con la riga pubblica di ogni giocatore: livello, statistiche, mestiere, serie, leggendari presi, ultima volta visto, la faccia e il profilo (<code>pr</code>), i giochi (<code>gi</code>). Si aggiorna a ogni salvataggio dello zaino e si unisce ai conti del wallet a ogni richiesta («i $pzk sono sempre quelli veri»). '''Mai il PIN né gli oggetti uno per uno.'''
 
@@ -1052,6 +1052,9 @@ Ogni voce ha <code>cosa</code> (il Palazzo Ducale, la Sala dei Giganti di Palazz
 Diciassette, in <code>db.METRICHE</code>: $pzk liberi, esperienza, livello, guadagnati in tutto, vinti ai giochi, persi ai giochi, pescati, cacciati, scavati, morti, comandi scritti, risposte giuste ai quiz, sfide fatte, side quest fatte, serie di giorni, acquisti, giorni di vita, EUR€. Dal 29.10 i numeri dei soldi li tiene il [[Il libro dei conti|libro dei conti]] del server.
 
 In chat: <code>classifica [metrica]</code>, <code>cerca mat</code>, <code>giocatore mario</code>, <code>notizie</code>, <code>rivale</code>, <code>banca</code>; in pzk os l'app [[Giocatori (app)|giocatori]] (le classifiche col podio coi numeri rovesciati, le notizie, cerca, «io» con la [[La lumachina|lumachina]]). L'argomento «giocatori» dei [[I quiz|quiz]] fa domande col database.
+
+== La riga non è più la fonte ==
+Dal 6.11.2026 ([[Le classifiche#Una fonte sola, dal 6 novembre|le classifiche, una fonte sola]]) le classifiche e le schede non leggono più la riga di questo file per i numeri: lo zaino sta nel conto dal 31.10, e la banca legge quello, vivo. La riga resta per «visto l'ultima volta» e per accorgersi delle [[Le notizie della banca|notizie]] (un livello nuovo, un mestiere nuovo), e si scrive ancora al più una volta ogni 20 secondi per conto. Nel browser <code>chat/db.js</code> tiene una risposta dieci secondi e la butta appena il proprio conto cambia versione.
 
 {{Vedi anche|Le classifiche|Le notizie della banca|Giocatori (app)|I giocatori (API)|Il libro dei conti}}
 [[Categoria:La chat]]

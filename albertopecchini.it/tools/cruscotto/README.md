@@ -24,8 +24,14 @@ Dall'alto:
   quella in cima;
 - la richiesta di Alberto, la nota di Claude, lo strumento in corso con da quanto e il numero
   nel turno; a fine turno quanto ci ha messo, con quanti strumenti, e l'inizio della risposta;
-- **Altre**: le altre sessioni di Claude aperte (al massimo quattro), ognuna col suo colore:
-  progetto, stato, richiesta, cosa sta facendo o cosa ha risposto;
+- **AGENTI** (9.11.2026): tutte le sessioni di Claude che lavorano, aspettano o hanno finito
+  nelle ultime tre ore, ognuna col suo colore e il ► su quella in cima: progetto, stato, **da
+  quanto lavora** (dal primo messaggio del giro, non da quelli mandati a lavoro in corso), la
+  **richiesta di Alberto** (quella vera: le notifiche `<task-notification>` dei lavori in
+  background non la sostituiscono, il testo incollato sì), cosa sta facendo o cosa ha risposto;
+  sotto ognuna, con `└─`, gli agenti che ha mandato a lavorare (strumento Agent, ganci
+  `SubagentStart`/`SubagentStop`): tipo, da quanto, cosa gli è stato chiesto, lo strumento in
+  corso, e per dieci minuti quelli finiti con quanto ci hanno messo;
 - il piano dei passi, con quello in corso (i fatti si riassumono quando non ci stanno);
 - le barre: i download, i siti della macchina del tempo, le barre di qualsiasi lavoro;
 - sistema (CPU, RAM, dischi), server di casa (pzkko 8787, regia 8788, tempo 8789, Vite 5173),
@@ -59,7 +65,10 @@ non la blocca più (la «modifica rapida» è spenta).
   `Win32_Process.Create`: un figlio del gancio moriva con lui) e scrivono la richiesta;
   `PreToolUse` lo strumento in corso; `PostToolUseFailure` gli errori; `Notification` lo stato
   e il suono; `Stop` lo stato, il suono, la durata del turno e l'inizio della risposta (dalla
-  coda della trascrizione); `SessionEnd` chiude la sessione. Ogni sessione nel suo file, perché
+  coda della trascrizione); `SessionEnd` chiude la sessione; `SubagentStart` e `SubagentStop`
+  gli agenti (l'Agent chiesto in `PreToolUse` si lega al primo `SubagentStart` del suo tipo; gli
+  strumenti con `agent_id` vanno sotto l'agente). Il log tiene solo l'ora: la regia ricostruisce il
+  giorno andando indietro dall'ultima modifica del file, così dopo mezzanotte resta in ordine. Ogni sessione nel suo file, perché
   i ganci arrivano da tutte. Una sessione vista per la prima volta a metà (ganci nuovi,
   compattazione) ripesca la richiesta dalla trascrizione. Le sessioni ferme da tre giorni si
   cancellano. Non blocca mai e esce sempre con 0 (`CRUSCOTTO_DEBUG=1` per vedere gli errori).
