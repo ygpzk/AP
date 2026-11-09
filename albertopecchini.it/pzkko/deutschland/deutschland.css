@@ -1,0 +1,66 @@
+/* Deutschland (9.11.2026): la pagina delle foto del viaggio a Monaco e Stoccarda con JMA. Nero (#0e0d0c), oro (#ffd400) e
+   rosso (#dd0000) come la bandiera; i titoli in Anton (il @font-face sta in barra/pagina.css, che qui si carica per
+   quello e si copre: niente muro né foglio). La macchinetta grande sta al centro sotto la barra (--barra), con il form
+   della password proiettato sul suo schermo (accesso.js) e la manopola «ziehen» sulla fila delle manopole. Dentro
+   #galleria non si stila niente: è dell'altro cantiere (galleria.css, pacchi.css), qui solo il contenitore. */
+@font-face{font-family:"Fake Receipt";src:url(/fonts/fake-receipt.woff2) format("woff2");font-weight:400;font-display:swap}
+:root{--nero:#0e0d0c;--oro:#ffd400;--rosso:#dd0000;--verde:#46ff7d;--filtri:64px;color-scheme:dark}
+html{background:var(--nero)}
+body{min-height:100dvh;background:var(--nero);color:#f1efe8;font:400 16px/1.5 "Special Elite","Courier New",monospace}
+body::before{display:none} /* (pagina.css: il muro scurito; qui no) */
+.dl{min-height:100dvh;display:flex;flex-direction:column}
+[hidden]{display:none!important}
+
+/* ── la macchinetta da vicino ── */
+.automat{flex:1;display:grid;justify-items:center;align-content:start;box-sizing:border-box;min-height:100dvh;
+  padding:calc(var(--barra,72px) + env(safe-area-inset-top) + 14px) 16px 18px;text-align:center}
+.am-titolo{margin:0;font:400 clamp(44px,8vw,86px)/.9 var(--fa,"Anton",Impact,sans-serif);color:var(--oro);letter-spacing:.03em;text-transform:uppercase;
+  text-shadow:0 3px 0 var(--rosso),0 6px 14px rgba(0,0,0,.7)}
+.am-sotto{margin:8px 0 0;color:#a8a39a;font-size:14px;letter-spacing:.04em}
+/* la macchinetta: larga quanto ci sta nel primo schermo, sotto la barra, con la nota sotto (3:4) */
+.am-corpo{position:relative;width:min(100%,calc((100dvh - var(--barra,72px) - 200px) * .75),540px);margin:12px auto 0;
+  filter:drop-shadow(0 6px 10px rgba(0,0,0,.6)) drop-shadow(0 26px 44px rgba(0,0,0,.55))}
+.am-foto{display:block;width:100%;height:auto}
+/* lo schermo: accesso.js lo mette sugli angoli di muro-dati.js (matrix3d); dentro, le misure sono in cqw dello schermo */
+.am-schermo{position:absolute;transform-origin:0 0;overflow:hidden;container-type:size;background:#0b0f0a;color:var(--verde);
+  box-shadow:inset 0 0 0 2px #060806,inset 0 0 28px rgba(0,0,0,.95)}
+.am-schermo::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(transparent 0 2px,rgba(0,0,0,.16) 2px 3px),linear-gradient(172deg,rgba(255,255,255,.09),rgba(255,255,255,.02) 46%,rgba(255,255,255,0) 48%)}
+.accesso{position:absolute;inset:0;display:grid;grid-template-rows:auto 1fr auto;align-items:center;gap:1.5cqw;box-sizing:border-box;padding:5cqw 6cqw 4cqw;margin:0;text-align:left}
+.ac-led{margin:0;font:400 11cqw/1 "Fake Receipt",monospace;letter-spacing:.1em;color:var(--verde);text-shadow:0 0 8px rgba(70,255,125,.85),0 0 2px rgba(70,255,125,.9)}
+.ac-campo{display:block}
+.nascosto{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ac-input{display:block;width:100%;box-sizing:border-box;padding:1.5cqw 2.5cqw;border:0;border-bottom:2px solid rgba(70,255,125,.45);border-radius:0;background:rgba(70,255,125,.07);
+  color:var(--verde);font:400 max(16px,10cqw)/1.2 "Fake Receipt",monospace;letter-spacing:.22em;caret-color:var(--verde);outline:none;text-shadow:0 0 6px rgba(70,255,125,.7)}
+.ac-input::placeholder{color:rgba(70,255,125,.35);text-shadow:none}
+.ac-input:focus{border-bottom-color:var(--verde);background:rgba(70,255,125,.11)}
+.ac-input:disabled{opacity:.5}
+.ac-stato{margin:0;min-height:1.3em;font:400 max(11px,5.8cqw)/1.25 "Special Elite","Courier New",monospace;color:rgba(201,255,217,.9)}
+.ac-stato[data-tipo="male"]{color:#ff7b6b}
+.ac-stato[data-tipo="spenta"]{color:#ffb14a}
+.ac-stato[data-tipo="bene"]{color:#fff}
+.ac-stato[data-tipo="attesa"]{color:#ffd400}
+.accesso.attesa .ac-input{opacity:.7}
+/* la manopola che si tira (ziehen): sulla fila delle manopole della foto, accesso.js le dà left/top/width */
+.ac-ziehen{position:absolute;transform:translateY(-50%);aspect-ratio:1;padding:0;border:0;background:none;cursor:pointer;display:grid;place-items:center;
+  color:#1c1a14;-webkit-tap-highlight-color:transparent;touch-action:manipulation;container-type:inline-size}
+.ac-manopola{display:block;width:100%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0,#d4d8db 22%,#7b8187 68%,#33373a 100%);
+  box-shadow:0 4px 8px rgba(0,0,0,.7),0 1px 0 rgba(255,255,255,.4) inset,0 -3px 6px rgba(0,0,0,.45) inset;transition:transform .12s cubic-bezier(.2,1.4,.4,1)}
+.ac-scritta{position:absolute;inset:0;display:grid;place-items:center;font:400 clamp(8px,26cqw,18px)/1 var(--fa,"Anton",Impact,sans-serif);letter-spacing:.06em;text-transform:lowercase;color:#2a2d30;text-shadow:0 1px 0 rgba(255,255,255,.5);pointer-events:none}
+@media (hover:hover){.ac-ziehen:hover .ac-manopola{filter:brightness(1.08)}}
+.ac-ziehen:active .ac-manopola,.ac-ziehen.tirata .ac-manopola{transform:translateY(7%) scale(.94)}
+.ac-ziehen:focus-visible{outline:3px solid var(--oro);outline-offset:4px;border-radius:50%}
+.am-nota{margin:16px 0 0;max-width:46ch;color:#8f8a80;font-size:13px;line-height:1.4}
+
+/* ── la galleria: solo il contenitore (dentro è galleria.css) ── */
+.galleria{box-sizing:border-box;min-height:100dvh;padding-top:calc(var(--barra,72px) + env(safe-area-inset-top))}
+html.dentro .piede{display:none} /* (dentro, la pagina è tutta della galleria) */
+
+.piede{width:min(100% - 32px,980px);margin:0 auto 24px;color:#8f8a80;font-size:13px;text-align:center}
+.piede a{color:var(--oro)}
+
+@media (max-width:600px){
+  .automat{padding-left:12px;padding-right:12px}
+  .am-corpo{width:min(100%,calc((100dvh - var(--barra,62px) - 190px) * .75))}
+}
+@media (prefers-reduced-motion:reduce){.ac-manopola{transition:none}}

@@ -1,0 +1,133 @@
+/* La galleria di Deutschland (9.11.2026, galleria.js e i suoi moduli). Tutto dentro #galleria (più il visore e la barra
+   delle scelte, che stanno fuori nel DOM): nero #0e0d0c, oro #ffd400, rosso #dd0000, Anton per titoli ed etichette
+   (@font-face in barra/pagina.css e pacchi.css). Alberto: «4 colonne di foto e 5 righe sempre visibili»: la griglia è
+   alta quanto resta sotto la barra e i filtri e le sue righe sono un quinto di quell'altezza, così in vista ce ne sono
+   sempre 4×5, sul computer come sul telefono (dove la mappa sta sopra, 38dvh). Nessuna animazione infinita: solo
+   transizioni brevi una tantum (la miniatura che arriva, la macchinina che gira, lo zoom). */
+#galleria{--filtri:122px;--oro:#ffd400;--rosso:#dd0000;--nero:#0e0d0c;--fa:"Anton",Impact,sans-serif;--fm:"Special Elite","Courier New",monospace;
+  position:relative;background:var(--nero);color:#fff;min-width:0}
+#galleria[hidden]{display:none}
+@media (max-width:899px){#galleria{--filtri:110px}}
+
+/* ── la scena: griglia + mappa ─────────────────────────────────────────────────────────────────────────────────────── */
+#galleria .scena{display:grid;grid-template-columns:1fr 1fr;height:calc(100dvh - var(--barra,72px) - env(safe-area-inset-top,0px) - var(--filtri,72px));min-height:0;min-width:0;background:#000}
+#griglia{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:calc((100% - 12px) / 5);gap:3px;height:100%;min-width:0;overflow-y:auto;overflow-x:hidden;
+  overscroll-behavior:contain;scroll-snap-type:y proximity;background:#000;scrollbar-width:thin;scrollbar-color:var(--oro) #000}
+#mappa{position:relative;isolation:isolate;min-width:0;min-height:0;height:100%;background:#000;color:#fff} /* (isolation: gli z-index di Leaflet, 400-800, restano dentro la mappa) */
+@media (max-width:899px){
+  #galleria .scena{grid-template-columns:1fr;grid-template-rows:38dvh minmax(0,1fr)}
+  #mappa{order:-1}
+}
+
+/* ── le celle ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
+.cella{position:relative;display:block;width:100%;height:100%;margin:0;padding:0;border:0;overflow:hidden;cursor:pointer;color:#fff;
+  background:#1a1a1a center/cover no-repeat;scroll-snap-align:start;-webkit-tap-highlight-color:transparent;touch-action:pan-y}
+.cella[hidden]{display:none}
+.cella img{display:block;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .25s ease}
+.cella.carica img{opacity:1}
+.cella.rotta img{visibility:hidden}
+.cella:focus-visible{outline:3px solid var(--oro);outline-offset:-3px}
+.cella .ora{position:absolute;right:4px;bottom:3px;font:400 11px/1 var(--fa);letter-spacing:.04em;color:#fff;text-shadow:0 1px 2px #000,0 0 4px #000}
+.cella .stima{position:absolute;left:5px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--oro);box-shadow:0 0 0 1.5px #000}
+.cella .play{position:absolute;left:5px;bottom:3px;padding-left:12px;font:400 11px/1 var(--fa);letter-spacing:.04em;color:#fff;text-shadow:0 1px 2px #000}
+.cella .play::before{content:"";position:absolute;left:0;top:0;border-style:solid;border-width:5.5px 0 5.5px 9px;border-color:transparent transparent transparent #fff;filter:drop-shadow(0 1px 1px #000)}
+.cella.evidenzia{outline:3px solid var(--oro);outline-offset:-3px}
+/* la scelta (condividi.js): la spunta d'oro e il velo; le altre si scuriscono un po' */
+#griglia.in-scelta .cella:not(.scelta) img{opacity:.55}
+.cella.scelta::after{content:"";position:absolute;inset:0;border:3px solid var(--oro);background:rgba(255,212,0,.18);pointer-events:none}
+.cella.scelta::before{content:"✓";position:absolute;top:5px;right:5px;z-index:1;width:22px;height:22px;border-radius:50%;background:var(--oro);color:#000;font:400 15px/22px var(--fa);text-align:center;box-shadow:0 1px 3px #000}
+
+/* ── la mappa (Leaflet, mappa.js) ──────────────────────────────────────────────────────────────────────────────────── */
+#mappa .leaflet-container{width:100%;height:100%;background:#000;font:12px/1.3 var(--fm);color:#ddd}
+/* la tinta «swag tedesco» nero/oro: le tile normali di OpenStreetMap rovesciate (invert: la carta chiara diventa nera, le
+   strade e le scritte chiare), poi in grigio e in seppia satura che fa d'oro quel che resta chiaro. Provate 8 varianti il
+   9.11 (CARTO, Esri scuro, OSM): questa non è marrone fango. Un filtro solo, nessun ridisegno a pagina ferma */
+#mappa .leaflet-tile-pane{filter:invert(1) grayscale(1) contrast(1.6) brightness(.8) sepia(1) saturate(3.5) hue-rotate(-8deg)}
+#mappa .leaflet-control-attribution{background:rgba(14,13,12,.85);color:#aaa;font:10px/1.4 var(--fm);padding:1px 5px}
+#mappa .leaflet-control-attribution a{color:var(--oro)}
+#mappa .leaflet-bar{border:2px solid #000;box-shadow:0 2px 6px #000}
+#mappa .leaflet-bar a{background:var(--nero);color:var(--oro);border-bottom-color:#333;font-family:var(--fa);font-size:18px}
+#mappa .leaflet-bar a:hover{background:#222;color:#fff}
+#mappa .leaflet-bar a.leaflet-disabled{color:#555}
+#mappa .gla-icona{background:none;border:0}
+#mappa .gla{display:block;width:40px;height:40px;object-fit:contain;transition:rotate .4s ease;filter:drop-shadow(0 2px 3px rgba(0,0,0,.7))}
+#mappa .posto-nome{padding:2px 7px;border:1px solid var(--oro);border-radius:0;background:var(--nero);color:var(--oro);font:400 12px/1.2 var(--fa);letter-spacing:.03em;box-shadow:0 2px 4px #000;white-space:nowrap}
+#mappa .posto-nome::before{border-top-color:var(--oro)}
+#mappa.lontano .posto-nome{display:none}
+@media (max-width:899px){#mappa .leaflet-control-attribution{font-size:9px;padding:0 4px}}
+#mappa .mappa-ferma{margin:0;padding:20px;font:400 14px/1.4 var(--fm);color:#aaa;text-align:center}
+@media (prefers-reduced-motion:reduce){#mappa .gla{transition:none}}
+
+/* ── i filtri: i pacchetti e lo scontrino (filtri.js) ──────────────────────────────────────────────────────────────── */
+#filtri{display:grid;grid-template-rows:minmax(0,1fr) auto;height:var(--filtri);min-width:0;overflow:hidden;background:var(--nero)}
+#filtri .pacchi{display:flex;align-items:stretch;gap:8px;min-width:0;padding:6px 10px 2px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:none;
+  mask-image:linear-gradient(90deg,#000 calc(100% - 28px),#0000)}
+#filtri .pacchi::-webkit-scrollbar{display:none}
+.pacco{position:relative;flex:none;width:64px;margin:0;padding:0;border:0;border-radius:4px;overflow:hidden;cursor:pointer;
+  background:var(--c,#444);color:var(--t,#fff);box-shadow:0 2px 0 #000,inset 0 0 0 1px rgba(0,0,0,.25);transition:translate .15s ease,box-shadow .15s ease;-webkit-tap-highlight-color:transparent}
+.pacco img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.pacco.segnaposto img{object-fit:contain;padding:2px}
+/* il nome: sui pacchetti veri (immagini senza scritte) in basso su una fascia scura, sul segnaposto al centro */
+.pacco .nome{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:flex-end;justify-content:center;padding:16px 4px 5px;text-align:center;overflow-wrap:normal;hyphens:manual;color:#fff;
+  background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.72));text-shadow:0 1px 2px #000;
+  font:400 11px/1.05 var(--f,var(--fa));pointer-events:none}
+.pacco .nome b{display:block;max-width:100%;font-weight:400}
+.pacco.segnaposto .nome{top:0;align-items:center;padding:22px 6px 26px;background:none;color:var(--t,#fff);text-shadow:0 1px 1px rgba(0,0,0,.25)}
+.pacco[aria-pressed="true"]{translate:0 -3px;box-shadow:0 0 0 2px var(--oro),0 5px 0 #000}
+.pacco:focus-visible{outline:2px solid var(--oro);outline-offset:2px}
+@media (max-width:899px){.pacco{width:56px}.pacco .nome{font-size:10px}.pacco.segnaposto .nome{padding:19px 5px 23px}}
+#filtri .scontrino{display:flex;align-items:center;gap:8px;height:30px;margin:4px 10px 6px;padding:0 10px;min-width:0;background:#f4efe2;color:#1c1a14;font:400 13px/1 var(--fm);
+  --dente:conic-gradient(from 135deg at 50% 100%,#000 90deg,#0000 0) 50% 100%/8px 4px repeat-x;
+  -webkit-mask:var(--dente),linear-gradient(#000 0 0) top/100% calc(100% - 4px) no-repeat;mask:var(--dente),linear-gradient(#000 0 0) top/100% calc(100% - 4px) no-repeat}
+#filtri .conta{flex:none;font:400 15px/1 var(--fa);letter-spacing:.02em;white-space:nowrap}
+#filtri .scegli{flex:none;margin:0;padding:3px 8px;border:0;background:#1c1a14;color:var(--oro);font:400 12px/1 var(--fa);letter-spacing:.04em;cursor:pointer}
+#filtri .scegli:hover{background:#000}
+#filtri .posti{display:flex;align-items:center;gap:6px;min-width:0;flex:1;height:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:none;padding-right:8px}
+#filtri .posti::-webkit-scrollbar{display:none}
+.posto{flex:none;margin:0;padding:2px 7px;border:1px solid #1c1a14;background:transparent;color:inherit;font:inherit;font-size:12px;white-space:nowrap;cursor:pointer}
+.posto small{font-size:10px;opacity:.7}
+.posto[aria-pressed="true"]{background:#1c1a14;color:var(--oro)}
+.posto[aria-pressed="true"] small{color:#fff}
+
+/* ── il visore (visore.js) ─────────────────────────────────────────────────────────────────────────────────────────── */
+#visore{position:fixed;inset:0;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:0;border:0;background:#000;color:var(--oro, #ffd400);overflow:hidden}
+#visore::backdrop{background:#000}
+#visore .v-barra{position:absolute;left:0;right:0;top:0;z-index:3;display:flex;align-items:center;gap:10px;padding:calc(8px + env(safe-area-inset-top,0px)) 12px 10px;
+  background:linear-gradient(rgba(0,0,0,.85),rgba(0,0,0,0));font:400 15px/1 "Anton",Impact,sans-serif;letter-spacing:.03em;pointer-events:none}
+#visore .v-barra>*{pointer-events:auto}
+#visore .v-conta{flex:none;color:#ffd400}
+#visore .v-info{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#ddd;font:400 13px/1 "Special Elite","Courier New",monospace}
+#visore .v-salva,#visore .v-chiudi{flex:none;margin:0;padding:6px 10px;border:2px solid #ffd400;background:#0e0d0c;color:#ffd400;font:400 14px/1 "Anton",Impact,sans-serif;letter-spacing:.04em;cursor:pointer}
+#visore .v-salva[data-stato="pronto"]{background:#ffd400;color:#000}
+#visore .v-salva:disabled{opacity:.6;cursor:default}
+#visore .v-chiudi{padding:4px 10px;font-size:20px;line-height:1}
+#visore .v-tela{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:zoom-in}
+#visore .v-tela.zoom{cursor:zoom-out}
+#visore .v-tela img,#visore .v-tela video{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;background:#000}
+#visore .v-tela img{transition:transform .25s ease;will-change:transform}
+#visore .v-tela.zoom img{transform:scale(2.5)}
+#visore .v-tela video{width:100%;height:100%;cursor:default}
+#visore .v-tela [hidden]{display:none}
+#visore .v-freccia{position:absolute;top:50%;z-index:2;translate:0 -50%;width:48px;height:72px;margin:0;padding:0;border:0;background:rgba(0,0,0,.45);color:#ffd400;font:400 44px/72px "Anton",Impact,sans-serif;cursor:pointer}
+#visore .v-prima{left:0;border-radius:0 6px 6px 0}
+#visore .v-dopo{right:0;border-radius:6px 0 0 6px}
+#visore .v-freccia:hover{background:rgba(0,0,0,.75)}
+#visore .v-piede{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;justify-content:space-between;gap:12px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.85));font:400 13px/1.2 "Special Elite","Courier New",monospace;color:#ddd;pointer-events:none}
+#visore .v-qualita{color:#ffd400}
+#visore .v-aiuto{opacity:.7;white-space:nowrap}
+@media (max-width:899px){#visore .v-freccia{display:none}#visore .v-aiuto{display:none}}
+@media (prefers-reduced-motion:reduce){#visore .v-tela img{transition:none}}
+
+/* ── la barra delle scelte (condividi.js) ──────────────────────────────────────────────────────────────────────────── */
+/* (left:0;right:0 + margin auto + width:max-content: con left:50% un elemento fisso avrebbe solo mezzo schermo e si stringerebbe) */
+#scelte{position:fixed;left:0;right:0;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:1000;display:flex;align-items:center;gap:10px;width:max-content;max-width:calc(100vw - 24px);margin:0 auto;box-sizing:border-box;
+  padding:10px 14px;border:2px solid #ffd400;background:#0e0d0c;color:#fff;font:400 15px/1 "Anton",Impact,sans-serif;letter-spacing:.03em;box-shadow:0 10px 30px rgba(0,0,0,.8)}
+#scelte[hidden]{display:none}
+#scelte .s-n{flex:none;color:#ffd400}
+#scelte .s-stato{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#bbb;font:400 12px/1 "Special Elite","Courier New",monospace}
+#scelte button{flex:none;margin:0;padding:7px 12px;border:2px solid #ffd400;background:#0e0d0c;color:#ffd400;font:400 14px/1 "Anton",Impact,sans-serif;letter-spacing:.04em;cursor:pointer}
+#scelte .s-tasto.pronto{background:#ffd400;color:#000}
+#scelte button:disabled{opacity:.5;cursor:default}
+#scelte .s-annulla{border-color:#666;color:#ccc}
+@media (max-width:899px){#scelte{gap:8px;padding:8px 10px;font-size:14px}#scelte button{padding:6px 9px;font-size:13px}}

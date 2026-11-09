@@ -58,3 +58,6 @@ tools/pzkko/lavoro/
 
 # la macchina del tempo: le versioni ricostruite, una alla volta
 tools/tempo/lavoro/
+
+# Deutschland: la cache di Python di riconosci.py
+tools/pzkko/deutschland/__pycache__/

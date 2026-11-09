@@ -28,6 +28,9 @@ export const DESK = {
     { k: '#wallet-muro', x: 20, y: 0, w: 245, r: -2 },
     { k: '#cercapersone-muro', x: 297, y: 6, w: 185, r: 3 },
     { k: 'bestiole/rivolo', x: 1215, y: 0, w: 36, r: 0 },
+    // la macchinetta delle sigarette (9.11, deutschland/muro.js): nel primo schermo, centrata, un po' sotto la metà (su un
+    // 16:9 sotto l'insegna si vedono ~280 unità di parete: per starci intera è larga 200)
+    { k: '#automat-muro', x: 540, y: 26, w: 200, r: -1 },
   ],
   fondo: [
     // la petizione: in fondo, in mezzo, sopra tutto; sotto di lei solo le sue penne
@@ -55,6 +58,7 @@ export const MOB = {
     { k: '#wallet-muro', x: 8, y: 0, w: 182, r: -2 },
     { k: '#cercapersone-muro', x: 218, y: 4, w: 150, r: 3 },
     { k: 'bestiole/rivolo', x: 352, y: 0, w: 22, r: 0 },
+    { k: '#automat-muro', x: 80, y: 210, w: 230, r: -1 },
   ],
   fondo: [
     { k: '#petizione', x: 100, w: 190, r: -1, sotto: 170 },
