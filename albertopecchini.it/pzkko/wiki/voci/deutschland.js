@@ -186,4 +186,27 @@ Una striscia di carta <code>#f4efe2</code> col bordo a denti (una maschera CSS),
 {{Vedi anche|La galleria di Deutschland|Deutschland|La macchinetta delle sigarette|Il font Fake Receipt}}
 [[Categoria:Deutschland]]`,
   },
+  'Il server delle foto di Deutschland': {
+    data: '2026-11-09',
+    fonti: ['albertopecchini.it/pzkko/api/deutschland.mjs', 'albertopecchini.it/api/deutschland.js', 'albertopecchini.it/tools/pzkko/deutschland/cataloga.mjs', 'albertopecchini.it/tools/pzkko/deutschland/manifesto.mjs', 'albertopecchini.it/tools/pzkko/deutschland/posti.mjs', 'albertopecchini.it/tools/pzkko/deutschland/riconosci.py', 'albertopecchini.it/tools/pzkko/deutschland/categorie.mjs', 'albertopecchini.it/tools/pzkko/deutschland/comune.mjs', 'albertopecchini.it/tools/pzkko/deutschland/finto.mjs', 'albertopecchini.it/tools/pzkko/deutschland/README.md'],
+    testo: `{{Infobox
+| titolo = Il server delle foto di Deutschland
+| dove = C:\\pzkko-server\\deutschland (il pc di Alberto), dietro il Funnel di Tailscale a /deutschland
+| dal = 9 novembre 2026
+| file = server.mjs, biglietto.mjs, accesso.mjs; tools/pzkko/deutschland/
+}}
+'''Il server delle foto di Deutschland''' è il pezzo di casa della galleria [[Deutschland]]: le 967 foto e video del viaggio a Monaco e Stoccarda con Mikas, Jonny e Jella (6–8 novembre 2026) non stanno su Vercel né su GitHub, ma su <code>C:\\pzkko-server\\deutschland\\</code>, e da fuori ci si arriva solo col Funnel di Tailscale e con un biglietto firmato. Pc spento = «la macchinetta è spenta».
+
+== Il biglietto ==
+Chi scrive la password nella [[La macchinetta delle sigarette|macchinetta]] manda <code>{ a: 'entra', password }</code> a <code>/api/deutschland</code>, un ponte di Vercel come <code>/api/wallet</code> (<code>pzkko/api/deutschland.mjs</code>), che la porta nella [[La banca sul server|banca]] di casa (<code>accesso.mjs</code>): la password si confronta con scrypt (in chiaro non è salvata da nessuna parte, la scrive <code>imposta.mjs</code>), con 5 errori per indirizzo ogni 10 minuti, 40 tentativi all'ora in tutto e una pausa a caso fra 400 e 900 ms a ogni errore. Chi la sa riceve l'indirizzo del server e un biglietto «scadenza.firma» (HMAC-SHA256 con una chiave derivata dal segreto del server, <code>biglietto.mjs</code>), valido da 24 a 30 ore e allineato a blocchi di 6 ore: così gli indirizzi delle foto restano uguali tutta la giornata e la cache del browser serve a qualcosa.
+
+== Il server ==
+<code>server.mjs</code> ascolta su 127.0.0.1:8790, solo Node, solo file statici: <code>/foto.json</code> (il manifesto), <code>/m/</code> miniature 480 px webp, <code>/g/</code> grandi 1800 px, <code>/o/</code> gli originali (i JPEG a 48 MP, letti da D: senza copie), <code>/raw/</code> i DNG, <code>/v/</code> i video h264 e <code>/p/</code> i poster, sempre con <code>?b=biglietto</code>. Chi non ce l'ha, o ce l'ha scaduto, riceve un 404 vuoto: da fuori lì non c'è niente. Un indirizzo incollato nella barra o messo in un iframe non apre niente (<code>Sec-Fetch-Dest</code>), e nemmeno da una pagina che non sia pzkko.it (Referer e Origin). Per il resto fa il server bravo: Range per i video, ETag, CORS, nome originale nel download (<code>IMG_5506.JPG</code>), niente metadati nei file. Con <code>DEUTSCHLAND_APERTO=1</code> serve senza biglietto le richieste che arrivano dritte dal pc, per sviluppare la galleria in locale e per il bot.
+
+== La pipeline ==
+Gli strumenti in <code>tools/pzkko/deutschland/</code> leggono la cartella del viaggio su D: (solo in lettura) e scrivono il catalogo: <code>cataloga.mjs</code> (incrementale: data dall'EXIF col fuso costruito a mano, GPS, miniature con sharp, i JPEG dentro i DNG, i video HDR dell'iPhone portati in SDR con ffmpeg), <code>posti.mjs</code> (le tappe come gruppi di foto entro 150 m, coi nomi da Nominatim che Alberto corregge), <code>riconosci.py</code> (i volti con insightface, raggruppati per somiglianza e stampati in fogli di contatto perché Alberto dica chi è chi), <code>categorie.mjs</code> (i tag cibo, paesaggi, natura, strada, auto, hotel, mezzi, alcool con CLIP su Replicate) e <code>manifesto.mjs</code>, che unisce tutto in <code>dati\\foto.json</code>. Le foto scattate nel riquadro di casa non entrano nel catalogo. Per sviluppare senza le foto vere c'è <code>finto.mjs</code>, sessanta quadrati colorati fra Monaco e Stoccarda.
+
+{{Vedi anche|Deutschland|La macchinetta delle sigarette|La galleria di Deutschland|La banca sul server|Il server dei dati in casa}}
+[[Categoria:Deutschland]]`,
+  },
 }

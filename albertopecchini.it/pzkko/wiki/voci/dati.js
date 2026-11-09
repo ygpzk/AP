@@ -12366,7 +12366,7 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 
 {{Vedi anche|Le app di pzk os|pzk os|Il cercapersone zero}}
 [[Categoria:Le app di pzk os]]` },
-  "Elenco dei commit": { data: "2026-11-09", fonti: ["README.md"], testo: `'''I 760 commit''' del [[Il repository AP|repository AP]] dal 2026-05-24 a oggi (l’ultimo: <code>39d41eb</code>, 2026-11-09). La lista completa, con filtri, sta in [[Speciale:UltimeModifiche|Ultime modifiche]]; la cronologia di ogni voce (la linguetta «Cronologia») elenca i commit che hanno toccato i suoi file. Generato da <code>git log</code> ogni volta che la wiki si aggiorna.
+  "Elenco dei commit": { data: "2026-11-09", fonti: ["README.md"], testo: `'''I 764 commit''' del [[Il repository AP|repository AP]] dal 2026-05-24 a oggi (l’ultimo: <code>b427098</code>, 2026-11-09). La lista completa, con filtri, sta in [[Speciale:UltimeModifiche|Ultime modifiche]]; la cronologia di ogni voce (la linguetta «Cronologia») elenca i commit che hanno toccato i suoi file. Generato da <code>git log</code> ogni volta che la wiki si aggiorna.
 
 == Per mese ==
 {| class="wikitable"
@@ -12393,15 +12393,19 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 | 190
 |-
 | 2026-11
-| 59
+| 63
 |}
 
 == Gli ultimi trenta ==
+* 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/b427098 b427098] merge: il ramo remoto albertopecchini.it (copia doppia del bot dei bug) riallineato a main + Deutschland
+* 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/0a2e5e8 0a2e5e8] feat(pzkko): la macchinetta delle sigarette sulla serranda e pzkko.it/deutschland, la galleria del viaggio a Monaco e Stoccarda con JMA
 * 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/39d41eb 39d41eb] feat(pzkko): la saracinesca alleggerita, solo 2D (6.11)
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/e168cea e168cea] docs(wiki): pzkkopedia allineata al biglietto dell'ospite (d6ff9ab)
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/d6ff9ab d6ff9ab] fix(pzkko): l'ospite appena arrivato aspetta il biglietto della banca prima di ogni azione (niente più 401 a ogni visita nuova)
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/65f5524 65f5524] docs(wiki): pzkkopedia allineata al bot dei bug (541f48c)
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/541f48c 541f48c] feat(tools): il bot dei bug di pzkko, che gira da solo a ogni push e due volte al giorno sul sito vero
+* 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/f1454a7 f1454a7] docs(wiki): pzkkopedia allineata al bot dei bug (99f4342)
+* 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/99f4342 99f4342] feat(tools): il bot dei bug di pzkko, che gira da solo a ogni push e due volte al giorno sul sito vero
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/d358119 d358119] Catture aggiornate: pzkko
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/7d8bf1c 7d8bf1c] docs(wiki): pzkkopedia allineata al cartello della manutenzione di Monaco (7d95b08)
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/7d95b08 7d95b08] feat(pzkko): il cartello della manutenzione sul muro della stazione di Monaco, e il sito chiuso fino a domenica alle 14
@@ -12423,10 +12427,6 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 * 2026-11-03 [https://github.com/albertoxpecchini/AP/commit/ad4fba1 ad4fba1] chore(tempo): le versioni di oggi di albertopecchini.it e pzkko.it
 * 2026-11-03 [https://github.com/albertoxpecchini/AP/commit/85b7b32 85b7b32] fix(cruscotto): la fine stimata del giro resta «—» finché non c'è una media
 * 2026-11-03 [https://github.com/albertoxpecchini/AP/commit/733905a 733905a] feat(cruscotto): la regia vede tutte le sessioni di Claude, ognuna col suo stato
-* 2026-11-03 [https://github.com/albertoxpecchini/AP/commit/6fd58b8 6fd58b8] chore(tempo): le versioni di oggi di albertopecchini.it e pzkko.it
-* 2026-11-03 [https://github.com/albertoxpecchini/AP/commit/7afe6e5 7afe6e5] feat(tempo): l'HTML vero di ogni giorno in un index leggero, e la regia di Claude per ogni lavoro
-* 2026-11-03 [https://github.com/albertoxpecchini/AP/commit/757ad9e 757ad9e] fix(tempo): le foto di Better Call Pekko non fanno più nascere un giorno nuovo di BCP
-* 2026-11-03 [https://github.com/albertoxpecchini/AP/commit/4e7bf20 4e7bf20] chore(tempo): le versioni di oggi di albertopecchini.it e pzkko.it
 
 == Dove si vede ==
 [[File:github.webp|thumb|none|380px|il repository AP su GitHub, con il numero dei commit]]

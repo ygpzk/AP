@@ -224,8 +224,7 @@ pzkko (il nome), Pekko, La chiocciola gigante africana, La nutria, Mantova, Riva
 Unimore, Le licenze, Cosa si salva, La beta, Il GitHub di Alberto, La storia del repository, Il sito precedente (React),
 Il font Fake Receipt, Cascadia Code, Open-Meteo, Compiler Explorer, Wikimedia Commons, Google Fonts
 
-**deutschland.js** — Deutschland, La macchinetta delle sigarette, La vernice, La galleria di Deutschland,
-I pacchetti di sigarette (e qui va la voce del server delle foto: Il server delle foto di Deutschland)
+**deutschland.js** — Deutschland, La macchinetta delle sigarette, La vernice, La galleria di Deutschland, I pacchetti di sigarette, Il server delle foto di Deutschland
 
 **dati.js (generato)** — un titolo per ogni oggetto dello shop (col suo nome: «Pzk-kola», «Tortelli di zucca»,
 «Canna da pesca», «Cassa dei Gonzaga»…), pesce («Alborella», «Carpa d'oro dei Gonzaga»…), bestia («Nutria (bestia)»
