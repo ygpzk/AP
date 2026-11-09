@@ -12366,7 +12366,7 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 
 {{Vedi anche|Le app di pzk os|pzk os|Il cercapersone zero}}
 [[Categoria:Le app di pzk os]]` },
-  "Elenco dei commit": { data: "2026-11-09", fonti: ["README.md"], testo: `'''I 764 commit''' del [[Il repository AP|repository AP]] dal 2026-05-24 a oggi (l’ultimo: <code>b427098</code>, 2026-11-09). La lista completa, con filtri, sta in [[Speciale:UltimeModifiche|Ultime modifiche]]; la cronologia di ogni voce (la linguetta «Cronologia») elenca i commit che hanno toccato i suoi file. Generato da <code>git log</code> ogni volta che la wiki si aggiorna.
+  "Elenco dei commit": { data: "2026-11-09", fonti: ["README.md"], testo: `'''I 765 commit''' del [[Il repository AP|repository AP]] dal 2026-05-24 a oggi (l’ultimo: <code>b5a7c82</code>, 2026-11-09). La lista completa, con filtri, sta in [[Speciale:UltimeModifiche|Ultime modifiche]]; la cronologia di ogni voce (la linguetta «Cronologia») elenca i commit che hanno toccato i suoi file. Generato da <code>git log</code> ogni volta che la wiki si aggiorna.
 
 == Per mese ==
 {| class="wikitable"
@@ -12393,10 +12393,11 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 | 190
 |-
 | 2026-11
-| 63
+| 64
 |}
 
 == Gli ultimi trenta ==
+* 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/b5a7c82 b5a7c82] docs(wiki): la voce «Il server delle foto di Deutschland» e la pzkkopedia allineata (0a2e5e8)
 * 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/b427098 b427098] merge: il ramo remoto albertopecchini.it (copia doppia del bot dei bug) riallineato a main + Deutschland
 * 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/0a2e5e8 0a2e5e8] feat(pzkko): la macchinetta delle sigarette sulla serranda e pzkko.it/deutschland, la galleria del viaggio a Monaco e Stoccarda con JMA
 * 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/39d41eb 39d41eb] feat(pzkko): la saracinesca alleggerita, solo 2D (6.11)
@@ -12426,7 +12427,6 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 * 2026-11-04 [https://github.com/albertoxpecchini/AP/commit/7df23bc 7df23bc] feat(esperimenti): finto preventivo Allianz per i mirtilli da collezione
 * 2026-11-03 [https://github.com/albertoxpecchini/AP/commit/ad4fba1 ad4fba1] chore(tempo): le versioni di oggi di albertopecchini.it e pzkko.it
 * 2026-11-03 [https://github.com/albertoxpecchini/AP/commit/85b7b32 85b7b32] fix(cruscotto): la fine stimata del giro resta «—» finché non c'è una media
-* 2026-11-03 [https://github.com/albertoxpecchini/AP/commit/733905a 733905a] feat(cruscotto): la regia vede tutte le sessioni di Claude, ognuna col suo stato
 
 == Dove si vede ==
 [[File:github.webp|thumb|none|380px|il repository AP su GitHub, con il numero dei commit]]

@@ -71,6 +71,25 @@ if (!args['senza-nomi']) {
     await pausa(1100)
   }
 }
-scriviJson(FILE, { generato: new Date().toISOString(), raggio: RAGGIO, minimo: MINIMO, posti: vivi.map(({ membri, somma, ...p }) => p), di }, 1)
+// lo stesso posto spezzato in più gruppi (l'Allianz Arena in cinque pezzi di Werner-Heisenberg-Allee, 150 m alla volta): due
+// gruppi non fissi con lo stesso nome entro UNIONE metri si uniscono nel più grande, che tiene l'id
+const UNIONE = Number(args.unione) || 800
+for (let cambiato = true; cambiato; ) {
+  cambiato = false
+  for (const a of vivi) for (const b of vivi) {
+    if (a === b || a.fisso || b.fisso || !a.nome || a.nome !== b.nome || a.n < b.n || !vivi.includes(b)) continue
+    if (metri(a.lat, a.lon, b.lat, b.lon) > UNIONE) continue
+    a.membri.push(...b.membri); a.n = a.membri.length
+    const veri = a.membri.filter((f) => !f.gpsStimato)
+    if (veri.length) { a.lat = +(veri.reduce((s, f) => s + f.lat, 0) / veri.length).toFixed(6); a.lon = +(veri.reduce((s, f) => s + f.lon, 0) / veri.length).toFixed(6) }
+    a.primo = a.membri.map((f) => f.t).sort()[0]
+    vivi.splice(vivi.indexOf(b), 1)
+    for (const f of b.membri) di[f.id] = a.id
+    cambiato = true
+    break
+  }
+}
+vivi.sort((a, b) => Date.parse(a.primo ?? 0) - Date.parse(b.primo ?? 0))
+scriviJson(FILE, { generato: new Date().toISOString(), raggio: RAGGIO, minimo: MINIMO, unione: UNIONE, posti: vivi.map(({ membri, somma, ...p }) => p), di }, 1)
 console.log(`✓ ${FILE}: ${vivi.length} posti (${vivi.filter((p) => p.fisso).length} fissi, ${nominati} nominati adesso) per ${foto.length} foto col GPS, ${inViaggio} «in viaggio» (gruppi sotto le ${MINIMO} foto)`)
 for (const p of vivi) console.log(`  ${p.id} ${p.fisso ? '🔒' : '  '} ${String(p.n).padStart(3)} ${p.primo?.slice(0, 16)} «${p.nome}» ${p.nomeAuto !== p.nome ? `(${p.nomeAuto})` : ''}`)

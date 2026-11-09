@@ -18,7 +18,8 @@ import { api } from '../../replicate.mjs'
 
 const args = argomenti()
 const MODELLO = 'andreasjansson/clip-features'
-const SOGLIA = Number(args.soglia) || 0.22, MAX_TAG = 3, LOTTO = 24
+const SOGLIA = Number(args.soglia) || 0.22, MAX_TAG = 3
+const LOTTO = Number(args.lotto) || 8 // (con 24 miniature da 480 px il modello finiva la memoria della GPU: CUDA out of memory)
 const FRASI = {
   cibo: 'a photo of food, a meal on a plate or a dish in a restaurant',
   paesaggi: 'a landscape photo: a city skyline, a panoramic view, mountains or a river seen from far away',
