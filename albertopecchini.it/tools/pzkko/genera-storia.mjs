@@ -1,6 +1,6 @@
 // Rifà pzkko/storia/index.html da pzkko/index.html, come genera-404.mjs: la storia ha la stessa strada, la stessa
-// insegna, lo stesso CSS, lo stesso script (la sera di Mantova, le auto, le mosche, i tagliandi, la regia) e la stessa
-// scena 3D della home, senza copiarli a mano. Della storia restano i suoi pezzi, che stanno nella pagina stessa:
+// insegna, lo stesso CSS e lo stesso script (la sera di Mantova, le auto, le mosche, i tagliandi, la regia) della home,
+// senza copiarli a mano (dal 6.11 senza scena 3D: il sito è solo in 2D). Della storia restano i suoi pezzi, che stanno nella pagina stessa:
 //
 //   <!-- storia: testa --> … <!-- /storia: testa -->     il titolo, la descrizione, og e i dati strutturati
 //   /* storia: stile */ … /* /storia: stile */           il CSS dei suoi fogli (le stampe con la Live Photo, i confronti,
@@ -8,7 +8,7 @@
 //   <div class="parete storia"> … </div></main>          i fogli: le posizioni le scrive disponi.mjs --pagina=storia
 //   <!-- storia: script --> … <!-- /storia: script -->   le Live Photo
 //
-// e le sue misure: l'altezza della parete (disponi.mjs) e le foto del caricamento (FOTO, scena/carico.mjs --pagina=storia).
+// e la sua misura: l'altezza della parete (disponi.mjs).
 // I testi della storia si cambiano lì, in pzkko/storia/index.html; questo si rilancia dopo ogni modifica a index.html
 // (lo fa serranda.mjs rifai):
 //
@@ -36,7 +36,6 @@ const script = pezzo(/<!-- storia: script -->[\s\S]*?<!-- \/storia: script -->\n
 // le misure della storia, se ci sono già (alla prima volta: due altezze qualunque, poi le scrive disponi.mjs)
 const alta = storia.match(/\.parete\{position:relative;height:calc\((\d+) \* var\(--u\)\)\}/)?.[1] ?? '2400'
 const altaM = storia.match(/\.parete\{height:calc\((\d+) \* var\(--u\)\);max-width:600px/)?.[1] ?? '4800'
-const foto = storia.match(/ {2}const FOTO = .*\n/)?.[0] ?? '  const FOTO = null // (la storia: le sue foto del caricamento le fa tools/pzkko/scena/carico.mjs --pagina=storia)\n'
 
 const rep = (from, to) => {
   const found = from instanceof RegExp ? from.test(html) : html.includes(from)
@@ -65,9 +64,10 @@ rep(/\.parete\{height:calc\(\d+ \* var\(--u\)\);max-width:600px/, `.parete{heigh
 // i fogli
 rep(/ {4}<div class="parete">[\s\S]*?\n {4}<\/div>\n {2}<\/main>/, parete)
 
-// le Live Photo, prima della scena; e le foto del caricamento della storia (la strada da lontano col suo muro)
-rep('<!-- La scena 3D (scena/)', `${script}<!-- La scena 3D (scena/)`)
-rep(/ {2}const FOTO = .*\n/, foto)
+// le Live Photo, in fondo, prima dello scontrino delle novità (fino al 6.11 prima della scena 3D, che non c'è più)
+rep('<!-- lo scontrino delle novità (benvenuto/)', `${script}<!-- lo scontrino delle novità (benvenuto/)`)
+// i caratteri dei titoli dei volantini della home (<link rel="preload" … data-home>) qui non servono
+html = html.replace(/<link rel="preload"[^>]* data-home>\n/g, '')
 
 writeFileSync(FILE, html)
 console.log('scritto', FILE, html.length, 'byte')

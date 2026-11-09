@@ -232,6 +232,74 @@ serio ma è un progetto Vercel a parte.
 La pagina è la saracinesca (la foto di riferimento: la serranda di un negozio
 chiuso a Bologna, con l'insegna «coin» sopra e i manifesti attaccati sotto).
 
+- **La saracinesca alleggerita, solo 2D (6.11.2026, versione 4.1.0 «serranda leggera»)**. Alberto: «alleggerisci la
+  serranda di volantini, fai tutto più leggero e meno laggoso, sito bloccato solo in 2D; togli tutti i volantini, rifai con
+  nuovi font quelli social, sii più compatto, mettili già in tutta la serranda anche se è vuota, sparsi a coordinate
+  casuali senza che si sovrappongano più del 10%; in fondo lascia la petizione e mettila sopra tutto così le penne si
+  muovono sempre; da mobile uguale ma 3 volantini per riga»; e a chi entrava «le ventole del pc diventano un aereo».
+  **Quello che segue in questa sezione, dove parla dei siti, dei giochi, dei manifesti degli altri, delle pile e del 3D,
+  racconta il muro fino al 6.11**; adesso è così:
+  - **Sul muro** restano il wallet e il cercapersone in cima, il rivolo della condensa, **sei volantini dei social**
+    (instagram, tiktok, github, whatsapp, e-mail, un caffè?) e **la petizione in fondo**. Via i volantini dei siti, dei
+    giochi, di pzk$meeting, della storia, «chi sono», la ciao, i manifesti degli altri, i graffiti, i nastri, gli adesivi
+    degli amici (le immagini restano in `art/`: le usano ancora la storia e la 404). I giochi si aprono dalla pagina dei
+    gadget (la barra), dal cercapersone e con `#roulette`, `#mine`… nell'indirizzo (anche a pagina già aperta); la storia
+    dalla barra.
+  - **I volantini compatti** (`.vol.s`): carta, illustrazione, titolo, contatto a penna, cinque tagliandi. Tutto in `cqw`
+    del volantino, senza minimi in pixel e senza script che misura: il foglio è alto quanto la sua carta (`--ar`) e non
+    cresce, l'illustrazione prende lo spazio che resta. Ognuno esce da una stamperia diversa (una classe `f-*`): Pacifico
+    (instagram), Rubik Glitch (tiktok), Silkscreen (github), Titan One (whatsapp), Playfair Display nero corsivo (e-mail),
+    Ultra (un caffè?); il contatto e i tagliandi in Patrick Hand. Tutti SIL OFL, da Google Fonts, serviti da qui.
+  - **Nessuna scritta va a capo spezzata** (era «whatsapp» con una «p» sola a capo: `.testo` spezza le parole lunghe dei
+    link, il titolo lo ereditava e non sbordava mai, quindi lo script che rimpicciolisce non se ne accorgeva). I titoli, le
+    note a mano e i contatti non si spezzano più (`overflow-wrap:normal`); sui compatti stanno su una riga per costruzione
+    (`white-space:nowrap`), con `--tt` e `--th` (la misura del titolo e del contatto in cqw) prese sulla larghezza vera
+    delle scritte. **`node tools/pzkko/scritte.mjs`** apre la pagina a otto larghezze (da 1440 a 320 px) e fallisce se una
+    parola è spezzata, se una scritta esce dal riquadro o se un titolo compatto fa due righe; `--scrivi` rimette `--tt` e
+    `--th` giusti (dopo aver cambiato un titolo, un contatto, un carattere o una carta); `--pagina=storia` controlla la
+    storia (lì i link lunghi nei testi possono spezzarsi: sono avvisi).
+  - **I caratteri a pezzi** (`fonts/sub/`, `tools/pzkko/caratteri.mjs`): un titolo è una parola, e scaricare il carattere
+    intero per scriverla non serve. Lo strumento chiede a Google Fonts il woff2 con le sole lettere che servono
+    (`css2?family=…&text=…`), lo salva qui e riscrive le regole `@font-face` fra i segni `/* caratteri: … */` (e i
+    `<link rel="preload" … data-home>` della home, che la storia e la 404 non tengono). Tre gruppi: `social` (i sei titoli e
+    la penna, 28 KB), `petizione` (le scritte stampate del foglio e il nastro «suono», 26 KB) e `barra` (le sette voci, 21 KB
+    invece di ~300). Ogni indirizzo porta l'impronta del file (`?v=`). Hanno nomi loro (`s-…`, `p-…`, `b-…`), davanti al
+    carattere intero, che arriva solo se serve una lettera in più. Cambiando una scritta: una riga in `GRUPPI` e si rilancia.
+  - **Sparsi a caso** (`tools/pzkko/disposizione.js`, `disponi.mjs`): niente più pile. `abs` mette un pezzo dove si dice
+    (wallet, cercapersone, rivolo), `fondo` lo attacca al fondo della parete (la petizione: sotto di lei restano 230
+    unità sul computer e 170 sul telefono, per le penne), `sparsi` lo mette a caso su tutta la parete, col seme: ogni pezzo
+    ha il suo caso (dal seme e dal suo nome: aggiungerne uno non sposta gli altri), prova 40 punti e tiene il più lontano
+    dagli altri, mai sopra un pezzo fisso e mai coperto più del 10%. La parete è alta `minimo`: 3320 unità sul computer
+    (com'era) e 3800 sul telefono (era 5760: i volantini lì sono larghi 118 su 390, **tre per riga**, non più due).
+    `serranda.mjs allunga --minimo=N` la cambia; cambiando `seme` cambia tutta la sparsa.
+  - **La petizione** sta in fondo, in mezzo, sopra tutto (`z-index:25`, più del foglio sotto il puntatore): niente copre
+    le penne. Dondolano al passaggio del puntatore come prima e, dal 6.11, **anche scorrendo** (una spinta quando la
+    pagina scorre con le penne in vista: col dito non c'è puntatore). Il suo codice, le firme e i quattro caratteri delle
+    calligrafie (~190 KB) si chiedono quando ci si avvicina a meno di due schermi, o subito con `#petizione`.
+  - **Solo 2D**: la scena 3D non parte più (né dalla regia, né con `?scena=1`, né per chi aveva `pzkko-3d` nel browser);
+    dalla pagina sono usciti lo script della testa che la sceglieva, il pomodoro del caricamento e tutto il blocco in fondo.
+    `scena/`, `art/scena/` e i loro strumenti restano dove sono, spenti. La regia non ha più il tasto «3D», lo scontrino
+    non dice più come accenderlo.
+  - **A pagina ferma il computer riposa.** Lavoravano sempre: i nove pixel della barra (animazioni CSS senza fine: ora
+    due giri all'apertura, poi solo col puntatore sulla barra), il led rosso del cercapersone (un'animazione CSS: ora una
+    classe ogni 0,6 s), le mosche (ferme 1,5–9 s: ora 12–80), e di notte lo sfarfallio dell'insegna, un fotogramma a ogni
+    giro dello schermo per tutta la notte con una variabile scritta su `html` (lo stile di tutta la pagina): ora la luce
+    sta ferma e il giro dorme fra un calo e l'altro e fra un'auto e l'altra, e le variabili si scrivono solo sugli
+    elementi che le usano. Gli strati delle luci (il velo della sera, l'alone e il cono dell'insegna, i fari, i fanali, i
+    riflessi: grandi quanto la strada o lo schermo, in multiply e in screen) stanno a `display:none` finché non servono
+    (`html.sera`, `html.acceso`, `html.auto`); la lamiera di sera si scurisce con un velo nello stesso sfondo, non con un
+    filtro su tutta la parete. Il cercapersone non scarica più da sé il suo 3D (modello da 1,2 MB e three.js): solo
+    quando ci si passa sopra o lo si tocca.
+  - **Le immagini leggere** (`tools/pzkko/leggere.mjs`): `art/social/` sono le sei illustrazioni stese sul bianco (in
+    multiply è lo stesso identico risultato, e senza la trasparenza, che era metà del file), larghe 360 px, qualità 92:
+    799 → 267 KB; `art/leggere/` le bestie e la goccia a 3× della misura a cui si vedono, senza perdite: 155 → 39 KB.
+  - **Misure** (6.11, Chrome senza finestra sul server di prova, computer 1300 × 860, prima visita): **155 richieste e
+    6,8 MB → 105 e 1,5 MB**; i caratteri da 590 a 178 KB, gli script da 1.088 a 342 KB. A pagina ferma il filo della
+    pagina lavorava 124 ms al secondo con 165 ricalcoli di stile al secondo, sempre; ora 12–20 ms al secondo e nessun
+    fotogramma chiesto nei momenti fermi (tre blocchi su quattro da 5 secondi, di giorno), e di notte lo stesso, tranne
+    quando passa un'auto o l'insegna ha un calo. Per rifarle: `tools/pzkko/scritte.mjs` per le scritte; le misure di
+    consumo erano script di prova, non sono nel repository.
+
 - **Come parte** (23.10, «per adesso avvialo sia da telefono che da pc in 2d con
   sempre luce sparata»): la home parte **sempre in 2D**, il muro di sempre, sul computer
   e sul telefono, anche dove c'è WebGL2. Fino al 29.10 partiva anche **a mezzogiorno col
@@ -422,6 +490,12 @@ chiuso a Bologna, con l'insegna «coin» sopra e i manifesti attaccati sotto).
   `tools/pzkko/genera-storia.mjs` (vedi «La storia»).
 
 ## La scena 3D (scena/)
+
+> **Spenta dal 6.11.2026** (Alberto: «sito bloccato solo in 2D»): la pagina non la carica più, in nessun modo. Questa
+> sezione resta com'era, per quando servisse riaccenderla: i file sono tutti in `scena/`, `art/scena/` e
+> `tools/pzkko/scena/`. Per riaccenderla andrebbero rimessi lo script della testa che la sceglie e il blocco del
+> caricamento in fondo a `index.html` (stanno nella storia di Git, prima del 6.11), e rifatte le foto dei volantini
+> (`scena/cattura.mjs`), che sono ancora quelle del muro di prima.
 
 Dal 18.10.2026 (dal 19.10 anche sul telefono), dove c'è WebGL2 la home non è
 più una pagina ma un posto: la stessa saracinesca coi suoi volantini, disegnata
@@ -3095,6 +3169,13 @@ stanno in fondo alle pile, `amici/jager` è attaccato sopra il manifesto punk. M
 sopra i volantini veri, che sono link.
 
 ## La disposizione
+
+> Dal 6.11.2026 la home non ha più pile: `disposizione.js` ha `abs`, `fondo` e `sparsi` (vedi «La saracinesca
+> alleggerita», in cima a «Com'è fatta la home»). Le pile (`cols`, `rel`) le usa ancora la storia. `serranda.mjs rifai`
+> adesso fa: `disponi.mjs tutto --foto`, `scritte.mjs`, `genera-404.mjs`, `genera-storia.mjs` e
+> `disponi.mjs tutto --pagina=storia`; niente più foto per la scena 3D. `volantino` e `pezzo` mettono il pezzo nuovo fra
+> gli sparsi (il posto lo trova il caso); `stato` elenca gli sparsi con le loro coordinate. Il browser degli strumenti:
+> anche il Chrome scaricato in `%LOCALAPPDATA%\pzkko-chrome` (`browser.mjs`). Quello che segue è la storia delle pile.
 
 Le posizioni non si scrivono a mano in `index.html`: stanno in
 `../tools/pzkko/disposizione.js` come pile per colonna (cinque sul desktop, due

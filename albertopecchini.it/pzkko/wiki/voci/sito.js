@@ -51,10 +51,69 @@ I $pzk e gli [[Gli EUR€|EUR€]] non si comprano, non si vendono e non valgono
 [[Categoria:I siti di Alberto]]`,
   },
 
+  'La saracinesca alleggerita': {
+    data: '2026-11-06',
+    fonti: [INDEX, README, 'albertopecchini.it/tools/pzkko/disposizione.js', 'albertopecchini.it/tools/pzkko/disponi.mjs', 'albertopecchini.it/tools/pzkko/serranda.mjs',
+      'albertopecchini.it/tools/pzkko/caratteri.mjs', 'albertopecchini.it/tools/pzkko/leggere.mjs', 'albertopecchini.it/tools/pzkko/scritte.mjs',
+      ...['s-pacifico', 's-rubik-glitch', 's-silkscreen', 's-titan-one', 's-playfair', 's-ultra', 's-mano', 'p-anton', 'p-special-elite', 'p-marker', 'b-special-elite', 'b-black-ops', 'b-marker', 'b-shrikhand', 'b-rubik-mono', 'b-caveat', 'b-bungee'].map((n) => `albertopecchini.it/pzkko/fonts/sub/${n}.woff2`),
+      ...['macchina', 'telefono', 'gatto', 'cornetta', 'piccione', 'caffe'].map((n) => `albertopecchini.it/pzkko/art/social/${n}.webp`),
+      ...['mosca', 'mosca-zampe', 'mosca-vola', 'mosca-vola2', 'formica', 'formica-lato', 'goccia', 'spruzzo'].map((n) => `albertopecchini.it/pzkko/art/leggere/${n}.webp`)],
+    testo: `{{Citazione|alleggerisci la serranda di volantini. fai tutto più leggero e meno laggoso. sito bloccato solo in 2D. mi dicevano che quando entrano le loro ventole del pc diventano un aereo|Alberto, 6.11.2026}}
+'''La saracinesca alleggerita''' è [[Il muro|il muro]] di [[pzkko.it]] dal 6 novembre 2026, la versione 4.1.0 «[[Serranda leggera]]»: via tutti i volantini, rifatti solo quelli dei social, sparsi a caso su tutta la parete, la petizione in fondo, e il sito solo in 2D.
+
+== Cosa c'è sul muro ==
+In cima il wallet e [[Il cercapersone zero|il cercapersone]]; poi sei volantini (instagram, tiktok, github, whatsapp, e-mail, un caffè?) e, in fondo, [[La petizione|la petizione]]. I volantini dei siti, dei giochi, della storia, i manifesti degli altri, i graffiti e gli adesivi degli amici non ci sono più: i giochi si aprono dalla pagina dei gadget ([[La barra in alto|la barra]]), dal cercapersone e con <code>#roulette</code>, <code>#mine</code>… nell'indirizzo.
+
+== I volantini compatti ==
+Ogni volantino dei social è un foglio piccolo (<code>.vol.s</code>): la carta, l'illustrazione, il titolo, il contatto a penna, cinque tagliandi da strappare. Tutto è misurato in <code>cqw</code> del volantino, senza minimi in pixel: il foglio è lo stesso disegno a ogni grandezza. Ognuno ha il suo carattere: Pacifico, Rubik Glitch, Silkscreen, Titan One, Playfair Display, Ultra; il contatto in Patrick Hand (tutti da [[Google Fonts]], serviti dal sito). Sul telefono ce ne stanno tre per riga.
+
+'''Nessuna scritta va a capo spezzata.''' Alberto: «le scritte alcune tipo whatsapp va a capo con 1 p (non deve assolutamente succedere)». I titoli stanno su una riga per costruzione, e <code>tools/pzkko/scritte.mjs</code> apre la pagina a otto larghezze e fallisce se una parola è spezzata o una scritta esce dal suo riquadro.
+
+== Sparsi a caso ==
+Niente più [[Le pile|pile]]: in <code>disposizione.js</code> un pezzo sta dove si dice (<code>abs</code>), attaccato al fondo (<code>fondo</code>, la petizione) o a caso (<code>sparsi</code>). Il caso ha un seme: la pagina è uguale a ogni visita, e ogni pezzo ha il suo, così aggiungerne uno non sposta gli altri. Fra quaranta punti a caso si tiene il più lontano dagli altri pezzi; mai coperti più del 10%. Vedi [[La disposizione]] e [[La serranda]].
+
+== La petizione sopra tutto ==
+[[La petizione]] sta in fondo, in mezzo, davanti a ogni altra cosa: niente copre [[Le penne della petizione|le penne]], che dondolano al passaggio del puntatore e, dal 6.11, anche quando la pagina scorre.
+
+== Solo 2D ==
+[[La scena 3D]] è spenta per tutti: non parte dalla [[La regia|regia]], né con <code>?scena=1</code>, né per chi l'aveva accesa. I suoi file restano nel repository.
+
+== Leggera ==
+{| class="wikitable"
+! cosa !! prima !! dopo
+|-
+| richieste all'apertura (computer) || 155 || 105
+|-
+| peso all'apertura || 6,8 MB || 1,5 MB
+|-
+| caratteri || 590 KB || 178 KB
+|-
+| lavoro a pagina ferma || 124 ms al secondo, sempre || 12–20 ms al secondo
+|}
+A pagina ferma lavoravano sempre i pixel della barra, il led del cercapersone, le mosche e, di notte, lo sfarfallio dell'insegna (un fotogramma a ogni giro dello schermo, per tutta la notte). Ora ognuno si ferma quando non si vede niente muoversi, e gli strati delle luci non si disegnano finché sono spenti.
+
+* '''I caratteri a pezzi''' (<code>tools/pzkko/caratteri.mjs</code>, <code>fonts/sub/</code>): un titolo è una parola, quindi del carattere si scaricano solo quelle lettere (1–10 KB invece di 13–59).
+* '''Le immagini leggere''' (<code>tools/pzkko/leggere.mjs</code>): le illustrazioni dei social stese sul bianco (<code>art/social/</code>: in multiply è lo stesso risultato, senza la trasparenza) e le bestie alla misura a cui si vedono (<code>art/leggere/</code>).
+* '''Il cercapersone''' non scarica più da sé il suo modello 3D: solo quando ci si passa sopra.
+* '''La petizione''' si carica quando ci si avvicina.
+
+{{Vedi anche|Il muro|I volantini|La petizione|La scena 3D|Serranda leggera|Skill serranda}}
+[[Categoria:Il muro]]`,
+  },
+  'Serranda leggera': {
+    data: '2026-11-06',
+    fonti: ['albertopecchini.it/pzkko/benvenuto/benvenuto.js', README],
+    testo: `'''Serranda leggera''' è il nome della versione 4.1.0 di [[pzkko.it]], del 6 novembre 2026: [[La saracinesca alleggerita|la saracinesca alleggerita]]. Sullo [[Lo scontrino delle novità|scontrino]]: la saracinesca alleggerita, i volantini dei social rifatti, tre per riga sul telefono, la petizione in fondo sopra tutto, il sito molto più leggero, i giochi che si aprono dai gadget e dal cercapersone, e l'addio alla strada in 3D. Dallo scontrino è uscito «come si accende il 3D».
+
+{{Vedi anche|Le versioni di pzkko|La saracinesca alleggerita|Chiocciola zero}}
+[[Categoria:Le versioni]]`,
+  },
   'Il muro': {
-    data: '2026-10-29',
+    data: '2026-11-06',
     fonti: [INDEX, README, 'albertopecchini.it/tools/pzkko/disposizione.js'],
-    testo: `{{Infobox
+    testo: `''Dal 6 novembre 2026 il muro è [[La saracinesca alleggerita|alleggerito e solo in 2D]]: restano i volantini dei social, sparsi a caso, e la petizione in fondo. Questa voce racconta com'era fino a quel giorno.''
+
+{{Infobox
 | titolo = Il muro
 | immagine = home-intera.webp
 | didascalia = la parete intera, dal computer: cinque colonne di fogli
@@ -218,9 +277,11 @@ Nella scena 1 unità della parete = 1,6 mm: la saracinesca è larga 2,05 m sul c
   },
 
   'I volantini': {
-    data: '2026-10-26',
+    data: '2026-11-06',
     fonti: [INDEX, 'albertopecchini.it/tools/pzkko/disposizione.js', 'albertopecchini.it/tools/pzkko/serranda.mjs', README],
-    testo: `{{Infobox
+    testo: `''Dal 6 novembre 2026 il muro è [[La saracinesca alleggerita|alleggerito e solo in 2D]]: restano i volantini dei social, sparsi a caso, e la petizione in fondo. Questa voce racconta com'era fino a quel giorno.''
+
+{{Infobox
 | titolo = I volantini
 | immagine = home-giorno.webp
 | didascalia = i volantini del muro: carta fotografata, testo vero sopra
@@ -281,7 +342,7 @@ Il tagliando si strappa anche all'orecchio: «le mani» di [[Il suono della stra
 
 == Chi le usa ==
 * i volantini (<code>.c-bianco</code>, <code>.c-giallo</code>…), che crescono col testo (la carta si stira un po');
-* le voci della [[La barra in alto|barra]]: ogni pezzo di carta strappato ha la sua carta (scontrino, cartone, post-it, rosa, quaderno, bianca, grigia);
+* le voci della [[La barra in alto|barra]]: ogni pezzo ha la sua carta (lo scontrino, il cartone, il post-it, il biglietto rosa, la pagina di quaderno, lo strappo bianco, il cartellino grigio), disegnata in CSS;
 * [[La finestra dei giochi|le finestre dei giochi]] e [[La regia|la regia]]: un foglio grande attaccato al muro col nastro (quello della roulette, capovolto per dado e moneta);
 * [[Gli strumenti di pzkko|le pagine degli strumenti]] e le pagine della barra (<code>barra/pagina.css</code>, il foglio col nastro).
 
@@ -360,9 +421,11 @@ Toccato, ogni pezzo schiocca col suo materiale: il cartoncino del dentista, lo s
   },
 
   'Le zone del muro': {
-    data: '2026-10-21',
+    data: '2026-11-06',
     fonti: [INDEX, 'albertopecchini.it/tools/pzkko/disposizione.js', README],
-    testo: `'''Le zone del muro''' sono le quattro parole sprayate sulla [[La lamiera|lamiera]] che fanno da intestazioni e da anchor: '''siti''', '''social''', '''games''', '''tools''' (<code>art/scritte/</code> e <code>scritte2/</code>). PRODUCT.md le aveva pensate come le due zone «tools» e «games» di un link-in-bio, vuote con uno stato vuoto curato (7.10.2026); il 17.10 la saracinesca si è allungata verso l'alto e la zona siti è andata in cima ([[I siti in cima]]).
+    testo: `''Dal 6 novembre 2026 il muro è [[La saracinesca alleggerita|alleggerito e solo in 2D]]: restano i volantini dei social, sparsi a caso, e la petizione in fondo. Questa voce racconta com'era fino a quel giorno.''
+
+'''Le zone del muro''' sono le quattro parole sprayate sulla [[La lamiera|lamiera]] che fanno da intestazioni e da anchor: '''siti''', '''social''', '''games''', '''tools''' (<code>art/scritte/</code> e <code>scritte2/</code>). PRODUCT.md le aveva pensate come le due zone «tools» e «games» di un link-in-bio, vuote con uno stato vuoto curato (7.10.2026); il 17.10 la saracinesca si è allungata verso l'alto e la zona siti è andata in cima ([[I siti in cima]]).
 
 * '''siti''': un volantino per sito, che si apre in una scheda nuova ([[albertopecchini.it]], [[Better Call Pekko|bettercallpekko.it]], [[rivaltasulmincio.it]], [[cascinafontana.xyz]], [[Il volantino «ti serve un sito?»|«ti serve un sito?»]], e quello non cliccabile dell'[[Ing. Dario Donelli]]); in mezzo [[I manifesti e la roba degli altri|la roba degli altri]];
 * '''social''': instagram, github, whatsapp, e-mail, paypal, [[TikTok sul muro|tiktok]] coi [[I tagliandi|tagliandi]], e [[Vendo il ciao|«vendo il ciao»]];
@@ -376,9 +439,11 @@ Fuori dalle zone: «chi sono» e «da dove viene questo muro?» nella colonna 0,
   },
 
   'I siti in cima': {
-    data: '2026-10-17',
+    data: '2026-11-06',
     fonti: [INDEX, 'albertopecchini.it/tools/pzkko/disposizione.js', README],
-    testo: `'''I siti in cima''' sono la zona ''siti'' del [[Il muro|muro]], arrivata il 17.10.2026 col commit ae76bda («il muro più alto coi siti in cima, la roulette 3D in una finestra, via le immagini che non servono»): la saracinesca si è allungata verso l'alto e le cose nuove stanno sopra. Un [[I volantini|volantino]] per sito, che si apre in una scheda nuova:
+    testo: `''Dal 6 novembre 2026 il muro è [[La saracinesca alleggerita|alleggerito e solo in 2D]]: restano i volantini dei social, sparsi a caso, e la petizione in fondo. Questa voce racconta com'era fino a quel giorno.''
+
+'''I siti in cima''' sono la zona ''siti'' del [[Il muro|muro]], arrivata il 17.10.2026 col commit ae76bda («il muro più alto coi siti in cima, la roulette 3D in una finestra, via le immagini che non servono»): la saracinesca si è allungata verso l'alto e le cose nuove stanno sopra. Un [[I volantini|volantino]] per sito, che si apre in una scheda nuova:
 
 {| class="wikitable"
 ! volantino !! carattere !! dove porta
@@ -630,9 +695,11 @@ Un IntersectionObserver con qualcosa da guardare, finché gira un'animazione (il
   },
 
   'Come parte la home': {
-    data: '2026-10-29',
+    data: '2026-11-06',
     fonti: [INDEX, 'albertopecchini.it/pzkko/regia/regia.js', README],
-    testo: `{{Citazione|per adesso avvialo sia da telefono che da pc in 2d con sempre luce sparata|Alberto, 23.10.2026}}
+    testo: `''Dal 6 novembre 2026 la home è [[La saracinesca alleggerita|solo in 2D]]: il 3D non si sceglie più. Restano le scelte dell'ora e del meteo.''
+
+{{Citazione|per adesso avvialo sia da telefono che da pc in 2d con sempre luce sparata|Alberto, 23.10.2026}}
 {{Citazione|impostazioni predefinite audio off|Alberto, 29.10.2026}}
 '''Come parte la home''' di [[pzkko.it]]: '''sempre in 2D''', [[Il muro|il muro di sempre]], sul computer e sul telefono, anche dove c'è WebGL2. Fino al 29.10.2026 partiva anche a mezzogiorno col sole; dal 29.10 parte '''con l'ora vera''' di Mantova ([[La sera a Mantova]]), '''il meteo vero''' e '''senza suoni''' ([[Il nastro suono|il nastro «suono»]] li accende).
 
@@ -669,9 +736,11 @@ Dove c'è WebGL2 ha [[La scena 3D|la sua scena]]: il suo volantino è fotografat
   },
 
   'La disposizione': {
-    data: '2026-10-26',
+    data: '2026-11-06',
     fonti: ['albertopecchini.it/tools/pzkko/disponi.mjs', 'albertopecchini.it/tools/pzkko/disposizione.js', 'albertopecchini.it/tools/pzkko/browser.mjs', README],
-    testo: `'''La disposizione''' è come le cose stanno sul [[Il muro|muro]]: le posizioni non si scrivono a mano in <code>index.html</code>, stanno in <code>tools/pzkko/disposizione.js</code> come [[Le pile|pile]] per colonna (cinque sul computer, due sul telefono) e pezzi ancorati ad altri, e <code>tools/pzkko/disponi.mjs</code> le riscrive nella pagina (le <code>--x --y --w --r</code> e, sotto i 900 px, le <code>--mx --my --mw --mr</code>).
+    testo: `''Dal 6 novembre 2026 la home non ha più pile: i suoi pezzi stanno dove si dice, attaccati al fondo o [[La saracinesca alleggerita|sparsi a caso col seme]]. Le pile le usa ancora la storia.''
+
+'''La disposizione''' è come le cose stanno sul [[Il muro|muro]]: le posizioni non si scrivono a mano in <code>index.html</code>, stanno in <code>tools/pzkko/disposizione.js</code> come [[Le pile|pile]] per colonna (cinque sul computer, due sul telefono) e pezzi ancorati ad altri, e <code>tools/pzkko/disponi.mjs</code> le riscrive nella pagina (le <code>--x --y --w --r</code> e, sotto i 900 px, le <code>--mx --my --mw --mr</code>).
 
 == Il comando ==
 <code>node tools/pzkko/disponi.mjs tutto --foto</code> (dalla cartella <code>albertopecchini.it</code>) dispone, misura le altezze vere in Chromium (i volantini crescono col testo), dispone di nuovo e lascia le foto del muro in <code>tools/pzkko/lavoro/</code> (<code>muro-desk.png</code>, <code>muro-mob.png</code>); poi si rigenera [[La 404|la 404]]. Un pezzo nuovo: lo si aggiunge in <code>index.html</code> e lo si mette in una pila. Per [[La storia del muro|la storia]]: <code>disponi.mjs tutto --pagina=storia</code>, con le pile di <code>tools/pzkko/storia/disposizione.js</code>. Dal 26.10 riconosce anche i <code>button</code> <code>.it</code>: [[Il wallet|il wallet]] e [[Il tasto sul muro|il cercapersone]] sono pezzi della parete come gli altri. Gli strumenti che misurano la pagina 2D la aprono con <code>?muro=1</code>, altrimenti la scena sposta il muro e le misure vengono sbagliate.
@@ -688,9 +757,11 @@ Dove c'è WebGL2 ha [[La scena 3D|la sua scena]]: il suo volantino è fotografat
   },
 
   'La serranda': {
-    data: '2026-10-22',
+    data: '2026-11-06',
     fonti: ['albertopecchini.it/tools/pzkko/serranda.mjs', 'albertopecchini.it/tools/pzkko/disposizione.js', '.claude/skills/serranda/SKILL.md', README],
-    testo: `{{Infobox
+    testo: `''Dal 6 novembre 2026 <code>serranda.mjs</code> lavora sulla [[La saracinesca alleggerita|saracinesca alleggerita]]: i pezzi nuovi vanno fra gli sparsi, e <code>rifai</code> non fa più le foto per la scena 3D ma controlla le scritte.''
+
+{{Infobox
 | titolo = La serranda
 | immagine = muro-desk.webp
 | didascalia = il muro misurato da disponi.mjs, la foto che lascia in lavoro/
@@ -723,9 +794,11 @@ La petizione ha le penne che sporgono ~180 unità sul computer e ~130 sul telefo
   },
 
   'Le pile': {
-    data: '2026-10-22',
+    data: '2026-11-06',
     fonti: ['albertopecchini.it/tools/pzkko/disposizione.js', 'albertopecchini.it/tools/pzkko/disponi.mjs', README],
-    testo: `'''Le pile''' sono la composizione del [[Il muro|muro]] dal 17.10.2026: cinque colonne da ~250 unità sul computer e due sul telefono, ogni pezzo sovrapposto di poco a quello sopra, graffiti e nastri ancorati ai fogli vicini. Stanno in <code>tools/pzkko/disposizione.js</code>: le chiavi sono gli id dei pezzi (<code>vol:pzk$meeting</code>, <code>#wallet-muro</code>, <code>#cercapersone-muro</code>…), e in una riga di <code>DESK</code> e <code>MOB</code> ci sono le manopole: <code>top</code>, <code>bottom</code>, <code>minimo</code>, <code>passo</code> (0,9 dal 21.10: le pile si sovrappongono del 10 % in più), <code>scala</code>, lette da [[La disposizione|disponi.mjs]] e scritte da [[La serranda|serranda.mjs]]; si possono cambiare anche a mano.
+    testo: `''Dal 6 novembre 2026 il muro è [[La saracinesca alleggerita|alleggerito e solo in 2D]]: restano i volantini dei social, sparsi a caso, e la petizione in fondo. Questa voce racconta com'era fino a quel giorno.''
+
+'''Le pile''' sono la composizione del [[Il muro|muro]] dal 17.10.2026: cinque colonne da ~250 unità sul computer e due sul telefono, ogni pezzo sovrapposto di poco a quello sopra, graffiti e nastri ancorati ai fogli vicini. Stanno in <code>tools/pzkko/disposizione.js</code>: le chiavi sono gli id dei pezzi (<code>vol:pzk$meeting</code>, <code>#wallet-muro</code>, <code>#cercapersone-muro</code>…), e in una riga di <code>DESK</code> e <code>MOB</code> ci sono le manopole: <code>top</code>, <code>bottom</code>, <code>minimo</code>, <code>passo</code> (0,9 dal 21.10: le pile si sovrappongono del 10 % in più), <code>scala</code>, lette da [[La disposizione|disponi.mjs]] e scritte da [[La serranda|serranda.mjs]]; si possono cambiare anche a mano.
 
 Dopo ogni cambio di testo si rimisurano le altezze vere dei fogli e si rifanno le pile. I graffiti stanno sotto i fogli, [[I manifesti e la roba degli altri|i manifesti]] fra i fogli, [[Gli adesivi degli amici|gli adesivi]] in fondo alle pile; [[La petizione|la petizione]] vuole sotto di sé un manifesto, non un link. Il wallet è in cima alla prima pila e il cercapersone in cima alla seconda (26.10). La parete è alta quanto la colonna più lunga più <code>bottom</code>, con un minimo: 3191 unità sul computer e 5486 sul telefono dal 22.10. La storia ha le sue pile in <code>tools/pzkko/storia/disposizione.js</code>, col passo 1.
 
@@ -775,12 +848,13 @@ Per ora ce n'è uno, [[pzk$meeting]] (21.10.2026). PRODUCT.md (7.10) diceva: «Z
   },
 
   'La barra in alto': {
-    data: '2026-10-27',
+    data: '2026-11-06',
     fonti: ['albertopecchini.it/pzkko/barra/barra.js', 'albertopecchini.it/pzkko/barra/barra.css', 'albertopecchini.it/pzkko/barra/pagina.css', README],
     testo: `{{Citazione|fai una topbar con sezioni dove c'è la storia del sito, i gadget, elenchi di oggetti, achievement, account, info e copyright|Alberto, 26.10.2026}}
 {{Citazione|più in stile pzk, senza sfondo: pixel che escono dall'alto, tasti che sono pezzi di carta, scritte di vari font|Alberto, 26.10.2026}}
-[[File:barra.webp|thumb|la barra: i pixel che colano, i pezzi di carta col nastro]]
-'''La barra in alto''' di [[pzkko.it]] (<code>barra/barra.js</code>, 26.10.2026) sta in cima a ogni pagina che la carica: la home, e quindi [[La storia del muro|la storia]] e [[La 404|la 404]] che si generano da lei, e le pagine nuove. Niente striscia: dall'alto colano pixel scuri (la frangia, un SVG a pixel che si ripete in orizzontale, 48 colonne da 6 px; qualche pixel colorato, giallo, verde, rosso o blu, si stacca e cade), e sotto le voci sono pezzi di carta strappati attaccati col nastro, ognuno con la sua [[Le carte dei volantini|carta]], il suo [[I caratteri del muro|carattere]] e la sua storta, in fila al centro («niente tasto pzk, allinea tutto centralmente»: il muro c'è già sotto). I bordi strappati e la frangia vengono da un caso col seme fisso (mulberry32, semi 1981 e 26101): sono sempre gli stessi, a ogni visita. <code>--barra</code> è l'altezza (<code>barra.css</code>): la home ci sposta sotto il wallet e il cercapersone.
+{{Citazione|rifallo stra figo|Alberto, 6.11.2026}}
+[[File:barra.webp|thumb|la barra: la vernice a pixel che cola, e ogni voce un pezzo di carta vero]]
+'''La barra in alto''' di [[pzkko.it]] (<code>barra/barra.js</code>, 26.10.2026) sta in cima a ogni pagina che la carica: la home, e quindi [[La storia del muro|la storia]] e [[La 404|la 404]] che si generano da lei, e le pagine nuove. Niente striscia: dall'alto cola vernice a pixel (la colata, più sotto), e le voci sono pezzi di carta veri, ognuno un oggetto diverso (le carte, più sotto), col suo [[I caratteri del muro|carattere]] e la sua storta, in fila al centro («niente tasto pzk, allinea tutto centralmente»: il muro c'è già sotto). Gli strappi e la colata vengono da un caso col seme fisso (mulberry32, semi 1981 e 26101): sono sempre gli stessi, a ogni visita. Tutto è disegnato in CSS e su una tela: nessuna immagine in più da scaricare. <code>--barra</code> è l'altezza (<code>barra.css</code>): la home ci sposta sotto il wallet e il cercapersone.
 
 == Le voci ==
 {| class="wikitable"
@@ -800,7 +874,23 @@ Per ora ce n'è uno, [[pzk$meeting]] (21.10.2026). PRODUCT.md (7.10) diceva: «Z
 |-
 | wiki || /wiki/ || grigia, bungee || [[Pzkkopedia]], questa wiki (dal 26.10 al 2.11 era «presto»: una voce senza indirizzo si vedeva sbiadita)
 |}
-Fuori dalla home, prima di tutte, '''← indietro''' (carta rossa): porta sempre alla home pulita (<code>/</code>), non alla pagina di prima. Le pagine delle voci usano <code>barra/pagina.css</code>: il foglio col nastro, come [[Gli strumenti di pzkko|gli strumenti]].
+Fuori dalla home, prima di tutte, '''indietro''': una freccia di cartoncino rosso col nastro nero, che porta sempre alla home pulita (<code>/</code>), non alla pagina di prima. Sul telefono, dove la fila scorre col dito, la freccia resta ferma a sinistra sopra le altre, e la voce della pagina in cui sei si porta in vista da sola. Le pagine delle voci usano <code>barra/pagina.css</code>: il foglio col nastro, come [[Gli strumenti di pzkko|gli strumenti]].
+
+== Le carte ==
+Dal 6.11.2026 («rifallo stra figo») ogni voce è un oggetto, non più un rettangolo colorato col nastro (<code>CARTE</code> in <code>barra.js</code>: la forma, l'orlo, i fermi, quel che c'è stampato):
+* '''storia''', lo scontrino: carta termica più lunga delle altre, strappata in cima, coi denti della taglierina in fondo, la riga tratteggiata e il codice a barre; nastro di carta;
+* '''gadget''', il cartone: strappato a mano sui quattro lati, con l'onda che si vede di taglio dove è rotto, la scritta a spruzzo, pinzato con due graffette;
+* '''oggetti''', il post-it: si regge da solo, con la colla più scura in cima e l'angolo in basso che si alza;
+* '''traguardi''', il biglietto rosa: le due tacche ai lati, la cornice stampata, la matrice tratteggiata con dentro la coppa; una puntina gialla;
+* '''account''', la pagina di quaderno: i buchi, il margine rosso, le righe azzurre, strappata in fondo; un pezzo di scotch trasparente sull'angolo;
+* '''info''', lo strappo bianco scritto a mano: strappato tutto intorno, con l'alone di una tazzina;
+* '''wiki''', il cartellino grigio: gli angoli smussati, il buco vero (si vede il muro) con l'anello di rinforzo, appeso a uno spago che sale fuori dalla pagina.
+Le carte strappate hanno l'anima chiara che spunta dall'orlo, e tutte un filo di luce e la grana (un rumore in SVG, una mattonella sola). La pagina in cui sei ha intorno un giro di pennarello rosso che si disegna da solo. Col puntatore sopra, il pezzo si raddrizza, si alza (l'ombra si allunga) e dondola intorno al punto dov'è attaccato. Alla prima pagina della visita i pezzi arrivano uno dopo l'altro, sbattuti sul muro; nelle pagine dopo la barra c'è già, ferma (<code>sessionStorage</code>, <code>pzkko-barra</code>).
+
+== La colata ==
+Fino al 6.11 era «la frangia»: un SVG fermo di 48 colonne da 6 px che si ripeteva. Ora è una tela (<code>colata</code> in <code>barra.js</code>) larga quanto la pagina, dove un pixel vale 4 px: in cima una fascia nera, e giù le gocce, ognuna larga e lunga a modo suo, con la pancia in fondo e il riflesso; qualcuna è di vernice gialla, verde, rossa o blu, sotto la nera. Fra la prima e l'ultima voce restano corte, perché lì ci sono i pezzi di carta; ai lati scendono lunghe.
+
+Si muove solo quando serve: alla prima pagina della visita cola giù; sotto il puntatore le gocce si allungano; finché il puntatore sta su una voce qualche goccia si stacca e cade. A pagina ferma non gira niente (le nove animazioni sempre in corso della frangia tenevano sveglia la scheda grafica), e con «riduci movimento» resta un disegno fermo.
 
 == I suoni ==
 I pezzi di carta frusciano, e il loro link parte 120 ms dopo perché il fruscio si senta ([[I suoni dell'interfaccia]]). Con [[La musica|la musica]] accesa i link della barra passano da <code>vai</code>: la pagina si apre dentro [[La cornice|la cornice]], senza fermare la musica. La barra carica <code>suono/interfaccia.js</code>, quindi i suonini ci sono in ogni pagina. Il 27.10 un fix: «la barra cambia pagina anche quando il riquadro è rifiutato o si clicca due volte».
@@ -915,7 +1005,7 @@ La prima versione, la stessa mattina, era una finestra sopra la home con lo spor
   },
 
   'Le versioni di pzkko': {
-    data: '2026-11-01',
+    data: '2026-11-06',
     fonti: ['albertopecchini.it/pzkko/benvenuto/benvenuto.js', INDEX, README],
     testo: `'''Le versioni di pzkko''' sono le tappe di [[pzkko.it]] dal 7 ottobre 2026. Le ultime due hanno un nome e uno [[Lo scontrino delle novità|scontrino]] all'ingresso; quelle prima si leggono nei commit del [[Il repository AP|repository]] ([[Elenco dei commit]]).
 
@@ -953,6 +1043,8 @@ La prima versione, la stessa mattina, era una finestra sopra la home con lo spor
 | 1.11.2026 || '''4.0.0 «chiocciola zero»''' || 6593e7b || il cercapersone zero per tutti, il nero eliminato per sempre
 |-
 | 2.11 || la lavatrice e il decifratore nello zero || f46c118 || e l'apertura col 3D senza bloccare il sito; pzkkopedia
+|-
+| 6.11 || [[Serranda leggera]] (4.1.0) || — || [[La saracinesca alleggerita|la saracinesca alleggerita]]: solo i social e la petizione, sparsi a caso; solo 2D; molto più leggero
 |}
 
 == I numeri delle versioni ==

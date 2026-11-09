@@ -100,6 +100,20 @@ function pendoli(el) {
       p.dentro = su
     }
   }, { passive: true })
+  // (6.11, Alberto: «le penne si muovono sempre»): anche scorrendo. Quando la pagina scorre con le penne in vista
+  // prendono una spinta, ognuna la sua, come appese davvero: col dito non c'è un puntatore che ci passi sopra. Al più
+  // una spinta ogni 0,15 s; ferme, non chiedono niente
+  let ys = scrollY, ts = 0
+  addEventListener('scroll', () => {
+    const dy = scrollY - ys, t = performance.now()
+    ys = scrollY
+    if (!dy || t - ts < 150 || ridotto.matches || in3d() || aperta) return
+    const r = el.getBoundingClientRect()
+    if (r.bottom < -r.width * 0.2 || r.bottom > innerHeight + r.width * 0.2) return
+    ts = t
+    const v = limita(dy / 70, -1.5, 1.5)
+    penne.forEach((p, i) => spingi(p, v * (0.65 + 0.3 * i)))
+  }, { passive: true })
 }
 
 // ── il foglio da vicino ──────────────────────────────────────────────────────
