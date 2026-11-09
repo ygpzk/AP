@@ -22,8 +22,8 @@ body::before{display:none} /* (pagina.css: il muro scurito; qui no) */
   text-shadow:0 3px 0 var(--rosso),0 6px 14px rgba(0,0,0,.7)}
 .am-sotto{margin:8px 0 0;color:#b7b1a6;font-size:14px;letter-spacing:.03em}
 .accesso{display:grid;justify-items:center;gap:0;width:100%;margin:0}
-/* la macchinetta: alta quanto resta nel primo schermo, sotto titolo e barra (954×1338) */
-.am-corpo{position:relative;width:min(100%,calc((100dvh - var(--barra,72px) - 240px) * .713),600px);margin:0 auto;container-type:inline-size;
+/* la macchinetta: alta quanto resta nel primo schermo, sotto titolo e barra (1028×1641: larghezza = altezza disponibile × 0,626) */
+.am-corpo{position:relative;width:min(100%,calc((100dvh - var(--barra,72px) - 200px) * .626),600px);margin:0 auto;container-type:inline-size;
   filter:drop-shadow(0 6px 10px rgba(0,0,0,.6)) drop-shadow(0 26px 44px rgba(0,0,0,.55))}
 .am-foto{display:block;width:100%;height:auto}
 /* lo schermo: accesso.js lo mette sugli angoli di muro-dati.js (matrix3d); dentro, le misure sono in cqw dello schermo */
