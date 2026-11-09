@@ -12366,7 +12366,7 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 
 {{Vedi anche|Le app di pzk os|pzk os|Il cercapersone zero}}
 [[Categoria:Le app di pzk os]]` },
-  "Elenco dei commit": { data: "2026-11-09", fonti: ["README.md"], testo: `'''I 766 commit''' del [[Il repository AP|repository AP]] dal 2026-05-24 a oggi (l’ultimo: <code>1f09869</code>, 2026-11-09). La lista completa, con filtri, sta in [[Speciale:UltimeModifiche|Ultime modifiche]]; la cronologia di ogni voce (la linguetta «Cronologia») elenca i commit che hanno toccato i suoi file. Generato da <code>git log</code> ogni volta che la wiki si aggiorna.
+  "Elenco dei commit": { data: "2026-11-09", fonti: ["README.md"], testo: `'''I 769 commit''' del [[Il repository AP|repository AP]] dal 2026-05-24 a oggi (l’ultimo: <code>0426e92</code>, 2026-11-09). La lista completa, con filtri, sta in [[Speciale:UltimeModifiche|Ultime modifiche]]; la cronologia di ogni voce (la linguetta «Cronologia») elenca i commit che hanno toccato i suoi file. Generato da <code>git log</code> ogni volta che la wiki si aggiorna.
 
 == Per mese ==
 {| class="wikitable"
@@ -12393,10 +12393,13 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 | 190
 |-
 | 2026-11
-| 65
+| 68
 |}
 
 == Gli ultimi trenta ==
+* 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/0426e92 0426e92] fix(deutschland): la macchinetta grande dell'ingresso con le misure vere (1028×1641) e il rapporto giusto nel CSS
+* 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/b49c218 b49c218] metà aspettando A1
+* 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/9470eb9 9470eb9] feat(pzkko): Deutschland 2, l'album dei ricordi: foto su Backblaze B2, album a righe giustificate, mappa su carta, macchinetta e pacchetti rifatti
 * 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/1f09869 1f09869] feat(pzkko): lo schermo della macchinetta con le dodici tappe vere, i posti spezzati riuniti
 * 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/b5a7c82 b5a7c82] docs(wiki): la voce «Il server delle foto di Deutschland» e la pzkkopedia allineata (0a2e5e8)
 * 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/b427098 b427098] merge: il ramo remoto albertopecchini.it (copia doppia del bot dei bug) riallineato a main + Deutschland
@@ -12424,9 +12427,6 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 * 2026-11-04 [https://github.com/albertoxpecchini/AP/commit/993f5d7 993f5d7] docs(esperimenti): nel README i .woff2 di Allianz Neo come si trovano nella cartella firma
 * 2026-11-04 [https://github.com/albertoxpecchini/AP/commit/0757cc8 0757cc8] fix(esperimenti): il generatore del PDF legge anche gli AllianzNeo .woff2 della cartella firma
 * 2026-11-04 [https://github.com/albertoxpecchini/AP/commit/bd16ee3 bd16ee3] feat(esperimenti): il preventivo dei mirtilli in PDF, con Allianz Neo incorporato
-* 2026-11-04 [https://github.com/albertoxpecchini/AP/commit/81c8c7b 81c8c7b] fix(esperimenti): il preventivo dei mirtilli nello stile Allianz del repo (nero, Allianz Neo, HTML A4)
-* 2026-11-04 [https://github.com/albertoxpecchini/AP/commit/7df23bc 7df23bc] feat(esperimenti): finto preventivo Allianz per i mirtilli da collezione
-* 2026-11-03 [https://github.com/albertoxpecchini/AP/commit/ad4fba1 ad4fba1] chore(tempo): le versioni di oggi di albertopecchini.it e pzkko.it
 
 == Dove si vede ==
 [[File:github.webp|thumb|none|380px|il repository AP su GitHub, con il numero dei commit]]
