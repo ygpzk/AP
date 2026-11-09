@@ -53,8 +53,8 @@ for (const v of voci) {
   } else for (const t of clip) tag.add(t)
   const volti = gruppi.perFoto?.[v.id]
   for (const g of volti?.gruppi ?? []) { const nome = nomiVolti[String(g)]; if (nome && PERSONE.has(nome)) tag.add(nome) }
+  for (const t of mano.piu?.[v.id] ?? []) tag.add(t) // (prima di «gruppo»: una persona messa a mano conta)
   if ([...tag].filter((t) => PERSONE.has(t)).length >= 2) tag.add('gruppo')
-  for (const t of mano.piu?.[v.id] ?? []) tag.add(t)
   for (const t of mano.meno?.[v.id] ?? []) tag.delete(t)
   for (const t of tag) tagVisti.add(t)
   const f = {

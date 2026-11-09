@@ -3,7 +3,7 @@
 // scrive, non si sposta, non si rinomina niente, nemmeno in _convertiti\) e scrive in C:\pzkko-server\deutschland\ le
 // miniature piccole (dati\s\ 360 webp q62, ~11 KB: viaggiano in fasci, fasci.mjs), le miniature (dati\m\ 480 webp q72), le
 // grandi (dati\g\ 1400 jpeg q80 mozjpeg, ~180 KB), i video (dati\v\ h264 ≤1080p yuv420p, tone-map se HDR, +faststart) coi
-// poster (dati\p\ 720 px), gli ORIGINALI scaricabili (dati\o\: il JPEG q90 mozjpeg senza metadati, ~4 MB; dal 9.11 sera
+// poster (dati\p\ 720 px), gli ORIGINALI scaricabili (dati\o\: il JPEG q85 mozjpeg senza metadati, ~4,4 MB; dal 9.11 sera
 // TUTTI in dati\o\, perché vanno su Backblaze B2 con carica.mjs e non si servono più da D:), e la cache delle voci
 // (catalogo\cache.json: data, GPS, misure, blur, colore, peso), da cui manifesto.mjs fa dati\foto.json.
 // Niente metadati nei file prodotti (sharp li toglie, ffmpeg con -map_metadata -1: niente GPS in giro).
@@ -11,14 +11,14 @@
 // LE DERIVATE HANNO UNA VERSIONE (DERIVATE, qui sotto; nella cache `ver`): quando cambiano le misure si alza il numero e il
 // giro rifà solo le immagini (s m g p o) delle voci vecchie, senza ricodificare i video già fatti (v resta se c'è e
 // l'impronta è uguale). Misurato il 9.11 su 20 foto: o/ q90 = 4,15 MB medio (q88: 3,5), g 178 KB, s 10,9 KB; totale su
-// B2 ≈ 5,7 GB (o 4,5 + video 1,0 + g 0,2), sotto i 10 GB gratuiti.
+// B2 ≈ 5,7 GB a q90; Alberto ha scelto q85: caricati 5,29 GB (o 3,9 + video 1,0 + g 0,14), sotto i 10 GB gratuiti.
 //
 // LA CARTELLA (dal 9.11 sera, importazione finita con «Mantieni originali»): 977 originali — DNG (ProRAW 48 MP, 25 MB),
 // HEIC, MOV (HEVC 10 bit HLG Dolby Vision), PNG (screenshot), JPG (IMG_E…, le modifiche), AAE e DAT (si ignorano) — e in
 // _convertiti\ i 353 JPG (48 MP) e i 46 MOV che il telefono aveva convertito. UNA VOCE PER NUMERO IMG_nnnn:
 // - il GEMELLO di _convertiti\IMG_nnnn.JPG, se c'è, è la sorgente di m, g e dell'originale scaricabile o (il JPEG a 48 MP
 //   che Alberto vuole scaricare: lo serve il server da D:, origini.json); il DNG resta /raw; l'HEIC dà solo i metadati;
-// - col gemello: o = il JPG a 48 MP risalvato q90 mozjpeg, ruotato (sharp .rotate() applica l'Orientation) e senza
+// - col gemello: o = il JPG a 48 MP risalvato q85 mozjpeg (Q_ORIGINALE), ruotato (sharp .rotate() applica l'Orientation) e senza
 //   metadati, in dati\o\ (oDa: 'convertito'); l'originale su D: non si tocca e non si serve più;
 // - senza gemello: DNG → il JPEG incorporato (4032 px, anteprima() di amici.mjs r.139-157) ruotato secondo l'Orientation
 //   del DNG, in dati\o\ (oDa: 'dng', «sviluppo dal DNG»); HEIC → sharp non lo apre (niente HEVC) ed exifr non lo legge:

@@ -38,7 +38,7 @@ Appena la pagina parte prova il biglietto salvato con <code>fetch(indirizzo('fot
 == Com'è fatta la pagina ==
 Nera (<code>#0e0d0c</code>), oro (<code>#ffd400</code>) e rosso (<code>#dd0000</code>) come la bandiera, il titolo «DEUTSCHLAND» in Anton con l'ombra rossa e sotto «München → Stuttgart · 6.–8. November 2026 · mit JMA»; [[La barra in alto|la barra]] in cima con INDIETRO. Dentro l'album le scritte di servizio sono in '''Oswald 600''' (<code>/fonts/oswald-600.woff2</code>, 12,7 KB, solo il latino, dichiarato in <code>pacchi.css</code> e caricato solo dopo l'accesso): la segnaletica tedesca, DIN-like, per cartelli, timbri ed etichette. I contenitori sono un contratto fra i moduli: <code>.telo</code> (il nero della vernice), <code>#automat</code> col form <code>#accesso</code>, <code>#album[hidden]</code> con la barra alta <code>#al-barra</code> (i cartelli ALBUM · KARTE · AUSWAHL · SPEICHERN e la riga «album scaricato al 62 %»), <code>#filtri</code>, <code>.al-scena</code> con <code>#pagine</code> e il foglio <code>#mappa-foglio</code>, il <code>&lt;dialog id="visore"&gt;</code>, <code>#scelte</code>; gli eventi fra i moduli sono <code>CustomEvent</code> su <code>document</code> col prefisso <code>deutschland:</code> (accesso, manifesto, filtro, conta, foto, vai, apri, scegli, scelta, speichern, karte, scaricato, uscita). I fogli <code>galleria.css</code> e <code>pacchi.css</code> stanno in fondo al <code>&lt;body&gt;</code>, così la macchinetta non li aspetta. La pagina ha la [[La manutenzione di Monaco|guardia della manutenzione]] per prima, come tutte, e nel <code>&lt;head&gt;</code> uno stile e uno script piccoli che tengono il telo nero solo a chi arriva dal muro (la chiave <code>pzkko-vernice</code> da meno di 15 secondi): agli altri <code>html.senza-telo</code>.
 
-{{Vedi anche|La macchinetta delle sigarette|La vernice|L'album di Deutschland|La mappa su carta|I pacchetti di sigarette|Le didascalie di Deutschland|Il server delle foto di Deutschland|Il server dei dati in casa|La banca sul server|Il ponte firmato}}
+{{Vedi anche|La storia di Deutschland|La macchinetta delle sigarette|La vernice|L'album di Deutschland|La mappa su carta|I pacchetti di sigarette|Le didascalie di Deutschland|Il server delle foto di Deutschland|Il server dei dati in casa|La banca sul server|Il ponte firmato}}
 [[Categoria:Il muro]]
 [[Categoria:Deutschland]]`,
   },
@@ -331,5 +331,73 @@ Per sviluppare senza le foto vere c'è <code>finto.mjs</code>, sessanta quadrati
 {{Vedi anche|Deutschland|L'album di Deutschland|Le didascalie di Deutschland|La macchinetta delle sigarette|La banca sul server|Il server dei dati in casa|Il tunnel Tailscale|Il ponte firmato}}
 [[Categoria:Deutschland]]
 [[Categoria:Il server]]`,
+  },
+  'La storia di Deutschland': {
+    data: '2026-11-09',
+    fonti: [`${D}index.html`, `${T}manifesto.mjs`, `${T}carica.mjs`, `${T}README.md`],
+    testo: `{{Infobox
+| titolo = La storia di Deutschland
+| immagine = macchinetta-muro.webp
+| didascalia = la macchinetta delle sigarette sulla serranda, la porta dell'album
+| quando = 9 novembre 2026, dalle 11 alle 23
+| il viaggio = 6–8 novembre 2026, Monaco e Stoccarda
+| commit = 0a2e5e8, 1f09869, 9470eb9, 0426e92, f03a95e e la chiusura
+| chi = Alberto dal telefono, a Modena; Claude con cinque agenti
+| giri = due: il primo la mattina, «Deutschland 2» il pomeriggio
+}}
+'''La storia di Deutschland''' è la cronaca di come [[Deutschland]], l'album del viaggio di [[Alberto Pecchini|Alberto]] con Mikas, Jonny e Jella, è nato, è stato buttato giù e rifatto, ed è stato chiuso: tutto in un giorno, il 9 novembre 2026, con Alberto fuori casa che guardava le anteprime dal telefono e scriveva poche parole alla volta.
+
+== Il viaggio ==
+Dal 6 all'8 novembre 2026 Alberto, Mikas, Jonny e Jella ('''JMA''') sono andati a Monaco e a Stoccarda con la Mercedes GLA grigia. Sono tornati con 967 ricordi fra foto e video: 103 il primo giorno, 504 il secondo, 360 il terzo, in 39 posti e 48 tappe. Gli originali stanno sul disco D: del pc di casa, che nessuno strumento modifica: si leggono e basta.
+
+== Il primo giro: la mattina del 9 novembre ==
+La mattina Alberto ha chiesto una galleria con la password, raggiungibile dal [[Il muro|muro]]. Claude si è preso un posto sulla serranda, nel primo schermo, e lo ha detto alle altre sessioni con una memoria («dii ai futuri agenti che ti sei preso quel posto in serranda e stai lavorando lì»).
+* '''11:23, commit 0a2e5e8''': sul muro arriva [[La macchinetta delle sigarette|un vecchio Zigarettenautomat]]. Al click [[La vernice|la vernice nera cola giù]] e scopre <code>/deutschland/</code>. La password la controlla la [[La banca sul server|banca di casa]] (scrypt, tentativi limitati), che dà un biglietto HMAC per il server delle foto sul pc, raggiunto dal [[Il tunnel Tailscale|Funnel]]. Dentro: una griglia 4 × 5, la mappa nera e oro, sedici pacchetti inventati come filtri.
+* '''14:16, commit 1f09869''': lo schermo della macchinetta sul muro mostra le dodici tappe vere, pixelate fino a non riconoscerle; <code>posti.mjs</code> riunisce l'Allianz Arena, che era spezzata in cinque posti.
+
+== Il verdetto dal telefono ==
+Il primo giro funzionava, ma Alberto lo ha aperto dal telefono a Modena e ha scritto:
+{{Citazione|moltissime anteprime non si caricano, è molto lento, lavora seriamente sul UI ma davvero […] fai la mappa dentro a un foglio vero, fai l'elenco fotografico in un album vero […] fai assolutamente meglio la macchietta del tabacco all'ingresso fatta da dio […] sii davvero un album dei ricordi super figo|Alberto, 9 novembre 2026}}
+La misura ha dato la causa: dal Funnel la banda in uscita di casa era 190–360 KB/s, con mezzo secondo per ogni richiesta, e il visore scaricava l'originale da 16 MB appena si apriva una foto (46 secondi, e intanto tutte le miniature aspettavano). La banda di casa non si poteva cambiare: andavano cambiati i byte e il posto delle foto.
+
+== Il piano e le scelte di Alberto ==
+Il piano «Deutschland 2» proponeva di spostare le foto fuori casa. Alberto lo ha rimandato indietro con una riga, «soluzioni gratuite per download rapidi», e fra le proposte ha scelto '''Backblaze B2''': 10 GB gratis, datacenter in Europa, bucket privato. Ha creato l'account e la chiave dal telefono. Poi due domande hanno deciso il formato degli originali:
+{{Citazione|volendo le riesce a pressare senza diminuire i pixel e facendole in formato JPEG? […] quelle ad alta qualità interessano solo a me e a loro no?|Alberto}}
+Così gli originali sono stati risalvati in JPEG q85 a tutti i pixel e senza metadati; dei DNG resta il JPEG che Apple ci mette dentro, a 12 MP. E: «devi fare la possibilità che loro possono selezionare alcune foto che interessano loro», da cui la scelta multipla dell'album (AUSWAHL) che salva un pacchetto di foto nel rullino.
+
+== Il secondo giro: Deutschland 2 ==
+Il pomeriggio hanno lavorato cinque agenti in parallelo, ognuno nella sua parte:
+* '''A1''', i dati: la pipeline in <code>tools/pzkko/deutschland/</code> (miniature da 360 px messe in 25 fasci da 40, medie a 1400 px, originali JPEG), <code>carica.mjs</code> che ha portato 3008 file e 5,29 GB su B2 con l'API nativa, la banca che dà un token di download di 24 ore insieme alla password, e <code>rete.js</code> con la cache nel telefono. Si è fermato al limite delle cinque ore, a caricamento già finito.
+* '''A2''', le immagini con gpt-image-2 su Replicate: la macchinetta nuova di notte, [[I pacchetti di sigarette|sedici pacchetti]] che sembrano veri (nome, «20 Filter Zigaretten», «Rauchen ist tödlich», senza marchi registrati) e otto sticker tedeschi.
+* '''A3''', l'interfaccia: [[L'album di Deutschland|l'album]] a capitoli per giorno con le righe giustificate (ogni foto nel suo ratio), [[La mappa su carta|la mappa su un foglio di carta]] chiaro con le scritte grandi, il visore con «salva nel rullino», i tasti in Oswald come i cartelli tedeschi.
+* '''A4''', [[Le didascalie di Deutschland|le didascalie]]: Qwen2-VL ha guardato le 967 miniature e ha scritto una frase e i tag per ognuna.
+* '''A5''', la wiki.
+'''17:26, commit 9470eb9''': Deutschland 2 sul ramo e nell'anteprima. Alberto ha unito lui la PR #16 su main, quindi Deutschland 2 è andato in produzione nel pomeriggio stesso. '''21:20, commit 0426e92''': la macchinetta grande dell'ingresso con le misure vere (1028 × 1641), che sui monitor bassi usciva dal primo schermo.
+
+[[File:deutschland-galleria.webp|thumb|l'album di Deutschland 2: capitoli, righe giustificate, la mappa su carta a destra]]
+
+== La sera: la banca e i nomi ==
+Le foto erano tutte su B2, ma la banca girava ancora col codice vecchio e mandava tutti al pc di casa. Alla sera Alberto ha scritto «riavvia la banca»: alle 22:42 il server della banca è ripartito, e da allora l'accesso risponde con <code>cdn: 'b2'</code>, in produzione e nelle anteprime.
+
+{| class="wikitable"
+! cosa !! dal pc di casa (mattina) !! da Backblaze (sera)
+|-
+| un originale da 4,3 MB || ~15 s || 0,85 s
+|-
+| il manifesto (967 voci) || ~3 s || 1,4 s
+|-
+| 40 miniature || 40 richieste, ~5 s || 1 fascio, ~1 s
+|}
+
+Nello stesso messaggio Alberto ha dato i nomi dei volti: «pekko 1, mikas 2, jonny 3, jella è la ragazza con mikas sul tetto a stoccarda night e nel letto». I gruppi 4, 5 e 8 erano Mikas di profilo e il 14 Jonny dietro il telefono, quindi sono finiti nei loro nomi (<code>catalogo\volti.json</code> sul server). Jella non aveva un gruppo: di notte e di spalle il riconoscimento non ha mai trovato il suo viso. È entrata a mano in <code>catalogo\tag-mano.json</code>, sulle 18 foto del tetto della Kolbstraße abbracciata a Mikas e sulle 2 del letto; <code>manifesto.mjs</code> da allora mette i tag a mano prima di contare il «gruppo». Risultato: Pekko in 281 ricordi, Mikas in 199, Jonny in 99, Jella in 20, 122 in gruppo. I pacchetti di Mikas, Jonny, Jella e luckypzkko, vuoti fino a quel momento, si sono riempiti.
+
+== La chiusura ==
+{{Citazione|va bene così abbiamo finito|Alberto, la sera del 9 novembre 2026}}
+Poi «pusha e fai wiki su storia di tutto»: questa voce. Il cantiere sulla serranda è stato chiuso e la memoria che teneva lontane le altre sessioni è diventata una nota breve su come si aggiornano foto e volti.
+
+Restavano aperte, alla chiusura: la chiave di Backblaze è quella Master e va sostituita con una limitata al bucket; i nomi veri dei posti non sono mai stati dati (le tappe hanno i nomi delle mappe); il gruppo 15, un ragazzo di profilo sul tetto di giorno, forse è Alberto ma non è confermato.
+
+{{Vedi anche|Deutschland|L'album di Deutschland|Il server delle foto di Deutschland|La macchinetta delle sigarette|I pacchetti di sigarette|Le didascalie di Deutschland|La mappa su carta}}
+[[Categoria:Deutschland]]`,
   },
 }
