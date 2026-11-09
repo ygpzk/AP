@@ -2,8 +2,9 @@
 // La serranda di pzkko.it, da allungare, comprimere e riempire senza toccare a mano
 // index.html e disposizione.js. Pensato per chi ci lavora (Alberto o Claude): ogni
 // comando scrive i file e dice cosa ha fatto; poi `rifai` rimette in fila tutto
-// (disposizione misurata, 404, foto dei volantini per la scena 3D, foto di prova).
-// La scena 3D si adatta da sola: la saracinesca è alta quanto la parete del DOM.
+// (disposizione misurata, scritte controllate, 404, storia, foto di prova).
+// Dal 6.11.2026 la home è alleggerita e solo in 2D: niente pile (i volantini sono sparsi a caso col seme, la petizione
+// sta in fondo: disposizione.js) e niente foto per la scena 3D, che è spenta.
 //
 //   node tools/pzkko/serranda.mjs [stato]
 //       quanto è alta la parete (unità e metri), le manopole, le colonne: quanti
@@ -25,10 +26,9 @@
 //       [--dopo=chiave] [--larg=230] [--mlarg=150]
 //       un manifesto (o un graffito, un resto di nastro) già in art/, nelle pile
 //   node tools/pzkko/serranda.mjs rifai [--senza-foto]
-//       disponi.mjs tutto, genera-404.mjs, genera-storia.mjs e disponi.mjs tutto --pagina=storia, scena/cattura.mjs,
-//       scena/carico.mjs (le foto del caricamento, della home e della storia) e le foto della scena 3D in
-//       tools/pzkko/lavoro/ (computer in cima, a metà e in fondo; telefono a un terzo; la storia in cima), da guardare
-//       prima di pubblicare
+//       disponi.mjs tutto, scritte.mjs (nessuna parola spezzata, nessuna scritta fuori dal riquadro), genera-404.mjs,
+//       genera-storia.mjs e disponi.mjs tutto --pagina=storia. Le foto delle pagine in tools/pzkko/lavoro/ (muro-desk,
+//       muro-mob, storia-desk, storia-mob), da guardare prima di pubblicare
 //
 //   --prova (con volantino, pezzo, allunga, comprimi): dice cosa farebbe e non scrive niente
 //   --pagina=storia (con stato, allunga, comprimi): il muro della storia (pzkko/storia/, le sue pile in
@@ -53,8 +53,6 @@ const PAGINA = PAGINE[pagina].file, DISP = PAGINE[pagina].disp
 const ha = (n) => process.argv.includes(`--${n}`)
 const prova = ha('prova')
 const [cmd = 'stato', primo] = process.argv.slice(2).filter((a) => !a.startsWith('--'))
-// metri per unità della parete: 2,048 m su 1280 sul computer, 0,95 m su 390 sul telefono (scena/scena.js)
-const METRI = { desk: 2.048 / 1280, mob: 0.95 / 390 }
 const CARTE = ['bianco', 'giallo', 'kraft', 'giornale', 'arancio', 'verde', 'crema', 'lucido', 'azzurro']
 const ZONE = ['siti', 'social', 'games', 'tools']
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
@@ -113,8 +111,13 @@ async function stato() {
     const scritta = vista === 'desk' ? html.match(/\.parete\{position:relative;height:calc\((\d+) \* var/)?.[1] : html.match(/\.parete\{height:calc\((\d+) \* var\(--u\)\);max-width:600px/)?.[1]
     const { attuali } = manopole(testo, vista)
     console.log(`\n${nome}`)
-    console.log(`  parete: ${scritta} unità in ${pagina === 'home' ? 'index.html' : 'storia/index.html'}, ${r.parete} dalle pile → saracinesca 3D alta ${(r.parete * METRI[vista]).toFixed(2)} m`)
+    console.log(`  parete: ${scritta} unità in ${pagina === 'home' ? 'index.html' : 'storia/index.html'}, ${r.parete} dalla disposizione`)
     console.log(`  manopole: ${Object.entries(attuali).map(([k, v]) => `${k} ${v}`).join(', ')}`)
+    if (r.sparsi) {
+      console.log(`  sparsi: ${r.sparsi.quanti} pezzi a caso (seme ${r.spec.sparsi.seme}), il più coperto al ${Math.round(r.sparsi.piuCoperto * 100)}% (tetto ${Math.round((r.spec.sparsi.copre ?? 0.1) * 100)}%), coprono il ${Math.round(r.sparsi.coperta * 100)}% della parete`)
+      for (const it of r.spec.sparsi.items) { const p = r.pos[it.k]; console.log(`    ${it.k.padEnd(22)} x ${String(p.x).padStart(4)}  y ${String(p.y).padStart(4)}  largo ${p.w}  alto ${Math.round(p.h)}  storto ${p.r}°`) }
+    }
+    for (const a of r.spec.fondo ?? []) { const p = r.pos[a.k]; console.log(`  in fondo: ${a.k} a y ${p.y} (alto ${Math.round(p.h)}, sotto restano ${a.sotto} unità)`) }
     r.spec.cols.forEach((c, i) => console.log(`  colonna ${i} (x ${c.x}): ${String(c.items.length).padStart(2)} pezzi, finisce a ${r.fondi[i]}, libere in fondo ${r.parete - r.fondi[i]} unità${i === piuCorta(r.fondi) ? '  ← la più corta' : ''}`))
   }
   console.log('\n(le altezze dei volantini sono quelle misurate l\'ultima volta: rettangoli.json, da disponi.mjs misura)')
@@ -230,6 +233,20 @@ async function pezzo() {
 // la riga nelle pile del computer e del telefono: nella colonna chiesta o nella più corta, dopo `dopo` o in fondo
 async function nellePile(testo, rigaD, rigaM) {
   const { d, m } = await calcola(pagina)
+  // la home alleggerita non ha pile: il pezzo nuovo va fra gli sparsi, e il caso gli trova il posto (disponi.mjs)
+  if (!d.spec.cols.length && d.spec.sparsi) {
+    const tra = (vista, riga) => {
+      const [a, b] = parti(testo)[vista]
+      let sez = testo.slice(a, b)
+      const s = sez.indexOf('sparsi: {'), fine = sez.indexOf('\n    ],', s)
+      if (s < 0 || fine < 0) throw new Error(`${vista}: in disposizione.js non trovo «sparsi: { … items: [ … ] }»`)
+      sez = sez.slice(0, fine) + '\n' + riga.replace(/, gap: -?\d+/, '').replace(/, r: -?[\d.]+ \}/, ' }') + sez.slice(fine)
+      testo = testo.slice(0, a) + sez + testo.slice(b)
+    }
+    tra('desk', `      ${rigaD},`); tra('mob', `      ${rigaM},`)
+    console.log('fra gli sparsi, sul computer e sul telefono: il posto lo trova il caso (disponi.mjs)')
+    return testo
+  }
   const cd = arg('colonna') !== undefined ? Number(arg('colonna')) : piuCorta(d.fondi)
   const cm = arg('mcolonna') !== undefined ? Number(arg('mcolonna')) : piuCorta(m.fondi)
   const dopo = arg('dopo') ?? null
@@ -268,19 +285,14 @@ async function rifaiTutto() {
     if (r.status !== 0) throw new Error(`${titolo}: non è andato (codice ${r.status})`)
   }
   passo('la disposizione, misurata nel browser', ['tools/pzkko/disponi.mjs', 'tutto', '--foto'])
+  passo('le scritte: nessuna parola spezzata, nessuna fuori dal riquadro', ['tools/pzkko/scritte.mjs'])
   passo('la 404', ['tools/pzkko/genera-404.mjs'])
   // la storia: rifatta dalla home (il suo CSS e il suo script cambiano con lei), poi le sue pile, misurate
   passo('la storia', ['tools/pzkko/genera-storia.mjs'])
   passo('la disposizione della storia', ['tools/pzkko/disponi.mjs', 'tutto', '--foto', '--pagina=storia'])
-  passo('le foto dei volantini per la scena 3D', ['tools/pzkko/scena/cattura.mjs'])
-  // (la foto del caricamento è la strada da lontano: con la parete più alta o più bassa non coinciderebbe più)
-  passo('le foto del caricamento', ['tools/pzkko/scena/carico.mjs'])
-  if (!ha('senza-foto')) {
-    for (const [nome, a] of [['serranda-cima', ['--scroll=0']], ['serranda-meta', ['--scroll=0.5']], ['serranda-fondo', ['--scroll=1']], ['serranda-telefono', ['--larg=390', '--alt=844', '--dpr=2', '--scroll=0.3']], ['serranda-storia', ['--pagina=/storia/', '--scroll=0']]]) {
-      passo(`la scena 3D: ${nome}`, ['tools/pzkko/scena/foto.mjs', '--ora=12:00', `--nome=${nome}`, ...a])
-    }
-    console.log('\nguarda tools/pzkko/lavoro/scena-serranda-*.png (e muro-desk.png, muro-mob.png, storia-desk.png e storia-mob.png per le pagine senza 3D)')
-  }
+  // (fino al 6.11 qui si rifacevano le foto dei volantini e del caricamento per la scena 3D, e le foto di prova della
+  // scena: scena/cattura.mjs, carico.mjs, foto.mjs. Il sito è solo in 2D: gli strumenti restano lì, spenti)
+  if (!ha('senza-foto')) console.log('\nguarda tools/pzkko/lavoro/muro-desk.png, muro-mob.png, storia-desk.png e storia-mob.png')
 }
 
 const COMANDI = { stato, allunga, comprimi, volantino, pezzo, rifai }

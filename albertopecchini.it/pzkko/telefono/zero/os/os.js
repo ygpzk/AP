@@ -22,6 +22,8 @@
 //   spingi(vista), togli()   le viste: { disegna(lcd, tic), tasto(n) → bool, carattere?, cancella?, invio?, entra?, esci?, tic? }
 //   dialogo({ titolo, testo, icona, tasti }) → Promise del tasto scelto
 //   tastiera({ testo, titolo }) → Promise del testo (null se si esce)
+//   spegnendo(k)             la barra dello spegnimento (INDIETRO tenuto), piena a k (0–1); null la toglie
+//   saluta()                 il «ciao» della chiusura: la chiocciolina che saluta a tutto schermo (home() lo toglie)
 //   avvia(), ferma()         il giro di disegno (quando il cercapersone è aperto o il muro lo guarda)
 //
 // COME SI FA UN'APP (e senza bug): telefono/zero/os/REGOLE.md. Ogni tasto fa già il suo bip e ogni app la sua sigla
@@ -176,8 +178,35 @@ export function avvia() {
     corrente()?.disegna(lcd, tic)
     lcd.ritaglia(null)
     barra(lcd)
+    if (spegni != null) barraSpegni(lcd, spegni)
     lcd.disegna()
   }, 100)
+}
+
+// ── la barra dello spegnimento (9.11, Alberto: «crea una barra di avanzamento per spegnerlo così uno capisce che sta
+// avanzando»): mentre INDIETRO è tenuto, sopra a tutto un riquadro smussato con la barra a blocchetti che si riempie in tre
+// secondi; lasciando sparisce. La comanda telefono.js (spegnendo) ──
+let spegni = null
+/** k 0–1: la barra piena a k; null: via. */
+export function spegnendo(k) {
+  const v = k == null ? null : Math.max(0, Math.min(1, k))
+  if (v === spegni) return
+  spegni = v
+  ridisegna()
+}
+function barraSpegni(l, k) {
+  const w = 188, h = 50, x = Math.round(W / 2 - w / 2), y = Math.round((BARRA + H) / 2 - h / 2)
+  l.riempi(x - 2, y - 2, w + 4, h + 4, 0)
+  l.cornice(x, y, w, h)
+  const t = 'tieni premuto: si spegne'
+  l.testo(Math.round(W / 2 - Lcd.larghezza(t) / 2), y + 7, t)
+  // la barra: 20 blocchetti da 7 pixel, pieni fino a k
+  const N = 20, bx = x + 12, by = y + 20, bw = w - 24, bh = 12
+  l.riquadro(bx, by, bw, bh)
+  const pieni = Math.floor(k * N + 1e-6)
+  for (let i = 0; i < pieni; i++) l.riempi(bx + 2 + i * 8, by + 2, 7, bh - 4)
+  const s = k >= 1 ? 'ciao!' : `${Math.ceil(3 - k * 3)} s · lascia per restare`
+  l.testo(Math.round(W / 2 - Lcd.larghezza(s) / 2), y + 38, s)
 }
 export function ferma() { clearInterval(giro); giro = 0 }
 
@@ -200,6 +229,39 @@ function barra(l) {
   l.riquadro(bx, 2, 15, 7); l.vert(bx + 15, 4, 3)
   l.riempi(bx + 2, 4, Math.round((11 * pct) / 100), 3)
   if (st.carica) { l.px(bx + 6, 1, 0); l.px(bx + 7, 1, 0) }
+}
+
+/** La chiocciolina di chat/tomodachi.js (la sua tela di 32 × 16 celle) disegnata da (x0, y0) a k × k pixel per cella.
+ *  → false se la tela non c'è */
+function chiocciolina(l, x0, y0, k) {
+  const c = tomodachi
+  if (!c?.width) return false
+  try {
+    const d = c.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, c.width, c.height).data
+    const cw = c.width / 32, ch = c.height / 16
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 32; x++) {
+      const o = ((Math.floor((y + 0.5) * ch)) * c.width + Math.floor((x + 0.5) * cw)) * 4
+      if (d[o + 3] > 128) l.riempi(x0 + x * k, y0 + y * k, k, k)
+    }
+    return true
+  } catch { return false }
+}
+
+/** Il saluto della chiusura (9.11, Alberto: «velocizza l'uscita… con un ciao da 1 secondo full schermo»): la chiocciolina
+ *  che saluta (tomodachi.saluta: l'antenna, «CIAO», il cuoricino) a tutto schermo, 8 × 8 pixel per cella (32 × 16 celle =
+ *  256 × 128, l'lcd intero), senza barra; i tasti non fanno niente. Se la tela non c'è, «ciao!» grande. Lo toglie home(). */
+export function saluta() {
+  home()
+  spingi({
+    nome: 'ciao', senzaBarra: true,
+    tic() { ridisegna() }, // (la chiocciolina si muove da sola: si ricopia a ogni tic)
+    tasto: () => true,
+    disegna(l) {
+      if (chiocciolina(l, 0, 0, 8)) return
+      const s = 'ciao!', k = 7
+      l.testo(Math.round(W / 2 - Lcd.larghezza(s, k) / 2), Math.round(H / 2 - (7 * k) / 2), s, { scala: k })
+    },
+  })
 }
 
 // ── la home: la chiocciolina a sinistra (le 32 × 16 celle della sua tela, a 4 × 4 pixel), i dati a destra, le cose da
@@ -235,18 +297,7 @@ const home_ = {
     if (serveConto()) return chiusa(l)
     const x0 = MARGINE, y0 = BARRA + 2
     // la chiocciolina
-    const c = tomodachi
-    if (c?.width) {
-      try {
-        const g = c.getContext('2d', { willReadFrequently: true })
-        const d = g.getImageData(0, 0, c.width, c.height).data
-        const cw = c.width / 32, ch = c.height / 16
-        for (let y = 0; y < 16; y++) for (let x = 0; x < 32; x++) {
-          const o = ((Math.floor((y + 0.5) * ch)) * c.width + Math.floor((x + 0.5) * cw)) * 4
-          if (d[o + 3] > 128) l.riempi(x0 + x * 4, y0 + y * 4, 4, 4)
-        }
-      } catch {}
-    } else l.testo(x0 + 30, y0 + 28, 'pzk os', { scala: 2 })
+    if (!chiocciolina(l, x0, y0, 4)) l.testo(x0 + 30, y0 + 28, 'pzk os', { scala: 2 })
     // i dati a destra
     const xd = 142
     l.testo(xd, y0 + 1, 'saldo')

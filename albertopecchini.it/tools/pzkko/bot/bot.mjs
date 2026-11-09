@@ -245,6 +245,7 @@ const PAGINE = [
   ['traguardi', '/traguardi/', null],
   ['info', '/info/', null],
   ['wiki', '/wiki/', '#testo', { racconta: true }],
+  ['deutschland', '/deutschland/', '#accesso'], // la macchinetta che chiede la password (in locale, col server aperto su 8790, si entra)
   ['lezioni', '/tools/lezioni/', null],
   ['404', NON_ESISTE, null, { stato: 404 }],
   ['manutenzione', '/manutenzione/?vedi', '.foglio #quanto'],

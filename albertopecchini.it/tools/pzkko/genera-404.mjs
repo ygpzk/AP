@@ -45,7 +45,7 @@ rep(parete[0], `<div class="parete p404">
         <div class="foglio" aria-hidden="true"></div>
         <div class="testo">
           <h2 class="titolo">questa pagina non c'è.</h2>
-          <p>l'indirizzo non esiste o è cambiato: qualcuno ha strappato il volantino. i siti, i social, i giochi e gli strumenti stanno tutti nella home.</p>
+          <p>l'indirizzo non esiste o è cambiato: qualcuno ha strappato il volantino. i social e la petizione stanno nella home, il resto nella barra in alto.</p>
           <p class="mano vai" style="margin-top:auto"><a href="/">torna a pzkko.it</a></p>
         </div>
       </article>
@@ -61,8 +61,7 @@ rep('</style>\n</head>', `/* 404: un muro corto */
 </head>`)
 
 html = html.replace('<!-- quello che c\'era già sul muro: graffiti, resti, manifesti di altri -->', '')
-// le foto del caricamento sono la strada della home da lontano, col suo muro alto: sotto il muro corto della 404 non
-// coinciderebbero. Qui niente foto: il nero e la tela che sfuma
-rep(/  const FOTO = .*\n/, '  const FOTO = null // (la 404: le foto del caricamento sono della home, tools/pzkko/genera-404.mjs)\n')
+// i caratteri dei titoli dei volantini della home (<link rel="preload" … data-home>) qui non servono
+html = html.replace(/<link rel="preload"[^>]* data-home>\n/g, '')
 writeFileSync(path.join(dir, '404.html'), html)
 console.log('scritto', path.join(dir, '404.html'), html.length, 'byte')

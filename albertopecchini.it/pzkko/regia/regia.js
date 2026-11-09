@@ -186,7 +186,7 @@ function riempi() {
   const S = scena(), arriva = !S && document.documentElement.classList.contains('scena-carico')
   metti('grafica', () => [...comeParte(), ...(S ? paginaGrafica(S) : arriva ? attesa() : senza3d())])
   metti('ora', paginaOra)
-  metti('meteo', () => (S ? paginaMeteo(S) : arriva ? attesa() : [titolo('il meteo', 100), nota('il meteo si vede solo nella scena 3D, che qui è spenta (si accende in cima alla scheda «grafica»): sul muro di sempre non piove mai.')]))
+  metti('meteo', () => (S ? paginaMeteo(S) : arriva ? attesa() : [titolo('il meteo', 100), nota('il meteo si vedeva solo nella strada in 3D, che dal 6.11 è spenta: sul muro non piove mai. il meteo vero lo sente ancora la chiocciolina del cercapersone.')]))
   metti('strada', () => paginaStrada(S))
   riempiSuono()
   metti('prove', () => paginaProve(S))
@@ -194,9 +194,7 @@ function riempi() {
 // (i suoni arrivano per conto loro: se la regia si è fatta prima, la loro pagina si rifà quando si apre)
 const riempiSuono = () => { conSuono = !!window.pzkkoSuono; metti('suono', paginaSuono) }
 const attesa = () => [nota('il 3D sta arrivando: le sue regole compaiono qui appena la strada si vede.')]
-const senza3d = () => [nota(pagina().scelte?.scena
-  ? 'il 3D è acceso ma qui non è partito (niente WebGL2, o un errore: lo dice la console). resta il muro di sempre, con l\'ora, la sera, le auto e i suoni.'
-  : 'il 3D è spento: questo è il muro di sempre, con l\'ora, la sera, le auto e i suoni. la qualità e i ritocchi della scena compaiono qui quando lo si accende.')]
+const senza3d = () => [nota('dal 6.11 il sito è solo in 2D: la strada in 3D è spenta, per tutti (faceva girare le ventole). questo è il muro, con l\'ora, la sera, le auto e i suoni.')]
 
 // ── come parte la pagina: le scelte di chi guarda, che restano nel browser (dal 23.10) ──
 // di partenza la pagina è il muro di sempre, in 2D, con l'ora vera (la sera e la notte) e il meteo vero (dal 29.10, Alberto;
@@ -207,11 +205,7 @@ const comeParte = () => {
   const P = pagina(), C = () => P.scelte ?? {}
   return [
     titolo('come parte', 25),
-    caselle('3D', [['spento', false], ['acceso', true]], () => !!C().scena, (v) => {
-      const prima = !!C().scena
-      P.scegli?.('scena', v)
-      if (v !== prima) ricarica({ muro: null, scena: null })
-    }),
+    // (il 3D non si sceglie più: dal 6.11 il sito è solo in 2D, index.html)
     caselle('ora', [['sempre giorno', 'giorno'], ['vera (con la notte)', 'vera']], () => C().ora ?? 'vera', (v) => P.scegli?.('ora', v)),
     caselle('meteo', [['sempre sole', 'sole'], ['vero', 'vero']], () => C().meteo ?? 'vero', (v) => P.scegli?.('meteo', v)),
     nota('restano in questo browser. il 3D si accende e si spegne ricaricando la pagina; l\'ora e il meteo cambiano subito (il meteo si vede solo nel 3D).'),
@@ -504,7 +498,7 @@ function paginaSuono() {
 // le prove: quello che ricarica la pagina, e i numeri della scheda
 function paginaProve(S) {
   const fuori = [titolo('le prove', 25)]
-  if (!S) return [...fuori, nota('le prove sono della scena 3D: si accende in cima alla scheda «grafica» (o con ?scena=1 nell\'indirizzo).')]
+  if (!S) return [...fuori, nota('le prove erano della strada in 3D, che dal 6.11 è spenta.')]
   return [
     ...fuori,
     caselle('il muro sotto', [['no', false], ['in trasparenza', true]], () => document.documentElement.classList.contains('scena-allinea'),

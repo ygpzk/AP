@@ -1,69 +1,76 @@
 ---
 name: serranda
-description: Allunga, comprime o riempie la serranda di pzkko.it (la home di albertopecchini.it/pzkko, muro 2D e scena 3D) — aggiungere un volantino, un manifesto o un graffito, fare spazio in cima o in fondo, stringere le pile perché ci stia altra roba. Usala quando Alberto chiede di mettere qualcosa di nuovo sul muro di pzkko, di allungare o accorciare la serranda, o dice che i volantini non ci stanno.
+description: Allunga, accorcia o riempie la serranda di pzkko.it (la home di albertopecchini.it/pzkko, solo 2D dal 6.11.2026) — aggiungere un volantino, un manifesto o un graffito, spostare la sparsa dei volantini, cambiare un titolo o un contatto senza che le scritte vadano a capo. Usala quando Alberto chiede di mettere qualcosa di nuovo sul muro di pzkko, di allungare o accorciare la serranda, di risparpagliare i volantini, o dice che una scritta va a capo male.
 ---
 
 # La serranda di pzkko.it
 
-Il muro di `albertopecchini.it/pzkko/index.html` è fatto di pile (cinque colonne sul
-computer, due sul telefono) scritte in `albertopecchini.it/tools/pzkko/disposizione.js`;
-le posizioni in pagina e l'altezza della parete le scrive `disponi.mjs`. La scena 3D
-(`pzkko/scena/`) legge la parete dal DOM: se la parete si allunga, si allunga anche la
-saracinesca 3D. Le foto dei volantini nella scena le fa `scena/cattura.mjs`.
+Dal 6.11.2026 la saracinesca è **alleggerita e solo in 2D** (Alberto: «le ventole del pc
+diventano un aereo»). Sul muro di `albertopecchini.it/pzkko/index.html` ci sono il wallet e
+il cercapersone in cima, sei volantini compatti dei social (`.vol.s`) **sparsi a caso col
+seme** su tutta la parete, mai coperti più del 10%, e la petizione in fondo, sopra tutto.
+Sul telefono i volantini sono larghi ~118 unità su 390: tre per riga. Niente pile, niente
+scena 3D (`pzkko/scena/` resta lì, spenta: non riaccenderla e non rifare le sue foto).
 
-Non spostare pezzi a mano in `index.html` (le `--x --y …` si riscrivono) e non
-toccare le righe delle pile se basta un comando. Tutto da `albertopecchini.it/`:
+Le posizioni stanno in `albertopecchini.it/tools/pzkko/disposizione.js` (`abs` = dove si
+dice, `fondo` = attaccato al fondo della parete, `sparsi` = a caso) e le scrive in pagina
+`disponi.mjs`. Non spostare pezzi a mano in `index.html` (le `--x --y …` si riscrivono).
+Tutto da `albertopecchini.it/`:
 
 ```bash
-node tools/pzkko/serranda.mjs                 # stato: parete, manopole, colonne, spazio libero
+node tools/pzkko/serranda.mjs                 # stato: parete, manopole, gli sparsi con le coordinate, la petizione
 node tools/pzkko/serranda.mjs volantino --titolo="…" --testo="…" [--link=URL] [--handle=…] [--mano="in arrivo"] \
-     [--carta=giallo] [--arte=arte2/dadi] [--zona=siti|social|games|tools] [--colonna=N] [--mcolonna=N] [--dopo=vol:titolo]
-node tools/pzkko/serranda.mjs pezzo --img=manifesti2/x [--tipo=man|tag|pezzo] [--colonna=N] [--dopo=chiave]
-node tools/pzkko/serranda.mjs allunga --sopra=400        # spazio nuovo in cima (tutto scende); --sotto, --minimo; --telefono / --entrambi
-node tools/pzkko/serranda.mjs comprimi 10                # le pile si sovrappongono del 10% in più; --scala=0.9; --annulla
-node tools/pzkko/serranda.mjs rifai                      # disponi + 404 + foto dei volantini + foto del caricamento + foto 3D di prova
+     [--carta=giallo] [--arte=arte2/dadi] [--zona=social]     # un volantino di quelli grandi, fra gli sparsi
+node tools/pzkko/serranda.mjs pezzo --img=manifesti2/x [--tipo=man|tag|pezzo]   # un manifesto o un graffito, fra gli sparsi
+node tools/pzkko/serranda.mjs allunga --minimo=3600      # l'altezza della parete (--telefono, --entrambi)
+node tools/pzkko/serranda.mjs rifai                      # disponi + scritte + 404 + storia, con le foto delle pagine
+node tools/pzkko/scritte.mjs [--scrivi] [--pagina=storia] # nessuna parola spezzata; --scrivi rimette --tt e --th
+node tools/pzkko/caratteri.mjs                           # i caratteri a pezzi (solo le lettere che servono)
+node tools/pzkko/leggere.mjs                             # le immagini leggere (art/social/, art/leggere/)
 ```
 
-`--prova` su volantino, pezzo, allunga e comprimi mostra cosa farebbe senza scrivere.
+`--prova` su volantino, pezzo e allunga mostra cosa farebbe senza scrivere.
 
 ## Come si fa
 
-1. `serranda.mjs` (stato): guarda quale colonna è più corta e quanto spazio c'è.
-2. Il pezzo nuovo: `volantino` o `pezzo`. Senza `--colonna` va in fondo alla colonna più
-   corta (computer e telefono, ognuno la sua). Le immagini devono già stare in
-   `pzkko/art/` (le genera `tools/pzkko/immagini.mjs`, vedi `pzkko/README.md`).
-   I testi dei volantini sono minuscoli, nello stile degli altri.
-3. Se non ci sta: `allunga --sopra=N` (la roba nuova in cima, come il 17.10) o
-   `comprimi P` (pile più fitte), poi di nuovo `stato`.
-4. `rifai`: serve un browser (Chromium di Playwright o Edge, `tools/pzkko/browser.mjs`) e
-   `npm ci` in `albertopecchini.it/` e in `tools/catture/`. Misura le altezze vere,
-   rigenera `404.html`, rifà le foto in `pzkko/art/scena/vol*` e le foto del caricamento
-   (`pzkko/art/scena/carico/`, la strada da lontano: dipendono dall'altezza della parete),
-   fotografa la scena.
-5. Guarda le foto con Read: `tools/pzkko/lavoro/scena-serranda-{cima,meta,fondo,telefono}.png`
-   (3D) e `muro-desk.png`, `muro-mob.png` (la pagina senza 3D). Controlla che niente
-   copra i link dei volantini veri, che il pezzo nuovo si veda e si legga nella scena 3D
-   e sul telefono. Per guardare da vicino: `node tools/pzkko/scena/foto.mjs --scroll=0.4
-   --dpr=2 --q=dpr=2 --ritaglio=x,y,l,a`.
-6. Aggiorna il `pzkko/README.md` se cambia qualcosa che lì è descritto (zone, altezze).
+1. `serranda.mjs` (stato): dove sono gli sparsi, quanto è alta la parete.
+2. **Un volantino compatto nuovo** (come quelli dei social) si scrive a mano in
+   `index.html`, copiandone uno: `class="vol it s c-<carta> f-<carattere>"`, l'illustrazione
+   (stesa sul bianco: aggiungila a `leggere.mjs`), il titolo in `<h3><a>`, `<p class="handle">`,
+   i cinque tagliandi (righe corte, con `<br>`: devono stare nell'altezza del tagliando).
+   Poi una riga in `sparsi.items` di `DESK` e di `MOB` in `disposizione.js`. Se il titolo ha
+   un carattere suo: una riga nel gruppo `social` di `caratteri.mjs` (il testo esatto del
+   titolo), una classe `f-…` nello stile, `node tools/pzkko/caratteri.mjs`.
+3. **Sempre**, dopo aver toccato un titolo, un contatto, un carattere o una carta:
+   `node tools/pzkko/scritte.mjs --scrivi`. Mette `--tt` e `--th` (le misure in cqw) e
+   controlla a otto larghezze che nessuna parola sia spezzata e niente esca dal riquadro.
+   Se dice «da sistemare» non è finito: Alberto non vuole MAI una lettera sola a capo.
+4. Risparpagliare: cambia `seme` in `sparsi` (computer e telefono). Più o meno larghi:
+   `prove` (più prove = più distanti e regolari), `copre` (quanto possono coprirsi, 0.1).
+   Se un pezzo «non trova posto»: `allunga --minimo=N`.
+5. `rifai`: serve un browser (`tools/pzkko/browser.mjs`: Chromium di Playwright, il Chrome
+   scaricato in `%LOCALAPPDATA%\pzkko-chrome`, o Edge) e `npm ci` in `albertopecchini.it/` e
+   in `tools/catture/`. Rigenera anche `404.html` e la storia.
+6. Guarda le foto con Read: `tools/pzkko/lavoro/muro-desk.png`, `muro-mob.png`,
+   `storia-desk.png`, `storia-mob.png` (sono grandi: rimpicciolite con sharp, o a pezzi).
+7. Aggiorna `pzkko/README.md` («La saracinesca alleggerita», in cima a «Com'è fatta la
+   home») se cambia qualcosa che lì è descritto.
 
 ## Attenzione
 
-- `disponi.mjs` misura nel browser che trova: con Edge le altezze dei volantini vengono
-  qualche unità diverse dal Chromium di Playwright, e tutto si sposta di poco. È normale.
-- Le manopole (top, bottom, minimo, passo, scala) stanno in una riga di `DESK` e `MOB`
-  in `disposizione.js`, scritta da `serranda.mjs`: si possono cambiare anche a mano.
-- La 404 non ha i pezzi nuovi (ha il suo muro corto), ma va rigenerata (lo fa `rifai`).
-- La storia (`pzkko/storia/`, pzkko.it/storia/) è la home con un altro muro: stesso CSS,
-  stesso script, stessa scena 3D, rifatta dalla home da `tools/pzkko/genera-storia.mjs`
-  (lo fa `rifai`, con le sue pile, le sue foto dei fogli e del caricamento). Le sue pile
-  stanno in `tools/pzkko/storia/disposizione.js`; `stato`, `allunga` e `comprimi` ci
-  lavorano con `--pagina=storia`. I suoi fogli si scrivono a mano in `storia/index.html`,
-  dentro `<div class="parete storia">` e con un id `storia-…` (non con `volantino` o `pezzo`).
-  Dopo `rifai` guarda anche `scena-serranda-storia.png`, `storia-desk.png` e `storia-mob.png`.
-- La petizione (`#petizione`, dal 22.10) ha le tre bic appese allo spago sotto il foglio:
-  sporgono ~180 unità sul computer e ~130 sul telefono. Nella pila, subito sotto, va un
-  graffito o un manifesto degli altri, mai un volantino vero (le penne coprirebbero il link).
-  La sua foto per la scena è vuota (le firme le scrive la scena dal vivo): `cattura.mjs`
-  nasconde penne e firme e annota dov'è la tabella.
+- **Leggera deve restare.** Niente animazioni CSS senza fine, niente `requestAnimationFrame`
+  che gira a pagina ferma, niente variabili scritte su `html` a ogni fotogramma, niente strati
+  in `mix-blend-mode` grandi quanto la pagina lasciati lì trasparenti (`display:none` finché
+  non servono). Un'immagine nuova: alla misura a cui si vede (3× al più), non l'originale.
+- La petizione (`#petizione`) sta in `fondo`, con `sotto` unità libere per le penne (230 sul
+  computer, 170 sul telefono), e ha `z-index:25`: niente deve stare sopra le penne. Gli
+  sparsi la evitano da soli.
+- I giochi, i siti e la storia non hanno più il volantino sul muro: si aprono dalla barra in
+  alto (gadget, storia), dal cercapersone e con `#roulette`, `#mine`… nell'indirizzo.
+- La storia (`pzkko/storia/`) è la home con un altro muro, a pile: stesso CSS e stesso
+  script, rifatta da `tools/pzkko/genera-storia.mjs` (lo fa `rifai`). Le sue pile stanno in
+  `tools/pzkko/storia/disposizione.js`; `stato` e `allunga` ci lavorano con `--pagina=storia`.
+  I suoi fogli si scrivono a mano in `storia/index.html`, dentro `<div class="parete storia">`.
+- `disponi.mjs` misura nel browser che trova: con Edge le altezze vengono qualche unità
+  diverse. È normale.
 - Non fare commit né push se Alberto non lo chiede: ogni push su `main` va online.

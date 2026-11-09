@@ -15,7 +15,10 @@
 //   node tools/pzkko/disponi.mjs tutto [--foto]
 //       applica, misura, applica di nuovo (le altezze si assestano) e misura
 //
-// Dopo: node tools/pzkko/genera-404.mjs e node tools/pzkko/scena/cattura.mjs (o tutto insieme:
+// Dal 6.11 la home non ha più pile: i suoi pezzi stanno dove si dice (abs), attaccati al fondo (fondo) o sparsi a caso
+// col seme (sparsi): vedi disposizione.js e, più sotto, «i pezzi sparsi».
+//
+// Dopo: node tools/pzkko/genera-404.mjs e node tools/pzkko/genera-storia.mjs (o tutto insieme:
 // node tools/pzkko/serranda.mjs rifai). Serve puppeteer-core in tools/catture (npm ci dentro
 // quella cartella) e un browser: il Chromium di Playwright o Edge (browser.mjs).
 import { createServer } from 'node:http'
@@ -65,7 +68,13 @@ export async function calcola(pagina = 'home') {
   const { DESK, MOB } = await import(pathToFileURL(P.disp).href + '?t=' + Date.now())
   const elems = elementi(html)
   const perK = Object.fromEntries(elems.map((e) => [e.k, e]))
+  // le carte dei volantini e la loro proporzione (.c-bianco{…--ar:560/732…} nello stile della pagina): un volantino
+  // compatto (.s) è alto quanto la sua carta, non cresce col testo, e la sua altezza si sa senza misurarla
+  const CARTE = Object.fromEntries([...html.matchAll(/\.c-([a-z]+)\{[^}]*--ar:(\d+)\/(\d+)/g)].map((m) => [m[1], m[3] / m[2]]))
   const altezza = (vista, k, w) => {
+    const classi = perK[k]?.tag.match(/\bclass="([^"]*)"/)?.[1].split(/\s+/) ?? []
+    const carta = classi.includes('s') && classi.map((c) => CARTE[c.replace(/^c-/, '')]).find((x) => x > 0)
+    if (carta) return carta * w
     const r = rett[vista]?.find((x) => x.k === k)
     if (r) return (r.h * w) / r.w
     if (perK[k]?.aspetto) return perK[k].aspetto * w
@@ -92,10 +101,60 @@ export async function calcola(pagina = 'home') {
       const w = Math.round(a.w * scala)
       pos[a.k] = { x: Math.round(b.x + (a.fx ?? 0) * b.w + (a.dx ?? 0) * scala), y: Math.round(b.y + (a.fy ?? 0) * b.h + (a.dy ?? 0) * scala), w, r: a.r ?? 0, h: altezza(vista, a.k, w) }
     }
-    for (const a of spec.abs ?? []) pos[a.k] = { x: a.x, y: a.y, w: a.w, r: a.r ?? 0, h: altezza(vista, a.k, a.w) }
-    return { pos, fondi, parete: Math.max(Math.max(...fondi) + (spec.bottom ?? 40), spec.minimo ?? 0), spec }
+    for (const a of spec.abs ?? []) { if (!perK[a.k]) throw new Error(`${vista}: in ${P.file} non c'è ${a.k}`); pos[a.k] = { x: a.x, y: a.y, w: a.w, r: a.r ?? 0, h: altezza(vista, a.k, a.w) } }
+    // (senza pile la parete è alta «minimo»)
+    const parete = Math.max(Math.max(...fondi) + (spec.bottom ?? 40), spec.minimo ?? 0)
+    // i pezzi attaccati al fondo della parete (la petizione: sotto di lei restano «sotto» unità, per le penne)
+    for (const a of spec.fondo ?? []) {
+      if (!perK[a.k]) throw new Error(`${vista}: in ${P.file} non c'è ${a.k}`)
+      const h = altezza(vista, a.k, a.w)
+      pos[a.k] = { x: a.x, y: Math.round(parete - a.sotto - h), w: a.w, r: a.r ?? 0, h, sotto: a.sotto }
+    }
+    const sparsi = spec.sparsi ? sparge(vista, spec, pos, parete, (k, w) => altezza(vista, k, w), perK, P.file) : null
+    return { pos, fondi, parete, spec, sparsi }
   }
   return { html, elems, d: disponi('desk', DESK), m: disponi('mob', MOB) }
+}
+
+// ── i pezzi sparsi ───────────────────────────────────────────────────────────
+// A caso su tutta la parete, ma col seme (ogni pezzo il suo, dal seme della sparsa e dal suo nome: la pagina è uguale a
+// ogni giro, e un pezzo nuovo non sposta gli altri). Per ogni pezzo si provano `prove` punti a caso e si tiene il più
+// lontano dagli altri pezzi (dal centro al centro; dai pezzi fissi conta lo spazio fra i bordi, due volte: gli si può
+// stare più vicino): larghi, ma non in fila. Un punto non vale se tocca un pezzo fisso
+// (abs e fondo, con `aria` intorno; sotto un pezzo del fondo anche le sue penne) o se il pezzo e un altro si coprono
+// più di `copre` (la parte comune sul più piccolo dei due). Se in 40 giri di prove non c'è posto: errore, si allunga.
+const caso = (seme) => () => { seme |= 0; seme = (seme + 0x6d2b79f5) | 0; let t = Math.imul(seme ^ (seme >>> 15), 1 | seme); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296 }
+const impronta = (s) => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.codePointAt(0), 16777619); return h >>> 0 }
+const comune = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y))
+const lontano = (a, b) => Math.hypot(a.x + a.w / 2 - b.x - b.w / 2, a.y + a.h / 2 - b.y - b.h / 2)
+const spazio = (a, b) => Math.hypot(Math.max(0, a.x - b.x - b.w, b.x - a.x - a.w), Math.max(0, a.y - b.y - b.h, b.y - a.y - a.h))
+export function sparge(vista, spec, pos, parete, altezza, perK, file) {
+  const S = spec.sparsi, W = vista === 'desk' ? 1280 : 390
+  const { prove = 14, copre = 0.1, aria = 20, lato = 10, cima = 10 } = S
+  const fissi = Object.values(pos).map((p) => ({ x: p.x - aria, y: p.y - aria, w: p.w + 2 * aria, h: p.h + (p.sotto ?? 0) + 2 * aria }))
+  const messi = []
+  let piuCoperto = 0
+  for (const it of S.items) {
+    if (!perK[it.k]) throw new Error(`${vista}: in ${file} non c'è ${it.k}`)
+    const r = caso(S.seme ^ impronta(it.k)), w = it.w, h = altezza(it.k, w)
+    const storta = it.r ?? (Math.round((1.5 + r() * 2.5) * 2) / 2) * (r() < 0.5 ? -1 : 1)
+    let meglio = null
+    for (let giro = 0; giro < 40 && !meglio; giro++) for (let i = 0; i < prove; i++) {
+      const c = { x: lato + r() * (W - 2 * lato - w), y: cima + r() * (parete - cima - (spec.bottom ?? 40) - h), w, h }
+      const altro = r()
+      if (fissi.some((f) => comune(c, f) > 0)) continue
+      const coperto = Math.max(0, ...messi.map((m) => comune(c, m) / Math.min(c.w * c.h, m.w * m.h)))
+      if (coperto > copre) continue
+      const d = Math.min(...messi.map((m) => lontano(c, m)), ...fissi.map((f) => 2 * spazio(c, f) + Math.min(c.w, c.h)))
+      const voto = (Number.isFinite(d) ? d : altro) - coperto * 1e5
+      if (!meglio || voto > meglio.voto) meglio = { ...c, voto, coperto }
+    }
+    if (!meglio) throw new Error(`${vista}: ${it.k} non trova posto sulla parete (alta ${parete}): serranda.mjs allunga --minimo=N`)
+    piuCoperto = Math.max(piuCoperto, meglio.coperto)
+    messi.push(meglio)
+    pos[it.k] = { x: Math.round(meglio.x), y: Math.round(meglio.y), w, r: storta, h }
+  }
+  return { quanti: messi.length, piuCoperto, coperta: messi.reduce((a, m) => a + m.w * m.h, 0) / (W * parete) }
 }
 
 export async function applica(pagina = 'home') {
@@ -115,12 +174,15 @@ export async function applica(pagina = 'home') {
   html = html.replace(/\.parete\{position:relative;height:calc\(\d+ \* var\(--u\)\)\}/, `.parete{position:relative;height:calc(${d.parete} * var(--u))}`)
   html = html.replace(/\.parete\{height:calc\(\d+ \* var\(--u\)\);max-width:600px/, `.parete{height:calc(${m.parete} * var(--u));max-width:600px`)
   await writeFile(quale(pagina).file, html)
-  console.log(`desktop: le colonne finiscono a ${d.fondi.join(', ')} → parete ${d.parete}`)
-  console.log(`telefono: le colonne finiscono a ${m.fondi.join(', ')} → parete ${m.parete}`)
+  for (const [nome, v] of [['desktop', d], ['telefono', m]]) {
+    const pile = v.fondi.length ? `le colonne finiscono a ${v.fondi.join(', ')} → ` : ''
+    const sparsi = v.sparsi ? ` · ${v.sparsi.quanti} pezzi sparsi, il più coperto al ${Math.round(v.sparsi.piuCoperto * 100)}%, ${Math.round(v.sparsi.coperta * 100)}% di parete` : ''
+    console.log(`${nome}: ${pile}parete ${v.parete}${sparsi}`)
+  }
 }
 
 // ── misura ───────────────────────────────────────────────────────────────────
-const TIPI = { '.html': 'text/html; charset=utf-8', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2' }
+const TIPI = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.webp': 'image/webp', '.png': 'image/png', '.jpg': 'image/jpeg', '.woff2': 'font/woff2' }
 export async function misura(foto, pagina = 'home') {
   const P = quale(pagina)
   const puppeteer = browser.puppeteer()
@@ -130,7 +192,7 @@ export async function misura(foto, pagina = 'home') {
     catch { res.statusCode = 404; res.end() }
   })
   await new Promise((r) => server.listen(0, '127.0.0.1', r))
-  const url = `http://127.0.0.1:${server.address().port}${P.url}?ora=12:00&muro=1` // muro=1: senza la scena 3D, che sposta il muro
+  const url = `http://127.0.0.1:${server.address().port}${P.url}?ora=12:00`
   const aperto = await puppeteer.launch({ executablePath: browser.eseguibile(), headless: true, args: ['--no-sandbox', '--hide-scrollbars'] })
   const out = {}
   await mkdir(LAVORO, { recursive: true })

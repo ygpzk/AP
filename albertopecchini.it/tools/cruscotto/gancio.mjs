@@ -10,6 +10,8 @@
 //   Stop                             Claude ha finito il turno: tocca ad Alberto, suona; l'inizio
 //                                    della risposta, quanto è durato il turno e con quanti strumenti
 //   SessionEnd                       la sessione è chiusa: la regia la toglie dalle altre
+//   SubagentStart, SubagentStop      gli agenti che la sessione manda a lavorare: cosa gli è stato
+//                                    chiesto, da quanto lavorano, cosa fanno, quando finiscono
 
 import { execFileSync } from 'node:child_process'
 import { basename, dirname, join } from 'node:path'
@@ -62,6 +64,17 @@ function descrivi(tool, i = {}) {
   return corto(Object.values(i).find((x) => typeof x === 'string') || '')
 }
 
+// Quello che ha scritto davvero Alberto: via i pezzi che aggiunge l'editor (<ide_…>) e i
+// promemoria, il testo incollato resta (senza il suo <pasted_content>); una notifica dei lavori in
+// background (<task-notification>) o un comando non sono suoi e tornano vuoti
+const VIA = /<(system-reminder|ide_[a-z_]+)[^>]*>[\s\S]*?<\/\1>/g
+export function pulito(t) {
+  const s = String(t ?? '')
+  if (/^\s*<task-notification/.test(s)) return ''
+  const r = s.replace(VIA, ' ').replace(/<\/?pasted_content[^>]*>/g, ' ').trim()
+  return r.startsWith('<') ? '' : r
+}
+
 // L'ultimo messaggio scritto, dalla coda della trascrizione (JSONL): «assistant» la risposta di
 // Claude, «user» la richiesta di Alberto (non i risultati degli strumenti, non i pezzi <…> che
 // aggiunge l'editor, non il riassunto della compattazione)
@@ -74,17 +87,19 @@ function ultimo(trascrizione, tipo, kb = 512) {
     const buf = Buffer.alloc(quanto)
     readSync(fd, buf, 0, quanto, size - quanto)
     for (const riga of buf.toString('utf8').split('\n').reverse()) {
-      if (!riga.includes(`"${tipo}"`)) continue
+      if (!riga.includes(`"${tipo}"`) && !(tipo === 'user' && riga.includes('"queued_command"'))) continue
       let m
       try {
         m = JSON.parse(riga)
       } catch {
         continue
       }
-      if (m.type !== tipo || m.isMeta || m.isCompactSummary) continue
-      const c = m.message?.content
+      // i messaggi che Alberto manda a lavoro in corso stanno in un «queued_command»
+      const coda = tipo === 'user' && m.attachment?.type === 'queued_command'
+      if (!coda && (m.type !== tipo || m.isMeta || m.isCompactSummary)) continue
+      const c = coda ? m.attachment.prompt : m.message?.content
       const pezzi = typeof c === 'string' ? [c] : Array.isArray(c) ? c.filter((p) => p.type === 'text').map((p) => p.text) : []
-      const testo = pezzi.filter((p) => !p.trimStart().startsWith('<')).join(' ')
+      const testo = tipo === 'user' ? pezzi.map(pulito).filter(Boolean).join(' ') : pezzi.filter((p) => !p.trimStart().startsWith('<')).join(' ')
       if (testo.trim()) return { testo, da: Date.parse(m.timestamp) || Date.now() }
     }
     return null
@@ -135,11 +150,13 @@ function gestisci(e) {
   const scrive = (chi, testo) => log(`${chi}#${id}`, testo)
   // una sessione che la regia vede per la prima volta a metà (ganci nuovi, compattazione): la
   // richiesta di Alberto la si ripesca dalla trascrizione, una volta sola
-  if (!s.richiesta && !s.cercata && evento !== 'UserPromptSubmit') {
+  // (e così si ripara una richiesta che era una notifica <task-notification> scambiata per sua)
+  const finta = s.richiesta?.testo != null && !pulito(s.richiesta.testo)
+  if (((!s.richiesta && !s.cercata) || finta) && evento !== 'UserPromptSubmit') {
     s.cercata = true
     try {
       const u = ultimo(e.transcript_path, 'user', 24 * 1024)
-      if (u) s.richiesta = { testo: corto(u.testo, 400), da: u.da }
+      s.richiesta = u ? { testo: corto(u.testo, 400), da: u.da } : null
     } catch {}
   }
 
@@ -151,16 +168,61 @@ function gestisci(e) {
     scrive('alberto', e.source === 'compact' ? 'la conversazione si è compattata e riprende' : e.source === 'resume' ? `riprendo la sessione in ${basename(s.cwd || '')}` : `sessione nuova in ${basename(s.cwd || '')}`)
   } else if (evento === 'UserPromptSubmit') {
     apri(s)
-    Object.assign(s, { stato: 'lavora', richiesta: { testo: corto(e.prompt, 400), da: adesso }, adesso: null, avviso: null, turno: 0 })
-    scrive('alberto', corto(e.prompt, 300))
+    // da quanto lavora: dal primo messaggio del giro, non da quelli mandati a lavoro in corso
+    if (s.stato !== 'lavora') s.inizioLavoro = adesso
+    const prompt = String(e.prompt || '')
+    // le notifiche dei lavori in background (<task-notification>…) arrivano come «richieste», ma
+    // non le ha scritte Alberto: la sua richiesta resta quella di prima (9.11.2026)
+    const suo = pulito(prompt)
+    if (!suo) {
+      if (!s.richiesta?.testo || !pulito(s.richiesta.testo)) {
+        try {
+          const u = ultimo(e.transcript_path, 'user', 24 * 1024)
+          s.richiesta = u ? { testo: corto(u.testo, 400), da: u.da } : null
+        } catch {}
+      }
+      Object.assign(s, { stato: 'lavora', avviso: null })
+      const sommario = prompt.match(/<summary>([\s\S]*?)<\/summary>/)?.[1] || prompt.match(/<event>([\s\S]*?)<\/event>/)?.[1] || 'notifica'
+      scrive('claude', `notifica: ${corto(sommario, 200)}`)
+    } else {
+      Object.assign(s, { stato: 'lavora', richiesta: { testo: corto(suo, 400), da: adesso }, adesso: null, avviso: null, turno: 0 })
+      scrive('alberto', corto(suo, 300))
+    }
   } else if (evento === 'PreToolUse') {
     const tool = e.tool_name || '?'
     const cosa = descrivi(tool, e.tool_input)
-    Object.assign(s, { stato: 'lavora', adesso: { tool, testo: cosa, da: adesso }, avviso: null, strumenti: (s.strumenti || 0) + 1, turno: (s.turno || 0) + 1 })
+    if (s.stato !== 'lavora' || !s.inizioLavoro) s.inizioLavoro = adesso
+    s.agenti ||= []
+    // uno strumento di un agente: va sotto l'agente, la sessione resta su quello che fa lei
+    const ag = e.agent_id && s.agenti.find((a) => a.id === e.agent_id)
+    if (ag) {
+      ag.adesso = { tool, testo: cosa, da: adesso }
+      ag.strumenti = (ag.strumenti || 0) + 1
+      Object.assign(s, { stato: 'lavora', avviso: null, strumenti: (s.strumenti || 0) + 1 })
+    } else Object.assign(s, { stato: 'lavora', adesso: { tool, testo: cosa, da: adesso }, avviso: null, strumenti: (s.strumenti || 0) + 1, turno: (s.turno || 0) + 1 })
+    // un agente che parte: cosa gli è stato chiesto e da quando (l'id arriva con SubagentStart)
+    if ((tool === 'Agent' || tool === 'Task') && !ag) {
+      const i = e.tool_input || {}
+      s.agenti = [{ tipo: i.subagent_type || 'general-purpose', descr: corto(i.description || i.prompt, 120), prompt: corto(i.prompt, 300), da: adesso, sfondo: !!i.run_in_background }, ...s.agenti].slice(0, 12)
+    }
     s.conteggi[tool] = (s.conteggi[tool] || 0) + 1
     const f = e.tool_input?.file_path
     if (f && /^(Edit|Write|NotebookEdit|MultiEdit)$/.test(tool)) s.file = [f, ...s.file.filter((x) => x !== f)].slice(0, 40)
-    scrive(`claude-${tool}`, cosa)
+    scrive(`claude-${tool}`, ag ? `[${ag.tipo}] ${cosa}` : cosa)
+  } else if (evento === 'SubagentStart') {
+    s.agenti ||= []
+    // si lega al più vecchio agente chiesto e non ancora partito, dello stesso tipo se c'è
+    const liberi = s.agenti.filter((a) => !a.id && !a.fine)
+    const a = liberi.reverse().find((x) => x.tipo === e.agent_type) || liberi[0]
+    if (a) Object.assign(a, { id: e.agent_id, tipo: e.agent_type || a.tipo, partito: adesso })
+    else s.agenti = [{ id: e.agent_id, tipo: e.agent_type || 'agente', descr: e.agent_type || 'agente', da: adesso, partito: adesso }, ...s.agenti].slice(0, 12)
+    scrive('claude', `parte l'agente ${e.agent_type || ''}${a?.descr ? ': ' + a.descr : ''}`)
+  } else if (evento === 'SubagentStop') {
+    s.agenti ||= []
+    const a = s.agenti.find((x) => x.id === e.agent_id) || s.agenti.filter((x) => !x.fine).at(-1)
+    if (a) Object.assign(a, { fine: adesso, adesso: null, risposta: corto(e.last_assistant_message, 200) })
+    const quanto = a ? Math.round((adesso - a.da) / 1000) : null
+    scrive('claude', `√ l'agente ${a?.tipo || e.agent_type || ''} ha finito${quanto != null ? ` in ${quanto < 60 ? quanto + 's' : Math.floor(quanto / 60) + 'm ' + String(quanto % 60).padStart(2, '0') + 's'}` : ''}${a?.descr ? ': ' + a.descr : ''}`)
   } else if (evento === 'PostToolUseFailure') {
     s.errori = (s.errori || 0) + 1
     scrive(`claude-${e.tool_name || '?'}`, `× ${corto(e.error || e.tool_response?.error || 'non è andato', 200)}`)
@@ -172,7 +234,8 @@ function gestisci(e) {
     try {
       testo ||= ultimo(e.transcript_path, 'assistant')?.testo || ''
     } catch {}
-    const durata = s.richiesta?.da ? Math.round((adesso - s.richiesta.da) / 1000) : null
+    const inizio = s.inizioLavoro || s.richiesta?.da
+    const durata = inizio ? Math.round((adesso - inizio) / 1000) : null
     Object.assign(s, { stato: 'fermo', adesso: null, fineTurno: adesso, suona: (s.suona || 0) + 1, risposta: { testo: corto(testo, 400), da: adesso, secondi: durata, strumenti: s.turno || 0 } })
     scrive('claude', `√ ho finito${durata != null ? ` in ${durata < 60 ? durata + 's' : Math.floor(durata / 60) + 'm ' + String(durata % 60).padStart(2, '0') + 's'}` : ''}${s.turno ? ` con ${s.turno} ${s.turno === 1 ? 'strumento' : 'strumenti'}` : ''}: ${corto(testo, 160) || 'tocca a te'}`)
   } else if (evento === 'SessionEnd') {

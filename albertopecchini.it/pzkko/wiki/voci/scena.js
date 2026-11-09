@@ -10,9 +10,11 @@ const INDEX = 'albertopecchini.it/pzkko/index.html'
 
 export const VOCI = {
   'La scena 3D': {
-    data: '2026-10-29',
+    data: '2026-11-06',
     fonti: [SCENA + 'scena.js', SCENA + 'mondo.js', SCENA + 'luci.js', SCENA + 'scena.css', README, INDEX],
-    testo: `{{Infobox
+    testo: `''Dal 6 novembre 2026 la scena 3D è '''spenta per tutti''' ([[La saracinesca alleggerita|il sito è solo in 2D]]: faceva girare le ventole). Questa voce racconta com'era; i suoi file restano nel repository.''
+
+{{Infobox
 | titolo = La scena 3D
 | immagine = scena-cima
 | didascalia = la strada vista da lontano, all'arrivo della telecamera

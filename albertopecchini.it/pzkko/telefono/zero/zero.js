@@ -396,8 +396,12 @@ export function crea({ dlg, ledEl }) {
       // la cornice, centrata sul cercapersone (un filo a destra: oltre la testata c'è la spina): tutto il cercapersone con
       // un po' d'aria (104,5 mm) se ci stanno almeno 19 px per mm (lo schermo ≥ 700 px), se no più stretta, e le testate
       // escono dai bordi; alta almeno quanto il cercapersone (36 mm visibili) quando la finestra lo permette
-      const fw = Math.min(104.5, Math.max((36 * w) / h, w / 19))
-      x0 = 32 - fw / 2; x1 = 32 + fw / 2; yc = 13.7
+      // (9.11) mai più stretta di TASTI: lo schermo e TUTTI i tasti (da x −2 a 73,5, INDIETRO finisce a 69,5), spostata a
+      // destra quanto serve. Prima a 1440 × 900 INDIETRO usciva a metà dal bordo destro, e sotto i 1100 px non c'era più
+      const TASTI = [-2, 73.5]
+      const fw = Math.min(104.5, Math.max((36 * w) / h, w / 19, TASTI[1] - TASTI[0]))
+      const xc = Math.max(32, TASTI[1] - fw / 2)
+      x0 = xc - fw / 2; x1 = xc + fw / 2; yc = 13.7
     }
     const fh = (x1 - x0) * (h / w)
     const Zp = 2.3, D = 150
@@ -444,6 +448,9 @@ export function crea({ dlg, ledEl }) {
   const raggio = new T.Raycaster()
   const ndc = new T.Vector2()
   function colpisci(ev) {
+    // (9.11) senza posa la telecamera sta nell'origine, DENTRO il modello: ogni raggio prendeva il corpo, e un clic fuori
+    // nei primi istanti dell'apertura non chiudeva niente
+    if (!posa) return null
     ndc.set((ev.clientX / W()) * 2 - 1, -(ev.clientY / H()) * 2 + 1)
     raggio.setFromCamera(ndc, camera)
     const hit = raggio.intersectObjects(Object.values(tasti).map((t) => t.mesh), false)[0]
@@ -464,7 +471,7 @@ export function crea({ dlg, ledEl }) {
   }
   const rig = {
     pronto, tela, camera, scene,
-    onTasto: () => {}, onFuori: () => {}, cliccabile: () => false, // (cliccabile(x, y): c'è una zona di pzk os in quel pixel? la mette telefono.js)
+    onTasto: () => {}, onFuori: () => {}, onTenuta: () => {}, cliccabile: () => false, // (onTenuta(true/false): INDIETRO tenuto col mouse comincia / finisce prima dei tre secondi) // (cliccabile(x, y): c'è una zona di pzk os in quel pixel? la mette telefono.js)
     /** Il tasto si abbassa e si scurisce (la croce si inclina dal lato premuto): finché non si lascia (tieni), o per 110 ms. */
     premi(nome, verso, { tieni = false } = {}) {
       const t = tasti[nome]
@@ -492,18 +499,22 @@ export function crea({ dlg, ledEl }) {
   tela.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return
     giu = colpisci(e)
+    // fuori dal cercapersone si chiude SUBITO, alla pressione (9.11, Alberto: «premendo fuori istantaneamente»): prima
+    // aspettava il rilascio; il rilascio poi non fa più niente (fuori)
+    if (!giu) { giu = { nome: 'fuori' }; rig.onFuori(); return }
     if (giu && giu.nome !== 'corpo') rig.premi(giu.nome, giu.verso, { tieni: true }) // (giù finché non si lascia)
     clearTimeout(tenuta)
+    if (giu?.nome === 'indietro') rig.onTenuta(true) // (la barra dello spegnimento, telefono.js)
     if (giu?.nome === 'indietro') tenuta = setTimeout(() => { tenuta = 0; giu = { nome: 'spento' }; rig.lascia('indietro'); rig.onTasto('spegni') }, TENUTA) // (spento: lasciandolo, anche fuori dal cercapersone, non fa più niente; prima era un clic fuori e chiudeva una seconda volta saltando il saluto)
   })
   const lascia = (e) => {
+    if (tenuta) rig.onTenuta(false) // (lasciato prima dei tre secondi: via la barra)
     clearTimeout(tenuta); tenuta = 0
     const su = e.type === 'pointerup' ? colpisci(e) : null, g = giu
     giu = null
-    if (g && g.nome !== 'corpo' && g.nome !== 'spento') rig.lascia(g.nome)
-    if (e.type !== 'pointerup') return
-    if (!g) { if (!su) rig.onFuori(); return }
-    if (g.nome === 'corpo' || g.nome === 'spento') return
+    if (g && g.nome !== 'corpo' && g.nome !== 'spento' && g.nome !== 'fuori') rig.lascia(g.nome)
+    if (e.type !== 'pointerup' || !g) return
+    if (g.nome === 'corpo' || g.nome === 'spento' || g.nome === 'fuori') return
     if (g.nome === 'lcd') { if (su?.nome === 'lcd' && Math.abs(su.verso.x - g.verso.x) < 6 && Math.abs(su.verso.y - g.verso.y) < 6) rig.onTasto('lcd', g.verso); return } // (il clic sullo schermo: giù e su nello stesso punto)
     if (su && su.nome === g.nome && (g.nome !== 'croce' || su.verso === g.verso)) rig.onTasto(g.nome, g.verso)
   }
@@ -572,7 +583,7 @@ export function crea({ dlg, ledEl }) {
       aggiornaLuce(true)
       return pronto.then(() => vola(B, posa ? ms : 0, APRE, (k) => { luceMescola = k; aggiornaLuce(); if (k > 0.5) tela.classList.remove('ombra') })).then(() => { aperto = !pieno; luceMescola = 1; aggiornaLuce(true) })
     },
-    /** Il volo di ritorno sul tasto (480 ms). */
+    /** Il volo di ritorno sul tasto (480 ms; telefono.js ne chiede 400). */
     async chiudi(tasto, { ms = 480 } = {}) {
       await pronto
       misuraTela()

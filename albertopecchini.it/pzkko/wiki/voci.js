@@ -14,9 +14,10 @@ import { VOCI as cercapersone } from './voci/cercapersone.js'
 import { VOCI as chat } from './voci/chat.js'
 import { VOCI as dietro } from './voci/dietro.js'
 import { VOCI as memoria } from './voci/memoria.js'
+import { VOCI as deutschland } from './voci/deutschland.js'
 import { VOCI as dati } from './voci/dati.js'
 
-export const MODULI = { principale, sito, scena, giochi, cercapersone, chat, dietro, memoria, dati }
+export const MODULI = { principale, sito, scena, giochi, cercapersone, chat, dietro, memoria, deutschland, dati }
 
 export const VOCI = {}
 export const FILE_DI = {}

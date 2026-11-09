@@ -52,7 +52,7 @@ La '''telecamera''' si scrive a mano (<code>makePerspective</code> coi quattro l
 [[File:zero-volo.webp|thumb|il volo: la telecamera parte dalla posa della foto sul muro e arriva sul fronte in 420 ms]]
 <code>telefono.js</code> in modo zero fa come prima. Aprendo, la tela disegna il cercapersone esattamente sopra il [[Il tasto sul muro|tasto del muro]] (la stessa posa della foto, storto uguale: la telecamera ruota dei gradi del tasto, e il tronco si allarga a tutta la finestra attorno al rettangolo del tasto), il tasto si nasconde, la telecamera vola alla posa aperta in '''420 ms''' con la chiocciolina sull'lcd 3D; arrivata, pzk os (il piano HTML sull'lcd, <code>.z-piano</code>, nascosto durante il volo) si accende come un lcd in '''400 ms''': la retroilluminazione che sale con un colpo di luce, il contenuto che si riempie a scatti. In carica, il [[Il cavo di ricarica|cavo]] entra nella porta sulla testata.
 
-I '''tasti sono veri''' ([[I sei tasti]]): si premono col mouse (il raggio sulla tela: INDIETRO si abbassa, la croce s'inclina dal lato premuto) e dalla tastiera (frecce, Invio, Backspace). INDIETRO fa una mossa indietro e nella home chiude (è l'unico tasto: fa anche da CHIUDI, come toccare fuori ed Esc); tenuto tre secondi spegne. Il [[Il led rosso|led]] 3D segue le classi del led di prima. Chiudendo: pzk os si spegne (si riempie di scuro a scatti e la luce cala), l'lcd 3D mostra la chiocciolina che [[Il saluto|saluta]] e la telecamera torna sul tasto. Sul cellulare pzk os è a tutta finestra: la tela sfuma via quando si accende e torna chiudendo.
+I '''tasti sono veri''' ([[I sei tasti]]): si premono col mouse (il raggio sulla tela: INDIETRO si abbassa, la croce s'inclina dal lato premuto) e dalla tastiera (frecce, Invio, Backspace). INDIETRO fa una mossa indietro e nella home chiude (è l'unico tasto: fa anche da CHIUDI, come toccare fuori ed Esc); tenuto tre secondi spegne. Il [[Il led rosso|led]] 3D segue le classi del led di prima. Chiudendo (dal 9 novembre): subito, alla pressione, la chiocciolina che [[Il saluto|saluta]] riempie tutto l'lcd per un secondo, poi la luce si spegne davvero e la telecamera torna sul tasto, dove lo schermo si riaccende sul desktop: 1,6 secondi in tutto (prima 3,3). Un clic fuori mentre si sta ancora aprendo chiude appena aperto. Tenendo INDIETRO, sull'lcd compare una barra che si riempie in tre secondi («tieni premuto: si spegne»): lasciando prima, sparisce e il cercapersone resta acceso. L'inquadratura tiene sempre dentro lo schermo e tutti i tasti, anche nelle finestre piccole. Sul cellulare pzk os è a tutta finestra: la tela sfuma via quando si accende e torna chiudendo.
 
 == Il secondo giro ==
 {{Citazione|è storto lo schermo… rifai icone in svg consumando pochissimo… pzkko sta solo sul lato sotto non a cavallo della smussatura… è troppo luminoso il modello 3d… in base a dove metto il mouse si inclini leggermente… rifai la home e al primo accesso spiega come funziona… fai impostazioni per regolare la luminosità, i suoni, il led rosso… la home con dati importanti come i miei soldi e le cose da fare oggi… evita di mettere negli angoli cose che con l'inclinazione non si vedono… la luce deve essere = a quella del sito… i riflessi identici delle auto, lampioni|Alberto, 29 ottobre 2026, sera}}
@@ -500,6 +500,8 @@ Si corregge REGOLE.md, non si aggira ([[Regole app pzk os (memoria)]]). Nella se
 |-
 | <code>--banca</code> || (6.11) <code>/api/wallet</code>, <code>/api/borsa</code>, <code>/api/giocatori</code> li serve la [[La banca sul server|banca vera]] (<code>C:\pzkko-server\banca</code>) coi file in memoria, come [[In locale (pzkko)|tools/dev.mjs]]: i dati veri non si toccano, e la pagina entra da sola col conto pzkko. Con <code>--app=profilo --giocate</code> il conto ha nel libro le giocate di Bighurra
 |-
+| <code>--rivali</code> || (6.11, con <code>--banca --app=giocatori</code> o <code>profilo</code>) altri tre conti nella banca in memoria, due pari merito con pzkko: per vedere che [[Le classifiche|classifica]], scheda e rivali dicano lo stesso posto («2° pari»)
+|-
 | <code>--turni</code> || (6.11) i tredici [[I minigiochi della chat|minigiochi del turno]], uno per mestiere, giocati coi sei tasti contro la banca vera in memoria: il mestiere messo a mano nel conto, «lavora» scritto nella chat, la risposta giusta letta dal tavolo della banca e data con le frecce e Invio (l'anagramma scritto dalla tastiera vera, due svolte del rider col clic del mouse). Foto <code>prova-turno-&lt;gioco&gt;-*.png</code>; la banca deve aver pagato il turno intero. <code>--turni=icona,ordine</code> solo quelli; <code>--sbaglia</code> la risposta sbagliata, <code>--scade</code> il tempo scaduto (devono finire in «turno storto»)
 |-
 | <code>--rider</code> || è <code>--turni=strada</code>. Dal 31 ottobre al 6 novembre non andava: il turno lo conta la banca, che nel collaudo non c'era («il turno non è stato contato»), e così nessuno giocava più un turno nel collaudo
@@ -732,6 +734,9 @@ I tasti che nella chat grande stavano dentro l'html (<code>data-cmd</code>: «co
 == Le scelte dei giochi ==
 Quando un minigioco aspetta una scelta la croce va sui suoi tasti o sulle celle della griglia e OK preme. Quando i tasti di una scelta sono direzioni (sinistra, dritto o centro, destra, giù: la consegna del rider, il rigore) le frecce li premono subito (<code>scegli</code>), il tasto porta la sua freccia e sotto c'è scritto «premi ← ↑ → o fai clic». Quando un evento vuole una parola (la banconota: PRENDILA, la nutria: SCIÒ) la parola è un tasto: coi sei tasti scriverla in cinque secondi non si faceva. Da scassato ([[Il cercapersone scassato]]) propone solo <code>lavora</code> e <code>compra cercapersone</code>.
 
+== Le tabelle ==
+Dal 6.11.2026 <code>pulisci</code> stacca le celle di una tabella con « · ». Prima erano incollate: <code>classifica</code> scriveva «2pzkko liv. 52» per dire 2°, pzkko, livello 5, valore 2 (si leggeva livello 52), e <code>lavora lista</code> «streamer7400». Ora «2° pari · pzkko (liv. 5) · 2».
+
 == Le icone delle schede ==
 Dal 6.11.2026 una scheda può avere il campo <code>icone</code> (i nomi) e <code>lato</code> (16 o 32): una fila di riquadri con l'icona a un bit, come i rulli della slot. È il solo modo di far vedere un'icona nella chat: quelle dentro il testo (<code>:canna:</code>) <code>pulisci</code> le toglie. Lo usano [[I minigiochi della chat|i minigiochi del turno]] (la cosa da ricordare, l'ordinazione, i pezzi del nastro) e la scheda della paga dello spazzino. Insieme sono arrivati <code>smetti</code> (una risposta che si dà coi tasti o scrivendo: chi arriva prima spegne l'altro), i tasti spenti che ← → saltano, e la parola da premere che prende la croce quando compare.
 
@@ -766,7 +771,7 @@ Al primo giro il [[Il collaudo delle app|collaudo]] ha trovato sei difetti, quat
 Si sfogliano con ← → (e ↑ ↓) coi pallini in alto e lo scorrimento di lato (<code>pagine</code> di pezzi.js):
 # il '''cartellino''': la faccia, il bollino del livello, il nome, l'indirizzo e la data, il titolo, i [[I soldi sporchi|soldi sporchi]] o la [[La galera|galera]], il motto, la barra degli xp che si riempie entrando, tutto dentro la cornice scelta disegnata davvero (nastro, oro doppia, neon a puntini, pixel a gradini);
 # i '''soldi''' (coi puntini fra nome e numero);
-# i '''giochi''' (la tabella mani, vinte, netto, colpo: i sei giochi grandi e, dal 6.11, la riga '''«nella chat»''', tutti i giochi giocati col bot insieme. Bighurra aveva vinto 400 $pzk al blackjack della chat, nel saldo c'erano, ma qui la riga «blackjack» restava a trattini: «non mi ha tenuto conto dei miei 400 guadagnati con il blackjack»);
+# i '''giochi''' (le mani sono le stesse della classifica «mani ai giochi»; la tabella mani, vinte, netto, colpo: i sei giochi grandi e, dal 6.11, la riga '''«nella chat»''', tutti i giochi giocati col bot insieme. Bighurra aveva vinto 400 $pzk al blackjack della chat, nel saldo c'erano, ma qui la riga «blackjack» restava a trattini: «non mi ha tenuto conto dei miei 400 guadagnati con il blackjack»);
 # la '''vita col bot''';
 # i '''progressi''';
 # le '''classifiche''' (col conto, da <code>chat/db.js</code>; senza, o col server che non risponde, lo dice).
@@ -963,7 +968,7 @@ L'elenco: quante finite, ogni storia con icona, nome, stato e una riga; il lucch
   },
 
   'Giocatori (app)': {
-    data: '2026-10-29',
+    data: '2026-11-06',
     fonti: [OS + 'giocatori.js', 'albertopecchini.it/pzkko/telefono/app/giocatori.js', 'albertopecchini.it/pzkko/chat/db.js', 'albertopecchini.it/pzkko/chat/lumaca-avvisi.js', README],
     testo: `{{Infobox
 | titolo = Giocatori (app)
@@ -979,11 +984,11 @@ L'elenco: quante finite, ogni storia con icona, nome, stato e una riga; il lucch
 }}
 '''Giocatori''' è [[Il database dei giocatori|il database dei giocatori]] in quattro pagine, più la [[La lumachina|lumachina]].
 
-# le '''classifiche''' (in cima quale, OK le diciassette; il podio coi numeri rovesciati, la faccia, il nome, il valore);
+# le '''classifiche''' (in cima quale, OK le diciannove; il podio coi numeri rovesciati, la faccia, il nome, il valore; i pari merito hanno lo stesso numero);
 # le '''notizie''' (icona, testo su due righe, quanto fa: [[Le notizie della banca]]);
 # '''cerca''' (scrivendo dalla tastiera o OK sulla riga in cima);
 # '''io''': l'avviso urgente della lumachina con «ho capito», la sua [[La salute della lumachina|salute]] con la barra, oggi, gli ultimi giorni, il tuo profilo, i rivali, la banca in numeri (scorre con ↑ ↓).
-La scheda di un giocatore: la faccia, il titolo, il livello con la barra, i numeri, le classifiche, i leggendari, «manda $pzk» (la chat, comando <code>manda</code>). Ogni pagina dice se il server non risponde. Nuovi: la lente, le barre in <code>impagina</code>, e nel collaudo il database dei giocatori finto (<code>--server-finto</code>).
+La scheda di un giocatore dice gli stessi numeri delle [[Le classifiche|classifiche]] (6.11, Alberto: «le classifiche dicono cose diverse da dentro i profili singoli»): nei numeri ci sono i soldi (guadagnati, vinti o persi ai giochi) e le mani del libro dei conti, e ogni posto ha accanto il suo valore («1° pari in pescati: 2»). La scheda di un giocatore: la faccia, il titolo, il livello con la barra, i numeri, le classifiche, i leggendari, «manda $pzk» (la chat, comando <code>manda</code>). Ogni pagina dice se il server non risponde. Nuovi: la lente, le barre in <code>impagina</code>, e nel collaudo il database dei giocatori finto (<code>--server-finto</code>).
 
 {{Vedi anche|Il database dei giocatori|Le classifiche|Le notizie della banca|La lumachina|Le app di pzk os}}
 [[Categoria:Le app di pzk os]]`,

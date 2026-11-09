@@ -1,0 +1,21 @@
+/* La macchinetta delle sigarette sul muro di pzkko.it (9.11.2026, #automat-muro in index.html, vestita da
+   deutschland/muro.js): una vecchia Zigarettenautomat a muro nel primo schermo della saracinesca, con lo schermo che
+   mostra le tappe del viaggio in Germania a pixel (lo sprite art/deutschland/schermo.webp, 4 × 3 mattonelle) e un alone
+   di luce FERMO (niente animazioni: il muro deve restare leggero). Il rilievo è il drop-shadow doppio dei pezzi vivi
+   (.chat-tasto). Toccandola cola la vernice (deutschland/vernice.js) e si va a /deutschland/. */
+.automat{height:auto;aspect-ratio:900/1200;padding:0;border:0;background:none;cursor:pointer;
+  filter:drop-shadow(0 3px 4px rgba(0,0,0,.5)) drop-shadow(0 10px 14px rgba(0,0,0,.3));transition:transform .18s cubic-bezier(.2,1.4,.4,1);-webkit-tap-highlight-color:transparent}
+.automat img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:contain;pointer-events:none}
+/* lo schermo (muro.js lo mette sugli angoli di muro-dati.js con la matrix3d): sotto il nero dello spento, sopra lo sprite
+   delle tappe a pixel netti e il riflesso del vetro */
+.automat .am-schermo{position:absolute;transform-origin:0 0;overflow:hidden;background:#0b0f0a url(/art/deutschland/schermo.webp) center/100% 100% no-repeat;image-rendering:pixelated;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.7),inset 0 0 14px rgba(0,0,0,.8)}
+.automat .am-schermo::after{content:"";position:absolute;inset:0;background:linear-gradient(172deg,rgba(255,255,255,.14),rgba(255,255,255,.04) 46%,rgba(255,255,255,0) 48%)}
+/* la luce: un alone verde fermo intorno allo schermo, e un velo caldo sulla lamiera sotto (nessun fotogramma in più) */
+.automat .am-luce{position:absolute;pointer-events:none;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(110,255,150,.42),rgba(110,255,150,.16) 55%,rgba(255,200,110,.06) 80%,rgba(110,255,150,0))}
+.automat .am-schermo[hidden],.automat .am-luce[hidden]{display:none}
+@media (hover:hover){.automat:hover{scale:1.03}}
+.automat:active{scale:.96}
+.automat:focus-visible{outline:3px solid #ffd400;outline-offset:4px}
+@media (prefers-reduced-motion:reduce){.automat{transition:none}}

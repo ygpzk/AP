@@ -1,246 +1,78 @@
 // La disposizione del muro di pzkko.it (index.html), usata da disponi.mjs.
-// Ogni colonna è una pila: ogni pezzo sta sotto il precedente, `gap` è la distanza
-// dal pezzo sopra (negativa = si sovrappone), `dx` lo scarto dal bordo della colonna,
-// `w` la larghezza e `r` la rotazione, tutto in unità della parete (1280 sul desktop,
-// 390 sotto i 900 px). `rel` ancora un pezzo a un altro già disposto (fx/fy in frazioni
-// della sua misura, dx/dy in unità); `abs` lo mette dove si dice. Le chiavi: '#id',
-// il percorso dell'immagine sotto art/ senza .webp, o 'vol:' + il titolo del volantino.
+//
+// Dal 6.11.2026 la saracinesca è alleggerita (Alberto: «togli tutti i volantini, rifai quelli social, mettili già in
+// tutta la serranda anche se è vuota, sparsi a coordinate casuali senza che si sovrappongano più del 10%; in fondo lascia
+// la petizione»): niente più pile. Ci sono tre modi di mettere un pezzo, tutto in unità della parete (1280 sul computer,
+// 390 sotto i 900 px):
+//
+//   abs     dove si dice: { k, x, y, w, r }
+//   fondo   attaccato al fondo della parete: { k, x, w, r, sotto } (sotto = quanto spazio resta sotto di lui: le penne
+//           della petizione, appese allo spago, sporgono ~180 unità sul computer e ~130 sul telefono)
+//   sparsi  a caso su tutta la parete: { k, w } (e r, se no la storta la decide il caso). Ogni pezzo ha il suo caso, dal
+//           seme e dal suo nome: aggiungerne uno non sposta gli altri. Fra `prove` punti a caso prende quello più lontano
+//           dagli altri pezzi (largo, ma non in fila), mai sopra un pezzo fisso (con `aria` intorno) e mai coperto più di
+//           `copre` (0.1 = il 10% del pezzo più piccolo). Cambiando `seme` cambia tutta la sparsa.
+//
+// L'altezza della parete è `minimo` (serranda.mjs allunga --minimo=N; --telefono per il telefono). Le chiavi: '#id', il
+// percorso dell'immagine sotto art/ senza .webp, o 'vol:' + il titolo del volantino. Le pile (`cols`, `rel`) ci sono
+// ancora in disponi.mjs: le usa la storia (storia/disposizione.js).
 
 const V = (k) => 'vol:' + k
 export const DESK = {
   gap: -15,
   // manopole (serranda.mjs): spazio in cima e in fondo, altezza minima, passo delle pile, larghezza dei pezzi
-  top: 0, bottom: 40, minimo: 2989, passo: 0.9, scala: 1,
-  cols: [
-    { x: 12, items: [
-      // il wallet (26.10): in cima, avvitato alla saracinesca; non più sospeso in alto a sinistra
-      { k: '#wallet-muro', w: 245, dx: 8, gap: 0, r: -2 },
-      { k: '#siti', w: 170, dx: 40, gap: 4, r: -6 },
-      { k: V('alberto pecchini'), w: 285, gap: -70, r: -2 },
-      { k: 'manifesti3/lyca-tim', w: 255, dx: 8, gap: -15, r: -3 },
-      { k: '#chi-sono', w: 290, dx: 4, gap: -5, r: -2 },
-      { k: V('da dove viene questo muro?'), w: 260, dx: 10, gap: -15, r: -3 },
-      { k: V('e-mail'), w: 285, gap: -20, r: 2.5 },
-      { k: V('pzk$meeting'), w: 290, dx: 0, gap: -10, r: -1.5 },
-      { k: V('vendo il ciao'), w: 275, gap: -15, r: 2.5 },
-      { k: 'amici/negozio', w: 115, gap: -15, r: -3 },
-      { k: 'manifesti8/modena', w: 200, dx: 40, gap: 10, r: -1.5 },
-    ] },
-    { x: 262, items: [
-      // il cercapersone (26.10; dal 31.10 lo zero, attaccato col nastro): in cima alla seconda pila
-      { k: '#cercapersone-muro', w: 185, dx: 35, gap: 6, r: 3 },
-      { k: 'manifesti4/brat', w: 220, dx: 30, gap: 12, r: 4 },
-      { k: V('better call pekko'), w: 280, gap: -35, r: 2 },
-      { k: '#social', w: 230, dx: 20, gap: 0, r: -3 },
-      { k: V('instagram'), w: 280, gap: -80, r: -4 },
-      { k: V('tiktok'), w: 275, gap: -15, r: -2.5 },
-      { k: 'manifesti1/concerto', w: 240, dx: 15, gap: -20, r: 4 },
-      { k: '#games', w: 210, dx: 20, gap: 0, r: 3 },
-      { k: V('blackjack'), w: 270, dx: 32, gap: -60, r: 1.5 },
-      { k: '#tools', w: 200, dx: 40, gap: -5, r: -4 },
-      { k: 'amici/ypsilon', w: 85, gap: -15, r: -4 },
-      { k: 'manifesti6/zucche', w: 210, dx: 20, gap: -12, r: -2 },
-      { k: 'manifesti7/bonsai', w: 190, dx: 30, gap: -15, r: -2.5 },
-      { k: 'manifesti6/rivalta', w: 230, dx: 10, gap: -15, r: 3 },
-    ] },
-    { x: 512, items: [
-      { k: V('rivalta sul mincio'), w: 280, gap: 130, r: -1.5 },
-      { k: 'manifesti3/starlink', w: 250, dx: 18, gap: -12, r: 2.5 },
-      { k: V('github'), w: 285, gap: -5, r: 2 },
-      { k: V('un caffè?'), w: 270, gap: -25, r: -2 },
-      { k: V('roulette'), w: 235, dx: 40, gap: -10, r: -1 },
-      { k: V('dado'), w: 230, dx: 10, gap: -15, r: -2 },
-      { k: 'manifesti7/iphone', w: 195, dx: 25, gap: -10, r: 2 },
-      { k: 'manifesti5/redbull', w: 225, gap: -15, r: 4 },
-      { k: 'manifesti5/eastpak', w: 215, gap: -15, r: 2 },
-      { k: 'manifesti6/epson', w: 200, dx: 20, gap: -15, r: -3 },
-      { k: 'manifesti8/vannacci', w: 195, dx: 30, gap: -12, r: -2 },
-    ] },
-    { x: 762, items: [
-      { k: 'manifesti3/unimore', w: 275, gap: 14, r: 2 },
-      { k: V('cascina fontana'), w: 275, gap: -20, r: -2 },
-      { k: V('ti serve un sito?'), w: 260, dx: 10, gap: -25, r: 3 },
-      { k: V('whatsapp'), w: 290, gap: -15, r: -2 },
-      { k: 'manifesti1/roulette', w: 215, dx: 20, gap: -15, r: 3 },
-      { k: V('moneta'), w: 220, dx: 10, gap: -15, r: 4 },
-      { k: 'manifesti2/gatto', w: 225, dx: 15, gap: -10, r: 5 },
-      { k: 'manifesti8/francia', w: 195, dx: 25, gap: -10, r: 2 },
-      { k: 'landini/copertina', w: 200, gap: -15, r: 3 },
-      { k: 'amici/landini', w: 165, gap: -15, r: 3.5 },
-      { k: 'amici/keglevich', w: 165, dx: 50, gap: -10, r: -4 },
-      { k: 'manifesti7/verona', w: 225, dx: 10, gap: 22, r: 2.5 },
-      // lo scontrino delle stufe, attaccato da solo sulla lamiera sotto la gita
-      { k: 'manifesti7/scontrino', w: 92, dx: 140, gap: -55, r: 5 },
-    ] },
-    { x: 1012, items: [
-      { k: 'manifesti4/tre-torri', w: 235, dx: 25, gap: 30, r: -5 },
-      { k: V('ing. dario donelli'), w: 255, dx: 5, gap: -5, r: 2.5 },
-      { k: 'manifesti3/moncler', w: 240, dx: 15, gap: -15, r: 3 },
-      { k: 'manifesti2/punk', w: 230, dx: 15, gap: -10, r: -5 },
-      { k: 'manifesti2/dadi', w: 200, dx: 30, gap: -10, r: -3 },
-      // la petizione: sotto le sue penne (appese allo spago, sporgono ~115 unità) un graffito, non un volantino vero
-      { k: '#petizione', w: 260, dx: 0, gap: -12, r: -1 },
-      { k: 'scritte2/unimore', w: 120, dx: 60, gap: 0, r: -4 },
-      // il graffito è basso e le penne arrivano oltre: prima un manifesto, poi le mine (dal 22.10 un link)
-      { k: 'manifesti1/teatro', w: 245, dx: 5, gap: -10, r: 2 },
-      { k: V('mine'), w: 230, dx: 15, gap: -12, r: 3 },
-      { k: 'manifesti1/sagra', w: 225, dx: 20, gap: -10, r: -3 },
-      { k: 'manifesti2/moneta', w: 210, dx: 20, gap: -10, r: -2 },
-      { k: 'landini/avviamento', w: 185, gap: -15, r: 2 },
-      { k: 'manifesti5/frutti', w: 205, gap: -15, r: 2 },
-      { k: V('virtual'), w: 230, dx: 10, gap: -15, r: -3 },
-    ] },
-  ],
-  rel: [
-    { k: 'manifesti4/frisk', to: V('better call pekko'), fx: 0.5, fy: 0.02, dy: -30, w: 105, r: -9 },
-    { k: 'manifesti4/parcheggio', to: 'manifesti3/moncler', fx: -0.12, fy: 0.08, w: 88, r: -7 },
-    { k: 'manifesti5/estathe', to: 'manifesti5/frutti', fx: -0.32, fy: 0.55, w: 105, r: 8 },
-    // il promemoria del dentista sopra i telefoni della pubblicità dell'iphone (lo scontrino delle stufe sta nella quarta colonna)
-    { k: 'manifesti6/dentista', to: 'manifesti7/iphone', fx: 0.55, fy: 0.42, w: 118, r: -6 },
-    // l'adesivo con la foto vera, sopra un manifesto degli altri (mai sui volantini veri)
-    { k: 'amici/jager', to: 'manifesti2/punk', fx: 0.3, fy: 0.42, w: 165, r: -6 },
-    // graffiti e resti degli altri, sotto
-    { k: 'tag/tag-nero', to: '#chi-sono', fx: 0.6, fy: 0.85, w: 300, r: -3 },
-    { k: 'tag/throwup-argento', to: V('whatsapp'), fx: -0.4, fy: -0.15, w: 250, r: -6 },
-    { k: 'tag/faccia', to: V('ing. dario donelli'), fx: 0.6, fy: 0.9, w: 95, r: 6 },
-    { k: 'tag/tag-verde', to: V('github'), fx: -0.3, fy: 0.9, w: 330, r: 2 },
-    { k: 'tag/ciao-bianco', to: 'manifesti2/punk', fx: -0.3, fy: 0.85, w: 250, r: -8 },
-    { k: 'tag/tag-arancio', to: V('pzk$meeting'), fx: 0.2, fy: 0.7, w: 260, r: 3 },
-    { k: 'tag/scarabocchio', to: 'manifesti2/gatto', fx: 0.7, fy: 0.3, w: 230, r: 0 },
-    { k: 'tag/tag-azzurro', to: 'manifesti1/teatro', fx: -0.2, fy: 0.85, w: 300, r: -4 },
-    { k: 'tag/stencil-chiocciola', to: V('pzk$meeting'), fx: 0.05, fy: 1.02, w: 110, r: 0 },
-    { k: 'strada2/tiamo', to: V('moneta'), fx: 0.8, fy: 0.1, w: 170, r: -4 },
-    { k: 'strada2/no', to: V('moneta'), fx: 0.15, fy: 1.55, w: 120, r: 3 },
-    { k: 'strada2/ciaomamma', to: V('roulette'), fx: -0.3, fy: 0.9, w: 170, r: -2 },
-    { k: 'strada2/pizza', to: V('dado'), fx: 0.6, fy: 0.85, w: 170, r: 2 },
-    { k: 'strada2/zio', to: 'manifesti8/francia', fx: 0.3, fy: 1.0, w: 110, r: 0 },
-    { k: 'strada2/qui', to: 'manifesti3/moncler', fx: 0.45, fy: -0.3, w: 120, r: 0 },
-    { k: 'strada1/gomme', to: 'manifesti7/iphone', fx: 1.04, fy: 0.85, w: 48, r: 0 },
-    { k: 'bestiole/gomme2', to: V('ing. dario donelli'), fx: 0.86, fy: 0.3, w: 30, r: 20 },
-    { k: 'nastro/resto-bianco', to: 'manifesti1/teatro', fx: 0.4, fy: 1.0, w: 200, r: -4 },
-    { k: 'nastro/resto-giallo', to: 'manifesti2/gatto', fx: 0.9, fy: 0.95, w: 170, r: 6 },
-    // sopra: nastri, graffette, adesivo, puntina
-    { k: 'nastro/scotch-storto', to: V('roulette'), fx: -0.12, fy: -0.06, w: 110, r: -50 },
-    { k: 'nastro/carta-gommata', to: V('un caffè?'), fx: 0.25, fy: -0.04, w: 120, r: 4 },
-    { k: 'nastro/nastro-nero', to: V('pzk$meeting'), fx: 0.62, fy: 0.95, w: 120, r: -8 },
-    { k: 'nastro/graffette', to: 'manifesti1/concerto', fx: 0.85, fy: 0.05, w: 70, r: 30 },
-    { k: 'nastro/adesivo', to: 'manifesti1/teatro', fx: 0.85, fy: 0.9, w: 90, r: -10 },
-    { k: 'nastro/puntina', to: 'manifesti2/dadi', fx: 0.48, fy: 0.02, w: 26, r: 0 },
-  ],
+  top: 0, bottom: 40, minimo: 3320, passo: 1, scala: 1,
+  cols: [],
   abs: [
+    // il wallet (avvitato) e il cercapersone (col nastro), in cima; il rivolo della condensa, dove cade la goccia
+    { k: '#wallet-muro', x: 20, y: 0, w: 245, r: -2 },
+    { k: '#cercapersone-muro', x: 297, y: 6, w: 185, r: 3 },
     { k: 'bestiole/rivolo', x: 1215, y: 0, w: 36, r: 0 },
-    { k: 'scritte2/brat-summer', x: 560, y: 0, w: 130, r: -6 },
+    // la macchinetta delle sigarette (9.11, deutschland/muro.js): nel primo schermo, centrata, un po' sotto la metà (su un
+    // 16:9 sotto l'insegna si vedono ~280 unità di parete: per starci intera è larga 200)
+    { k: '#automat-muro', x: 540, y: 26, w: 200, r: -1 },
   ],
+  fondo: [
+    // la petizione: in fondo, in mezzo, sopra tutto; sotto di lei solo le sue penne
+    { k: '#petizione', x: 510, w: 260, r: -1, sotto: 230 },
+  ],
+  sparsi: {
+    seme: 628, prove: 40, copre: 0.1, aria: 26, lato: 16, cima: 14,
+    items: [
+      { k: V('instagram'), w: 200 },
+      { k: V('tiktok'), w: 195 },
+      { k: V('github'), w: 205 },
+      { k: V('whatsapp'), w: 215 },
+      { k: V('e-mail'), w: 200 },
+      { k: V('un caffè?'), w: 195 },
+    ],
+  },
 }
 
 export const MOB = {
   gap: -12,
   // manopole (serranda.mjs): spazio in cima e in fondo, altezza minima, passo delle pile, larghezza dei pezzi
-  top: 0, bottom: 40, minimo: 5228, passo: 0.9, scala: 1,
-  cols: [
-    { x: 6, items: [
-      { k: '#wallet-muro', w: 182, dx: 2, gap: 0, r: -2 },
-      { k: '#siti', w: 120, dx: 25, gap: 4, r: -6 },
-      { k: V('alberto pecchini'), w: 188, gap: -50, r: -2 },
-      { k: 'manifesti3/lyca-tim', w: 170, dx: 6, gap: -12, r: -3 },
-      { k: V('cascina fontana'), w: 188, gap: -12, r: -2 },
-      { k: 'manifesti4/tre-torri', w: 165, dx: 12, gap: -10, r: -5 },
-      { k: V('ti serve un sito?'), w: 185, gap: -12, r: 3 },
-      { k: '#chi-sono', w: 200, gap: -5, r: -2 },
-      { k: V('da dove viene questo muro?'), w: 185, dx: 6, gap: -12, r: -3 },
-      { k: V('instagram'), w: 188, gap: -12, r: -3 },
-      { k: V('tiktok'), w: 188, gap: -12, r: -2.5 },
-      { k: V('e-mail'), w: 185, gap: -12, r: 3 },
-      { k: 'manifesti1/concerto', w: 150, dx: 20, gap: -12, r: 5 },
-      { k: '#games', w: 150, dx: 10, gap: -5, r: -4 },
-      { k: V('blackjack'), w: 192, gap: -40, r: 2 },
-      { k: V('mine'), w: 180, gap: -12, r: 3 },
-      { k: 'manifesti1/roulette', w: 150, dx: 20, gap: -12, r: 3 },
-      { k: '#tools', w: 140, dx: 25, gap: 0, r: 5 },
-      { k: V('pzk$meeting'), w: 195, gap: -45, r: -1 },
-      { k: 'manifesti1/teatro', w: 150, dx: 10, gap: -10, r: -4 },
-      { k: 'manifesti2/moneta', w: 150, dx: 30, gap: -10, r: -2 },
-      { k: 'manifesti1/sagra', w: 150, dx: 15, gap: -10, r: -4 },
-      { k: 'manifesti5/redbull', w: 150, gap: -12, r: 4 },
-      { k: 'landini/copertina', w: 140, gap: -12, r: 3 },
-      { k: 'amici/landini', w: 130, gap: -12, r: 3.5 },
-      { k: 'manifesti5/frutti', w: 150, gap: 8, r: 2 },
-      { k: 'amici/keglevich', w: 125, dx: 20, gap: -12, r: -4 },
-      { k: 'manifesti8/modena', w: 145, dx: 25, gap: 24, r: -1.5 },
-      { k: 'manifesti7/iphone', w: 140, dx: 10, gap: 12, r: 2 },
-      { k: 'manifesti8/francia', w: 140, dx: 30, gap: -12, r: 2 },
-      { k: V('virtual'), w: 180, gap: -12, r: -3 },
-    ] },
-    { x: 198, items: [
-      { k: '#cercapersone-muro', w: 150, dx: 20, gap: 4, r: 3 },
-      { k: 'manifesti4/brat', w: 150, dx: 20, gap: 12, r: 4 },
-      { k: 'scritte2/brat-summer', w: 105, dx: 45, gap: -35, r: -6 },
-      { k: V('better call pekko'), w: 188, gap: -60, r: 2 },
-      { k: 'manifesti3/unimore', w: 180, dx: 4, gap: -12, r: 2 },
-      { k: V('rivalta sul mincio'), w: 188, gap: -12, r: -1.5 },
-      { k: 'manifesti3/starlink', w: 168, dx: 10, gap: -10, r: 2.5 },
-      { k: V('ing. dario donelli'), w: 185, gap: -12, r: 2 },
-      { k: 'manifesti3/moncler', w: 160, dx: 14, gap: -10, r: 3 },
-      { k: '#social', w: 150, dx: 20, gap: 0, r: -5 },
-      { k: V('github'), w: 188, gap: -40, r: 2 },
-      { k: V('whatsapp'), w: 190, gap: -12, r: -2 },
-      { k: V('un caffè?'), w: 185, gap: -12, r: -2 },
-      { k: 'manifesti2/punk', w: 160, dx: 14, gap: -12, r: 4 },
-      // la petizione, e sotto le sue penne un manifesto (non un volantino vero)
-      { k: '#petizione', w: 190, gap: -12, r: -1 },
-      { k: 'manifesti6/zucche', w: 150, dx: 20, gap: -14, r: -2 },
-      { k: V('roulette'), w: 185, gap: -12, r: -2 },
-      { k: V('dado'), w: 180, gap: -12, r: -3 },
-      { k: V('moneta'), w: 180, gap: -12, r: 4 },
-      { k: 'manifesti2/dadi', w: 150, dx: 20, gap: -12, r: -3 },
-      { k: 'manifesti2/gatto', w: 150, dx: 10, gap: -10, r: 3 },
-      { k: V('vendo il ciao'), w: 188, gap: -12, r: 2.5 },
-      { k: 'manifesti5/eastpak', w: 150, gap: -12, r: 2 },
-      { k: 'landini/avviamento', w: 130, gap: -12, r: 2 },
-      { k: 'amici/negozio', w: 100, gap: -12, r: -3 },
-      { k: 'amici/ypsilon', w: 70, gap: -12, r: -4 },
-      { k: 'manifesti7/bonsai', w: 140, dx: 25, gap: 22, r: -2.5 },
-      { k: 'manifesti8/vannacci', w: 140, dx: 10, gap: -12, r: -2 },
-      { k: 'manifesti6/rivalta', w: 160, dx: 14, gap: -12, r: 3 },
-      { k: 'manifesti7/verona', w: 160, dx: 10, gap: -12, r: 2.5 },
-      { k: 'manifesti6/epson', w: 145, dx: 20, gap: -12, r: -3 },
-    ] },
-  ],
-  rel: [
-    { k: 'manifesti4/frisk', to: V('better call pekko'), fx: 0.55, fy: 0, dy: -24, w: 76, r: -9 },
-    { k: 'manifesti4/parcheggio', to: 'manifesti3/starlink', fx: -0.25, fy: 0.5, w: 62, r: -8 },
-    { k: 'manifesti5/estathe', to: 'manifesti5/redbull', fx: 0.72, fy: 0.5, w: 80, r: 8 },
-    { k: 'manifesti6/dentista', to: 'manifesti7/iphone', fx: 0.55, fy: 0.46, w: 88, r: -6 },
-    { k: 'manifesti7/scontrino', to: 'manifesti5/eastpak', fx: 0.6, fy: 0.56, w: 66, r: 5 },
-    { k: 'amici/jager', to: 'manifesti2/punk', fx: 0.28, fy: 0.4, w: 120, r: -6 },
-    { k: 'scritte2/unimore', to: 'manifesti2/gatto', fx: 0.2, fy: 1.0, w: 95, r: -4 },
-    { k: 'tag/tag-nero', to: V('ti serve un sito?'), fx: 0.1, fy: 0.86, w: 230, r: -6 },
-    { k: 'tag/throwup-argento', to: V('whatsapp'), fx: -0.4, fy: 0.1, w: 200, r: -5 },
-    { k: 'tag/faccia', to: V('roulette'), fx: 0.75, fy: 0.95, w: 70, r: 8 },
-    { k: 'tag/tag-verde', to: V('e-mail'), fx: 0.3, fy: 0.85, w: 240, r: 3 },
-    { k: 'tag/ciao-bianco', to: 'manifesti2/punk', fx: -0.6, fy: 0.6, w: 180, r: -7 },
-    { k: 'tag/tag-arancio', to: V('pzk$meeting'), fx: 0.1, fy: 0.9, w: 230, r: 4 },
-    { k: 'tag/scarabocchio', to: 'manifesti2/gatto', fx: -0.6, fy: 0.5, w: 170, r: -5 },
-    { k: 'tag/tag-azzurro', to: V('dado'), fx: -0.3, fy: 0.8, w: 170, r: -6 },
-    { k: 'tag/stencil-chiocciola', to: 'manifesti2/moneta', fx: 0.9, fy: 0.3, w: 110, r: 0 },
-    { k: 'strada2/tiamo', to: V('mine'), fx: 0.5, fy: 0.9, w: 120, r: -3 },
-    { k: 'strada2/no', to: 'manifesti1/teatro', fx: 0.9, fy: 0.3, w: 70, r: 3 },
-    { k: 'strada2/ciaomamma', to: V('roulette'), fx: -0.4, fy: 0.85, w: 150, r: -2 },
-    { k: 'strada2/pizza', to: 'manifesti1/roulette', fx: 0.8, fy: 0.5, w: 130, r: 2 },
-    { k: 'strada2/zio', to: 'manifesti2/moneta', fx: -0.2, fy: 0.9, w: 80, r: 0 },
-    { k: 'strada2/qui', to: 'manifesti3/moncler', fx: -0.45, fy: 0.3, w: 80, r: 0 },
-    { k: 'strada1/gomme', to: 'manifesti2/moneta', fx: 1.1, fy: 0.9, w: 34, r: 0 },
-    { k: 'bestiole/gomme2', to: V('rivalta sul mincio'), fx: 0.92, fy: 0.95, w: 22, r: 20 },
-    { k: 'nastro/resto-bianco', to: 'manifesti1/teatro', fx: 0.1, fy: 1.0, w: 120, r: -8 },
-    { k: 'nastro/resto-giallo', to: V('instagram'), fx: 0.6, fy: -0.1, w: 120, r: 10 },
-    { k: 'nastro/scotch-storto', to: V('pzk$meeting'), fx: 0.6, fy: -0.05, w: 80, r: -40 },
-    { k: 'nastro/carta-gommata', to: V('mine'), fx: 0.2, fy: -0.05, w: 90, r: 6 },
-    { k: 'nastro/nastro-nero', to: V('dado'), fx: 0.5, fy: -0.06, w: 90, r: -10 },
-    { k: 'nastro/graffette', to: 'manifesti1/concerto', fx: 0.75, fy: 0.05, w: 50, r: 30 },
-    { k: 'nastro/adesivo', to: 'manifesti1/sagra', fx: 0.72, fy: -0.12, w: 70, r: -12 },
-    { k: 'nastro/puntina', to: 'manifesti1/roulette', fx: 0.45, fy: 0.02, w: 22, r: 0 },
-  ],
+  top: 0, bottom: 40, minimo: 3800, passo: 1, scala: 1,
+  cols: [],
   abs: [
+    { k: '#wallet-muro', x: 8, y: 0, w: 182, r: -2 },
+    { k: '#cercapersone-muro', x: 218, y: 4, w: 150, r: 3 },
     { k: 'bestiole/rivolo', x: 352, y: 0, w: 22, r: 0 },
+    { k: '#automat-muro', x: 80, y: 210, w: 230, r: -1 },
   ],
+  fondo: [
+    { k: '#petizione', x: 100, w: 190, r: -1, sotto: 170 },
+  ],
+  // tre volantini per riga: larghi ~118 su 390
+  sparsi: {
+    seme: 628, prove: 40, copre: 0.1, aria: 14, lato: 6, cima: 10,
+    items: [
+      { k: V('instagram'), w: 118 },
+      { k: V('tiktok'), w: 118 },
+      { k: V('github'), w: 120 },
+      { k: V('whatsapp'), w: 122 },
+      { k: V('e-mail'), w: 118 },
+      { k: V('un caffè?'), w: 118 },
+    ],
+  },
 }

@@ -107,9 +107,11 @@ serio ma è un progetto Vercel a parte.
   salvano) o il conto (vedi «Il wallet e la borsa», sotto).
 - `barra/` — la barra in alto (26.10, Alberto: «una topbar con sezioni: la storia del sito, i gadget,
   elenchi di oggetti, achievement, account, info e copyright»): `barra.js` la mette in cima a ogni pagina che lo carica
-  (la home, e quindi la storia e la 404 che si generano da lei, e le pagine nuove), `barra.css` (niente sfondo: dall'alto
-  colano pixel scuri, qualcuno colorato si stacca e cade; le voci sono pezzi di carta strappati col nastro, in fila al
-  centro, ognuno con la sua carta e il suo carattere; i bordi e i pixel vengono da un caso col seme fisso, sempre uguali;
+  (la home, e quindi la storia e la 404 che si generano da lei, e le pagine nuove), `barra.css` (niente sfondo; rifatta il 6.11, «rifallo stra figo»: dall'alto
+  cola vernice a pixel, una tela che disegna `barra.js` e che si muove solo all'apertura e sotto il puntatore; le voci
+  sono pezzi di carta veri, in fila al centro: lo scontrino col codice a barre, il cartone pinzato, il post-it con l'angolo
+  alzato, il biglietto rosa con la puntina, la pagina di quaderno, lo strappo bianco, il cartellino appeso allo spago,
+  ognuno col suo carattere; tutto in CSS, niente immagini; strappi e gocce da un caso col seme fisso, sempre uguali;
   `--barra` è l'altezza), `pagina.css` (il foglio
   col nastro delle pagine nuove). Le voci: **storia**, **gadget** (`gadget/`: il wallet, il cercapersone e le sue 17 app,
   i giochi, coi link che li aprono), **oggetti** (`oggetti/`: lo shop per reparto, il bottino con quanto spesso esce, le
@@ -117,7 +119,7 @@ serio ma è un progetto Vercel a parte.
   **traguardi** (`traguardi/`: gli achievement, `chat/traguardi.js`: ventisei, ognuno una funzione che legge lo zaino e
   dice a che punto sei, quindi valgono anche quelli fatti prima), **account** (nella home apre il cercapersone
   sull'account; dalle altre pagine porta a `/#account`, che fa lo stesso), **info** (`info/`: cos'è, i soldi finti, chi
-  l'ha fatto, cosa si salva, i crediti, il copyright) e **wiki**, spenta con «presto» finché non c'è. Fuori dalla home, prima di tutte, **← indietro** (carta rossa): porta sempre alla home pulita (`/`), non
+  l'ha fatto, cosa si salva, i crediti, il copyright) e **wiki**, spenta con «presto» finché non c'è. Fuori dalla home, prima di tutte, **indietro** (una freccia di cartoncino rosso; sul telefono resta ferma a sinistra): porta sempre alla home pulita (`/`), non
   alla pagina di prima (che poteva essere `/#account`). La home, usato `#account`, lo toglie dall'indirizzo.
 - `wallet/` — il wallet dei $pzk (22.10 notte), il portafoglio di pelle alla Fallout (dal 26.10 il banner è un pezzo del muro):
   `wallet.js` (gli schermi, la batteria, la borsa; dal 26.10 il conto è nell'app Account del cercapersone) e `wallet.css`; la foto del
@@ -231,6 +233,74 @@ serio ma è un progetto Vercel a parte.
 
 La pagina è la saracinesca (la foto di riferimento: la serranda di un negozio
 chiuso a Bologna, con l'insegna «coin» sopra e i manifesti attaccati sotto).
+
+- **La saracinesca alleggerita, solo 2D (6.11.2026, versione 4.1.0 «serranda leggera»)**. Alberto: «alleggerisci la
+  serranda di volantini, fai tutto più leggero e meno laggoso, sito bloccato solo in 2D; togli tutti i volantini, rifai con
+  nuovi font quelli social, sii più compatto, mettili già in tutta la serranda anche se è vuota, sparsi a coordinate
+  casuali senza che si sovrappongano più del 10%; in fondo lascia la petizione e mettila sopra tutto così le penne si
+  muovono sempre; da mobile uguale ma 3 volantini per riga»; e a chi entrava «le ventole del pc diventano un aereo».
+  **Quello che segue in questa sezione, dove parla dei siti, dei giochi, dei manifesti degli altri, delle pile e del 3D,
+  racconta il muro fino al 6.11**; adesso è così:
+  - **Sul muro** restano il wallet e il cercapersone in cima, il rivolo della condensa, **sei volantini dei social**
+    (instagram, tiktok, github, whatsapp, e-mail, un caffè?) e **la petizione in fondo**. Via i volantini dei siti, dei
+    giochi, di pzk$meeting, della storia, «chi sono», la ciao, i manifesti degli altri, i graffiti, i nastri, gli adesivi
+    degli amici (le immagini restano in `art/`: le usano ancora la storia e la 404). I giochi si aprono dalla pagina dei
+    gadget (la barra), dal cercapersone e con `#roulette`, `#mine`… nell'indirizzo (anche a pagina già aperta); la storia
+    dalla barra.
+  - **I volantini compatti** (`.vol.s`): carta, illustrazione, titolo, contatto a penna, cinque tagliandi. Tutto in `cqw`
+    del volantino, senza minimi in pixel e senza script che misura: il foglio è alto quanto la sua carta (`--ar`) e non
+    cresce, l'illustrazione prende lo spazio che resta. Ognuno esce da una stamperia diversa (una classe `f-*`): Pacifico
+    (instagram), Rubik Glitch (tiktok), Silkscreen (github), Titan One (whatsapp), Playfair Display nero corsivo (e-mail),
+    Ultra (un caffè?); il contatto e i tagliandi in Patrick Hand. Tutti SIL OFL, da Google Fonts, serviti da qui.
+  - **Nessuna scritta va a capo spezzata** (era «whatsapp» con una «p» sola a capo: `.testo` spezza le parole lunghe dei
+    link, il titolo lo ereditava e non sbordava mai, quindi lo script che rimpicciolisce non se ne accorgeva). I titoli, le
+    note a mano e i contatti non si spezzano più (`overflow-wrap:normal`); sui compatti stanno su una riga per costruzione
+    (`white-space:nowrap`), con `--tt` e `--th` (la misura del titolo e del contatto in cqw) prese sulla larghezza vera
+    delle scritte. **`node tools/pzkko/scritte.mjs`** apre la pagina a otto larghezze (da 1440 a 320 px) e fallisce se una
+    parola è spezzata, se una scritta esce dal riquadro o se un titolo compatto fa due righe; `--scrivi` rimette `--tt` e
+    `--th` giusti (dopo aver cambiato un titolo, un contatto, un carattere o una carta); `--pagina=storia` controlla la
+    storia (lì i link lunghi nei testi possono spezzarsi: sono avvisi).
+  - **I caratteri a pezzi** (`fonts/sub/`, `tools/pzkko/caratteri.mjs`): un titolo è una parola, e scaricare il carattere
+    intero per scriverla non serve. Lo strumento chiede a Google Fonts il woff2 con le sole lettere che servono
+    (`css2?family=…&text=…`), lo salva qui e riscrive le regole `@font-face` fra i segni `/* caratteri: … */` (e i
+    `<link rel="preload" … data-home>` della home, che la storia e la 404 non tengono). Tre gruppi: `social` (i sei titoli e
+    la penna, 28 KB), `petizione` (le scritte stampate del foglio e il nastro «suono», 26 KB) e `barra` (le sette voci, 21 KB
+    invece di ~300). Ogni indirizzo porta l'impronta del file (`?v=`). Hanno nomi loro (`s-…`, `p-…`, `b-…`), davanti al
+    carattere intero, che arriva solo se serve una lettera in più. Cambiando una scritta: una riga in `GRUPPI` e si rilancia.
+  - **Sparsi a caso** (`tools/pzkko/disposizione.js`, `disponi.mjs`): niente più pile. `abs` mette un pezzo dove si dice
+    (wallet, cercapersone, rivolo), `fondo` lo attacca al fondo della parete (la petizione: sotto di lei restano 230
+    unità sul computer e 170 sul telefono, per le penne), `sparsi` lo mette a caso su tutta la parete, col seme: ogni pezzo
+    ha il suo caso (dal seme e dal suo nome: aggiungerne uno non sposta gli altri), prova 40 punti e tiene il più lontano
+    dagli altri, mai sopra un pezzo fisso e mai coperto più del 10%. La parete è alta `minimo`: 3320 unità sul computer
+    (com'era) e 3800 sul telefono (era 5760: i volantini lì sono larghi 118 su 390, **tre per riga**, non più due).
+    `serranda.mjs allunga --minimo=N` la cambia; cambiando `seme` cambia tutta la sparsa.
+  - **La petizione** sta in fondo, in mezzo, sopra tutto (`z-index:25`, più del foglio sotto il puntatore): niente copre
+    le penne. Dondolano al passaggio del puntatore come prima e, dal 6.11, **anche scorrendo** (una spinta quando la
+    pagina scorre con le penne in vista: col dito non c'è puntatore). Il suo codice, le firme e i quattro caratteri delle
+    calligrafie (~190 KB) si chiedono quando ci si avvicina a meno di due schermi, o subito con `#petizione`.
+  - **Solo 2D**: la scena 3D non parte più (né dalla regia, né con `?scena=1`, né per chi aveva `pzkko-3d` nel browser);
+    dalla pagina sono usciti lo script della testa che la sceglieva, il pomodoro del caricamento e tutto il blocco in fondo.
+    `scena/`, `art/scena/` e i loro strumenti restano dove sono, spenti. La regia non ha più il tasto «3D», lo scontrino
+    non dice più come accenderlo.
+  - **A pagina ferma il computer riposa.** Lavoravano sempre: i nove pixel della barra (animazioni CSS senza fine: ora
+    due giri all'apertura, poi solo col puntatore sulla barra), il led rosso del cercapersone (un'animazione CSS: ora una
+    classe ogni 0,6 s), le mosche (ferme 1,5–9 s: ora 12–80), e di notte lo sfarfallio dell'insegna, un fotogramma a ogni
+    giro dello schermo per tutta la notte con una variabile scritta su `html` (lo stile di tutta la pagina): ora la luce
+    sta ferma e il giro dorme fra un calo e l'altro e fra un'auto e l'altra, e le variabili si scrivono solo sugli
+    elementi che le usano. Gli strati delle luci (il velo della sera, l'alone e il cono dell'insegna, i fari, i fanali, i
+    riflessi: grandi quanto la strada o lo schermo, in multiply e in screen) stanno a `display:none` finché non servono
+    (`html.sera`, `html.acceso`, `html.auto`); la lamiera di sera si scurisce con un velo nello stesso sfondo, non con un
+    filtro su tutta la parete. Il cercapersone non scarica più da sé il suo 3D (modello da 1,2 MB e three.js): solo
+    quando ci si passa sopra o lo si tocca.
+  - **Le immagini leggere** (`tools/pzkko/leggere.mjs`): `art/social/` sono le sei illustrazioni stese sul bianco (in
+    multiply è lo stesso identico risultato, e senza la trasparenza, che era metà del file), larghe 360 px, qualità 92:
+    799 → 267 KB; `art/leggere/` le bestie e la goccia a 3× della misura a cui si vedono, senza perdite: 155 → 39 KB.
+  - **Misure** (6.11, Chrome senza finestra sul server di prova, computer 1300 × 860, prima visita): **155 richieste e
+    6,8 MB → 105 e 1,5 MB**; i caratteri da 590 a 178 KB, gli script da 1.088 a 342 KB. A pagina ferma il filo della
+    pagina lavorava 124 ms al secondo con 165 ricalcoli di stile al secondo, sempre; ora 12–20 ms al secondo e nessun
+    fotogramma chiesto nei momenti fermi (tre blocchi su quattro da 5 secondi, di giorno), e di notte lo stesso, tranne
+    quando passa un'auto o l'insegna ha un calo. Per rifarle: `tools/pzkko/scritte.mjs` per le scritte; le misure di
+    consumo erano script di prova, non sono nel repository.
 
 - **Come parte** (23.10, «per adesso avvialo sia da telefono che da pc in 2d con
   sempre luce sparata»): la home parte **sempre in 2D**, il muro di sempre, sul computer
@@ -422,6 +492,12 @@ chiuso a Bologna, con l'insegna «coin» sopra e i manifesti attaccati sotto).
   `tools/pzkko/genera-storia.mjs` (vedi «La storia»).
 
 ## La scena 3D (scena/)
+
+> **Spenta dal 6.11.2026** (Alberto: «sito bloccato solo in 2D»): la pagina non la carica più, in nessun modo. Questa
+> sezione resta com'era, per quando servisse riaccenderla: i file sono tutti in `scena/`, `art/scena/` e
+> `tools/pzkko/scena/`. Per riaccenderla andrebbero rimessi lo script della testa che la sceglie e il blocco del
+> caricamento in fondo a `index.html` (stanno nella storia di Git, prima del 6.11), e rifatte le foto dei volantini
+> (`scena/cattura.mjs`), che sono ancora quelle del muro di prima.
 
 Dal 18.10.2026 (dal 19.10 anche sul telefono), dove c'è WebGL2 la home non è
 più una pagina ma un posto: la stessa saracinesca coi suoi volantini, disegnata
@@ -2130,8 +2206,17 @@ che cercapersone zero è predefinito e quello attuale si elimina per sempre»). 
 led rosso lampeggia piano quando c'è qualcosa da riscuotere e **sfarfalla come la spia del disco di un PC** quando il
 sistema lavora (`chat/led.js`: ogni richiesta al server, il bot che pensa e scrive). Al clic il cercapersone si apre
 (`telefono/telefono.js`: vola la telecamera dal tasto allo schermo, la retroilluminazione si accende in 400 ms, sotto c'è
-già pzk os con l'app chiesta, l'ultima aperta o il desktop); chiudendo la chiocciolina saluta (`tomodachi.saluta`) e il
-cercapersone torna nel tasto. La barra di stato è vera (29.10, Alberto: «metti dati veri tipo quelli del pc tipo wifi»: la
+già pzk os con l'app chiesta, l'ultima aperta o il desktop); chiudendo (dal 9.11, Alberto: «non si spegne e quindi non si
+chiude… velocizza l'uscita anche premendo fuori istantaneamente con un ciao da 1 secondo full schermo») la chiocciolina che
+saluta (`tomodachi.saluta`) riempie TUTTO l'lcd per un secondo (`os.saluta`: le sue 32 × 16 celle a 8 × 8 pixel), subito,
+alla pressione (il clic fuori non aspetta più il rilascio; chiesto mentre si sta ancora aprendo, chiude appena aperto), poi
+la retroilluminazione si spegne davvero (180 ms) e la telecamera torna sul tasto (400 ms), dove lo schermo si riaccende sul
+desktop: 1,6 s in tutto, prima 3,3 (la luce calava e RISALIVA, poi 2,3 s di saluto piccolo). INDIETRO tenuto tre secondi
+fa lo stesso; mentre lo si tiene (col mouse o con Backspace), dopo 250 ms compare sull'lcd la barra dello spegnimento
+(`os.spegnendo`; Alberto: «crea una barra di avanzamento per spegnerlo così uno capisce che sta avanzando»): un riquadro
+smussato, «tieni premuto: si spegne», venti blocchetti che si riempiono in tre secondi e «2 s · lascia per restare»;
+lasciando prima sparisce e resta acceso. L'inquadratura aperta tiene sempre dentro lo schermo e TUTTI i tasti (prima a 1440 × 900 INDIETRO usciva a
+metà, e sotto i 1100 px non si vedeva più); collaudo: `prova.mjs --tasti3d` e `--chiudi-aprendo`. La barra di stato è vera (29.10, Alberto: «metti dati veri tipo quelli del pc tipo wifi»: la
 rete di chi guarda col **ping vero**, una HEAD a `/favicon.png` all'apertura e ogni 30 secondi, e la **batteria vera**
 dove il browser la dice, se no quella del gioco come nel wallet).
 
@@ -2891,6 +2976,27 @@ apre la banca, e nel collaudo la banca non c'era.
   banca deve aver pagato il turno intero), `--sbaglia` e `--scade` (la risposta sbagliata e il tempo scaduto),
   `--giocate` (le giocate di Bighurra nel profilo). `--rider` adesso è `--turni=strada`.
 
+**Classifiche e schede, una fonte sola** (6.11, Alberto: «le classifiche dicono cose diverse da dentro i profili singoli,
+devi aggiornare tutto questo sistema»). Coi dati veri di quel giorno le differenze erano cinque:
+- **il posto**: la classifica metteva in fila i pari merito per anzianità (1°, 2°), la scheda contava solo chi aveva di più
+  (1°, 1°). Bighurra era 2° in «pescati», «sfide» e «pezzi comprati» in classifica e 1° nella sua scheda;
+- **le mani**: il profilo le contava dal libro dei conti (tutti i giochi), la scheda e la classifica dallo zaino (solo i sei
+  grandi): 17 contro 23 per pzkko, 4 contro 0 per Bighurra;
+- **i numeri della chat**: le classifiche leggevano la riga di `giocatori.json`, una copia dello zaino scritta al più ogni
+  20 secondi: l'ultima mossa di una seduta poteva non arrivarci mai;
+- **il tempo**: la classifica restava in memoria fino a due minuti e mezzo, la scheda venti secondi;
+- **le colonne**: «classifica» nella chat a 8 bit incollava le celle della tabella, e «2pzkko liv. 52» voleva dire 2°,
+  livello 5, valore 2.
+
+Adesso, nella banca (`C:\pzkko-server\banca\giocatori-dati.mjs`): lo zaino è quello del conto, vivo; le mani e i soldi
+vengono dal libro; **il posto lo dà una funzione sola** (`posto`: 1 + quanti hanno di più) per la classifica, la scheda e i
+rivali, e i pari merito hanno lo stesso posto e lo si dice («2° pari»); una memoria sola di dieci secondi. Nel browser:
+`chat/db.js` chiede con la versione del proprio conto (dopo una mossa arriva tutto nuovo) e ha la classifica «mani ai
+giochi»; la scheda di `os/giocatori.js` scrive il valore accanto a ogni posto e ha i soldi e le mani; `os/profilo.js` dice
+«(pari)»; `os/chat.js` stacca le celle delle tabelle con « · ». Le prove: `banca\prove\giocatori.mjs` (257, in memoria:
+col codice di prima ne fallivano 123), `node tools/pzkko/giocatori.mjs` (lo sguardo da fuori sul sito vero: tutte le
+classifiche contro tutte le schede) e `prova.mjs --app=giocatori --banca --rivali` (tre conti in più, due pari merito).
+
 ## Il bot dei bug (../tools/pzkko/bot/, 6.11)
 
 Alberto, 6.11.2026: «ci sono bugs ovunque io guardo, devi creare un bot che verifichi tutti sti errori».
@@ -3095,6 +3201,13 @@ stanno in fondo alle pile, `amici/jager` è attaccato sopra il manifesto punk. M
 sopra i volantini veri, che sono link.
 
 ## La disposizione
+
+> Dal 6.11.2026 la home non ha più pile: `disposizione.js` ha `abs`, `fondo` e `sparsi` (vedi «La saracinesca
+> alleggerita», in cima a «Com'è fatta la home»). Le pile (`cols`, `rel`) le usa ancora la storia. `serranda.mjs rifai`
+> adesso fa: `disponi.mjs tutto --foto`, `scritte.mjs`, `genera-404.mjs`, `genera-storia.mjs` e
+> `disponi.mjs tutto --pagina=storia`; niente più foto per la scena 3D. `volantino` e `pezzo` mettono il pezzo nuovo fra
+> gli sparsi (il posto lo trova il caso); `stato` elenca gli sparsi con le loro coordinate. Il browser degli strumenti:
+> anche il Chrome scaricato in `%LOCALAPPDATA%\pzkko-chrome` (`browser.mjs`). Quello che segue è la storia delle pile.
 
 Le posizioni non si scrivono a mano in `index.html`: stanno in
 `../tools/pzkko/disposizione.js` come pile per colonna (cinque sul desktop, due

@@ -8,12 +8,20 @@ import * as pzk from '../games/pzk.js'
 
 const API = '/api/giocatori/' // con la barra finale (trailingSlash): niente redirect
 const cache = new Map()
+let versione = null // la versione del mio conto (conto.agg) con cui è stata riempita la memoria
 
-async function leggi(q, ttl = 30_000) {
+// (6.11, Alberto: «le classifiche dicono cose diverse da dentro i profili singoli») UNA MEMORIA SOLA E CORTA: prima una
+// classifica restava qui 30 secondi (e sul server fino a due minuti e mezzo) e una scheda 20, così le due pagine parlavano
+// di due momenti diversi. Adesso dieci secondi per tutto, e ogni richiesta porta la versione del mio conto (&v=): appena
+// faccio una mossa la memoria di qui si svuota e l'indirizzo cambia, quindi classifica e scheda arrivano tutte e due nuove.
+// Il posto e i numeri li calcola la banca con una funzione sola (giocatori-dati.mjs, posto): qui non si ricalcola niente
+async function leggi(q, ttl = 10_000) {
+  const v = pzk.conto()?.agg ?? 0
+  if (v !== versione) { cache.clear(); versione = v }
   const c = cache.get(q)
   if (c && Date.now() - c.t < ttl) return c.d
   try {
-    const d = await (await fetch(`${API}?${q}`)).json()
+    const d = await (await fetch(`${API}?${q}${v ? `&v=${v}` : ''}`)).json()
     if (d?.ok) cache.set(q, { t: Date.now(), d })
     return d ?? { ok: false }
   } catch { return { ok: false, errore: 'il server non risponde' } }
@@ -25,13 +33,16 @@ export const METRICHE = {
   pescati: ['pescati', 'n', 'canna'], cacciati: ['cacciati', 'n', 'fionda'], scavati: ['scavati', 'n', 'pala'], morti: ['morti', 'n', 'teschio'], comandi: ['comandi scritti', 'n', 'telefono'],
   quiz: ['risposte giuste ai quiz', 'n', 'quiz'], sfide: ['sfide fatte', 'n', 'fulmine'], missioni: ['side quest fatte', 'n', 'chiave-vecchia'], serie: ['serie di giorni', 'n', 'fuoco'], acquisti: ['pezzi comprati', 'n', 'sacco'],
   vecchiaia: ['giorni di vita', 'n', 'clessidra'], eur: ['EUR€', 'eur', 'eur'], persi: ['persi ai giochi', 'pzk', 'no'],
+  giri: ['mani ai giochi', 'n', 'carte'], // (6.11: le mani del libro dei conti, tutti i giochi; la banca la classifica l'aveva già, qui mancava)
 }
+/** «2°», o «2° pari» se altri hanno lo stesso valore (la banca: pos e pari). */
+export const postoTesto = (x) => `${x.pos}°${x.pari ? ' pari' : ''}`
 // i valori corti (1,0K, 13,3K, 1,0M…: games/pzk.js fmtCorto) perché nelle classifiche e nei podi stiano nella riga
 export const valoreHtml = (metrica, v) => { const t = METRICHE[metrica]?.[1]; const n = t === 'eur' ? Number(v).toLocaleString('it-IT') : pzk.fmtCorto(Number(v)); return t === 'pzk' ? `<span class="pzk">${n} $pzk</span>` : t === 'eur' ? `<span class="eur">EUR€ ${n}</span>` : n }
 
 export const top = (metrica, n = 10) => leggi(`top=${encodeURIComponent(metrica)}&n=${n}`)
-export const cerca = (testo) => leggi(`cerca=${encodeURIComponent(testo)}`, 15_000)
-export const profilo = (ind) => leggi(`ind=${encodeURIComponent(ind)}`, 20_000)
+export const cerca = (testo) => leggi(`cerca=${encodeURIComponent(testo)}`)
+export const profilo = (ind) => leggi(`ind=${encodeURIComponent(ind)}`)
 export const statistiche = () => leggi('stats=1')
 export const notizie = () => leggi('notizie=1')
 

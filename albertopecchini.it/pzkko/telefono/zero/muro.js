@@ -60,11 +60,14 @@ export function veste(tasto) {
     new ResizeObserver(metti).observe(tasto)
   }
   tasto.classList.add('vestito') // (ora lcd e led stanno sul vetro: si vedono)
-  // il 3D si scalda da sé appena la pagina è tranquilla (il modello, 1,2 MB, e three.js sono già in cache quando si tocca
-  // il tasto), e pzk os si accende sul vetro
+  // Il 3D si scalda quando chi guarda fa per aprirlo: il puntatore sul tasto, il dito che lo tocca, il fuoco della
+  // tastiera. Fino al 6.11 si scaldava da sé appena la pagina era tranquilla: il modello (1,2 MB) e three.js (650 KB)
+  // scaricati e letti da tutti, anche da chi il cercapersone non lo apre mai (Alberto: «leggerissimo»). Chi lo tocca
+  // senza passarci sopra aspetta un attimo in più la prima volta; poi è in cache
+  const scalda = () => { fetch(GLB, { priority: 'low' }).catch(() => {}); import('./zero.js').catch(() => {}) }
+  for (const e of ['pointerenter', 'pointerdown', 'touchstart', 'focus']) tasto.addEventListener(e, scalda, { once: true, passive: true })
+  // pzk os si accende sul vetro appena la pagina è tranquilla
   ;(window.requestIdleCallback ?? setTimeout)(() => {
-    fetch(GLB, { priority: 'low' }).catch(() => {})
-    import('./zero.js').catch(() => {})
     import('./os/os.js').then((os) => vivo(tasto, os)).catch((e) => console.warn('pzk os non acceso sul muro', e))
   }, { timeout: 6000 })
 }

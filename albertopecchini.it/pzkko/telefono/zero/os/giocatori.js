@@ -2,7 +2,7 @@
 // cercapersone zero. I dati sono quelli di chat/db.js (top, notizie, cerca, profilo, io, statistiche) e della lumachina
 // (chat/lumaca.mjs, chat/lumaca-avvisi.js), i testi e i tempi quelli dei giocatori del cercapersone vecchio
 // (telefono/app/giocatori.js), la faccia quella del profilo (telefono/app/profilo.js).
-// - CLASSIFICHE: in cima quale (OK: le diciassette), sotto le posizioni (il podio rovesciato, la faccia, il nome, il valore).
+// - CLASSIFICHE: in cima quale (OK: le diciannove), sotto le posizioni (il podio rovesciato, la faccia, il nome, il valore).
 // - NOTIZIE: le cose successe in banca, con l'icona e quanto fa.
 // - CERCA: scrivi un nome o un indirizzo (dalla tastiera, o OK sulla riga in cima); i trovati sotto.
 // - IO: la lumachina (l'avviso urgente se ha combinato qualcosa: OK «ho capito»), la sua salute, oggi, gli ultimi giorni; il
@@ -10,6 +10,10 @@
 // - LA SCHEDA di un giocatore (OK su un nome): la faccia, il titolo, il livello, i numeri, le classifiche, i leggendari; sotto
 //   «manda $pzk» (lo fa la chat, col comando «manda»).
 // Il server può non rispondere: ogni pagina lo dice e i tasti continuano a funzionare.
+// (6.11, Alberto: «le classifiche dicono cose diverse da dentro i profili singoli») LA SCHEDA DICE I NUMERI DELLA CLASSIFICA:
+// il posto e il valore vengono dalla stessa funzione della banca (i pari merito hanno lo stesso posto: «1° pari»), e accanto
+// a ogni posto c'è il valore, così si confronta a occhio con la classifica. Nei numeri ci sono anche i soldi (guadagnati,
+// vinti o persi ai giochi) e le mani, quelle del libro dei conti: le stesse della pagina dei giochi del profilo.
 // Le regole: os/REGOLE.md.
 import { Lcd, W, H } from './lcd.js'
 import * as icone from './icone.js'
@@ -30,7 +34,7 @@ const valore = (m, v) => senzaHtml(db.valoreHtml(m, v))
 function richiesta(fai) {
   const r = { st: null, d: null, n: 0, t: 0, poi: null }
   r.carica = (os, ...a) => { const n = ++r.n; r.st = 'carico'; r.t = Date.now(); os.ridisegna(); fai(...a).then((d) => { if (n !== r.n) return; r.st = d?.ok ? 'ok' : 'no'; r.d = d; if (r.st === 'ok') r.poi?.(d); r.poi = null; os.ridisegna() }).catch(() => { if (n === r.n) { r.st = 'no'; r.d = null; r.poi = null; os.ridisegna() } }) }
-  r.vecchia = () => !r.st || r.st === 'no' || Date.now() - r.t > 30_000
+  r.vecchia = () => !r.st || r.st === 'no' || Date.now() - r.t > 10_000 // (dieci secondi, come la memoria di chat/db.js)
   return r
 }
 const carico = (l, t, y = 66) => l.testo(Math.round(W / 2 - Lcd.larghezza('carico...') / 2), y, 'carico' + '.'.repeat(1 + (Math.floor(t / 3) % 3)))
@@ -38,6 +42,7 @@ const fuori = (l, d, y = 60) => Lcd.acapo(txt(d?.errore ?? 'il database adesso n
 
 let metrica = 'pzk', q = '', ultima = 0
 const DONO = 10 // (i $pzk che «manda $pzk» della scheda manda col comando della chat)
+const colSegno = (n) => `${n < 0 ? '−' : ''}${fmtCorto(Math.abs(Math.round(n ?? 0)))}`
 
 // ── la scelta della classifica ──
 function sceltaMetrica(os, poi) {
@@ -78,13 +83,13 @@ function scheda(os, ind) {
       const da = 60 * (p.liv - 1) ** 2, k = (p.xp - da) / Math.max(1, (p.xpProssimo ?? 0) - da)
       l.testo(46, 32, corto(`livello ${p.liv} · ${fmt(p.xp)} xp`, 22)); l.riquadro(184, 33, 61, 5); l.riempi(185, 34, Math.round(59 * Math.max(0, Math.min(1, k))), 3)
       l.testo(46, 41, corto(`${p.ind} · in banca da ${fa(p.creato).replace(' fa', '')}${p.ult ? ` · visto ${fa(p.ult)}` : ''}`, 33))
-      const pos = Object.entries(p.posizioni ?? {}).filter(([m]) => db.METRICHE[m]).sort((a, b) => a[1].pos - b[1].pos).slice(0, 8)
-      const numeri = [['$pzk', fmtCorto(p.pzk)], ['pescati', s.pescati], ['cacciati', s.cacciati], ['scavati', s.scavati], ['quiz', `${s.quizGiusti ?? 0}/${s.quizTotali ?? 0}`], ['sfide', s.sfideFatte], ['quest', s.missioniFatte], ['morti', s.morti], ...(p.sp ? [['sporchi', fmtCorto(p.sp)]] : []), ['giochi', `${s.giri ?? 0} mani`], ['serie', `${p.serie ?? 0} giorni`]]
+      const pos = Object.entries(p.posizioni ?? {}).filter(([m]) => db.METRICHE[m]).sort((a, b) => a[1].pos - b[1].pos) // (tutte: prima le prime otto)
+      const numeri = [['$pzk', fmtCorto(p.pzk)], ['guadagnati', colSegno(s.guadagnati)], [s.persi ? 'persi ai giochi' : 'vinti ai giochi', fmtCorto(s.persi || s.vinti || 0)], ['pescati', s.pescati], ['cacciati', s.cacciati], ['scavati', s.scavati], ['quiz', `${s.quizGiusti ?? 0}/${s.quizTotali ?? 0}`], ['sfide', s.sfideFatte], ['quest', s.missioniFatte], ['morti', s.morti], ...(p.sp ? [['sporchi', fmtCorto(p.sp)]] : []), ['giochi', `${s.giri ?? 0} mani`], ['serie', `${p.serie ?? 0} giorni`]]
       const righe = impagina([
         ...(p.pr?.mot ? [{ testo: `«${p.pr.mot}»` }] : []),
         ...(p.gal ? [{ testo: `in galera fino alle ${new Date(p.gal).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}` }] : []),
         { titolo: 'i numeri' }, ...Array.from({ length: Math.ceil(numeri.length / 2) }, (_, i) => ({ testo: numeri.slice(i * 2, i * 2 + 2).map(([n, x]) => `${n} ${typeof x === 'number' ? fmtCorto(x) : x ?? 0}`).join(' · ') })),
-        ...(pos.length ? [{ titolo: 'in classifica' }, ...pos.map(([m, x]) => ({ punto: `${x.pos}° in ${db.METRICHE[m][0]}` }))] : []),
+        ...(pos.length ? [{ titolo: 'in classifica' }, ...pos.map(([m, x]) => ({ punto: `${db.postoTesto(x)} in ${db.METRICHE[m][0]}: ${valore(m, x.valore)}` }))] : []),
         ...(p.rari?.length ? [{ titolo: 'leggendari presi' }, { testo: p.rari.map(nomeDi).join(', ') }] : []),
       ])
       giu = scorrevole(l, righe, { y0: 52, vis: mio ? 7 : 5, giu })
@@ -240,7 +245,7 @@ export function vista(os) {
         ...(prima.length ? [{ titolo: 'gli ultimi giorni' }, ...prima.map((v) => ({ punto: `${giornoBreve(v.g)} · ${Math.round(v.s)} % · ${v.ev?.titolo ?? ''} · ${v.testo}` }))] : []),
         { testo: 'ogni giorno si sveglia e decide lei com’è la giornata. Tu non puoi farci niente.' },
         ...(p ? [{ titolo: 'il tuo profilo' }, { testo: `${p.profilo.nome} · livello ${p.profilo.liv} · ${fmt(p.profilo.xp)} xp` },
-          ...(p.vicini ? [{ titolo: 'i tuoi rivali (esperienza)' }, p.vicini.su ? { punto: `da superare: ${p.vicini.su.nome}, ${p.vicini.su.pos}°, ancora ${fmt(p.vicini.su.valore - p.vicini.io)} xp` } : { punto: 'sei il primo' }, ...(p.vicini.giu ? [{ punto: `ti insegue: ${p.vicini.giu.nome}, ${p.vicini.giu.pos}°, ${fmt(p.vicini.io - p.vicini.giu.valore)} xp dietro` }] : [])] : [])]
+          ...(p.vicini ? [{ titolo: 'i tuoi rivali (esperienza)' }, { punto: `sei ${db.postoTesto(p.vicini)} su ${p.vicini.totale}, con ${fmt(p.vicini.io)} xp` }, p.vicini.su ? { punto: `da superare: ${p.vicini.su.nome}, ${p.vicini.su.pos}°, ancora ${fmt(p.vicini.su.valore - p.vicini.io)} xp` } : { punto: 'nessuno ne ha più di te' }, ...(p.vicini.giu ? [{ punto: `ti insegue: ${p.vicini.giu.nome}, ${p.vicini.giu.pos}°, ${fmt(p.vicini.io - p.vicini.giu.valore)} xp dietro` }] : [])] : [])]
           : io.st === 'carico' ? [{ titolo: 'il tuo profilo' }, { testo: 'carico…' }] : [{ titolo: 'il tuo profilo' }, { testo: io.d?.io?.errore ?? 'il database adesso non risponde.' }]),
         ...(st ? [{ titolo: 'la banca in numeri' }, { testo: `${st.giocatori} giocatori · ${st.attivi24h} attivi oggi · ${st.attivi7g} in settimana` }, { testo: `${fmtCorto(st.pzk)} $pzk in giro · livello medio ${st.livelloMedio}` }, { testo: `pescati ${fmtCorto(st.pescati)} · quiz ${fmtCorto(st.quizGiusti)} · sfide ${fmtCorto(st.sfideFatte)} · quest ${fmtCorto(st.missioniFatte)}` }] : []),
       ]

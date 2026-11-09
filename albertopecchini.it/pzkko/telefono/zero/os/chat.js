@@ -63,12 +63,15 @@ export function pulisci(html) {
     .replace(/<span class="c-carta coperta"><\/span>/gi, ' ■ ').replace(/<span class="c-carta[^"]*">/gi, ' ') // (le carte del blackjack staccate: prima «K♦7♣» tutto attaccato)
     .replace(/<\/b>\s*<small[^>]*>/gi, '</b> · ').replace(/<\/small>\s*(?=<(small|span)\b)/gi, '</small> · ') // (il nome e la riga piccola sotto: «La campana stonatati manca: livello 2» tutto attaccato)
     .replace(/<s\b[^>]*>([^<]*)<\/s>\s*(<span class="c-v-sconto">[^<]*<\/span>)?/gi, '$1 → ') // (il prezzo in offerta: «40-20 %32 $pzk» diventa «40 → 32 $pzk»)
+    // (6.11) le celle di una tabella staccate con « · »: prima erano incollate, e «classifica» scriveva «2pzkko liv. 52» per
+    // dire 2°, pzkko, livello 5, valore 2 (si leggeva livello 52: «le classifiche dicono cose diverse da dentro i profili»)
+    .replace(/<\/t[dh]>\s*<t[dh]\b[^>]*>/gi, ' · ')
     .replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>\s*<p[^>]*>/gi, '\n').replace(/<li[^>]*>/gi, '\n• ').replace(/<\/(div|p|tr|h\d)>/gi, '\n')
     .replace(/<code[^>]*>([^<]*)<\/code>/gi, '[$1]')
     .replace(/<img[^>]*alt="([^"]*)"[^>]*>/gi, '').replace(/<[^>]+>/g, '')
     .replace(/:([a-z0-9-]+):/g, '')
     .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
-    .replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n').trim())
+    .replace(/[ \t]+/g, ' ').replace(/ *\n */g, '\n').replace(/^(?:· ?)+/gm, '').trim()) // (una riga non comincia col puntino: la prima cella vuota di una tabella)
 }
 /** L'icona dentro un pezzetto di html (alt="nome"), se c'è. */
 const iconaIn = (html) => /alt="([^"]+)"/.exec(String(html ?? ''))?.[1] ?? null
