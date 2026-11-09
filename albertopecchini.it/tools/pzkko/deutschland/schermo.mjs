@@ -1,14 +1,18 @@
 #!/usr/bin/env node
 // Lo schermo della macchinetta delle sigarette (9.11.2026): due lavori, tutti e due con sharp.
 //
-//   node tools/pzkko/deutschland/schermo.mjs angoli [--foto=tools/pzkko/lavoro/deutschland/automat.png]
+//   node tools/pzkko/deutschland/schermo.mjs angoli [--foto=tools/pzkko/lavoro/deutschland/automat/automat-chiave.png] [--tasti=0.10,0.75]
 //       nella foto della macchinetta (gpt-image-2, immagini.mjs) trova lo schermo verde pieno (#00FF00: G alto e lontano
 //       da R e B), ne prende i quattro angoli e li scrive in frazioni in pzkko/deutschland/muro-dati.js (`schermo`; la
 //       `manopola` resta com'è), poi riempie il verde di nero spento (#0b0f0a) e scrive pzkko/art/deutschland/automat.webp
 //       (900 px, sul muro si vede al più a 290 px CSS) e automat-grande.webp (1800 px, la pagina). Le otto vetrinette
-//       sopra le manopole sono blu pieno (#0000FF) nella foto: le trova (componenti connesse, da sinistra), le riempie
-//       di grigio scuro e ci compone i nostri pacchetti (pacchi/<tag>.webp, con un po' d'ombra; --pacchi=alles,pekko,…),
-//       così dentro non ci sono marche vere (Alberto: marche inventate)
+//       sopra i tasti sono blu pieno (#0000FF) nella foto: le trova (componenti connesse, da sinistra), le scrive in
+//       muro-dati.js (`vetrine`: [x, y, w, h] in frazioni), le riempie di grigio scuro e ci compone i nostri pacchetti
+//       (pacchi/<tag>.webp, con un po' d'ombra; --pacchi=alles,pekko,…), così dentro non ci sono marche vere. I TASTI
+//       numerati 1–8 stanno sotto le vetrinette, uno per vetrinetta, e non sono di un colore pieno: il loro rettangolo si
+//       stima dalla vetrinetta sopra (stessa x e larghezza; sotto di `gap` e alto `alt`, in frazioni dell'altezza della
+//       vetrinetta: --tasti=gap,alt, da guardare sul controllo automat-rettangoli.png in lavoro/deutschland e ritoccare)
+//       → `tasti` in muro-dati.js (li legge accesso.js per il tasto che manda la password e per far «premere» il tasto)
 //   node tools/pzkko/deutschland/schermo.mjs sprite [--finto]
 //       lo sprite delle tappe per lo schermo sul muro: 4 × 3 mattonelle di 12 × 9 px, ingrandite ×6 a pixel netti e
 //       sfumate di 1 px → pzkko/art/deutschland/schermo.webp (irriconoscibili: possono stare nel repo). Le mattonelle
@@ -16,7 +20,7 @@
 //       passo regolare lungo il viaggio); con --finto, o se il manifesto non c'è, 12 colori e forme astratte.
 import { readFile, writeFile, mkdir, access } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import sharp from 'sharp'
 
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url))
@@ -35,6 +39,8 @@ const verde = (r, g, b) => Math.max(0, Math.min(1, (g - Math.max(r, b) - 60) / 9
 const blu = (r, g, b) => Math.max(0, Math.min(1, (b - Math.max(r, g) - 60) / 90)) * (b > 150 ? 1 : 0)
 const VETRINA = { r: 40, g: 41, b: 43 } // il fondo della vetrinetta, grigio scuro
 const PACCHI_VETRINE = 'alles,pekko,mikas,jonny,jella,alcool,foto,video' // gli otto pacchetti nelle vetrinette (--pacchi=…)
+const TASTI = '0.20,0.42' // il tasto sotto la vetrinetta: distanza e altezza in frazioni dell'altezza della vetrinetta (--tasti=…)
+const fr4 = (v) => +v.toFixed(4)
 
 /** Le componenti connesse dei pixel blu pieni, con riquadro, grandi almeno 400 pixel, da sinistra a destra. */
 function componentiBlu(data, w, h) {
@@ -84,41 +90,72 @@ async function angoli() {
   const fr = ([x, y], ax, ay) => [+((x + ax) / w).toFixed(4), +((y + ay) / h).toFixed(4)]
   const schermo = [fr(tl, 0, 0), fr(tr, 1, 0), fr(br, 1, 1), fr(bl, 0, 1)]
   console.log(`schermo: ${schermo.map((p) => `(${p[0]}, ${p[1]})`).join(' ')}  (${w}×${h}, ${n} pixel verdi)`)
-  // muro-dati.js: solo `schermo`, con le misure della foto
+  // le vetrinette: i rettangoli blu (componenti connesse, da sinistra a destra); i tasti stimati sotto ognuna
+  const vetrine = componentiBlu(data, w, h)
+  const [gap, alt] = arg('tasti', TASTI).split(',').map(Number)
+  const rettV = vetrine.map((b) => [fr4(b.x0 / w), fr4(b.y0 / h), fr4((b.x1 - b.x0 + 1) / w), fr4((b.y1 - b.y0 + 1) / h)])
+  const rettT = vetrine.map((b) => { const bh = b.y1 - b.y0 + 1; return [fr4(b.x0 / w), fr4((b.y1 + 1 + bh * gap) / h), fr4((b.x1 - b.x0 + 1) / w), fr4((bh * alt) / h)] })
+  // muro-dati.js: la riga `export default` rifatta (misure, schermo, vetrine, tasti); la `manopola` resta quella che c'è
+  const { default: vecchi } = await import(`${pathToFileURL(DATI).href}?${Date.now()}`)
+  const lista = (a) => JSON.stringify(a).replace(/,/g, ', ')
+  const manopola = `{ ${Object.entries(vecchi.manopola || { x: 0.5, y: 0.73, w: 0.08 }).map(([k, v]) => `${k}: ${v}`).join(', ')} }`
+  const riga = `export default { w: 900, h: ${Math.round((h / w) * 900)}, schermo: ${lista(schermo)}, vetrine: ${lista(rettV)}, tasti: ${lista(rettT)}, manopola: ${manopola} }`
   let js = await readFile(DATI, 'utf8')
-  js = js.replace(/schermo:\s*\[\[[^\]]*\](?:,\s*\[[^\]]*\]){3}\]/, `schermo: ${JSON.stringify(schermo).replace(/,/g, ', ')}`).replace(/w:\s*\d+,\s*h:\s*\d+/, `w: 900, h: ${Math.round((h / w) * 900)}`)
+  js = /^export default .*$/m.test(js) ? js.replace(/^export default .*$/m, riga) : `${js.trimEnd()}\n${riga}\n`
   await writeFile(DATI, js)
-  // il verde → nero spento, il blu delle vetrinette → grigio scuro (l'orlo sfumato si mescola), poi le due misure
+  // il controllo da guardare: la foto coi rettangoli sopra (verde lo schermo, blu le vetrinette, rosso i tasti)
+  const rett = (r, col) => `<rect x="${r[0] * w}" y="${r[1] * h}" width="${r[2] * w}" height="${r[3] * h}" fill="none" stroke="${col}" stroke-width="4"/>`
+  const svg = `<svg width="${w}" height="${h}"><polygon points="${schermo.map((p) => `${p[0] * w},${p[1] * h}`).join(' ')}" fill="none" stroke="#0f0" stroke-width="4"/>${rettV.map((r) => rett(r, '#39f')).join('')}${rettT.map((r) => rett(r, '#f33')).join('')}</svg>`
+  // (in sharp il resize passa prima del composite qualunque sia l'ordine: prima si compone in un buffer, poi si riduce)
+  const controllo = await sharp(data, { raw: { width: w, height: h, channels: 4 } }).composite([{ input: Buffer.from(svg) }]).png().toBuffer()
+  await sharp(controllo).resize({ width: 900 }).png().toFile(join(ROOT, 'tools/pzkko/lavoro/deutschland/automat-rettangoli.png'))
+  // il verde → nero spento, il blu delle vetrinette → grigio scuro, poi le due misure. L'orlo sfumato (il pixel mezzo
+  // verde e mezzo cornice) con la soglia stretta restava un filo verde: dentro il riquadro dello schermo (e di ogni
+  // vetrinetta), allargato di 3 px, basta molto meno verde (o blu) per essere spento, fuori vale la soglia stretta
+  // (il led verde del lettore carta resta acceso).
   const out = Buffer.from(data)
+  const dentroRiq = (x, y, r) => x >= r[0] * w - 3 && x <= (r[0] + r[2]) * w + 3 && y >= r[1] * h - 3 && y <= (r[1] + r[3]) * h + 3
+  const xs = schermo.map((p) => p[0]), ys = schermo.map((p) => p[1])
+  const riqS = [Math.min(...xs), Math.min(...ys), Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)]
+  const largo = (a, b1, b2) => Math.max(0, Math.min(1, (a - Math.max(b1, b2) - 15) / 50))
   for (let i = 0; i < w * h; i++) {
-    const v = verde(data[i * 4], data[i * 4 + 1], data[i * 4 + 2]), u = v ? 0 : blu(data[i * 4], data[i * 4 + 1], data[i * 4 + 2])
+    const x = i % w, y = (i / w) | 0, r = data[i * 4], g = data[i * 4 + 1], b = data[i * 4 + 2]
+    let v = verde(r, g, b), u = v ? 0 : blu(r, g, b)
+    if (dentroRiq(x, y, riqS)) v = Math.max(v, largo(g, r, b))
+    else if (rettV.some((q) => dentroRiq(x, y, q))) u = Math.max(u, largo(b, r, g))
     if (!v && !u) continue
     const c = v ? SPENTO : VETRINA, k = v || u
-    out[i * 4] = Math.round(data[i * 4] * (1 - k) + c.r * k); out[i * 4 + 1] = Math.round(data[i * 4 + 1] * (1 - k) + c.g * k); out[i * 4 + 2] = Math.round(data[i * 4 + 2] * (1 - k) + c.b * k)
+    out[i * 4] = Math.round(r * (1 - k) + c.r * k); out[i * 4 + 1] = Math.round(g * (1 - k) + c.g * k); out[i * 4 + 2] = Math.round(b * (1 - k) + c.b * k)
   }
   await mkdir(ART, { recursive: true })
-  // le vetrinette: i rettangoli blu (componenti connesse, da sinistra a destra), e dentro i nostri pacchetti
-  const vetrine = componentiBlu(data, w, h)
+  // dentro le vetrinette i nostri pacchetti
   let base = sharp(out, { raw: { width: w, height: h, channels: 4 } })
   if (vetrine.length) {
-    console.log(`vetrinette: ${vetrine.length} ${vetrine.map((b) => `[${(b.x0 / w).toFixed(3)},${(b.y0 / h).toFixed(3)} ${((b.x1 - b.x0 + 1) / w).toFixed(3)}×${((b.y1 - b.y0 + 1) / h).toFixed(3)}]`).join(' ')}`)
+    console.log(`vetrinette: ${vetrine.length} ${rettV.map((r) => `[${r.join(',')}]`).join(' ')}\ntasti (gap ${gap}, alt ${alt}): ${rettT.map((r) => `[${r.join(',')}]`).join(' ')}`)
     const nomi = arg('pacchi', PACCHI_VETRINE).split(',')
     const strati = []
     for (const [i, b] of vetrine.entries()) {
       const nome = nomi[i % nomi.length], file = join(ART, 'pacchi', `${nome}.webp`)
       if (!(await ce(file))) { console.warn(`  manca ${file}`); continue }
+      // il pacchetto largo quasi quanto la vetrinetta; se la vetrinetta è alta (quelle della macchinetta del 9.11 sono
+      // 1 × 2,4) ce ne stanno due impilati, come la scorta di una macchinetta vera; mai più di due
       const bw = b.x1 - b.x0 + 1, bh = b.y1 - b.y0 + 1
-      const pacco = await sharp(file).resize({ width: Math.round(bw * 0.78), height: Math.round(bh * 0.84), fit: 'inside' }).png().toBuffer({ resolveWithObject: true })
-      const left = Math.round(b.x0 + (bw - pacco.info.width) / 2), top = Math.round(b.y0 + (bh - pacco.info.height) / 2)
+      const pacco = await sharp(file).resize({ width: Math.round(bw * 0.86), height: Math.round(bh * 0.88), fit: 'inside' }).png().toBuffer({ resolveWithObject: true })
+      const pw = pacco.info.width, ph = pacco.info.height, gapP = Math.round(bh * 0.02)
+      const quanti = Math.max(1, Math.min(2, Math.floor((bh * 0.9 + gapP) / (ph + gapP))))
+      const left = Math.round(b.x0 + (bw - pw) / 2), top0 = Math.round(b.y0 + (bh - (quanti * ph + (quanti - 1) * gapP)) / 2)
       // l'ombra: la sagoma del pacchetto, nera e sfumata, un po' più in basso a destra
       const ombra = await sharp(pacco.data).ensureAlpha().linear([0, 0, 0, 0.55], [0, 0, 0, 0]).blur(3).png().toBuffer()
-      strati.push({ input: ombra, left: left + Math.round(bw * 0.03), top: top + Math.round(bh * 0.04) }, { input: pacco.data, left, top })
+      for (let k = 0; k < quanti; k++) {
+        const top = top0 + k * (ph + gapP)
+        strati.push({ input: ombra, left: left + Math.round(bw * 0.03), top: top + Math.round(bw * 0.05) }, { input: pacco.data, left, top })
+      }
     }
     base = sharp(await base.composite(strati).raw().toBuffer(), { raw: { width: w, height: h, channels: 4 } })
   } else console.warn('nessuna vetrinetta blu nella foto: resta com’è')
   await base.clone().resize({ width: 900 }).webp({ quality: 84, alphaQuality: 90 }).toFile(join(ART, 'automat.webp'))
   await base.clone().resize({ width: Math.min(1800, w) }).webp({ quality: 86, alphaQuality: 90 }).toFile(join(ART, 'automat-grande.webp'))
-  console.log(`✓ ${join(ART, 'automat.webp')} (900) e automat-grande.webp (${Math.min(1800, w)}); muro-dati.js aggiornato`)
+  console.log(`✓ ${join(ART, 'automat.webp')} (900) e automat-grande.webp (${Math.min(1800, w)}); muro-dati.js aggiornato; controllo: lavoro/deutschland/automat-rettangoli.png`)
 }
 
 // ── sprite ──────────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -178,4 +215,4 @@ try {
   if (cosa === 'angoli') await angoli()
   else if (cosa === 'sprite') await sprite()
   else { console.log('uso: schermo.mjs angoli [--foto=…] | sprite [--finto]'); process.exit(2) }
-} catch (e) { console.error(`✗ ${e.message}`); process.exit(1) }
+} catch (e) { console.error(`✗ ${process.env.DEBUG ? e.stack : e.message}`); process.exit(1) }

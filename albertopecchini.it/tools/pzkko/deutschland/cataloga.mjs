@@ -1,20 +1,29 @@
 #!/usr/bin/env node
 // Il catalogo delle foto di Deutschland (9.11.2026): legge la cartella del viaggio su D: (SOLO in lettura: lì dentro non si
 // scrive, non si sposta, non si rinomina niente, nemmeno in _convertiti\) e scrive in C:\pzkko-server\deutschland\ le
-// miniature (dati\m\ 480 webp q72), le grandi (dati\g\ 1800 jpeg q88 mozjpeg), i video (dati\v\ h264 ≤1080p yuv420p,
-// tone-map se HDR, +faststart) coi poster (dati\p\), gli originali che non stanno su D: così come servono (dati\o\), e la
-// cache delle voci (catalogo\cache.json: data, GPS, misure, blur, colore, peso), da cui manifesto.mjs fa dati\foto.json.
+// miniature piccole (dati\s\ 360 webp q62, ~11 KB: viaggiano in fasci, fasci.mjs), le miniature (dati\m\ 480 webp q72), le
+// grandi (dati\g\ 1400 jpeg q80 mozjpeg, ~180 KB), i video (dati\v\ h264 ≤1080p yuv420p, tone-map se HDR, +faststart) coi
+// poster (dati\p\ 720 px), gli ORIGINALI scaricabili (dati\o\: il JPEG q90 mozjpeg senza metadati, ~4 MB; dal 9.11 sera
+// TUTTI in dati\o\, perché vanno su Backblaze B2 con carica.mjs e non si servono più da D:), e la cache delle voci
+// (catalogo\cache.json: data, GPS, misure, blur, colore, peso), da cui manifesto.mjs fa dati\foto.json.
 // Niente metadati nei file prodotti (sharp li toglie, ffmpeg con -map_metadata -1: niente GPS in giro).
+//
+// LE DERIVATE HANNO UNA VERSIONE (DERIVATE, qui sotto; nella cache `ver`): quando cambiano le misure si alza il numero e il
+// giro rifà solo le immagini (s m g p o) delle voci vecchie, senza ricodificare i video già fatti (v resta se c'è e
+// l'impronta è uguale). Misurato il 9.11 su 20 foto: o/ q90 = 4,15 MB medio (q88: 3,5), g 178 KB, s 10,9 KB; totale su
+// B2 ≈ 5,7 GB (o 4,5 + video 1,0 + g 0,2), sotto i 10 GB gratuiti.
 //
 // LA CARTELLA (dal 9.11 sera, importazione finita con «Mantieni originali»): 977 originali — DNG (ProRAW 48 MP, 25 MB),
 // HEIC, MOV (HEVC 10 bit HLG Dolby Vision), PNG (screenshot), JPG (IMG_E…, le modifiche), AAE e DAT (si ignorano) — e in
 // _convertiti\ i 353 JPG (48 MP) e i 46 MOV che il telefono aveva convertito. UNA VOCE PER NUMERO IMG_nnnn:
 // - il GEMELLO di _convertiti\IMG_nnnn.JPG, se c'è, è la sorgente di m, g e dell'originale scaricabile o (il JPEG a 48 MP
 //   che Alberto vuole scaricare: lo serve il server da D:, origini.json); il DNG resta /raw; l'HEIC dà solo i metadati;
+// - col gemello: o = il JPG a 48 MP risalvato q90 mozjpeg, ruotato (sharp .rotate() applica l'Orientation) e senza
+//   metadati, in dati\o\ (oDa: 'convertito'); l'originale su D: non si tocca e non si serve più;
 // - senza gemello: DNG → il JPEG incorporato (4032 px, anteprima() di amici.mjs r.139-157) ruotato secondo l'Orientation
 //   del DNG, in dati\o\ (oDa: 'dng', «sviluppo dal DNG»); HEIC → sharp non lo apre (niente HEVC) ed exifr non lo legge:
 //   pixel da ffmpeg (decodifica e ruota da sé), JPEG q95 in dati\o\ (oDa: 'heic'), EXIF dal blocco Exif dentro l'HEIC;
-//   PNG e JPG → se stessi;
+//   PNG → copiato com'è in dati\o\ (uno screenshot, niente GPS dentro); JPG (IMG_E…) → q90 come il gemello;
 // - data e GPS dal master (DNG/HEIC/PNG/JPG), se mancano dal gemello;
 // - MOV: la sorgente dell'mp4 è il gemello di _convertiti\ quando c'è (stesso HEVC: il filtro guarda il flusso e decide
 //   da sé se tone-mappare), se no l'originale; data da com.apple.quicktime.creationdate (col fuso), GPS da
@@ -34,12 +43,13 @@
 //   node tools/pzkko/deutschland/cataloga.mjs --rifai           rifà anche quello che c'è (con --solo: quei file)
 //   node tools/pzkko/deutschland/cataloga.mjs --niente-video    salta i MOV
 //   node tools/pzkko/deutschland/cataloga.mjs --solo-video      solo i MOV (la seconda passata)
-import { readdirSync, statSync, readFileSync, existsSync, mkdirSync, writeFileSync, renameSync } from 'node:fs'
+//   node tools/pzkko/deutschland/cataloga.mjs --q=88            la qualità degli originali JPEG (85 di default)
+import { readdirSync, statSync, readFileSync, existsSync, mkdirSync, writeFileSync, renameSync, copyFileSync } from 'node:fs'
 import { execFileSync, spawnSync } from 'node:child_process'
 import path from 'node:path'
 import sharp from 'sharp'
 import exifr from 'exifr'
-import { DATI, CATALOGO, LAVORO, configurazione, leggiJson, scriviJson, idDi, numeroDi, aCasa, ffmpeg, argomenti, die } from './comune.mjs'
+import { DATI, CATALOGO, LAVORO, DERIVATE, configurazione, leggiJson, scriviJson, idDi, numeroDi, aCasa, ffmpeg, argomenti, die } from './comune.mjs'
 import { barra, log as logRegia } from '../../cruscotto/diretta.mjs'
 
 const args = argomenti()
@@ -53,16 +63,17 @@ const FUSO = '+01:00' // Monaco e Stoccarda a novembre: ora solare, come casa
 const VICINI = 30, MEZZORA = 30 * 60_000
 const FF = ffmpeg('ffmpeg'), FP = ffmpeg('ffprobe')
 const aCasaF = await aCasa()
+const Q_ORIGINALE = Math.min(95, Math.max(75, Number(args.q) || 85)) // (Alberto, 9.11 sera: q85, tutti i pixel, senza metadati)
 
 if (!existsSync(ORIGINALI)) die(`non trovo la cartella delle foto: ${ORIGINALI}`)
-for (const d of ['m', 'g', 'o', 'p', 'v']) mkdirSync(path.join(DATI, d), { recursive: true })
+for (const d of ['s', 'm', 'g', 'o', 'p', 'v', 'f']) mkdirSync(path.join(DATI, d), { recursive: true })
 mkdirSync(CATALOGO, { recursive: true })
 mkdirSync(LAVORO, { recursive: true })
 
 // ── la cache ──
-const cache = leggiJson(CACHE, { v: 2, voci: {} })
+const cache = leggiJson(CACHE, { v: 3, voci: {} })
 cache.voci ??= {}
-const salvaCache = () => { if (!PROVA) { cache.v = 2; cache.generato = new Date().toISOString(); scriviJson(CACHE, cache) } }
+const salvaCache = () => { if (!PROVA) { cache.v = 3; cache.derivate = DERIVATE; cache.generato = new Date().toISOString(); scriviJson(CACHE, cache) } }
 
 // ── i file su D: (cartella principale + _convertiti), raggruppati per base (IMG_5506, IMG_E5527…) ──
 const MEDIA = /\.(heic|dng|mov|png|jpe?g)$/i
@@ -156,20 +167,27 @@ function anteprima(buf) {
   return best && buf.subarray(best.da, best.a)
 }
 
-// ── le immagini derivate: g (1800 jpeg), m (480 webp), blur (16 webp base64), colore, misure dopo la rotazione ──
+// ── le immagini derivate: g (1400 jpeg q80), m (480 webp q72), s (360 webp q62), blur (16 webp base64), colore, misure dopo la rotazione ──
 const esa = (n) => Math.round(Math.max(0, Math.min(255, n))).toString(16).padStart(2, '0')
 async function derivate(sorgente, id, { ruota = true } = {}) {
   let img = sharp(sorgente, { limitInputPixels: 1e9, failOn: 'none' })
   if (ruota) img = img.rotate()
-  const g = await img.clone().resize(1800, 1800, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 88, mozjpeg: true }).toBuffer({ resolveWithObject: true })
-  // le misure vere, già ruotate (Orientation 5-8 = la foto è di traverso); m, blur e colore medio dalla grande
+  const g = await img.clone().resize(1400, 1400, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 80, mozjpeg: true }).toBuffer({ resolveWithObject: true })
+  // le misure vere, già ruotate (Orientation 5-8 = la foto è di traverso); m, s, blur e colore medio dalla grande
   const { width: W, height: H } = await img.metadata().then((m) => (ruota && m.orientation >= 5 ? { width: m.height, height: m.width } : { width: m.width, height: m.height }))
   const m = await sharp(g.data).resize(480, 480, { fit: 'inside' }).webp({ quality: 72 }).toBuffer()
+  const s = await sharp(g.data).resize(360, 360, { fit: 'inside' }).webp({ quality: 62 }).toBuffer()
   const blur = await sharp(g.data).resize(16, 16, { fit: 'inside' }).webp({ quality: 40 }).toBuffer()
   const stat = await sharp(g.data).stats()
   const col = `#${stat.channels.slice(0, 3).map((c) => esa(c.mean)).join('')}`
-  if (!PROVA) { writeFileSync(path.join(DATI, 'g', `${id}.jpg`), g.data); writeFileSync(path.join(DATI, 'm', `${id}.webp`), m) }
-  return { w: W, h: H, blur: `data:image/webp;base64,${blur.toString('base64')}`, col }
+  if (!PROVA) { writeFileSync(path.join(DATI, 'g', `${id}.jpg`), g.data); writeFileSync(path.join(DATI, 'm', `${id}.webp`), m); writeFileSync(path.join(DATI, 's', `${id}.webp`), s) }
+  return { w: W, h: H, blur: `data:image/webp;base64,${blur.toString('base64')}`, col, s: `${id}.webp`, ver: DERIVATE, pesoG: g.data.length, pesoS: s.length }
+}
+/** L'originale scaricabile: il JPEG q90 mozjpeg, ruotato (l'Orientation applicata ai pixel) e senza metadati, in dati\o\. */
+async function originaleJpeg(sorgente, id) {
+  const o = await sharp(sorgente, { limitInputPixels: 1e9, failOn: 'none' }).rotate().jpeg({ quality: Q_ORIGINALE, mozjpeg: true }).toBuffer()
+  if (!PROVA) writeFileSync(path.join(DATI, 'o', `${id}.jpg`), o)
+  return o
 }
 
 // ── un lavoro → la voce della cache ──
@@ -196,14 +214,19 @@ async function cataloga(l) {
     if (!PROVA) {
       const out = path.join(DATI, 'v', voce.v), tmp = path.join(LAVORO, `${l.id}.tmp.mp4`)
       const vf = filtroVideo(vs ?? {})
-      const r = spawnSync(FF, ['-y', '-v', 'error', '-i', sorgente, '-map', '0:v:0', '-map', '0:a:0?', '-vf', vf, '-c:v', 'libx264', '-preset', 'fast', '-crf', '22', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', '-ac', '2', '-movflags', '+faststart', '-map_metadata', '-1', tmp], { stdio: ['ignore', 'ignore', 'pipe'] })
-      if (r.status !== 0) throw new Error(`ffmpeg: ${String(r.stderr).trim().split('\n').pop()}`)
-      renameSync(tmp, out)
+      // il video già codificato con la stessa sorgente resta (sono le derivate che cambiano versione, non l'h264)
+      const vecchia = cache.voci[l.id]
+      if (RIFAI || !(vecchia?.v && vecchia.impronta === voce.impronta && existsSync(out))) {
+        const r = spawnSync(FF, ['-y', '-v', 'error', '-i', sorgente, '-map', '0:v:0', '-map', '0:a:0?', '-vf', vf, '-c:v', 'libx264', '-preset', 'fast', '-crf', '22', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '128k', '-ac', '2', '-movflags', '+faststart', '-map_metadata', '-1', tmp], { stdio: ['ignore', 'ignore', 'pipe'] })
+        if (r.status !== 0) throw new Error(`ffmpeg: ${String(r.stderr).trim().split('\n').pop()}`)
+        renameSync(tmp, out)
+      }
       const posterTmp = path.join(LAVORO, `${l.id}.poster.jpg`)
       const poster = spawnSync(FF, ['-y', '-v', 'error', '-ss', String(Math.min(0.5, voce.durata / 2)), '-i', sorgente, '-frames:v', '1', '-vf', vf, '-q:v', '3', '-map_metadata', '-1', posterTmp], { stdio: ['ignore', 'ignore', 'pipe'] })
       if (poster.status !== 0) throw new Error(`poster: ${String(poster.stderr).trim().split('\n').pop()}`)
       const pb = readFileSync(posterTmp)
-      writeFileSync(path.join(DATI, 'p', voce.p), await sharp(pb).jpeg({ quality: 86, mozjpeg: true }).toBuffer())
+      // il poster a 720 px sul lato lungo (prima era 1080: 60 KB invece di 140)
+      writeFileSync(path.join(DATI, 'p', voce.p), await sharp(pb).resize(720, 720, { fit: 'inside', withoutEnlargement: true }).jpeg({ quality: 82, mozjpeg: true }).toBuffer())
       Object.assign(voce, await derivate(pb, l.id, { ruota: false }))
       const pv = probe(out)?.streams.find((s) => s.codec_type === 'video')
       if (pv) { voce.w = pv.width; voce.h = pv.height }
@@ -222,9 +245,11 @@ async function cataloga(l) {
   if (aCasaF(voce.lat, voce.lon)) return { ...voce, escluso: 'casa' }
 
   if (l.gemello) {
-    // il gemello JPG di _convertiti: pixel e originale (servito da D:); la sua Orientation la legge sharp
-    voce.o = `${l.id}.jpg`; voce.origine = relativo(l.gemello); voce.oDa = 'convertito'; voce.peso = statSync(l.gemello).size
-    Object.assign(voce, await derivate(l.gemello, l.id))
+    // il gemello JPG di _convertiti (48 MP): l'originale scaricabile è il suo q90 ruotato e senza metadati in dati\o\ (va su
+    // B2); origine null = il server di casa lo serve da dati\o\ e non più da D:
+    const o = await originaleJpeg(l.gemello, l.id)
+    voce.o = `${l.id}.jpg`; voce.origine = null; voce.oDa = 'convertito'; voce.peso = o.length; voce.pesoD = statSync(l.gemello).size
+    Object.assign(voce, await derivate(o, l.id, { ruota: false }))
   } else if (l.tipo === 'dng') {
     // senza gemello: lo sviluppo dal DNG = il JPEG incorporato, ruotato secondo l'Orientation del DNG e ripulito (porta un
     // EXIF suo con Make e Model), in dati\o\
@@ -245,10 +270,16 @@ async function cataloga(l) {
     voce.o = `${l.id}.jpg`; voce.origine = null; voce.oDa = 'heic'; voce.peso = o.length
     if (!PROVA) writeFileSync(path.join(DATI, 'o', voce.o), o)
     Object.assign(voce, await derivate(o, l.id, { ruota: false }))
-  } else {
-    // PNG e JPG (IMG_E…, gli AirDrop): se stessi, serviti da D:
-    voce.o = `${l.id}.${l.tipo === 'png' ? 'png' : 'jpg'}`; voce.origine = relativo(l.master); voce.oDa = l.tipo; voce.peso = st.size
+  } else if (l.tipo === 'png') {
+    // PNG (gli screenshot): copiato com'è in dati\o\ (niente GPS in uno screenshot; sharp lo ripasserebbe inutilmente)
+    voce.o = `${l.id}.png`; voce.origine = null; voce.oDa = 'png'; voce.peso = st.size
+    if (!PROVA) copyFileSync(l.master, path.join(DATI, 'o', voce.o))
     Object.assign(voce, await derivate(l.master, l.id))
+  } else {
+    // JPG (IMG_E…, le modifiche, gli AirDrop): q90 come il gemello
+    const o = await originaleJpeg(l.master, l.id)
+    voce.o = `${l.id}.jpg`; voce.origine = null; voce.oDa = 'jpg'; voce.peso = o.length; voce.pesoD = st.size
+    Object.assign(voce, await derivate(o, l.id, { ruota: false }))
   }
   return voce
 }
@@ -259,7 +290,8 @@ const daFare = lavori.filter((l) => {
   if (RIFAI || !c) return true
   if (c.impronta !== impronta(l.master, l.gemello)) return true
   if (c.escluso) return false
-  const servono = [path.join(DATI, 'm', c.m), path.join(DATI, 'g', c.g), c.v && path.join(DATI, 'v', c.v), c.p && path.join(DATI, 'p', c.p), c.o && !c.origine && path.join(DATI, 'o', c.o)].filter(Boolean)
+  if ((c.ver ?? 0) < DERIVATE) return true // (le immagini sono di una versione vecchia: si rifanno s m g p o, il video resta)
+  const servono = [path.join(DATI, 's', c.s ?? ''), path.join(DATI, 'm', c.m), path.join(DATI, 'g', c.g), c.v && path.join(DATI, 'v', c.v), c.p && path.join(DATI, 'p', c.p), c.o && !c.origine && path.join(DATI, 'o', c.o)].filter(Boolean)
   return servono.some((f) => !existsSync(f))
 })
 // le voci della cache che non hanno più un file su D: (un DNG cancellato e ricopiato con un altro nome, i JPG spostati)

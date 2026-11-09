@@ -1,8 +1,11 @@
 /* I caratteri dei 16 pacchetti di sigarette di Deutschland (9.11.2026, filtri.js: PACCHI): i woff2 interi di /fonts/,
    caricati solo dopo l'accesso (index.html mette questo foglio in fondo, galleria.js lo aggiunge se manca) e solo quando
    un pacchetto li usa (font-display: swap: prima si legge col carattere di scorta, poi arriva quello vero). Anton è già
-   in barra/pagina.css: qui c'è lo stesso per chi carica la galleria da sola. NON si usa fonts/sub/ (i sottoinsiemi di
-   un'altra sessione): i nomi dei pacchetti sono liberi. */
+   in barra/pagina.css: qui c'è lo stesso per chi carica la galleria da sola. Oswald 600 (Google Fonts, licenza OFL,
+   /fonts/oswald-600.woff2, solo il latino: 12,7 KB) è la segnaletica tedesca dell'album (Deutschland 2): cartelli, timbri,
+   etichette; si carica solo qui dentro, dopo l'accesso. NON si usa fonts/sub/ (i sottoinsiemi di un'altra sessione): i
+   nomi dei pacchetti sono liberi. */
+@font-face{font-family:"Oswald";src:url(/fonts/oswald-600.woff2) format("woff2");font-weight:600;font-display:swap}
 @font-face{font-family:"Anton";src:url(/fonts/anton.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Abril Fatface";src:url(/fonts/abril-fatface.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Permanent Marker";src:url(/fonts/permanent-marker.woff2) format("woff2");font-weight:400;font-display:swap}

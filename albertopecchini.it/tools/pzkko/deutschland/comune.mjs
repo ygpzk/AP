@@ -22,6 +22,11 @@ export const CONFIG = 'C:\\pzkko-server\\config\\deutschland.json'
 /** I 15 tag, nell'ordine di pzkko/deutschland/comune.js (TAG): la galleria li usa così. */
 export const TAG = ['pekko', 'mikas', 'jonny', 'jella', 'cibo', 'paesaggi', 'natura', 'strada', 'auto', 'screenshot', 'hotel', 'mezzi', 'alcool', 'foto', 'video']
 export const VIAGGIO = { titolo: 'Monaco e Stoccarda con JMA', da: '2026-11-06', a: '2026-11-09' }
+/** La versione delle immagini derivate di cataloga.mjs (s m g p o): 3 = 9.11 sera (s 360 q62, g 1400 q80, poster 720, o q85
+ *  per tutti in dati\o\). Una voce della cache con `ver` più basso si rifà (le immagini, non il video). */
+export const DERIVATE = 3
+/** Quante miniature piccole per fascio (fasci.mjs / rete.js): 967 foto → 25 fasci da ~400 KB. */
+export const PER_FASCIO = 40
 
 export const leggiJson = (f, altrimenti = null) => { try { return JSON.parse(readFileSync(f, 'utf8').replace(/^\uFEFF/, '')) } catch { return altrimenti } }
 /** Scrive un JSON accanto e poi lo rinomina sopra: chi legge (il server, l'Agente 3) non vede mai mezzo file. */

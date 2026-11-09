@@ -5,15 +5,16 @@
 <!-- la guardia della manutenzione (manutenzione/guardia.js): finché dura, del sito si vede solo il cartello -->
 <script src="/manutenzione/guardia.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Deutschland: le foto del viaggio con JMA</title>
-<!-- Deutschland (9.11.2026): le foto del viaggio a Monaco e Stoccarda con Mikas, Jonny e Jella (JMA), dietro una password.
-     Dal muro ci si arriva dalla macchinetta delle sigarette (#automat-muro in index.html, deutschland/muro.js): la vernice
-     cola giù (vernice.js), si arriva qui e il telo nero scende via. Qui la macchinetta da vicino chiede la password
-     (accesso.js, proiettata sul suo schermo); dentro, la galleria (galleria.js e i suoi moduli: griglia, mappa, visore,
-     condividi, filtri). Le foto NON stanno su Vercel: stanno sul pc di Alberto (C:\pzkko-server\deutschland), e la pagina
+<title>Deutschland: l'album del viaggio con JMA</title>
+<!-- Deutschland (9.11.2026, rifatta la sera stessa: «Deutschland 2», l'album dei ricordi): le foto del viaggio a Monaco e
+     Stoccarda con Mikas, Jonny e Jella (JMA), dietro una password. Dal muro ci si arriva dalla macchinetta delle sigarette
+     (#automat-muro in index.html, deutschland/muro.js): la vernice cola giù (vernice.js), si arriva qui e il telo nero
+     scende via. Qui la macchinetta da vicino chiede la password sul suo display (accesso.js) e il tasto largo ZIEHEN la
+     manda; dentro, l'album (galleria.js e i suoi moduli: album, filtri, mappa, visore, condividi) con le immagini che
+     passano tutte da rete.js. Le foto NON stanno su Vercel: stanno sul pc di Alberto (o su Backblaze, cdn b2) e la pagina
      le chiede col biglietto che dà /api/deutschland. Niente canonical né sitemap: è una pagina privata -->
 <meta name="robots" content="noindex,nofollow">
-<meta name="description" content="Le foto del viaggio a Monaco e Stoccarda con JMA. Solo per chi sa la password.">
+<meta name="description" content="L'album del viaggio a Monaco e Stoccarda con JMA. Solo per chi sa la password.">
 <meta name="author" content="Alberto Pecchini">
 <meta name="theme-color" content="#0e0d0c">
 <link rel="icon" href="/favicon.png" type="image/png" sizes="64x64">
@@ -38,37 +39,68 @@
 <body>
 <div class="telo" aria-hidden="true"></div>
 <main class="dl">
-  <!-- la macchinetta da vicino, con la password proiettata sul suo schermo (accesso.js). La foto è automat-grande.webp
-       (gpt-image-2, tools/pzkko/deutschland/immagini.mjs; lo schermo verde è diventato nero e i suoi angoli stanno in
-       muro-dati.js); per provare senza foto c'è automat-segnaposto.svg -->
+  <!-- ── l'ingresso: la macchinetta da vicino ─────────────────────────────────────────────────────────────────────────
+       La foto è automat-grande.webp (gpt-image-2, tools/pzkko/deutschland/immagini.mjs; gli angoli dello schermo stanno
+       in muro-dati.js). Il form avvolge la macchinetta: sul computer accesso.js mette il campo DENTRO il display
+       proiettato (#ac-slot) e il tasto ZIEHEN sotto il display (#ac-slot-ziehen); sul telefono campo, tasto e riga di
+       stato stanno sotto la macchinetta, nel flusso (#ac-modulo), coi tasti grandi per il pollice. -->
   <section id="automat" class="automat" aria-labelledby="am-titolo">
-    <h1 id="am-titolo" class="am-titolo">Deutschland</h1>
-    <p class="am-sotto">Monaco e Stoccarda con JMA · novembre 2026</p>
-    <div class="am-corpo">
-      <img class="am-foto" src="/art/deutschland/automat-grande.webp" alt="una vecchia macchinetta tedesca delle sigarette, a muro" width="954" height="1338" decoding="async" fetchpriority="high">
-      <div class="am-schermo" id="am-schermo">
-        <form id="accesso" class="accesso" autocomplete="off" novalidate>
+    <header class="am-testa">
+      <h1 id="am-titolo" class="am-titolo">Deutschland</h1>
+      <p class="am-sotto">München → Stuttgart · 6.–8. November 2026 · mit JMA</p>
+    </header>
+    <form id="accesso" class="accesso" autocomplete="off" novalidate>
+      <div class="am-corpo">
+        <img class="am-foto" src="/art/deutschland/automat-grande.webp" alt="una vecchia macchinetta tedesca delle sigarette, a muro" width="954" height="1338" decoding="async" fetchpriority="high">
+        <div class="am-schermo" id="am-schermo">
           <p class="ac-led" aria-hidden="true">PASSWORT</p>
-          <label class="ac-campo">
-            <span class="nascosto">la password</span>
-            <input id="ac-password" class="ac-input" type="password" name="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="latin" placeholder="······" aria-describedby="ac-stato" enterkeyhint="go">
-          </label>
-          <p id="ac-stato" class="ac-stato" role="status" aria-live="polite"></p>
-        </form>
+          <div class="ac-slot" id="ac-slot"></div>
+          <p class="ac-led-sotto" aria-hidden="true">BITTE EINGEBEN ▼</p>
+        </div>
+        <div class="ac-slot-ziehen" id="ac-slot-ziehen"></div>
+        <!-- il pacchetto che la macchinetta sputa dopo la password giusta (una transizione sola, poi l'album) -->
+        <img class="am-pacco" id="am-pacco" src="/art/deutschland/pacchi/alles.webp" alt="" width="60" height="80" hidden>
       </div>
-      <!-- la manopola: si tira (ziehen) per avere il pacchetto; qui manda la password. Sta sulla fila delle manopole
-           della foto (muro-dati.js, manopola), fuori dallo schermo -->
-      <button class="ac-ziehen" id="ac-ziehen" type="submit" form="accesso" data-suono-no aria-label="ziehen: manda la password"><span class="ac-manopola" aria-hidden="true"></span><span class="ac-scritta">ziehen</span></button>
-    </div>
-    <p class="am-nota">le foto stanno sul pc di Alberto: se è spento, la macchinetta è spenta.</p>
+      <div class="ac-modulo" id="ac-modulo">
+        <label class="ac-campo">
+          <span class="nascosto">la password</span>
+          <input id="ac-password" class="ac-input" type="password" name="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="latin" placeholder="••••••" aria-describedby="ac-stato" enterkeyhint="go">
+          <button type="button" class="ac-occhio" id="ac-occhio" aria-label="mostra la password" aria-pressed="false" data-suono-no><span aria-hidden="true"></span></button>
+        </label>
+        <button class="ac-ziehen" id="ac-ziehen" type="submit" data-suono-no><span class="ac-ziehen-testo">Ziehen</span><span class="ac-ziehen-freccia" aria-hidden="true">▸</span></button>
+        <p id="ac-stato" class="ac-stato" role="status" aria-live="polite"></p>
+      </div>
+    </form>
+    <p class="am-nota">la password la controlla il pc di Alberto: se è spento, la macchinetta è spenta.</p>
   </section>
 
-  <!-- la galleria (galleria.js e i suoi moduli: li scrive l'altro cantiere, qui solo i contenitori del contratto) -->
-  <section id="galleria" class="galleria" hidden aria-label="le foto del viaggio">
-    <nav id="filtri" class="filtri" aria-label="i pacchetti: i filtri delle foto"></nav>
-    <div class="scena">
-      <div id="griglia" class="griglia-foto" role="list" aria-label="le foto"></div>
-      <div id="mappa" class="mappa" aria-label="la mappa del viaggio"></div>
+  <!-- ── l'album (galleria.js e i suoi moduli: solo i contenitori) ─────────────────────────────────────────────────── -->
+  <section id="album" class="album" hidden aria-label="l'album del viaggio">
+    <!-- la barra alta: i cartelli ALBUM · KARTE · AUSWAHL · SPEICHERN e, sotto, la riga «album scaricato al 62 %» -->
+    <div class="al-barra" id="al-barra">
+      <div class="al-tasti" role="toolbar" aria-label="l'album">
+        <button type="button" class="segnale" data-azione="album" title="in cima all'album">Album</button>
+        <button type="button" class="segnale segnale-blau" data-azione="karte" aria-pressed="false" title="la mappa del viaggio">Karte</button>
+        <button type="button" class="segnale" data-azione="auswahl" aria-pressed="false" title="scegli più foto da salvare">Auswahl</button>
+        <button type="button" class="segnale segnale-gelb" data-azione="speichern" title="salva le foto scelte">Speichern</button>
+      </div>
+      <p class="al-scaricato" id="al-scaricato" hidden><i></i><span></span></p>
+    </div>
+    <nav id="filtri" class="filtri" aria-label="i pacchetti e le tappe: i filtri delle foto"></nav>
+    <div class="al-scena">
+      <div id="pagine" class="al-pagine" role="list" aria-label="le foto, per giorno"></div>
+      <!-- la mappa dentro un foglio vero (mappa.js): carta crema, pieghe, nastro agli angoli, titolo a pennarello -->
+      <aside id="mappa-foglio" class="mappa-foglio" aria-label="la mappa del viaggio">
+        <h2 class="mf-titolo" id="mf-titolo">München → Stuttgart</h2>
+        <div id="mappa" class="mappa"></div>
+        <div class="mf-piede">
+          <ul class="mf-legenda" aria-label="legenda">
+            <li class="lg-fatto">fatto</li><li class="lg-dopo">ancora da fare</li><li class="lg-tappa">tappa</li><li class="lg-gla">la GLA</li>
+          </ul>
+          <button type="button" class="segnale mf-tutto" data-azione="tutto">Tutto il viaggio</button>
+          <button type="button" class="segnale segnale-gelb mf-chiudi" data-azione="chiudi-karte">Zurück zum Album</button>
+        </div>
+      </aside>
     </div>
   </section>
   <dialog id="visore" class="visore" aria-label="la foto grande"></dialog>
@@ -77,7 +109,7 @@
 <footer class="piede">© 2026 pzkko · fatto da <a href="https://www.albertopecchini.it">Alberto Pecchini</a> · le foto sono di chi c'era · <a href="/info/">info e copyright</a></footer>
 <script type="module" src="/barra/barra.js"></script>
 <script type="module" src="/deutschland/accesso.js"></script>
-<!-- gli stili della galleria e dei pacchetti (dell'altro cantiere): in fondo, così la macchinetta non li aspetta -->
+<!-- gli stili dell'album e dei pacchetti: in fondo, così la macchinetta non li aspetta (galleria.js li aggiunge se mancano) -->
 <link rel="stylesheet" href="/deutschland/galleria.css">
 <link rel="stylesheet" href="/deutschland/pacchi.css">
 </body>

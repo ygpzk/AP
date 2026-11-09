@@ -34,7 +34,7 @@ node tools/pzkko/wiki/prova.mjs [titolo…]     # la wiki nel browser: errori, l
 | `pzkko/wiki/voci/chat.js` | la chat col bot, le attività, lo zaino, l'economia (cassa, rapina, galera, soldi sporchi), shop, quiz, sfide, quest, miniera, cucina, traguardi |
 | `pzkko/wiki/voci/dietro.js` | il repository AP, i workflow, Vercel, il server in casa, la banca, le API, gli altri siti, gli strumenti di albertopecchini.it, i servizi usati |
 | `pzkko/wiki/voci/memoria.js` | la memoria di Claude (una voce per memoria), CLAUDE.md, le skill, come lavora Alberto con Claude, le persone, i luoghi |
-| `pzkko/wiki/voci/deutschland.js` | Deutschland: la macchinetta delle sigarette sul muro, la vernice, la pagina con la password, la galleria del viaggio JMA e il server delle foto in casa |
+| `pzkko/wiki/voci/deutschland.js` | Deutschland: la macchinetta delle sigarette sul muro, la vernice, la pagina con la password, l'album del viaggio JMA (capitoli, righe giustificate, rete.js), la mappa su carta, i pacchetti e gli sticker, le didascalie del modello, e il percorso delle foto (Backblaze B2 + la banca di casa) |
 | `pzkko/wiki/voci/dati.js` | **GENERATO** da `genera.mjs`: oggetti, pesci, bestie, reperti, mestieri, quest, squadre, pezzi della miniera, traguardi, sfide, foto dei quiz, giornate della lumachina. Non si tocca a mano |
 | `pzkko/wiki/cronologia.js` | **GENERATO**: i commit del repository e, per ogni voce, quelli che hanno toccato le sue `fonti` |
 | `pzkko/wiki/stato.json` | **GENERATO**: il commit a cui la wiki è allineata, la data, i numeri |
@@ -224,7 +224,7 @@ pzkko (il nome), Pekko, La chiocciola gigante africana, La nutria, Mantova, Riva
 Unimore, Le licenze, Cosa si salva, La beta, Il GitHub di Alberto, La storia del repository, Il sito precedente (React),
 Il font Fake Receipt, Cascadia Code, Open-Meteo, Compiler Explorer, Wikimedia Commons, Google Fonts
 
-**deutschland.js** — Deutschland, La macchinetta delle sigarette, La vernice, La galleria di Deutschland, I pacchetti di sigarette, Il server delle foto di Deutschland
+**deutschland.js** — Deutschland, La macchinetta delle sigarette, La vernice, L'album di Deutschland (e il rinvio «La galleria di Deutschland», il titolo del mattino), La mappa su carta, I pacchetti di sigarette, Le didascalie di Deutschland, Il server delle foto di Deutschland
 
 **dati.js (generato)** — un titolo per ogni oggetto dello shop (col suo nome: «Pzk-kola», «Tortelli di zucca»,
 «Canna da pesca», «Cassa dei Gonzaga»…), pesce («Alborella», «Carpa d'oro dei Gonzaga»…), bestia («Nutria (bestia)»
