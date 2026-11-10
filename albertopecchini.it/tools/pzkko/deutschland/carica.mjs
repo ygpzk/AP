@@ -16,7 +16,7 @@
 // upload stessi sono classe A, gratis).
 //
 //   node tools/pzkko/deutschland/carica.mjs                         tutto quello che manca o è cambiato
-//   node tools/pzkko/deutschland/carica.mjs --solo=s,f,foto.json    solo quelle cartelle (s f g p v o foto.json)
+//   node tools/pzkko/deutschland/carica.mjs --solo=s,f,foto.json    solo quelle cartelle (s m f g p v o foto.json)
 //   node tools/pzkko/deutschland/carica.mjs --prova                 elenca cosa caricherebbe, non carica niente
 //   node tools/pzkko/deutschland/carica.mjs --max=5                 carica al più N file (per provare davvero con poco)
 //   node tools/pzkko/deutschland/carica.mjs --paralleli=4           quanti insieme (4)
@@ -33,7 +33,8 @@ const args = argomenti()
 const PROVA = Boolean(args.prova)
 const PARALLELI = Math.max(1, Math.min(8, Number(args.paralleli) || 4))
 const MAX = Number(args.max) > 0 ? Number(args.max) : Infinity
-const CARTELLE = ['foto.json', 'f', 's', 'g', 'p', 'v', 'o']
+// (m, la miniatura 480 che usa il tavolo dei ricordi dal 9.11 notte, mancava: aggiunta il 10.11, le foto del tavolo non arrivavano)
+const CARTELLE = ['foto.json', 'f', 's', 'm', 'g', 'p', 'v', 'o']
 const SOLO = typeof args.solo === 'string' ? args.solo.split(',').map((s) => s.trim()).filter(Boolean) : CARTELLE
 for (const c of SOLO) if (!CARTELLE.includes(c)) die(`--solo: «${c}» non è fra ${CARTELLE.join(' ')}`)
 const MIME = { webp: 'image/webp', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', mp4: 'video/mp4', bin: 'application/octet-stream', json: 'application/json' }

@@ -48,7 +48,7 @@ node tools/pzkko/deutschland/categorie.mjs           # CLIP su Replicate (pochi 
 node tools/pzkko/deutschland/descrivi.mjs            # le didascalie col VLM (dopo manifesto.mjs: legge foto.json); --solo=20; --rifai=5506,5522; --conta
 node tools/pzkko/deutschland/manifesto.mjs           # scrive dati\foto.json (v2); --prova; --pulisci (via i file finti)
 node tools/pzkko/deutschland/fasci.mjs --verifica    # dati\f\<n>.bin dalle s\ nell'ordine del manifesto, e li rilegge
-node tools/pzkko/deutschland/carica.mjs              # su B2 quello che manca o è cambiato (sha1); --prova; --solo=s,f,foto.json; --max=5; --elenco; --senza-cors
+node tools/pzkko/deutschland/carica.mjs              # su B2 quello che manca o è cambiato (sha1); --prova; --solo=s,f,foto.json,m; --max=5; --elenco; --senza-cors
 ```
 
 ## Il caricamento su B2 (`carica.mjs`) e i fasci (`fasci.mjs`)
