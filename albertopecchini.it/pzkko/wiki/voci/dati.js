@@ -12366,7 +12366,7 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 
 {{Vedi anche|Le app di pzk os|pzk os|Il cercapersone zero}}
 [[Categoria:Le app di pzk os]]` },
-  "Elenco dei commit": { data: "2026-11-10", fonti: ["README.md"], testo: `'''I 775 commit''' del [[Il repository AP|repository AP]] dal 2026-05-24 a oggi (l’ultimo: <code>74c82a3</code>, 2026-11-09). La lista completa, con filtri, sta in [[Speciale:UltimeModifiche|Ultime modifiche]]; la cronologia di ogni voce (la linguetta «Cronologia») elenca i commit che hanno toccato i suoi file. Generato da <code>git log</code> ogni volta che la wiki si aggiorna.
+  "Elenco dei commit": { data: "2026-11-10", fonti: ["README.md"], testo: `'''I 778 commit''' del [[Il repository AP|repository AP]] dal 2026-05-24 a oggi (l’ultimo: <code>39b80ef</code>, 2026-11-10). La lista completa, con filtri, sta in [[Speciale:UltimeModifiche|Ultime modifiche]]; la cronologia di ogni voce (la linguetta «Cronologia») elenca i commit che hanno toccato i suoi file. Generato da <code>git log</code> ogni volta che la wiki si aggiorna.
 
 == Per mese ==
 {| class="wikitable"
@@ -12393,10 +12393,13 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 | 190
 |-
 | 2026-11
-| 74
+| 77
 |}
 
 == Gli ultimi trenta ==
+* 2026-11-10 [https://github.com/albertoxpecchini/AP/commit/39b80ef 39b80ef] feat(studio): il selfie allo specchio sotto «Prima per curiosità, poi per mestiere»
+* 2026-11-10 [https://github.com/albertoxpecchini/AP/commit/58d6ca6 58d6ca6] Catture aggiornate: Ing. Dario Donelli
+* 2026-11-10 [https://github.com/albertoxpecchini/AP/commit/c40dae8 c40dae8] feat(deutschland): Deutschland 3, il tavolo dei ricordi, i tasti veri della macchinetta e i pacchetti che aprono il loro album
 * 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/74c82a3 74c82a3] docs(wiki): pzkkopedia allineata a 51bfa22, la storia di Deutschland e i pacchetti delle persone pieni
 * 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/51bfa22 51bfa22] Merge remote-tracking branch 'origin/main' into albertopecchini.it
 * 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/18971d7 18971d7] feat(deutschland): i nomi nell'album e la storia di Deutschland nella wiki
@@ -12424,9 +12427,6 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/0b2f180 0b2f180] fix(pzkko): il turno di lavoro rifatto da capo per lo zero, e il blackjack della chat nel profilo
 * 2026-11-05 [https://github.com/albertoxpecchini/AP/commit/7032f2e 7032f2e] feat(pzkko): il file di verifica del dominio per Discord in /.well-known/discord
 * 2026-11-04 [https://github.com/albertoxpecchini/AP/commit/46a4315 46a4315] chore: il generatore di email tiene i suoi dati con sé, e torna il modello per email:new
-* 2026-11-04 [https://github.com/albertoxpecchini/AP/commit/4e41929 4e41929] chore: riordino del repo — via PRODUCT.md, DESIGN.md e .impeccable, CLAUDE.md più corto
-* 2026-11-04 [https://github.com/albertoxpecchini/AP/commit/020ebb6 020ebb6] docs(lezioni): nel README la barra a destra del 24", fuori dalla cattura
-* 2026-11-04 [https://github.com/albertoxpecchini/AP/commit/1f9a292 1f9a292] feat(lezioni): la barra sta sul bordo destro del 24" ed esce dalla cattura
 
 == Dove si vede ==
 [[File:github.webp|thumb|none|380px|il repository AP su GitHub, con il numero dei commit]]
