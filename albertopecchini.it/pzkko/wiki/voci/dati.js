@@ -12366,7 +12366,7 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 
 {{Vedi anche|Le app di pzk os|pzk os|Il cercapersone zero}}
 [[Categoria:Le app di pzk os]]` },
-  "Elenco dei commit": { data: "2026-11-10", fonti: ["README.md"], testo: `'''I 780 commit''' del [[Il repository AP|repository AP]] dal 2026-05-24 a oggi (l’ultimo: <code>f46f86b</code>, 2026-11-10). La lista completa, con filtri, sta in [[Speciale:UltimeModifiche|Ultime modifiche]]; la cronologia di ogni voce (la linguetta «Cronologia») elenca i commit che hanno toccato i suoi file. Generato da <code>git log</code> ogni volta che la wiki si aggiorna.
+  "Elenco dei commit": { data: "2026-11-10", fonti: ["README.md"], testo: `'''I 782 commit''' del [[Il repository AP|repository AP]] dal 2026-05-24 a oggi (l’ultimo: <code>cf57778</code>, 2026-11-10). La lista completa, con filtri, sta in [[Speciale:UltimeModifiche|Ultime modifiche]]; la cronologia di ogni voce (la linguetta «Cronologia») elenca i commit che hanno toccato i suoi file. Generato da <code>git log</code> ogni volta che la wiki si aggiorna.
 
 == Per mese ==
 {| class="wikitable"
@@ -12393,10 +12393,12 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 | 190
 |-
 | 2026-11
-| 79
+| 81
 |}
 
 == Gli ultimi trenta ==
+* 2026-11-10 [https://github.com/albertoxpecchini/AP/commit/cf57778 cf57778] fix(controllo): non controlla l'archivio della macchina del tempo
+* 2026-11-10 [https://github.com/albertoxpecchini/AP/commit/528c26e 528c26e] fix(deutschland): carica.mjs porta su B2 anche le miniature m/ del tavolo dei ricordi
 * 2026-11-10 [https://github.com/albertoxpecchini/AP/commit/f46f86b f46f86b] feat(deutschland): Deutschland 4, la macchinetta gialla di Stoccarda frontale sul suo muro
 * 2026-11-10 [https://github.com/albertoxpecchini/AP/commit/464d4b7 464d4b7] docs(wiki): pzkkopedia allineata a 39b80ef, il selfie in /studio/ e lo scontorno col fondo vicino
 * 2026-11-10 [https://github.com/albertoxpecchini/AP/commit/39b80ef 39b80ef] feat(studio): il selfie allo specchio sotto «Prima per curiosità, poi per mestiere»
@@ -12425,8 +12427,6 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/d358119 d358119] Catture aggiornate: pzkko
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/7d8bf1c 7d8bf1c] docs(wiki): pzkkopedia allineata al cartello della manutenzione di Monaco (7d95b08)
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/7d95b08 7d95b08] feat(pzkko): il cartello della manutenzione sul muro della stazione di Monaco, e il sito chiuso fino a domenica alle 14
-* 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/a0ab410 a0ab410] docs(wiki): pzkkopedia allineata al turno di lavoro rifatto (0b2f180)
-* 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/0b2f180 0b2f180] fix(pzkko): il turno di lavoro rifatto da capo per lo zero, e il blackjack della chat nel profilo
 
 == Dove si vede ==
 [[File:github.webp|thumb|none|380px|il repository AP su GitHub, con il numero dei commit]]

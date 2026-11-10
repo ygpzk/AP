@@ -1295,7 +1295,7 @@ Campo trappola, 3 s minimi, 4 messaggi al minuto per IP, niente link né HTML, n
 * titolo, descrizione e lingua;
 * niente <code>undefined</code>, <code>NaN</code> o <code>[object Object]</code> nella pagina: il segno di un dato mancante in un template;
 * che ogni indirizzo di <code>sitemap.xml</code> sia una pagina.
-Fa eccezione solo <code>/email/</code> (<code>SENZA_CREDITO</code>). In locale: <code>npm run build && node tools/controllo/controllo.mjs</code>; esce con 0 o con 1 e l'elenco dei problemi, che in GitHub Actions diventano annotazioni <code>::error</code>. Il controllo di questa wiki (<code>tools/pzkko/wiki/controlla.mjs</code>) fa lo stesso lavoro per le voci: [[Pzkkopedia:Come si aggiorna]].
+Fanno eccezione al credito <code>/email/</code> e <code>/portfolio/tavole/</code> (<code>SENZA_CREDITO</code>). Le copie della [[La macchina del tempo|macchina del tempo]] (<code>/tempo/&lt;sito&gt;/&lt;giorno&gt;/pagina/</code>) non si controllano affatto: sono l'HTML congelato dei siti com'erano quel giorno, con i difetti di allora, e dal 10 novembre 2026, quando ne avevano accumulati 517, il controllo le conta a parte e le salta. In locale: <code>npm run build && node tools/controllo/controllo.mjs</code>; esce con 0 o con 1 e l'elenco dei problemi, che in GitHub Actions diventano annotazioni <code>::error</code>. Il controllo di questa wiki (<code>tools/pzkko/wiki/controlla.mjs</code>) fa lo stesso lavoro per le voci: [[Pzkkopedia:Come si aggiorna]].
 
 {{Vedi anche|Il controllo della build (workflow)|Il credito nei siti dei clienti}}
 [[Categoria:Gli strumenti]]`,
