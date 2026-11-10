@@ -10,7 +10,7 @@
      dei ricordi): le foto del viaggio a Monaco e
      Stoccarda con Mikas, Jonny e Jella (JMA), dietro una password. Dal muro ci si arriva dalla macchinetta delle sigarette
      (#automat-muro in index.html, deutschland/muro.js): la vernice cola giù (vernice.js), si arriva qui e il telo nero
-     scende via. Qui la macchinetta da vicino chiede la password sul suo display (accesso.js) e i suoi tasti veri 1–8 la
+     scende via. Qui (Deutschland 4, più sotto) la macchinetta gialla, la password sul foglietto, le 20 vetrinette: la
      mandano; dentro, il tavolo dei ricordi (galleria.js e i suoi moduli: tavolo, packung, album, mappa, visore, condividi) con le immagini che
      passano tutte da rete.js. Le foto NON stanno su Vercel: stanno sul pc di Alberto (o su Backblaze, cdn b2) e la pagina
      le chiede col biglietto che dà /api/deutschland. Niente canonical né sitemap: è una pagina privata -->
@@ -40,41 +40,47 @@
 <body>
 <div class="telo" aria-hidden="true"></div>
 <main class="dl">
-  <!-- ── l'ingresso: la macchinetta da vicino ─────────────────────────────────────────────────────────────────────────
-       La foto è automat-grande.webp (gpt-image-2, tools/pzkko/deutschland/immagini.mjs; gli angoli dello schermo, le
-       vetrinette e i tasti stanno in muro-dati.js). Deutschland 3 (9.11.2026 notte, Alberto: «il tasto deve essere della
-       macchinetta gigante», «deve avere la luce vera»): il campo della password sta DENTRO il display proiettato, anche sul
-       telefono, e si entra coi TASTI VERI 1–8 della foto (accesso.js ci mette sopra otto bottoni trasparenti, #am-tasti):
-       il tasto 1 (JMA) apre il tavolo dei ricordi, gli altri anche l'album del loro pacchetto. La luce (#am-luce: insegna,
-       vetrinette, alone dello schermo, led) la disegna accesso.js con gli stessi numeri. -->
+  <!-- ── l'ingresso: la via di Stoccarda ─────────────────────────────────────────────────────────────────────────────
+       Deutschland 4 (10.11.2026, Alberto: «ricrea esattamente quello sfondo e questa macchinetta al posto di quell'inizio
+       orribile e triste»): la via dove l'8.11 c'era la macchinetta gialla vera (vicino a Fangelsbachstraße), rifatta con
+       nano-banana-pro su Replicate dalle foto del viaggio (tools/pzkko/deutschland/via.mjs; adesivi e marchi tutti
+       inventati, il doppio della roba) e preparata da tools/pzkko/deutschland/automat.mjs (misure in muro-dati.js). La
+       notte stessa (Alberto: «crea la macchinetta da zero frontalmente», «avvicinati di più», «fai fare tutto lì
+       direttamente», «disabilita lo scroll e togli il piè di pagina»): una schermata sola e ferma, la macchinetta frontale
+       grande al centro, la via intorno alla sua scala, il titolo una targa stradale, la password sul foglietto attaccato
+       al muro (#accesso), le 20 vetrinette tasti veri (una vetrinetta = un pacchetto = il tavolo, e l'album del suo tag).
+       Tutto in accesso.js. Niente piè di pagina in questa pagina. -->
   <section id="automat" class="automat" aria-labelledby="am-titolo">
-    <header class="am-testa">
+    <!-- la via intorno, alla scala della macchinetta (accesso.js, disponi): una schermata sola, ferma -->
+    <div class="via" aria-hidden="true">
+      <img class="via-foto" id="via-foto" src="/art/deutschland/muro-2400.webp" srcset="/art/deutschland/muro-2400.webp 2400w, /art/deutschland/muro-4800.webp 4800w" sizes="(min-width:900px) 180vw, 400vw" alt="" width="5504" height="3072" decoding="async">
+    </div>
+    <!-- il titolo: una targa stradale di Stoccarda avvitata sul travertino -->
+    <header class="targa">
       <h1 id="am-titolo" class="am-titolo">Deutschland</h1>
       <p class="am-sotto">München → Stuttgart · 6.–8. November 2026 · mit JMA</p>
     </header>
-    <form id="accesso" class="accesso" autocomplete="off" novalidate>
-      <div class="am-corpo">
-        <img class="am-foto" src="/art/deutschland/automat-grande.webp" alt="una vecchia macchinetta tedesca delle sigarette, a muro, accesa" width="1028" height="1641" decoding="async" fetchpriority="high">
-        <div class="am-luce" id="am-luce" aria-hidden="true"></div>
-        <div class="am-schermo" id="am-schermo">
-          <p class="ac-led" id="ac-led" aria-hidden="true">PASSWORT</p>
-          <div class="ac-slot" id="ac-slot">
-            <label class="ac-campo">
-              <span class="nascosto">la password</span>
-              <input id="ac-password" class="ac-input" type="password" name="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="latin" placeholder="••••••" aria-describedby="ac-stato" enterkeyhint="go">
-              <button type="button" class="ac-occhio" id="ac-occhio" aria-label="mostra la password" aria-pressed="false" data-suono-no><span aria-hidden="true"></span></button>
-            </label>
-            <p id="ac-stato" class="ac-stato" role="status" aria-live="polite"></p>
-          </div>
-          <p class="ac-led-sotto" id="ac-led-sotto" aria-hidden="true">DANN TASTE DRÜCKEN ▼</p>
-        </div>
-        <!-- i tasti veri 1–8 della foto (accesso.js): uno qualsiasi manda la password -->
-        <div class="am-tasti" id="am-tasti" role="group" aria-label="i tasti della macchinetta: il pacchetto che vuoi"></div>
-        <!-- il pacchetto che la macchinetta sputa dalla bocchetta dopo la password giusta (quello del tasto premuto) -->
-        <img class="am-pacco" id="am-pacco" src="/art/deutschland/pacchi/alles.webp" alt="" width="60" height="80" hidden>
-      </div>
+    <!-- la macchinetta, frontale, grande al centro: le 20 vetrinette sono i tasti (#am-vetrine) -->
+    <div class="am-corpo" id="am-corpo">
+      <img class="am-foto" src="/art/deutschland/automat-gelb-1400.webp" srcset="/art/deutschland/automat-gelb-800.webp 800w, /art/deutschland/automat-gelb-1400.webp 1400w" sizes="(min-width:900px) 80vh, 100vw" alt="la macchinetta gialla delle sigarette, piena di adesivi, sul muro" width="3195" height="4954" decoding="async" fetchpriority="high">
+      <div class="am-lcd" id="am-lcd" aria-hidden="true"><span class="ac-led" id="ac-led">PASSWORT?</span></div>
+      <div class="am-vetrine" id="am-vetrine" role="group" aria-label="le 20 vetrinette: il pacchetto che vuoi"></div>
+      <p class="am-etichetta" id="am-etichetta" hidden aria-hidden="true"><b></b><span></span></p>
+      <!-- il pacchetto che la macchinetta sputa dalla bocchetta, quello della vetrinetta scelta -->
+      <img class="am-pacco" id="am-pacco" src="/art/deutschland/pacchi/alles.webp" alt="" width="60" height="99" hidden>
+    </div>
+    <!-- la password: un foglietto attaccato col nastro (sul computer al muro accanto, sul telefono sul piede) -->
+    <form id="accesso" class="foglietto" autocomplete="off" novalidate>
+      <p class="fo-titolo" id="fo-titolo">Passwort?</p>
+      <label class="ac-campo">
+        <span class="nascosto">la password</span>
+        <input id="ac-password" class="ac-input" type="password" name="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="latin" placeholder="hier schreiben" aria-describedby="ac-stato" enterkeyhint="go">
+        <button type="button" class="ac-occhio" id="ac-occhio" aria-label="mostra la password" aria-pressed="false" data-suono-no><span aria-hidden="true"></span></button>
+      </label>
+      <button type="submit" class="fo-los" id="fo-los">los ➜</button>
+      <p id="ac-stato" class="ac-stato" role="status" aria-live="polite"></p>
+      <p class="fo-nota">la controlla il pc di Alberto: se è spento, la macchinetta è spenta.</p>
     </form>
-    <p class="am-nota">la password la controlla il pc di Alberto: se è spento, la macchinetta è spenta.</p>
   </section>
 
   <!-- ── dentro: il tavolo dei ricordi (Deutschland 3, tavolo.js) ───────────────────────────────────────────────────────
@@ -132,7 +138,6 @@
   <dialog id="visore" class="visore" aria-label="la foto grande"></dialog>
   <div id="scelte" class="scelte" hidden role="toolbar" aria-label="le foto scelte"></div>
 </main>
-<footer class="piede">© 2026 pzkko · fatto da <a href="https://www.albertopecchini.it">Alberto Pecchini</a> · le foto sono di chi c'era · <a href="/info/">info e copyright</a></footer>
 <script type="module" src="/barra/barra.js"></script>
 <script type="module" src="/deutschland/accesso.js"></script>
 <!-- gli stili del tavolo, dell'album e dei pacchetti: in fondo, così la macchinetta non li aspetta (galleria.js li aggiunge se mancano) -->

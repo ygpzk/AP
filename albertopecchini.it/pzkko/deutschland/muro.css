@@ -3,7 +3,7 @@
    mostra le tappe del viaggio in Germania a pixel (lo sprite art/deutschland/schermo.webp, 4 × 3 mattonelle) e un alone
    di luce FERMO (niente animazioni: il muro deve restare leggero). Il rilievo è il drop-shadow doppio dei pezzi vivi
    (.chat-tasto). Toccandola cola la vernice (deutschland/vernice.js) e si va a /deutschland/. */
-.automat{height:auto;aspect-ratio:900/1200;padding:0;border:0;background:none;cursor:pointer;
+.automat{height:auto;aspect-ratio:900/1095;padding:0;border:0;background:none;cursor:pointer;
   filter:drop-shadow(0 3px 4px rgba(0,0,0,.5)) drop-shadow(0 10px 14px rgba(0,0,0,.3));transition:transform .18s cubic-bezier(.2,1.4,.4,1);-webkit-tap-highlight-color:transparent}
 .automat img{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:contain;pointer-events:none}
 /* lo schermo (muro.js lo mette sugli angoli di muro-dati.js con la matrix3d): sotto il nero dello spento, sopra lo sprite
@@ -19,3 +19,9 @@
 .automat:active{scale:.96}
 .automat:focus-visible{outline:3px solid #ffd400;outline-offset:4px}
 @media (prefers-reduced-motion:reduce){.automat{transition:none}}
+/* Deutschland 4 (10.11.2026): la macchinetta gialla di Stoccarda, di giorno, sulla serranda di sera: un velo che la scurisce
+   un poco; lo schermo delle tappe sta sul foglio nero incollato sul giallo (niente alone verde: è carta) */
+.automat img{filter:brightness(.86) saturate(.92)}
+.automat .am-luce{display:none!important}
+.automat .am-schermo{box-shadow:inset 0 0 0 1px rgba(0,0,0,.7),inset 0 0 6px rgba(0,0,0,.6)}
+.automat .am-schermo::after{background:none}

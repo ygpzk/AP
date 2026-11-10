@@ -180,3 +180,44 @@ biglietto (solo per le richieste che arrivano dritte dal pc; `pzkko/deutschland/
 - CLIP: `andreasjansson/clip-features` su Replicate, 24 miniature per predizione; le somiglianze restano in
   `catalogo\clip.json`, la soglia si ritocca gratis.
 - Nominatim: 1 richiesta al secondo, `User-Agent: pzkko-deutschland (pzkko@yahoo.com)`.
+
+## La via e la macchinetta gialla (Deutschland 4, 10.11.2026: `via.mjs`, `automat.mjs`)
+
+L'ingresso di `/deutschland/` è la via di Stoccarda dove l'8.11 alle 14:14 c'era la macchinetta gialla vera (img-6354…6361
+del catalogo). Alberto: «ricrea esattamente quello sfondo e questa macchinetta», adesivi e loghi **tutti inventati**, «il
+doppio della roba», la password su un foglietto attaccato al muro, la gialla anche sulla serranda.
+
+```
+node tools/pzkko/deutschland/via.mjs rif          # riferimenti dagli originali (lavoro/deutschland/via/rif/, fuori da Git): la macchinetta di
+                                                   # img-6355 RADDRIZZATA frontale (omografia sugli angoli ANGOLI_6355, alto/largo 1,35)
+node tools/pzkko/deutschland/via.mjs genera automat-nb via-nb [--volte=2]   # nano-banana-pro 4K (automat-gpt: gpt-image-2, a confronto)
+node tools/pzkko/deutschland/via.mjs contatto     # lavoro/deutschland/via-v1.png: GUARDARLO
+node tools/pzkko/deutschland/via.mjs ritocca [nome…]   # ritocchi su ritagli medi (RITOCCHI) della macchinetta scelta
+node tools/pzkko/deutschland/via.mjs componi      # automat-finale.png: i ritocchi buoni (FINALE) dentro le loro maschere + i pezzi in SVG
+node tools/pzkko/deutschland/automat.mjs          # scontorno, 20 vetrinette coi pacchetti e i cartellini, display, cartello UE,
+                                                   # webp per la pagina e la serranda, muro-dati.js, controllo automat-rettangoli.png
+```
+
+Com'è andata (≈ 4 $): la via al primo colpo (`via-nb/20261110-203402-1.png`); la macchinetta: delle due nano-banana è
+stata tenuta la `9ae5aj` (gpt-image-2 a 1024 × 1536 era più disegnata). Ritoccarla tutta intera NON funziona (il modello
+incolla gli adesivi nuovi dove capita, anche sul foglio nero, e lascia i vecchi); i ritagli troppo piccoli (< 400 px) gli
+fanno inventare un'inquadratura nuova; i ritagli medi (500–900 px) funzionano, e si incolla solo dentro una maschera
+attorno al pezzo cambiato (così il testo vicino resta com'era). Dove il modello storpiava le scritte piccole (il tondo
+«BREZN AKTION», «kartengeld», la targhetta della ditta, il cartello UE) le scritte sono disegnate in SVG, esatte; librsvg
+(sharp) non sa fare `textPath`: la scritta in cerchio è una lettera alla volta (`anello`). In sharp, `removeAlpha()` e
+`joinChannel()` nella stessa catena lasciano lo strato opaco: due passi.
+
+`automat.mjs` scrive `muro-dati.js` (la serranda nell'export di default; `pagina`, `colonna`, `vetrine`, `via` per la
+pagina): **`schermo.mjs angoli` e `immagini.mjs usa automat` sono della macchinetta grigia di prima e lo riscriverebbero
+nel formato vecchio: non lanciarli più.** Le prove: `tools/pzkko/lavoro/deutschland/prova-via.mjs [--telefono]` (la via,
+il foglietto, da vicino, la vetrinetta 9 → Brezn Gold) e `prova-serranda.mjs` (la gialla sulla home).
+
+**La notte stessa** (Alberto: «crea la macchinetta da zero frontalmente perfettamente in vista perpendicolare»,
+«avvicinati di più», «fai fare tutto lì direttamente», «disabilita lo scroll e togli il piè di pagina», «rifai il muro
+con replicate da zero»): `via.mjs genera automat-orto` ridisegna la macchinetta finita come un prospetto (tenuta la
+`6w6ayd`), `via.mjs orto` ci rifà in SVG le scritte piccole che il modello aveva storpiato di nuovo (adesivo verde, rosa,
+targhetta, anello BREZN, «KAFFEE IST PFLICHT», «BAD CANNSTATT») e riporta il cartello UE giusto → `automat-orto-finale.png`,
+quella che usa `automat.mjs`. `via.mjs genera muro-nb` fa il muro da vicino (travertino di fronte, centro vuoto, 4K; tenuta
+la `9h062p`, copiata in `lavoro/deutschland/via/muro-scelto.png`) → `art/deutschland/muro-2400.webp`, `muro-4800.webp`; il
+panorama largo (`via-nb`) non si usa più. La pagina è una schermata sola: niente vista da vicino, le 20 vetrinette sono
+tasti sulla macchinetta (`pagina.vetrine`, `pagina.bocchetta` in muro-dati.js).

@@ -1,13 +1,17 @@
-/* Deutschland (9.11.2026, «Deutschland 2» la sera stessa, «Deutschland 3» la notte): l'ingresso dell'album del viaggio a
-   Monaco e Stoccarda con JMA. Nero (#0e0d0c), oro (#ffd400) e rosso (#dd0000) come la bandiera; i titoli in Anton (il
-   @font-face sta in barra/pagina.css, che qui si carica per quello e si copre: niente muro né foglio). Oswald (la
-   segnaletica tedesca) è dichiarato in pacchi.css e si usa solo dentro: la macchinetta non lo aspetta. La macchinetta grande
-   sta al centro sotto la barra (--barra), accesa: una lampada calda dall'alto sul muro, e la sua luce (#am-luce,
-   accesso.js) su insegna, vetrinette, display, led. Il campo della password sta DENTRO il display proiettato (anche sul
-   telefono) e si manda coi tasti veri 1–8 della foto (.am-tasto, trasparenti, col bordo che si schiaccia). Dentro #album
-   non si stila niente: è galleria.css. */
+/* Deutschland (9.11.2026, «Deutschland 2» la sera stessa, «Deutschland 3» la notte): l'album del viaggio a Monaco e
+   Stoccarda con JMA. Nero (#0e0d0c), oro (#ffd400) e rosso (#dd0000) come la bandiera; i titoli dentro in Anton (il
+   @font-face sta in barra/pagina.css, che qui si carica per quello e si copre: niente muro né foglio).
+   Deutschland 4 (10.11.2026, Alberto: «ricrea esattamente quello sfondo e questa macchinetta al posto di quell'inizio
+   orribile e triste»): l'ingresso è LA VIA di Stoccarda della macchinetta gialla vera, di giorno, d'autunno. La notte
+   stessa («avvicinati di più», «fai fare tutto lì direttamente», «disabilita lo scroll e togli il piè di pagina»): una
+   schermata sola e ferma, la macchinetta frontale grande al centro (accesso.js, disponi(), mette --mx --my --mw --mh in
+   px su #automat e il panorama alla sua scala), le 20 vetrinette tasti veri, la targa e il foglietto sul muro ai lati
+   (sul telefono, .stretto: la targa sopra, il foglietto sul piede). Niente piè di pagina. Oswald (la segnaletica
+   tedesca, la targa) e Caveat (la penna del foglietto) sono già nei fogli del sito. Dentro #album non si stila niente:
+   è galleria.css. */
 @font-face{font-family:"Fake Receipt";src:url(/fonts/fake-receipt.woff2) format("woff2");font-weight:400;font-display:swap}
-:root{--nero:#0e0d0c;--oro:#ffd400;--rosso:#dd0000;--verde:#46ff7d;--carta:#f4efe2;--inchiostro:#1c1a14;color-scheme:dark}
+@font-face{font-family:"Oswald";src:url(/fonts/oswald-600.woff2) format("woff2");font-weight:600;font-display:swap}
+:root{--nero:#0e0d0c;--oro:#ffd400;--rosso:#dd0000;--verde:#46ff7d;--carta:#f4efe2;--inchiostro:#1c1a14;--penna:#1d3b8f;color-scheme:dark}
 html{background:var(--nero)}
 body{min-height:100dvh;background:var(--nero);color:#f1efe8;font:400 16px/1.5 "Special Elite","Courier New",monospace;overflow-x:hidden}
 body::before{display:none} /* (pagina.css: il muro scurito; qui no) */
@@ -15,111 +19,99 @@ body::before{display:none} /* (pagina.css: il muro scurito; qui no) */
 [hidden]{display:none!important}
 .nascosto{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
-/* ── l'ingresso: la macchinetta da vicino, sotto una lampada ───────────────────────────────────────────────────────── */
-.automat{flex:1;display:grid;justify-items:center;align-content:start;box-sizing:border-box;min-height:100dvh;
-  padding:calc(var(--barra,72px) + env(safe-area-inset-top) + 10px) 16px 18px;text-align:center;
-  background:radial-gradient(ellipse 46% 60% at 50% 30%,rgba(255,186,110,.17),rgba(255,170,90,.05) 55%,transparent 75%),
-    radial-gradient(ellipse 80% 40% at 50% 100%,rgba(0,0,0,.6),transparent),var(--nero)}
-.am-testa{margin:0 0 8px}
-.am-titolo{margin:0;font:400 clamp(40px,6.4vw,70px)/.92 var(--fa,"Anton",Impact,sans-serif);color:var(--oro);letter-spacing:.03em;text-transform:uppercase;white-space:nowrap;
-  text-shadow:0 3px 0 var(--rosso),0 6px 14px rgba(0,0,0,.7),0 0 34px rgba(255,190,80,.25)}
-.am-sotto{margin:8px 0 0;color:#b7b1a6;font-size:14px;letter-spacing:.03em}
-.accesso{position:relative;isolation:isolate;display:grid;justify-items:center;gap:0;width:100%;margin:0}
-/* la luce della macchinetta che si spande sul muro buio intorno */
-.accesso::before{content:"";position:absolute;left:50%;top:-4%;z-index:-1;width:min(150%,1150px);aspect-ratio:1;translate:-50% 0;pointer-events:none;
-  background:radial-gradient(closest-side,rgba(255,196,120,.2),rgba(255,176,96,.08) 50%,transparent)}
-/* la macchinetta: alta quanto resta nel primo schermo, sotto titolo e barra (1028×1641: larghezza = altezza disponibile × 0,626) */
-.am-corpo{position:relative;width:min(100%,calc((100dvh - var(--barra,72px) - 190px) * .626),600px);margin:0 auto;container-type:inline-size;
-  filter:drop-shadow(0 6px 10px rgba(0,0,0,.6)) drop-shadow(0 26px 44px rgba(0,0,0,.55))}
-.am-foto{display:block;width:100%;height:auto;filter:brightness(1.04) contrast(1.03)}
+/* ── l'ingresso: una schermata sola, ferma (niente scroll, niente piè di pagina) ───────────────────────────────────── */
+html:not(.dentro),html:not(.dentro) body{overflow:hidden;overscroll-behavior:none}
+.automat{position:relative;height:100dvh;overflow:hidden;color:var(--inchiostro);background:#8f887b var(--segnaposto,none) center/cover no-repeat}
+/* la via: accesso.js (disponi) mette il panorama alla scala della macchinetta, con lei al centro */
+.via{position:absolute;inset:0;overflow:hidden}
+.via-foto{position:absolute;display:block;max-width:none;pointer-events:none;-webkit-user-select:none;user-select:none}
 
-/* la luce (accesso.js la mette sugli stessi numeri di muro-dati.js): si accende una volta, con lo sfarfallio dei neon */
-.am-luce{position:absolute;inset:0;pointer-events:none}
-.am-luce>i{position:absolute;display:block;opacity:0}
-.am-luce.accesa>i{opacity:1;animation:dl-accendi 1.5s linear .25s 1 both}
-.am-luce.accesa>.luce-led{animation-duration:.4s;animation-delay:1.3s}
-@keyframes dl-accendi{0%{opacity:0}6%{opacity:.85}10%{opacity:.08}17%{opacity:1}21%{opacity:.25}30%{opacity:.95}34%{opacity:.5}44%,100%{opacity:1}}
-/* l'insegna ZIGARETTEN e le vetrinette accese da dietro: backdrop-filter alza il contrasto (le lettere e i pacchetti chiari si
-   accendono, il fondo nero resta nero), il neon in cima a ogni vetrinetta e la luce che ne esce; l'alone caldo sul metallo
-   intorno all'insegna */
-.luce-insegna{-webkit-backdrop-filter:contrast(1.45) brightness(1.1) saturate(.9);backdrop-filter:contrast(1.45) brightness(1.1) saturate(.9);border-radius:3px}
-.luce-alone{background:radial-gradient(closest-side,rgba(255,196,120,.16),rgba(255,180,100,.05) 60%,transparent);mix-blend-mode:screen}
-.luce-vetrina{-webkit-backdrop-filter:brightness(1.16) contrast(1.12) saturate(1.12);backdrop-filter:brightness(1.16) contrast(1.12) saturate(1.12);border-radius:2px;
-  background:linear-gradient(rgba(255,250,232,.3),rgba(255,250,232,0) 26%);box-shadow:0 0 2.4cqw .5cqw rgba(255,226,170,.2)}
-/* la luce delle vetrinette che cade sui tasti */
-.luce-cade{background:linear-gradient(rgba(255,222,165,.2),rgba(255,222,165,.08) 60%,transparent);mix-blend-mode:screen}
-/* l'alone verde del display sul metallo intorno */
-.luce-schermo{border-radius:1.5cqw;box-shadow:0 0 4cqw 1.2cqw rgba(70,255,125,.2),0 0 1.2cqw .3cqw rgba(70,255,125,.22);mix-blend-mode:screen}
-.luce-led{border-radius:50%;background:radial-gradient(circle,#e8fff0 0 14%,rgba(70,255,125,.85) 26%,rgba(70,255,125,.3) 48%,transparent 70%);mix-blend-mode:screen}
+/* la macchinetta: --mx, --my, --mw, --mh (px) li calcola disponi(); sul computer il corpo è alto quanto lo schermo sotto
+   la barra e il piede esce in basso (ci si è avvicinati); l'ombra morbida del pomeriggio, luce da sinistra */
+.am-corpo{position:absolute;left:var(--mx,0);top:var(--my,0);width:var(--mw,0);height:var(--mh,0);z-index:2;container-type:inline-size;
+  filter:drop-shadow(1cqw .7cqw 1.2cqw rgba(40,30,20,.4))}
+.am-foto{display:block;width:100%;height:100%;max-width:none}
+/* il display LCD (accesso.js lo proietta sugli angoli di muro-dati.js): cifre scure sul verde-grigio, come quelli veri */
+.am-lcd{position:absolute;transform-origin:0 0;overflow:hidden;container-type:size;display:grid;place-items:center;pointer-events:none}
+.ac-led{font:400 min(44cqh,10.5cqw)/1 "Fake Receipt","Courier New",monospace;letter-spacing:.04em;color:#1d2419;white-space:nowrap;text-shadow:.6cqh .8cqh 0 rgba(29,36,25,.18)}
 
-/* lo schermo: accesso.js lo mette sugli angoli di muro-dati.js (matrix3d); dentro, le misure sono in cqw dello schermo */
-.am-schermo{position:absolute;transform-origin:0 0;overflow:hidden;container-type:size;background:#0b0f0a;color:var(--verde);
-  box-shadow:inset 0 0 0 2px #060806,inset 0 0 28px rgba(0,0,0,.95)}
-.am-schermo::after{content:"";position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(ellipse at 50% 45%,rgba(70,255,125,.07),transparent 70%),repeating-linear-gradient(transparent 0 2px,rgba(0,0,0,.16) 2px 3px),linear-gradient(172deg,rgba(255,255,255,.09),rgba(255,255,255,.02) 46%,rgba(255,255,255,0) 48%)}
-.am-schermo>*{position:relative;z-index:1}
-.am-schermo{display:grid;grid-template-rows:auto 1fr auto;align-content:stretch;box-sizing:border-box;padding:5cqw 6cqw 4cqw;text-align:left;gap:1cqw}
-.ac-led{margin:0;font:400 clamp(18px,11cqw,46px)/1 "Fake Receipt",monospace;letter-spacing:.1em;color:var(--verde);text-shadow:0 0 8px rgba(70,255,125,.85),0 0 2px rgba(70,255,125,.9);white-space:nowrap}
-.ac-led-sotto{margin:0;font:400 clamp(11px,5cqw,18px)/1.2 "Fake Receipt",monospace;letter-spacing:.08em;color:rgba(70,255,125,.75);text-shadow:0 0 6px rgba(70,255,125,.6);white-space:nowrap}
-.ac-slot{display:grid;align-content:center;gap:2cqw;min-height:0}
-/* il campo: alto 64 px sul computer, carattere monospazio 28 px, con l'occhio che mostra la password */
-.ac-campo{position:relative;display:block;width:100%}
-.ac-input{display:block;width:100%;height:clamp(46px,19cqw,64px);box-sizing:border-box;padding:0 clamp(52px,15cqw,62px) 0 clamp(10px,3cqw,16px);border:2px solid rgba(70,255,125,.45);border-radius:4px;background:rgba(70,255,125,.08);
-  color:var(--verde);font:400 clamp(20px,8cqw,28px)/1 "Fake Receipt","Courier New",monospace;letter-spacing:.18em;caret-color:var(--verde);outline:none;text-shadow:0 0 6px rgba(70,255,125,.7)}
-.ac-input::placeholder{color:rgba(70,255,125,.35);text-shadow:none;letter-spacing:.1em}
-.ac-input:focus{border-color:var(--verde);background:rgba(70,255,125,.13);box-shadow:0 0 0 3px rgba(70,255,125,.18)}
+/* le 20 vetrinette: tasti veri. Il tasto è la casella della griglia; la luce sta sulla vetrinetta (--in-x, --in-y) */
+.am-vetrine{position:absolute;inset:0;pointer-events:none}
+.am-vetrina{position:absolute;margin:0;padding:0;border:0;background:transparent;cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.am-vetrina::after{content:"";position:absolute;inset:var(--in-y,0) var(--in-x,0);border-radius:.25cqw;transition:background-color .08s ease,box-shadow .08s ease}
+.am-vetrina.scelto::after{background:rgba(255,246,214,.16);box-shadow:0 0 0 .35cqw rgba(255,220,120,.95),0 0 2.4cqw .7cqw rgba(255,210,110,.55)}
+.am-vetrina.premuto::after,.am-vetrina:active::after{background:rgba(0,0,0,.28);box-shadow:inset 0 .5cqw .8cqw rgba(0,0,0,.7)}
+.am-vetrina.comprato::after{background:rgba(255,212,0,.3);box-shadow:0 0 0 .45cqw var(--oro),0 0 3.4cqw 1cqw rgba(255,212,0,.65)}
+.am-vetrina:focus-visible{outline:2px solid var(--oro);outline-offset:1px}
+/* il cartellino sopra la vetrinetta: nome e prezzo, un adesivo da prezzo */
+.am-etichetta{position:absolute;z-index:3;margin:0;translate:-50% calc(-100% - .8cqw);display:grid;justify-items:center;gap:.1em;padding:.35em .7em .4em;white-space:nowrap;pointer-events:none;
+  background:#fffdf3;color:#1c1a14;border-radius:3px;box-shadow:0 2px 6px rgba(0,0,0,.4);font:400 clamp(12px,1.9cqw,17px)/1.1 "Special Elite","Courier New",monospace;rotate:-1.5deg}
+.am-etichetta b{font:600 clamp(14px,2.3cqw,21px)/1.05 "Oswald","Arial Narrow",sans-serif;letter-spacing:.02em}
+.am-etichetta span{color:#c8102e}
+.am-etichetta::after{content:"";position:absolute;left:50%;bottom:-5px;width:10px;height:10px;translate:-50% 0;rotate:45deg;background:#fffdf3}
+/* il pacchetto che cade dalla bocchetta (una transizione sola) */
+.am-pacco{position:absolute;z-index:3;height:auto;translate:-50% 0;filter:drop-shadow(0 .6cqw .8cqw rgba(0,0,0,.45));pointer-events:none}
+.am-pacco.sputa{transition:translate .62s cubic-bezier(.55,0,.8,.4),rotate .62s ease-in,scale .62s ease-in;translate:-50% 190%;rotate:16deg;scale:1.7}
+
+/* il titolo: una targa stradale di Stoccarda (smalto bianco, cornice nera, quattro viti) sul travertino a sinistra */
+.targa{position:absolute;z-index:2;right:calc(100vw - var(--mx) + 34px);top:calc(var(--my) + var(--mh) * .1);rotate:-.8deg;
+  box-sizing:border-box;width:max-content;max-width:calc(var(--mx) - 50px);padding:10px 26px 12px;border-radius:7px;text-align:center;color:#111;
+  background:radial-gradient(circle at 12px 12px,#9a9a96 0 3.2px,transparent 3.8px),radial-gradient(circle at calc(100% - 12px) 12px,#9a9a96 0 3.2px,transparent 3.8px),
+    radial-gradient(circle at 12px calc(100% - 12px),#9a9a96 0 3.2px,transparent 3.8px),radial-gradient(circle at calc(100% - 12px) calc(100% - 12px),#9a9a96 0 3.2px,transparent 3.8px),
+    linear-gradient(170deg,#fbfbf7,#e9e8e1);
+  box-shadow:inset 0 0 0 5px #fbfbf7,inset 0 0 0 9px #121212,4px 4px 8px rgba(30,25,20,.35)}
+.am-titolo{margin:0;font:600 clamp(30px,3.2vw,52px)/1.05 "Oswald","Arial Narrow",sans-serif;letter-spacing:.02em;text-transform:uppercase;white-space:nowrap}
+.am-sotto{margin:3px 0 0;font:600 clamp(9px,.82vw,14px)/1.3 "Oswald","Arial Narrow",sans-serif;letter-spacing:.04em;white-space:nowrap}
+
+/* la password: un foglietto a quadretti attaccato col nastro di carta sul muro a destra, scritto a penna (Caveat) */
+.foglietto{--q:15px;position:absolute;z-index:3;left:calc(var(--mx) + var(--mw) + 30px);top:calc(var(--my) + var(--mh) * .2);rotate:2.2deg;
+  box-sizing:border-box;width:min(240px,calc(100vw - var(--mx) - var(--mw) - 50px));margin:0;padding:24px 18px 14px;display:grid;gap:6px;color:var(--penna);font:400 22px/1.15 "Caveat","Comic Sans MS",cursive;
+  background:repeating-linear-gradient(transparent 0 calc(var(--q) - 1px),rgba(70,120,190,.22) calc(var(--q) - 1px) var(--q)),repeating-linear-gradient(90deg,transparent 0 calc(var(--q) - 1px),rgba(70,120,190,.22) calc(var(--q) - 1px) var(--q)),#fbfaf3;
+  box-shadow:3px 6px 10px rgba(30,25,20,.35),inset 0 0 26px rgba(160,140,100,.12)}
+.foglietto::before{content:"";position:absolute;left:50%;top:-12px;width:90px;height:26px;translate:-50% 0;rotate:-3deg;background:rgba(232,220,180,.78);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.fo-titolo{margin:0;font:400 34px/1 "Permanent Marker","Caveat",cursive;color:#c8102e;rotate:-2deg}
+.ac-campo{position:relative;display:block}
+.ac-input{display:block;width:100%;box-sizing:border-box;height:44px;padding:0 40px 2px 4px;border:0;border-bottom:3px dashed rgba(29,59,143,.7);background:transparent;border-radius:0;
+  color:var(--penna);font:400 30px/1 "Caveat","Comic Sans MS",cursive;letter-spacing:.06em;caret-color:#c8102e;outline:none}
+.ac-input::placeholder{color:rgba(29,59,143,.38);letter-spacing:0}
+.ac-input:focus{border-bottom-style:solid;background:rgba(255,236,120,.25)}
 .ac-input:disabled{opacity:.5}
-.ac-occhio{position:absolute;right:2px;top:2px;bottom:2px;width:clamp(44px,13cqw,56px);margin:0;padding:0;border:0;border-radius:3px;background:transparent;color:var(--verde);cursor:pointer;display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
-.ac-occhio span{display:block;width:26px;height:16px;border:2.5px solid currentColor;border-radius:100% 100% 100% 100%/160% 160% 160% 160%;position:relative;opacity:.8}
+.ac-occhio{position:absolute;right:0;top:0;bottom:0;width:40px;margin:0;padding:0;border:0;background:transparent;color:var(--penna);cursor:pointer;display:grid;place-items:center;-webkit-tap-highlight-color:transparent}
+.ac-occhio span{display:block;width:24px;height:14px;border:2.5px solid currentColor;border-radius:100%/160%;position:relative;opacity:.75}
 .ac-occhio span::after{content:"";position:absolute;left:50%;top:50%;width:7px;height:7px;border-radius:50%;background:currentColor;translate:-50% -50%}
-.ac-occhio[aria-pressed="true"] span{opacity:1;box-shadow:0 0 8px rgba(70,255,125,.7)}
-.ac-occhio[aria-pressed="true"] span::before{content:"";position:absolute;left:-4px;top:50%;width:34px;height:2.5px;background:currentColor;rotate:-30deg}
-.ac-occhio:focus-visible{outline:2px solid var(--verde);outline-offset:1px}
-.ac-stato{margin:0;min-height:1.3em;font:400 clamp(12px,4.8cqw,17px)/1.25 "Special Elite","Courier New",monospace;color:rgba(201,255,217,.9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ac-stato[data-tipo="male"]{color:#ff8a7a}
-.ac-stato[data-tipo="spenta"]{color:#ffb14a}
-.ac-stato[data-tipo="bene"]{color:#fff}
-.ac-stato[data-tipo="attesa"]{color:var(--oro)}
-.accesso.attesa .ac-input{opacity:.7}
-/* tornati dal tavolo col biglietto buono: niente campo, solo «BITTE WÄHLEN» e i tasti */
-.accesso.scegli .ac-campo{display:none}
-.accesso.scegli .ac-stato{text-align:center;font-size:clamp(13px,6cqw,20px)}
+.ac-occhio[aria-pressed="true"] span{opacity:1}
+.ac-occhio[aria-pressed="true"] span::before{content:"";position:absolute;left:-4px;top:50%;width:32px;height:2.5px;background:currentColor;rotate:-30deg}
+.ac-occhio:focus-visible,.fo-los:focus-visible{outline:2px solid #c8102e;outline-offset:2px}
+.fo-los{justify-self:end;min-height:40px;margin:0;padding:2px 14px;border:2.5px solid #c8102e;border-radius:48% 52% 45% 55%/60% 50% 55% 45%;background:transparent;color:#c8102e;
+  font:400 24px/1 "Permanent Marker","Caveat",cursive;cursor:pointer;rotate:-3deg;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+@media (hover:hover){.fo-los:hover{background:rgba(200,16,46,.08)}}
+.fo-los:active{scale:.95}
+.ac-stato{margin:0;font:400 21px/1.1 "Caveat","Comic Sans MS",cursive;color:var(--penna)}
+.ac-stato:empty{display:none}
+.ac-stato[data-tipo="male"],.ac-stato[data-tipo="spenta"]{color:#c8102e}
+.ac-stato[data-tipo="attesa"]{color:#b06a00}
+.fo-nota{margin:2px 0 0;font:400 11px/1.25 "Special Elite","Courier New",monospace;color:rgba(28,26,20,.55)}
+.foglietto.attesa .ac-input{opacity:.6}
+/* col biglietto buono: niente campo né tasto, solo «Passt! ✓» e «scegli un pacchetto» */
+.foglietto.buono .ac-campo,.foglietto.buono .fo-los,.foglietto.buono .fo-nota{display:none}
+.foglietto.buono .fo-titolo{color:#1a7a32}
+.foglietto.scuoti{animation:fo-scuoti .42s 1}
+@keyframes fo-scuoti{20%{translate:-7px 0}40%{translate:7px 0}60%{translate:-5px 0}80%{translate:3px 0}}
 
-/* i tasti veri 1–8 della foto: bottoni trasparenti sopra (accesso.js), la zona del tocco più grande del tasto, il bordo che
-   si schiaccia (ombra dentro) e la luce gialla su quello scelto */
-.am-tasti{position:absolute;inset:0;pointer-events:none;z-index:2}
-.am-tasto{position:absolute;margin:0;padding:0;border:0;border-radius:9%;background:transparent;cursor:pointer;pointer-events:auto;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-.am-tasto::before{content:"";position:absolute;inset:-34% -20%}
-.am-tasto::after{content:"";position:absolute;inset:3%;border-radius:inherit;transition:background-color .08s ease,box-shadow .08s ease}
-@media (hover:hover){.am-tasto:hover::after{background:rgba(255,226,170,.16);box-shadow:0 0 1.6cqw .3cqw rgba(255,214,140,.35)}}
-.am-tasto:active::after,.am-tasto.premuto::after{background:rgba(0,0,0,.32);box-shadow:inset 0 .7cqw 1cqw rgba(0,0,0,.8),inset 0 -.2cqw .4cqw rgba(255,255,255,.12)}
-.am-tasto.scelto::after{background:rgba(255,212,0,.28);box-shadow:inset 0 .5cqw .8cqw rgba(0,0,0,.55),0 0 2.6cqw .8cqw rgba(255,212,0,.5)}
-.am-tasto:focus-visible{outline:3px solid var(--oro);outline-offset:3px}
-.am-tasto:disabled{cursor:default}
-/* il pacchetto che la macchinetta sputa dopo la password giusta: sta nella bocchetta in basso, cade fuori e cresce */
-.am-pacco{position:absolute;left:50%;top:83%;width:12%;height:auto;translate:-50% 0;z-index:3;filter:drop-shadow(0 6px 10px rgba(0,0,0,.7));pointer-events:none}
-.am-pacco.sputa{transition:translate .7s cubic-bezier(.3,.9,.4,1),scale .7s cubic-bezier(.3,.9,.4,1);translate:-50% 70%;scale:2.4}
-.am-nota{margin:12px 0 0;color:#8f8a80;font-size:13px;line-height:1.4;white-space:nowrap}
+/* stretto (il telefono, o se ai lati non c'è posto: lo decide disponi): la targa sopra la macchinetta, il foglietto sul
+   piede, sotto la bocchetta */
+.automat.stretto .targa{right:auto;left:50%;top:auto;bottom:calc(100% - var(--my) + 8px);translate:-50% 0;max-width:calc(100vw - 20px);padding:7px 18px 9px}
+.automat.stretto .am-titolo{font-size:clamp(28px,9vw,40px)}
+.automat.stretto .am-sotto{font-size:clamp(9px,2.6vw,12px)}
+.automat.stretto .foglietto{left:50%;top:calc(var(--my) + var(--mh) * .76);translate:-50% 0;rotate:-1.6deg;width:min(250px,calc(100vw - 40px));padding:20px 16px 12px;gap:4px}
+.automat.stretto .foglietto.buono{top:calc(var(--my) + var(--mh) * .8);padding:16px 14px 10px}
+.automat.stretto .foglietto.scuoti{animation-name:fo-scuoti-t}
+@keyframes fo-scuoti-t{20%{translate:calc(-50% - 7px) 0}40%{translate:calc(-50% + 7px) 0}60%{translate:calc(-50% - 5px) 0}80%{translate:calc(-50% + 3px) 0}}
+.automat.stretto .fo-titolo{font-size:30px}
 
 /* ── dentro: solo il contenitore (il resto è galleria.css) ── */
 .album{box-sizing:border-box;min-height:100dvh;padding-top:calc(var(--barra,72px) + env(safe-area-inset-top))}
 html.dentro .barra{position:absolute} /* (la barra del sito, dentro, scorre via: non passa sopra alle foto) */
-html.dentro .piede{display:none} /* (dentro, la pagina è tutta del tavolo) */
 .dl{overflow-x:clip} /* (le cose storte del tavolo non allargano la pagina: sul telefono la farebbero più larga dello schermo) */
 
-.piede{width:min(100% - 32px,980px);margin:0 auto 24px;color:#8f8a80;font-size:13px;text-align:center}
-.piede a{color:var(--oro)}
-
-/* ── il telefono: la macchinetta larga quanto lo schermo, il campo sempre nel display ── */
-@media (max-width:899px),(hover:none) and (pointer:coarse){
-  .automat{padding-left:14px;padding-right:14px}
-  .am-titolo{font-size:clamp(38px,11vw,52px)}
-  .am-sotto{font-size:12.5px}
-  .am-corpo{width:min(100%,calc((100dvh - var(--barra,62px) - 150px) * .626),440px)}
-  .am-schermo{padding:4cqw 5cqw 3cqw}
-  .ac-led{font-size:clamp(16px,10cqw,40px)}
-  .ac-input{height:clamp(44px,21cqw,58px);font-size:clamp(18px,9cqw,24px);padding-left:12px}
-  .ac-stato{font-size:clamp(12px,5.4cqw,16px)}
-  .am-nota{font-size:12.5px;margin-top:12px;max-width:46ch;white-space:normal}
-}
-@media (prefers-reduced-motion:reduce){.am-pacco.sputa{transition:none}.am-luce.accesa>i{animation:none}.am-tasto::after{transition:none}}
+@media (prefers-reduced-motion:reduce){.am-pacco.sputa,.am-vetrina::after{transition:none}.foglietto.scuoti{animation:none}}

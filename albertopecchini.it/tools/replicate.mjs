@@ -109,7 +109,8 @@ export async function prediction(id) {
 /** Scarica le immagini di una predizione riuscita in `dir`, con il JSON dell'input accanto. */
 export async function salva(p, dir, extra = {}) {
   await mkdir(dir, { recursive: true })
-  const stamp = new Date(p.created_at || Date.now()).toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '-')
+  // (con l'id della predizione in coda: due predizioni dello stesso secondo non si sovrascrivono)
+  const stamp = `${new Date(p.created_at || Date.now()).toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '-')}-${String(p.id).slice(0, 6)}`
   const files = []
   for (const [i, url] of [p.output].flat().filter(Boolean).entries()) {
     const res = await fetch(url)

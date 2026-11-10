@@ -567,8 +567,10 @@ html.auto .fari,html.auto .freni,html.auto .neonauto,html.auto .riflessi{display
            che mostra miniature pixelate delle tappe come fossero le marche, luce propria, rilievo 2D, nel primo schermo, centrata,
            un po' sotto la metà»): le foto del viaggio in Germania con JMA, a /deutschland/, dietro una password. La veste
            deutschland/muro.js (lo schermo con lo sprite delle tappe, la luce ferma; le regole in deutschland/muro.css); al tocco cola
-           la vernice (deutschland/vernice.js). Pezzo abs di disposizione.js (#automat-muro) -->
-      <button class="it pezzo vivo automat" id="automat-muro" type="button" data-suono-no style="--x:540;--y:26;--w:200;--r:-1deg;--mx:80;--my:210;--mw:230;--mr:-1deg;z-index:6" aria-label="la macchinetta delle sigarette: le foto del viaggio in Germania" title="Zigarettenautomat"><img src="/art/deutschland/automat.webp" alt="" width="900" height="1437"><span class="am-schermo" aria-hidden="true" hidden></span><span class="am-luce" aria-hidden="true" hidden></span></button>
+           la vernice (deutschland/vernice.js). Pezzo abs di disposizione.js (#automat-muro). Dal 10.11 (Deutschland 4) è la
+           macchinetta gialla vera di Stoccarda, solo il corpo, un filo scurita per la sera; lo schermo delle tappe sta sul suo
+           foglio nero (muro-dati.js `schermo`, tools/pzkko/deutschland/automat.mjs) -->
+      <button class="it pezzo vivo automat" id="automat-muro" type="button" data-suono-no style="--x:540;--y:26;--w:225;--r:-1deg;--mx:75;--my:210;--mw:240;--mr:-1deg;z-index:6" aria-label="la macchinetta delle sigarette: le foto del viaggio in Germania" title="Zigarettenautomat"><img src="/art/deutschland/automat.webp" alt="" width="900" height="1095"><span class="am-schermo" aria-hidden="true" hidden></span><span class="am-luce" aria-hidden="true" hidden></span></button>
       <script>import('/deutschland/muro.js').then((m) => m.veste(document.getElementById('automat-muro'))).catch((e) => console.warn('automat non vestito', e))</script>
       <!-- /automat -->
     </div>
