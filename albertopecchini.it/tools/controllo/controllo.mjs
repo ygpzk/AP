@@ -57,6 +57,13 @@ const urlOf = (file) => {
   return rel.endsWith('/index.html') ? rel.slice(0, -'index.html'.length) : rel
 }
 
+// La macchina del tempo (public/tempo/<sito>/<giorno>/pagina/) conserva l'HTML vero
+// dei siti com'erano quel giorno, anche di altri siti e con i difetti di allora:
+// è un archivio congelato, non si corregge e non si controlla.
+const ARCHIVIO = /^\/tempo\/[^/]+\/[^/]+\/pagina\//
+const archiviate = pages.filter((file) => ARCHIVIO.test(urlOf(file))).length
+pages.splice(0, pages.length, ...pages.filter((file) => !ARCHIVIO.test(urlOf(file))))
+
 /** Esiste nella build il file che risponde a `path` (con cleanUrls e trailingSlash di vercel.json)? */
 const exists = (path) => {
   if (redirects.has(path)) return true
@@ -145,7 +152,7 @@ if (existsSync(sitemap)) {
   }
 }
 
-const where = relative(process.cwd(), OUT) || OUT
+const where = (relative(process.cwd(), OUT) || OUT) + (archiviate ? ` (più ${archiviate} della macchina del tempo, non controllate)` : '')
 if (!problems.length) {
   console.log(`controllo: ${pages.length} pagine in ${where}, nessun problema`)
   process.exit(0)
