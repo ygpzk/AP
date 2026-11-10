@@ -310,7 +310,7 @@ function tempo() {
 }
 
 // ── Il manifesto a tutta larghezza ───────────────────────────────────────────
-// La frase a sinistra, Alberto scontornato a destra (la foto «curioso» dello studio) (come il «The most
+// La frase a sinistra, Alberto scontornato a destra (la foto «curioso», l'iPhone bianco) (come il «The most
 // important technology…» di reflection).
 
 function banner() {

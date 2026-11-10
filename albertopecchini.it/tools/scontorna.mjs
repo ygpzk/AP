@@ -9,8 +9,15 @@
 //
 // Decontaminazione: nei pixel semitrasparenti del bordo (i capelli) il colore
 // della foto è ancora un misto di soggetto e fondo, e su una pagina scura
-// lascerebbe un alone chiaro. Il fondo si stima dai bordi della foto (mediana) e
-// si toglie: soggetto = (osservato − (1 − a) · fondo) / a.
+// lascerebbe un alone chiaro. Il fondo si stima intorno a ogni pixel di bordo
+// (media dei pixel di fondo vicini, o la mezza finestra più simile dove il fondo
+// cambia di colpo: muro, porta, piastrelle) e si toglie:
+// soggetto = (osservato − (1 − a) · fondo) / a.
+//
+// Il modello restituisce la maschera a circa 1024 px sul lato lungo: su una foto
+// grande i bordi (capelli, orecchie, polsi) vengono morbidi. Per un lavoro fino si
+// rimanda il modello su ritagli stretti delle zone difficili e si fondono le
+// maschere in <uscita>.modello.png, che lo script poi riusa.
 
 import { writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
@@ -84,28 +91,72 @@ const Lb = 0.2126 * fondo[0] + 0.7152 * fondo[1] + 0.0722 * fondo[2]
 const comeFondo = (i) =>
   lum(i) >= Lb - 12 && Math.max(Math.abs(foto[i] - foto[i + 1]), Math.abs(foto[i + 1] - foto[i + 2]), Math.abs(foto[i] - foto[i + 2])) <= 10
 
-// immagini integrali: conteggio dei pixel pieni e somma dei loro colori
+// Immagini integrali: conteggio e somma dei colori dei pixel pieni (il soggetto)
+// e di quelli che il modello dà per fondo. Il fondo non è sempre uniforme (in
+// bagno: muro chiaro, porta di legno, piastrelle nere): per ogni pixel di bordo
+// conta il fondo che ha intorno, non la mediana dei bordi della foto.
 const W1 = w + 1
-const cnt = new Float64Array(W1 * (h + 1))
-const sums = [0, 1, 2, 3].map(() => new Float64Array(W1 * (h + 1)))
+const integrali = () => ({ cnt: new Float64Array(W1 * (h + 1)), sums: [0, 1, 2, 3].map(() => new Float64Array(W1 * (h + 1))) })
+const sog = integrali()
+const fnd = integrali()
 for (let y = 0; y < h; y++) {
   for (let x = 0; x < w; x++) {
     const i = (y * w + x) * 4
-    const pieno = mask[i + 3] > 242 && !comeFondo(i) ? 1 : 0
     const o = (y + 1) * W1 + x + 1
     const up = o - W1
-    cnt[o] = pieno + cnt[o - 1] + cnt[up] - cnt[up - 1]
     const vals = [foto[i], foto[i + 1], foto[i + 2], lum(i)]
-    for (let k = 0; k < 4; k++) sums[k][o] = pieno * vals[k] + sums[k][o - 1] + sums[k][up] - sums[k][up - 1]
+    const pesi = [[sog, mask[i + 3] > 242 && !comeFondo(i) ? 1 : 0], [fnd, mask[i + 3] < 8 ? 1 : 0]]
+    for (const [{ cnt, sums }, n] of pesi) {
+      cnt[o] = n + cnt[o - 1] + cnt[up] - cnt[up - 1]
+      for (let k = 0; k < 4; k++) sums[k][o] = n * vals[k] + sums[k][o - 1] + sums[k][up] - sums[k][up - 1]
+    }
   }
 }
 const box = (arr, x, y, r) => {
   const x0 = Math.max(0, x - r), y0 = Math.max(0, y - r), x1 = Math.min(w, x + r + 1), y1 = Math.min(h, y + r + 1)
   return arr[y1 * W1 + x1] - arr[y0 * W1 + x1] - arr[y1 * W1 + x0] + arr[y0 * W1 + x0]
 }
+// Colore medio vicino: le medie su tre finestre (R, 3R, 9R) si mescolano in
+// proporzione a quanti pixel contengono. Passare dall'una all'altra di colpo fa
+// saltare l'alpha sul bordo della finestra quadrata, e sul fondo scuro si vedono
+// rettangoli.
+const vicino = ({ cnt, sums }, x, y) =>
+  [9 * R, 3 * R, R].reduce((acc, r, k) => {
+    const n = box(cnt, x, y, r)
+    if (!n) return acc
+    const s = { L: box(sums[3], x, y, r) / n, c: [0, 1, 2].map((j) => box(sums[j], x, y, r) / n) }
+    if (!acc) return s
+    const t = Math.min(1, n / [0, 200, 80][k])
+    return { L: acc.L + (s.L - acc.L) * t, c: acc.c.map((v, j) => v + (s.c[j] - v) * t) }
+  }, null)
+
+// Il fondo vicino, ma dove il fondo cambia di colpo (soffitto e muro, muro e
+// porta) la media mescola i due lati e una striscia del lato più scuro resta
+// semitrasparente. Si guardano anche le quattro mezze finestre (sopra, sotto,
+// sinistra, destra) e vale quella col fondo più simile al pixel.
+const MEZZA = 2 * R
+const mezza = ({ cnt, sums }, x0, y0, x1, y1) => {
+  x0 = Math.max(0, x0), y0 = Math.max(0, y0), x1 = Math.min(w, x1), y1 = Math.min(h, y1)
+  const b = (arr) => arr[y1 * W1 + x1] - arr[y0 * W1 + x1] - arr[y1 * W1 + x0] + arr[y0 * W1 + x0]
+  const n = b(cnt)
+  return n >= 60 ? { L: b(sums[3]) / n, c: [0, 1, 2].map((j) => b(sums[j]) / n) } : null
+}
+const fondoVicino = (x, y, L) => {
+  const r = MEZZA
+  const cand = [
+    vicino(fnd, x, y),
+    mezza(fnd, x - r, y - r, x + r + 1, y + 1),
+    mezza(fnd, x - r, y, x + r + 1, y + r + 1),
+    mezza(fnd, x - r, y - r, x + 1, y + r + 1),
+    mezza(fnd, x, y - r, x + r + 1, y + r + 1),
+  ].filter(Boolean)
+  if (!cand.length) return { L: Lb, c: fondo }
+  return cand.reduce((best, s) => (Math.abs(s.L - L) < Math.abs(best.L - L) ? s : best))
+}
 
 const A = new Float32Array(w * h) // alpha finale, 0–1
 const FG = new Float32Array(w * h * 3).fill(-1) // colore del soggetto vicino, dove serve
+const BG = new Float32Array(w * h * 3).fill(-1) // colore del fondo vicino, dove serve
 let rifiniti = 0
 for (let y = 0; y < h; y++) {
   for (let x = 0; x < w; x++) {
@@ -114,21 +165,12 @@ for (let y = 0; y < h; y++) {
     let a = mask[i + 3] / 255
     // tutti i semitrasparenti del modello, più i trasparenti vicini al soggetto
     // (i capelli sottili tagliati): limitarsi a una fascia lascerebbe bordi dritti
-    if (a < 0.95 && (a > 0 || box(cnt, x, y, BANDA) > 0)) {
-      // Colore del soggetto vicino: le medie su tre finestre (R, 3R, 9R) si
-      // mescolano in proporzione a quanti pixel pieni contengono. Passare
-      // dall'una all'altra di colpo fa saltare l'alpha sul bordo della finestra
-      // quadrata, e sul fondo scuro si vedono rettangoli.
-      const ref = [9 * R, 3 * R, R].reduce((acc, r, k) => {
-        const n = box(cnt, x, y, r)
-        if (!n) return acc
-        const s = { L: box(sums[3], x, y, r) / n, c: [0, 1, 2].map((j) => box(sums[j], x, y, r) / n) }
-        if (!acc) return s
-        const t = Math.min(1, n / [0, 200, 80][k])
-        return { L: acc.L + (s.L - acc.L) * t, c: acc.c.map((v, j) => v + (s.c[j] - v) * t) }
-      }, null)
-      if (ref && Lb - ref.L >= CONTRASTO) {
-        a = Math.max(0, Math.min(1, (Lb - lum(i)) / (Lb - ref.L)))
+    if (a < 0.98 && (a > 0 || box(sog.cnt, x, y, BANDA) > 0)) {
+      const bg = fondoVicino(x, y, lum(i))
+      for (let k = 0; k < 3; k++) BG[p * 3 + k] = bg.c[k]
+      const ref = a < 0.95 && vicino(sog, x, y)
+      if (ref && bg.L - ref.L >= CONTRASTO) {
+        a = Math.max(0, Math.min(1, (bg.L - lum(i)) / (bg.L - ref.L)))
         if (a < 0.1) a = 0 // rumore e leggere ombre del fondo, non capelli
         for (let k = 0; k < 3; k++) FG[p * 3 + k] = ref.c[k]
         rifiniti++
@@ -161,9 +203,10 @@ for (let p = 0; p < w * h; p++) {
   if (!a) continue // resta tutto a zero: trasparente
   const i = p * 4
   const fg = FG[p * 3] >= 0
+  const bg = BG[p * 3] >= 0 ? BG.subarray(p * 3, p * 3 + 3) : fondo
   for (let k = 0; k < 3; k++) {
     const o = foto[i + k]
-    const f = a > 0.98 ? o : a < 0.3 && fg ? FG[p * 3 + k] : (o - (1 - a) * fondo[k]) / a
+    const f = a > 0.98 ? o : a < 0.3 && fg ? FG[p * 3 + k] : (o - (1 - a) * bg[k]) / a
     pulita[i + k] = Math.max(0, Math.min(255, Math.round(f)))
   }
   pulita[i + 3] = Math.round(a * 255)

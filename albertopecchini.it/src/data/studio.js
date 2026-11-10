@@ -18,8 +18,21 @@ export const photos = {
   portrait: { src: '/media/studio/fototessera.webp', width: 1000, height: 1250, alt: 'Alberto Pecchini in primo piano, di fronte, con un maglione blu scuro', caption: 'FIG. 01 — Ritratto' },
   // La testa della stessa fototessera, in un quadrato, per il saluto in cima alla home.
   avatar: { src: '/media/studio/fototessera-avatar.webp', width: 192, height: 192, alt: '' },
-  // Scontornata (fondo trasparente): in /studio/ esce dal riquadro scuro. Le misure
-  // sono della versione grande; `small` è la variante per i telefoni.
+  // Scontornate (fondo trasparente). Le misure sono della versione grande; `small`
+  // è la variante per i telefoni.
+  // Il selfie allo specchio, in bianco e nero: in /studio/ esce dal riquadro scuro
+  // sotto «Prima per curiosità, poi per mestiere». Foto del 10.11.2026 (6048×8064),
+  // ritagliata dalla cima dei capelli a sotto la bandiera e scontornata con
+  // tools/scontorna.mjs; testa e mano rifatte su ritagli stretti per avere la
+  // maschera a piena risoluzione, il telefono ripulito dalle staffe del muro.
+  mirror: {
+    src: '/media/studio/specchio-1600.webp',
+    small: '/media/studio/specchio-900.webp',
+    width: 1600,
+    height: 1735,
+    alt: 'Alberto Pecchini si fa un selfie allo specchio, in bianco e nero, con una felpa nera con la scritta Scotland',
+  },
+  // L'iPhone bianco: il manifesto della home.
   curious: {
     src: '/media/studio/curioso-1600.webp',
     small: '/media/studio/curioso-900.webp',

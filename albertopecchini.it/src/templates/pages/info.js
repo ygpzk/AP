@@ -232,7 +232,7 @@ export function studioPage() {
         <figure class="spop" data-reveal="pop">
           <div class="spop__stage">
             <div class="spop__panel" aria-hidden="true"></div>
-            <img class="spop__figure" src="${photos.curious.src}" srcset="${photos.curious.small} 900w, ${photos.curious.src} 1600w" sizes="(min-width: 900px) 60vw, 100vw" width="${photos.curious.width}" height="${photos.curious.height}" alt="${esc(photos.curious.alt)}" fetchpriority="high" decoding="async">
+            <img class="spop__figure" src="${photos.mirror.src}" srcset="${photos.mirror.small} 900w, ${photos.mirror.src} 1600w" sizes="(min-width: 900px) 40vw, 100vw" width="${photos.mirror.width}" height="${photos.mirror.height}" alt="${esc(photos.mirror.alt)}" fetchpriority="high" decoding="async">
           </div>
           <figcaption class="spop__cap">
             <span class="spop__quote">Prima per <em class="serif-i">curiosità</em>, poi per mestiere.</span>
