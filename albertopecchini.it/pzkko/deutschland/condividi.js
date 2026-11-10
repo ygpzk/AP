@@ -1,5 +1,5 @@
 // La scelta multipla e «salva tutte» di Deutschland (9.11.2026, «Deutschland 2»). Alberto: «fallo semplice per scaricarle
-// su iPhone e pc», «no file e no zip». Tocco lungo (400 ms) su una stampa, o il cartello AUSWAHL della barra
+// su iPhone e pc», «no file e no zip». Tocco lungo (400 ms) su una stampa, o il cartello «Scegli foto» (prima AUSWAHL) dell'album
 // («deutschland:scegli») → modalità scelta: le stampe si spuntano (.scelta, spunta grande gialla), in basso la barra grande
 // #scelte «7 FOTO · SALVA TUTTE · ANNULLA». Gli originali li dà rete.js (originale(): su un tocco, mai da soli).
 //   iPhone (Web Share): il gesto fresco di Safari vuole navigator.share dentro un tocco appena fatto, non dopo cinque secondi
@@ -8,7 +8,7 @@
 //     il foglio di iOS, «Salva n immagini» → in Foto. Poi il gruppo dopo, finché finiscono.
 //   pc (o niente Web Share): una dopo l'altra, <a download> da blob: col nome vero (IMG_5506.JPG) appena ognuna è scaricata.
 // MAI uno zip, MAI un file scritto sul server. Dopo si libera tutto (revokeObjectURL, via i File).
-// Il visore usa PC, scaricaFile e condividiFile per la foto singola. SPEICHERN della barra («deutschland:speichern») salva
+// Il visore usa PC, scaricaFile e condividiFile per la foto singola. «Salva scelte» (prima SPEICHERN, «deutschland:speichern») salva
 // le scelte, o se non ce ne sono apre la scelta con l'invito «tocca le foto da salvare».
 
 import { evento, ascolta, peso } from './comune.js'

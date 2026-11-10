@@ -21,4 +21,10 @@
 @font-face{font-family:"Black Ops One";src:url(/fonts/black-ops-one.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Shrikhand";src:url(/fonts/shrikhand.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Rock Salt";src:url(/fonts/rock-salt.woff2) format("woff2");font-weight:400;font-display:swap}
+/* le cinque calligrafie del tavolo (9.11 notte, Alberto: «altri font, tipo altri 5»): Google Fonts, licenza OFL, solo il latino */
+@font-face{font-family:"Gloria Hallelujah";src:url(/fonts/gloria-hallelujah.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Shadows Into Light";src:url(/fonts/shadows-into-light.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Patrick Hand";src:url(/fonts/patrick-hand.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Covered By Your Grace";src:url(/fonts/covered-by-your-grace.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"Gochi Hand";src:url(/fonts/gochi-hand.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Reenie Beanie";src:url(/fonts/reenie-beanie.woff2) format("woff2");font-weight:400;font-display:swap}

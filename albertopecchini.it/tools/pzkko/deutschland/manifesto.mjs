@@ -32,6 +32,10 @@ const gruppi = leggiJson(path.join(CATALOGO, 'volti-gruppi.json'), { perFoto: {}
 const nomiVolti = leggiJson(path.join(CATALOGO, 'volti.json'), {}) // { '1': 'pekko', '4': 'mikas' } (lo scrive Alberto guardando i fogli)
 const mano = leggiJson(path.join(CATALOGO, 'tag-mano.json'), { piu: {}, meno: {} })
 const didascalie = leggiJson(path.join(CATALOGO, 'didascalie.json'), null) // (Agente 4: si legge soltanto)
+// i ricordi (Deutschland 3, 9.11.2026 notte): { migliori: [id…], meme: [{ testo, chi, vicino? }] }, scritto a mano. Le
+// migliori sono le foto del tavolo appena si entra; i meme le frasi del viaggio sparse sul tavolo (vicino = la foto accanto
+// a cui stanno). Stanno qui, nel manifesto dietro la password, e non nel repo pubblico
+const ricordi = leggiJson(path.join(CATALOGO, 'ricordi.json'), { migliori: [], meme: [] })
 const PERSONE = new Set(['pekko', 'mikas', 'jonny', 'jella'])
 /** L'elenco chiuso dei 20 tag del modello (piano, punto 4), nell'ordine in cui si aggiungono a TAG se compaiono. */
 const TAG_MODELLO = ['pekko', 'mikas', 'jonny', 'jella', 'gruppo', 'selfie', 'cibo', 'birra', 'notte', 'stadio', 'chiesa', 'strada', 'auto', 'treno', 'hotel', 'natura', 'panorama', 'negozio', 'screenshot', 'video']
@@ -89,6 +93,13 @@ for (const [i, f] of foto.entries()) {
 const giorni = foto.map((f) => f.giorno).sort()
 const nFasci = foto.length ? Math.floor((foto.length - 1) / PER_FASCIO) + 1 : 0
 const manifesto = { v: 2, generato: new Date().toISOString(), viaggio: { ...VIAGGIO, da: giorni[0] ?? VIAGGIO.da, a: giorni[giorni.length - 1] ?? VIAGGIO.a }, tag: ELENCO_TAG, fasci: { n: nFasci, per: PER_FASCIO }, posti: elencoPosti, tappe, foto }
+{
+  const ci = new Set(foto.map((f) => f.id))
+  const via = (ricordi.migliori ?? []).filter((id) => !ci.has(id))
+  if (via.length) console.log(`  ATTENZIONE: in ricordi.json ${via.length} migliori che non ci sono più (${via.slice(0, 5).join(', ')})`)
+  manifesto.migliori = (ricordi.migliori ?? []).filter((id) => ci.has(id))
+  manifesto.meme = (ricordi.meme ?? []).map((m) => ({ testo: pulito(m.testo, 200), chi: pulito(m.chi, 30) || null, vicino: ci.has(m.vicino) ? m.vicino : null })).filter((m) => m.testo)
+}
 
 const conta = Object.fromEntries(ELENCO_TAG.map((t) => [t, foto.filter((f) => f.tag.includes(t)).length]))
 const senzaS = foto.filter((f) => !cache.voci[f.id]?.s).length

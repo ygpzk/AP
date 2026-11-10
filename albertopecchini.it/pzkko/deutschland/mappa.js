@@ -9,8 +9,9 @@
 // {i}: ricerca binaria sui punti con GPS); la GLA grigia (art/deutschland/gla.webp) è un divIcon che si sposta con setLatLng
 // e gira col bearing dal punto prima, per la via più corta, con una transizione CSS di .4 s, e lascia una piccola scia; la
 // mappa si sposta SOLO se la GLA esce dai bordi ridotti del 20% (panTo; se è lontana, setView sulla città). Zoom iniziale
-// per città, il tasto «TUTTO IL VIAGGIO» (che poi diventa «DOV'È LA GLA»). Sul telefono il foglio sta ripiegato in alto
-// (36 dvh) e KARTE («deutschland:karte» {aperta}) lo apre a tutto schermo. Niente che giri a pagina ferma.
+// per città, il tasto «TUTTO IL VIAGGIO» (che poi diventa «DOV'È LA GLA»). Dalla notte («Deutschland 3») il foglio sta fuori
+// dallo schermo a destra e KARTE («deutschland:karte» {aperta}, galleria.js) lo fa entrare dal lato; un timbro con l'album
+// chiuso apre l'album di quel posto (packung.js). Niente che giri a pagina ferma.
 // Leaflet lo carica galleria.js dopo l'accesso e ce lo passa (L): qui niente import della libreria.
 
 import { evento, ascolta } from './comune.js'
@@ -101,14 +102,10 @@ function tutto(si) {
   else if (!si) map.setView(auto.getLatLng(), ZOOM_CITTA, { animate: !fermo() })
 }
 
-/** KARTE: sul telefono il foglio a tutto schermo (o ripiegato); sul computer, dove il foglio è sempre lì, «tutto il viaggio». */
+/** KARTE: il foglio è entrato dal lato (galleria.js lo apre e lo chiude): Leaflet si rimisura e la GLA si vede da vicino. */
 function karte({ aperta }) {
-  if (!foglio) return
-  if (innerWidth >= 900) { tutto(!!aperta); return }
-  foglio.classList.toggle('piena', !!aperta)
-  document.documentElement.classList.toggle('karte-aperta', !!aperta)
-  // (invalidateSize lo fa il ResizeObserver; qui l'inquadratura: aperta → la GLA da vicino)
-  requestAnimationFrame(() => { map.invalidateSize({ animate: false }); if (aperta && !vistaTutto) map.setView(auto.getLatLng(), ZOOM_VICINO, { animate: false }) })
+  if (!foglio || !aperta) return
+  requestAnimationFrame(() => { map.invalidateSize({ animate: false }); if (!vistaTutto) map.setView(auto.getLatLng(), ZOOM_CITTA, { animate: false }) })
 }
 
 /** «München → Stuttgart · 6.–8. November · 967 Erinnerungen» per il titolo a pennarello. */
@@ -184,7 +181,6 @@ export function avvia(manifesto, Leaflet) {
 
   tastoTutto = foglio?.querySelector('.mf-tutto')
   tastoTutto?.addEventListener('click', () => tutto(!vistaTutto))
-  foglio?.querySelector('.mf-chiudi')?.addEventListener('click', () => evento('karte', { aperta: false }))
 
   ascolta('foto', ({ i }) => vai(+i))
   ascolta('karte', karte)

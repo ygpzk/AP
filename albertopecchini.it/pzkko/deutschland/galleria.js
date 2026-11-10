@@ -1,20 +1,26 @@
-// L'album di Deutschland (9.11.2026, «Deutschland 2»): le foto del viaggio a Monaco e Stoccarda con Mikas, Jonny e Jella,
-// dopo la password. Questo modulo lo importa accesso.js (import('/deutschland/galleria.js')) quando il biglietto c'è:
-// scarica il manifesto foto.json dal server (comune.js: indirizzo), lo passa ai pezzi e li avvia:
-//   album.js      i capitoli per giorno e le righe giustificate (le miniature da rete.js), lo scroll che muove la mappa
-//   filtri.js     i 16 pacchetti sulla stecca e le tappe come scontrini
+// Dentro Deutschland (9.11.2026, «Deutschland 2»; la notte «Deutschland 3», il tavolo dei ricordi): le foto del viaggio a
+// Monaco e Stoccarda con Mikas, Jonny e Jella, dopo la password. Questo modulo lo importa accesso.js
+// (import('/deutschland/galleria.js')) quando il biglietto c'è: scarica il manifesto foto.json dal server (comune.js:
+// indirizzo), lo passa ai pezzi e li avvia:
+//   tavolo.js     il tavolo dei ricordi: le foto migliori sparse a mano, i pacchetti, i meme, gli sticker (si vede subito)
+//   packung.js    l'album di un pacchetto (o di un posto) in sovrapposizione al tavolo
+//   album.js      dentro la sovrapposizione: i capitoli per giorno e le righe giustificate, lo scroll che muove la mappa
+//   filtri.js     i 16 pacchetti (solo i dati)
 //   visore.js     la foto grande con la didascalia e i due tasti grandi di salvataggio
-//   condividi.js  la scelta multipla (tocco lungo o AUSWAHL) e «salva tutte»
-//   mappa.js      Leaflet dentro il foglio di carta, con la GLA: si carica SOLO qui, dopo l'accesso (pzkko-leggero)
+//   condividi.js  la scelta multipla (tocco lungo o «Scegli foto» nell'album) e «salva tutte»
+//   mappa.js      Leaflet dentro il foglio di carta che entra dal lato, con la GLA: si carica SOLO qui, dopo l'accesso
 //   rete.js       tutte le immagini passano di lì (cache, coda, fasci): qui si avvia il prefetch in idle dell'album
-// Qui stanno anche i quattro cartelli della barra alta (ALBUM · KARTE · AUSWAHL · SPEICHERN) e la riga «album scaricato
-// al 62 %». Il foglio di stile (galleria.css, pacchi.css) lo aggiunge lui se manca, così la pagina chiusa non lo scarica.
-// Se il server risponde 404 (biglietto scaduto o cambiato) o non risponde: evento «uscita», accesso.js riapre il form.
+// Qui stanno anche la barra alta del tavolo («◂ AUTOMAT» torna alla macchinetta, KARTE apre la mappa) con la riga «album
+// scaricato al 62 %», e l'apri-e-chiudi della mappa: il foglio entra da destra (.aperta), col velo dietro e la linguetta
+// KARTE sul bordo («deutschland:karte» {aperta}; mappa.js poi la inquadra). Il foglio di stile (galleria.css, pacchi.css) lo
+// aggiunge lui se manca, così la pagina chiusa non lo scarica. Se il server risponde 404 (biglietto scaduto o cambiato) o
+// non risponde: evento «uscita», accesso.js riapre il form.
 
 import { stato, indirizzo, evento, ascolta } from './comune.js'
 import * as rete from './rete.js'
-import * as filtri from './filtri.js'
 import * as album from './album.js'
+import * as tavolo from './tavolo.js'
+import * as packung from './packung.js'
 import * as visore from './visore.js'
 import * as condividi from './condividi.js'
 
@@ -38,23 +44,36 @@ async function manifesto() {
   try { return await r.json() } catch (e) { console.warn('deutschland: foto.json non è JSON', e?.message ?? e); evento('uscita', { motivo: 'json' }); return null }
 }
 
-/** La barra alta: i quattro cartelli e la riga dello scaricamento. */
+/** La barra alta del tavolo, la linguetta e il velo della mappa, e l'apri-e-chiudi del foglio. */
 function barra() {
   const b = document.getElementById('al-barra')
   if (!b || b.dataset.pronta) return
   b.dataset.pronta = '1'
-  const auswahl = b.querySelector('[data-azione="auswahl"]'), karte = b.querySelector('[data-azione="karte"]')
+  const foglioMappa = document.getElementById('mappa-foglio'), velo = document.getElementById('karte-velo'), linguetta = document.getElementById('karte-linguetta')
+  const tastiKarte = () => document.querySelectorAll('#al-barra [data-azione="karte"], #karte-linguetta')
+  const aperta = () => foglioMappa?.classList.contains('aperta')
   b.addEventListener('click', (e) => {
     const t = e.target.closest('[data-azione]')
     if (!t) return
-    const azione = t.dataset.azione
-    if (azione === 'album') { evento('karte', { aperta: false }); scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion:reduce)').matches ? 'instant' : 'smooth' }) }
-    else if (azione === 'karte') evento('karte', { aperta: karte.getAttribute('aria-pressed') !== 'true' })
-    else if (azione === 'auswahl') evento('scegli')
-    else if (azione === 'speichern') evento('speichern')
+    if (t.dataset.azione === 'automat') { evento('karte', { aperta: false }); evento('automat') }
+    else if (t.dataset.azione === 'karte') evento('karte', { aperta: !aperta() })
   })
-  ascolta('scelta', ({ attiva }) => auswahl?.setAttribute('aria-pressed', String(!!attiva)))
-  ascolta('karte', ({ aperta }) => karte?.setAttribute('aria-pressed', String(!!aperta)))
+  linguetta?.addEventListener('click', () => evento('karte', { aperta: !aperta() }))
+  velo?.addEventListener('click', () => evento('karte', { aperta: false }))
+  foglioMappa?.querySelector('.mf-chiudi')?.addEventListener('click', () => evento('karte', { aperta: false }))
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && aperta() && !document.getElementById('visore')?.open) evento('karte', { aperta: false }) })
+  ascolta('karte', ({ aperta: si }) => {
+    if (!foglioMappa) return
+    foglioMappa.classList.toggle('aperta', !!si)
+    foglioMappa.setAttribute('aria-hidden', String(!si))
+    foglioMappa.inert = !si
+    if (velo) velo.hidden = !si
+    document.documentElement.classList.toggle('karte-aperta', !!si)
+    for (const k of tastiKarte()) k.setAttribute('aria-pressed', String(!!si))
+    if (si) foglioMappa.querySelector('.mf-chiudi')?.focus({ preventScroll: true })
+  })
+  if (foglioMappa) foglioMappa.inert = true
+  if (linguetta) linguetta.hidden = false
   // «album scaricato al 62 %» (rete.js, prefetch dei fasci in idle); a 100 % la riga se ne va
   const riga = document.getElementById('al-scaricato')
   if (riga) {
@@ -81,10 +100,11 @@ export async function parti() {
   if (a) a.hidden = false
   try { await rete.pulisci?.(String(m.v ?? 1)) } catch {}
   barra()
-  await filtri.avvia(m)
   album.avvia(m)
+  tavolo.avvia(m)
   visore.avvia(m)
   condividi.avvia(m)
+  packung.avvia(m)
   partita = true; inCorso = false
   // Leaflet solo adesso: prima il foglio, poi lo script (UMD: si mette su window.L), poi la mappa
   try {
@@ -103,4 +123,7 @@ export async function parti() {
 }
 
 ascolta('accesso', () => { parti() })
+// fuori (alla macchinetta) la linguetta della mappa non c'è
+ascolta('automat', () => { const l = document.getElementById('karte-linguetta'); if (l) l.hidden = true })
+ascolta('accesso', () => { const l = document.getElementById('karte-linguetta'); if (l && partita) l.hidden = false })
 parti()

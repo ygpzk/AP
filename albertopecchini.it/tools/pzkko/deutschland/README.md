@@ -19,6 +19,7 @@ C:\pzkko-server\deutschland\catalogo\cache.json  + dati\s\ (360 webp q62)  dati\
    │ categorie.mjs → catalogo\clip.json (somiglianze), clip-auto.json (tag)
    │ descrivi.mjs → catalogo\didascalie.json (didascalia, persone, tag del VLM) + didascalie-conto.json (la spesa)
    │ a mano → catalogo\tag-mano.json { piu: { id: [tag] }, meno: { id: [tag] } }
+   │ a mano → catalogo\ricordi.json { migliori: [id…], meme: [{ testo, chi, vicino? }] } (il tavolo dei ricordi)
    ▼ manifesto.mjs (v2: s, fascio, didascalia, persone)
 C:\pzkko-server\deutschland\dati\foto.json (il contratto della galleria) + dati\origini.json (privato: id → DNG su D: per /raw)
    ▼ fasci.mjs
@@ -160,6 +161,10 @@ biglietto (solo per le richieste che arrivano dritte dal pc; `pzkko/deutschland/
   Alberto guarda e scrive `catalogo\volti.json` (`{ "1": "pekko", "2": "mikas", "5": "jonny", "7": "jella" }`): i gruppi
   senza nome restano senza tag. Il gruppo che somiglia alla foto «jager» di `amici.mjs` è proposto come pekko.
 - `catalogo\tag-mano.json`: `{ "piu": { "img-5506": ["alcool"] }, "meno": { "img-5510": ["auto"] } }`.
+- `catalogo\ricordi.json` (9.11.2026 notte, «Deutschland 3»): `migliori` = le foto del tavolo dei ricordi appena si
+  entra (scelte a occhio su fogli di provini), `meme` = le frasi del viaggio sparse sul tavolo (`vicino` = la foto accanto
+  a cui stanno). `manifesto.mjs` le copia in `foto.json` come `migliori` e `meme`: stanno dietro la password, non nel repo.
+  Dopo un cambio: `manifesto.mjs` e `carica.mjs --solo=foto.json`.
 - Dopo ogni correzione: `node tools/pzkko/deutschland/manifesto.mjs`.
 
 ## Cose da sapere

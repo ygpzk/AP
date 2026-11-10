@@ -6,11 +6,12 @@
 <script src="/manutenzione/guardia.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Deutschland: l'album del viaggio con JMA</title>
-<!-- Deutschland (9.11.2026, rifatta la sera stessa: «Deutschland 2», l'album dei ricordi): le foto del viaggio a Monaco e
+<!-- Deutschland (9.11.2026, rifatta la sera stessa: «Deutschland 2», l'album dei ricordi; la notte «Deutschland 3», il tavolo
+     dei ricordi): le foto del viaggio a Monaco e
      Stoccarda con Mikas, Jonny e Jella (JMA), dietro una password. Dal muro ci si arriva dalla macchinetta delle sigarette
      (#automat-muro in index.html, deutschland/muro.js): la vernice cola giù (vernice.js), si arriva qui e il telo nero
-     scende via. Qui la macchinetta da vicino chiede la password sul suo display (accesso.js) e il tasto largo ZIEHEN la
-     manda; dentro, l'album (galleria.js e i suoi moduli: album, filtri, mappa, visore, condividi) con le immagini che
+     scende via. Qui la macchinetta da vicino chiede la password sul suo display (accesso.js) e i suoi tasti veri 1–8 la
+     mandano; dentro, il tavolo dei ricordi (galleria.js e i suoi moduli: tavolo, packung, album, mappa, visore, condividi) con le immagini che
      passano tutte da rete.js. Le foto NON stanno su Vercel: stanno sul pc di Alberto (o su Backblaze, cdn b2) e la pagina
      le chiede col biglietto che dà /api/deutschland. Niente canonical né sitemap: è una pagina privata -->
 <meta name="robots" content="noindex,nofollow">
@@ -40,10 +41,12 @@
 <div class="telo" aria-hidden="true"></div>
 <main class="dl">
   <!-- ── l'ingresso: la macchinetta da vicino ─────────────────────────────────────────────────────────────────────────
-       La foto è automat-grande.webp (gpt-image-2, tools/pzkko/deutschland/immagini.mjs; gli angoli dello schermo stanno
-       in muro-dati.js). Il form avvolge la macchinetta: sul computer accesso.js mette il campo DENTRO il display
-       proiettato (#ac-slot) e il tasto ZIEHEN sotto il display (#ac-slot-ziehen); sul telefono campo, tasto e riga di
-       stato stanno sotto la macchinetta, nel flusso (#ac-modulo), coi tasti grandi per il pollice. -->
+       La foto è automat-grande.webp (gpt-image-2, tools/pzkko/deutschland/immagini.mjs; gli angoli dello schermo, le
+       vetrinette e i tasti stanno in muro-dati.js). Deutschland 3 (9.11.2026 notte, Alberto: «il tasto deve essere della
+       macchinetta gigante», «deve avere la luce vera»): il campo della password sta DENTRO il display proiettato, anche sul
+       telefono, e si entra coi TASTI VERI 1–8 della foto (accesso.js ci mette sopra otto bottoni trasparenti, #am-tasti):
+       il tasto 1 (JMA) apre il tavolo dei ricordi, gli altri anche l'album del loro pacchetto. La luce (#am-luce: insegna,
+       vetrinette, alone dello schermo, led) la disegna accesso.js con gli stessi numeri. -->
   <section id="automat" class="automat" aria-labelledby="am-titolo">
     <header class="am-testa">
       <h1 id="am-titolo" class="am-titolo">Deutschland</h1>
@@ -51,65 +54,88 @@
     </header>
     <form id="accesso" class="accesso" autocomplete="off" novalidate>
       <div class="am-corpo">
-        <img class="am-foto" src="/art/deutschland/automat-grande.webp" alt="una vecchia macchinetta tedesca delle sigarette, a muro" width="1028" height="1641" decoding="async" fetchpriority="high">
+        <img class="am-foto" src="/art/deutschland/automat-grande.webp" alt="una vecchia macchinetta tedesca delle sigarette, a muro, accesa" width="1028" height="1641" decoding="async" fetchpriority="high">
+        <div class="am-luce" id="am-luce" aria-hidden="true"></div>
         <div class="am-schermo" id="am-schermo">
-          <p class="ac-led" aria-hidden="true">PASSWORT</p>
-          <div class="ac-slot" id="ac-slot"></div>
-          <p class="ac-led-sotto" aria-hidden="true">BITTE EINGEBEN ▼</p>
+          <p class="ac-led" id="ac-led" aria-hidden="true">PASSWORT</p>
+          <div class="ac-slot" id="ac-slot">
+            <label class="ac-campo">
+              <span class="nascosto">la password</span>
+              <input id="ac-password" class="ac-input" type="password" name="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="latin" placeholder="••••••" aria-describedby="ac-stato" enterkeyhint="go">
+              <button type="button" class="ac-occhio" id="ac-occhio" aria-label="mostra la password" aria-pressed="false" data-suono-no><span aria-hidden="true"></span></button>
+            </label>
+            <p id="ac-stato" class="ac-stato" role="status" aria-live="polite"></p>
+          </div>
+          <p class="ac-led-sotto" id="ac-led-sotto" aria-hidden="true">DANN TASTE DRÜCKEN ▼</p>
         </div>
-        <div class="ac-slot-ziehen" id="ac-slot-ziehen"></div>
-        <!-- il pacchetto che la macchinetta sputa dopo la password giusta (una transizione sola, poi l'album) -->
+        <!-- i tasti veri 1–8 della foto (accesso.js): uno qualsiasi manda la password -->
+        <div class="am-tasti" id="am-tasti" role="group" aria-label="i tasti della macchinetta: il pacchetto che vuoi"></div>
+        <!-- il pacchetto che la macchinetta sputa dalla bocchetta dopo la password giusta (quello del tasto premuto) -->
         <img class="am-pacco" id="am-pacco" src="/art/deutschland/pacchi/alles.webp" alt="" width="60" height="80" hidden>
-      </div>
-      <div class="ac-modulo" id="ac-modulo">
-        <label class="ac-campo">
-          <span class="nascosto">la password</span>
-          <input id="ac-password" class="ac-input" type="password" name="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="latin" placeholder="••••••" aria-describedby="ac-stato" enterkeyhint="go">
-          <button type="button" class="ac-occhio" id="ac-occhio" aria-label="mostra la password" aria-pressed="false" data-suono-no><span aria-hidden="true"></span></button>
-        </label>
-        <button class="ac-ziehen" id="ac-ziehen" type="submit" data-suono-no><span class="ac-ziehen-testo">Ziehen</span><span class="ac-ziehen-freccia" aria-hidden="true">▸</span></button>
-        <p id="ac-stato" class="ac-stato" role="status" aria-live="polite"></p>
       </div>
     </form>
     <p class="am-nota">la password la controlla il pc di Alberto: se è spento, la macchinetta è spenta.</p>
   </section>
 
-  <!-- ── l'album (galleria.js e i suoi moduli: solo i contenitori) ─────────────────────────────────────────────────── -->
-  <section id="album" class="album" hidden aria-label="l'album del viaggio">
-    <!-- la barra alta: i cartelli ALBUM · KARTE · AUSWAHL · SPEICHERN e, sotto, la riga «album scaricato al 62 %» -->
+  <!-- ── dentro: il tavolo dei ricordi (Deutschland 3, tavolo.js) ───────────────────────────────────────────────────────
+       Alberto: «solo foto migliori appena apri», «sparse e messe a mano, non perfette», «le sigarette tra le foto», «come
+       l'outro di Cars 2, con la carta vera e tutte le cose del viaggio». Un foglio di carta con i margini spessi a destra e
+       a sinistra: le foto migliori (manifesto.migliori) sparse storte, i pacchetti di sigarette in mezzo, i meme del viaggio
+       su post-it, sottobicchieri e scontrini, gli sticker. Un pacchetto apre il suo album sopra (#packung, packung.js). -->
+  <section id="album" class="album" hidden aria-label="i ricordi del viaggio">
     <div class="al-barra" id="al-barra">
-      <div class="al-tasti" role="toolbar" aria-label="l'album">
-        <button type="button" class="segnale" data-azione="album" title="in cima all'album">Album</button>
-        <button type="button" class="segnale segnale-blau" data-azione="karte" aria-pressed="false" title="la mappa del viaggio">Karte</button>
-        <button type="button" class="segnale" data-azione="auswahl" aria-pressed="false" title="scegli più foto da salvare">Auswahl</button>
-        <button type="button" class="segnale segnale-gelb" data-azione="speichern" title="salva le foto scelte">Speichern</button>
-      </div>
+      <button type="button" class="segnale al-automat" data-azione="automat" title="torna alla macchinetta"><span aria-hidden="true">◂</span>Automat</button>
+      <p class="al-titolo">Deutschland</p>
+      <button type="button" class="segnale segnale-karte" data-azione="karte" aria-pressed="false" title="la mappa del viaggio"><svg class="ic-karte" viewBox="0 0 28 22" aria-hidden="true"><path d="M1 4l8-3 9 3 9-3v17l-9 3-9-3-8 3z" fill="#e9e1c6" stroke="#1c1a14" stroke-width="1.1" stroke-linejoin="round"/><path d="M9 1v17M18 4v17" stroke="#1c1a14" stroke-width=".7" opacity=".45"/><path d="M5 15c4-5 7-2 10-5s5-3 8-5" fill="none" stroke="#ffd400" stroke-width="2.6" stroke-linecap="round"/><path d="M5 15c4-5 7-2 10-5s5-3 8-5" fill="none" stroke="#1c1a14" stroke-width=".7" stroke-dasharray="1 2"/><circle cx="5" cy="15" r="2.1" fill="#dd0000"/><circle cx="23" cy="5" r="2.1" fill="#dd0000"/></svg>Karte</button>
       <p class="al-scaricato" id="al-scaricato" hidden><i></i><span></span></p>
     </div>
-    <nav id="filtri" class="filtri" aria-label="i pacchetti e le tappe: i filtri delle foto"></nav>
-    <div class="al-scena">
-      <div id="pagine" class="al-pagine" role="list" aria-label="le foto, per giorno"></div>
-      <!-- la mappa dentro un foglio vero (mappa.js): carta crema, pieghe, nastro agli angoli, titolo a pennarello -->
-      <aside id="mappa-foglio" class="mappa-foglio" aria-label="la mappa del viaggio">
-        <h2 class="mf-titolo" id="mf-titolo">München → Stuttgart</h2>
-        <div id="mappa" class="mappa"></div>
-        <div class="mf-piede">
-          <ul class="mf-legenda" aria-label="legenda">
-            <li class="lg-fatto">fatto</li><li class="lg-dopo">ancora da fare</li><li class="lg-tappa">tappa</li><li class="lg-gla">la GLA</li>
-          </ul>
-          <button type="button" class="segnale mf-tutto" data-azione="tutto">Tutto il viaggio</button>
-          <button type="button" class="segnale segnale-gelb mf-chiudi" data-azione="chiudi-karte">Zurück zum Album</button>
-        </div>
-      </aside>
-    </div>
+    <div id="tavolo" class="tavolo" role="list" aria-label="le foto migliori, i pacchetti e i ricordi"></div>
   </section>
+
+  <!-- la mappa: un foglio di carta che entra dal lato destro (mappa.js; galleria.js la apre e la chiude), col velo dietro.
+       Il tasto è UNO solo per volta: sul computer largo la cartina appuntata nel margine destro (#karte-linguetta), se no
+       quella nella barra del tavolo -->
+  <button type="button" class="segnale segnale-karte karte-linguetta" id="karte-linguetta" data-azione="karte" hidden title="la mappa del viaggio"><svg class="ic-karte" viewBox="0 0 28 22" aria-hidden="true"><path d="M1 4l8-3 9 3 9-3v17l-9 3-9-3-8 3z" fill="#e9e1c6" stroke="#1c1a14" stroke-width="1.1" stroke-linejoin="round"/><path d="M9 1v17M18 4v17" stroke="#1c1a14" stroke-width=".7" opacity=".45"/><path d="M5 15c4-5 7-2 10-5s5-3 8-5" fill="none" stroke="#ffd400" stroke-width="2.6" stroke-linecap="round"/><path d="M5 15c4-5 7-2 10-5s5-3 8-5" fill="none" stroke="#1c1a14" stroke-width=".7" stroke-dasharray="1 2"/><circle cx="5" cy="15" r="2.1" fill="#dd0000"/><circle cx="23" cy="5" r="2.1" fill="#dd0000"/></svg><span>Karte</span></button>
+  <div class="karte-velo" id="karte-velo" hidden></div>
+  <!-- (la quinta: una cornice fissa grande quanto lo schermo che taglia il foglio quando è fuori, se no sul telefono la pagina
+       diventerebbe più larga dello schermo) -->
+  <div class="karte-quinta">
+  <aside id="mappa-foglio" class="mappa-foglio" aria-label="la mappa del viaggio" aria-hidden="true">
+    <h2 class="mf-titolo" id="mf-titolo">München → Stuttgart</h2>
+    <div id="mappa" class="mappa"></div>
+    <div class="mf-piede">
+      <ul class="mf-legenda" aria-label="legenda">
+        <li class="lg-fatto">fatto</li><li class="lg-dopo">ancora da fare</li><li class="lg-tappa">tappa</li><li class="lg-gla">la GLA</li>
+      </ul>
+      <button type="button" class="segnale mf-tutto" data-azione="tutto">Tutto il viaggio</button>
+      <button type="button" class="segnale segnale-gelb mf-chiudi" data-azione="chiudi-karte">Zurück</button>
+    </div>
+  </aside>
+  </div>
+
+  <!-- l'album di un pacchetto (o di un posto della mappa), sopra al tavolo (packung.js; dentro, album.js) -->
+  <div id="packung" class="packung" hidden role="dialog" aria-modal="true" aria-labelledby="pk-nome">
+    <header class="pk-testa">
+      <span class="pk-scatola" id="pk-scatola" aria-hidden="true"><img class="pk-pacco" id="pk-pacco" alt="" width="40" height="64"></span>
+      <div class="pk-titoli"><h2 class="pk-nome" id="pk-nome">JMA</h2><p class="pk-conta" id="pk-conta"></p></div>
+      <div class="pk-tasti" role="toolbar" aria-label="l'album">
+        <button type="button" class="segnale" data-azione="auswahl" aria-pressed="false" title="scegli più foto da salvare">Scegli foto</button>
+        <button type="button" class="segnale segnale-gelb" data-azione="speichern" title="salva le foto scelte">Salva scelte</button>
+        <button type="button" class="segnale segnale-karte" data-azione="karte" title="la mappa del viaggio"><svg class="ic-karte" viewBox="0 0 28 22" aria-hidden="true"><path d="M1 4l8-3 9 3 9-3v17l-9 3-9-3-8 3z" fill="#e9e1c6" stroke="#1c1a14" stroke-width="1.1" stroke-linejoin="round"/><path d="M9 1v17M18 4v17" stroke="#1c1a14" stroke-width=".7" opacity=".45"/><path d="M5 15c4-5 7-2 10-5s5-3 8-5" fill="none" stroke="#ffd400" stroke-width="2.6" stroke-linecap="round"/><path d="M5 15c4-5 7-2 10-5s5-3 8-5" fill="none" stroke="#1c1a14" stroke-width=".7" stroke-dasharray="1 2"/><circle cx="5" cy="15" r="2.1" fill="#dd0000"/><circle cx="23" cy="5" r="2.1" fill="#dd0000"/></svg>Karte</button>
+      </div>
+      <button type="button" class="segnale segnale-gelb pk-chiudi" data-azione="chiudi" title="torna al tavolo" aria-label="chiudi l'album, torna al tavolo"><span aria-hidden="true">✕</span></button>
+    </header>
+    <div class="pk-scorre" id="pk-scorre">
+      <div id="pagine" class="al-pagine" role="list" aria-label="le foto del pacchetto, per giorno"></div>
+    </div>
+  </div>
   <dialog id="visore" class="visore" aria-label="la foto grande"></dialog>
   <div id="scelte" class="scelte" hidden role="toolbar" aria-label="le foto scelte"></div>
 </main>
 <footer class="piede">© 2026 pzkko · fatto da <a href="https://www.albertopecchini.it">Alberto Pecchini</a> · le foto sono di chi c'era · <a href="/info/">info e copyright</a></footer>
 <script type="module" src="/barra/barra.js"></script>
 <script type="module" src="/deutschland/accesso.js"></script>
-<!-- gli stili dell'album e dei pacchetti: in fondo, così la macchinetta non li aspetta (galleria.js li aggiunge se mancano) -->
+<!-- gli stili del tavolo, dell'album e dei pacchetti: in fondo, così la macchinetta non li aspetta (galleria.js li aggiunge se mancano) -->
 <link rel="stylesheet" href="/deutschland/galleria.css">
 <link rel="stylesheet" href="/deutschland/pacchi.css">
 </body>
