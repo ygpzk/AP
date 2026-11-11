@@ -1037,6 +1037,9 @@ La scheda: icona grande, nome, quanti e quanto vale, cosa fa e il bonus (scorre 
 == Le pagine ==
 La '''postazione''': la scena in piccolo, i maturati che crescono da soli con la barra della memoria, produzione, temperatura, hash, resa; OK incassa (la moneta), ↓ la guardi a schermo intero, senza barra, coi pixel veri del disegno (200 × 125). I '''pezzi''': le dodici categorie col pezzo montato o «manca!»; OK il negozio della categoria (disegno a metà, nome, numeri, prezzo o «ne hai»), la scheda (il disegno 38 × 38, i numeri, se va bene col resto, compra confermato, monta o monta +1, smonta, vendi confermato). I '''[[I PC pronti della miniera|PC pronti]]''': la scheda col disegno, la produzione, il prezzo (il listino barrato) e «compra e monta».
 
+== Il pezzo che non ci sta ==
+L'11 novembre 2026 Alberto: «non posso montare i pezzi comprati». Aveva comprato la rx del cugino (una scheda media) col case da scarpe montato, che tiene solo schede corte: il tasto «monta» spariva senza dire perché. Da allora «monta» resta: dice perché il pezzo non ci sta e qual è il pezzo meno caro che lo fa stare (prima uno che hai già; <code>perMontare</code> in <code>chat/miniera.js</code>), e un tasto porta alla sua scheda. Comprare un pezzo che adesso non entra chiede conferma con l'avviso, e nel negozio della categoria quelli che hai ma non entrano hanno il ⚠. Il collaudo rifà il caso con <code>--banca --miniera-cugino</code>.
+
 {{Vedi anche|La miniera|Elenco dei pezzi della miniera|I PC pronti della miniera|Le app di pzk os}}
 [[Categoria:Le app di pzk os]]`,
   },
