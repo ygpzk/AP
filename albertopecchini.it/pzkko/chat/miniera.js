@@ -184,17 +184,20 @@ export function piena(ora = Date.now()) {
 }
 
 /** (11.11, Alberto: «non posso montare i pezzi comprati») Il pezzo non ci sta: quale altro pezzo cambiare perché ci stia.
- *  Prima uno che hai già, poi il meno caro da comprare. → { cat, id, ho } o null (ci sta già, o niente lo fa stare) */
-export function perMontare(cat, id) {
-  if (!PER_ID[id] || compatibile(cat, id, 1).ok) return null
+ *  Prima uno che hai già, poi il meno caro da comprare. → { cat, id, ho } o null (ci sta già, o niente lo fa stare)
+ *  (11.11) `n`: quanti ne devono stare, per «monta +1» (il secondo monitor col tavolo da un posto solo, la seconda scheda
+ *  col case da uno slot: prima cercava solo per il primo, e il «non ci sta» non sapeva suggerire il tavolo o il case) */
+export function perMontare(cat, id, n = 1) {
+  n = Math.max(1, Math.floor(n) || 1)
+  if (!PER_ID[id] || compatibile(cat, id, n).ok) return null
   const s = leggi()
   let meglio = null
   for (const c of ['case', 'tavolo', 'gpu', 'ventole', 'schermo']) {
     if (c === cat) continue
     for (const y of catalogo(c)) {
-      const m = { ...s.montati, [c]: scritto(c, y.id, 1), [cat]: scritto(cat, id, 1) }
+      const m = { ...s.montati, [c]: scritto(c, y.id, 1), [cat]: scritto(cat, id, n) }
       if (c === 'case' || c === 'tavolo') adatta(m)
-      if (incastri(m, cat).length || !posto(m, cat)) continue
+      if (incastri(m, cat).length || !(posto(m, cat)?.n >= n)) continue // (adatta può averne smontati: devono starci tutti e n)
       const ho = (s.posseduti[y.id] ?? 0) > 0, costo = ho ? 0 : y.prezzo
       if (!meglio || costo < meglio.costo) meglio = { cat: c, id: y.id, ho, costo }
     }

@@ -8,7 +8,7 @@
 //   tasti ♥ − + carrello compra (← → li scelgono). Comprare si conferma; poi lo scontrino, che si stampa riga per riga.
 // - IL CARRELLO: le righe (OK: togli, una in meno, una in più), paga (si conferma), svuota.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, C, esa } from './lcd.js'
 import * as icone from './icone.js'
 import * as pzk from '../../../games/pzk.js'
 import * as zaino from '../../../chat/zaino.js'
@@ -41,6 +41,15 @@ const nonPuoi = (t) => (pzk.inGalera() ? `in galera fino alle ${ora(pzk.galera()
 const bm = (id, lato) => icone.bitmap(id, lato) ?? icone.bitmap('app-shop', lato)
 const ce = (x) => x.unico && zaino.ha(x.id)
 
+// ── i colori (11.11, Alberto: «fai colori a 8bit su tutto»): pochi e con un senso. Il testo resta d'inchiostro; quello che è
+// colorato (lo sconto, i soldi che mancano, i risparmi) è un cartellino col testo bianco, che si legge su tutti gli sfondi
+// (rosso o verde chiaro su «arancione» spariva); il cuore dei preferiti è rosso; lo scontrino è un foglio di carta col testo
+// nero, come uno vero ──
+const ROSSO = esa('#cc0000'), VERDE = esa('#006600'), CARTA = esa('#ffffcc'), NERO = C.nero, GRIGIO = esa('#999999')
+/** Un cartellino: la fascia del colore attorno al testo (un pixel d'aria), il testo bianco. → la larghezza */
+function cartellino(l, x, y, s, fondo) { const w = Lcd.larghezza(s) + 4; l.riempi(x, y - 1, w, 9, fondo); l.testo(x + 2, y, s, { col: C.bianco }); return w }
+const largoCart = (s) => Lcd.larghezza(s) + 4
+
 // le scelte della vetrina: restano finché la pagina è aperta
 let ordine = 'top', solo = false, cerca = '', ultima = 0
 
@@ -65,7 +74,7 @@ function aggiungi(x, n) {
 // ── lo scontrino: si stampa una riga alla volta ──
 function scontrino(os, s, alla) {
   let stampate = 0
-  const righe = [...s.righe.map((r) => ({ a: `${r.n} × ${PER_ID[r.id]?.nome ?? r.id}`, b: fmt(r.tot) })), ...(s.risparmio ? [{ a: 'sconti di oggi', b: `-${fmt(s.risparmio)}` }] : [])]
+  const righe = [...s.righe.map((r) => ({ a: `${r.n} × ${PER_ID[r.id]?.nome ?? r.id}`, b: fmt(r.tot) })), ...(s.risparmio ? [{ a: 'sconti di oggi', b: `-${fmt(s.risparmio)}`, risp: true }] : [])]
   const VIS = 4 // (11.11: ?.nome: un id della banca che il catalogo non ha più rompeva lo scontrino dopo aver pagato)
   const v = {
     nome: 'negozio-scontrino', app: 'negozio',
@@ -74,14 +83,26 @@ function scontrino(os, s, alla) {
     disegna(l) {
       centro(l, os.BARRA + 3, 'pzk shop')
       centro(l, os.BARRA + 12, new Date(s.t).toLocaleString('it-IT', { timeZone: 'Europe/Rome', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }))
-      for (let x = 12; x < W - 12; x += 4) l.riempi(x, os.BARRA + 22, 2, 1) // il tratteggio dello scontrino
+      // (11.11) il foglio dello scontrino: carta chiara col testo nero, che si allunga mentre si stampa; la carta e il nero
+      // non dipendono dallo sfondo, così si legge anche su «notte», e un bordo grigio lo stacca da «carta»
+      const r0 = os.BARRA + 25, nr = Math.min(stampate, VIS) + (righe.length > VIS && stampate > VIS ? 1 : 0)
+      const yt = r0 + (Math.min(righe.length, VIS) + (righe.length > VIS ? 1 : 0)) * 9 + 2
+      const fondo = stampate > righe.length + 2 ? yt + 31 : stampate > righe.length + 1 ? yt + 22 : stampate > righe.length ? yt + 12 : r0 + nr * 9 + 1
+      const y0 = os.BARRA + 20, xa0 = 10, xa1 = W - 10
+      l.riempi(xa0, y0, xa1 - xa0, fondo - y0, CARTA); l.vert(xa0, y0, fondo - y0, GRIGIO); l.vert(xa1 - 1, y0, fondo - y0, GRIGIO)
+      for (let x = xa0; x < xa1; x += 4) l.riempi(x, fondo, 2, 1, CARTA) // (lo strappo, a dentini)
+      const tratto = (y) => { for (let x = 12; x < W - 12; x += 4) l.riempi(x, y, 2, 1, GRIGIO) }
+      tratto(os.BARRA + 22) // il tratteggio dello scontrino
+      const riga = (y, a, b, cb = NERO) => { // (puntini di pezzi.js, col nero della carta: l'inchiostro su «notte» è chiaro)
+        const x0 = 14, x1 = 241, xa = x0 + Lcd.larghezza(a) + 4, xb = x1 - Lcd.larghezza(b) - 4
+        l.testo(x0, y, a, { col: NERO }); for (let x = xa; x < xb; x += 3) l.px(x, y + 6, GRIGIO); destra(l, x1, y, b, { col: cb })
+      }
       const mostra = righe.slice(0, Math.min(stampate, VIS))
-      mostra.forEach((r, i) => puntini(l, os.BARRA + 25 + i * 9, corto(r.a, 28), r.b, { x0: 14, x1: 241 }))
-      if (righe.length > VIS && stampate > VIS) l.testo(14, os.BARRA + 25 + VIS * 9, corto(righe.length - VIS === 1 ? 'e un’altra riga' : `e altre ${righe.length - VIS} righe`, 37)) // (11.11: «e altre 1 righe»)
-      const yt = os.BARRA + 25 + (Math.min(righe.length, VIS) + (righe.length > VIS ? 1 : 0)) * 9 + 2
-      if (stampate > righe.length) { for (let x = 12; x < W - 12; x += 4) l.riempi(x, yt, 2, 1); puntini(l, yt + 3, 'TOTALE $PZK', fmt(s.tot), { x0: 14, x1: 241 }) }
-      if (stampate > righe.length + 1) centro(l, yt + 13, corto(`saldo: ${fmt(pzk.saldo())} $pzk`, 38))
-      if (stampate > righe.length + 2) centro(l, yt + 22, 'grazie, e arrivederci')
+      mostra.forEach((r, i) => riga(r0 + i * 9, corto(r.a, 28), r.b, r.risp ? VERDE : NERO)) // (gli sconti, verdi: soldi risparmiati)
+      if (righe.length > VIS && stampate > VIS) l.testo(14, r0 + VIS * 9, corto(righe.length - VIS === 1 ? 'e un’altra riga' : `e altre ${righe.length - VIS} righe`, 37), { col: NERO }) // (11.11: «e altre 1 righe»)
+      if (stampate > righe.length) { tratto(yt); riga(yt + 3, 'TOTALE $PZK', fmt(s.tot)) }
+      if (stampate > righe.length + 1) centro(l, yt + 13, corto(`saldo: ${fmt(pzk.saldo())} $pzk`, 38), { col: NERO })
+      if (stampate > righe.length + 2) centro(l, yt + 22, 'grazie, e arrivederci', { col: NERO })
       const a = 'OK continua · → apre lo zaino', xa = Math.round(W / 2 - Lcd.larghezza(a) / 2)
       l.testo(xa, H - 9, a)
       os.zona(xa - 3, H - 11, Lcd.larghezza('OK continua') + 6, 11, () => alla())
@@ -139,11 +160,13 @@ function scheda(os, x, alla, avvisa = () => {}) {
       // la testa: l'icona grande, il nome, il reparto, il prezzo, quanti ne hai
       l.bitmap(bm(x.id, 32), 8, 14)
       l.testo(46, 15, corto(x.nome, 33))
-      l.testo(46, 24, corto(`${reparto ? reparto[1] : ''}${x.tipo === 'usa' ? ' · da usare' : x.tipo === 'cassa' ? ' · cassa' : x.unico ? ' · da tenere' : ''}${preferiti().has(x.id) ? ' · ♥' : ''}`, 33))
+      const pref = preferiti().has(x.id), r2 = `${reparto ? reparto[1] : ''}${x.tipo === 'usa' ? ' · da usare' : x.tipo === 'cassa' ? ' · cassa' : x.unico ? ' · da tenere' : ''}`
+      const xr = l.testo(46, 24, corto(pref ? `${r2} · ` : r2, pref ? 31 : 33))
+      if (pref) l.testo(46 + xr + 1, 24, '♥', { col: ROSSO }) // (11.11: il cuore dei preferiti, rosso)
       const s = mercato.scontoDi(x.id), p = `${fmt(mercato.prezzoDi(x))} $pzk`
       let xp = 46
-      if (s) { const v0 = fmt(x.prezzo); l.testo(xp, 33, v0); l.orizz(xp - 1, 36, Lcd.larghezza(v0) + 2); xp += Lcd.larghezza(v0) + 6 } // (il prezzo pieno, barrato)
-      l.testo(xp, 33, p); if (s) l.testo(xp + Lcd.larghezza(p) + 6, 33, pct(s))
+      if (s) { const v0 = fmt(x.prezzo); l.testo(xp, 33, v0); l.orizz(xp - 1, 36, Lcd.larghezza(v0) + 2, ROSSO); xp += Lcd.larghezza(v0) + 6 } // (il prezzo pieno, barrato: 11.11 in rosso)
+      l.testo(xp, 33, p); if (s) cartellino(l, xp + Lcd.larghezza(p) + 4, 33, pct(s), ROSSO) // (lo sconto, sul cartellino rosso)
       l.testo(46, 42, corto(ce(x) ? 'ce l’hai già nello zaino' : `ne hai ${zaino.quanti(x.id)} · ${x.unico ? 'se ne ha uno solo' : 'fino a 50 alla volta'}`, 33))
       // la descrizione, che scorre
       const d = desc(), VIS = 4, g = Math.min(giu, Math.max(0, d.length - VIS)) // (11.11: disegna non cambia giu, 4.8: lo tiene nei margini il tasto)
@@ -151,13 +174,17 @@ function scheda(os, x, alla, avvisa = () => {}) {
       if (g > 0) l.testo(W - 14, 52, '↑')
       if (g + VIS < d.length) l.testo(W - 14, 52 + (VIS - 1) * 9, '↓')
       // quanti e il totale, e i tasti
-      if (!ce(x)) l.testo(10, 89, corto(`${x.unico ? '' : `quanti ${n} · `}${fmt(tot())} $pzk${pzk.inGalera() ? ' · in galera' : tot() > puliti() ? ` · ti mancano ${fmt(tot() - puliti())}${pul()}` : ''}`, 39))
+      if (!ce(x)) { // (11.11: quello che manca, o la galera, sul cartellino rosso)
+        const base = corto(`${x.unico ? '' : `quanti ${n} · `}${fmt(tot())} $pzk`, 39), no = pzk.inGalera() ? 'in galera' : tot() > puliti() ? `ti mancano ${fmt(tot() - puliti())}${pul()}` : ''
+        const xb = 10 + l.testo(10, 89, base) + 5, resta = Math.floor((W - 10 - xb - 4) / 6)
+        if (no && resta >= 3) cartellino(l, xb, 89, corto(no, resta), ROSSO)
+      }
       const ws = B.map((b) => Lcd.larghezza(b) + 8), tutta = ws.reduce((a, w) => a + w, 0) + (B.length - 1) * 4
       let xb = Math.round(W / 2 - tutta / 2)
       B.forEach((b, i) => {
         const on = i === sb
         if (on) l.riempi(xb, 99, ws[i], 11); else l.cornice(xb, 99, ws[i], 11)
-        l.testo(xb + 4, 101, b, { inv: on })
+        l.testo(xb + 4, 101, b, on ? { inv: true } : { col: b === '♥' && preferiti().has(x.id) ? ROSSO : 1 }) // (11.11: il ♥ rosso se è già nei preferiti)
         if (!attesa) os.zona(xb, 97, ws[i], 15, () => { sel = i; premi(b) }) // (aspettando la banca il clic non parte, come i tasti)
         xb += ws[i] + 4
       })
@@ -254,9 +281,10 @@ export function vista(os) {
             const val = qui ? 'ce l’hai' : fmt(p)
             destra(l, x0 + w, y + 5, val, o)
             const xs = x0 + w - Lcd.larghezza(val) - 6
-            if (sc && !qui) destra(l, xs, y + 5, pct(sc), o)
-            const spazio = Math.floor((xs - (sc && !qui ? Lcd.larghezza(pct(sc)) + 6 : 0) - (x0 + 18) - 4) / 6)
-            l.testo(x0 + 18, y + 5, corto(`${preferiti().has(vc.id) ? '♥ ' : ''}${vc.nome}`, spazio), o)
+            if (sc && !qui) cartellino(l, xs - largoCart(pct(sc)) + 2, y + 5, pct(sc), ROSSO) // (11.11: lo sconto sul cartellino rosso, anche sulla riga scelta)
+            const spazio = Math.floor((xs - (sc && !qui ? Lcd.larghezza(pct(sc)) + 6 : 0) - (x0 + 18) - 4) / 6), pref = preferiti().has(vc.id)
+            if (pref) l.testo(x0 + 18, y + 5, '♥', on ? o : { col: ROSSO }) // (11.11: il cuore dei preferiti, rosso)
+            l.testo(x0 + 18 + (pref ? 12 : 0), y + 5, corto(vc.nome, spazio - (pref ? 2 : 0)), o)
           },
         })
         if (L.length === 1) centro(l, 70, corto(cerca ? `niente per «${cerca}»` : solo ? 'niente che puoi comprare qui' : 'niente da mostrare', 38))
@@ -321,7 +349,12 @@ export function vista(os) {
         clic: (vc) => { stc.chiave = chiaveDi(vc); rigaCarrello(vc, x) },
         riga(l, vc, x0, y, w, on) {
           const o = { inv: on }
-          if (vc.paga) { const t = totale(); l.testo(x0, y + 4, corto(nonPuoi(t) ?? `paga ${fmt(t)} $pzk`, Math.floor(w / 6)), o); return } // (niente ▶: qui → cambia pagina, si paga con OK)
+          if (vc.paga) { // (niente ▶: qui → cambia pagina, si paga con OK)
+            const t = totale(), no = nonPuoi(t)
+            if (no && !on) cartellino(l, x0 - 2, y + 4, corto(no, Math.floor((w - 4) / 6)), ROSSO) // (11.11: non si può pagare: il cartellino rosso)
+            else l.testo(x0, y + 4, corto(no ?? `paga ${fmt(t)} $pzk`, Math.floor(w / 6)), o)
+            return
+          }
           if (vc.svuota) { l.testo(x0, y + 4, 'svuota il carrello', o); return }
           const p = PER_ID[vc.id]
           l.bitmap(bm(p.id, 16), x0 - 2, y - 1, o)
@@ -332,8 +365,13 @@ export function vista(os) {
       })
       const t = totale(), sal = puliti(), ris = risparmio()
       l.orizz(8, 98, W - 16)
-      l.testo(10, 100, corto(`${pezzi()} pezz${pezzi() === 1 ? 'o' : 'i'}, ${fmt(t)} $pzk${ris ? ` · sconti -${fmt(ris)}` : ''}`, 39))
-      l.testo(10, 109, corto(pzk.inGalera() ? `in galera fino alle ${ora(pzk.galera())}: niente shop` : `${pul() ? 'puliti' : 'saldo'} ${fmt(sal)} · ${t > sal ? `ti mancano ${fmt(t - sal)}` : `dopo ${fmt(sal - t)}`}`, 39))
+      // (11.11) i soldi che dicono qualcosa sui cartellini: gli sconti verdi (risparmiati), quello che manca e la galera rossi
+      const dopo = (y, base, s, col) => { const xb = base ? 10 + l.testo(10, y, base) + 5 : 8, resta = Math.floor((W - 10 - xb - 4) / 6); if (resta >= 3) cartellino(l, xb, y, corto(s, resta), col) }
+      const base = corto(`${pezzi()} pezz${pezzi() === 1 ? 'o' : 'i'}, ${fmt(t)} $pzk`, 39)
+      if (ris) dopo(100, base, `sconti -${fmt(ris)}`, VERDE); else l.testo(10, 100, base)
+      if (pzk.inGalera()) dopo(109, '', `in galera fino alle ${ora(pzk.galera())}: niente shop`, ROSSO)
+      else if (t > sal) dopo(109, corto(`${pul() ? 'puliti' : 'saldo'} ${fmt(sal)}`, 20), `ti mancano ${fmt(t - sal)}`, ROSSO)
+      else l.testo(10, 109, corto(`${pul() ? 'puliti' : 'saldo'} ${fmt(sal)} · dopo ${fmt(sal - t)}`, 39))
     },
     tasto(k, x) {
       const L = vociCarrello()
@@ -344,10 +382,18 @@ export function vista(os) {
     },
   }
   const P = [paginaProdotti('offerte', 'le offerte del giorno', 'regalo'), paginaProdotti('tutti', 'tutto lo shop', 'app-shop'), ...REPARTI.map(([id, n, i]) => paginaProdotti(id, n, i)), paginaCarrello]
+  let qui = null // (la x di pagine, per la striscia: la dà entra)
   v = pagine(os, {
     nome: 'negozio', app: 'negozio', pagine: P, iniziale: ultima,
     ascolta: [(f) => pzk.osserva(f), (f) => zaino.ascolta(f), (f) => icone.ascolta(f)],
+    entra: (x) => { qui = x },
     esci: (x) => { ultima = x.pag },
   })
+  // (11.11) aperto con un comando (os.apri('negozio', { comando: 'pomodoro' }): la missione bloccata «allo shop»), si apre la
+  // scheda di quel pezzo: prima lo shop si apriva sulle offerte e il pezzo che manca andava cercato fra i reparti
+  v.comando = (id) => {
+    const p = prodotti({ rep: 'tutti' }).find((q) => q.id === id)
+    if (p && os.corrente() === v) os.spingi(scheda(os, p, torna, (ok, t) => { if (qui?.qui()) qui.dì(ok, t) }))
+  }
   return v
 }

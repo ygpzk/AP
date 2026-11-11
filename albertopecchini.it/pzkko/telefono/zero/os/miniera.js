@@ -1,7 +1,8 @@
 // L'app «miniera» di pzk os (29.10, Alberto: «crea uno alla volta … miniera …»): la postazione che mina $pzk, sul
 // cercapersone zero. Le regole, il catalogo, i conti e lo stato sono quelli di chat/miniera.js; i disegni sono la pixel art
-// di chat/miniera-pixel.js (componi, componiPezzo), portata a un bit qui (i colori diventano luce, col retino di Bayer); i
-// numeri di un pezzo in una riga vengono dalla miniera del cercapersone vecchio (telefono/app/miniera.js: statsTesto).
+// di chat/miniera-pixel.js (componi, componiPezzo), coi suoi colori nella tavolozza a 8 bit di lcd.js; i numeri di un pezzo
+// in una riga vengono dalla miniera del cercapersone vecchio (telefono/app/miniera.js: statsTesto). Il testo è d'inchiostro;
+// colorati solo i soldi (verde), quello che manca o scotta (rosso) e gli avvisi (⚠ giallo su un quadretto nero).
 // - LA POSTAZIONE: la scena in piccolo, i $pzk maturati (crescono da soli, una volta al secondo) con la barra della memoria,
 //   la produzione, la temperatura, l'hash, l'efficienza, gli avvisi. OK incassa; ↓ la guardi a schermo intero (200 × 125, i
 //   pixel veri del disegno).
@@ -10,43 +11,46 @@
 //   e i tasti compra, monta (o monta +1), smonta o vendi.
 // - I PC PRONTI: le postazioni già pensate; la scheda mostra il disegno, la produzione e «compra e monta» (si conferma).
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, D, C, colore, sfondo } from './lcd.js'
 import * as icone from './icone.js'
+import { leggi as impostazioni } from './impostazioni.js'
 import * as M from '../../../chat/miniera.js'
 import * as P from '../../../chat/miniera-pixel.js'
 import { fmt, fmtCorto } from '../../../games/pzk.js'
 import { statsTesto, perOra, montatoDi } from '../../app/miniera.js'
 import { txt, corto, destra, centro, puntini, elenco, muovi, pagine, striscia, impagina, scorrevole, bottoni } from './pezzi.js'
 
-// ── la pixel art a un bit: la luce di ogni pixel (o la media di 2 × 2, a metà), i livelli stirati, il retino di Bayer ──
-const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
-// (negativo: la scena è una stanza buia con le cose accese; sull'lcd il buio diventa carta e la luce inchiostro, come un
-// disegno a tratto: dritta veniva quasi tutta nera. I pezzi da soli, su fondo trasparente, restano dritti)
-function unBit(t, mezzo = false, negativo = false) {
-  const k = mezzo ? 2 : 1, w = Math.floor(t.w / k), h = Math.floor(t.h / k), lum = new Float32Array(w * h).fill(-1)
-  let lo = 1, hi = 0
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    let s = 0, n = 0
-    for (let j = 0; j < k; j++) for (let i = 0; i < k; i++) { const c = t.pixel[(y * k + j) * t.w + x * k + i]; if (c >= 0) { s += (0.299 * ((c >> 16) & 255) + 0.587 * ((c >> 8) & 255) + 0.114 * (c & 255)) / 255; n++ } }
-    if (n) { const v = s / n; lum[y * w + x] = v; lo = Math.min(lo, v); hi = Math.max(hi, v) }
+// ── la pixel art coi suoi colori (11.11, Alberto: «colori a 8bit su tutto»; prima era ridotta a un bit col retino di
+// Bayer, e la scena in negativo): ogni pixel del disegno prende il colore più vicino della tavolozza a 8 bit di lcd.js. A
+// metà misura i pixel del disegno sono i pixel veri dello schermo (D = 2): niente si perde ──
+function aColori(t, mezzo = false) {
+  const w = Math.floor(t.w / (mezzo ? 2 : 1)), h = Math.floor(t.h / (mezzo ? 2 : 1)), pw = w * D, ph = h * D, px = new Uint8Array(pw * ph)
+  for (let Y = 0; Y < ph; Y++) for (let X = 0; X < pw; X++) {
+    const c = t.pixel[Math.floor((Y * t.h) / ph) * t.w + Math.floor((X * t.w) / pw)]
+    if (c >= 0) px[Y * pw + X] = colore((c >> 16) & 255, (c >> 8) & 255, c & 255)
   }
-  // in negativo il muro (il colore più usato) e quelli appena più chiari sono carta piena: la luce si conta da lì in su
-  let fondo = lo
-  if (negativo) { const conta = new Map(); for (const c of t.pixel) if (c >= 0) conta.set(c, (conta.get(c) ?? 0) + 1); const [c] = [...conta].sort((a, b) => b[1] - a[1])[0] ?? [0]; fondo = (0.299 * ((c >> 16) & 255) + 0.587 * ((c >> 8) & 255) + 0.114 * (c & 255)) / 255 + 0.03 }
-  const bit = new Uint8Array(w * h)
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    const v0 = lum[y * w + x]
-    if (v0 < 0 || (negativo && v0 <= fondo)) continue
-    const v = negativo ? 1 - (v0 - fondo) / Math.max(0.05, hi - fondo) : (v0 - lo) / Math.max(0.05, hi - lo)
-    if (v < (BAYER[y & 3][x & 3] + 0.5) / 16) bit[y * w + x] = 1
-  }
-  return { w, h, bit }
+  return { w, h, d: D, px }
 }
 const cache = new Map()
-const scena = (montati, mezzo) => { const k = `s:${mezzo}:${JSON.stringify(montati)}`; if (!cache.has(k)) cache.set(k, unBit(P.componi(montati), mezzo, true)); return cache.get(k) }
-const disegno = (id, mezzo) => { const k = `p:${mezzo}:${id}`; if (!cache.has(k)) cache.set(k, unBit(P.componiPezzo(id), mezzo)); return cache.get(k) }
+const scena = (montati, mezzo) => { const k = `s:${mezzo}:${JSON.stringify(montati)}`; if (!cache.has(k)) cache.set(k, aColori(P.componi(montati), mezzo)); return cache.get(k) }
+const disegno = (id, mezzo) => { const k = `p:${mezzo}:${id}`; if (!cache.has(k)) cache.set(k, aColori(P.componiPezzo(id), mezzo)); return cache.get(k) }
 const nomeCat = (id) => M.CATEGORIE.find((k) => k.id === id)?.nome ?? id
 const gradi = (c) => `${Math.round(c.temperatura ?? 0)} °C`
+
+// ── i colori che dicono qualcosa (11.11, Alberto: «colori a 8bit su tutto»): il verde dei soldi e il rosso di quello che
+// manca o scotta. Un colore solo non si legge su tutti gli sfondi (il verde scuro sparisce su «notte», quello chiaro su
+// «carta» e sull'arancione): sugli sfondi chiari il tono scuro, su quelli scuri (l'inchiostro è chiaro) il tono chiaro ──
+const TONI = { chiaro: { verde: colore(0, 102, 0), rosso: colore(153, 0, 0) }, scuro: { verde: colore(102, 255, 102), rosso: colore(255, 102, 102) } }
+const toni = () => { const k = sfondo(impostazioni().sfondo).inchiostro; return TONI[0.299 * k[0] + 0.587 * k[1] + 0.114 * k[2] > 128 ? 'scuro' : 'chiaro'] }
+// l'avviso: il ⚠ giallo su un quadretto nero, come un cartello (giallo sul fondo chiaro non si legge; il quadretto sì, anche
+// dentro la fascia scelta e su «notte»)
+function cartello(l, x, y) { l.riempi(x - 1, y - 1, 7, 9, C.nero); l.testo(x, y, '⚠', { col: C.giallo }) }
+// una riga a pezzi di colore diverso ([testo, colore], …), tagliata coi puntini a n caratteri come corto
+function misto(l, x, y, parti, n, o = {}) {
+  const tutto = [...corto(parti.map((p) => p[0]).join(''), n)]
+  let i = 0
+  for (const [s, col] of parti) { const k = [...txt(s)].length, pezzo = tutto.slice(i, i + k).join(''); if (pezzo) l.testo(x + i * 6, y, pezzo, { ...o, col }); i += k }
+}
 
 // ── la postazione a schermo intero ──
 function grande(os, montati = null, titolo = 'la tua postazione') {
@@ -129,7 +133,7 @@ function schedaPezzo(os, id) {
     if (t.fai === 'monta') { const m = montatoDi(M.stato().montati, p.cat), r = await banca('monto', () => (m?.id === p.id ? M.monta(p.cat, p.id, m.n + 1) : M.monta(p.cat, p.id))); if (os.corrente() !== v) return; if (!r.ok) return dì(false, r.errore ?? 'non si può'); const n = montatoDi(M.stato().montati, p.cat)?.n ?? 1; return dì(true, `montato${n > 1 ? ` ×${n}` : ''}`, avvisi(r)) }
     if (t.fai === 'nonci') {
       const m = montatoDi(M.stato().montati, p.cat), montato = m?.id === p.id
-      const ci = M.compatibile(p.cat, p.id, montato ? m.n + 1 : 1), q = montato ? null : M.perMontare(p.cat, p.id), y = q && M.pezzo(q.id)
+      const ci = M.compatibile(p.cat, p.id, montato ? m.n + 1 : 1), q = M.perMontare(p.cat, p.id, montato ? m.n + 1 : 1), y = q && M.pezzo(q.id)
       if (ci.ok) return
       const dopo = y ? (q.ho ? ` Hai già ${y.nome}: monta prima quello.` : ` Ci sta con ${y.nome} (${fmt(y.prezzo)} $pzk).`) : ''
       const s = await os.dialogo({ titolo: 'non ci sta', testo: `${ci.errore}.${dopo}`, tasti: y ? ['no', `vai a ${nomeCat(q.cat)}`] : ['ok'] })
@@ -155,7 +159,7 @@ function schedaPezzo(os, id) {
       l.bitmap(b, 8 + Math.round((38 - b.w) / 2), 13); l.riquadro(6, 12, 41, 41)
       l.testo(52, 14, corto(p.nome, 32))
       l.testo(52, 23, corto(`${nomeCat(p.cat)} · livello ${p.livello ?? 1}`, 32))
-      l.testo(52, 32, corto(`${fmt(p.prezzo)} $pzk${ho ? ` · ne hai ${ho}` : ''}${montato ? ` · montat${m.n > 1 ? `i ${m.n}` : 'o'}` : ''}`, 32))
+      misto(l, 52, 32, [[`${fmt(p.prezzo)} $pzk${ho ? ` · ne hai ${ho}` : ''}${montato ? ' · ' : ''}`, 1], [montato ? `montat${m.n > 1 ? `i ${m.n}` : 'o'}` : '', toni().verde]], 32) // (11.11: montato in verde, come nel negozio)
       l.testo(52, 41, corto(statsTesto(p), 32))
       const righe = leggibile()
       scorrevole(l, righe, { y0: 57, vis: VIS, giu }) // (giu e sel li tiene in riga tasto: disegna non cambia lo stato, 4.8)
@@ -196,9 +200,12 @@ function categoria(os, cat) {
           const o = { inv: on }, ho = M.stato().posseduti?.[p.id] ?? 0, montato = m?.id === p.id
           const b = disegno(p.id, true)
           l.bitmap(b, x0 - 2, y + 1, o)
-          const s = montato ? `montat${m.n > 1 ? `i ${m.n}` : 'o'}` : ho ? `${M.compatibile(cat, p.id, 1).ok ? '' : '⚠ '}ne hai ${ho}` : fmt(p.prezzo) // (⚠: ce l'hai ma adesso non ci sta)
-          destra(l, x0 + w, y + 2, s, o)
-          l.testo(x0 + 22, y + 2, corto(p.nome, Math.floor((w - 22 - Lcd.larghezza(s) - 6) / 6)), o)
+          // (11.11) montato in verde; ⚠ (ce l'hai ma adesso non ci sta) è il cartello giallo, prima un carattere d'inchiostro
+          const s = montato ? `montat${m.n > 1 ? `i ${m.n}` : 'o'}` : ho ? `ne hai ${ho}` : fmt(p.prezzo), avv = !montato && ho && !M.compatibile(cat, p.id, 1).ok
+          const ws = Lcd.larghezza(s) + (avv ? 9 : 0)
+          destra(l, x0 + w, y + 2, s, { ...o, col: montato ? toni().verde : 1 })
+          if (avv) cartello(l, x0 + w - ws, y + 2)
+          l.testo(x0 + 22, y + 2, corto(p.nome, Math.floor((w - 22 - ws - 6) / 6)), o)
           l.testo(x0 + 22, y + 11, corto(statsTesto(p), Math.floor((w - 22) / 6)), o)
         },
       })
@@ -250,9 +257,10 @@ function schedaPronto(os, id) {
       l.bitmap(b, 8, 14); l.riquadro(7, 13, b.w + 2, b.h + 2)
       const x0 = 8 + b.w + 8, n = Math.floor((245 - x0) / 6)
       Lcd.acapo(txt(p.nome), n).slice(0, 2).forEach((r, i) => l.testo(x0, 15 + i * 9, r))
-      l.testo(x0, 35, corto(c.completa ? perOra(c.perOra) : 'non completa', n))
-      l.testo(x0, 44, corto(p.prezzo ? `${fmt(p.prezzo)} $pzk` : 'ce l’hai già tutto', n))
-      if (p.prezzo < p.listino) { const s = fmt(p.listino); l.testo(x0, 53, s); l.orizz(x0 - 1, 56, Lcd.larghezza(s) + 2) } // (il listino, barrato: paghi solo quello che manca)
+      const T = toni() // (11.11: «non completa» in rosso, «ce l'hai già tutto» in verde, il listino barrato di rosso)
+      l.testo(x0, 35, corto(c.completa ? perOra(c.perOra) : 'non completa', n), { col: c.completa ? 1 : T.rosso })
+      l.testo(x0, 44, corto(p.prezzo ? `${fmt(p.prezzo)} $pzk` : 'ce l’hai già tutto', n), { col: p.prezzo ? 1 : T.verde })
+      if (p.prezzo < p.listino) { const s = fmt(p.listino); l.testo(x0, 53, s); l.orizz(x0 - 1, 56, Lcd.larghezza(s) + 2, T.rosso) } // (il listino, barrato: paghi solo quello che manca)
       const dr = Lcd.acapo(txt(p.descr ?? ''), 39) // (sotto la miniatura; se è più lunga di due righe, la seconda finisce coi puntini)
       ;[dr[0] ?? '', dr.length > 2 ? corto(dr.slice(1).join(' '), 39) : dr[1] ?? ''].forEach((r, i) => l.testo(10, 80 + i * 9, r))
       bottoni(l, os.zona, { etichette: [p.prezzo ? 'compra e monta' : 'monta'], sel: 0, y: 99, premi: () => compra() })
@@ -290,26 +298,29 @@ export function vista(os) {
       const b = scena(M.stato().montati, true)
       l.bitmap(b, 8, 34); l.riquadro(7, 33, b.w + 2, b.h + 2)
       x.zona(7, 33, b.w + 2, b.h + 2, () => os.spingi(grande(os)))
-      const x0 = 8 + b.w + 8, n = Math.floor((245 - x0) / 6)
+      const x0 = 8 + b.w + 8, n = Math.floor((245 - x0) / 6), T = toni()
       if (c.completa) {
+        // (11.11) i maturati e la barra in verde; la memoria piena in rosso (da lì non cresce più: si incassa); la temperatura e
+        // la resa in rosso quando il PC scotta e rallenta
+        const piena = k >= 1, scotta = (c.temperatura ?? 0) > M.SOGLIA, resa = Math.round((c.efficienza ?? 0) * 100)
         l.testo(x0, 34, 'maturati')
-        l.testo(x0, 43, corto(`${fmt(Math.floor(mat * 10) / 10)} $pzk`, n))
-        l.riquadro(x0, 53, 245 - x0, 5); l.riempi(x0 + 1, 54, Math.round((243 - x0) * k), 3)
-        l.testo(x0, 61, corto(k >= 1 ? 'memoria piena!' : `memoria ${fmt(c.capienzaOre)} ore`, n))
+        l.testo(x0, 43, corto(`${fmt(Math.floor(mat * 10) / 10)} $pzk`, n), { col: T.verde })
+        l.riquadro(x0, 53, 245 - x0, 5); l.riempi(x0 + 1, 54, Math.round((243 - x0) * k), 3, piena ? T.rosso : T.verde)
+        l.testo(x0, 61, corto(piena ? 'memoria piena!' : `memoria ${fmt(c.capienzaOre)} ore`, n), { col: piena ? T.rosso : 1 })
         l.testo(x0, 72, corto(perOra(c.perOra), n))
-        l.testo(x0, 81, corto(`${gradi(c)} · hash ${fmtCorto(c.hash ?? 0)}`, n))
-        l.testo(x0, 90, corto(`resa ${Math.round((c.efficienza ?? 0) * 100)} % · × ${(Math.round((c.moltiplicatore ?? 1) * 100) / 100).toLocaleString('it-IT')}`, n))
+        misto(l, x0, 81, [[gradi(c), scotta ? T.rosso : 1], [` · hash ${fmtCorto(c.hash ?? 0)}`, 1]], n)
+        misto(l, x0, 90, [[`resa ${resa} %`, resa < 100 ? T.rosso : 1], [` · × ${(Math.round((c.moltiplicatore ?? 1) * 100) / 100).toLocaleString('it-IT')}`, 1]], n)
       } else {
         // spenta: o mancano dei pezzi, o ci sono tutti ma non si incastrano (calcola mette quei problemi in cima agli avvisi:
         // prima qui restava «mancano» con niente dopo)
         const manca = c.manca.length > 0, R = Lcd.acapo(txt(manca ? c.manca.map(nomeCat).join(', ') : c.avvisi?.[0] ?? 'i pezzi non si incastrano'), n)
-        l.testo(x0, 34, manca ? 'spenta: mancano' : 'spenta, perché:')
+        l.testo(x0, 34, manca ? 'spenta: mancano' : 'spenta, perché:', { col: T.rosso }) // (11.11: spenta in rosso)
         const resto = mat >= 0.5, max = resto ? 3 : 5 // (11.11: quello maturato prima di spegnerla si incassa lo stesso, e si vede qui sotto)
         ;[...R.slice(0, max - 1), ...(R.length > max ? [corto(R.slice(max - 1).join(' '), n)] : R.slice(max - 1, max))].forEach((r, i) => l.testo(x0, 44 + i * 9, r)) // (l'ultima riga coi puntini, se ce n'è ancora)
-        if (resto) { l.testo(x0, 75, 'da incassare'); l.testo(x0, 84, corto(`${fmt(Math.floor(mat * 10) / 10)} $pzk`, n)) }
+        if (resto) { l.testo(x0, 75, 'da incassare'); l.testo(x0, 84, corto(`${fmt(Math.floor(mat * 10) / 10)} $pzk`, n), { col: T.verde }) }
       }
       const avviso = c.completa || c.manca.length ? c.avvisi?.[0] : c.avvisi?.[1] // (il problema già scritto a destra non si ripete sotto)
-      if (avviso) l.testo(10, 104, corto(`! ${avviso}`, 39))
+      if (avviso) { cartello(l, 10, 104); l.testo(19, 104, corto(avviso, 37)) } // (11.11: il cartello ⚠ giallo al posto del «!» d'inchiostro)
     },
     tasto(k) { if (k === 'giu') { os.spingi(grande(os)); return true } return false },
   }
@@ -328,7 +339,7 @@ export function vista(os) {
           const s = m && m.n > 1 ? `×${m.n}` : ''
           if (s) destra(l, x0 + w, y + 2, s, o)
           l.testo(x0 + 22, y + 2, corto(`${k.nome}${k.obbligatoria ? '' : ' · facoltativo'}`, Math.floor((w - 22 - Lcd.larghezza(s) - 6) / 6)), o)
-          l.testo(x0 + 22, y + 11, corto(p ? p.nome : k.obbligatoria ? 'manca!' : 'niente', Math.floor((w - 22) / 6)), o)
+          l.testo(x0 + 22, y + 11, corto(p ? p.nome : k.obbligatoria ? 'manca!' : 'niente', Math.floor((w - 22) / 6)), { ...o, col: !p && k.obbligatoria ? toni().rosso : 1 }) // (11.11: «manca!» in rosso)
         },
       })
     },
@@ -345,7 +356,7 @@ export function vista(os) {
         riga(l, p, x0, y, w, on) {
           const o = { inv: on }, c = M.calcola(p.pezzi ?? {})
           const s = p.prezzo ? fmt(p.prezzo) : 'ce l’hai'
-          destra(l, x0 + w, y + 2, s, o)
+          destra(l, x0 + w, y + 2, s, { ...o, col: p.prezzo ? 1 : toni().verde }) // (11.11: «ce l'hai» in verde, come «montato»)
           l.testo(x0, y + 2, corto(p.nome, Math.floor((w - Lcd.larghezza(s) - 6) / 6)), o)
           l.testo(x0, y + 11, corto(c.completa ? perOra(c.perOra) : '', Math.floor(w / 6)), o)
         },

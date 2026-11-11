@@ -13,6 +13,14 @@
 //   … --tasti3d                                    (9.11) OK e INDIETRO 3D col mouse, poi INDIETRO tenuto: si spegne e si chiude
 //   … --chiudi-aprendo                             (9.11) un clic fuori mentre si apre: si chiude appena aperto
 //   … --tasti=ok,aspetta@3000,…                    aspetta@<ms>: fermo senza tasti (il quiz che va avanti da solo)
+//   … --lenta=<ms>                                 (11.11) la banca (finta o vera) risponde dopo <ms> alle azioni (non a
+//                                                  «stato»): la rotellina, INDIETRO mentre aspetta, la risposta che arriva tardi
+//   … --server-finto --decifra-rete|--fondo-vuoto  (11.11) il primo «decifra» cade senza rete; il fondo dei portafogli
+//                                                  smarriti è vuoto e decifra paga 0 (anche con --banca). --economia=scalda:
+//                                                  tre già decifrati oggi
+//   … --banca --economia                           (11.11) come col server finto, ma nel conto pzkko vero in memoria
+//   … --banca --sfide=pronta|tutte|preso           (11.11) le sfide di oggi da riscuotere, tutte riscosse col bonus da
+//                                                  prendere, o il bonus già preso
 // Serve puppeteer-core in tools/catture e un browser (tools/pzkko/browser.mjs). Niente server vero: il wallet e lo zaino
 // restano nel browser (le richieste alle api falliscono, e il sito sta in piedi lo stesso).
 import { createServer } from 'node:http'
@@ -61,8 +69,10 @@ if (conBanca) {
     gestisci: b.gestisci, accesso: () => w.accessoLocale('pzkko'), rnd: motore.rnd,
     conto: async () => (await (await store()).read()).db.conti.find((c) => c.nome === 'pzkko') ?? null,
     metti: async (fn, nome = 'pzkko') => arch.aggiorna(await store(), (db) => { const c = db.conti.find((x) => x.nome === nome); c.zaino ??= { v: 1, t: 0, xp: 0, mestiere: null, turni: 0, oggetti: {}, attese: {}, effetti: {}, serie: {}, stat: {}, rapidi: [] }; fn(c, db); c.agg = (c.agg ?? 0) + 1 }),
+    giorno: arch.giornoDi, // (il giorno di Mantova della banca: le sfide e i decifrati sono «di oggi»)
   }
 }
+const sfondoArg = (process.argv.find((a) => a.startsWith('--sfondo=')) ?? '').slice(9) || null // --sfondo=notte|carta|tramonto…: lo sfondo delle impostazioni (os/lcd.js, SFONDI)
 const senzaConto = process.argv.includes('--senzaconto') // nessun conto: il cercapersone chiuso, l'account
 const finto = process.argv.includes('--server-finto') // un server del wallet finto (qui sotto): entra (PIN 1234), crea, converti, invia… // un turno da rider: la consegna con le frecce e coi clic del mouse
 const guidaPrima = process.argv.includes('--guida') // la guida del primo accesso all'apertura (con --senzaconto: il giro di chi arriva)
@@ -87,8 +97,15 @@ if (economia) {
   contoFinto.pzk += sp; contoFinto.sporchi = sp
   contoFinto.zaino = { v: 1, t: 0, xp: 300, mestiere: null, turni: 0, oggetti: { canna: 1, 'wallet-pzk': 2, chiavetta: 1 }, app: { lavatrice: 1, decifratore: 1 }, attese: {}, effetti: {}, serie: {}, stat: {} }
   contoFinto.mosse.push({ t: ORA - 2 * 36e5, tipo: 'rapina', n: 73500 })
-  contoFinto.decifrati = 0
+  contoFinto.decifrati = ecoTipo === 'scalda' ? 3 : 0 // (11.11: =scalda, tre già decifrati oggi: «tre al giorno» coi pezzi ancora nello zaino)
 }
+// (11.11) quello che col server finto prima non si poteva fotografare: la banca lenta (--lenta=<ms>, su tutte le azioni
+// tranne lo stato che si chiede da solo), il primo «decifra» che cade senza rete (--decifra-rete: la connessione si chiude,
+// come quando la rete non c'è) e il fondo dei portafogli smarriti vuoto (--fondo-vuoto: decifra paga 0)
+const lenta = Number((process.argv.find((a) => a.startsWith('--lenta=')) ?? '').slice(8)) || 0
+const decifraRete = process.argv.includes('--decifra-rete'), fondoVuoto = process.argv.includes('--fondo-vuoto')
+let decifraCaduta = false
+const lento = (a) => lenta && !['stato', 'ospite', 'biglietto'].includes(a) && new Promise((r) => setTimeout(r, lenta))
 if (lavaggio) contoFinto.lavaggio = { n: 50000, fino: lavaggio === 'pronto' ? ORA - 6e4 : ORA + 7 * 6e4 }
 let stati = 0, tavoloFinto = null, quizFinto = null
 // i giochini finti del decifratore: la risposta giusta è sempre la prima delle scelte (così OK la dà, → e OK sbagliano)
@@ -119,6 +136,7 @@ function walletFinto(body) {
   if (a === 'fai' && body.cosa === 'decifratore.apri') {
     const ogg = body.args?.tipo === 'chiavetta' ? 'chiavetta' : 'wallet-pzk'
     if (!(contoFinto.zaino?.oggetti?.[ogg] > 0)) return { ok: false, errore: 'non hai wallet da decifrare' }
+    if (contoFinto.decifrati >= 3) return { ok: false, errore: 'tre al giorno: il decifratore si scalda. domani' } // (11.11: come la banca vera)
     tavoloFinto = { tipo: body.args.tipo, prove: PROVE.slice(0, 3), i: 0, errori: 0 }
     return ok({ esito: vedeFinto(tavoloFinto) })
   }
@@ -136,7 +154,8 @@ function walletFinto(body) {
   }
   if (a === 'decifra') {
     if (tavoloFinto?.risolto !== body.tipo) return { ok: false, errore: 'prima si risolve il codice' }
-    const ogg = body.tipo === 'chiavetta' ? 'chiavetta' : 'wallet-pzk', n = body.tipo === 'chiavetta' ? 2750 : 830
+    if (contoFinto.decifrati >= 3) return { ok: false, errore: 'tre al giorno: il decifratore si scalda. domani' }
+    const ogg = body.tipo === 'chiavetta' ? 'chiavetta' : 'wallet-pzk', n = fondoVuoto ? 0 : body.tipo === 'chiavetta' ? 2750 : 830
     contoFinto.zaino.oggetti[ogg]--; contoFinto.zaino = { ...contoFinto.zaino, oggetti: { ...contoFinto.zaino.oggetti } }
     contoFinto.pzk += n; contoFinto.decifrati++; tavoloFinto = null; contoFinto.mosse.push({ t: Date.now(), tipo: 'decifrato', n })
     return ok({ fatto: { n, tipo: body.tipo } })
@@ -198,6 +217,7 @@ const server = createServer(async (req, res) => {
     if (daBanca) {
       let corpo = ''
       if (req.method === 'POST') { const parti = []; for await (const p of req) parti.push(p); corpo = Buffer.concat(parti).toString('utf8') }
+      if (daBanca === 'wallet' && lenta) { let a = ''; try { a = JSON.parse(corpo).a } catch {} await lento(a) } // (11.11: --lenta anche con la banca vera)
       const r = await bancaVera.gestisci(daBanca, { m: req.method === 'HEAD' ? 'GET' : req.method, q: new URL(req.url, 'http://x').search, ip: '127.0.0.1', ua: req.headers['user-agent'] ?? '', corpo })
       res.writeHead(r.status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); return res.end(r.corpo)
     }
@@ -216,6 +236,8 @@ const server = createServer(async (req, res) => {
     if (req.method === 'GET') { const ind = u.searchParams.get('ind'); return res.end(JSON.stringify(ind === 'pzk999999' ? { ok: false, errore: 'nessun conto a questo indirizzo' } : { ok: true, conto: { nome: 'mario', ind } })) }
     let b = ''; for await (const x of req) b += x
     let body = {}; try { body = JSON.parse(b) } catch {}
+    await lento(body.a)
+    if (body.a === 'decifra' && decifraRete && !decifraCaduta) { decifraCaduta = true; return res.destroy() } // (la rete che cade: pzk.js dà «niente rete: riprova»)
     return res.end(JSON.stringify(walletFinto(body)))
   }
   let f = join(ROOT, decodeURIComponent(new URL(req.url, 'http://x').pathname))
@@ -242,18 +264,21 @@ try {
   console.log('webgl:', await page.evaluate(() => { const gl = document.createElement('canvas').getContext('webgl2'); if (!gl) return 'niente'; const d = gl.getExtension('WEBGL_debug_renderer_info'); return d ? gl.getParameter(d.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER) }))
   // lo zaino (senza «zero»: dal 31.10 lo zero c'è per tutti) e il conto finto, prima che la pagina parta
   // (1.11) le app del pzkstore (la lavatrice, il decifratore) si collaudano installate: se no non sono nel menu e non si aprono
-  await page.evaluateOnNewDocument((suoniAccesi, peggiori, senzaConto, daStore, conBanca) => {
-    const zaino = { v: 1, t: 0, xp: peggiori ? 987654 : 300, ...(peggiori && { profilo: { av: 'av-gonzaga', avs: ['av-gonzaga'], col: 'blu', cor: 'pixel', mot: 'chi va piano va sano e va lontano, ma chi va forte arriva prima' } }), mestiere: null, turni: 0, oggetti: { canna: 1 }, attese: {}, effetti: {}, serie: {}, stat: {}, rapidi: [] }
+  await page.evaluateOnNewDocument((suoniAccesi, peggiori, senzaConto, daStore, conBanca, sfondo) => {
+    const zaino = { v: 1, t: 0, xp: peggiori ? 987654 : 300, ...(peggiori && { profilo: { av: 'av-gonzaga', avs: ['av-gonzaga'], col: 'blu', cor: 'pixel', mot: 'chi va piano va sano e va lontano, ma chi va forte arriva prima' } }), mestiere: peggiori ? 'sviluppatore' : null, turni: 0, oggetti: { canna: peggiori ? 987654321 : 1 }, attese: {}, effetti: {}, serie: {}, stat: peggiori ? { comandi: 987654321, turniLavoro: 987654321, pescati: 987654321, cacciati: 987654321, scavati: 987654321, crimini: 987654321, casse: 987654321, acquisti: 987654321, morti: 987654321, sfideFatte: 987654321, missioniFatte: 987654321, quizGiusti: 987654321, quizTotali: 999999999, minati: 987654321 } : {}, rapidi: [] }
+    // (11.11) dal 31.10 lo zaino che si vede è quello del conto (pzk.zainoBanca): con --peggiori va anche lì, se no il profilo
+    // mostrava bot, liv 1 e nessun motto, e il «liv 129» non si provava più
     sessionStorage.setItem('pzkko-chat-sessione', JSON.stringify(zaino))
     localStorage.setItem('pzkko-chat', JSON.stringify({ ind: 'pzk000001', zaino, visto: 0 }))
-    if (!senzaConto && !conBanca) localStorage.setItem('pzkko-wallet', JSON.stringify({ token: 'prova.prova', conto: { ind: 'pzk000001', nome: peggiori ? 'Bartolomeo Pecchinix' : 'prova', pzk: peggiori ? 987654321 : 52340, ...(peggiori && { creato: Date.UTC(2026, 9, 1), sporchi: 123456 }), ...(daStore && { zaino: { v: 1, t: 0, xp: 300, mestiere: null, turni: 0, oggetti: {}, app: { lavatrice: 1, decifratore: 1 }, attese: {}, effetti: {}, serie: {}, stat: {} } }), eur: 0, mosse: [], t: Date.now() }, tasso: 1, t: Date.now() }))
+    if (!senzaConto && !conBanca) localStorage.setItem('pzkko-wallet', JSON.stringify({ token: 'prova.prova', conto: { ind: 'pzk000001', nome: peggiori ? 'Bartolomeo Pecchinix' : 'prova', pzk: peggiori ? 987654321 : 52340, ...(peggiori && { creato: Date.UTC(2026, 9, 1), sporchi: 123456, zaino }), ...(daStore && { zaino: { v: 1, t: 0, xp: 300, mestiere: null, turni: 0, oggetti: {}, app: { lavatrice: 1, decifratore: 1 }, attese: {}, effetti: {}, serie: {}, stat: {} } }), eur: 0, mosse: [], t: Date.now() }, tasso: 1, t: Date.now() }))
     localStorage.setItem('pzkko-benvenuto', JSON.stringify({ versione: 99 }))
     if (!location.search.includes('guida')) localStorage.setItem('pzkko-zero-guida', 'si')
     // i suoni: si contano gli oscillatori che nascono (ogni suono di suono/interfaccia.js ne fa almeno uno)
     localStorage.setItem('pzkko-suono', suoniAccesi ? 'si' : 'no')
+    if (sfondo) localStorage.setItem('pzkko-zero-impostazioni', JSON.stringify({ sfondo })) // (--sfondo=notte: 11.11, gli sfondi di os/lcd.js)
     const AC = window.AudioContext
     if (AC) { const crea = AC.prototype.createOscillator; AC.prototype.createOscillator = function () { if (/interfaccia.js/.test(new Error().stack ?? '')) window.__oscillatori = (window.__oscillatori ?? 0) + 1; return crea.call(this) } } // (solo i suoni di suono/interfaccia.js: la musica e la strada ne fanno di continuo)
-  }, suoni, peggiori, senzaConto, ['lavatrice', 'decifratore'].includes(app), conBanca)
+  }, suoni, peggiori, senzaConto, ['lavatrice', 'decifratore'].includes(app), conBanca, sfondoArg)
 
   // (--guida: come chi arriva per la prima volta, la guida all'apertura; con --app l'app non si apre da sola, la guida porta lì)
   await page.goto(`${base}/?muro=1&chat&ora=${ora}${guidaPrima ? '&guida' : ''}`, { waitUntil: 'networkidle2', timeout: 60000 })
@@ -385,7 +410,7 @@ try {
     // gli angoli dello schermo sono stondati (2,2 mm: un quarto d'ellisse di 15 × 13 pixel): lì l'inchiostro non si vede
     const RX = 15, RY = 13
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      if (!fb[y * W + x]) continue
+      if (!os.lcd.pieno(x, y)) continue // (11.11: i pixel veri sono 2 × 2 per pixel, a colori)
       const cx = x < RX ? RX : x >= W - RX ? W - 1 - RX : null, cy = y < RY ? RY : y >= H - RY ? H - 1 - RY : null
       if (cx !== null && cy !== null && ((x - cx) / RX) ** 2 + ((y - cy) / RY) ** 2 > 1) { fuori.angoli++; if (fuori.dove.length < 6) fuori.dove.push(x + ',' + y) }
       else if (y >= BARRA && (x < MARGINE - 2 || x >= W - MARGINE + 2)) { fuori.margine++; if (fuori.dove.length < 6) fuori.dove.push(x + ',' + y) } // (2 px di tolleranza: le cornici dei dialoghi)
@@ -437,7 +462,7 @@ try {
         const st = await adesso()
         const esito = st.ultime.find((u) => u.n > prima && /^(paga|turno storto|presi)$/.test(u.t))?.t // (solo le schede di questo turno)
         if (esito && !st.scelta && !st.scrivi && !st.occupata) { fine = esito; break }
-        const t = (await bancaVera.conto())?.tavoli?.['chat-turno']
+        const t = piano ? null : (await bancaVera.conto())?.tavoli?.['chat-turno'] // (11.11: il tavolo si legge finché non c'è il piano; a ogni giro era lento, e la memoria scadeva)
         if (!piano && t?.gioco) {
           if (t.gioco !== gioco) { male(`la banca ha aperto «${t.gioco}»`); break }
           piano = { riscrivi: () => t.atteso.split(' ').map((eti) => ({ eti })), contrario: () => [...t.atteso].map((eti) => ({ eti })), memoria: () => t.cinque.map((eti) => ({ eti })),
@@ -448,7 +473,7 @@ try {
         }
         // la scheda è cambiata: una foto (la prova da guardare, i tasti, la paga)
         const ora = st.scheda ? `${st.scheda.t}|${st.scheda.d.split('\n')[0]}|${st.scelta ? 'tasti' : st.scrivi ? 'scrivi' : ''}` : ''
-        if (st.scheda?.fatta && st.schede > prima && ora !== visto && gioco !== 'nastro') { visto = ora; await foto(st.scelta ? 'tasti' : st.scrivi ? 'scrivi' : 'guarda'); continue }
+        if (st.scheda?.fatta && st.schede > prima && ora !== visto && gioco !== 'nastro') { visto = ora; await foto(st.scelta ? 'tasti' : st.scrivi ? 'scrivi' : 'guarda', gioco === 'memoria' && fatte > 0); continue } // (11.11: fra un tasto e l'altro della memoria la foto svelta, se no i 20 secondi scadono)
         // un lavoro rischioso chiede prima se si vuole lavorare lo stesso
         if (st.scelta?.tasti.some((b) => b.id === 'si') && st.scelta.tasti.some((b) => b.id === 'no')) { await foto('rischio'); const i = st.scelta.tasti.findIndex((b) => b.id === 'si'); for (let k = 0; k < 6 && (await adesso()).scelta?.sel !== i; k++) { await page.keyboard.press('ArrowRight'); await dorm(60) } await page.keyboard.press('Enter'); await dorm(300); continue }
         if (!piano) continue
@@ -476,7 +501,13 @@ try {
           if (cursore !== 'pointer') male(`clic ${++clic}: sopra il tasto il puntatore non è la manina (${cursore || 'niente'})`)
           await page.mouse.click(pt.x, pt.y)
         } else if (verso) await page.keyboard.press(FRECCE[verso]) // (una direzione: la freccia preme subito)
-        else { for (let k = 0; k < 40 && (await adesso()).scelta?.sel !== i; k++) { await page.keyboard.press('ArrowRight'); await dorm(35) } await page.keyboard.press('Enter') }
+        else {
+          // (11.11) se intanto la scelta è sparita (il tempo è scaduto), niente frecce né Invio: finirebbero sulla fila della chat
+          let via = false
+          for (let k = 0; k < 40; k++) { const sc = (await adesso()).scelta; if (!sc) { via = true; break } if (sc.sel === i) break; await page.keyboard.press('ArrowRight'); await dorm(35) }
+          if (via) continue
+          await page.keyboard.press('Enter')
+        }
         piano.shift(); fatte++
         await dorm(120)
         if (fatte === 1 || !piano.length) await foto(piano.length ? 'primo' : 'ultimo', true)
@@ -520,6 +551,44 @@ try {
       await bancaVera.metti((c) => { c.pzk = 1736; c.zaino.miniera = { posseduti: { 'tavolo-sagra': 1, 'sedia-sgabello': 1, 'case-scarpe': 1, 'cpu-nonno': 1, 'ram-cassetto': 1, 'mem-ticchetta': 1, 'schermo-ragioniere': 1, 'tast-supermercato': 1, 'mouse-filo': 1, 'gpu-cugino': 1 }, montati: { tavolo: 'tavolo-sagra', sedia: 'sedia-sgabello', case: 'case-scarpe', cpu: 'cpu-nonno', ram: 'ram-cassetto', memoria: 'mem-ticchetta', schermo: { id: 'schermo-ragioniere', n: 1 }, tastiera: 'tast-supermercato', mouse: 'mouse-filo' }, dal: Date.now(), acc: 0 } })
       await page.evaluate(() => import('/games/pzk.js').then((p) => p.sincronizza())); await dorm(600)
     }
+    // (11.11) le app del pzkstore col conto pzkko vero: la lavatrice e il decifratore installati (se no non si aprono: con
+    // 1.000 puliti non si possono nemmeno comprare). --economia: come col server finto, 73.500 sporchi di una rapina (un
+    // lotto nuovo, come li scrive economia.mjs), due wallet e una chiavetta, nessuno decifrato oggi (=scalda: tre, il
+    // decifratore si scalda; =vuota: niente sporchi; =poveri: 1.200 puliti), --lavaggio=gira|pronto; --fondo-vuoto: decifra paga 0
+    if (['lavatrice', 'decifratore'].includes(app) || economia || fondoVuoto) {
+      await bancaVera.metti((c, db) => {
+        const z = c.zaino
+        if (['lavatrice', 'decifratore'].includes(app)) z.app = { ...z.app, [app]: Date.now() }
+        if (economia) {
+          z.app = { ...z.app, lavatrice: Date.now(), decifratore: Date.now() }
+          z.oggetti = { ...z.oggetti, 'wallet-pzk': 2, chiavetta: 1 }
+          delete c.galera; delete c.tavoli?.decifratore
+          c.decifrati = { g: bancaVera.giorno(), n: ecoTipo === 'scalda' ? 3 : 0 }
+          const sp = ecoTipo === 'vuota' ? 0 : 73500
+          c.pzk = (ecoTipo === 'poveri' ? 1200 : Math.max(c.pzk, 10000)) + sp
+          if (sp) c.sporchi = [{ n: sp, t: Date.now() - 2 * 36e5 }]; else delete c.sporchi
+          if (lavaggio) c.lavaggio = { n: Math.min(50000, sp), fino: lavaggio === 'pronto' ? Date.now() - 6e4 : Date.now() + 7 * 6e4 }
+        }
+        if (fondoVuoto && db.eco) db.eco.persi = []
+      })
+      await page.evaluate(() => import('/games/pzk.js').then((p) => p.sincronizza())); await dorm(600)
+    }
+    // (11.11) --sfide=pronta: le tre sfide di oggi fatte, da riscuotere; =tutte: riscosse, il bonus da prendere (sesto giorno
+    // di fila); =preso: anche il bonus preso. Le sfide sono fisse (quiz, comandi, guadagna) e le statistiche vanno avanti
+    // di quanto serve, così il progresso lo calcola la banca vera
+    const sfideArg = (process.argv.find((a) => a.startsWith('--sfide=')) ?? '').slice(8)
+    if (sfideArg) {
+      await bancaVera.metti((c) => {
+        const z = c.zaino, oggi = bancaVera.giorno(), ieri = bancaVera.giorno(Date.now() - 864e5)
+        const sfide = [{ id: 'quiz', diff: 0, target: 2 }, { id: 'comandi', diff: 1, target: 16 }, { id: 'guadagna', diff: 2, target: 1500 }]
+        const stat = { quiz: 'quizGiusti', comandi: 'comandi', guadagna: 'guadagnati' }
+        const base = Object.fromEntries(sfide.map((y) => [stat[y.id], z.stat?.[stat[y.id]] ?? 0]))
+        z.stat = { ...z.stat, ...Object.fromEntries(sfide.map((y) => [stat[y.id], base[stat[y.id]] + y.target])) }
+        const tutte = sfideArg === 'tutte' || sfideArg === 'preso'
+        z.sfide = { g: oggi, sfide, base, riscosse: tutte ? sfide.map((y) => y.id) : [], bonus: sfideArg === 'preso', serie: sfideArg === 'preso' ? { ultimo: oggi, n: 7 } : { ultimo: ieri, n: 6 } }
+      })
+      await page.evaluate(() => import('/games/pzk.js').then((p) => p.sincronizza())); await dorm(600)
+    }
     if (process.argv.includes('--giocate')) {
       await bancaVera.metti((c) => { c.libro = { ...c.libro, lav: 10292.5, pre: 1160, spe: 10580, g: { 'chat-slot': [3, 0, 60, 0, 0], 'chat-blackjack': [1, 1, 400, 800, 400], blackjack: [5, 2, 865, 130, 50], roulette: [2, 2, 5000, 6000, 500] } } })
       await page.evaluate(() => import('/games/pzk.js').then((p) => p.sincronizza())); await dorm(600)
@@ -533,7 +602,8 @@ try {
     // --tasti=dx,dx,ok,giu…: una sequenza a scelta al posto di quella fissa (per vedere tutte le pagine di un'app)
     const TASTI = { su: 'ArrowUp', giu: 'ArrowDown', sx: 'ArrowLeft', dx: 'ArrowRight', ok: 'Enter', indietro: 'Escape', okvero: 'Control+Enter' } // (okvero: il tasto OK anche dove Invio va a capo, l'editor di «codice C»)
     // (e clic@80x121: un clic del mouse sul pixel 80, 121 dell'lcd, attraverso il 3D vero; scrivi@caf: testo dalla tastiera vera, + per lo spazio;
-    // conta@pescati@5: lo zaino conta come dopo cinque pescate, per far avanzare sfide e quest; prendi@caffe@3: tre caffè nello zaino;
+    // conta@pescati@5: lo zaino conta come dopo cinque pescate, per far avanzare sfide e quest; prendi@caffe@3: tre caffè nello zaino
+    // (questi due solo con --banca: lo zaino sta sulla banca);
     // finta@direzioni|griglia|parola|azioni: nella chat una scheda finta che aspetta le frecce del rider, una griglia come le mine,
     // la parola della banconota, o dei tasti con uno spento e uno da finire: senza la banca, che nel collaudo non c'è)
     const scelti = (process.argv.find((a) => a.startsWith('--tasti=')) ?? '').slice(8).split(',').filter((k) => TASTI[k] || /^clic@\d+x\d+$/.test(k) || /^scrivi@[\w+]+$/.test(k) || /^(conta|prendi)@[\w-]+@\d+$/.test(k) || /^aspetta@\d+$/.test(k) || /^finta@\w+$/.test(k))
@@ -548,7 +618,7 @@ try {
       if (nome === 'indietro' && i > 0 && ultimaVista === 'home' && !scelti.length) continue
       const prima = await page.evaluate(() => window.__oscillatori ?? 0)
       const accesiPrima = await page.evaluate(() => localStorage.getItem('pzkko-suono') === 'si')
-      const giaAperta = !k && (await page.evaluate((a) => import('/telefono/zero/os/os.js').then((os) => os.corrente()?.app === a), app)) // (già aperta da sola, come l'account senza conto: la sigla è già suonata) // (se il collaudo li ha appena spenti dalle impostazioni, il silenzio è giusto)
+      const giaAperta = !k && (await page.evaluate((a, sc) => import('/telefono/zero/os/os.js').then((os) => os.corrente()?.app === a || (sc && os.corrente()?.app === 'account')), app, senzaConto)) // (11.11: senza conto l'account c'è già, e apri non lo riapre) // (già aperta da sola, come l'account senza conto: la sigla è già suonata) // (se il collaudo li ha appena spenti dalle impostazioni, il silenzio è giusto)
       if (k?.finta) await page.evaluate(async (tipo) => {
         const c = await import('/telefono/zero/os/chat.js')
         window.__esiti ??= []
@@ -560,8 +630,14 @@ try {
         segna(c.scegli(s, b.map((id) => ({ id, eti: id })), 0, tipo === 'griglia' ? { griglia: 'g3' } : {}))
       }, k.finta)
       else if (k?.aspetta) await dorm(k.aspetta) // (aspetta@3000: tre secondi senza toccare niente, per le cose che vanno da sole)
-      else if (k?.conta) await page.evaluate(([s, n]) => import('/chat/zaino.js').then((z) => z.conta(s, n)), k.conta)
-      else if (k?.prendi) await page.evaluate(([s, n]) => import('/chat/zaino.js').then((z) => z.aggiungi(s, n)), k.prendi)
+      // (11.11) conta@ e prendi@ passano dalla banca in memoria: dal 31.10 lo zaino sta lì, e chat/zaino.js non ha più
+      // conta né aggiungi (si fermavano con un TypeError). Senza --banca non si può: lo si dice, e si va avanti
+      else if (k?.conta || k?.prendi) {
+        if (!bancaVera) { errori.push(`${i} ${nome}: conta@ e prendi@ vogliono --banca (lo zaino sta sulla banca)`); continue }
+        const [id, n] = k.conta ?? k.prendi
+        await bancaVera.metti((c) => { const z = c.zaino, dove = k.conta ? 'stat' : 'oggetti'; z[dove] = { ...z[dove], [id]: (z[dove]?.[id] ?? 0) + n } })
+        await page.evaluate(() => import('/games/pzk.js').then((p) => p.sincronizza()))
+      }
       else if (k?.scrivi) await page.keyboard.type(k.scrivi.replaceAll('+', ' '), { delay: 40 }) // (scrivi@mine+50: il + è lo spazio)
       else if (k?.clic) { const p = await page.evaluate((x, y) => window.pzkkoZero.puntoLcd(x, y), ...k.clic); await page.mouse.click(p.x, p.y) }
       else if (k === 'Control+Enter') { await page.keyboard.down('Control'); await page.keyboard.press('Enter'); await page.keyboard.up('Control') }
@@ -579,7 +655,7 @@ try {
       // (le lettere della tastiera vera, i conti dello zaino e le attese non suonano; 2.11: il push era finito dentro il
       // commento, così il controllo del suono non c'era più e il suo if prendeva la riga dopo)
       if (suoni && accesiPrima && !suono && !giaAperta && !k?.scrivi && !k?.conta && !k?.prendi && !k?.aspetta && !k?.finta) errori.push(`${i} ${nome}: nessun suono`)
-      if (i === 0 && r.app !== app && r.vista !== 'presto' && !guidaPrima) errori.push(`l'app ${app} non si è aperta (c'è ${r.vista})`)
+      if (i === 0 && r.app !== app && r.vista !== 'presto' && !guidaPrima && !(senzaConto && r.app === 'account')) errori.push(`l'app ${app} non si è aperta (c'è ${r.vista})`) // (11.11: senza conto si apre l'account, ed è giusto: REGOLE 3.8)
     }
     const esiti = await page.evaluate(() => window.__esiti ?? [])
     if (esiti.length) console.log('  le scelte finte: ' + esiti.join(' · '))

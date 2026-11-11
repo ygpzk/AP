@@ -14,11 +14,23 @@
 // si apre sulla banca coi numeri a caso dei passi (le righe, le carte, le fasce), e finito ogni passo le mosse coi loro tempi
 // vanno alla banca, che fa il voto e alla fine la medaglia e i premi. Il coltello, la lancetta e il sacco si muovono col
 // tempo, come sulla banca: il voto che si vede è il suo. Aspettando la banca, in fondo «la nonna assaggia…».
-import { Lcd, W, H } from './lcd.js'
+// (11.11, Alberto: «fai colori a 8bit su tutto») I colori, pochi e con un senso: il verde della fascia giusta e del tempo
+// che c'è (la cucina vecchia diceva già «la fascia verde»), il rosso del tempo che finisce, dei voti bassi e degli sbagli,
+// le medaglie coi colori di MEDAGLIE, il tagliere di legno, il sugo nella pentola, la sfoglia. Il testo resta d'inchiostro;
+// quello che deve spiccare (i premi, il voto, il record, gli sbagli) sta su una fascia di colore con la scritta di un colore
+// fisso, che si legge su tutti gli sfondi (anche «notte» e «carta»).
+import { Lcd, W, H, C, esa } from './lcd.js'
 import * as icone from './icone.js'
 import * as zaino from '../../../chat/zaino.js'
-import { RICETTE, COME, commento, medaglia, PAGATE, stato, nomeIng, apri, passo as mandaPasso, votoDi, coltello as coltelloDi, lancetta as lancettaDi, livello } from '../../app/cucina.js'
+import { RICETTE, COME, commento, medaglia, MEDAGLIE, PAGATE, stato, nomeIng, apri, passo as mandaPasso, votoDi, coltello as coltelloDi, lancetta as lancettaDi, livello } from '../../app/cucina.js'
 import { txt, corto, destra, centro, testata, elenco, muovi } from './pezzi.js'
+
+const COL = {
+  verde: esa('#339933'), rosso: esa('#cc3300'), oro: esa('#ffcc33'),
+  legno: esa('#cc9966'), gesso: C.bianco, taglio: esa('#330000'), lama: esa('#cccccc'), manico: esa('#996633'),
+  sugo: esa('#993300'), mestolo: esa('#ffcc99'), pasta: esa('#ffcc66'), grani: esa('#cc9933'),
+}
+const MED = Object.fromEntries(MEDAGLIE.map((m) => [m[1], esa(m[2])])) // (i colori delle medaglie sono quelli della cucina vecchia)
 
 const bm = (id, lato) => icone.bitmap(id, lato) ?? icone.bitmap('app-cucina', lato)
 const nonna = (lato) => icone.bitmap('nonna', lato)
@@ -29,7 +41,22 @@ const NOME_M = { oro: 'medaglia d’oro', argento: 'medaglia d’argento', bronz
 const ART = { tortelli: 'i', pilota: 'il', sbrisolona: 'la', luccio: 'il' } // (11.11: la nonna diceva «i torta sbrisolona!» e «i luccio in salsa!»)
 
 /** Un testo centrato nel riquadro x … x + w. */
-const centro0 = (l, x, w, y, s, scala = 1) => l.testo(x + Math.round((w - Lcd.larghezza(s, scala)) / 2), y, s, { scala })
+const centro0 = (l, x, w, y, s, scala = 1, col = 1) => l.testo(x + Math.round((w - Lcd.larghezza(s, scala)) / 2), y, s, { scala, col })
+/** Una scritta su una fascia di colore (righe y - 1 … y + 7, gli angoli smussati), col testo di un colore fisso. → la larghezza */
+function pillola(l, x, y, s, fondo, col = C.bianco) {
+  const w = Lcd.larghezza(s) + 6
+  l.riempi(x - 3, y - 1, w, 9, fondo)
+  for (const [a, b] of [[x - 3, y - 1], [x + w - 4, y - 1], [x - 3, y + 7], [x + w - 4, y + 7]]) l.px(a, b, 0)
+  l.testo(x, y, s, { col })
+  return w
+}
+/** La medaglia: un tondo 7 × 7 col suo colore e il bordino (d'inchiostro, o di fondo sulla riga scelta). */
+function medaglina(l, x, y, nome, inv = false) {
+  const c = MED[nome], b = inv ? 0 : 1
+  if (!c) return
+  l.riempi(x + 2, y, 3, 1, b); l.riempi(x + 1, y + 1, 5, 1, b); l.riempi(x, y + 2, 7, 3, b); l.riempi(x + 1, y + 5, 5, 1, b); l.riempi(x + 2, y + 6, 3, 1, b)
+  l.riempi(x + 2, y + 1, 3, 1, c); l.riempi(x + 1, y + 2, 5, 3, c); l.riempi(x + 2, y + 5, 3, 1, c)
+}
 /** Al più max righe da n caratteri: se ne avanzano, l'ultima finisce con «…». */
 const righeCorte = (s, n, max) => { const R = Lcd.acapo(txt(s), n), o = R.slice(0, max); if (R.length > max) o[max - 1] = corto(o[max - 1] + '…', n); return o }
 /** Il fumetto della nonna: l'avatar a sinistra e il testo a capo accanto. */
@@ -174,8 +201,9 @@ function vistaRicetta(os, r, par) {
       }
       if (G.fase === 'esito') {
         const v = G.punti.at(-1), s = String(Math.round(v * 100))
-        if (lampo % 2) l.riempi(W / 2 - Lcd.larghezza(s, 3) / 2 - 4, 34, Lcd.larghezza(s, 3) + 8, 25)
-        centro(l, 36, s, { scala: 3, inv: lampo % 2 === 1 })
+        // (11.11: il voto su una fascia verde se passa, rossa se no, in bianco; lampeggiando la fascia è d'inchiostro)
+        l.riempi(W / 2 - Lcd.larghezza(s, 3) / 2 - 4, 34, Lcd.larghezza(s, 3) + 8, 25, lampo % 2 ? 1 : v >= 0.45 ? COL.verde : COL.rosso)
+        centro(l, 36, s, { scala: 3, inv: lampo % 2 === 1, col: C.bianco })
         centro(l, 61, 'su 100')
         fumetto(l, 72, commento(v), 2)
         const ultimo = G.i === r.passi.length - 1
@@ -186,11 +214,19 @@ function vistaRicetta(os, r, par) {
       if (G.fase === 'fine') {
         const f = fine, m = f.m
         l.bitmap(bm(r.piatto, 32), 10, 33) // (11.11: righe 33–64, i premi sotto da 66: a 64 il piatto bucava «niente premi»)
-        l.testo(48, 35, m ? NOME_M[m[1]] : 'niente medaglia')
+        const nm = m ? NOME_M[m[1]] : 'niente medaglia'
+        l.testo(48, 35, nm)
+        if (m) medaglina(l, 48 + Lcd.larghezza(nm) + 4, 35, m[1]) // (11.11: la medaglia col suo colore, accanto al nome)
         l.testo(48, 45, `${Math.round(f.v * 100)} / 100`, { scala: 2 })
-        if (f.record) l.testo(48 + Lcd.larghezza(`${Math.round(f.v * 100)} / 100`, 2) + 6, 50, 'record!')
-        const premi = [f.pzk || f.xp ? `+${f.pzk} $pzk · +${f.xp} xp` : m ? `oggi i premi li hai già presi (${PAGATE} al giorno)` : 'niente premi: riprova', f.piatto ? `${nomeIng(r.piatto)} nello zaino` : ''].filter(Boolean).join(' · ') // (11.11: il nome del piatto, non l'id: «luccio-salsa nello zaino»)
-        righeCorte(premi, 39, 2).forEach((s, i) => l.testo(10, 66 + i * 9, s))
+        if (f.record) pillola(l, 48 + Lcd.larghezza(`${Math.round(f.v * 100)} / 100`, 2) + 9, 50, 'record!', COL.oro, C.nero) // (11.11: su una fascia d'oro)
+        // i premi: i $pzk e gli xp guadagnati su una fascia verde (11.11), il resto d'inchiostro
+        const guadagno = f.pzk || f.xp ? corto(`+${f.pzk} $pzk · +${f.xp} xp`, 37) : null
+        const premi = [guadagno ? '' : m ? `oggi i premi li hai già presi (${PAGATE} al giorno)` : 'niente premi: riprova', f.piatto ? `${nomeIng(r.piatto)} nello zaino` : ''].filter(Boolean).join(' · ') // (11.11: il nome del piatto, non l'id: «luccio-salsa nello zaino»)
+        if (guadagno) {
+          const wg = pillola(l, 13, 66, guadagno, COL.verde)
+          if (premi && 10 + wg + 4 + Lcd.larghezza(premi) <= 245) l.testo(10 + wg + 4, 66, premi) // (ci sta accanto: sulla stessa riga)
+          else if (premi) l.testo(10, 75, corto(premi, 39))
+        } else righeCorte(premi, 39, 2).forEach((s, i) => l.testo(10, 66 + i * 9, s))
         fumetto(l, 83, m?.[1] === 'oro' ? 'come li faccio io. anzi meglio!' : m ? 'buoni! la prossima volta di più.' : 'questi al gatto. riproviamo?', 1) // (una riga sola, 33 lettere: sotto ci sono i tasti)
         const E = ['rifalla', 'le ricette']
         const ws = E.map((e) => Lcd.larghezza(e) + 8), tot = ws[0] + ws[1] + 4
@@ -202,14 +238,15 @@ function vistaRicetta(os, r, par) {
       // ── il gioco ──
       if (!g) return
       const resta = Math.max(0, (g.fino - ora()) / TEMPO[g.tipo])
-      l.riquadro(10, 34, W - 20, 5); l.riempi(11, 35, Math.round((W - 22) * resta), 3) // (il tempo)
+      l.riquadro(10, 34, W - 20, 5); l.riempi(11, 35, Math.round((W - 22) * resta), 3, resta < 0.3 ? COL.rosso : COL.verde) // (il tempo: verde, rosso quando sta per finire)
       if (g.tipo === 'taglia') {
         const x0 = 20, w = W - 40, xc = x0 + Math.round(coltello() * w)
+        l.riempi(x0 - 1, 49, w + 2, 40, COL.legno) // (11.11: il tagliere di legno, le righe da tagliare a gesso, i tagli scuri)
         l.bitmap(bm(g.o.icona, 32), Math.round(W / 2 - 16), 52)
         l.riquadro(x0 - 2, 48, w + 4, 42)
-        for (const q of g.righe) { const xq = x0 + Math.round(q.x * w); if (!q.fatto) for (let y = 49; y < 89; y += 3) l.px(xq, y); else { l.vert(x0 + Math.round(q.dove * w), 49, 40); l.vert(x0 + Math.round(q.dove * w) + 1, 49, 40) } }
-        // il coltello: la lama e il manico, sopra il tagliere
-        l.riempi(xc - 1, 92, 3, 12); l.riempi(xc - 2, 104, 5, 6); l.px(xc, 91)
+        for (const q of g.righe) { const xq = x0 + Math.round(q.x * w); if (!q.fatto) for (let y = 49; y < 89; y += 3) l.px(xq, y, COL.gesso); else { l.vert(x0 + Math.round(q.dove * w), 49, 40, COL.taglio); l.vert(x0 + Math.round(q.dove * w) + 1, 49, 40, COL.taglio) } }
+        // il coltello: la lama (col filo chiaro) e il manico di legno, sotto il tagliere
+        l.riempi(xc - 1, 92, 3, 12); l.vert(xc, 93, 10, COL.lama); l.riempi(xc - 2, 104, 5, 6); l.riempi(xc - 1, 105, 3, 4, COL.manico); l.px(xc, 91)
         os.zona(10, 40, W - 20, 76, colpo)
       } else if (g.tipo === 'ordina') {
         // la fila da fare, col segno su quelli già messi
@@ -220,7 +257,8 @@ function vistaRicetta(os, r, par) {
           const x = x0 + k * cw + (k === g.sel && g.scossa ? (g.scossa % 2 ? 2 : -2) : 0), on = k === g.sel, messa = g.messe.has(s), nome = corto(txt(nomeIng(s).split(' ')[0]), Math.floor((cw - 6) / 6))
           if (messa) { // (già nella pentola: il ✓ al posto dell'icona, senza cornice; scelta, la cornice sottile)
             if (on) l.riquadro(x, 55, cw - 3, 30)
-            centro0(l, x, cw - 3, 58, '✓', 2)
+            l.riempi(x + Math.round((cw - 3) / 2) - 8, 56, 16, 18, COL.verde) // (11.11: il ✓ bianco su verde)
+            centro0(l, x, cw - 3, 58, '✓', 2, C.bianco)
             l.testo(x + Math.round((cw - 3 - Lcd.larghezza(nome)) / 2), 76, nome)
           } else {
             if (on) l.riempi(x, 55, cw - 3, 30); else l.cornice(x, 55, cw - 3, 30)
@@ -230,14 +268,15 @@ function vistaRicetta(os, r, par) {
           os.zona(x, 55, cw - 3, 30, () => { g.sel = k; colpo() })
         })
         l.bitmap(bm('pentola', 16), Math.round(W / 2 - 8), 92)
-        centro(l, 110, `sbagli: ${g.sbagli}`)
+        { const s = `sbagli: ${g.sbagli}`; if (g.sbagli) pillola(l, Math.round(W / 2 - Lcd.larghezza(s) / 2), 110, s, COL.rosso); else centro(l, 110, s) } // (11.11: gli sbagli su una fascia rossa)
       } else if (g.tipo === 'mescola') {
         // la pentola vista dall'alto, il mestolo nel quarto dove sei, la freccia che serve adesso
         const cx = 128, cy = 76, rr = 28
+        for (let dy = -(rr - 2); dy <= rr - 2; dy++) { const hw = Math.floor(Math.sqrt((rr - 1.5) ** 2 - dy * dy)); l.riempi(cx - hw, cy + dy, 2 * hw + 1, 1, COL.sugo) } // (11.11: dentro, il sugo; un filo dentro l'orlo, a rr - 1 spuntava fra i puntini)
         for (let i = 0; i < 64; i++) { const q = (i / 64) * Math.PI * 2; l.px(Math.round(cx + Math.cos(q) * rr), Math.round(cy + Math.sin(q) * rr)); l.px(Math.round(cx + Math.cos(q) * (rr + 2)), Math.round(cy + Math.sin(q) * (rr + 2))) }
         const a = (g.quarti % 4) * (Math.PI / 2) - Math.PI / 2 + Math.PI / 4 // (il mestolo gira in senso orario)
         const mx = Math.round(cx + Math.cos(a) * 16), my = Math.round(cy + Math.sin(a) * 16)
-        l.riempi(mx - 3, my - 3, 7, 7)
+        l.riempi(mx - 3, my - 3, 7, 7); l.riempi(mx - 2, my - 2, 5, 5, COL.mestolo) // (il mestolo di legno, col bordino)
         for (let s = 0; s < 16; s++) l.px(Math.round(cx + Math.cos(a) * s), Math.round(cy + Math.sin(a) * s))
         const freccia = { dx: '→', giu: '↓', sx: '←', su: '↑' }[GIRO[g.atteso]]
         l.testo(20, 60, 'ora', {}); l.testo(20, 70, freccia, { scala: 2 })
@@ -250,7 +289,7 @@ function vistaRicetta(os, r, par) {
       } else if (g.tipo === 'impasta') {
         // la sfoglia che si allarga e si abbassa a ogni colpo
         const k = Math.min(1, g.n / g.o.colpi), w = Math.round(40 + 150 * k), h = Math.round(30 - 18 * k)
-        l.riempi(Math.round(W / 2 - w / 2), 92 - h, w, h)
+        l.riempi(Math.round(W / 2 - w / 2), 92 - h, w, h); l.riempi(Math.round(W / 2 - w / 2) + 1, 93 - h, w - 2, h - 2, COL.pasta) // (11.11: la sfoglia gialla col bordino)
         l.bitmap(bm(g.o.icona, 16), Math.round(W / 2 - 8), 48, {})
         centro(l, 98, `${g.n}/${g.o.colpi}`, { scala: 2 })
         os.zona(10, 40, W - 20, 76, colpo)
@@ -260,9 +299,9 @@ function vistaRicetta(os, r, par) {
         const bx = 120, by = 46, bw = 60, bh = 64
         l.vert(bx, by, bh); l.vert(bx + bw, by, bh); l.orizz(bx, by + bh, bw + 1)
         const ya = Math.round(by + bh - g.b * bh), yb = Math.round(by + bh - g.a * bh)
-        for (let y = ya; y <= yb; y++) for (let x = bx + 1; x < bx + bw; x += 2) if (y === ya || y === yb || (x + y) % 6 === 0) l.px(x, y)
+        l.riempi(bx + 1, ya, bw - 1, yb - ya + 1, COL.verde) // (11.11: la fascia verde, come la cucina vecchia; prima era a retino)
         const yl = Math.round(by + bh - livello(g.ms + (g.aperto ? ora() - g.ultimo : 0)) * bh) // (il livello dai ms di sacco aperto, come la banca)
-        l.riempi(bx + 2, yl, bw - 3, by + bh - yl)
+        l.riempi(bx + 2, yl, bw - 3, by + bh - yl, COL.grani); if (yl < by + bh) l.orizz(bx + 2, yl, bw - 3) // (quello che scende, col pelo d'inchiostro: si vede anche sulla fascia)
         // la fascia anche fuori dal bicchiere (dentro, il livello la copre): due parentesi, a sinistra e a destra
         for (const xs of [bx - 6, bx + bw + 2]) { l.orizz(xs, ya, 5); l.orizz(xs, yb, 5); l.vert(xs + (xs < bx ? 0 : 4), ya, yb - ya + 1) }
         // il getto: cade dal sacco aperto dentro il bicchiere, a puntini che scendono
@@ -279,7 +318,7 @@ function vistaRicetta(os, r, par) {
         const x0 = 20, w = W - 40, y = 86
         l.riquadro(x0, y, w, 12)
         const xa = x0 + Math.round(g.a * w), xb = x0 + Math.round(g.b * w)
-        for (let x = xa; x <= xb; x++) for (let yy = y + 1; yy < y + 11; yy++) if ((x + yy) % 2 === 0) l.px(x, yy)
+        l.riempi(xa, y + 1, xb - xa + 1, 10, COL.verde) // (11.11: la fascia verde; prima era a retino)
         const xl = x0 + Math.round(lancetta() * w)
         l.riempi(xl - 1, y - 4, 3, 20)
         os.zona(10, 40, W - 20, 76, colpo)
@@ -338,6 +377,7 @@ export function vista(os) {
           l.bitmap(bm(r.piatto, 16), x0 - 2, y, o)
           l.testo(x0 + 18, y + 5, corto(r.nome, 22), o)
           destra(l, x0 + w, y + 5, dx, o)
+          if (m) medaglina(l, x0 + w - Lcd.larghezza(dx) - 10, y + 5, m[1], on) // (11.11: la medaglia col suo colore; il nome resta, per chi non distingue i colori)
         },
       })
       centro(l, H - 9, aprendo ? 'la nonna prepara…' : 'OK cucina · ↑↓ sceglie')

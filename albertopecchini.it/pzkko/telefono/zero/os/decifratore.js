@@ -2,7 +2,7 @@
 // apre i wallet pzk cifrati e le chiavette usb che lo spazzino trova sul nastro. I giochini li prepara la banca
 // (giochi/app-decifratore.mjs: tre codici, due errori perdonati, al terzo il pezzo si blocca) e la banca paga
 // (wallet.mjs, decifra: tre al giorno); la logica è quella di telefono/app/decifratore.js (DOMANDE, DENTRO, TIPI, pezzi,
-// decifratiOggi, apri, risolvi): qui c'è solo la faccia a un bit. Si compra nel pzkstore.
+// decifratiOggi, apri, risolvi): qui c'è solo la faccia (a colori dall'11.11). Si compra nel pzkstore.
 // - I PEZZI: quanti se ne sono aperti oggi (tre caselle), i pezzi nello zaino (icona, nome, quanti, quanto c'è dentro);
 //   OK apre quello scelto. Senza pezzi, in galera o a tre al giorno: perché no.
 // - IL CODICE (una vista sopra): il pezzo, a che codice sei e le vite; la domanda, il codice grande nel riquadro e le quattro
@@ -10,7 +10,7 @@
 //   una vita in meno. Alla fine il lucchetto che salta e i $pzk, o il pezzo bloccato.
 // - COME FUNZIONA: le regole, che scorrono.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, C, esa, colore } from './lcd.js'
 import * as icone from './icone.js'
 import * as pzk from '../../../games/pzk.js'
 import * as zaino from '../../../chat/zaino.js'
@@ -24,6 +24,19 @@ const ora = (t) => new Date(t).toLocaleTimeString('it-IT', { ...ROMA, hour: '2-d
 const nome = (id) => TIPI[id][1]
 const il = (id) => `${TIPI[id][0] === 'chiavetta' ? 'la' : 'il'} ${nome(id)}` // (11.11: «collego il chiavetta usb…»)
 const dentro = (id) => DENTRO[TIPI[id][0]]
+
+// (11.11, Alberto: «fai colori a 8bit su tutto») pochi colori, ognuno col suo senso: verde quello che va (il codice giusto, i
+// $pzk, i pezzi aperti oggi), rosso quello che si perde (le vite, il pezzo bloccato, la galera), giallo l'avviso. Le scritte
+// stanno su una fascia piena col loro testo fisso (nero sul verde e sul giallo, bianco sul rosso scuro), così si leggono su
+// ogni sfondo: il verde acceso sull'arancione e il rosso scuro su «notte», da soli, sparivano
+const VERDE = C.verde, ROSSO = esa('#cc0000'), GIALLO = C.giallo, NERO = C.nero, BIANCO = C.bianco
+const SPENTA = colore(128, 128, 128) // (la vita persa: un grigio medio, che si vede su «carta», «notte» e arancione)
+/** Una fascia piena di colore col testo centrato sopra (scala 1 o 2). */
+function fascia(l, y, s, fondo, col, scala = 1) {
+  const w = Lcd.larghezza(s, scala) + 4 * scala + 4
+  l.riempi(Math.round(W / 2 - w / 2), y - 2 * scala, w, 11 * scala, fondo)
+  centro(l, y, s, { scala, col })
+}
 
 const REGOLE = [
   { titolo: 'il decifratore' },
@@ -43,6 +56,13 @@ function codice(os, id, v0, avvisa) {
   let v = v0, sel = 0, attesa = null, esito = null, fine = null, salto = 0
   const dì = (ok, testo) => { esito = { ok, testo: txt(testo), fino: Date.now() + 3000 }; os.ridisegna() }
   const qui = () => os.corrente() === g
+  // l'esito in fondo sulla fascia del suo colore (11.11: verde il giusto, rosso lo sbagliato; ✓ e ! restano per chi non distingue i colori)
+  const segna = (l) => {
+    if (!esito || Date.now() >= esito.fino) return false
+    l.riempi(10, H - 11, W - 20, 10, esito.ok ? VERDE : ROSSO)
+    centro(l, H - 9, `${esito.ok ? '✓' : '!'} ${corto(esito.testo, 35)}`, { col: esito.ok ? NERO : BIANCO })
+    return true
+  }
   async function rispondi(k) {
     if (attesa || fine || !v?.prova) return
     sel = k
@@ -85,10 +105,12 @@ function codice(os, id, v0, avvisa) {
         l.bitmap(icone.bitmap(fine.n !== undefined ? 'pzk' : 'lucchetto', 32), 112, y0 + 4 - su)
         if (fine.n !== undefined) {
           centro(l, y0 + 44, 'aperto!', { scala: 2 })
-          centro(l, y0 + 64, `+${fmt(fine.n)} $pzk puliti`)
+          if (fine.n > 0) fascia(l, y0 + 64, `+${fmt(fine.n)} $pzk puliti`, VERDE, NERO) // (11.11 i soldi guadagnati, verdi)
+          else centro(l, y0 + 64, `+${fmt(fine.n)} $pzk puliti`)
           centro(l, y0 + 75, fine.n > 0 ? 'dal fondo dei portafogli smarriti' : 'il fondo dei portafogli smarriti è vuoto') // (11.11: la banca paga quello che c'è nel fondo, anche zero)
         } else {
-          centro(l, y0 + 44, fine.errore ? 'non si apre' : 'bloccato', { scala: 2 })
+          if (fine.errore) fascia(l, y0 + 44, 'non si apre', GIALLO, NERO, 2) // (11.11 l'avviso giallo: la rete, si riprova)
+          else fascia(l, y0 + 44, 'bloccato', ROSSO, BIANCO, 2) // (11.11 il pezzo perso per oggi, rosso)
           const s = fine.errore ?? (fine.sparito ? `${il(id)} non è più nello zaino` : `tre errori: il pezzo resta nello zaino. Riprova quando vuoi.`)
           Lcd.acapo(txt(s), 39).slice(0, 3).forEach((r, i) => centro(l, y0 + 64 + i * 9, r))
         }
@@ -101,13 +123,17 @@ function codice(os, id, v0, avvisa) {
       // la testa: il pezzo, a che codice sei, le vite
       l.bitmap(icone.bitmap(id, 16), 8, y0 - 2)
       l.testo(28, y0 + 2, corto(nome(id), 20))
-      destra(l, W - 8, y0 + 2, `${v.i + 1} di 3  ${'♥'.repeat(Math.max(0, 3 - v.errori))}`)
+      // (11.11 le vite rosse e quelle perse grigie: prima le perse sparivano, ora si contano a colpo d'occhio)
+      const vive = Math.max(0, 3 - v.errori), xc = W - 8 - Lcd.larghezza('♥♥♥')
+      for (let i = 0; i < 3; i++) l.testo(xc + i * 6, y0 + 2, '♥', { col: i < vive ? ROSSO : SPENTA })
+      destra(l, xc - 7, y0 + 2, `${v.i + 1} di 3`)
       l.orizz(6, y0 + 14, W - 12)
       // la domanda (al più tre righe) e il codice nel riquadro (a scala 2 se ci sta)
       Lcd.acapo(txt(dom.testo), 39).slice(0, 3).forEach((r, i) => l.testo(8, y0 + 17 + i * 9, r))
       const c = txt(dom.codice), sc = Lcd.larghezza(c, 2) <= W - 24 ? 2 : 1
-      l.riquadro(8, 58, W - 16, 18)
-      centro(l, sc === 2 ? 60 : 63, c, { scala: sc })
+      // (11.11 il codice su uno schermino nero a fosfori verdi, come un terminale: fondo e testo fissi, si legge su ogni sfondo)
+      l.riquadro(8, 58, W - 16, 18); l.riempi(9, 59, W - 18, 16, NERO)
+      centro(l, sc === 2 ? 60 : 63, c, { scala: sc, col: VERDE })
       // le quattro risposte, in due file
       p.scelte.slice(0, 4).forEach((s, k) => {
         const x = k % 2 ? 130 : 8, y = k < 2 ? 80 : 94, w = 118, on = k === sel
@@ -116,7 +142,7 @@ function codice(os, id, v0, avvisa) {
         l.testo(Math.round(x + w / 2 - Lcd.larghezza(r) / 2), y + 3, r, { inv: on })
         if (!attesa) os.zona(x, y, w, 12, () => rispondi(k))
       })
-      if (!striscia(l, { esito, attesa }, t)) centro(l, H - 9, '↑↓←→ sceglie · OK risponde')
+      if (!striscia(l, { esito: null, attesa }, t) && !segna(l)) centro(l, H - 9, '↑↓←→ sceglie · OK risponde')
     },
     tasto(k) {
       if (k === 'indietro') { os.togli(); return true } // (il pezzo resta nello zaino: riaprendolo, i codici ripartono)
@@ -155,10 +181,10 @@ export function vista(os) {
     aiuto: () => (!pezzi().length || fermo() ? '←→ pagine' : pezzi().length > 1 ? 'OK decifra · ↑↓ sceglie · ←→ pagine' : 'OK decifra · ←→ pagine'),
     ok(x) { const p = ipezzi()[st.sel]; if (p) apriPezzo(x, p[0]) },
     disegna(l, x) {
-      // oggi: tre caselle, piene quelle già aperte
-      const n = Math.min(AL_GIORNO, decifratiOggi())
+      // oggi: tre caselle, piene quelle già aperte (11.11 verdi; rosse tutte e tre quando il decifratore si scalda)
+      const n = Math.min(AL_GIORNO, decifratiOggi()), piena = n >= AL_GIORNO ? ROSSO : VERDE
       l.testo(10, 34, 'aperti oggi')
-      for (let i = 0; i < AL_GIORNO; i++) { const xx = 82 + i * 9; if (i < n) l.riempi(xx, 34, 7, 7); else l.riquadro(xx, 34, 7, 7) }
+      for (let i = 0; i < AL_GIORNO; i++) { const xx = 82 + i * 9; l.riquadro(xx, 34, 7, 7); if (i < n) l.riempi(xx + 1, 35, 5, 5, piena) }
       destra(l, 245, 34, `${n} di ${AL_GIORNO}`)
       const P = ipezzi(), no = fermo()
       if (!P.length) {
@@ -178,7 +204,11 @@ export function vista(os) {
           l.testo(x0 + 18, y + 11, corto(`dentro da ${fmt(da)} a ${fmt(a)} $pzk`, 30), o)
         },
       })
-      Lcd.acapo(no?.[0] ?? 'tre codici per pezzo: al terzo errore si blocca', 39).slice(0, 2).forEach((r, i) => l.testo(10, 92 + i * 9, r))
+      if (!no) { l.testo(10, 92, 'tre codici per pezzo: al terzo errore si blocca'); return }
+      // (11.11 perché oggi no, su una fascia: rossa la galera, gialla col ⚠ il decifratore che si scalda)
+      const gal = pzk.inGalera(), righe = Lcd.acapo(gal ? no[0] : `⚠ ${no[0]}`, 38).slice(0, 2)
+      l.riempi(8, 90, W - 16, righe.length * 9 + 3, gal ? ROSSO : GIALLO)
+      righe.forEach((r, i) => l.testo(10, 92 + i * 9, r, { col: gal ? BIANCO : NERO }))
     },
     tasto(k) { const n = ipezzi().length; if (!muovi(st, n, k)) return false; tieni(); return true },
   }

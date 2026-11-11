@@ -116,8 +116,12 @@ function pulisci() {
   }
 }
 
-// la regia è aperta? se no la si apre (non più di una volta ogni 20 secondi)
+// la regia è aperta? se no la si apre (non più di una volta ogni 20 secondi). Dall'11.11.2026 solo
+// se Alberto l'ha chiesto («crea icona desktop per aprirla manualmente e disattiva avvio
+// automatico»): impostazioni.json { "apriDaSola": true }, o «:automatica si» nella regia. Di solito
+// la si apre dall'icona «Regia di Claude» sul desktop; i ganci scrivono lo stesso tutto il resto.
 function apri(s) {
+  if (!leggi(join(CARTELLA, 'impostazioni.json'), {})?.apriDaSola) return
   const f = leggi(join(CARTELLA, 'finestra.json'))
   if (f && Date.now() - f.battito < 5000) return
   if (Date.now() - (s.apertura || 0) < 20000) return

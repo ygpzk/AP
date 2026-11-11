@@ -10,11 +10,33 @@
 //   $pzk, la conferma), ALTRO (l'indirizzo che si cambia una volta sola, il PIN, instagram).
 // Mentre si aspetta il server, in fondo la rotellina e i tasti non fanno partire altro; l'esito resta lì qualche secondo.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, C, esa } from './lcd.js'
 import * as icone from './icone.js'
 import * as pzk from '../../../games/pzk.js'
 import { RISERVATI, descriviMossa } from '../../app/account.js'
 import { txt, corto, destra, centro, sposta, testata, striscia } from './pezzi.js'
+
+// ── i colori (11.11, Alberto: «fai colori a 8bit su tutto»): pochi e col loro senso. Il verde è quello che entra (le mosse
+// col +, quanto ricevi, gli invii aperti, il conto trovato), il rosso quello che esce o non va (le mosse col −, quanto dai,
+// l'errore), l'oro i $pzk (la barra della quota), il giallo l'avviso su una fascia. Il testo resta d'inchiostro. Di ogni
+// tinta una versione scura per gli sfondi chiari e una chiara per «notte» (l'inchiostro chiaro): un verde chiaro su carta o
+// un rosso scuro su notte non si leggono ──
+const SCURE = { verde: esa('#006600'), rosso: esa('#cc0000'), oro: esa('#cc9900'), luce: esa('#ffcc33') } // (luce: il filo chiaro in cima all'oro)
+const CHIARE = { verde: esa('#33cc33'), rosso: esa('#ff3333'), oro: esa('#ffcc33'), luce: esa('#ffff99') }
+/** Le tinte che si leggono sullo sfondo di adesso (l è l'lcd vero, quello col tema). */
+const tinte = (l) => ((l.tema?.inchiostro ?? [0, 0, 0]).reduce((a, b) => a + b, 0) > 384 ? CHIARE : SCURE)
+/** Una scritta a pezzi di colori diversi ([testo, colore]), al più n caratteri («…» in fondo). → i caratteri, da scrivere. */
+function aPezzi(parti, n) {
+  const c = parti.flatMap(([s, col]) => [...txt(s)].map((ch) => [ch, col ?? 1]))
+  if (c.length > n) { c.length = n - 1; c.push(['…', c[n - 2]?.[1] ?? 1]) }
+  return c
+}
+/** Scrive i pezzi da x (o centrati, o finendo a xd). */
+function scriviPezzi(l, x, y, c) { for (const [ch, col] of c) x += l.testo(x, y, ch, { col }) + 1 }
+const pezziCentro = (l, y, parti, n = 39) => { const c = aPezzi(parti, n); scriviPezzi(l, Math.round(W / 2 - Lcd.larghezza('x'.repeat(c.length)) / 2), y, c) }
+const pezziDestra = (l, xd, y, parti, n) => { const c = aPezzi(parti, n); scriviPezzi(l, xd - Lcd.larghezza('x'.repeat(c.length)), y, c) }
+/** Il colore di una mossa (descriviMossa): «+» verde, «−» rosso; un cambio ha tutti e due, «−1.000 $pzk → +12,50 €». */
+const pezziMossa = (n, T) => n.split(' → ').flatMap((s, i) => [...(i ? [[' → ', 1]] : []), [s, s.startsWith('+') ? T.verde : s.startsWith('−') ? T.rosso : 1]])
 
 const ROMA = { timeZone: 'Europe/Rome' }
 const valida = (t) => t && !Number.isNaN(new Date(t).getTime())
@@ -25,11 +47,11 @@ const fmt = (x) => pzk.fmt(x ?? 0), eur = (x) => pzk.fmtEur(x ?? 0)
  *  cassa»). (11.11: arrotondato al più vicino, il «ricevi» della conferma prometteva un centesimo o mezzo $pzk in più) */
 const riceve = (verso, n, t) => (verso === 'pzk' ? Math.floor(n * t * 100 + 1e-9) / 100 : Math.floor((n / t) * 2 + 1e-9) / 2)
 /** Una riga «nome ........ valore» (i puntini fra i due, come il profilo). */
-function riga(l, y, nome, v) {
+function riga(l, y, nome, v, col = 1) {
   const xa = 10 + Lcd.larghezza(nome) + 4, xb = 245 - Lcd.larghezza(v) - 4
   l.testo(10, y, nome)
   for (let x = xa; x < xb; x += 3) l.px(x, y + 6)
-  destra(l, 245, y, v)
+  destra(l, 245, y, v, { col })
 }
 /** Le righe che si scelgono (↑ ↓, OK; e il clic): la scelta rovesciata, il valore a destra. (30.10: senza più il ▶ sulla
  *  riga scelta: → sfoglia le pagine, e un ▶ che → non fa non ci va, REGOLE.md 3.3) */
@@ -39,7 +61,7 @@ function righe(l, os, lista, sel, y0, passo, scegli) {
     if (on) l.riempi(6, y - 2, W - 12, 11)
     l.testo(10, y, r.nome, { inv: on })
     const v = corto(r.valore ?? '', 22)
-    destra(l, W - 10, y, v, { inv: on })
+    destra(l, W - 10, y, v, { inv: on, col: r.col ?? 1 }) // (11.11: il valore col suo colore, rovesciato sulla riga scelta)
     os.zona(6, y - 2, W - 12, 11, () => scegli(i))
   })
 }
@@ -56,23 +78,27 @@ function quota(os, verso) {
       nome: 'account-quota', app: 'account',
       tic() { if (avviso > 0) { avviso--; os.ridisegna() } },
       disegna(l) {
-        const t = pzk.tasso(), n = quanto()
+        const t = pzk.tasso(), n = quanto(), T = tinte(l)
         centro(l, os.BARRA + 4, verso === 'pzk' ? 'il cambio: $pzk → EUR€' : 'il cambio: EUR€ → $pzk')
-        // la barra, con una tacca ogni 10 %
-        const X = 18, L = 220, Y = os.BARRA + 18
-        l.riquadro(X - 2, Y, L + 4, 12); l.riempi(X, Y + 2, Math.round((L * p) / 100), 8)
+        // la barra, con una tacca ogni 10 % (11.11: piena dell'oro dei $pzk, dentro la cornice d'inchiostro, col filo di luce
+        // in cima come le barre dei giochi a 8 bit)
+        const X = 18, L = 220, Y = os.BARRA + 18, pieno = Math.round((L * p) / 100)
+        l.riquadro(X - 2, Y, L + 4, 12); l.riempi(X, Y + 2, pieno, 8, T.oro); l.orizz(X, Y + 2, pieno, T.luce)
         for (let k = 0; k <= 10; k++) l.vert(X + Math.round((L * k) / 10), Y + 13, k % 5 ? 2 : 4)
         for (let k = 0; k <= 20; k++) os.zona( // (il clic sulla barra: a passi del 5 %)
           X + Math.round((L * k) / 20) - 6, Y - 2, 12, 18, () => { p = k * 5 })
         centro(l, Y + 22, `${p}%`, { scala: 2 })
-        const di = (f) => (verso === 'pzk' ? `dai ${fmt(n)} $pzk (di ${f(tot())}${pzk.sporchi() ? ' puliti' : ''})` : `dai ${eur(n)} EUR€ (di ${f(tot())})`)
+        // (11.11, i colori: quanto dai in rosso, quanto ricevi in verde, come le mosse; il resto d'inchiostro)
+        const di = (f) => (verso === 'pzk' ? [['dai '], [`${fmt(n)} $pzk`, T.rosso], [` (di ${f(tot())}${pzk.sporchi() ? ' puliti' : ''})`]] : [['dai '], [`${eur(n)} EUR€`, T.rosso], [` (di ${f(tot())})`]])
         // (11.11: con quasi un miliardo di puliti la riga finiva in «(di 987.530.865 p…»: il totale si accorcia, 987,5M)
-        const dai = [...di(verso === 'pzk' ? fmt : eur)].length > 39 ? di(pzk.fmtCorto) : di(verso === 'pzk' ? fmt : eur)
-        const ricevi = verso === 'pzk' ? `ricevi ${eur(riceve(verso, n, t))} EUR€` : `ricevi ${fmt(riceve(verso, n, t))} $pzk`
-        centro(l, Y + 42, corto(dai, 39)); centro(l, Y + 52, corto(`${ricevi} · a ${t.toFixed(4)}`, 39))
+        const lungo = (p) => p.reduce((a, [s]) => a + [...s].length, 0)
+        const dai = lungo(di(verso === 'pzk' ? fmt : eur)) > 39 ? di(pzk.fmtCorto) : di(verso === 'pzk' ? fmt : eur)
+        const ricevi = verso === 'pzk' ? `${eur(riceve(verso, n, t))} EUR€` : `${fmt(riceve(verso, n, t))} $pzk`
+        pezziCentro(l, Y + 42, dai); pezziCentro(l, Y + 52, [['ricevi '], [ricevi, T.verde], [` · a ${t.toFixed(4)}`]])
         const a = avviso ? (n > 0 ? 'troppo poco: non ricevi niente' : 'scegli quanto: almeno qualcosa') :'←→ 10% · ↑↓ 1% · OK converte'
-        if (avviso) l.riempi(10, H - 11, W - 20, 10) // (11.11: l'avviso rovesciato senza la sua fascia era spento su spento, invisibile)
-        centro(l, H - 9, a, { inv: !!avviso })
+        // (11.11: l'avviso rovesciato senza la sua fascia era spento su spento, invisibile; dall'11.11 a colori: la fascia gialla
+        // degli avvisi, e sopra il nero, che si legge su tutti gli sfondi)
+        if (avviso) { l.riempi(10, H - 11, W - 20, 10, C.giallo); centro(l, H - 9, a, { col: C.nero }) } else centro(l, H - 9, a)
       },
       tasto(k) {
         if (k === 'sx') p = Math.max(0, p - 10)
@@ -248,27 +274,27 @@ export function vista(os) {
   const PAGINE = [
     {
       nome: 'il conto', icona: 'app-account', aiuto: 'OK sincronizza o esci · ←→ pagine', ok: azioniConto,
-      disegna(l, c) {
+      disegna(l, c, t, T) {
         l.testo(10, 34, corto(c.nome, 20), { scala: 2 }) // (11.11: 20 lettere a scala 2 sono 238 px, da 10 a 248: con 19 un nome di 20 perdeva l'ultima)
         l.testo(10, 51, corto(`${c.ind}${valida(c.creato) ? ` · nato il ${data(c.creato)}` : ''}`, 39))
         // (11.11: i puliti e gli sporchi di pzk.js, come il cambio e invia: c.puliti resta vecchio quando il canale cambia
         // solo i $pzk, e un conto salvato senza c.puliti mostrava fra i puliti anche gli sporchi)
         const r = [['$pzk puliti', fmt(pzk.puliti())]]
         if (pzk.sporchi()) r.push(['sporchi (rapine)', fmt(pzk.sporchi())])
-        r.push(['EUR€', eur(c.eur)], [`cambio delle ${ora(pzk.sincronizzato())}`, `1 $pzk = ${pzk.tasso().toFixed(4)} €`], ['invii', c.invii ? 'aperti' : valida(c.inviiDa) ? `dal ${data(c.inviiDa, true)}` : 'non ancora']) // (senza la data: «non ancora», non «dal»)
-        r.forEach(([n, v], i) => riga(l, 63 + i * 10, n, v))
+        r.push(['EUR€', eur(c.eur)], [`cambio delle ${ora(pzk.sincronizzato())}`, `1 $pzk = ${pzk.tasso().toFixed(4)} €`], ['invii', c.invii ? 'aperti' : valida(c.inviiDa) ? `dal ${data(c.inviiDa, true)}` : 'non ancora', c.invii ? T.verde : 1]) // (senza la data: «non ancora», non «dal»; 11.11: «aperti» in verde)
+        r.forEach(([n, v, col], i) => riga(l, 63 + i * 10, n, v, col))
       },
     },
     {
       nome: 'le mosse', icona: 'clessidra', aiuto: '↑↓ scorre · ←→ pagine',
-      disegna(l, c) {
+      disegna(l, c, t, T) {
         const m = [...(c.mosse ?? [])].reverse()
         if (!m.length) { centro(l, 64, 'niente ancora'); return }
         const VIS = 4
         m.slice(primaMossa, primaMossa + VIS).forEach((x, i) => {
           const d = descriviMossa(x), y = 34 + i * 20
           l.testo(10, y, d.quando)
-          destra(l, 240, y, corto(d.n, 22))
+          pezziDestra(l, 240, y, pezziMossa(d.n, T), 22) // (11.11: quel che entra verde, quel che esce rosso)
           l.testo(16, y + 9, corto(d.cosa, 37))
         })
         if (m.length > VIS) { // la barra di scorrimento
@@ -280,9 +306,9 @@ export function vista(os) {
     },
     {
       nome: 'il cambio', icona: 'pzk', aiuto: 'OK cambia $pzk e EUR€ · ←→ pagine', ok: cambia,
-      disegna(l) {
+      disegna(l, c, t, T) {
         centro(l, 35, `1 $pzk = ${pzk.tasso().toFixed(4)} €`, { scala: 2 })
-        centro(l, 53, `cambio delle ${ora(pzk.sincronizzato())}${pzk.scaduto() ? ' (vecchio)' : ''}`)
+        pezziCentro(l, 53, [[`cambio delle ${ora(pzk.sincronizzato())}`], ...(pzk.scaduto() ? [[' (vecchio)', T.rosso]] : [])]) // (11.11: il cambio vecchio in rosso)
         centro(l, 65, corto(`hai ${fmt(pzk.saldo())} $pzk e ${eur(pzk.euro())} EUR€`, 39))
         Lcd.acapo('parcheggia i $pzk in EUR€ quando pensi che scendano: per giocarli vanno riconvertiti.', 39).forEach((r, i) => centro(l, 80 + i * 9, r))
       },
@@ -290,16 +316,17 @@ export function vista(os) {
     {
       nome: 'invia', icona: 'app-banca',
       aiuto: () => (!pzk.conto()?.invii ? '←→ pagine' : ['OK sceglie l’indirizzo', 'OK sceglie quanti', 'OK invia'][sel] + ' · ↑↓'),
-      disegna(l, c) {
+      disegna(l, c, t, T) {
         if (!c.invii) { (valida(c.inviiDa) ? ['gli invii si aprono il', data(c.inviiDa, true), '(48 ore dopo che è nato il conto)'] : ['gli invii non sono ancora aperti:', 'si aprono 48 ore dopo che', 'è nato il conto.']).forEach((r, i) => centro(l, 50 + i * 11, r)); return }
-        const chi = invio.chi === 'cerco' ? 'cerco…' : invio.chi?.nome ? `è il conto di ${invio.chi.nome}` : invio.chi?.errore ?? ''
+        // (11.11, i colori: il conto trovato e «pronto» in verde, l'indirizzo che non c'è e i $pzk che non bastano in rosso)
+        const chi = invio.chi === 'cerco' ? [['cerco…']] : invio.chi?.nome ? [['è il conto di '], [invio.chi.nome, T.verde]] : invio.chi?.errore ? [[invio.chi.errore, T.rosso]] : null
         righe(l, oz, [
           { nome: 'a chi', valore: invio.ind ? `pzk${invio.ind}` : 'scegli' },
           { nome: 'quanti', valore: invio.quanti ? `${fmt(Number(invio.quanti))} $pzk` : 'scegli' },
-          { nome: 'invia', valore: invio.ind && invio.quanti && Number(invio.quanti) <= pzk.puliti() ? 'pronto' : '' }, // (11.11: diceva «pronto» anche con più $pzk di quelli che hai)
+          { nome: 'invia', valore: invio.ind && invio.quanti && Number(invio.quanti) <= pzk.puliti() ? 'pronto' : '', col: T.verde }, // (11.11: diceva «pronto» anche con più $pzk di quelli che hai)
         ], sel, 36, 24, (i) => { sel = i; PAGINE[3].fai() })
-        if (chi) l.testo(16, 47, corto(chi, 38), { inv: false })
-        if (invio.quanti && Number(invio.quanti) > pzk.puliti()) l.testo(16, 71, corto(`ne hai solo ${fmt(pzk.puliti())}${pzk.sporchi() ? ' puliti' : ''}`, 38))
+        if (chi) scriviPezzi(l, 16, 47, aPezzi(chi, 38))
+        if (invio.quanti && Number(invio.quanti) > pzk.puliti()) l.testo(16, 71, corto(`ne hai solo ${fmt(pzk.puliti())}${pzk.sporchi() ? ' puliti' : ''}`, 38), { col: T.rosso })
         l.testo(10, 100, 'arrivano subito. almeno 1 $pzk.')
       },
       righe: () => (pzk.conto()?.invii ? 3 : 0),
@@ -309,11 +336,11 @@ export function vista(os) {
       nome: 'altro', icona: 'lucchetto',
       // (11.11: con l'indirizzo già scelto o il regalo già preso, «OK cambia l'indirizzo» e «OK apre instagram» non erano veri)
       aiuto: () => ((sel === 0 && pzk.conto()?.indCambiato) || (sel === 2 && pzk.premioPreso()) ? '↑↓ sceglie · ←→ pagine' : ['OK cambia l’indirizzo', 'OK cambia il PIN', 'OK apre instagram'][sel] + ' · ↑↓'),
-      disegna(l, c) {
+      disegna(l, c, t, T) {
         righe(l, oz, [
           { nome: 'indirizzo', valore: c.indCambiato ? `${c.ind} (tuo)` : `${c.ind} · cambialo` },
           { nome: 'PIN', valore: 'cambia' },
-          { nome: 'instagram', valore: pzk.premioPreso() ? 'fatto, grazie' : `+${fmt(pzk.PREMIO_IG)} $pzk` },
+          { nome: 'instagram', valore: pzk.premioPreso() ? 'fatto, grazie' : `+${fmt(pzk.PREMIO_IG)} $pzk`, col: pzk.premioPreso() ? 1 : T.verde }, // (11.11: il regalo da prendere in verde, come quel che entra)
         ], sel, 36, 12, (i) => { sel = i; PAGINE[4].fai() })
         const nota = [
           c.indCambiato ? 'l’indirizzo l’hai scelto tu: non si cambia più.' : 'è a caso: puoi cambiarlo una volta sola con sei cifre tue (studenti unimore: il numero dell’e-mail).',
@@ -349,7 +376,7 @@ export function vista(os) {
       testata(l, attesa ? muto : os, { icona: P.icona, nome: P.nome, n: PAGINE.length, pag, vai, va: (i) => { if (i !== pag) vai(i - pag) } }) // (aspettando il server niente clic, come i tasti)
       l.ritaglia([os.MARGINE, 32, W - 2 * os.MARGINE, 86])
       oz = scorre || attesa ? muto : os
-      P.disegna(sposta(l, scorre), c, t)
+      P.disegna(sposta(l, scorre), c, t, tinte(l)) // (11.11: le tinte dallo sfondo vero: sposta() non ha il tema)
       oz = os
       l.ritaglia(null)
       if (!striscia(l, { esito, attesa }, t)) {

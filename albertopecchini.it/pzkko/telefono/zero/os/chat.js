@@ -3,23 +3,24 @@
 // motore di chat/chat.js: le attese, gli eventi casuali, il cercapersone scassato, i soldi): ogni comando riceve un «ctx»
 // come quello della chat in HTML, ma qui le schede, i tasti, le griglie dei minigiochi (le mine, il gratta e vinci), i
 // rulli della slot, le barre del tempo e la riga da scrivere si disegnano a pixel. Le schede sono messaggi con la barra
-// a sinistra, l'icona di Alberto (a un bit, icone.js) e il titolo, il testo a capo a 40 colonne, i campi «nome: valore»,
+// a sinistra, l'icona di Alberto (a colori, icone.js) e il titolo, il testo a capo a 40 colonne, i campi «nome: valore»,
 // il piè; i tasti di seguito e le scelte dei minigiochi sono riquadri che la croce sceglie e OK preme. Lo stile è quello
-// del Flipper: tutto a un bit, le cornici smussate, la voce scelta rovesciata.
+// del Flipper: le cornici smussate, la voce scelta rovesciata, il testo d'inchiostro; dall'11.11 i colori a 8 bit dove
+// dicono qualcosa («i colori», qui sotto).
 //
 // Come si usa (4.11, Alberto: «i tasti che premo danno comandi diversi da quel che hanno di nome… fai una cosa più facile:
 // uno che non ha mai aperto il sito fa fatica»): c'è SEMPRE un tasto scelto, rovesciato. ← → lo spostano su tutto quello
 // che si può premere adesso: i tasti dell'ultima scheda, poi i CONSIGLIATI nella fila in fondo (2.11, Alberto: «fai che la
 // chat mostri subito dei tasti da dove cominciare»: i comandi pronti adesso, il premio giornaliero, le quest, lavora, pesca;
-// poi le ultime righe scritte, zaino.rapidi, e saldo, negozio, aiuto), poi «scrivi…», la tastiera sullo schermo
-// (os.tastiera). OK preme quello scelto, il clic quello sotto il mouse, e il fumetto dice il nome del tasto premuto. ↑ ↓
+// poi le ultime righe scritte, zaino.rapidi, e saldo, negozio, aiuto), poi «scrivi…», la riga dove si scrive con la
+// tastiera vera (os.tastiera; 11.11: la tastiera sullo schermo non c'è più). OK preme quello scelto, il clic quello sotto il mouse, e il fumetto dice il nome del tasto premuto. ↑ ↓
 // scorrono i messaggi (in fondo «· ↑ leggi» se sopra c'è da leggere). Dalla tastiera vera si scrive e basta: sopra la
 // riga ci sono i suggerimenti (chat/predittivo.js: i comandi e i loro argomenti), ← → li scelgono, OK completa, Invio
 // manda. INDIETRO cancella la riga, e a riga vuota esce dall'app. Quando un minigioco aspetta una scelta, la croce va sui
 // suoi tasti (o sulle celle della griglia) e OK preme; quando aspetta una parola (scrivi) la parola è un tasto. I messaggi
 // restano (storia: sessionStorage nella sessione, localStorage per conto), come nella chat grande.
 import * as os from './os.js'
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, esa } from './lcd.js'
 import * as icone from './icone.js'
 import * as zaino from '../../../chat/zaino.js'
 import * as pzk from '../../../games/pzk.js'
@@ -29,7 +30,7 @@ import * as chat from '../../../chat/chat.js'
 import { icona, conIcone } from '../../../chat/icone.js'
 import { COMANDI, PER_NOME, CATEGORIE } from '../../../chat/comandi/index.js'
 import { eventoCasuale, salutoIniziale } from '../../../chat/comandi/eventi.js'
-import { NEGOZIO, PER_ID } from '../../../chat/testi.js'
+import { NEGOZIO, PER_ID, COLORI } from '../../../chat/testi.js'
 import { prezzoDi } from '../../../chat/mercato.js'
 import { calcola } from '../../../chat/predittivo.js'
 import { txt, corto } from './pezzi.js'
@@ -39,6 +40,71 @@ const { fmt, pzkHtml, eurHtml, nome, importo, caso, rnd, tra, durata, analizza, 
 const BARRA = os.BARRA
 const COL = 40 // le colonne di testo dentro una scheda (x 10 → 250)
 const X0 = 10 // dove comincia il testo delle schede (la barra a sinistra sta a x 6, sul margine: REGOLE.md)
+
+// ── i colori (11.11, Alberto: «aumenta la qualità dei pixel in dpi e fai colori a 8bit su tutto»): pochi e col senso che hanno
+// nella chat grande. La barra a sinistra di una scheda ha il colore della scheda (oro una vincita, rosso un errore o una
+// perdita, ambra un'attesa o una puntata, blu un gioco, grigio il resto); un tasto verde, oro o rosso ha la cornice del suo
+// colore; i soldi col + sono verdi, col − rossi (e quelli persi o di multa); le carte sono cartellini bianchi, cuori e quadri
+// rossi; l'avviso ⚠ è giallo su una fascia; la barra del tempo passa dal verde al rosso, quella delle sfide si riempie di
+// verde. Il testo resta d'inchiostro (REGOLE.md 4.9). Di ogni tinta una versione scura per gli sfondi chiari e una chiara per
+// «notte» (l'inchiostro chiaro): un verde chiaro su carta o un rosso scuro su notte non si leggono ──
+const SCURE = { rosso: esa('#cc0000'), verde: esa('#006600'), oro: esa('#996600'), ambra: esa('#993300'), blu: esa('#0033cc'), viola: esa('#6600cc'), grigio: esa('#666666') }
+const CHIARE = { rosso: esa('#ff3333'), verde: esa('#33cc33'), oro: esa('#ffcc33'), ambra: esa('#ff9933'), blu: esa('#6699ff'), viola: esa('#cc66ff'), grigio: esa('#999999') }
+const GIALLO = esa('#ffcc00'), BIANCO = esa('#ffffff'), NERO = esa('#000000'), DORSO = esa('#003399'), DORSO2 = esa('#3366cc')
+const ARCOBALENO = ['rosso', 'ambra', 'oro', 'verde', 'blu', 'viola'] // (la scheda «arcobaleno»: la barra a strisce)
+/** I colori del gioco del bidello (chat/testi.js, COLORI): la parola si scrive col suo, il nome accanto resta (REGOLE.md 5.6). */
+const TONI = new Map(COLORI.map(([n, h]) => [n, esa(h)]))
+let tinte = SCURE, suScuro = false // (le sceglie disegna a ogni disegno, dall'inchiostro del tema: le righe le leggono quando disegnano)
+/** Il colore di una scheda o di uno stile di tasto (rosso, oro…), o l'inchiostro. */
+const tintaDi = (nome) => tinte[nome === 'arcobaleno' ? 'oro' : nome] ?? 1
+const SOLDI = String.raw`\d[\d.,]*(?:\s?(?:\$pzk|xp|EUR€|%))?`
+const COL_SEGNO = new RegExp(String.raw`(^|[\s(:·•])([+−-])(${SOLDI})`, 'g') // («+120 $pzk», «−50 $pzk», «+35 xp», «(+10 %)»)
+const COL_PERSI = /\b(?:perso|persi|multa(?: di)?)\s+(\d[\d.,]*\s?\$pzk)/g
+const COL_VINTI = /\b(?:vinto|vinti|incassi|incassato)\s+(\d[\d.,]*\s?\$pzk)/g
+const COL_PAROLA = new RegExp(`^(.+) → (${COLORI.map(([n]) => n).join('|')})$`) // (il bidello: «nutria → rosso»)
+/** I colori di una riga di testo, carattere per carattere: c (1 l'inchiostro), e le fasce (sotto quei caratteri una fascia
+ *  d'inchiostro, sugli sfondi chiari: il giallo dell'avviso e il bianco del bidello lì non si leggono). */
+function coloriDi(s) {
+  const c = new Array(s.length).fill(1), fasce = []
+  const metti = (da, n, v) => c.fill(v, da, Math.min(s.length, da + n))
+  for (const m of s.matchAll(COL_SEGNO)) if (m[2] === '+' || !m[3].endsWith('%')) metti(m.index + m[1].length, 1 + m[3].length, m[2] === '+' ? tinte.verde : tinte.rosso) // (uno sconto, «−20 %», non è una perdita: resta d'inchiostro)
+  for (const m of s.matchAll(COL_PERSI)) metti(m.index + m[0].length - m[1].length, m[1].length, tinte.rosso)
+  for (const m of s.matchAll(/(\d[\d.,]*\s?\$pzk) di multa/g)) metti(m.index, m[1].length, tinte.rosso)
+  for (const m of s.matchAll(COL_VINTI)) metti(m.index + m[0].length - m[1].length, m[1].length, tinte.verde)
+  const rl = /^(\d{1,2}) (rosso|verde)$/.exec(s) // (la roulette: «17 rosso» nel titolo)
+  if (rl) metti(0, s.length, tinte[rl[2]])
+  for (const m of s.matchAll(/(?:10|[2-9AJQK])?[♥♦]/g)) metti(m.index, m[0].length, tinte.rosso)
+  const p = COL_PAROLA.exec(s)
+  if (p) fasce.push([0, p[1].length, TONI.get(p[2])])
+  for (const m of s.matchAll(/⚠/g)) fasce.push([m.index, 1, GIALLO])
+  for (const [da, n, v] of fasce) metti(da, n, v)
+  return { c, fasce }
+}
+/** Una riga di testo coi suoi colori (coloriDi), a pezzi dello stesso colore. */
+function scriviColori(l, x, y, s) {
+  if (s.length !== [...s].length) return l.testo(x, y, s) // (un carattere fuori dal piano base sfalserebbe i colori: allora d'inchiostro)
+  const { c, fasce } = coloriDi(s)
+  if (!suScuro) for (const [da, n] of fasce) l.riempi(x + da * 6 - 1, y - 1, n * 6 + 1, 9)
+  for (let i = 0; i < s.length;) { let j = i + 1; while (j < s.length && c[j] === c[i]) j++; l.testo(x + i * 6, y, s.slice(i, j), { col: c[i] }); i = j }
+}
+/** Una riga di carte del blackjack («K♥ 7♣ ■»): cartellini bianchi, la coperta col dorso blu. */
+const CARTE = /^(?:(?:10|[2-9AJQK])[♥♦♣♠]|■)(?: (?:(?:10|[2-9AJQK])[♥♦♣♠]|■))*$/
+function carte(l, x, y, s) {
+  for (const k of s.split(' ')) {
+    const w = k === '■' ? 13 : Lcd.larghezza(k) + 6
+    if (k === '■') { l.riempi(x + 1, y + 1, w - 2, 11, DORSO); for (let j = 0; j < 9; j++) for (let i = (j % 2); i < w - 4; i += 2) l.px(x + 2 + i, y + 2 + j, DORSO2) }
+    else { l.riempi(x + 1, y + 1, w - 2, 11, BIANCO); l.testo(x + 3, y + 3, k, { col: /[♥♦]/.test(k) ? SCURE.rosso : NERO }) } // (sul cartellino bianco il rosso scuro e il nero, su tutti gli sfondi)
+    l.cornice(x, y, w, 13)
+    x += w + 3
+  }
+}
+/** La barra delle sfide (pulisci: dieci ■ □): una cornice d'inchiostro piena di verde, d'oro quando è piena. */
+const BARRA_SFIDA = /^(■*)(□*)$/
+function barraSfida(l, x, y, s) {
+  const k = BARRA_SFIDA.exec(s)[1].length / 10
+  l.cornice(x, y + 1, 62, 7)
+  if (k > 0) l.riempi(x + 1, y + 2, Math.round(60 * k), 5, k >= 1 ? tinte.oro : tinte.verde)
+}
 
 // ── i messaggi ──
 let msgs = [] // { tipo: 'tu' | 'sistema' | 'bot' | 'pensa', testo, e, av, fatto, pensa, righe, h, scelte, rulli, tempo }
@@ -63,6 +129,7 @@ export function pulisci(html) {
     .replace(/<span class="c-carta coperta"><\/span>/gi, ' ■ ').replace(/<span class="c-carta[^"]*">/gi, ' ') // (le carte del blackjack staccate: prima «K♦7♣» tutto attaccato)
     .replace(/<\/b>\s*<small[^>]*>/gi, '</b> · ').replace(/<\/small>\s*(?=<(small|span)\b)/gi, '</small> · ') // (il nome e la riga piccola sotto: «La campana stonatati manca: livello 2» tutto attaccato)
     .replace(/<\/span>\s*(?=<small\b)/gi, '</span> · ') // (11.11: il premio delle sfide, «320 $pzk+35 xp» tutto attaccato)
+    .replace(/<div class="c-barra"><i style="width:(\d+)%"><\/i><\/div>/gi, (_, p) => { const k = Math.max(0, Math.min(10, Math.round(p / 10))); return `\n${'■'.repeat(k)}${'□'.repeat(10 - k)}` }) // (11.11: la barra delle sfide spariva; adesso è una riga di dieci ■ □, che impagina disegna come una barra a colori; l'a capo dopo lo mette il </div> di fuori)
     .replace(/<s\b[^>]*>([^<]*)<\/s>\s*(<span class="c-v-sconto">[^<]*<\/span>)?/gi, '$1 → ') // (il prezzo in offerta: «40-20 %32 $pzk» diventa «40 → 32 $pzk»)
     // (6.11) le celle di una tabella staccate con « · »: prima erano incollate, e «classifica» scriveva «2pzkko liv. 52» per
     // dire 2°, pzkko, livello 5, valore 2 (si leggeva livello 52: «le classifiche dicono cose diverse da dentro i profili»)
@@ -368,7 +435,7 @@ function azione(cmd, eti = null) {
   annulla()
   return esegui(cmd, { eti: eti || null }) // (un tasto di sola icona ha il nome vuoto: allora il fumetto dice il comando)
 }
-/** La tastiera sullo schermo: quello che si scrive va nella chat (un comando, o la risposta che un gioco aspetta). */
+/** La riga da scrivere (os.tastiera, con la tastiera vera): quello che si scrive va nella chat (un comando, o la risposta che un gioco aspetta). */
 function scriviComando(testo = '', titolo = null) {
   const att = aspettaTesto // (30.10: la risposta che arriva tardi, a scrivi già scaduto, non diventa un comando: si butta)
   // (11.11) e un comando scritto resta un comando: se intanto un evento aspettava una parola, invia lo dava come risposta
@@ -473,7 +540,7 @@ function schedaAttiva() {
   return ub?.fatto && !ub.vecchia && !ub.scelte?.length && azioniDi(ub).some((b) => !b.disabled) ? ub : null // (con le scelte le azioni non si disegnano)
 }
 /** La parola che un evento vuole scritta (la banconota: PRENDILA, la nutria: SCIÒ): diventa un tasto. Coi soli sei tasti
- *  scriverla in cinque secondi con la tastiera sullo schermo non si fa. */
+ *  non si scrive, e in cinque secondi aprire la riga da scrivere è già tardi. */
 const parola = (seg) => (seg && /^[\p{L}\d]{2,16}$/u.test(seg) ? seg : null)
 /** Tutto quello che si può premere adesso, in ordine: { k, eti, fai, b?, m?, fila? } (fila: sta nella fila in fondo). */
 function tasti() {
@@ -525,11 +592,14 @@ function puntini(l, x, y, w, h) {
   for (let i = 0; i < w; i += 2) { l.px(x + i, y); l.px(x + i, y + h - 1) }
   for (let j = 2; j < h - 1; j += 2) { l.px(x, y + j); l.px(x + w - 1, y + j) }
 }
-const rigaTesto = (s, x, opz) => ({ h: 9, d: (l, y) => l.testo(x, y, s, opz) })
+/** Una riga della scheda: le carte del blackjack, la barra delle sfide, o il testo coi suoi colori (11.11). */
+/** Quanto è largo un tasto in fila (11.11: col quadratino del colore, quelli del bidello, 9 pixel in più). */
+const largo = (b, sc) => Lcd.larghezza(b.eti || '?') + 8 + (sc && TONI.has(b.eti) ? 9 : 0)
+const rigaTesto = (s, x) => (CARTE.test(s) ? { h: 15, d: (l, y) => carte(l, x, y, s) } : /^[■□]{10}$/.test(s) ? { h: 9, d: (l, y) => barraSfida(l, x, y, s) } : { h: 9, d: (l, y) => scriviColori(l, x, y, s) })
 function impagina(m) {
   const R = []
   if (m.tipo === 'pensa') { R.push({ h: 12, d: (l, y, t) => { l.bitmap(icone.bitmap('bot-pensa', 16), 6, y - 2); l.testo(26, y + 1, '.'.repeat(1 + (Math.floor(t / 3) % 3))) } }); return R }
-  if (m.tipo === 'sistema') { for (const r of Lcd.acapo(m.testo, 40)) R.push({ h: 9, d: (l, y) => l.testo(Math.round(W / 2 - Lcd.larghezza(r) / 2), y, r) }); R.push({ h: 3, d() {} }); return R } // (11.11: a 42 colonne la riga era 251 px e usciva dal margine)
+  if (m.tipo === 'sistema') { for (const r of Lcd.acapo(m.testo, 40)) R.push({ h: 9, d: (l, y) => scriviColori(l, Math.round(W / 2 - Lcd.larghezza(r) / 2), y, r) }); R.push({ h: 3, d() {} }); return R } // (11.11: a 42 colonne la riga era 251 px e usciva dal margine)
   if (m.tipo === 'tu') {
     const righe = Lcd.acapo(txt(m.testo), 36) // (11.11: quello che si scrive dalla tastiera vera, «£» o «§» della tastiera italiana, non ha il glifo: «?», mai il quadratino)
     const w = Math.max(...righe.map((r) => Lcd.larghezza(r))) + 10, h = righe.length * 9 + 5
@@ -542,7 +612,7 @@ function impagina(m) {
   const testa = { h: 18, d: (l, y) => { l.bitmap(icone.bitmap(m.av, 16), X0 - 2, y) } }
   R.push(testa)
   const titolo = pulisci(conIcone(e.t ?? ''))
-  if (titolo) { const righe = Lcd.acapo(titolo, 36); righe.forEach((r, i) => { if (i === 0) testa.d = ((d) => (l, y) => { d(l, y); l.testo(X0 + 20, y + 1, r) })(testa.d); else R.push(rigaTesto(r, X0 + 20)) }) }
+  if (titolo) { const righe = Lcd.acapo(titolo, 36); righe.forEach((r, i) => { if (i === 0) testa.d = ((d) => (l, y) => { d(l, y); scriviColori(l, X0 + 20, y + 1, r) })(testa.d); else R.push(rigaTesto(r, X0 + 20)) }) }
   else testa.h = 16
   const corpo = [pulisci(conIcone(e.d ?? '')), m.rulli ? '' : pulisci(conIcone(String(e.html ?? '').replace(/<button\b[^>]*\bdata-cmd[^>]*>[\s\S]*?<\/button>/gi, '')))].filter(Boolean).join('\n') // (i tasti data-cmd sono diventati tasti della scheda, azioniHtml: nel testo restava un «compra» che non si premeva)
   for (const r of Lcd.acapo(corpo, COL)) if (r) R.push(rigaTesto(r, X0)); else R.push({ h: 4, d() {} })
@@ -552,12 +622,12 @@ function impagina(m) {
   if (e.icone?.length) { const nomi = [...e.icone], lato = e.lato === 32 ? 32 : 16, c = lato + 6; R.push({ h: c + 3, d: (l, y) => nomi.forEach((n, i) => { const x = X0 + i * (c + 2); l.cornice(x, y, c, c); l.bitmap(icone.bitmap(n, lato), x + 3, y + 3) }) }) }
   for (const [n, v] of e.campi ?? []) { const s = `${pulisci(conIcone(n))}: ${pulisci(conIcone(v))}`; for (const r of Lcd.acapo(s, COL)) R.push(rigaTesto(r, X0)) }
   if (e.pie) for (const r of Lcd.acapo('· ' + pulisci(conIcone(e.pie)), COL)) R.push(rigaTesto(r, X0))
-  if (m.tempo) { const tm = m.tempo; R.push({ h: 6, d: (l, y) => { const k = tm.fermo ? 0 : Math.max(0, 1 - (Date.now() - tm.da) / tm.ms); l.riempi(X0, y + 1, Math.round(230 * k), 2) } }) } // (tm preso qui: m.tempo diventa null a tempo scaduto e queste righe restano in memoria, rileggerlo dava «reading 'fermo'»; la fine la decide il tic, anche fuori schermo)
+  if (m.tempo) { const tm = m.tempo; R.push({ h: 6, d: (l, y) => { const k = tm.fermo ? 0 : Math.max(0, 1 - (Date.now() - tm.da) / tm.ms); l.riempi(X0, y + 1, Math.round(230 * k), 2, k > 0.5 ? tinte.verde : k > 0.2 ? tinte.ambra : tinte.rosso) } }) } // (11.11: verde finché c'è tempo, ambra, rosso alla fine) // (tm preso qui: m.tempo diventa null a tempo scaduto e queste righe restano in memoria, rileggerlo dava «reading 'fermo'»; la fine la decide il tic, anche fuori schermo)
   // i tasti: quelli di seguito (azioni) e quelli delle scelte (scegli, anche più d'una: la griglia e «incassa»), in fila o in griglia
   for (const sc of m.scelte?.length ? m.scelte : [null]) {
     if (sc?.griglia) {
       const n = sc.griglia === 'g5' ? 5 : 3, lato = 18
-      for (let r = 0; r < Math.ceil(sc.lista.length / n); r++) R.push({ h: lato + 1, sc, da: r * n, a: r * n + n - 1, d: (l, y) => { for (let c = 0; c < n; c++) { const b = sc.lista[r * n + c]; if (!b) continue; const x = X0 + c * (lato + 1), on = scelta === sc && sc.sel === r * n + c; if (on) l.riempi(x, y, lato, lato); else if (b.disabled) puntini(l, x, y, lato, lato); else l.cornice(x, y, lato, lato); if (b.icona) l.bitmap(icone.bitmap(b.icona, 16), x + 1, y + 1, { inv: on }); else l.testo(x + 6, y + 5, b.bum ? '*' : b.eti.slice(0, 1), { inv: on }); zonaChat(x, y, lato, lato, () => clicca(sc, b)) } } })
+      for (let r = 0; r < Math.ceil(sc.lista.length / n); r++) R.push({ h: lato + 1, sc, da: r * n, a: r * n + n - 1, d: (l, y) => { for (let c = 0; c < n; c++) { const b = sc.lista[r * n + c]; if (!b) continue; const x = X0 + c * (lato + 1), on = scelta === sc && sc.sel === r * n + c; if (on) l.riempi(x, y, lato, lato); else if (b.bum) l.cornice(x, y, lato, lato, tinte.rosso); else if (b.disabled) puntini(l, x, y, lato, lato); else l.cornice(x, y, lato, lato); if (b.icona) l.bitmap(icone.bitmap(b.icona, 16), x + 1, y + 1, { inv: on }); else l.testo(x + 6, y + 5, b.bum ? '*' : b.eti.slice(0, 1), { inv: on, col: b.bum ? tinte.rosso : 1 }); zonaChat(x, y, lato, lato, () => clicca(sc, b)) } } })
       R.push({ h: 2, d() {} })
       continue
     }
@@ -565,7 +635,7 @@ function impagina(m) {
     if (!fila.length) continue
     const righe = []
     let r = [], w = 0
-    for (const b of fila) { const bw = Lcd.larghezza(b.eti || '?') + 8; if (w + bw > 240 && r.length) { righe.push(r); r = []; w = 0 } r.push(b); w += bw + 3 }
+    for (const b of fila) { const bw = largo(b, sc); if (w + bw > 240 && r.length) { righe.push(r); r = []; w = 0 } r.push(b); w += bw + 3 }
     if (r.length) righe.push(r)
     // (le azioni: si premono solo quelle dell'ultima scheda, schedaAttiva; le altre e quelle «spento» hanno la cornice a
     // puntini e il clic non le prende: tutto quello che si clicca si fa anche coi tasti, REGOLE.md)
@@ -573,10 +643,11 @@ function impagina(m) {
       let x = X0
       const viva = !sc && attivaOra === m
       for (const b of fr) {
-        const bw = Lcd.larghezza(b.eti || '?') + 8, on = sc ? scelta === sc && sc.lista[sc.sel] === b : viva && selOra?.b === b
+        const bw = largo(b, sc), tono = sc ? TONI.get(b.eti) : undefined, on = sc ? scelta === sc && sc.lista[sc.sel] === b : viva && selOra?.b === b
         const morta = sc ? b.disabled && !b.premuto : !viva || b.disabled // (11.11: i tasti di una scelta finita, o spenti dal gioco, restavano incorniciati come vivi e il clic non li prendeva: REGOLE.md 3.13)
-        if (on || b.premuto) l.riempi(x, y, bw, 11); else if (morta || b.usato) puntini(l, x, y, bw, 11); else l.cornice(x, y, bw, 11) // (usato: un pezzo già premuto, minigiochi.js)
-        l.testo(x + 4, y + 2, b.eti || '?', { inv: on || b.premuto })
+        if (on || b.premuto) l.riempi(x, y, bw, 11); else if (morta || b.usato) puntini(l, x, y, bw, 11); else l.cornice(x, y, bw, 11, tintaDi(b.stile)) // (usato: un pezzo già premuto, minigiochi.js; 11.11: la cornice del colore del tasto, verde, oro o rosso)
+        if (tono !== undefined) { l.riempi(x + 3, y + 2, 7, 7, NERO); l.riempi(x + 4, y + 3, 5, 5, tono) } // (11.11, il bidello: il quadratino del colore accanto al nome; il bordo nero si vede anche sulla fascia chiara di «notte»)
+        l.testo(x + 4 + (tono !== undefined ? 9 : 0), y + 2, b.eti || '?', { inv: on || b.premuto })
         const bb = b
         if (sc) zonaChat(x, y, bw, 11, () => clicca(sc, bb))
         else if (!morta) zonaChat(x, y, bw, 11, () => { cur = null; curScheda = m; azione(bb.dataset.id, bb.detto) })
@@ -662,6 +733,7 @@ export function vista() {
     disegna(l, t) {
       const lista = tasti()
       selOra = lista[quale(lista)] ?? null; attivaOra = schedaAttiva()
+      suScuro = (l.tema?.inchiostro ?? [0, 0, 0]).reduce((a, b) => a + b, 0) > 384; tinte = suScuro ? CHIARE : SCURE // (l'inchiostro chiaro: lo sfondo è scuro, «notte»)
       const yIn = Y_IN, yTop = BARRA + 1, yFondo = fondo()
       // i messaggi, dal fondo in su
       l.ritaglia([0, yTop, W, yFondo - yTop])
@@ -673,8 +745,11 @@ export function vista() {
         if (y + h < yTop) break
         let yy = y
         for (const r of R) { if (yy + r.h > yTop && yy < yFondo) r.d(l, yy, t); yy += r.h }
-        // la barra a sinistra delle schede del bot
-        if (m.tipo === 'bot' && !m.pensa) l.riempi(6, y, 2, h - 4)
+        // la barra a sinistra delle schede del bot, del colore della scheda (11.11; l'arcobaleno a strisce)
+        if (m.tipo === 'bot' && !m.pensa) {
+          if (m.e?.colore === 'arcobaleno') for (let k = 0; k < h - 4; k += 4) l.riempi(6, y + k, 2, Math.min(4, h - 4 - k), tinte[ARCOBALENO[(k / 4) % ARCOBALENO.length]])
+          else l.riempi(6, y, 2, h - 4, tintaDi(m.e?.colore))
+        }
       }
       l.ritaglia(null)
       if (scorri > 0) { const s = `↓ ${Math.ceil(scorri / 16)}`, w = Lcd.larghezza(s) + 6, x = W - os.MARGINE - 4 - w; l.riempi(x - 1, yTop, w + 2, 12, 0); l.riempi(x, yTop + 1, w, 10); l.testo(x + 3, yTop + 2, s, { inv: true }); os.zona(x, yTop + 1, w, 10, () => { scorri = 0 }) } // (un bollino rovesciato con l'aria attorno: prima il testo finiva attaccato a quello dei messaggi)

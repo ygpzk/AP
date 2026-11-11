@@ -142,6 +142,7 @@ async function costruisci() {
     else if (t?.dataset.t === 'indietro') indietro()
   })
   tastiera()
+  tastieraTelefono()
   // la barra di stato vera: la rete e la batteria cambiano da sole
   for (const ev of ['online', 'offline']) addEventListener(ev, () => { if (dlg.open) misuraPing() })
   navigator.connection?.addEventListener?.('change', () => { if (dlg.open) aggiornaStato() })
@@ -196,6 +197,33 @@ function barraSpegni(si) {
     os.spegnendo(ms / 3000)
     if (ms >= 3000) { clearInterval(barraT); barraT = 0 }
   }, 50)
+}
+// (11.11, Alberto: «elimina la tastiera che uso quella del mio pc») sul telefono una tastiera vera non c'è: quando pzk os
+// scrive (os.tastiera, os.numero) e si tocca lo schermo, un campo invisibile prende il fuoco e fa uscire quella del
+// telefono. Quello che arriva passa a pzk os lettera per lettera, come dalla tastiera del computer; il campo resta vuoto
+function tastieraTelefono() {
+  const campo = document.createElement('input')
+  campo.className = 't-scrivi'
+  Object.assign(campo, { type: 'text', autocomplete: 'off', spellcheck: false, enterKeyHint: 'done' })
+  campo.setAttribute('autocapitalize', 'off'); campo.setAttribute('aria-label', 'scrivi')
+  campo.style.cssText = 'position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;border:0;padding:0;font-size:16px' // (16px: iOS non ingrandisce la pagina)
+  dlg.appendChild(campo)
+  campo.addEventListener('beforeinput', (e) => {
+    e.preventDefault()
+    if (!dentro) return
+    if (e.inputType === 'deleteContentBackward') os.cancella()
+    else if (e.inputType === 'insertLineBreak') os.invio()
+    else if (e.data) for (const ch of e.data) os.carattere(ch)
+  })
+  campo.addEventListener('input', () => { if (campo.value) { for (const ch of campo.value) os.carattere(ch); campo.value = '' } }) // (le tastiere che non mandano beforeinput annullabile)
+  campo.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); os.invio() }
+    else if (e.key === 'Escape') { e.preventDefault(); os.tasto('indietro') }
+  })
+  os.conTastieraVera((si, { numeri = false } = {}) => {
+    if (si) { campo.inputMode = numeri ? 'decimal' : 'text'; campo.focus({ preventScroll: true }) }
+    else if (document.activeElement === campo) { campo.blur(); dlg.querySelector('.t-corpo')?.focus({ preventScroll: true }) }
+  })
 }
 function tastiera() {
   dlg.addEventListener('keydown', (e) => {

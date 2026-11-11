@@ -1,10 +1,10 @@
 // L'app «foto» di pzk os (29.10, Alberto: «crea uno alla volta … foto …»): le foto vere dei quiz (chat/immagini.js:
 // Mantova, il cibo, il Landini, il Ciao…, da Wikimedia Commons o da Imgur, con l'autore e la licenza), sul cercapersone zero.
-// Arrivano a un bit col retino di Bayer (icone.foto); una che il browser non lascia leggere ha il punto di domanda.
+// Arrivano a colori a 8 bit col retino di Bayer (icone.foto, dall'11.11); una che il browser non lascia leggere ha il punto di domanda.
 // - LA GALLERIA: le miniature cinque per riga (le frecce si muovono, la riga scorre), sotto cosa è quella scelta. OK la apre.
 // - LA FOTO: a tutto schermo, senza la barra; sotto cosa è e il credito. ← → la prima e la dopo, OK o INDIETRO tornano.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, C } from './lcd.js'
 import * as icone from './icone.js'
 import { IMMAGINI, src, credito } from '../../../chat/immagini.js'
 import { txt, corto, destra, centro, pagine } from './pezzi.js'
@@ -13,11 +13,24 @@ const IDS = Object.keys(IMMAGINI)
 const COL = 5, CW = 46, CH = 36, RIGHE = 2
 let sel = 0 // (si ricorda finché la pagina è aperta: si torna sulla stessa foto)
 
+// (11.11, i colori a 8 bit: le foto sono già a colori; il posto di quella che manca è un riquadro grigio, un grigio medio che
+// si vede sull'arancione, sulla carta e sulla notte: a puntini mentre arriva, pieno col «?» se non arriva. Prima era un pixel)
+const GRIGIO = C.grigio
+function posto(l, x, y, w, h, puntini) {
+  for (let i = 0; i < w; i++) if (!puntini || i % 2 === 0) { l.px(x + i, y, GRIGIO); l.px(x + i, y + h - 1, GRIGIO) }
+  for (let j = 1; j < h - 1; j++) if (!puntini || j % 2 === 0) { l.px(x, y + j, GRIGIO); l.px(x + w - 1, y + j, GRIGIO) }
+}
+
 /** Una foto nel riquadro x, y, w, h: centrata; mentre arriva «carico», se non si può il punto di domanda. */
 function riquadro(l, os, id, x, y, w, h, piccola) {
   const b = icone.foto(src(id), w, h, () => os.ridisegna())
-  if (b === 'carico') { if (!piccola) centro(l, y + Math.round(h / 2) - 3, 'carico…'); else l.px(x + Math.round(w / 2), y + Math.round(h / 2)); return }
-  if (b === 'no') { const s = piccola ? '?' : 'la foto non si lascia vedere'; l.testo(x + Math.round(w / 2 - Lcd.larghezza(s) / 2), y + Math.round(h / 2) - 3, s); return }
+  if (b === 'carico' || b === 'no') {
+    const s = b === 'carico' ? (piccola ? '' : 'carico…') : piccola ? '?' : 'la foto non si lascia vedere'
+    if (piccola) posto(l, x + 1, y + 1, w - 2, h - 2, b === 'carico') // (dentro il pixel chiaro della scelta)
+    else l.bitmap(icone.bitmap('app-foto', 32), x + Math.round(w / 2) - 16, y + Math.round(h / 2) - 24, { sbiadita: b === 'no' }) // (la macchina fotografica a colori dell'app; sbiadita se la foto non arriva)
+    if (s) l.testo(x + Math.round(w / 2 - Lcd.larghezza(s) / 2), y + Math.round(h / 2) + (piccola ? -3 : 12), s)
+    return
+  }
   l.bitmap(b, x + Math.round((w - b.w) / 2), y + Math.round((h - b.h) / 2))
 }
 

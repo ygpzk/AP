@@ -100,7 +100,7 @@ export const MINIGIOCHI = {
     await aspetta(p.mostra)
     return testo(ctx, s, { colore: 'blu', t: 'memoria', d: `adesso premile nell’ordine di prima. ${secondi(p.ms)} secondi.` }, mescola(p.parole), p.ms, ' ')
   },
-  /** colori: quattro parole, ognuna col suo colore (scritto: lo schermo è a un bit), poi «di che colore era X?» */
+  /** colori: quattro parole, ognuna col suo colore (sullo zero os/chat.js la colora; il nome resta scritto per chi distingue male i colori), poi «di che colore era X?» */
   async colori(ctx, p) {
     const s = ctx.dì({ colore: 'blu', t: 'i colori', d: `ricorda il colore di ogni parola (${secondi(p.mostra)} secondi):\n${p.parole.map((w, i) => `<b>${w}</b> → ${p.colori[i][0]}`).join('\n')}` })
     await ctx.inVista(s)

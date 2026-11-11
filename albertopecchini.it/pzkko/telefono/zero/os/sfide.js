@@ -6,8 +6,10 @@
 // - LE RIGHE (↑ ↓): le tre sfide (l'icona, la difficoltà e cosa fare, la barra, a che punto sei, il premio) e il bonus del
 //   giorno. OK: «riscuoti» se è pronta, «vai» se no (si apre l'app dove si fa: la chat col comando giusto, lo shop, il quiz…),
 //   «prendi» per il bonus. Riscuotere suona la moneta.
+// - I COLORI (11.11, Alberto: «fai colori a 8bit su tutto»): oro quello che aspetta di essere riscosso, verde quello già
+//   riscosso, blu la strada che manca. Il testo resta d'inchiostro; le targhette hanno il testo nero sul loro colore.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, C } from './lcd.js'
 import * as icone from './icone.js'
 import * as zaino from '../../../chat/zaino.js'
 import * as sfide from '../../../chat/sfide.js'
@@ -25,6 +27,11 @@ const dove = (s) => { const [app, comando] = DOVE[s.id] ?? ['chat'], m = /^\S+ (
 const NOMI = { negozio: 'lo shop', quiz: 'il quiz', missioni: 'le quest', chat: 'la chat' }
 /** Le sfide non ci sono perché la banca non risponde (e non perché le sta preparando): prepara() riprova a ogni disegno. */
 const muta = () => serverOnline() === false
+/** I colori dei tre stati (11.11): pronta da riscuotere, riscossa, ancora da fare. */
+const ORO = C.oro, FATTA = C.verde, STRADA = C.blu
+/** Una targhetta a colori allineata a destra in xd (11.11): il testo nero sul colore, che si legge su ogni sfondo e anche
+ *  sulla fascia della riga scelta (un testo verde o oro sullo sfondo arancione o carta non si leggeva). */
+const targa = (l, xd, y, s, col) => { const w = Lcd.larghezza(s); l.riempi(xd - w - 2, y - 1, w + 4, 9, col); l.testo(xd - w, y, s, { col: C.nero }) }
 
 export function vista(os) {
   const st = { sel: 0, da: 0 }
@@ -84,7 +91,9 @@ export function vista(os) {
         const o = sfide.oggi(), fatte = o.sfide.filter((s) => s.riscossa).length
         // in cima: la serie, oggi, i pallini, le nuove
         l.testo(10, 34, corto(`${o.serie} di fila · oggi ${fatte}/3`, 26))
-        o.sfide.forEach((s, i) => { const xp = 170 + i * 9; if (s.riscossa) l.riempi(xp, 34, 7, 7); else if (s.pronta) { l.riquadro(xp, 34, 7, 7); l.riempi(xp, 37, 7, 4) } else l.riquadro(xp, 34, 7, 7) })
+        // (11.11: i pallini a colori, col bordo d'inchiostro: pieni verdi le riscosse, a metà oro le pronte; la metà resta per
+        // chi distingue male i colori)
+        o.sfide.forEach((s, i) => { const xp = 170 + i * 9; l.riquadro(xp, 34, 7, 7); if (s.riscossa) l.riempi(xp + 1, 35, 5, 5, FATTA); else if (s.pronta) l.riempi(xp + 1, 37, 5, 3, ORO) })
         l.testo(10, 43, o.sfide.length ? `nuove fra ${aMezzanotte()}` : muta() ? 'la banca non risponde: riprovo…' : 'la banca prepara le sfide…') // (31.10: il giorno lo prepara la banca; 11.11: senza rete diceva che le preparava)
         elenco(l, x.zona, {
           voci: righe(), stato: st, y0: 53, alta: 63, passo: 21,
@@ -99,8 +108,8 @@ export function vista(os) {
               // a 7 di fila diceva 8. Quella vera è nel bonus del giorno di chat/sfide.js: +10 % a giorno di fila)
               const su = b.bonusRiscosso ? '✓' : '', giu = b.bonusPronto && !b.bonusRiscosso ? 'prendi ▶' : ''
               const poi = Math.round((b.bonusGiorno / sfide.BONUS_GIORNO.pzk - 1) * 10) + 1
-              if (su) destra(l, x0 + w, y + 2, su, o2)
-              if (giu) destra(l, x0 + w, y + 11, giu, o2)
+              if (su) targa(l, x0 + w, y + 2, su, FATTA) // (11.11: il ✓ verde, il «prendi ▶» oro come i soldi che aspettano)
+              if (giu) targa(l, x0 + w, y + 11, giu, ORO)
               const via = (s) => (s ? Lcd.larghezza(s) + 6 : 0)
               l.testo(x0 + 18, y + 2, corto(b.bonusRiscosso ? 'bonus del giorno: preso, a domani' : `bonus: ${fmt(bonusVero(b.bonusGiorno))} $pzk e una cassa`, Math.floor((w - 18 - via(su)) / 6)), o2)
               const sotto = b.bonusRiscosso ? `serie di ${b.serie}` : [b.bonusPronto ? '' : 'fai tutte e tre', b.serie && poi > b.serie ? `la serie va a ${poi}` : ''].filter(Boolean).join(' · ')
@@ -110,7 +119,7 @@ export function vista(os) {
             const s = r.sfida
             l.bitmap(bm(s.icona, 16), x0 - 2, y + 2, o2)
             const stato = s.riscossa ? '✓' : s.pronta ? 'riscuoti ▶' : 'vai ▶'
-            destra(l, x0 + w, y + 2, stato, o2)
+            if (s.riscossa || s.pronta) targa(l, x0 + w, y + 2, stato, s.riscossa ? FATTA : ORO); else destra(l, x0 + w, y + 2, stato, o2)
             l.testo(x0 + 18, y + 2, corto(`${s.nome}: ${s.testo}`, Math.floor((w - 18 - Lcd.larghezza(stato) - 6) / 6)), o2)
             // la barra, a che punto sei, il premio
             // (11.11: i traguardi in $pzk crescono col livello: «123456/207000» finiva sotto il premio. La barra si accorcia, e
@@ -119,7 +128,8 @@ export function vista(os) {
             let quanto = `${fmt(s.fatto)}/${fmt(s.target)}`
             if (spazio - 4 - Lcd.larghezza(quanto) < 40) quanto = `${fmtCorto(s.fatto)}/${fmtCorto(s.target)}`
             const bw = Math.max(16, Math.min(60, spazio - 4 - Lcd.larghezza(quanto))), k = Math.max(0, Math.min(1, s.fatto / Math.max(1, s.target)))
-            l.riquadro(x0 + 18, y + 12, bw, 5, on ? 0 : 1); l.riempi(x0 + 19, y + 13, Math.round((bw - 2) * k), 3, on ? 0 : 1)
+            // (11.11: la barra si riempie del colore del suo stato: blu la strada, oro pronta, verde riscossa)
+            l.riquadro(x0 + 18, y + 12, bw, 5, on ? 0 : 1); l.riempi(x0 + 19, y + 13, Math.round((bw - 2) * k), 3, s.riscossa ? FATTA : s.pronta ? ORO : STRADA)
             l.testo(x0 + 18 + bw + 4, y + 11, quanto, o2)
             destra(l, x0 + w, y + 11, premio, o2)
           },

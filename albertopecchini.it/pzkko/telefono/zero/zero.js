@@ -251,7 +251,7 @@ export function crea({ dlg, ledEl }) {
   // l'lcd dentro il vetro: la tela di pzk os (os/lcd.js, 768 × 384), ricopiata qui dentro un rettangolo con gli angoli
   // stondati del modulo; sotto il vetro trasparente, sopra il labbro della cornice. Si aggiorna quando pzk os ridisegna
   const lcdTela = document.createElement('canvas')
-  lcdTela.width = 768; lcdTela.height = 384
+  lcdTela.width = LCD_OS.canvas.width; lcdTela.height = LCD_OS.canvas.height // (11.11: 1536 × 768, i pixel a doppia densità)
   const lcdG = lcdTela.getContext('2d')
   const lcdTex = new T.CanvasTexture(lcdTela)
   lcdTex.colorSpace = T.SRGBColorSpace; lcdTex.anisotropy = 8

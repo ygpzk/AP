@@ -1,6 +1,8 @@
 // L'app «rapina» di pzk os (29.10, Alberto: «crea uno alla volta … rapina …»): il colpo alla cassa di pzk sul cercapersone
 // zero. Le regole sono quelle del server (api/wallet.mjs, colpo e cauzione) e dell'app vecchia (telefono/app/rapina.js: PROB,
-// bottino, CAUZIONE, ora, resta); i soldi passano da games/pzk.js (colpo, cauzione). Qui c'è solo la faccia a un bit.
+// bottino, CAUZIONE, ora, resta); i soldi passano da games/pzk.js (colpo, cauzione). Qui c'è solo la faccia, a colori
+// dall'11.11 (Alberto: «fai colori a 8bit su tutto»): la cassaforte d'acciaio, il lampeggiante blu dei carabinieri, la cella
+// con le sbarre di ferro, il codice sul biglietto, la quota presa verde e la multa rossa. Il testo resta d'inchiostro.
 // - IL COLPO, secondo com'è messo:
 //   · LA CASSA: quanto c'è dentro, e due righe: organizza un colpo, entra col codice di un complice (le quattro lettere
 //     dalla tastiera). Un colpo al giorno: si dice da quando.
@@ -14,8 +16,9 @@
 //     con la conferma) se li hai.
 // - COME FUNZIONA: la tabella della banda (riuscita e bottino a testa con la cassa di adesso) e le regole, che scorrono.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, C, esa, sfondo } from './lcd.js'
 import * as icone from './icone.js'
+import { leggi } from './impostazioni.js'
 import * as pzk from '../../../games/pzk.js'
 import * as zaino from '../../../chat/zaino.js'
 import { PROB, bottino, CAUZIONE, ORE_GALERA, ora, resta } from '../../app/rapina.js'
@@ -23,6 +26,13 @@ import { corto, destra, centro, elenco, muovi, pagine, impagina, scorrevole, bot
 
 const fmt = (n) => pzk.fmt(n ?? 0), corti = (n) => pzk.fmtCorto(n ?? 0)
 const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` }
+// (11.11) i colori: quelli dei disegni, che stanno su un fondo loro (la cassaforte, la cella, il biglietto, il lampeggiante), e
+// i due che stanno sullo sfondo, scuri sugli sfondi chiari e chiari su «notte» (un verde o un rosso medio sull'arancione non
+// si legge)
+const ACCIAIO = esa('#666666'), FERRO = esa('#999999'), LUCE = esa('#cccccc'), BUIO = esa('#333333')
+const tinte = () => { const k = sfondo(leggi().sfondo).inchiostro; return k[0] + k[1] + k[2] > 384 ? { su: C.verde, giu: esa('#ff6666') } : { su: esa('#006600'), giu: esa('#990000') } }
+/** Ripassa a colori un pezzo di una riga già scritta d'inchiostro: sono gli stessi pixel, il pezzo prende il colore. */
+const tingi = (l, x, y, riga, pezzo, col) => { const i = riga.lastIndexOf(pezzo); if (pezzo && i >= 0) l.testo(x + [...riga.slice(0, i)].length * 6, y, pezzo, { col }) }
 const REGOLE = [
   { titolo: 'il colpo' },
   { testo: 'Chi organizza apre il colpo e ha un codice di quattro lettere da dare ai complici, che entrano col codice (al più quattro in tutto). Il via lo dà chi ha organizzato, entro quindici minuti.' },
@@ -157,39 +167,46 @@ export function vista(os) {
     disegna(l, x, t) {
       const c = come(), k = S.colpo
       if (c === 'scasso') {
-        // la cassaforte: la manopola che gira, la barra che si riempie
+        // la cassaforte: la manopola che gira, la barra che si riempie (11.11: d'acciaio, la ghiera d'oro, la lancetta bianca)
         const cx = 128, cy = 66, r = 18, a = (10 - scasso.fino) * 0.9
-        l.riquadro(cx - 28, cy - 26, 56, 52); l.riquadro(cx - 26, cy - 24, 52, 48)
-        for (let i = 0; i < 24; i++) { const g = (i / 24) * Math.PI * 2; l.px(Math.round(cx + Math.cos(g) * r), Math.round(cy + Math.sin(g) * r)) }
-        for (let s = 0; s < r - 3; s++) l.px(Math.round(cx + Math.cos(a) * s), Math.round(cy + Math.sin(a) * s))
-        l.riempi(cx - 1, cy - 1, 3, 3)
+        l.riquadro(cx - 28, cy - 26, 56, 52); l.riempi(cx - 27, cy - 25, 54, 50, ACCIAIO); l.riquadro(cx - 26, cy - 24, 52, 48, FERRO)
+        for (let i = 0; i < 24; i++) { const g = (i / 24) * Math.PI * 2; l.px(Math.round(cx + Math.cos(g) * r), Math.round(cy + Math.sin(g) * r), C.oro) }
+        for (let s = 0; s < r - 3; s++) l.px(Math.round(cx + Math.cos(a) * s), Math.round(cy + Math.sin(a) * s), C.bianco)
+        l.riempi(cx - 1, cy - 1, 3, 3, C.rosso)
         centro(l, 98, 'si scassina la cassa…')
-        l.riquadro(68, 108, 120, 6); l.riempi(70, 110, Math.round((116 * (10 - scasso.fino)) / 10), 2)
+        l.riquadro(68, 108, 120, 6); l.riempi(69, 109, 118, 4, BUIO); l.riempi(70, 110, Math.round((116 * (10 - scasso.fino)) / 10), 2, C.oro)
         zona(x)(os.MARGINE, 32, W - 2 * os.MARGINE, 86, salta) // (11.11: «un tasto salta», e il clic pure)
         return
       }
       if (c === 'galera' && retata > 0) {
-        // presi: il lampeggiante, a fotogrammi alterni la scena rovesciata
-        const on = retata % 4 < 2
-        if (on) l.riempi(os.MARGINE, 32, W - 2 * os.MARGINE, 86)
-        l.bitmap(icone.bitmap('sirena', 32), 112, 38, { inv: on })
-        centro(l, 78, 'presi!', { scala: 3, inv: on })
-        centro(l, 104, 'arrivano i carabinieri', { inv: on })
+        // presi: il lampeggiante, a fotogrammi alterni la scena blu dei carabinieri con le scritte bianche (11.11: prima, a un bit,
+        // la scena rovesciata); spento, «presi!» rosso
+        const on = retata % 4 < 2, o = on ? { col: C.bianco } : {}
+        if (on) l.riempi(os.MARGINE, 32, W - 2 * os.MARGINE, 86, C.blu)
+        l.bitmap(icone.bitmap('sirena', 32), 112, 38)
+        centro(l, 78, 'presi!', { scala: 3, col: on ? C.bianco : tinte().giu })
+        centro(l, 104, 'arrivano i carabinieri', o)
         zona(x)(os.MARGINE, 32, W - 2 * os.MARGINE, 86, salta)
         return
       }
       if (c === 'galera') {
         // la cella: il bot dietro le sbarre, che ogni tanto si scuotono
+        // (11.11: il muro scuro della cella e le sbarre di ferro, chiare a sinistra dove prendono la luce)
         const dx = scossa > 0 ? (scossa % 2 ? 1 : -1) : 0
-        l.riquadro(10, 34, 72, 80)
+        l.riquadro(10, 34, 72, 80); l.riempi(11, 35, 70, 78, BUIO)
         l.bitmap(icone.bitmap('bot', 32), 30, 56)
-        for (let xx = 16; xx < 80; xx += 9) { l.riempi(xx + dx, 35, 2, 78, 0); l.vert(xx + dx, 35, 78); l.vert(xx + 1 + dx, 35, 78) }
-        l.orizz(11, 44, 70); l.orizz(11, 104, 70)
+        for (let xx = 16; xx < 80; xx += 9) { l.vert(xx + dx, 35, 78, LUCE); l.vert(xx + 1 + dx, 35, 78, FERRO) }
+        l.orizz(11, 44, 70, FERRO); l.orizz(11, 104, 70, FERRO)
         l.testo(92, 35, 'in galera', { scala: 2 })
         l.testo(92, 54, `fuori alle ${ora(pzk.galera())}`)
         l.testo(92, 63, `fra ${resta(pzk.galera())}`)
         const presi = k?.stato === 'fatto' && k.io && k.esito?.ok === false
-        Lcd.acapo(presi ? `presi: ${ORE_GALERA} ore e una multa di ${fmt(k.esito.multa)} $pzk.` : 'niente lavoro, giochi né colpi.', 25).slice(0, 2).forEach((r, i) => l.testo(92, 75 + i * 9, r))
+        Lcd.acapo(presi ? `presi: ${ORE_GALERA} ore e una multa di ${fmt(k.esito.multa)} $pzk.` : 'niente lavoro, giochi né colpi.', 25).slice(0, 2).forEach((r, i) => {
+          l.testo(92, 75 + i * 9, r)
+          if (!presi) return
+          const m = fmt(k.esito.multa) // (11.11: la multa, rossa; col «$pzk» se va a capo con lei, se no il numero in fondo alla riga)
+          tingi(l, 92, 75 + i * 9, r, r.includes(`${m} $pzk`) ? `${m} $pzk` : r.endsWith(` ${m}`) ? m : '', tinte().giu)
+        })
         const puoi = pzk.puliti() >= CAUZIONE, eti = `cauzione ${fmt(CAUZIONE)}`, bw = Lcd.larghezza(eti) + 8
         if (puoi) { l.riempi(92, 99, bw, 11); l.testo(96, 101, eti, { inv: true }); zona(x)(92, 97, bw, 15, () => cauzione(x)) }
         else Lcd.acapo(`la cauzione è ${fmt(CAUZIONE)} puliti: ne hai ${corti(pzk.puliti())}`, 25).slice(0, 2).forEach((r, i) => l.testo(92, 98 + i * 9, r))
@@ -199,7 +216,8 @@ export function vista(os) {
         const e = k.esito, su = salto > 0 ? [0, 3, 5, 6, 5, 3, 1, 0][8 - salto] ?? 0 : 0
         l.bitmap(icone.bitmap('sacco', 32), 10, 38 - su)
         l.testo(50, 36, 'colpo riuscito', { scala: 2 })
-        l.testo(50, 54, corto(`+${fmt(e.quota)} sporchi a testa`, 32))
+        const preso = corto(`+${fmt(e.quota)} sporchi a testa`, 32)
+        l.testo(50, 54, preso); tingi(l, 50, 54, preso, `+${fmt(e.quota)}`, tinte().su) // (11.11: la quota presa, verde)
         l.testo(50, 63, corto(`${fmt(e.bottino)} in tutto, ${k.membri.length} nella banda`, 32))
         Lcd.acapo('sporchi: non si spendono né si mandano. Si lavano nella lavatrice, o da soli in 96 giorni.', 39).slice(0, 3).forEach((r, i) => l.testo(10, 74 + i * 9, r))
         bottoni(l, zona(x), { etichette: azioni().map((a) => a.eti), sel: Math.min(bott, azioni().length - 1), y: 101, premi: (i) => { bott = i; azioni()[i].fai(x) } })
@@ -208,13 +226,16 @@ export function vista(os) {
       if (c === 'aperto') {
         const n = k.membri.length, A = azioni()
         l.testo(10, 34, 'il codice: dallo ai complici')
-        l.testo(10, 45, k.codice, { scala: 3 })
+        // (11.11) il codice su un biglietto scuro, d'oro; l'ultimo minuto e lo scaduto rossi
+        const bw = Math.min(80, Lcd.larghezza(k.codice ?? '', 3) + 6), T = tinte()
+        l.riempi(7, 43, bw, 25, BUIO); l.cornice(7, 43, bw, 25, C.oro)
+        l.testo(10, 45, k.codice, { scala: 3, col: C.oro })
         const quanto = k.scade - Date.now()
-        l.testo(96, 46, quanto > 0 ? `scade fra ${mmss(quanto)}` : 'scaduto')
+        l.testo(96, 46, quanto > 0 ? `scade fra ${mmss(quanto)}` : 'scaduto', { col: quanto < 6e4 ? T.giu : 1 })
         l.testo(96, 55, `banda ${n}/4 · riesce ${PROB[Math.max(2, n)]} %`)
         k.membri.forEach((m, i) => { const xx = 10 + (i % 2) * 118, y = 70 + Math.floor(i / 2) * 9; l.testo(xx, y, i ? corto(`• ${m.nome}`, 19) : `• ${corto(m.nome, 10)} (capo)`) }) // (11.11: un nome di 20 lettere si mangiava «(capo)»)
-        if (scaduto()) centro(l, 89, 'scaduto: esci, e se vuoi rifallo') // (11.11: «aspetta il via» e «via!» non dicevano il vero)
-        else if (!S.rete) centro(l, 89, 'la banca non risponde: riprovo') // (11.11: senza rete il colpo aperto non lo diceva)
+        if (scaduto()) centro(l, 89, 'scaduto: esci, e se vuoi rifallo', { col: T.giu }) // (11.11: «aspetta il via» e «via!» non dicevano il vero)
+        else if (!S.rete) centro(l, 89, 'la banca non risponde: riprovo', { col: T.giu }) // (11.11: senza rete il colpo aperto non lo diceva)
         else if (n < 2 || !k.capo) centro(l, 89, n < 2 ? `serve almeno un complice${'...'.slice(0, (Math.floor(t / 5) % 3) + 1)}` : 'aspetta il via di chi organizza…')
         bottoni(l, zona(x), { etichette: A.map((a) => a.eti), sel: Math.min(bott, A.length - 1), y: 101, premi: (i) => { bott = i; A[i].fai(x) } })
         return
@@ -223,7 +244,7 @@ export function vista(os) {
       l.bitmap(icone.bitmap('app-rapina', 32), 10, 35)
       l.testo(50, 35, 'la cassa di pzk')
       if (S.cassa != null) { const s = corti(S.cassa); l.testo(50, 45, s, { scala: 2 }); l.testo(54 + Lcd.larghezza(s, 2), 52, '$pzk') }
-      else l.testo(50, 47, S.rete ? 'la apro…' : 'non risponde: riprovo')
+      else l.testo(50, 47, S.rete ? 'la apro…' : 'non risponde: riprovo', { col: S.rete ? 1 : tinte().giu })
       const ultimo = pzk.conto()?.colpo ?? 0, domani = ultimo + 864e5
       l.testo(10, 69, corto(domani > Date.now() ? `un colpo al giorno, di nuovo alle ${ora(domani)}` : 'dentro: puntate perse, acquisti e multe', 39)) // (39 giusti con l'ora: «il prossimo dalle» erano 43 e l'ora si tagliava)
       elenco(l, zona(x), {
@@ -252,12 +273,13 @@ export function vista(os) {
     aiuto: '↑↓ legge · ←→ pagine',
     disegna(l, x) {
       // la tabella: banda, riuscita, bottino a testa con la cassa di adesso
+      const T = tinte()
       l.testo(10, 34, 'banda'); l.testo(64, 34, 'riesce'); destra(l, 240, 34, 'a testa')
       l.orizz(10, 42, 231)
       ;[2, 3, 4].forEach((n, i) => {
         const y = 45 + i * 9
         l.testo(22, y, String(n)); l.testo(70, y, `${PROB[n]} %`)
-        destra(l, 240, y, S.cassa != null ? `${fmt(Math.round(bottino(S.cassa, n)))} $pzk` : S.rete ? '…' : i ? '' : 'la banca non risponde') // (11.11: senza rete «…» per sempre)
+        destra(l, 240, y, S.cassa != null ? `${fmt(Math.round(bottino(S.cassa, n)))} $pzk` : S.rete ? '…' : i ? '' : 'la banca non risponde', { col: S.cassa != null ? T.su : S.rete ? 1 : T.giu }) // (11.11: senza rete «…» per sempre; dall'11.11 il bottino verde)
       })
       scorrevole(l, impagina(REGOLE), { y0: 74, vis: 5, giu })
     },

@@ -1,9 +1,9 @@
 {
-  "commit": "d195e6e",
+  "commit": "732b789",
   "data": "2026-11-11",
-  "generata": "2026-11-11T12:05:59.299Z",
-  "voci": 1082,
-  "commit_totali": 785,
+  "generata": "2026-11-11T15:52:09.262Z",
+  "voci": 1085,
+  "commit_totali": 786,
   "moduli": {
     "principale": 55,
     "sito": 59,
@@ -11,7 +11,7 @@
     "giochi": 40,
     "cercapersone": 45,
     "chat": 56,
-    "dietro": 65,
+    "dietro": 68,
     "memoria": 33,
     "dati": 668
   }

@@ -1,11 +1,11 @@
 // L'app «virtual» di pzk os (29.10, Alberto: «crea uno alla volta … virtual …»): il campionato virtuale sul cercapersone
 // zero. La partita è quella del gioco grande (games/virtual/partita.js: il ciclo di cinque minuti, deciso dall'orario), lo
 // schermino è il SUO (games/virtual/schermo.js: il campo, gli omini, gli spalti, la telecamera, il meteo, i replay), con le
-// due primitive (il pixel e il rettangolo) che qui scrivono su un lcd a un bit: ogni colore diventa una trama secondo la sua
-// luce. Le scommesse e i pagamenti passano dalla STESSA schedina della finestra grande (games/virtual/schedina.js), che dal
-// 31.10 è quella della banca (Alberto: «il browser non decide più niente»): ogni giocata si chiede alla banca (con la
-// rotellina in fondo, regola 8.6), il risultato e la cronaca arrivano dalla banca a partita iniziata, e le partite finite
-// le paga lei; qui si chiede e si mostra.
+// due primitive (il pixel e il rettangolo) che qui scrivono nei colori della tavolozza a 8 bit dell'lcd (11.11: fino al
+// 10.11 l'lcd era a un bit e ogni colore diventava una trama secondo la sua luce). Le scommesse e i pagamenti passano dalla
+// STESSA schedina della finestra grande (games/virtual/schedina.js), che dal 31.10 è quella della banca (Alberto: «il
+// browser non decide più niente»): ogni giocata si chiede alla banca (con la rotellina in fondo, regola 8.6), il risultato
+// e la cronaca arrivano dalla banca a partita iniziata, e le partite finite le paga lei; qui si chiede e si mostra.
 // - LA PARTITA: lo schermino a metà, il tabellone (le sigle, il punteggio, il minuto o quanto manca al fischio), la voce
 //   della telecronaca. ↓ la partita a schermo intero, senza barra, a misura vera (192 × 120), dieci fotogrammi al secondo.
 // - LE QUOTE: la fiche (OK la cambia), 1 X 2 e gli over/under con le fiches che ci hai messo (OK punta), «togli l'ultima»;
@@ -14,7 +14,7 @@
 // Finita una partita, al giro dopo la banca la paga e la striscia lo dice; quelle finite ad app chiusa le paga entrando. I suoni
 // (il fischio, il gol, il palo, la fiche, la vincita) sono le sigle virtual-* di suono/interfaccia.js, via os.suoni.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, C, colore, esa } from './lcd.js'
 import * as icone from './icone.js'
 import * as pzk from '../../../games/pzk.js'
 import { PUNTATE, PER_PUNTATA, fase, aperte as giocateAperte, adesso, partita, minuto, punteggioA, scriviRisultato, CHIUDE } from '../../../games/virtual/partita.js'
@@ -25,58 +25,115 @@ import { txt, corto, destra, centro, puntini, elenco, muovi, pagine, striscia } 
 const fmt = pzk.fmt, q = SC.fmtQuota
 const METEO = { sereno: 'sereno', nuvole: 'nuvoloso', pioggia: 'pioggia', nebbia: 'nebbia', neve: 'neve', vento: 'vento forte' }
 
-// ── lo schermino del gioco, a un bit: le sue primitive scrivono la luce di ogni pixel grosso, poi la luce diventa trama ──
-const lume = (col) => {
+// ── lo schermino del gioco, a colori (11.11, Alberto: «fai colori a 8bit su tutto»): le sue primitive scrivono il colore di
+// ogni pixel grosso, trasparenze comprese (la pioggia, la nebbia, il buio, la luce dei riflettori), e a fotogramma finito
+// ogni pixel diventa il colore più vicino della tavolozza. (Fino al 10.11 l'lcd era a un bit: la luce di ogni colore
+// diventava una trama, e in campo l'erba si indovinava dal fotogramma perché gli omini non ci sparissero dentro.) ──
+const tinte = new Map()
+/** Un colore del gioco ('#rgb', '#rrggbb', 'rgb()', 'rgba()') → [r, g, b, a]. */
+const rgba = (col) => {
   const s = String(col).trim()
+  let t = tinte.get(s)
+  if (t) return t
   let r = 0, g = 0, b = 0, a = 1, m
   if ((m = /^#([0-9a-f]{3})$/i.exec(s))) [r, g, b] = [...m[1]].map((c) => parseInt(c + c, 16))
   else if ((m = /^#([0-9a-f]{6})$/i.exec(s))) [r, g, b] = [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16))
   else if ((m = /^rgba?\(([^)]+)\)$/i.exec(s))) { const v = m[1].split(',').map((x) => parseFloat(x)); [r, g, b] = v; a = v[3] ?? 1 }
-  return [(0.299 * r + 0.587 * g + 0.114 * b) / 255, a]
+  if (tinte.size > 4000) tinte.clear() // (la nebbia respira: le sue trasparenze cambiano a ogni fotogramma)
+  tinte.set(s, (t = [r, g, b, a]))
+  return t
 }
 const nulla = () => {}
-class SchermoUnBit extends Schermo {
+// la tela finta dello Schermo: i rettangoli passano dalle primitive qui sotto; l'unica cosa che lo Schermo disegna da sé è
+// il bagliore tondo dei riflettori di notte (un gradiente), che qui si fa a mano
+const tela = (chi) => {
+  let stile = null
+  return {
+    save: nulla, restore: nulla, set fillStyle(v) { stile = v }, set imageSmoothingEnabled(_) {},
+    createRadialGradient: (xa, ya, r0, x, y, r1) => ({ x, y, r0, r1, fermate: [], addColorStop(o, c) { this.fermate.push([o, rgba(c)]) } }),
+    fillRect: () => { if (stile?.fermate) chi().alone(stile) },
+  }
+}
+class SchermoColori extends Schermo {
   constructor() {
-    super({ getContext: () => ({ save: nulla, restore: nulla, fillRect: nulla, createRadialGradient: () => ({ addColorStop: nulla }), set fillStyle(_) {}, set imageSmoothingEnabled(_) {} }) })
+    let io = null
+    super({ getContext: () => tela(() => io) })
+    io = this
     this.k = 1
-    this.lumi = new Float32Array(LARG * ALT) // (non «luce»: lo Schermo ha già il suo metodo luce(), quello della luce del giorno)
+    this.r = new Float32Array(LARG * ALT); this.g = new Float32Array(LARG * ALT); this.b = new Float32Array(LARG * ALT)
+    this.indici = new Uint8Array(LARG * ALT) // (gli indici della tavolozza: la bitmap che va sull'lcd)
   }
   px(x, y, col) { this.rett(x, y, 1, 1, col) }
+  mescola(k, [r, g, b, a]) {
+    if (a >= 1) { this.r[k] = r; this.g[k] = g; this.b[k] = b; return }
+    this.r[k] += (r - this.r[k]) * a; this.g[k] += (g - this.g[k]) * a; this.b[k] += (b - this.b[k]) * a
+  }
   rett(x, y, w, h, col) {
     const x0 = Math.max(0, Math.round(x)), y0 = Math.max(0, Math.round(y)), x1 = Math.min(LARG, Math.round(x + w)), y1 = Math.min(ALT, Math.round(y + h))
     if (x1 <= x0 || y1 <= y0) return
-    const [v, a] = lume(col)
-    for (let j = y0; j < y1; j++) for (let i = x0; i < x1; i++) { const k = j * LARG + i; this.lumi[k] = a >= 1 ? v : this.lumi[k] * (1 - a) + v * a }
+    const c = rgba(col)
+    for (let j = y0; j < y1; j++) for (let i = x0; i < x1; i++) this.mescola(j * LARG + i, c)
+  }
+  /** Il gradiente tondo (i riflettori): fra r0 e r1 dal centro le fermate, mescolate come quelle del canvas. */
+  alone({ x, y, r0, r1, fermate }) {
+    if (!fermate.length) return
+    for (let j = 0; j < ALT; j++) for (let i = 0; i < LARG; i++) {
+      const u = Math.max(0, Math.min(1, (Math.hypot(i + 0.5 - x, j + 0.5 - y) - r0) / Math.max(1e-6, r1 - r0)))
+      let n = 0
+      while (n < fermate.length - 1 && fermate[n + 1][0] < u) n++
+      const [oa, a] = fermate[n], [ob, b] = fermate[Math.min(n + 1, fermate.length - 1)], f = ob > oa ? Math.max(0, Math.min(1, (u - oa) / (ob - oa))) : 0
+      this.mescola(j * LARG + i, a.map((v, z) => v + (b[z] - v) * f))
+    }
+  }
+  /** Il fotogramma in indici della tavolozza. */
+  tavolozza() {
+    for (let k = 0; k < this.indici.length; k++) this.indici[k] = colore(this.r[k] | 0, this.g[k] | 0, this.b[k] | 0)
+    return this.indici
   }
 }
-// le trame: dal buio (pieno) alla luce (vuoto), cinque gradini; il campo verde viene a puntini radi, le righe bianche vuote
-const TRAMA = [() => true, (x, y) => (x + y) % 2 === 0 || y % 2 === 0, (x, y) => (x + y) % 2 === 0, (x, y) => x % 2 === 0 && y % 2 === 0, () => false]
-const gradino = (v) => (v < 0.18 ? 0 : v < 0.32 ? 1 : v < 0.46 ? 2 : v < 0.62 ? 3 : 4)
-// IN CAMPO la resa si adatta al fotogramma (di notte e con la pioggia le due righe d'erba venivano due trame scure e gli
-// omini ci sparivano dentro): le due luci più frequenti sono l'erba, a puntini radi; più scuro dell'erba (gli omini, le
-// ombre) pieno o fitto; più chiaro (le righe, la palla, le maglie chiare) carta. Fuori dal campo (l'attesa, il tabellone)
-// i cinque gradini fissi, che lì si leggono già bene.
-function erbaDi(s) {
-  const conta = new Uint32Array(64)
-  for (let i = 0; i < s.lumi.length; i++) conta[Math.min(63, Math.floor(s.lumi[i] * 64))]++
-  let a = 0, b = 0
-  for (let i = 1; i < 64; i++) { if (conta[i] > conta[a]) { b = a; a = i } else if (i !== a && conta[i] > conta[b]) b = i }
-  return [Math.min(a, b) / 64 - 0.02, (Math.max(a, b) + 1) / 64 + 0.02]
+// lo schermino sull'lcd: una bitmap a colori coi pixel del gioco. Intero (la partita grande) ogni pixel del gioco è un pixel
+// d'impaginazione; a metà (la pagina della partita) è un pixel VERO dell'lcd (d = 2, come D): tutto il disegno, nitido, in
+// un quarto del posto. (A un bit, a metà, quattro pixel diventavano uno, e le scritte dello schermino non si leggevano.)
+function disegnaSchermo(l, s, x0, y0, mezzo) {
+  const k = mezzo ? 2 : 1
+  l.bitmap({ w: LARG / k, h: ALT / k, d: k, px: s.tavolozza() }, x0, y0)
 }
-function disegnaSchermo(l, s, x0, y0, mezzo, inCampo = false) {
-  const k = mezzo ? 2 : 1, w = LARG / k, h = ALT / k, erba = inCampo ? erbaDi(s) : null
-  const passo = (v) => (!erba ? gradino(v) : v >= erba[0] && v <= erba[1] ? 3 : v < erba[0] ? (v < erba[0] - 0.12 ? 0 : 1) : 4)
-  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
-    let v = 0
-    for (let j = 0; j < k; j++) for (let i = 0; i < k; i++) v += s.lumi[(y * k + j) * LARG + x * k + i]
-    if (TRAMA[passo(v / (k * k))](x, y)) l.px(x0 + x, y0 + y)
+
+// ── i disegnini (11.11), a pixel veri (d = 2): fn(i, j, x, y) dà il colore del pixel vero i, j (x, y dal centro), 0 vuoto;
+// 1 è l'inchiostro del bordo, che sulla fascia della riga scelta diventa il fondo ──
+const disegnino = (w, h, fn) => {
+  const px = new Uint8Array(w * 2 * h * 2)
+  for (let j = 0; j < h * 2; j++) for (let i = 0; i < w * 2; i++) px[j * w * 2 + i] = fn(i, j, i + 0.5 - w, j + 0.5 - h)
+  return { w, h, d: 2, px }
+}
+// la fiche: i colori delle fiches fotografate del gioco grande (art/fiches: crema coi segni blu, rossa, verde scura, nera,
+// gialla coi segni neri), sei segni sul bordo e il valore in mezzo, un pallino
+const FICHE = { 1: ['#eeeedd', '#3366cc'], 5: ['#cc0000', '#ffffff'], 25: ['#006633', '#ffffff'], 100: ['#222222', '#ffffff'], 500: ['#ffcc00', '#000000'] }
+const fiche = new Map()
+const ficheDi = (v) => {
+  if (!fiche.has(v)) {
+    const [fondo, segni] = (FICHE[v] ?? FICHE[1]).map(esa)
+    fiche.set(v, disegnino(7, 7, (i, j, x, y) => {
+      const r = Math.hypot(x, y), a = ((Math.atan2(y, x) / (Math.PI / 3)) % 1 + 1) % 1
+      return r > 7 ? 0 : r > 6 ? 1 : (r > 4 && (a < 0.2 || a > 0.8)) || r < 1.8 ? segni : fondo
+    }))
   }
+  return fiche.get(v)
 }
+// accanto alla voce della partita: il pallone del gol, il cartellino giallo o rosso
+const SEGNI = {
+  gol: disegnino(5, 5, (i, j, x, y) => { const r = Math.hypot(x, y); return r > 5 ? 0 : r > 4 ? 1 : r < 1.6 || (Math.abs(r - 3.2) < 0.6 && (i + 2 * j) % 5 === 0) ? C.nero : C.bianco }),
+  giallo: disegnino(3, 5, (i, j) => (i === 0 || j === 0 || i === 5 || j === 9 ? 1 : C.giallo)),
+  rosso: disegnino(3, 5, (i, j) => (i === 0 || j === 0 || i === 5 || j === 9 ? 1 : C.rosso)),
+}
+// l'esito di una giocata pagata in un bollino: verde la vinta, rosso la persa, la parola resta (chi distingue male i
+// colori). Il testo ha il suo colore, nero sul verde e bianco sul rosso: si legge su ogni sfondo e sulla fascia
+const BOLLINO = { vinta: [C.verde, C.nero], persa: [esa('#cc0000'), C.bianco] }
 
 // ── il campionato: la partita di adesso, la fase, il pagamento della finita ──
 function campionato(os, avvisa) {
   const suona = (nome) => os.suoni.sigla(nome) // (l'interruttore dei suoni lo guarda os.suoni, non l'app: regola 7.4)
-  const c = { corrente: fase(), P: null, voce: '', schermo: new SchermoUnBit(), ultimoT: performance.now(), evento: null, campo: false, suona }
+  const c = { corrente: fase(), P: null, voce: '', schermo: new SchermoColori(), ultimoT: performance.now(), evento: null, campo: false, segno: null, suona }
   c.P = partita(c.corrente.indice)
   // (31.10) la fase è cambiata, o si sono chiuse le giocate (CHIUDE prima del fischio: lo dice la banca)
   c.cambiata = (f) => f.indice !== c.corrente.indice || f.fase !== c.corrente.fase || giocateAperte(f) !== giocateAperte(c.corrente)
@@ -102,7 +159,7 @@ function campionato(os, avvisa) {
     c.P = c.corrente.fase === 'partita' ? SC.cronaca(c.corrente.indice) : partita(c.corrente.indice) // (con quello che la banca ha detto)
     const now = performance.now(), P = c.P, t = c.t()
     // (11.11) in campo solo se lo schermino ha disegnato il campo: al fischio, finché la cronaca non arriva, disegna ancora
-    // l'attesa coi cartelli, e la resa dell'erba la faceva una poltiglia di puntini (di notte non si leggeva niente)
+    // l'attesa coi cartelli
     c.campo = c.corrente.fase === 'partita' && !!P.cronaca
     c.schermo.disegna(P, { fase: c.campo ? 'partita' : 'scommesse', t, ridotto: false, dt: Math.min(0.5, (now - c.ultimoT) / 1000) })
     c.ultimoT = now
@@ -119,6 +176,9 @@ function campionato(os, avvisa) {
         else if (e.tipo === 'sospesa') c.voce = `sospesa: ${e.causa}. ${scriviRisultato(P.risultato)}`
         else if (e.tipo === 'intervallo') { suona('virtual-fischio'); c.voce = 'intervallo' }
         else if (e.tipo === 'fine') { suona('virtual-fischio'); c.voce = `finale: ${scriviRisultato(P.risultato)}` }
+        // (11.11) il disegno accanto alla voce: il pallone del gol, il cartellino giallo o rosso; vale finché la voce è quella
+        // (gli eventi senza voce, come il fallo, non lo toccano: il pallone del gol spariva al fallo dopo)
+        if (['gol', 'giallo', 'rosso'].includes(e.tipo)) c.segno = { voce: c.voce, tipo: e.tipo }
       }
     }
   }
@@ -143,7 +203,7 @@ function grande(os, c) {
   return {
     nome: 'virtual-grande', app: 'virtual', senzaBarra: true,
     tic() { c.fotogramma(); os.ridisegna() },
-    disegna(l) { disegnaSchermo(l, c.schermo, Math.round(W / 2 - LARG / 2), Math.round(H / 2 - ALT / 2), false, c.campo); os.zona(0, 0, W, H, () => os.togli()) },
+    disegna(l) { disegnaSchermo(l, c.schermo, Math.round(W / 2 - LARG / 2), Math.round(H / 2 - ALT / 2), false); os.zona(0, 0, W, H, () => os.togli()) },
     tasto(k) { if (k === 'indietro' || k === 'ok' || k === 'su') os.togli(); return true },
   }
 }
@@ -214,6 +274,8 @@ export function vista(os) {
       // tavolino» perdeva la coda senza segno)
       const vv = Lcd.acapo(txt(c.voce || `${P.casa.nome} contro ${P.ospite.nome}`), n)
       ;[vv[0], vv.length > 2 ? corto(vv.slice(1).join(' '), n) : vv[1]].forEach((r, i) => r && l.testo(xd, 84 + i * 9, r))
+      const sg = c.segno?.voce === c.voce ? SEGNI[c.segno.tipo] : null // (fra lo schermino e la voce: il pallone, il cartellino)
+      if (sg) l.bitmap(sg, xd - sg.w - 1, 85)
       l.testo(10, 104, corto(`forze ${P.forze.casa}-${P.forze.ospite} · 1 ${q(P.quote['1'])}  X ${q(P.quote.X)}  2 ${q(P.quote['2'])}`, 39)) // (sotto la telecronaca, non addosso)
     },
     tasto(k) { if (k === 'giu') { os.spingi(grande(os, c)); return true } return false },
@@ -242,6 +304,7 @@ export function vista(os) {
           if (v.fiche) { // (scelta: il valore fra ◀ ▶, che si cliccano; le zone dopo quella della riga, così vincono)
             const s = on ? `◀ ${fmt(SC.S.fiche)} ▶` : fmt(SC.S.fiche), ws = Lcd.larghezza(s)
             l.testo(xx, y + 2, 'la fiche', o); destra(l, xx + w, y + 2, s, o)
+            l.bitmap(ficheDi(SC.S.fiche), xx + w - ws - 10, y + 2, o) // (11.11: la fiche disegnata, coi colori della sua)
             if (on) { x.zona(xx + w - ws - 2, y, 10, 11, () => giraFiche(-1)); x.zona(xx + w - 8, y, 10, 11, () => giraFiche(1)) }
             return
           }
@@ -270,7 +333,8 @@ export function vista(os) {
         riga(l, b, xx, y, w, on) {
           const o = { inv: on }, pu = PER_PUNTATA.get(b.id), qui = b.indice === c.corrente.indice, v = SC.vincitaDi(b)
           const esito = b.pagata ? (b.esito === 'vinta' ? `+${fmt(v)}` : 'persa') : qui && c.corrente.fase === 'partita' ? 'in corso' : `→ ${fmt(v)}`
-          destra(l, xx + w, y + 2, esito, o)
+          const bo = b.pagata ? BOLLINO[b.esito === 'vinta' ? 'vinta' : 'persa'] : null
+          if (bo) { const we = Lcd.larghezza(esito); l.riempi(xx + w - we - 2, y + 1, we + 3, 9, bo[0]); destra(l, xx + w, y + 2, esito, { col: bo[1] }) } else destra(l, xx + w, y + 2, esito, o)
           l.testo(xx, y + 2, corto(`${b.casa}-${b.ospite}${b.risultato ? ` ${b.risultato}` : ''}`, Math.floor((w - Lcd.larghezza(esito) - 6) / 6)), o)
           l.testo(xx + 6, y + 11, corto(`${pu?.nome ?? b.id} @ ${q(b.quota)} · ${fmt(b.puntata)} $pzk`, Math.floor((w - 6) / 6)), o)
         },

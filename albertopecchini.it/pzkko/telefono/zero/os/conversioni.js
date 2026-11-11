@@ -1,13 +1,17 @@
 // L'app «bin·hex» di pzk os (29.10, Alberto: «crea uno alla volta … bin&hex …»): le conversioni fra le basi sul cercapersone
 // zero. I conti sono quelli dell'app vecchia (telefono/app/conversioni.js: leggi, scritto, c2, passi, coi BigInt e la parte
 // dopo la virgola), e la scelta si ricorda con la sua (telefono/ricordi.js, «conversioni»): qui c'è la faccia a un bit.
-// - LE RIGHE (↑ ↓, in tondo): il numero (OK la tastiera; si scrive anche dalla tastiera vera, Backspace cancella), in che
+// - LE RIGHE (↑ ↓, in tondo): il numero (OK apre la riga dove si scrive; si scrive anche qui dalla tastiera vera, Backspace cancella), in che
 //   base è scritto e i bit del complemento a 2 (◀ ▶ li cambiano), i risultati nelle quattro basi e su n bit (OK lo vedi
 //   intero, e lì OK lo copia), e «come si fa verso» una base (◀ ▶ la base, OK i passaggi).
 // - I PASSAGGI: quelli che si scrivono a scuola (le divisioni coi resti, le potenze, i gruppi di bit), che scorrono con ↑ ↓;
 //   ← → cambiano la base d'arrivo.
 // Quando il numero cambia i risultati si riscrivono da sinistra. Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+// I COLORI (11.11, Alberto: «fai colori a 8bit su tutto»): pochi e con un senso. In blu le cifre che fanno il risultato (i
+// resti delle divisioni, le cifre delle moltiplicazioni, i gruppi di bit d'arrivo) e il risultato in fondo: lo stesso
+// colore lega le cifre a quello che diventano. In rosso il «!» di un numero che non si legge e il bit del segno quando dice
+// «negativo». Sempre su una fascia sua con la cifra bianca, così si legge su tutti gli sfondi (anche «carta» e «notte»).
+import { Lcd, W, H, esa, C } from './lcd.js'
 import { BASI, NOME, leggi, scritto, c2, intIn, gruppi, passi } from '../../app/conversioni.js'
 import { ricordo, ricorda } from '../../ricordi.js'
 import { txt, corto, destra, centro, elenco, pagine, impagina, scorrevole, senzaHtml, striscia, testata } from './pezzi.js'
@@ -16,11 +20,16 @@ const BIT = [0, 8, 16, 32, 64]
 const SIGLA = Object.fromEntries(BASI.map(([b, s]) => [b, s]))
 const sup = (s) => senzaHtml(String(s).replace(/<sup>(.*?)<\/sup>/g, '^$1'))
 const copia = (s) => navigator.clipboard?.writeText(s).then(() => true, () => false) ?? Promise.resolve(false)
+// (11.11: medi e non chiari: col bianco sopra si leggono, e la fascia si vede sia sull'arancione sia su «notte»)
+const BLU = esa('#0066cc'), ROSSO = esa('#cc0000')
+/** Un pezzo di testo bianco su una fascia colorata (alta come una riga: nelle tabelle le fasce una sotto l'altra fanno una colonna). */
+const fascia = (l, x, y, s, col) => { l.riempi(x - 1, y - 1, Lcd.larghezza(s) + 2, 9, col); l.testo(x, y, s, { col: C.bianco }) }
 
-/** Le righe dei passaggi per lo schermo: i testi a capo, le tabelle a colonne allineate, l'esito in una fascia. */
+/** Le righe dei passaggi per lo schermo: i testi a capo, le tabelle a colonne allineate, l'esito in una fascia.
+ *  seg: [da, n], i caratteri della riga che vanno in blu (le cifre del risultato). */
 function righePassi(x, verso) {
-  const out = []
-  for (const b of passi(x, verso)) {
+  const out = [], B = passi(x, verso), ultima = B.findLastIndex((b) => b.tab)
+  for (const [ib, b] of B.entries()) {
     if (b.p || b.nota) { out.push(...impagina([{ testo: sup(b.p ?? b.nota) }])); continue }
     // (11.11: a 64 bit l'esito tagliato con «…» non si leggeva mai intero: va a capo, tutto nella fascia)
     if (b.fine) { out.push({ s: '' }, ...Lcd.acapo(txt(sup(b.fine)), 36).map((s) => ({ s, tipo: 'titolo' }))); continue }
@@ -34,13 +43,21 @@ function righePassi(x, verso) {
     const stretta = T[0].length > 2 && larghe.reduce((a, n) => a + n, 0) + 3 * (larghe.length - 1) > 37
     const L = stretta ? [larghe[0], larghe.at(-1)] : larghe
     const n0 = Math.min(L[0], 37 - 3 - L.at(-1)) // (stretta: quanto resta alla prima colonna)
+    // (11.11: l'ultima colonna in blu dove sono le cifre del risultato: i resti, le cifre dopo la virgola, i gruppi della
+    // base d'arrivo. Non le potenze da sommare, e non i bit di passaggio da ottale a esadecimale: lì il risultato è altrove)
+    const blu = b.testa || (ib === ultima && sep === ' → ')
+    const seg = (s, da, n) => { n = Math.min(n, 37 - da); return blu && n > 0 && [...s].length > da ? [da, n] : undefined }
     T.forEach((r, k) => {
-      const s = k === 0 && b.testa ? '   ' : sep
+      const s = k === 0 && b.testa ? '   ' : sep, testa = k === 0 && b.testa, ul = [...r.at(-1)].length
       // (11.11: «F × 16^15 = 17.293.822.569.102.704.640» è 38 caratteri: il valore va sotto, allineato a destra, e non perde la coda)
-      if (r.length === 2 && larghe[0] + s.length + [...r[1]].length > 37) return out.push({ s: corto(r[0] + s.trimEnd(), 37) }, { s: corto(r[1], 37).padStart(37) })
-      if (!stretta) return out.push({ s: corto(r.map((c, i) => (i < r.length - 1 ? c.padEnd(larghe[i]) : c)).join(s), 37) })
-      const c0 = [...r[0]], primo = c0.length <= n0 ? r[0].padEnd(n0) : k === 0 && b.testa ? c0.slice(0, n0).join('') : corto(r[0], n0) // (la testa si taglia senza «…»)
-      out.push({ s: primo + s + r.at(-1) })
+      if (r.length === 2 && larghe[0] + s.length + [...r[1]].length > 37) { const v = corto(r[1], 37).padStart(37); return out.push({ s: corto(r[0] + s.trimEnd(), 37) }, { s: v, seg: testa ? undefined : seg(v, 37 - Math.min(ul, 37), ul) }) }
+      if (!stretta) {
+        const tutta = r.map((c, i) => (i < r.length - 1 ? c.padEnd(larghe[i]) : c)).join(s), v = corto(tutta, 37)
+        const da = larghe.slice(0, -1).reduce((a, n) => a + n, 0) + s.length * (r.length - 1)
+        return out.push({ s: v, seg: testa ? undefined : seg(v, da, v === tutta ? ul : 36 - da) }) // (tagliata: il «…» resta d'inchiostro)
+      }
+      const c0 = [...r[0]], primo = c0.length <= n0 ? r[0].padEnd(n0) : testa ? c0.slice(0, n0).join('') : corto(r[0], n0) // (la testa si taglia senza «…»)
+      out.push({ s: primo + s + r.at(-1), seg: testa ? undefined : seg(primo + s + r.at(-1), [...primo].length + s.length, ul) })
     })
   }
   return out
@@ -57,10 +74,16 @@ function vistaPassi(os, S, salva) {
     disegna(l) {
       const x = leggi(S.testo, S.da)
       testata(l, os, { icona: 'app-conversioni', nome: `verso ${NOME[S.verso]}`, n: BASI.length, pag: BASI.findIndex(([b]) => b === S.verso), vai: cambia, va: (i) => { S.verso = BASI[i][0]; giu = 0; salva() } })
-      if (x.errore) { centro(l, 64, corto(`! ${txt(x.errore)}`, 38)); centro(l, H - 9, 'INDIETRO torna'); return }
+      if (x.errore) { const e = corto(`! ${txt(x.errore)}`, 38); centro(l, 64, e); fascia(l, Math.round(W / 2 - Lcd.larghezza(e) / 2), 64, '!', ROSSO); centro(l, H - 9, 'INDIETRO torna'); return }
       const R = righe()
       l.ritaglia([os.MARGINE, 32, W - 2 * os.MARGINE, 86])
-      scorrevole(l, R, { y0: 34, vis: 9, giu }) // (giu lo tiene giusto tasto: disegna non cambia lo stato)
+      const g = scorrevole(l, R, { y0: 34, vis: 9, giu }) // (giu lo tiene giusto tasto: disegna non cambia lo stato)
+      // (11.11: sopra le righe d'inchiostro di scorrevole, i colori: le cifre del risultato e l'esito in fondo, in blu)
+      R.slice(g, g + 9).forEach((r, i) => {
+        const y = 34 + i * 9
+        if (r.tipo === 'titolo') { l.riempi(8, y - 1, 232, 9, BLU); l.testo(10, y, r.s, { col: C.bianco }) } // (la fascia di scorrevole, blu)
+        else if (r.seg) fascia(l, 10 + r.seg[0] * 6, y, [...r.s].slice(r.seg[0], r.seg[0] + r.seg[1]).join(''), BLU)
+      })
       l.ritaglia(null)
       centro(l, H - 9, R.length > 9 ? '↑↓ legge · ←→ base · OK torna' : '←→ base · OK torna')
     },
@@ -76,7 +99,7 @@ function vistaPassi(os, S, salva) {
 }
 
 // ── un risultato intero ──
-function vistaIntero(os, titolo, vista, testo) {
+function vistaIntero(os, titolo, vista, testo, { segno = false } = {}) {
   let esito = null
   const v = {
     nome: 'conversioni-intero', app: 'conversioni',
@@ -86,6 +109,7 @@ function vistaIntero(os, titolo, vista, testo) {
       const tutte = Lcd.acapo(txt(vista), 39), r = tutte.slice(0, 7)
       if (tutte.length > 7) r[6] = corto(r[6] + '…', 39) // (il «…» in fondo all'ultima riga: sotto c'è «N cifre»)
       r.forEach((s, i) => l.testo(10, 36 + i * 10, s))
+      if (segno && r[0]?.[0] === '1') fascia(l, 10, 36, '1', ROSSO) // (11.11: il bit del segno a 1, il numero è negativo: in rosso)
       const n = [...testo].filter((c) => /[0-9A-F]/i.test(c)).length // (solo le cifre: non il meno, non la virgola)
       l.testo(10, 108, `${n} ${n === 1 ? 'cifra' : 'cifre'}`)
       const a = 'OK lo copia · INDIETRO torna', xa = Math.round(W / 2 - Lcd.larghezza(a) / 2)
@@ -110,8 +134,9 @@ export function vista(os) {
   let scrive = 0 // i risultati che si riscrivono da sinistra (0 → 4)
   const cambiato = () => { scrive = 0; salva() }
   // (11.11: la base che si vede: con 0x 0b 0o davanti è quella del prefisso, come in leggi, anche quando una cifra è
-  // sbagliata e leggi non dice la base; con «0x1F» in decimale OK apriva i tasti dei numeri, «in decimale», senza A–F)
-  const base = () => { const x = leggi(S.testo, S.da); return x.b ?? { B: 2, O: 8, X: 16 }[/^[-+]?0([BOX])/.exec(S.testo.trim().replace(/[\s_']/g, '').toUpperCase())?.[1]] ?? S.da }
+  // sbagliata; con «0x1F» in decimale OK apriva i tasti dei numeri, «in decimale», senza A–F. Ora leggi dice la base anche
+  // con l'errore, e la regola del prefisso, «0B» in esadecimale compreso, sta in un posto solo)
+  const base = () => leggi(S.testo, S.da).b ?? S.da
   const giraBase = (d) => {
     // (11.11: con 0x davanti la riga dice «esadecimale», e ▶ deve andare alla base dopo quella che si vede, non dopo S.da)
     const x = leggi(S.testo, S.da), i = BASI.findIndex(([b]) => b === base()), nuova = BASI[(i + d + BASI.length) % BASI.length][0]
@@ -122,11 +147,12 @@ export function vista(os) {
   const giraBit = (d) => { S.bit = BIT[(BIT.indexOf(S.bit) + d + BIT.length) % BIT.length]; cambiato() }
   const giraVerso = (d) => { const i = BASI.findIndex(([b]) => b === S.verso); S.verso = BASI[(i + d + BASI.length) % BASI.length][0]; salva() }
   async function scrivi(x) {
-    // (in decimale e in ottale i tasti grandi di os.numero, col meno e la virgola; il binario lungo e le lettere A–F
-    // dell'esadecimale vogliono la tastiera, coi simboli per il meno e la virgola)
+    // (in decimale e in ottale os.numero, che vuole solo cifre, il meno e la virgola; il binario lungo e le lettere
+    // A–F dell'esadecimale vogliono os.tastiera. Tutte e due dall'11.11 sono una riga che si riempie dalla tastiera vera, del
+    // computer o del telefono: la tastiera sullo schermo non c'è più)
     const b = base(), titolo = `il numero, in ${NOME[b]}`
-    // (max 80 come la tastiera vera qui sotto: os.numero per ora si ferma a 24 senza dirlo, la correzione è in os.js)
-    const s = b === 10 || b === 8 ? await os.numero({ titolo, testo: S.testo, max: 80 }) :await os.tastiera({ titolo, testo: S.testo, simboli: true })
+    // (max 80 come quando si scrive qui sulla riga)
+    const s = b === 10 || b === 8 ? await os.numero({ titolo, testo: S.testo, max: 80 }) : await os.tastiera({ titolo, testo: S.testo, max: 80 })
     if (s === null || !x.qui()) return
     S.testo = s.trim(); cambiato()
   }
@@ -137,7 +163,7 @@ export function vista(os) {
     R.push({ nome: 'numero', val: S.testo, numero: true, ok: scrivi, aiuto: 'OK scrive · ↑↓ righe' })
     R.push({ nome: 'scritto in', val: NOME[base()], gira: giraBase, aiuto: '←→ cambia · ↑↓ righe' })
     R.push({ nome: 'bit (compl. a 2)', val: S.bit ? `${S.bit}` : 'no', gira: giraBit, aiuto: '←→ cambia · ↑↓ righe' })
-    if (x.errore) R.push({ nome: `! ${x.errore}`, val: '', aiuto: 'OK scrive il numero', ok: scrivi })
+    if (x.errore) R.push({ nome: `! ${x.errore}`, val: '', errore: true, aiuto: 'OK scrive il numero', ok: scrivi })
     else {
       for (const [b, sigla] of BASI) { const s = scritto(x, b); R.push({ nome: sigla, val: s.vista, risultato: true, ok: () => os.spingi(vistaIntero(os, NOME[b], s.vista, s.testo)), aiuto: 'OK lo vedi intero · ↑↓ righe' }) }
       if (S.bit) {
@@ -145,7 +171,7 @@ export function vista(os) {
         if (p === null) R.push({ nome: x.fraz ? 'il compl. a 2 è per gli interi' : `non ci sta in ${S.bit} bit`, val: '', aiuto: '↑↓ righe' })
         else {
           const bin = p.toString(2).padStart(S.bit, '0'), hex = intIn(p, 16).padStart(S.bit / 4, '0')
-          R.push({ nome: `${S.bit} bit`, val: gruppi(bin, 4), risultato: true, ok: () => os.spingi(vistaIntero(os, `${S.bit} bit, complemento a 2`, gruppi(bin, 4), bin)), aiuto: 'OK lo vedi intero · ↑↓ righe' })
+          R.push({ nome: `${S.bit} bit`, val: gruppi(bin, 4), risultato: true, segno: true, ok: () => os.spingi(vistaIntero(os, `${S.bit} bit, complemento a 2`, gruppi(bin, 4), bin, { segno: true })), aiuto: 'OK lo vedi intero · ↑↓ righe' })
           R.push({ nome: `hex ${S.bit}`, val: gruppi(hex, 4), risultato: true, ok: () => os.spingi(vistaIntero(os, `hex su ${S.bit} bit`, gruppi(hex, 4), hex)), aiuto: 'OK lo vedi intero · ↑↓ righe' })
           // (11.11: era l'unico risultato che con OK non si apriva intero)
           if (bin[0] === '1' && !x.neg && (x.b === 2 || x.b === 16)) { const seg = String(p - (1n << BigInt(S.bit))); R.push({ nome: 'letto col segno', val: seg, risultato: true, ok: () => os.spingi(vistaIntero(os, `letto col segno su ${S.bit} bit`, seg, seg)), aiuto: 'OK lo vedi intero · ↑↓ righe' }) }
@@ -170,6 +196,7 @@ export function vista(os) {
           riga(l, r, x0, y, w, on, k) {
             const o = { inv: on }
             l.testo(x0, y + 1, corto(r.nome, r.val ? 18 : 37), o)
+            if (r.errore) fascia(l, x0, y + 1, '!', ROSSO) // (11.11: il numero che non si legge: il «!» in rosso, anche sulla riga scelta)
             if (!r.val && !r.numero) return
             const spazio = Math.floor((w - Lcd.larghezza(corto(r.nome, 18)) - 10) / 6)
             if (r.gira) { // il valore fra ◀ ▶ (si cliccano), le frecce solo sulla riga scelta
@@ -189,7 +216,9 @@ export function vista(os) {
               return
             }
             const v = txt(r.val), quanti = r.risultato ? Math.ceil(([...v].length * scrive) / 4) : [...v].length // (si riscrive da sinistra)
-            destra(l, x0 + w, y + 1, corto([...v].slice(0, quanti).join(''), spazio), o)
+            const s = corto([...v].slice(0, quanti).join(''), spazio)
+            destra(l, x0 + w, y + 1, s, o)
+            if (r.segno && s[0] === '1') fascia(l, x0 + w - Lcd.larghezza(s), y + 1, '1', ROSSO) // (11.11: il bit del segno a 1 dice «negativo»: in rosso)
           },
         })
       },

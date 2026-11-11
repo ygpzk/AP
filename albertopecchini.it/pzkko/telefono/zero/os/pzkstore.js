@@ -7,8 +7,10 @@
 // - LA SCHEDA: l'icona grande, il nome, il genere e la versione, lo stato; il testo intero che scorre con ↑ ↓ (cosa fa, in
 //   breve, come si usa, cosa serve, le novità, togliere); sotto i tasti: compra e scarica, o apri e togli. Comprare e togliere
 //   si confermano.
+// - I COLORI (11.11, Alberto: «fai colori a 8bit su tutto»): installata su una fascia verde, il prezzo che non ti puoi
+//   permettere su una rossa, la galera rossa, il «!» di chi ti servirebbe su un bollino giallo. Il resto è d'inchiostro.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, C } from './lcd.js'
 import * as icone from './icone.js'
 import * as pzk from '../../../games/pzk.js'
 import * as zaino from '../../../chat/zaino.js'
@@ -25,6 +27,15 @@ const la = (x) => (x.f ? 'la' : 'lo')
 const bm = (id, lato) => icone.bitmap(id, lato) ?? icone.bitmap('app-pzkstore', lato)
 /** Le app: prima quelle da scaricare, poi le tue (come la vetrina vecchia). */
 const ordinate = () => [...CATALOGO.filter((x) => !zaino.installata(x.id)), ...CATALOGO.filter((x) => zaino.installata(x.id))]
+/** Non ce la fai: costa più dei puliti che hai. */
+const caro = (x) => !!x.prezzo && pzk.puliti() < x.prezzo
+// (11.11) un'etichetta su una fascia colorata, col testo nero: un testo verde o rosso sul fondo arancione, «carta» o «notte»
+// non si legge (troppo simile, o troppo scuro), il nero sul verde, sul rosso e sul giallo medi sì, e la fascia si vede su
+// tutti gli sfondi e anche sulla riga scelta. x, y sono quelli del testo: la fascia sborda di 2 ai lati e di 1 sopra e sotto
+function targa(l, x, y, s, col) {
+  l.riempi(x - 2, y - 1, Lcd.larghezza(s) + 4, 9, col)
+  l.testo(x, y, s, { col: C.nero })
+}
 
 // (11.11) quello che la banca sta facendo, per app: con INDIETRO a metà di «compro…» la scheda riaperta non lo vedeva e lasciava
 // partire un secondo acquisto della stessa app; ora la rotellina c'è anche lì, e OK aspetta
@@ -100,8 +111,12 @@ function scheda(os, x) {
       const stato = tua()
         ? `✓ ${fatta(x)}${regalata(x.id) ? ` · ${x.f ? 'regalata' : 'regalato'}` : zaino.installataIl(x.id) > 1e12 ? ` ${ilGiorno(zaino.installataIl(x.id))}` : ''}` // (11.11: un segno vecchio, «1», diceva «il 1 gen 1970»)
         : x.prezzo ? `${fmt(x.prezzo)} $pzk puliti` : 'gratis'
-      l.testo(46, 33, corto(stato, 33))
-      l.testo(46, 42, corto(pzk.inGalera() ? `in galera fino alle ${ora(pzk.galera())}: chiuso` : `hai ${fmt(pzk.puliti())} $pzk puliti`, 33)) // (33 lettere: «…: non vende» si tagliava)
+      // (11.11) installata in verde, il prezzo che non ti puoi permettere in rosso, la galera in rosso: su una fascia (targa)
+      if (tua()) targa(l, 46, 33, corto(stato, 33), C.verde)
+      else if (caro(x)) targa(l, 46, 33, corto(stato, 33), C.rosso)
+      else l.testo(46, 33, corto(stato, 33))
+      if (pzk.inGalera()) targa(l, 46, 42, corto(`in galera fino alle ${ora(pzk.galera())}: chiuso`, 33), C.rosso) // (33 lettere: «…: non vende» si tagliava)
+      else l.testo(46, 42, corto(`hai ${fmt(pzk.puliti())} $pzk puliti`, 33))
       giu = scorrevole(l, testo(), { y0: 52, vis: 5, giu })
       const T = tasti()
       bottoni(l, os.zona, { etichette: T, sel: sel < T.length ? sel : 0, y: 99, premi: (i) => { sel = i; premi(i) } }) // (disegna non cambia sel: lo tiene a posto tasto, 4.8)
@@ -138,7 +153,8 @@ export function vista(os) {
           ? `in galera fino alle ${ora(pzk.galera())}: non vende. Si esce con la cauzione: app rapina.` // (due righe: la cauzione non si perdeva più)
           : 'app in più: si pagano una volta coi $pzk puliti e restano tue.'
         const R = Lcd.acapo(intro, 39)
-        R.slice(0, 2).forEach((r, i) => l.testo(10, 34 + i * 9, i === 1 && R.length > 2 ? corto(`${r}…`, 39) : r)) // (se mai non ci sta, almeno i «…»)
+        if (pzk.inGalera()) l.riempi(8, 33, W - 16, 19, C.rosso) // (11.11: in galera il negozio è chiuso: le due righe su una fascia rossa, il testo nero)
+        R.slice(0, 2).forEach((r, i) => l.testo(10, 34 + i * 9, i === 1 && R.length > 2 ? corto(`${r}…`, 39) : r, pzk.inGalera() ? { col: C.nero } : {})) // (se mai non ci sta, almeno i «…»)
         // (11.11) il cursore per chiave (REGOLE 3.12): comprata un'app, la vetrina la mette in fondo, e tornando dalla scheda
         // la riga scelta era diventata l'altra app; ora resta su quella di prima
         const L = ordinate(), k = L.findIndex((a) => a.id === st.id)
@@ -149,9 +165,15 @@ export function vista(os) {
           riga(l, a, x0, y, w, on) {
             const o = { inv: on }, tua = zaino.installata(a.id), serve = !tua && a.utile()
             l.bitmap(bm(a.icona, 16), x0 - 2, y + 2, o)
-            const val = inCorso.get(a.id) ?? (tua ? fatta(a) : a.prezzo ? fmt(a.prezzo) : 'gratis') // (11.11: «compro…» anche qui, uscito dalla scheda a metà)
-            destra(l, x0 + w, y + 2, val, o)
-            l.testo(x0 + 18, y + 2, corto(`${serve ? '! ' : ''}${a.nome}`, Math.floor((w - 18 - Lcd.larghezza(val) - 8) / 6)), o)
+            const fa = inCorso.get(a.id), val = fa ?? (tua ? fatta(a) : a.prezzo ? fmt(a.prezzo) : 'gratis') // (11.11: «compro…» anche qui, uscito dalla scheda a metà)
+            // (11.11) installata su una fascia verde, il prezzo troppo alto per i tuoi puliti su una rossa (il resto d'inchiostro)
+            const col = fa ? null : tua ? C.verde : caro(a) ? C.rosso : null
+            if (col) targa(l, x0 + w - Lcd.larghezza(val), y + 2, val, col)
+            else destra(l, x0 + w, y + 2, val, o)
+            // (11.11) il «!» di chi ti servirebbe: un bollino giallo col punto esclamativo nero, prima del nome (al posto di «! »)
+            if (serve) { l.riempi(x0 + 17, y + 1, 7, 9, C.giallo); l.testo(x0 + 18, y + 2, '!', { col: C.nero }) }
+            const dopo = serve ? 10 : 0 // (il nome dopo il bollino, con quattro pixel d'aria)
+            l.testo(x0 + 18 + dopo, y + 2, corto(a.nome, Math.floor((w - 18 - dopo - Lcd.larghezza(val) - 8) / 6)), o)
             l.testo(x0 + 18, y + 11, corto(serve ? a.perche() : a.breve, Math.floor((w - 18) / 6)), o)
           },
         })

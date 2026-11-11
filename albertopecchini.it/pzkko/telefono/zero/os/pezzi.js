@@ -17,6 +17,11 @@ export const sposta = (l, dx) => (!dx ? l : {
   px: (x, y, v) => l.px(x + dx, y, v), riempi: (x, y, w, h, v) => l.riempi(x + dx, y, w, h, v), riquadro: (x, y, w, h, v) => l.riquadro(x + dx, y, w, h, v),
   cornice: (x, y, w, h, v) => l.cornice(x + dx, y, w, h, v), orizz: (x, y, w, v) => l.orizz(x + dx, y, w, v), vert: (x, y, h, v) => l.vert(x + dx, y, h, v),
   testo: (x, y, s, o) => l.testo(x + dx, y, s, o), bitmap: (b, x, y, o) => l.bitmap(b, x + dx, y, o),
+  // (11.11: lo schermo a doppia densità e a colori, os/lcd.js: anche i pixel veri, il rettangolo vero, l'inversione, il
+  // ritaglio e il tema, se no una pagina che li usa li disegnava ferma mentre il resto scorreva)
+  pv: (X, Y, v) => l.pv(X + dx * 2, Y, v), rettangolo: (X, Y, w, h, v) => l.rettangolo(X + dx * 2, Y, w, h, v),
+  inverti: (x, y, w, h) => l.inverti(x + dx, y, w, h), ritaglia: (r) => l.ritaglia(r ? [r[0] + dx, r[1], r[2], r[3]] : null),
+  pieno: (x, y) => l.pieno(x + dx, y), get tema() { return l.tema },
 })
 
 /** La testata di un'app a pagine (righe 13–31): ◀, l'icona e il nome della pagina, i pallini (quello pieno è la pagina), ▶ e la

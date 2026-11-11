@@ -41,3 +41,15 @@ a.scheda:hover,a.scheda:focus-visible{transform:translate(-2px,-2px);box-shadow:
 .scheda .pr.tuo{margin-left:6px;background:#2e7d32;color:#fff}
 .scheda[hidden],section[hidden]{display:none}
 .riassunto{font-size:17px}.riassunto b{font:400 24px/1 var(--fa)}
+/* L'informatore dei sistemi (11.11.2026, stato/frase.js): il pallino fermo, niente alone che pulsa (pzkko leggero) */
+.stato__punto{display:inline-block;width:.6em;height:.6em;margin-right:.45em;border-radius:50%;background:#9a958a;vertical-align:.05em;box-shadow:0 0 0 1px rgba(0,0,0,.35)}
+[data-tono=su] .stato__punto,.stato__punto[data-tono=su]{background:#43a047}
+[data-tono=parziale] .stato__punto,.stato__punto[data-tono=parziale]{background:#ffb300}
+[data-tono=spento] .stato__punto,.stato__punto[data-tono=spento]{background:#e53935}
+.piede .stato{display:block;margin-top:4px;color:#d8d4c8;text-decoration:none}
+.piede a.stato:hover .stato__testo,.piede a.stato:focus-visible .stato__testo{text-decoration:underline}
+.stato-riga{font:400 18px/1.4 "Special Elite","Courier New",monospace}
+.stato-scheda{grid-template-columns:18px 1fr;align-items:center}
+.stato-scheda .stato__punto{width:14px;height:14px;margin:0}
+.stato-scheda.spento{opacity:1;filter:none;background:#fbe9e7}
+.foglio .stato-nota{margin-top:22px;color:#6a6458;font-size:14px}

@@ -9,7 +9,7 @@
 //   può), e in fondo «lascia la quest» (si conferma). INDIETRO dalle scelte torna al testo, dal testo all'elenco. Cosa ha fatto
 //   la scelta di prima (pagato, perso, usato, è andata o no) passa nella striscia in fondo. Alla fine il premio.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, C, esa } from './lcd.js'
 import * as icone from './icone.js'
 import * as zaino from '../../../chat/zaino.js'
 import * as missioni from '../../../chat/missioni.js'
@@ -25,6 +25,15 @@ const premioVero = (p) => ({ ...p, pzk: Math.round(p.pzk * zaino.moltiplicatore(
 /** Le quest con una scelta già partita verso la banca (11.11: INDIETRO esce mentre la banca decide; rientrando, una seconda
  *  scelta partiva lo stesso, e la banca la giocava sul passo DOPO, perché la scelta è solo il numero della riga). */
 const inVolo = new Set()
+// (11.11, Alberto: «fai colori a 8bit su tutto») i colori dicono qualcosa: verde i $pzk che arrivano e la quest finita, rosso
+// quelli che si pagano e la quest bloccata, blu l'xp e la quest in corso. Sempre in un bollino col suo testo bianco, mai testo
+// colorato sul fondo: un verde o un rosso che si leggono sull'arancione spariscono su «notte», e viceversa
+const VERDE = esa('#006633'), ROSSO = esa('#cc0000'), BLU = esa('#0066cc')
+const STATO_COL = { 'in corso': BLU, fatta: VERDE, bloccata: ROSSO }
+/** Un bollino colorato col testo bianco, da x (il testo comincia 2 pixel dentro), alla riga di testo y. → la larghezza. */
+const bollino = (l, x, y, s, col) => { const w = Lcd.larghezza(s) + 4; l.riempi(x, y - 1, w, 9, col); l.testo(x + 2, y, s, { col: C.bianco }); return w }
+/** Il rischio di una scelta come una barretta: verde la parte che va bene, rossa l'altra, nella cornice d'inchiostro. → la larghezza. */
+const rischio = (l, x, y, p, inv) => { l.riquadro(x, y, 22, 7, inv ? 0 : 1); const k = Math.round(20 * p / 100); l.riempi(x + 1, y + 1, k, 5, C.verde); l.riempi(x + 1 + k, y + 1, 20 - k, 5, C.rosso); return 22 }
 
 // ── la storia ──
 function storia(os, id, esitoPrima = null) {
@@ -103,10 +112,16 @@ function storia(os, id, esitoPrima = null) {
         let n = 0
         R.forEach((r, i) => { const vis = r.slice(0, Math.max(0, mostra - n)); n += r.length + 1; l.testo(10, 35 + i * 9, vis) })
         if (vista.fatta) { // (su due righe: l'oggetto del premio non si taglia; 11.11: in una riga sola «+380 $pzk · +70 xp · tè freddo alla p…», e la chiave del civico 28 pure: i soldi salgono accanto a «il premio», l'oggetto ha la riga sua)
-          const y = Math.min(35 + R.length * 9 + 4, 94), p = pagato ?? premioVero(m.premio), soldi = `+${fmt(p.pzk)} $pzk · +${p.xp} xp`
-          l.cornice(8, y, W - 16, 22)
-          l.testo(12, y + 3, corto(p.oggetto ? `il premio: ${soldi}` : 'il premio', 38))
-          l.testo(12, y + 12, corto(p.oggetto ? `+ ${nomeDi(p.oggetto)}` : soldi, 38))
+          const y = Math.min(35 + R.length * 9 + 4, 92), p = pagato ?? premioVero(m.premio), soldi = `+${fmt(p.pzk)} $pzk · +${p.xp} xp`
+          l.cornice(8, y, W - 16, 24)
+          // (11.11: i $pzk in un bollino verde e l'xp in uno blu, come i soldi che arrivano; se coi numeri peggiori non ci stanno, il testo di prima)
+          const bollini = (x, yt) => {
+            const a = `+${fmt(p.pzk)} $pzk`, b = `+${p.xp} xp`
+            if (x + Lcd.larghezza(a) + Lcd.larghezza(b) + 12 > W - 12) return void l.testo(x, yt, corto(soldi, Math.floor((W - 12 - x) / 6)))
+            x += bollino(l, x, yt, a, VERDE) + 4; bollino(l, x, yt, b, BLU)
+          }
+          if (p.oggetto) { bollini(12 + l.testo(12, y + 4, 'il premio:') + 5, y + 4); l.testo(12, y + 14, corto(`+ ${nomeDi(p.oggetto)}`, 38)) }
+          else { l.testo(12, y + 4, 'il premio'); bollini(12, y + 14) }
         }
       } else {
         elenco(l, zona, {
@@ -115,9 +130,18 @@ function storia(os, id, esitoPrima = null) {
           riga(l, s, x0, y, w, on) {
             const o = { inv: on }
             if (s.lascia) { l.testo(x0, y + 6, 'lascia la quest', o); return }
-            l.testo(x0, y + 2, corto(`${s.ok ? '' : 'x '}${s.eti}`, Math.floor(w / 6)), o)
-            const sotto = !s.ok ? s.motivo : [s.costo ? `costa ${s.costo} $pzk` : '', s.azzardo ? `${s.azzardo}% che vada bene` : ''].filter(Boolean).join(' · ')
-            if (sotto) l.testo(x0 + 6, y + 11, corto(sotto, Math.floor((w - 6) / 6)), o)
+            if (s.ok) l.testo(x0, y + 2, corto(s.eti, Math.floor(w / 6)), o)
+            else { bollino(l, x0, y + 2, '×', ROSSO); l.testo(x0 + 12, y + 2, corto(s.eti, Math.floor((w - 12) / 6)), o) } // (11.11: la «x» delle scelte che non si possono è una crocetta in un bollino rosso)
+            const costo = s.costo ? `costa ${s.costo} $pzk` : '', caso = s.azzardo ? `${s.azzardo}% che vada bene` : ''
+            const largo = (costo ? Lcd.larghezza(costo) + 4 + (caso ? 6 : 0) : 0) + (caso ? 25 + Lcd.larghezza(caso) : 0)
+            if (s.ok && (costo || caso) && largo <= w - 6) { // (11.11: quello che costa in un bollino rosso, e il rischio anche disegnato: verde la parte che va bene)
+              let x = x0 + 6
+              if (costo) x += bollino(l, x, y + 11, costo, ROSSO) + 6
+              if (caso) { x += rischio(l, x, y + 11, s.azzardo, on) + 3; l.testo(x, y + 11, caso, o) }
+            } else {
+              const sotto = !s.ok ? s.motivo : [costo, caso].filter(Boolean).join(' · ')
+              if (sotto) l.testo(x0 + 6, y + 11, corto(sotto, Math.floor((w - 6) / 6)), o)
+            }
           },
         })
       }
@@ -170,7 +194,12 @@ export function vista(os) {
       ok: (x) => { const m = missioni.elenco()[st.sel]; if (m) apri(m, x) },
       disegna(l, x) {
         const el = missioni.elenco()
-        l.testo(10, 34, corto(`storie brevi a bivi · finite ${el.filter((m) => m.stato === 'fatta').length} di ${el.length}`, 39))
+        const fatte = el.filter((m) => m.stato === 'fatta').length
+        l.testo(10, 34, corto(`storie brevi a bivi · finite ${fatte} di ${el.length}`, 39))
+        // (11.11) quante finite anche disegnate: una riga di puntini, verde fin dove sei arrivato
+        const k = Math.round((W - 20) * fatte / Math.max(1, el.length))
+        for (let x = 10 + k; x < W - 10; x += 3) l.px(x, 43)
+        l.riempi(10, 42, k, 2, C.verde)
         elenco(l, x.zona, {
           voci: el, stato: st, y0: 45, alta: 66, passo: 22,
           clic: (m) => apri(m, x),
@@ -178,9 +207,10 @@ export function vista(os) {
             const o = { inv: on }
             l.bitmap(bm(m.icona, 16), x0 - 2, y + 3, o)
             if (m.stato === 'bloccata' || m.stato === 'fatta') { const b = icone.bitmap(m.stato === 'fatta' ? 'stella' : 'lucchetto', 8); if (b) { l.riempi(x0 + 7, y + 12, 10, 10, on ? 1 : 0); l.bitmap(b, x0 + 8, y + 13, o) } } // (il lucchetto o la stella sull'icona)
-            const s = STATI[m.stato]
-            destra(l, x0 + w, y + 2, s, o)
-            l.testo(x0 + 18, y + 2, corto(m.nome, Math.floor((w - 18 - Lcd.larghezza(s) - 6) / 6)), o)
+            const s = STATI[m.stato], col = STATO_COL[m.stato]
+            if (col) bollino(l, x0 + w - Lcd.larghezza(s) - 2, y + 2, s, col) // (11.11: lo stato in un bollino: verde finita, blu in corso, rosso bloccata; «da fare» d'inchiostro)
+            else destra(l, x0 + w, y + 2, s, o)
+            l.testo(x0 + 18, y + 2, corto(m.nome, Math.floor((w - 18 - Lcd.larghezza(s) - 8) / 6)), o)
             l.testo(x0 + 18, y + 11, corto(m.stato === 'bloccata' ? `ti manca: ${m.manca.join(', ')}` : m.breve, Math.floor((w - 18) / 6)), o)
           },
         })

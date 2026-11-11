@@ -37,7 +37,7 @@ export const serverGiu = () => Date.now() < stato.giuFino
 const sha = (b) => createHash('sha256').update(b).digest('hex')
 const errore = (msg, extra = {}) => Object.assign(new Error(`server dei dati: ${msg}`), extra)
 
-async function chiama({ url, segreto }, metodo, nome, { corpo = null, ifMatch = '', ifNoneMatch = '', indirizzo = `/v1/f/${nome}` } = {}) {
+async function chiama({ url, segreto }, metodo, nome, { corpo = null, ifMatch = '', ifNoneMatch = '', indirizzo = `/v1/f/${nome}`, scadenza = metodo === 'PUT' ? 20_000 : 10_000 } = {}) {
   const ts = String(Date.now()), nonce = randomBytes(24).toString('base64url')
   const buf = corpo === null ? null : Buffer.from(corpo, 'utf8')
   const lung = String(buf?.length ?? 0), impronta = buf ? sha(buf) : ''
@@ -54,7 +54,7 @@ async function chiama({ url, segreto }, metodo, nome, { corpo = null, ifMatch = 
       },
       body: buf ?? undefined,
       redirect: 'error',
-      signal: AbortSignal.timeout(metodo === 'PUT' ? 20_000 : 10_000),
+      signal: AbortSignal.timeout(scadenza),
     })
     testo = metodo === 'HEAD' || r.status === 304 ? Buffer.alloc(0) : Buffer.from(await r.arrayBuffer())
   } catch (e) {
@@ -101,6 +101,21 @@ export async function ponte(nome, req, res, { max = 16 * 1024 } = {}) {
   let d
   try { d = JSON.parse(r.testo.toString('utf8')) } catch { return manda(502, { ok: false, errore: 'la banca ha risposto male' }) }
   return manda(d.status ?? 200, d.corpo ?? '{}', d.cache ?? 'no-store')
+}
+
+/**
+ * IL CONTROLLO (11.11.2026, Alberto: «un informatore che dice che i sistemi vanno sempre connessi dal mio pc»): per
+ * /api/stato, una chiamata firmata qualsiasi in sola lettura (GET /v1/salute, o la GET pubblica di una funzione della
+ * banca attraverso /v1/api/<nome>), con un'attesa più corta. Dà { status, ms, json } o lancia come le altre.
+ */
+export async function chiedi(indirizzo, { corpo = null, attesa = 6_000 } = {}) {
+  const opz = serverOpzioni()
+  if (!opz) throw errore('non configurato', { spento: true })
+  const t0 = Date.now()
+  const r = await chiama(opz, corpo === null ? 'GET' : 'PUT', null, { indirizzo, corpo, scadenza: attesa })
+  let json = null
+  try { json = r.testo.length ? JSON.parse(r.testo.toString('utf8')) : null } catch {}
+  return { status: r.status, ms: Date.now() - t0, json }
 }
 
 /** L'archivio del file `nome` (es. pzkko/wallet.json) sul server: { etag(), read() → { db, etag }, write(db, etag) → bool }. */

@@ -6,8 +6,11 @@
 // - LA SCHEDA: l'icona grande, il nome, quanti ne hai e quanto vale, cosa fa (scorre con ↑ ↓) e i bonus; sotto i tasti:
 //   usa (si consuma qui, e parte l'effetto), gratta, apri, vendi, vendi tutto (li fa la chat, che ha le animazioni e i conti
 //   del bonus di vendita), allo shop o compra ancora.
+// - I COLORI (11.11, Alberto: «fai colori a 8bit su tutto»): pochi e con un senso. Il bonus è verde (in cima e nella
+//   scheda), il tempo di un effetto che sta per finire è rosso, un pezzo leggendario è d'oro, uno che vale quasi niente è
+//   grigio. Il resto è d'inchiostro.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, esa } from './lcd.js'
 import * as icone from './icone.js'
 import * as zaino from '../../../chat/zaino.js'
 import { PER_ID, nomeDi } from '../../../chat/testi.js'
@@ -18,8 +21,31 @@ import { txt, corto, destra, centro, elenco, muovi, pagine, striscia, impagina, 
 const bm = (id, lato) => icone.bitmap(id, lato) ?? icone.bitmap('app-zaino', lato)
 const ICONE = { tutto: 'app-zaino', usa: 'clessidra', tieni: 'stella', attrezzo: 'canna', cassa: 'regalo', vendi: 'pzk' }
 const pezzi = () => zaino.oggetti().reduce((a, [, q]) => a + q, 0)
-/** La riga in cima: gli effetti in corso (col tempo che resta) e i bonus di adesso. */
-const inCima = () => { const e = zaino.effetti().map(([id, t]) => `${nomeCorto(id)} ${resto(t - Date.now())}`), b = testoBonus(zaino.bonusTutti()); return [...e, ...(b ? [b] : [])].join(' · ') }
+// ── i colori (11.11): ognuno ha due tinte, la scura per i fondi chiari (arancione, carta, cielo…) e la chiara per «notte» e
+// per la fascia scura della riga scelta (un oro chiaro sull'arancione non si legge, uno scuro su «notte» nemmeno) ──
+const TINTE = { verde: [esa('#006600'), esa('#66ff66')], rosso: [esa('#990000'), esa('#ff6666')], oro: [esa('#996600'), esa('#ffcc33')], grigio: [esa('#555555'), esa('#aaaaaa')] }
+/** L'indice del colore che si legge lì: sul fondo, o (fascia) sulla fascia d'inchiostro della riga scelta. */
+const tinta = (l, nome, fascia = false) => { const c = l.tema?.inchiostro ?? [0, 0, 0]; return TINTE[nome][(c[0] + c[1] + c[2] > 384) !== fascia ? 1 : 0] } // (inchiostro chiaro: il fondo è scuro)
+/** Il colore del nome di un pezzo: d'oro il leggendario, grigio quello che vale quasi niente, se no null (inchiostro). */
+const tintaDi = (id) => { const x = PER_ID[id]; return x?.leggendario ? 'oro' : x?.schifo ? 'grigio' : null }
+/** Una riga fatta di gruppi separati da « · » (ogni gruppo: pezzi { s, col }), tagliata a n caratteri con «…» come corto:
+ *  ogni pezzo col suo colore (col null: inchiostro). */
+function fila(l, x, y, gruppi, n) {
+  const tutti = gruppi.flatMap((g, i) => (i ? [{ s: ' · ' }, ...g] : g)), lungo = tutti.reduce((a, p) => a + [...txt(p.s)].length, 0)
+  let resta = lungo > n ? n - 1 : n
+  for (const p of tutti) {
+    const s = [...txt(p.s)].slice(0, resta).join('')
+    if (s) x += l.testo(x, y, s, { col: p.col ?? 1 }) + 1
+    if ((resta -= [...s].length) <= 0) break
+  }
+  if (lungo > n) l.testo(x, y, '…')
+}
+/** La riga in cima: gli effetti in corso (col tempo che resta: rosso negli ultimi cinque minuti) e i bonus di adesso (verdi). */
+const inCima = (l) => {
+  const e = zaino.effetti().map(([id, t]) => [{ s: `${nomeCorto(id)} ` }, { s: resto(t - Date.now()), col: t - Date.now() <= 5 * 60000 ? tinta(l, 'rosso') : null }])
+  const b = testoBonus(zaino.bonusTutti())
+  return [...e, ...(b ? [[{ s: b, col: tinta(l, 'verde') }]] : [])]
+}
 
 // ── la scheda di un pezzo ──
 function scheda(os, id) {
@@ -31,7 +57,10 @@ function scheda(os, id) {
   const leggibile = () => {
     const cosa = x.cosa ?? (x.leggendario ? 'leggendario: ne esce uno ogni cento.' : x.schifo ? 'vale quasi niente, ma l’hai preso tu.' : tipoDi(id) === 'vendi' ? 'si vende.' : 'non si vende: si tiene.') // (11.11: un pezzo che il catalogo non conosce era «da tenere» e diceva «si vende.»)
     const b = testoBonus(x.bonus)
-    return { righe: impagina([{ testo: cosa }, ...(b ? [{ titolo: 'il bonus' }, { testo: `${b}${x.effetto ? ` · per ${resto(x.effetto)}` : x.unico ? ' · finché ce l’hai' : ''}` }] : [])]), vis: azioni().length ? 5 : 7 }
+    const righe = impagina([{ testo: cosa }, ...(b ? [{ titolo: 'il bonus' }, { testo: `${b}${x.effetto ? ` · per ${resto(x.effetto)}` : x.unico ? ' · finché ce l’hai' : ''}` }] : [])])
+    const da = righe.findIndex((r) => r.tipo === 'titolo')
+    if (da >= 0) righe.slice(da + 1).forEach((r) => { r.verde = true }) // (11.11: le righe del bonus, che disegna ripassa in verde)
+    return { righe, vis: azioni().length ? 5 : 7 }
   }
   async function premi(a) {
     if (!a || attesa) return // (11.11: aspettando la banca un altro OK non ne consumava un secondo, 8.6)
@@ -63,12 +92,17 @@ function scheda(os, id) {
     disegna(l, t) {
       const n = zaino.quanti(id), A = n ? azioniDi(id, x) : [], s = sel < A.length ? sel : 0 // (sel e giu li tiene in riga tasto: 4.8)
       l.bitmap(bm(id, 32), 8, 14)
-      l.testo(46, 15, corto(nomeCorto(id), 33))
+      const c = tintaDi(id)
+      l.testo(46, 15, corto(nomeCorto(id), 33), { col: c ? tinta(l, c) : 1 }) // (11.11: il colore che ha nella lista)
       l.testo(46, 24, corto(`ne hai ${n}${x.vale ? ` · vale ${x.vale} $pzk l’uno` : ''}`, 33))
       const tipo = { usa: 'da usare', tieni: 'da tenere', attrezzo: 'attrezzo', cassa: 'cassa', vendi: 'da vendere' }[tipoDi(id)] ?? ''
-      l.testo(46, 33, corto(`${tipo}${x.leggendario ? ' · leggendario' : ''}`, 33))
+      const xl = 46 + l.testo(46, 33, corto(tipo, 33)) + 1
+      if (x.leggendario) l.testo(xl, 33, ' · leggendario', { col: tinta(l, 'oro') }) // (11.11: d'oro, come il suo nome nella lista)
       const { righe, vis } = leggibile()
-      scorrevole(l, righe, { y0: 46, vis, giu })
+      const g = scorrevole(l, righe, { y0: 46, vis, giu })
+      // (11.11) il bonus in verde: scorrevole (pezzi.js) scrive d'inchiostro, qui si riscrivono le stesse lettere negli stessi
+      // pixel col verde, che le copre tutte
+      righe.slice(g, g + vis).forEach((r, i) => { if (r.verde && r.s) l.testo(10, 46 + i * 9, r.s, { col: tinta(l, 'verde') }) })
       const legge = righe.length > vis ? ' · ↑↓ legge' : '' // (↑↓ solo se c'è da scorrere)
       if (A.length) bottoni(l, attesa ? () => {} : os.zona, { etichette: A.map((a) => a.eti), sel: s, y: 99, premi: (i) => { sel = i; premi(A[i]) } }) // (aspettando la banca i clic non partono, come i tasti)
       if (!striscia(l, { esito, attesa }, t)) centro(l, H - 9, !n ? 'non ce l’hai più · INDIETRO torna' : A.length > 1 ? `←→ sceglie · OK preme${legge}` : A.length ? `OK preme${legge}` : `INDIETRO torna${legge}`)
@@ -109,8 +143,8 @@ export function vista(os) {
       },
       tic: (t) => t % 300 === 0 && zaino.effetti().length > 0, // (il tempo degli effetti, a minuti)
       disegna(l, x) {
-        const cima = inCima(), y0 = cima ? 44 : 34
-        if (cima) l.testo(10, 34, corto(cima, 39))
+        const cima = inCima(l), y0 = cima.length ? 44 : 34
+        if (cima.length) fila(l, 10, 34, cima, 39) // (11.11: il bonus verde, il tempo che sta per finire rosso)
         const L = voci()
         if (!L.length) { (filtro === 'tutto' ? ['lo zaino è vuoto:', 'lo shop vende, pesca caccia e scava', 'riempiono.'] : ['niente qui.']).forEach((r, i) => centro(l, 58 + i * 10, r)); return }
         elenco(l, x.zona, {
@@ -121,7 +155,8 @@ export function vista(os) {
             l.bitmap(bm(id, 16), x0 - 2, y, o)
             const s = q > 1 ? `×${q}` : ''
             if (s) destra(l, x0 + w, y + 5, s, o)
-            l.testo(x0 + 18, y + 5, corto(nomeCorto(id), Math.floor((w - 18 - Lcd.larghezza(s) - 6) / 6)), o)
+            const c = tintaDi(id), nome = corto(nomeCorto(id), Math.floor((w - 18 - Lcd.larghezza(s) - 6) / 6))
+            l.testo(x0 + 18, y + 5, nome, c ? { col: tinta(l, c, on) } : o) // (11.11: il leggendario d'oro, lo schifo grigio; sulla fascia la tinta chiara)
           },
         })
       },

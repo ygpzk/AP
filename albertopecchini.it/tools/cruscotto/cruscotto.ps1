@@ -12,6 +12,9 @@
 param([double]$Pollici = 24, [int]$Colonne = 160, [int]$Righe = 50, [switch]$Nuova, [switch]$Riavvia)
 
 $titolo = 'Regia di Claude'
+# dall'icona sul desktop (11.11.2026) la console di questo PowerShell prende il nome del
+# collegamento, «Regia di Claude»: FindWindow trovava lei e credeva la regia già aperta
+try { $Host.UI.RawUI.WindowTitle = 'apro la regia' } catch {}
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type @'
 using System; using System.Runtime.InteropServices;
@@ -32,6 +35,15 @@ public class RegiaFinestra {
   [DllImport("kernel32.dll")] public static extern bool GetConsoleMode(IntPtr h, out uint mode);
   [DllImport("kernel32.dll")] public static extern bool SetConsoleMode(IntPtr h, uint mode);
   [DllImport("kernel32.dll")] public static extern bool CloseHandle(IntPtr h);
+  [DllImport("dwmapi.dll")] public static extern int DwmSetWindowAttribute(IntPtr h, int attr, ref int val, int size);
+  // la barra del titolo di Windows scura come la regia (11.11.2026): 20 da Windows 10 20H1, 19 prima
+  public static int Scura(IntPtr h) {
+    int si = 1;
+    int r = DwmSetWindowAttribute(h, 20, ref si, 4);
+    if (r != 0) r = DwmSetWindowAttribute(h, 19, ref si, 4);
+    SetWindowPos(h, IntPtr.Zero, 0, 0, 0, 0, 0x0027);
+    return r;
+  }
   // via la «modifica rapida»: un clic dentro la finestra la metteva in «Seleziona» e il disegno si fermava
   public static string SenzaSelezione(uint pid) {
     FreeConsole();
@@ -81,6 +93,7 @@ function Centra([IntPtr]$h) {
   $y = $area.Y + [int](($area.Height - $hh) / 2)
   [void][RegiaFinestra]::SetWindowPos($h, [IntPtr]::Zero, $x, $y, $w, $hh, 0x0044)
   [void][RegiaFinestra]::SetForegroundWindow($h)
+  [void][RegiaFinestra]::Scura($h)
   Write-Host "regia: ${w}x${hh} in ($x, $y) su $($schermo.DeviceName)"
 }
 
@@ -102,14 +115,27 @@ if (-not $Nuova) {
 
 $qui = Split-Path -Parent $MyInvocation.MyCommand.Path
 $comando = "title $titolo & mode con: cols=$Colonne lines=$Righe & node `"$qui\cruscotto.mjs`""
-$p = Start-Process -FilePath 'conhost.exe' -ArgumentList "cmd.exe /k `"$comando`"" -PassThru
+# Si parte da un collegamento (regia-console.lnk, rifatto ogni volta): una console aperta da un
+# collegamento ne prende l'icona, così la barra del titolo ha quella della regia (regia.ico)
+$lnk = Join-Path $qui 'regia-console.lnk'
+try {
+  $l = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk)
+  $l.TargetPath = "$env:SystemRoot\System32\conhost.exe"
+  $l.Arguments = "cmd.exe /k `"$comando`""
+  $l.WorkingDirectory = $qui
+  $l.IconLocation = "$qui\regia.ico,0"
+  $l.Save()
+  Start-Process -FilePath $lnk
+} catch {
+  Start-Process -FilePath 'conhost.exe' -ArgumentList "cmd.exe /k `"$comando`""
+}
 
-# la finestra: la console è intestata al cmd figlio di conhost
+# la finestra: la console è intestata al cmd che tiene node
 $h = [IntPtr]::Zero
 $cmd = $null
 for ($i = 0; $i -lt 80 -and $h -eq [IntPtr]::Zero; $i++) {
   Start-Sleep -Milliseconds 150
-  $cmd = Get-CimInstance Win32_Process -Filter "ParentProcessId = $($p.Id) AND Name = 'cmd.exe'" -ErrorAction SilentlyContinue | Select-Object -First 1
+  $cmd = Get-CimInstance Win32_Process -Filter "Name = 'cmd.exe'" -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like '*cruscotto.mjs*' } | Select-Object -First 1
   if ($cmd) { $h = (Get-Process -Id $cmd.ProcessId -ErrorAction SilentlyContinue).MainWindowHandle }
   if (-not $h -or $h -eq [IntPtr]::Zero) { $h = [RegiaFinestra]::FindWindow([NullString]::Value, $titolo) }
 }

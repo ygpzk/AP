@@ -4,12 +4,16 @@
 // - L'EDITOR: i numeri di riga, il cursore che lampeggia, le frecce lo muovono (← → vanno anche a capo), le righe con un
 //   errore hanno il numero rovesciato. Dalla tastiera vera si scrive: Invio va a capo tenendo il rientro (e lo allarga
 //   dopo «{»), la graffa chiusa torna indietro, Backspace cancella, Ctrl+Invio è OK.
-// - OK apre IL MENU: esegui, scrivi qui (la tastiera coi simboli del C), a capo, cancella, l'input per scanf, l'ultimo
+// - OK apre IL MENU: esegui, scrivi qui (una riga dalla tastiera vera, 11.11), a capo, cancella, l'input per scanf, l'ultimo
 //   output, gli esempi.
 // - L'OUTPUT: mentre compila la rotellina e i punti che corrono; poi gli avvisi, quello che ha stampato, il codice d'uscita, i
 //   secondi e dove. Scorre con ↑ ↓, OK lo rifà.
+// - I COLORI (11.11, Alberto: «fai colori a 8bit su tutto»): nell'editor le stringhe verdi, i commenti grigi, le direttive
+//   (#include, #define) blu, il resto d'inchiostro; il numero di una riga con un errore su una fascia rossa, con un avviso su
+//   una gialla. Nell'output la riga «error:» su una fascia rossa e la «warning:» su una gialla, le righe che le spiegano (e lo
+//   stderr del programma) col filo del loro colore a sinistra; la riga del codice d'uscita verde se è 0, rossa se no.
 // Il codice esce dal sito per compilarlo (Alberto ha scelto così il 26.10): l'output lo ricorda. Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, esa } from './lcd.js'
 import { ESEMPI, compila, S } from '../../app/compilatore.js'
 import { ricorda } from '../../ricordi.js'
 import { txt, corto, destra, centro, testata, striscia, elenco, muovi } from './pezzi.js'
@@ -25,6 +29,46 @@ const VIS = 9, COL = 36 // le righe e le colonne di codice che si vedono
  *  a destra restano le frecce ↑ ↓, come in pezzi.impagina. */
 const aPezzi = (s, n = 37) => String(s ?? '').replace(/\t/g, '    ').split('\n').flatMap((r) => { const a = [...txt(r)]; if (!a.length) return ['']; const o = []; for (let i = 0; i < a.length; i += n) o.push(a.slice(i, i + n).join('')); return o })
 
+// ── i colori (11.11): le fasce hanno il loro testo (bianco sul rosso e sul verde, nero sul giallo), così si leggono su ogni
+// sfondo; i colori del codice, che stanno sul fondo, hanno una versione scura per gli sfondi chiari e una chiara per «notte»
+// (l'inchiostro chiaro), come nella chat: un verde chiaro su carta o un blu scuro su notte non si leggono ──
+const BIANCO = esa('#ffffff'), NERO = esa('#000000')
+const FASCE = { err: [esa('#cc0000'), BIANCO], avv: [esa('#ffcc00'), NERO], ok: [esa('#009900'), BIANCO] }
+const SCURE = { stringa: esa('#006600'), commento: esa('#666666'), direttiva: esa('#0033cc'), verde: esa('#006600'), rosso: esa('#cc0000'), ambra: esa('#993300') }
+const CHIARE = { stringa: esa('#33cc33'), commento: esa('#999999'), direttiva: esa('#6699ff'), verde: esa('#33cc33'), rosso: esa('#ff3333'), ambra: esa('#ff9933') }
+/** Le tinte per lo sfondo di adesso (dall'inchiostro del tema: chiaro vuol dire fondo scuro). */
+const tinte = (l) => ((l.tema?.inchiostro ?? [0, 0, 0]).reduce((a, b) => a + b, 0) > 384 ? CHIARE : SCURE)
+/** Una riga su una fascia del suo colore (err, avv, ok): il testo da x, la fascia due pixel prima. */
+const suFascia = (l, x, y, s, k) => { const [f, c] = FASCE[k]; l.riempi(x - 2, y - 1, Lcd.larghezza(s) + 4, 9, f); l.testo(x, y, s, { col: c }) }
+
+/** Il codice a pezzi colorati: per ogni riga, per ogni carattere, null (inchiostro), 'stringa', 'commento' o 'direttiva'. I
+ *  commenti /* … *\/ vanno da una riga all'altra, una stringa senza fine si chiude a fine riga; la direttiva è tutta la riga
+ *  che comincia con # (fino a un commento). Ricordato per il codice di adesso: disegna lo chiede due volte al secondo. */
+let pezziDi = { src: null, k: [] }
+function colori(L) {
+  const src = L.join('\n')
+  if (pezziDi.src === src) return pezziDi.k
+  const K = []
+  let blocco = false
+  for (const riga of L) {
+    const a = [...riga], k = new Array(a.length).fill(null)
+    let i = 0, str = null
+    const dir = /^\s*#/.test(riga)
+    while (i < a.length) {
+      if (blocco) { k[i] = 'commento'; if (a[i] === '*' && a[i + 1] === '/') { k[i + 1] = 'commento'; i += 2; blocco = false } else i++; continue }
+      if (str) { k[i] = 'stringa'; if (a[i] === '\\') { if (i + 1 < a.length) k[i + 1] = 'stringa'; i += 2; continue } if (a[i] === str) str = null; i++; continue }
+      if (a[i] === '/' && a[i + 1] === '/') { k.fill('commento', i); break }
+      if (a[i] === '/' && a[i + 1] === '*') { k[i] = k[i + 1] = 'commento'; i += 2; blocco = true; continue }
+      if (dir) { k[i++] = 'direttiva'; continue } // (#include "x.h": la riga resta tutta blu)
+      if (a[i] === '"' || a[i] === '\'') { str = a[i]; k[i++] = 'stringa'; continue }
+      i++
+    }
+    K.push(k)
+  }
+  pezziDi = { src, k: K }
+  return K
+}
+
 // ── una lista che si sceglie (il menu, gli esempi, le righe dell'input) ──
 function lista(os, { titolo, icona, voci, aiuto = 'OK sceglie · ↑↓ · INDIETRO torna' }) {
   const st = { sel: 0, da: 0 }
@@ -36,7 +80,7 @@ function lista(os, { titolo, icona, voci, aiuto = 'OK sceglie · ↑↓ · INDIE
       elenco(l, os.zona, {
         voci: V, stato: st, y0: 34, alta: 80, passo: 10,
         clic: (v) => v.fai(),
-        riga(l, v, x0, y, w, on) { l.testo(x0, y + 1, corto(v.nome, v.val ? 24 : 37), { inv: on }); if (v.val) destra(l, x0 + w, y + 1, corto(v.val, 12), { inv: on }) },
+        riga(l, v, x0, y, w, on) { l.testo(x0, y + 1, corto(v.nome, v.val ? 24 : 37), { inv: on }); if (v.val) destra(l, x0 + w, y + 1, corto(v.val, 12), on || !v.tinta ? { inv: on } : { col: tinte(l)[v.tinta] }) }, // (11.11: il valore col suo colore, «fatto» verde; sulla riga scelta rovesciato come il resto)
       })
       centro(l, H - 9, aiuto)
     },
@@ -53,16 +97,23 @@ function lista(os, { titolo, icona, voci, aiuto = 'OK sceglie · ↑↓ · INDIE
 // ── l'output ──
 function vistaOutput(os) {
   let giu = 0
-  /** Le righe: { s, err } (err: un messaggio del compilatore o lo stderr, rovesciato; tenuto a parte, così l'output che
-   *  comincia con «!» resta com'è). */
+  /** Le righe: { s, fascia, filo } (11.11, coi colori: fascia err, avv o ok è la riga su una fascia rossa, gialla o verde;
+   *  filo err o avv il filo colorato a sinistra delle righe che spiegano un errore o un avviso, e dello stderr. Tenuti a
+   *  parte dal testo, così l'output che comincia con «!» o con «error:» resta com'è). */
   const righe = () => {
-    const u = ultimo, R = [], metti = (L, err = false) => R.push(...L.map((s) => ({ s, err })))
+    const u = ultimo, R = [], metti = (L, o = {}) => R.push(...L.map((s) => ({ s, ...o })))
     if (!u) return [{ s: 'ancora niente: dal menu, esegui.' }]
-    if (u.rete) return Lcd.acapo(txt(u.testo), 37).map((s) => ({ s })) // (11.11: è una frase, a capo sulle parole; a pezzi diceva «sei off» e sotto «line?»)
+    if (u.rete) return Lcd.acapo(txt(u.testo), 37).map((s) => ({ s, fascia: 'avv' })) // (11.11: è una frase, a capo sulle parole; a pezzi diceva «sei off» e sotto «line?»)
     const s = (u.ms / 1000).toLocaleString('it-IT', { maximumFractionDigits: 1 })
-    if (u.messaggi) metti(aPezzi(u.messaggi), true)
-    if (u.compilato) { metti(u.out ? aPezzi(u.out) : ['(non ha stampato niente)']); if (u.err) metti(aPezzi(u.err), true) }
-    metti(['', u.compilato ? `[finito: codice d’uscita ${u.codice ?? '?'} · ${s} s]` : `[non compila · ${s} s]`, `[${u.dove}]`, ...Lcd.acapo('il codice si compila su un servizio esterno: non scriverci password.', 37)]) // (la nota sì, a capo sulle parole)
+    if (u.messaggi) { // (le righe del compilatore: «error:» e «warning:» sulla fascia, le altre col filo del blocco a cui stanno)
+      const M = String(u.messaggi).split('\n'), tipo = (r) => (/\berror:/.test(r) ? 'err' : /\bwarning:/.test(r) ? 'avv' : null)
+      const T = M.map(tipo), primo = T.find(Boolean) ?? (u.compilato ? 'avv' : 'err') // («In function 'main':» sta prima del suo errore: prende quello che viene dopo)
+      let blocco = primo
+      M.forEach((r, i) => { if (T[i]) blocco = T[i]; metti(aPezzi(r), T[i] ? { fascia: T[i], filo: T[i] } : { filo: blocco }) })
+    }
+    if (u.compilato) { metti(u.out ? aPezzi(u.out) : ['(non ha stampato niente)']); if (u.err) metti(aPezzi(u.err), { filo: 'err' }) }
+    metti(['']); metti([u.compilato ? `[finito: codice d’uscita ${u.codice ?? '?'} · ${s} s]` : `[non compila · ${s} s]`], { fascia: u.compilato && u.codice === 0 ? 'ok' : 'err' }) // (0: è andato; un altro codice o niente: no)
+    metti([`[${u.dove}]`, ...Lcd.acapo('il codice si compila su un servizio esterno: non scriverci password.', 37)]) // (la nota sì, a capo sulle parole)
     return R
   }
   const v = {
@@ -74,14 +125,15 @@ function vistaOutput(os) {
         const g = ['|', '/', '-', '\\'][Math.floor(t / 2) % 4]
         centro(l, 56, `${g} compilo ed eseguo ${g}`, { scala: 1 })
         centro(l, 68, 'GCC 14.2 su Compiler Explorer')
-        for (let i = 0; i < 12; i++) { const x = 92 + i * 6, on = (Math.floor(t / 2) - i + 120) % 12 < 3; if (on) l.riempi(x, 82, 4, 4); else l.px(x + 1, 84) } // (i punti che corrono)
+        for (let i = 0; i < 12; i++) { const x = 92 + i * 6, on = (Math.floor(t / 2) - i + 120) % 12 < 3; if (on) l.riempi(x, 82, 4, 4, tinte(l).verde); else l.px(x + 1, 84) } // (i punti che corrono; 11.11 verdi)
         centro(l, H - 9, 'INDIETRO torna (finisce lo stesso)')
         return
       }
       const R = righe(), g = Math.max(0, Math.min(giu, R.length - VIS)) // (una copia: giu lo tiene giusto tasto)
       R.slice(g, g + VIS).forEach((r, i) => {
         const y = 34 + i * 9
-        if (r.err && r.s) { l.riempi(8, y - 1, Lcd.larghezza(r.s) + 4, 9); l.testo(10, y, r.s, { inv: true }) } // (gli errori rovesciati; 11.11: la riga vuota no, era un quadratino nero)
+        if (r.filo) l.riempi(6, y - 1, 2, 9, FASCE[r.filo][0]) // (il filo: le righe di seguito fanno una riga sola)
+        if (r.fascia && r.s) suFascia(l, 10, y, r.s, r.fascia) // (11.11: la riga vuota no, era un quadratino nero)
         else l.testo(10, y, r.s)
       })
       if (g > 0) l.testo(W - 14, 34, '↑')
@@ -142,20 +194,23 @@ export function vista(os) {
     else if (r > 0) { c = L[r - 1].length; L[r - 1] += L[r]; L.splice(r, 1); r-- }
     metti(L); segui()
   }
-  const erroriRiga = () => new Set((ultimo?.errori ?? []).filter((e) => (e.severity ?? 3) >= 3 || /error/.test(e.text ?? '')).map((e) => e.line))
+  const grave = (e) => (e.severity ?? 3) >= 3 || /error/.test(e.text ?? '')
+  const erroriRiga = () => new Set((ultimo?.errori ?? []).filter(grave).map((e) => e.line))
+  /** Le righe con un avviso e nessun errore (11.11: la fascia gialla; prima a un bit si vedevano solo gli errori). */
+  const avvisiRiga = () => new Set((ultimo?.errori ?? []).filter((e) => !grave(e) && (e.severity === 2 || /warning/.test(e.text ?? ''))).map((e) => e.line))
 
   const menu = () => lista(os, {
     titolo: 'codice C: cosa fai', icona: 'app-compilatore',
     voci: () => [
       { nome: 'esegui', fai: () => { os.togli(); esegui(os) } }, // (senza ▶: → nel menu non fa niente, REGOLE 3.3)
       { nome: 'scrivi qui', val: `riga ${r + 1}`, fai: async () => {
-        const qui = os.corrente(), s = await os.tastiera({ titolo: `scrivi alla riga ${r + 1}, colonna ${c + 1}`, simboli: true })
+        const qui = os.corrente(), s = await os.tastiera({ titolo: `scrivi alla riga ${r + 1}, colonna ${c + 1}` })
         if (s && os.corrente() === qui) { os.togli(); scrivi(s) } // (dopo l'attesa il menu deve essere ancora in cima)
       } },
       { nome: 'a capo', fai: () => { os.togli(); aCapo() } },
       { nome: 'cancella un carattere', fai: () => { os.togli(); cancella() } },
       { nome: 'l’input (quello che legge scanf)', fai: () => { os.togli(); os.spingi(vistaInput()) } },
-      { nome: 'l’ultimo output', val: ultimo ? (ultimo.rete ? 'offline' : ultimo.compilato ? 'fatto' : 'errori') : '', fai: () => { os.togli(); os.spingi(vistaOutput(os)) } },
+      { nome: 'l’ultimo output', val: ultimo ? (ultimo.rete ? 'offline' : ultimo.compilato ? 'fatto' : 'errori') : '', tinta: ultimo ? (ultimo.rete ? 'ambra' : ultimo.compilato ? 'verde' : 'rosso') : null, fai: () => { os.togli(); os.spingi(vistaOutput(os)) } },
       { nome: 'gli esempi', val: `${Object.keys(ESEMPI).length}`, fai: () => { os.togli(); os.spingi(vistaEsempi()) } },
     ],
   })
@@ -178,7 +233,7 @@ export function vista(os) {
     voci: () => {
       const L = S.input ? S.input.split('\n') : []
       const cambia = async (i) => {
-        const s = await os.tastiera({ titolo: i < L.length ? `la riga ${i + 1} dell'input` : 'una riga nuova', testo: L[i] ?? '', simboli: true })
+        const s = await os.tastiera({ titolo: i < L.length ? `la riga ${i + 1} dell'input` : 'una riga nuova', testo: L[i] ?? '' })
         if (s === null) return
         const N = [...L]; if (i < L.length) N[i] = s; else N.push(s)
         S.input = N.join('\n'); salva()
@@ -198,16 +253,23 @@ export function vista(os) {
     tic() { if (esito && Date.now() >= esito.fino) { esito = null; os.ridisegna() } }, // (il cursore lampeggia da sé: os ridisegna ogni mezzo secondo)
     disegna(l, t) {
       // (copie: il cursore e la finestra li tiene segui; qui solo i limiti, se il codice è cambiato da un'altra parte)
-      const L = righe(), E = erroriRiga(), p = piu(), col = COL - p, xc = 26 + p * 6
+      const L = righe(), E = erroriRiga(), A = avvisiRiga(), p = piu(), col = COL - p, xc = 26 + p * 6
+      const K = colori(L.map((x) => x.replace(/\t/g, '    '))), T = tinte(l)
       const rr = Math.max(0, Math.min(r, L.length - 1)), cc = Math.max(0, Math.min(c, L[rr].length))
       const tp = Math.min(Math.max(top, rr - VIS + 1), rr), s0 = Math.min(Math.max(sx, cc - col + 1), cc)
       testata(l, os, { icona: 'app-compilatore', nome: 'codice C', n: 1 })
       destra(l, 245, 18, `${rr + 1}:${cc + 1}`)
       for (let i = 0; i < VIS && tp + i < L.length; i++) {
         const k = tp + i, y = 34 + i * 9, n = String(k + 1).padStart(2 + p) // (dalla riga 100 tre cifre: il separatore si sposta)
-        if (E.has(k + 1)) { l.riempi(7, y - 1, 14 + p * 6, 9); l.testo(8, y, n, { inv: true }) } else l.testo(8, y, n)
-        const a = [...txt(L[k].replace(/\t/g, '    '))], pezzo = a.slice(s0, s0 + col).join('')
-        l.testo(xc, y, pezzo)
+        const fa = E.has(k + 1) ? 'err' : A.has(k + 1) ? 'avv' : null // (11.11: l'errore su una fascia rossa, l'avviso su una gialla)
+        if (fa) { l.riempi(7, y - 1, 14 + p * 6, 9, FASCE[fa][0]); l.testo(8, y, n, { col: FASCE[fa][1] }) } else l.testo(8, y, n)
+        const a = [...txt(L[k].replace(/\t/g, '    '))], kk = K[k] ?? []
+        for (let j = s0; j < Math.min(a.length, s0 + col);) { // (11.11: a pezzi dello stesso colore: le stringhe, i commenti, le direttive)
+          let e = j + 1
+          while (e < Math.min(a.length, s0 + col) && kk[e] === kk[j]) e++
+          l.testo(xc + (j - s0) * 6, y, a.slice(j, e).join(''), kk[j] ? { col: T[kk[j]] } : {})
+          j = e
+        }
         if (a.length > s0 + col) l.testo(242, y, '›')
         if (s0 > 0 && a.length) l.px(xc - 2, y + 3)
         for (let j = 0; j <= col; j++) { // (11.11: il clic mette il cursore sulla lettera cliccata, non a metà riga; oltre la fine, in fondo)

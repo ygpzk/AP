@@ -1,7 +1,8 @@
 // L'app «lavatrice» di pzk os (1.11, Alberto: «sì» a farla, dopo che il cercapersone nero se n'era andato con la sua):
 // i soldi sporchi delle rapine che tornano puliti. Le regole sono quelle della banca (wallet.mjs, lava: al più 50.000 a
 // lavaggio, 2.000 puliti di commissione, dieci minuti, una alla volta, in galera non parte) e la logica è quella di
-// telefono/app/lavatrice.js (stato, dopo, storia, lava, ritira): qui c'è solo la faccia a un bit. Si compra nel pzkstore.
+// telefono/app/lavatrice.js (stato, dopo, storia, lava, ritira): qui c'è solo la faccia, a colori dall'11.11 (la macchina
+// bianca con l'oblò, l'acqua blu, i soldi che entrano verdi e quelli che escono rossi). Si compra nel pzkstore.
 // - LA LAVATRICE, secondo com'è messa:
 //   · FERMA, CON GLI SPORCHI: quanto lavare (di serie il massimo, perché la commissione è fissa; ↑ ↓ cambiano di 5.000),
 //     la commissione e quanto pesa, come sarai dopo (i puliti, gli sporchi che restano e i lavaggi che servono ancora),
@@ -12,8 +13,9 @@
 // - LA STORIA: le mosse del conto coi soldi sporchi (le rapine, le commissioni, i lavaggi finiti, i puliti dal tempo).
 // - COME FUNZIONA: le regole, che scorrono.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, C, esa, sfondo } from './lcd.js'
 import * as icone from './icone.js'
+import { leggi } from './impostazioni.js'
 import * as pzk from '../../../games/pzk.js'
 import * as zaino from '../../../chat/zaino.js'
 import { MAX, COSTO, DURATA, mmss, ora, quando, pct, stato, dopo, STORIA, storia, lava, ritira } from '../../app/lavatrice.js'
@@ -26,35 +28,54 @@ const X0 = 64, X1 = 245 // la colonna a destra della macchina
 /** Le quantità che si possono scegliere: il massimo, poi i multipli di 5.000 sotto. */
 const quantita = (max) => (max <= PASSO ? [max] : [max, ...Array.from({ length: Math.ceil(max / PASSO) - 1 }, (_, i) => (Math.ceil(max / PASSO) - 1 - i) * PASSO)])
 
+// (11.11, i colori a 8 bit) la macchina è un disegno coi suoi colori, uguale su tutti gli sfondi: bianca col bordo
+// d'acciaio, il display scuro coi led, l'oblò di vetro scuro. Le cifre che dicono qualcosa prendono la tinta che si legge
+// sullo sfondo scelto (tinte(): scure sugli sfondi chiari, accese su «notte»), come nella rapina.
+const ACCIAIO = esa('#666666'), FERRO = esa('#999999'), SMALTO = esa('#cccccc'), BUIO = esa('#333333'), VETRO = esa('#333366')
+const tinte = () => {
+  const k = sfondo(leggi().sfondo).inchiostro
+  return k[0] + k[1] + k[2] > 384 ? { su: C.verde, giu: esa('#ff6666'), acqua: C.cielo } : { su: esa('#006600'), giu: esa('#990000'), acqua: esa('#0033cc') }
+}
+/** Ripassa a colori un pezzo di una riga già scritta d'inchiostro (gli stessi pixel, il pezzo prende il colore). */
+const tingi = (l, x, y, riga, pezzo, col) => { const i = riga.indexOf(pezzo); if (pezzo && i >= 0) l.testo(x + [...riga.slice(0, i)].length * 6, y, pezzo, { col }) }
+/** L'avviso ⚠ come un cartello: giallo su un quadratino scuro, così si vede anche sugli sfondi chiari. → dove scrivere dopo */
+const avviso = (l, x, y) => { l.riempi(x - 1, y - 1, 7, 9, BUIO); l.testo(x, y, '⚠', { col: C.giallo }); return x + 9 }
+
 /** Un cerchio di raggio r (il contorno, punto per punto). */
-function cerchio(l, cx, cy, r) {
+function cerchio(l, cx, cy, r, v = 1) {
   const n = Math.ceil(2 * Math.PI * r * 1.5)
-  for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; l.px(Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r)) }
+  for (let i = 0; i < n; i++) { const a = (i / n) * Math.PI * 2; l.px(Math.round(cx + Math.cos(a) * r), Math.round(cy + Math.sin(a) * r), v) }
+}
+/** Un disco pieno di raggio r. */
+function disco(l, cx, cy, r, v) {
+  for (let j = -r; j <= r; j++) for (let i = -r; i <= r; i++) if (i * i + j * j <= r * r) l.px(cx + i, cy + j, v)
 }
 
 /** La lavatrice disegnata (48 × 76, da x, y): il pannello col display e la manopola, l'oblò; dentro, secondo com'è: il
  *  sacco degli sporchi, il cestello che gira con l'acqua, la moneta pronta, il lucchetto della galera, niente. */
 function macchina(l, x, y, { dentro, giro = 0, salto = 0, vibra = 0 }) {
   x += vibra
-  l.riquadro(x, y, 48, 72)
-  l.orizz(x + 1, y + 12, 46)
-  l.riquadro(x + 4, y + 3, 20, 7) // il display
-  if (dentro === 'gira') for (let i = 0; i < 3; i++) if ((giro + i) % 3) l.riempi(x + 6 + i * 6, y + 5, 4, 3) // (le tacche che corrono)
-  cerchio(l, x + 38, y + 6, 3); l.px(x + 38, y + 4) // la manopola
-  l.riempi(x + 6, y + 72, 6, 3); l.riempi(x + 36, y + 72, 6, 3) // i piedini
+  l.riempi(x + 1, y + 1, 46, 70, SMALTO); l.riquadro(x, y, 48, 72, ACCIAIO)
+  l.orizz(x + 1, y + 12, 46, ACCIAIO)
+  l.riempi(x + 4, y + 3, 20, 7, BUIO) // il display: i led verdi corrono mentre gira, fermi quando è pronta, rossi in galera
+  const led = { gira: C.verde, pronta: C.verde, galera: C.rosso }[dentro]
+  if (led) for (let i = 0; i < 3; i++) if (dentro !== 'gira' || (giro + i) % 3) l.riempi(x + 6 + i * 6, y + 5, 4, 3, led)
+  disco(l, x + 38, y + 6, 3, FERRO); cerchio(l, x + 38, y + 6, 3, ACCIAIO); l.px(x + 38, y + 4, BUIO) // la manopola
+  l.riempi(x + 6, y + 72, 6, 3, BUIO); l.riempi(x + 36, y + 72, 6, 3, BUIO) // i piedini
   const cx = x + 24, cy = y + 42
-  cerchio(l, cx, cy, 17); cerchio(l, cx, cy, 14)
+  disco(l, cx, cy, 17, FERRO); disco(l, cx, cy, 14, VETRO) // l'oblò: l'anello e il vetro
+  cerchio(l, cx, cy, 17, ACCIAIO); cerchio(l, cx, cy, 14, ACCIAIO)
   if (dentro === 'gira') {
-    // l'acqua (un pixel sì e uno no, sotto la riga dell'acqua) e i tre panni che girano
-    for (let j = 3; j <= 13; j++) for (let i = -13; i <= 13; i++) if (i * i + j * j <= 144 && (i + j) % 2 === 0) l.px(cx + i, cy + j)
-    const a0 = giro * 0.7
-    for (let k = 0; k < 3; k++) { const a = a0 + (k * Math.PI * 2) / 3; l.riempi(Math.round(cx + Math.cos(a) * 8) - 2, Math.round(cy + Math.sin(a) * 8) - 2, 4, 4) }
+    // l'acqua blu sotto la riga dell'acqua (prima era un pixel sì e uno no: col bit unico si fingeva così) e tre panni colorati che girano
+    for (let j = 3; j <= 13; j++) for (let i = -13; i <= 13; i++) if (i * i + j * j <= 144) l.px(cx + i, cy + j, C.blu)
+    const a0 = giro * 0.7, PANNI = [C.rosso, C.giallo, C.bianco]
+    for (let k = 0; k < 3; k++) { const a = a0 + (k * Math.PI * 2) / 3; l.riempi(Math.round(cx + Math.cos(a) * 8) - 2, Math.round(cy + Math.sin(a) * 8) - 2, 4, 4, PANNI[k]) }
     return
   }
   const ic = { sporchi: 'sacco', pronta: 'pzk', galera: 'lucchetto' }[dentro]
   if (ic) { l.bitmap(icone.bitmap(ic, 16), cx - 8, cy - 8 - salto); return }
   // vuota: due riflessi sul vetro
-  for (let i = 0; i < 4; i++) { l.px(cx - 7 + i, cy - 4 - i); l.px(cx - 4 + i, cy - 2 - i) }
+  for (let i = 0; i < 4; i++) { l.px(cx - 7 + i, cy - 4 - i, C.bianco); l.px(cx - 4 + i, cy - 2 - i, C.bianco) }
 }
 
 /** Il tasto disegnato a mano nella colonna a destra (centrato lì, non su tutto lo schermo: a sinistra c'è la macchina). */
@@ -150,21 +171,21 @@ export function vista(os) {
         l.testo(X0, 34, 'in lavaggio')
         const n = fmt(lav.n); l.testo(X0, 44, n, { scala: 2 }); l.testo(X0 + 4 + Lcd.larghezza(n, 2), 51, '$pzk')
         l.testo(X0, 65, 'fra'); l.testo(X0 + 22, 62, mmss(resta), { scala: 2 })
-        l.riquadro(X0, 81, X1 - X0, 7); l.riempi(X0 + 2, 83, Math.round((X1 - X0 - 4) * k), 3)
+        l.riquadro(X0, 81, X1 - X0, 7); l.riempi(X0 + 2, 83, Math.round((X1 - X0 - 4) * k), 3, tinte().acqua) // (la barra si riempie d'acqua)
         l.testo(X0, 92, `pronti alle ${ora(lav.fino)}`)
         l.testo(X0, 103, corto(s.dentro ? 'in galera, ma questa finisce' : 'puoi chiudere: lava da sola', 30))
         return
       }
       if (c === 'pronta') {
         l.testo(X0, 34, 'lavaggio finito')
-        l.testo(X0, 44, `+${fmt(s.lav.n)}`, { scala: 2 })
+        l.testo(X0, 44, `+${fmt(s.lav.n)}`, { scala: 2, col: tinte().su }) // (11.11: i soldi che tornano, verdi)
         l.testo(X0, 62, 'sporchi diventati puliti')
         l.testo(X0, 71, corto(`ritirati, avrai ${corti(s.pu + s.lav.n)} puliti`, 30)) // (finché non si ritira, quelli lavati contano ancora fra gli sporchi)
         tasto(l, x.zona, 'ritira', 99, () => ritiraOra(x))
         return
       }
       if (c === 'galera') {
-        l.testo(X0, 34, 'in galera', { scala: 2 })
+        l.testo(X0, 34, 'in galera', { scala: 2, col: tinte().giu })
         l.testo(X0, 53, `fino alle ${ora(pzk.galera())}`)
         Lcd.acapo('la lavatrice non parte. Si esce prima con la cauzione: app rapina.', 30).slice(0, 3).forEach((r, i) => l.testo(X0, 66 + i * 9, r))
         if (s.sp > 0) l.testo(X0, 101, corto(`da lavare: ${corti(s.sp)} sporchi`, 30))
@@ -185,16 +206,20 @@ export function vista(os) {
         if (piu) { l.testo(X1 - 6, 43, '▲'); x.zona(X1 - 9, 41, 12, 9, () => { muovi(-1); os.ridisegna() }) }
         if (meno) { l.testo(X1 - 6, 52, '▼'); x.zona(X1 - 9, 51, 12, 9, () => { muovi(1); os.ridisegna() }) }
       }
-      puntini(l, 63, 'commissione', `${fmt(COSTO)} · ${pct(COSTO, n)}`, { x0: X0, x1: X1 })
+      const com = `${fmt(COSTO)} · ${pct(COSTO, n)}`, T = tinte()
+      puntini(l, 63, 'commissione', com, { x0: X0, x1: X1 })
+      tingi(l, X1 - Lcd.larghezza(com), 63, com, fmt(COSTO), T.giu) // (11.11: la commissione è quello che si perde, rossa)
       puntini(l, 72, 'puliti dopo', corti(d.puliti), { x0: X0, x1: X1 })
       puntini(l, 81, 'restano', d.restano > 0 ? `${corti(d.restano)} · ${d.ancora} ${d.ancora === 1 ? 'lavaggio' : 'lavaggi'}` : 'nessuno', { x0: X0, x1: X1 })
       if (s.pu < COSTO) {
         l.testo(X0, 90, `la commissione è ${fmt(COSTO)} puliti`)
-        l.testo(X0, 99, corto(`e ne hai ${corti(s.pu)}.`, 30))
+        const hai = corto(`e ne hai ${corti(s.pu)}.`, 30)
+        l.testo(X0, 99, hai); tingi(l, X0, 99, hai, corti(s.pu), T.giu) // (quelli che mancano: pochi, rossi)
         l.testo(X0, 108, 'si fanno col lavoro e le quest')
         return
       }
-      l.testo(X0, 90, corto(n < COSTO ? '⚠ lavi meno della commissione' : `pronti in 10 minuti`, 30))
+      if (n < COSTO) l.testo(avviso(l, X0 + 1, 90), 90, corto('lavi meno della commissione', 28)) // (11.11: il ⚠ giallo, sul suo cartello)
+      else l.testo(X0, 90, 'pronti in 10 minuti')
       tasto(l, x.zona, `lava ${fmt(n)}`, 101, () => lavaQ(x))
     },
     tasto(k) {
@@ -214,7 +239,7 @@ export function vista(os) {
     const [nome, cosa, segno] = STORIA[m.tipo], d = quando(m.t), piu = segno === 'meno' ? '-' : '+'
     let a = `  ${piu}${fmt(m.n)} ${cosa}`
     if (a.length + 1 + d.length > RIGA_S) a = `  ${piu}${corti(m.n)} ${cosa}` // (un bottino enorme: il numero corto, la data resta)
-    return [{ s: corto(nome, RIGA_S) }, { s: corto(a, RIGA_S - 1 - d.length).padEnd(RIGA_S - d.length) + d }]
+    return [{ s: corto(nome, RIGA_S) }, { s: corto(a, RIGA_S - 1 - d.length).padEnd(RIGA_S - d.length) + d, segno, cifra: a.trim().split(' ')[0] }]
   })
   const storiaPag = {
     nome: 'la storia', icona: 'clessidra',
@@ -223,6 +248,9 @@ export function vista(os) {
       const R = righeStoria()
       if (!R.length) { centro(l, 60, 'ancora niente coi soldi sporchi'); centro(l, 72, 'le rapine, i lavaggi: qui'); return }
       giuS = scorrevole(l, R, { y0: 34, vis: VIS_S, giu: giuS })
+      // (11.11: l'importo a colori, i puliti che entrano verdi e la commissione rossa; il bottino sporco resta d'inchiostro)
+      const T = tinte()
+      R.slice(giuS, giuS + VIS_S).forEach((r, i) => { if (r.segno) tingi(l, 10, 34 + i * 9, r.s, r.cifra, r.segno === 'meno' ? T.giu : T.su) })
     },
     tasto(k) {
       const n = Math.max(0, righeStoria().length - VIS_S)

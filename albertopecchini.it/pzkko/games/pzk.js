@@ -124,8 +124,10 @@ export function inFiches(importo) {
   return out
 }
 /** I $pzk come si scrivono: 1.250 o 7,5. Gli EUR€: 1.250,00. */
-export const fmt = (n) => n.toLocaleString('it-IT', { maximumFractionDigits: 1 })
-export const fmtEur = (n) => n.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+// (11.11: per l'italiano Chrome mette il punto solo da cinque cifre in su, e la lavatrice scriveva «2000» accanto a «50.000»:
+// useGrouping 'always' lo mette anche a 1.250; i browser più vecchi lo leggono come true e restano come prima)
+export const fmt = (n) => n.toLocaleString('it-IT', { maximumFractionDigits: 1, useGrouping: 'always' })
+export const fmtEur = (n) => n.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: 'always' })
 /** I numeri corti per i riquadri stretti: 999, 1,0K, 13,3K, 1,0M, 1,0B, 1,0T. */
 export function fmtCorto(n) {
   const a = Math.abs(Number(n) || 0), meno = n < 0 ? '−' : ''
@@ -170,14 +172,25 @@ async function manda(body, { keepalive = false } = {}) {
   const dati = W ? { token: W.token, ...body } : { ospite: O?.biglietto ?? null, ...body }
   const chi = W?.token ?? 'ospite' // (chi ha chiesto: se intanto si è entrati o usciti, la risposta è dell'altro e non si prende)
   try {
-    const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dati), keepalive })
+    // (11.11: una rete appesa teneva la promessa aperta per sempre, e la rotellina della banca girava senza fine. 25 secondi:
+    // più dei 20 che il ponte, _server.mjs, aspetta il pc di Alberto, così di solito arriva prima il suo «in pausa»)
+    const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dati), keepalive, signal: AbortSignal.timeout?.(25_000) })
     const d = await r.json().catch(() => ({ ok: false, offline: true, errore: 'la banca non risponde' }))
     online = !d.offline
     if ((W?.token ?? 'ospite') !== chi) return d
     if (d.esci && W) esci()
     accogli(d)
     return d
-  } catch { online = false; avvisa(); return { ok: false, offline: true, errore: 'niente rete: riprova' } }
+  } catch (e) {
+    online = false; avvisa()
+    // (11.11: interrotta da qui, un'azione coi soldi può essere stata fatta lo stesso dalla banca: niente «riprova», si
+    // chiede il conto com'è, e chi gioca guarda il saldo prima di rifarla)
+    if (e?.name === 'TimeoutError') {
+      if (body.a !== 'stato' && body.a !== 'ospite') sincronizza()
+      return { ok: false, offline: true, errore: 'la banca non ha risposto: controlla il saldo' }
+    }
+    return { ok: false, offline: true, errore: 'niente rete: riprova' }
+  }
 }
 /** La risposta della banca con dentro il conto: diventa lo stato, se non è più vecchia di quella che si ha. */
 function accogli(d) {
@@ -276,7 +289,7 @@ export async function colpo(op, codice = '') {
 export const cambiaIndirizzo = (nuovo, key) => azione({ a: 'indirizzo', nuovo, ...(key && { key }) })
 export const cambiaPin = (vecchio, nuovo) => azione({ a: 'pin', vecchio, nuovo })
 /** Chi è a questo indirizzo (per controllare prima di inviare). → { ok, conto: { nome, ind } } */
-export async function chiE(ind) { try { return await (await fetch(`${API}?ind=${encodeURIComponent(ind)}`)).json() } catch { return { ok: false, errore: 'niente rete' } } }
+export async function chiE(ind) { try { return await (await fetch(`${API}?ind=${encodeURIComponent(ind)}`, { signal: AbortSignal.timeout?.(25_000) })).json() } catch { return { ok: false, errore: 'niente rete' } } } // (11.11: anche qui un tempo massimo, come manda)
 
 // ── le banconote perse per terra (scena/banconote.js): una volta al giorno ciascuna, le dà la banca ──
 /** Le banconote già raccolte oggi (['b500', …]). */

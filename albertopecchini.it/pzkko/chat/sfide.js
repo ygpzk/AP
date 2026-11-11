@@ -37,14 +37,17 @@ const SERIE_MAX = 7
 
 const ieri = (giorno) => giornoDi(new Date(`${giorno}T12:00:00+01:00`).getTime() - 24 * 3600_000)
 
-// il giorno nuovo lo prepara la banca: una richiesta sola per giorno (oggi() si chiama a ogni disegno)
+// il giorno nuovo lo prepara la banca: una richiesta sola per giorno e per conto (oggi() si chiama a ogni disegno)
+// (11.11: «chiesto» ricordava solo il giorno: chiesto da ospite, dopo l'accesso il giorno del conto non arrivava mai, e
+// l'app, il pallino della home e il comando «sfide» restavano a zero finché non si ricaricava la pagina)
 let chiesto = ''
 function prepara(oggi) {
-  if (chiesto === oggi) return
+  const chi = `${pzk.conto()?.ind ?? 'ospite'}|${oggi}`
+  if (chiesto === chi) return
   // prima della prima risposta della banca l'ospite non ha ancora il biglietto: chiedere adesso torna 401 («entra di
   // nuovo») a ogni visita nuova (trovato dal bot dei bug, 6.11). Si chiede al disegno dopo, quando lo zaino è arrivato
   if (pzk.ospite() && pzk.zainoBanca() === null) return
-  chiesto = oggi
+  chiesto = chi
   pzk.fai('sfide.oggi').then((d) => { if (!d?.ok) chiesto = '' }).catch(() => { chiesto = '' }) // (riprova al prossimo disegno; quando arriva, zaino.ascolta ridisegna)
 }
 
@@ -63,7 +66,9 @@ export function oggi() {
     const fatto = Math.max(0, zaino.stat(m.stat) - (s.base?.[m.stat] ?? 0))
     const riscossa = s.riscosse.includes(x.id)
     return { id: x.id, diff: x.diff, nome: NOMI_DIFF[x.diff], icona: m.icona, testo: m.testo(x.target), target: x.target, fatto: Math.min(fatto, x.target), pronta: !riscossa && fatto >= x.target, riscossa,
-      premio: { pzk: Math.round(PREMI[x.diff].pzk * zaino.moltiplicatore() * bonusSfide), xp: PREMI[x.diff].xp } }
+      // (11.11: la banca paga a mezzi $pzk, PREMI × bonus × moltiplicatore: arrotondato all'intero la riga diceva «+326» e
+      // la striscia dopo la riscossione «+326,5 $pzk»)
+      premio: { pzk: Math.round(PREMI[x.diff].pzk * bonusSfide * zaino.moltiplicatore() * 2) / 2, xp: PREMI[x.diff].xp } }
   })
   const tutte = lista.length > 0 && lista.every((x) => x.riscossa)
   return { giorno: s.g, sfide: lista, tutte, bonusPronto: tutte && !s.bonus, bonusRiscosso: s.bonus, serie: s.serie.ultimo === s.g || s.serie.ultimo === ieri(s.g) ? s.serie.n : 0, serieOggi: s.serie.ultimo === s.g,

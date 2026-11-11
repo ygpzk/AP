@@ -14,8 +14,11 @@
 // il posto e il valore vengono dalla stessa funzione della banca (i pari merito hanno lo stesso posto: «1° pari»), e accanto
 // a ogni posto c'è il valore, così si confronta a occhio con la classifica. Nei numeri ci sono anche i soldi (guadagnati,
 // vinti o persi ai giochi) e le mani, quelle del libro dei conti: le stesse della pagina dei giochi del profilo.
+// (11.11, Alberto: «fai colori a 8bit su tutto») I COLORI dicono qualcosa, il resto resta d'inchiostro: i soldi presi su una
+// targhetta verde e quelli persi su una rossa (anche quelli della lumachina e delle notizie), il podio d'oro, d'argento e di
+// bronzo, l'avviso urgente su una fascia gialla, la barra della salute verde, gialla o rossa, quella degli xp blu.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, C, esa } from './lcd.js'
 import * as icone from './icone.js'
 import * as db from '../../../chat/db.js'
 import { nomeDi } from '../../../chat/testi.js'
@@ -43,6 +46,65 @@ const fuori = (l, d, y = 60) => Lcd.acapo(txt(d?.errore ?? 'il database adesso n
 let metrica = 'pzk', q = '', ultima = 0
 const DONO = 10 // (i $pzk che «manda $pzk» della scheda manda col comando della chat)
 const colSegno = (n) => `${n < 0 ? '−' : ''}${fmtCorto(Math.abs(Math.round(n ?? 0)))}`
+
+// ── i colori (11.11): ogni colore è una coppia [fondo, scritta] fissa, su una targhetta. (Un verde o un rosso scritti
+// direttamente sullo sfondo non si leggono su tutti: il verde sparisce sull'arancione, il rosso scuro sulla notte. Sulla
+// targhetta la scritta è nera o bianca e si legge su ogni sfondo e anche sulla riga scelta, come in quiz.js e sfide.js) ──
+const VERDE = [C.verde, C.nero], ROSSO = [esa('#cc0000'), C.bianco], GIALLO = [C.giallo, C.nero]
+const MEDAGLIA = { 1: [C.oro, C.nero], 2: [esa('#aaaaaa'), C.nero], 3: [esa('#cc6633'), C.nero] } // (il podio: oro, argento, bronzo; l'argento più chiaro spariva sulla carta)
+const XP = C.blu, salute = (s) => (s >= 50 ? C.verde : s >= 20 ? C.giallo : esa('#cc0000'))
+/** Una scritta su una targhetta del suo colore, con un pixel d'aria attorno (sta nella riga: 9 pixel). */
+const targa = (l, x, y, s, [fondo, col]) => { l.riempi(x - 1, y - 1, Lcd.larghezza(s) + 2, 9, fondo); l.testo(x, y, s, { col }) }
+/** Un segno da colorare: src è una regex col pezzo da colorare fra parentesi (gli spazi possono essere un a capo); c è la
+ *  coppia, o una funzione del pezzo trovato che la dà (o null: resta d'inchiostro). */
+const segno = (src, c) => ({ re: new RegExp(src, 'gd'), c })
+const esc = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/ /g, '\\s+')
+const dopo = (prima, testo, c) => segno(`${esc(prima)}(${esc(testo)})`, c) // (il numero dopo il suo nome: «guadagnati 52,2K»)
+// i soldi col segno di pzkTesto e pctTesto («+12 $pzk», «−1,68 %»): verdi se più, rossi se meno
+const COL_SEGNO = segno('([+−][\\d.,]+[KM]?\\s+(?:\\$pzk|%))', (s) => (s[0] === '+' ? VERDE : ROSSO))
+// le notizie (chat/db.js, testoNotizia): la vincita ai giochi verde, il bottino sporco e la galera rossi, la lumachina col segno
+const SEGNI_NOTIZIE = [segno('vinto\\s+([\\d.,]+\\s+\\$pzk)', VERDE), segno('([\\d.,]+\\s+\\$pzk\\s+sporchi)', ROSSO), segno('(sei\\s+ore\\s+di\\s+galera)', ROSSO), COL_SEGNO]
+/** Dove cadono i segni in righe di testo già andate a capo: Map riga → [{ da, n, c }] in caratteri (un segno spezzato
+ *  dall'a capo diventa due pezzi, senza gli spazi ai bordi né il rientro dei punti). */
+function pezziColorati(righe, segni) {
+  const tutto = righe.join('\n'), inizio = [], fuori = new Map()
+  let o = 0
+  for (const r of righe) { inizio.push(o); o += r.length + 1 }
+  for (const { re, c } of segni) for (const m of tutto.matchAll(re)) {
+    const [a, b] = m.indices[1], coppia = typeof c === 'function' ? c(m[1]) : c
+    if (!coppia) continue
+    for (let i = 0; i < righe.length; i++) {
+      const fine = inizio[i] + righe[i].length
+      if (fine <= a || inizio[i] >= b) continue
+      let da = Math.max(a, inizio[i]) - inizio[i], fino = Math.min(b, fine) - inizio[i]
+      while (da < fino && righe[i][da] === ' ') da++
+      while (fino > da && righe[i][fino - 1] === ' ') fino--
+      if (fino > da) { if (!fuori.has(i)) fuori.set(i, []); fuori.get(i).push({ da, n: fino - da, c: coppia }) }
+    }
+  }
+  return fuori
+}
+/** Le righe in fila da (x, y), passo 9, coi loro pezzi colorati sopra (le scritte le ha già messe chi chiama). piene: le
+ *  stesse righe prima del taglio con «…» (i segni si cercano lì: un «45.000 $pzk sporchi» tagliato in «4…» resta rosso). */
+const colora = (l, righe, x, y, segni, piene = righe) => pezziColorati(piene, segni).forEach((ps, i) => ps.forEach((p) => {
+  const s = righe[i] ?? '', taglio = s.endsWith('…') && s !== piene[i] ? s.length - 1 : s.length
+  if (p.da >= taglio) return
+  const fino = p.da + p.n > taglio ? s.length : p.da + p.n // (il pezzo tagliato si prende anche il «…»)
+  targa(l, x + p.da * 6, y + i * 9, s.slice(p.da, fino), p.c)
+}))
+/** I colori sopra quello che ha scritto scorrevole (pezzi.js scrive d'inchiostro): i segni nelle righe di testo, le fasce
+ *  dei titoli in titoli { testo: coppia }, la barra del colore barra. (Le misure della fascia e della barra sono quelle di
+ *  scorrevole: se cambiano là, vanno cambiate qui) */
+function aColori(l, righe, giu, { y0, vis, x0 = 10 }, { segni = [], titoli = {}, barra = null } = {}) {
+  const viste = righe.slice(giu, giu + vis)
+  viste.forEach((r, i) => {
+    const y = y0 + i * 9, c = r.tipo === 'titolo' && titoli[r.s]
+    if (c) { l.riempi(x0 - 2, y - 1, W - 12 - (x0 - 8) - 10, 9, c[0]); l.testo(x0, y, r.s, { col: c[1] }) }
+    else if (r.tipo === 'barra' && barra) l.riempi(x0 + 1, y + 2, Math.round((W - 12 - (x0 - 8) - 18) * r.k), 3, barra)
+  })
+  // (i segni si cercano in tutte le righe, anche quelle fuori vista: un numero andato a capo sul bordo resta colorato)
+  pezziColorati(righe.map((r) => (r.tipo ? '' : r.s)), segni).forEach((ps, k) => { if (k < giu || k >= giu + vis) return; ps.forEach((p) => targa(l, x0 + p.da * 6, y0 + (k - giu) * 9, righe[k].s.slice(p.da, p.da + p.n), p.c)) })
+}
 
 // ── la scelta della classifica ──
 function sceltaMetrica(os, poi) {
@@ -84,7 +146,7 @@ function scheda(os, ind) {
       l.testo(46, 14, corto(p.nome, 33))
       l.testo(46, 23, corto(`${p.titolo ?? ''}${p.mest ? ` · ${nomeDi(p.mest)}` : ''}`, 33))
       const da = 60 * (p.liv - 1) ** 2, k = (p.xp - da) / Math.max(1, (p.xpProssimo ?? 0) - da)
-      l.testo(46, 32, corto(`livello ${p.liv} · ${fmt(p.xp)} xp`, 22)); l.riquadro(184, 33, 61, 5); l.riempi(185, 34, Math.round(59 * Math.max(0, Math.min(1, k))), 3)
+      l.testo(46, 32, corto(`livello ${p.liv} · ${fmt(p.xp)} xp`, 22)); l.riquadro(184, 33, 61, 5); l.riempi(185, 34, Math.round(59 * Math.max(0, Math.min(1, k))), 3, XP)
       l.testo(46, 41, corto(`${p.ind} · in banca da ${fa(p.creato).replace(' fa', '')}${p.ult ? ` · visto ${fa(p.ult)}` : ''}`, 33))
       const pos = Object.entries(p.posizioni ?? {}).filter(([m]) => db.METRICHE[m]).sort((a, b) => a[1].pos - b[1].pos) // (tutte: prima le prime otto)
       const numeri = [['$pzk', fmtCorto(p.pzk)], ['guadagnati', colSegno(s.guadagnati)], [s.persi ? 'persi ai giochi' : 'vinti ai giochi', fmtCorto(s.persi || s.vinti || 0)], ['pescati', s.pescati], ['cacciati', s.cacciati], ['scavati', s.scavati], ['quiz', `${s.quizGiusti ?? 0}/${s.quizTotali ?? 0}`], ['sfide', s.sfideFatte], ['quest', s.missioniFatte], ['morti', s.morti], ...(p.sp ? [['sporchi', fmtCorto(p.sp)]] : []), ['giochi', `${s.giri ?? 0} mani`], ['serie', `${p.serie ?? 0} giorni`]]
@@ -95,7 +157,16 @@ function scheda(os, ind) {
         ...(pos.length ? [{ titolo: 'in classifica' }, ...pos.map(([m, x]) => ({ punto: `${db.postoTesto(x)} in ${db.METRICHE[m][0]}: ${valore(m, x.valore)}` }))] : []),
         ...(p.rari?.length ? [{ titolo: 'leggendari presi' }, { testo: p.rari.map(nomeDi).join(', ') }] : []),
       ])
-      giu = scorrevole(l, righe, { y0: 52, vis: mio ? 7 : 5, giu })
+      // (11.11) i soldi presi verdi e quelli persi rossi, la galera rossa, i posti sul podio coi colori delle medaglie
+      const segni = [
+        ...(s.guadagnati ? [dopo('guadagnati ', colSegno(s.guadagnati), s.guadagnati > 0 ? VERDE : ROSSO)] : []),
+        ...(s.persi ? [dopo('persi ai giochi ', fmtCorto(s.persi), ROSSO)] : s.vinti ? [dopo('vinti ai giochi ', fmtCorto(s.vinti), VERDE)] : []),
+        ...(p.gal ? [segno('(in galera)', ROSSO)] : []),
+        segno('•\\s([123]°(?:\\s+pari)?)\\s+in\\s', (x) => MEDAGLIA[x[0]]),
+      ]
+      const vis = mio ? 7 : 5
+      giu = scorrevole(l, righe, { y0: 52, vis, giu })
+      aColori(l, righe, giu, { y0: 52, vis }, { segni })
       if (!mio) bottoni(l, os.zona, { etichette: [`manda ${DONO} $pzk a ${corto(p.nome, 16)}`], sel: 0, y: 99, premi: () => manda(p) }) // (32 lettere al più: sta nella riga)
       centro(l, H - 9, mio ? '↑↓ legge · INDIETRO torna' : 'OK manda · ↑↓ legge')
     },
@@ -142,9 +213,10 @@ export function vista(os) {
         riga(l, g, x0, y, w, on) {
           const o = { inv: on }
           if (g.scegli) { l.testo(x0, y + 5, corto(db.METRICHE[metrica][0], 24), o); if (lista.length || top.st === 'ok') destra(l, x0 + w, y + 5, `${top.d.giocatori ?? 0} in banca`, o); return } // (niente ▶: qui → sfoglia le pagine, la classifica si cambia con OK)
-          // il podio: i primi tre col numero rovesciato
+          // il podio: i primi tre su una medaglia d'oro, d'argento e di bronzo (11.11: prima un quadrato rovesciato, uguale per
+          // tutti e tre; il numero nero si legge sulla medaglia con ogni sfondo, anche sulla riga scelta)
           const ps = String(g.pos)
-          if (g.pos <= 3) { l.riempi(x0 - 2, y + 3, 14, 11, on ? 0 : 1); l.testo(x0 + 5 - Math.round(Lcd.larghezza(ps) / 2), y + 5, ps, { inv: !on }) } else destra(l, x0 + 11, y + 5, ps, o)
+          if (g.pos <= 3) { l.riempi(x0 - 2, y + 3, 14, 11, MEDAGLIA[g.pos][0]); l.testo(x0 + 5 - Math.round(Lcd.larghezza(ps) / 2), y + 5, ps, { col: MEDAGLIA[g.pos][1] }) } else destra(l, x0 + 11, y + 5, ps, o)
           l.bitmap(bm(facciaDi(g), 16), x0 + 16, y, o)
           const v = valore(metrica, g.valore)
           destra(l, x0 + w, y + 5, v, o)
@@ -182,8 +254,10 @@ export function vista(os) {
           const r = Lcd.acapo(txt(senzaHtml(tn.html)), Math.floor((w - 18) / 6))
           l.testo(x0 + 18, y + 2, r[0] ?? '', o)
           const sec = r.length > 2 ? corto(r.slice(1).join(' '), Math.floor((w - 18 - Lcd.larghezza(quando) - 6) / 6)) : r[1] ?? ''
-          l.testo(x0 + 18, y + 11, corto(sec, Math.floor((w - 18 - Lcd.larghezza(quando) - 6) / 6)), o)
+          const r2 = corto(sec, Math.floor((w - 18 - Lcd.larghezza(quando) - 6) / 6))
+          l.testo(x0 + 18, y + 11, r2, o)
           destra(l, x0 + w, y + 11, quando, o)
+          colora(l, [r[0] ?? '', r2], x0 + 18, y + 2, SEGNI_NOTIZIE, [r[0] ?? '', r.slice(1).join(' ')]) // (11.11: quanto fa, sulla sua targhetta)
         },
       })
     },
@@ -257,7 +331,10 @@ export function vista(os) {
           : io.st === 'carico' ? [{ titolo: 'il tuo profilo' }, { testo: 'carico…' }] : [{ titolo: 'il tuo profilo' }, { testo: io.d?.io?.errore ?? 'il database adesso non risponde.' }]),
         ...(st ? [{ titolo: 'la banca in numeri' }, { testo: `${st.giocatori} giocatori · ${st.attivi24h} attivi oggi · ${st.attivi7g} in settimana` }, { testo: `${fmtCorto(st.pzk)} $pzk in giro · livello medio ${st.livelloMedio}` }, { testo: `pescati ${fmtCorto(st.pescati)} · quiz ${fmtCorto(st.quizGiusti)} · sfide ${fmtCorto(st.sfideFatte)} · quest ${fmtCorto(st.missioniFatte)}` }] : []),
       ]
-      giuIo = scorrevole(l, impagina(blocchi), { y0: 34, vis: 9, giu: giuIo })
+      // (11.11) l'avviso urgente su una fascia gialla, la salute col suo colore, quello che la lumachina ha fatto col segno
+      const righe = impagina(blocchi)
+      giuIo = scorrevole(l, righe, { y0: 34, vis: 9, giu: giuIo })
+      aColori(l, righe, giuIo, { y0: 34, vis: 9 }, { segni: [COL_SEGNO], titoli: { 'urgente · la tua lumachina': GIALLO }, barra: salute(gi.salute) })
     },
     tasto(k) { if (k === 'su') { giuIo = Math.max(0, giuIo - 1); return true } if (k === 'giu') { giuIo++; return true } return false },
   }

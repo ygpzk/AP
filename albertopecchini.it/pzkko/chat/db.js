@@ -21,7 +21,7 @@ async function leggi(q, ttl = 10_000) {
   const c = cache.get(q)
   if (c && Date.now() - c.t < ttl) return c.d
   try {
-    const d = await (await fetch(`${API}?${q}${v ? `&v=${v}` : ''}`)).json()
+    const d = await (await fetch(`${API}?${q}${v ? `&v=${v}` : ''}`, { signal: AbortSignal.timeout?.(25_000) })).json() // (11.11: come io, un tempo massimo)
     if (d?.ok) cache.set(q, { t: Date.now(), d })
     return d ?? { ok: false }
   } catch { return { ok: false, errore: 'il server non risponde' } }
@@ -51,7 +51,8 @@ export async function io(vicini = null) {
   const token = pzk.token()
   if (!token) return { ok: false, errore: 'serve un conto: crealo nell’app account' }
   try {
-    const d = await (await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, ...(vicini && { vicini }) }) })).json()
+    // (11.11: una rete appesa lasciava le app su «carico» per sempre; dopo 25 secondi, più dei 20 del ponte, il catch di sotto)
+    const d = await (await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, ...(vicini && { vicini }) }), signal: AbortSignal.timeout?.(25_000) })).json()
     return d ?? { ok: false }
   } catch { return { ok: false, errore: 'il server non risponde' } }
 }
@@ -65,7 +66,7 @@ export function testoNotizia(n) {
   switch (n.tipo) {
     case 'livello': return { icona: 'livello', html: `${chi} è salito al livello <b>${D}</b>` }
     case 'leggenda': return { icona: D, html: `${chi} ha preso <b>${{ 'carpa-oro': 'la carpa d’oro dei Gonzaga', drago: 'il drago del Mincio', tesoro: 'il tesoro dei Gonzaga' }[D] ?? D}</b>` }
-    case 'vincita': return { icona: 'sette', html: `${chi} ha vinto <span class="pzk">${Number(D).toLocaleString('it-IT')} $pzk</span> ai giochi` }
+    case 'vincita': return { icona: 'sette', html: `${chi} ha vinto <span class="pzk">${pzk.fmt(Number(D))} $pzk</span> ai giochi` }
     case 'mestiere': return { icona: D, html: `${chi} ora fa il mestiere: <b>${D}</b>` }
     case 'sfide': return { icona: 'fulmine', html: `${chi} ha fatto <b>${D}</b> sfide giornaliere` }
     case 'missione': return { icona: 'chiave-vecchia', html: `${chi} ha finito la side quest numero <b>${D}</b>` }
@@ -73,7 +74,7 @@ export function testoNotizia(n) {
     case 'serie': return { icona: 'fuoco', html: `${chi} è a <b>${D}</b> giorni di fila` }
     case 'nuovo': return { icona: 'bot-ride', html: `${chi} è arrivato in banca` }
     // i colpi alla cassa (26.10, api/wallet.mjs, colpo): { ok, n, bottino }
-    case 'rapina': return { icona: 'lucchettone', html: `${chi} e la sua banda (${D?.n ?? 2}) hanno rapinato la cassa di pzk: <span class="pzk">${Number(D?.bottino ?? 0).toLocaleString('it-IT')} $pzk</span> sporchi` }
+    case 'rapina': return { icona: 'lucchettone', html: `${chi} e la sua banda (${D?.n ?? 2}) hanno rapinato la cassa di pzk: <span class="pzk">${pzk.fmt(Number(D?.bottino ?? 0))} $pzk</span> sporchi` } // (11.11: pzk.fmt, col punto anche a 2.000, come tutti gli altri $pzk)
     case 'retata': return { icona: 'sirena', html: `${chi} e la sua banda (${D?.n ?? 2}) presi con le mani nella cassa: sei ore di galera` }
     case 'lumaca': { // le catastrofi e i miracoli della lumachina (api/wallet.mjs): { ev, pct, titolo }
       const p = Number(D?.pct) || 0, titolo = String(D?.titolo ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])

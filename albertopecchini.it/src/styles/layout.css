@@ -1014,6 +1014,37 @@ footer.site-footer::before {
   white-space: nowrap;
 }
 
+/* L'informatore dei sistemi (11.11.2026, src/client/stato.js): il pallino è fermo, colorato dallo stato vero */
+.foot-legal__stato {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: var(--muted);
+  line-height: 1.6;
+  text-decoration: none;
+  transition: color var(--t-1) var(--ease-out);
+}
+
+.foot-legal__stato:hover,
+.foot-legal__stato:focus-visible {
+  color: var(--fg);
+}
+
+.foot-legal__stato .stato__punto {
+  flex: none;
+  /* (a metà della prima riga anche quando la frase va a capo, sul telefono) */
+  margin-top: calc(0.8em - 0.25rem);
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--muted);
+  opacity: 0.6;
+}
+
+.foot-legal__stato[data-tono='su'] .stato__punto { background: #2f9e5b; opacity: 1; }
+.foot-legal__stato[data-tono='parziale'] .stato__punto { background: #e0a100; opacity: 1; }
+.foot-legal__stato[data-tono='spento'] .stato__punto { background: #d64545; opacity: 1; }
+
 .foot-top {
   margin-left: auto;
 }

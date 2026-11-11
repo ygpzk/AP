@@ -15,9 +15,10 @@ export function statsTesto(p) {
   const s = p.stats ?? {}
   const pz = (x) => pct(x / 100 > 1 ? x / 100 : x) // i bonus possono essere 0,12 o 12: tutti e due diventano «+12 %»
   switch (p.cat) {
-    case 'tavolo': return `${s.posti} schermi · case fino a «${s.caseMax}» · comfort ${pz(s.comfort ?? 0)}`
+    // (11.11) col numero 1 il singolare: «1 schermi» sui tavoli da un posto, «1 gpu · 1 ventole» nella scatola da scarpe
+    case 'tavolo': return `${s.posti === 1 ? 'uno schermo' : `${s.posti} schermi`} · case fino a «${s.caseMax}» · comfort ${pz(s.comfort ?? 0)}`
     case 'sedia': return `comfort ${pz(s.comfort ?? 0)}`
-    case 'case': return `${s.slotGpu} gpu (fino a ${s.gpuMax}) · ${s.slotVentole} ventole · ${fmt(s.raffreddamento ?? 0)} W`
+    case 'case': return `${s.slotGpu === 1 ? 'una gpu' : `${s.slotGpu} gpu`} (fino a ${s.gpuMax}) · ${s.slotVentole === 1 ? 'una ventola' : `${s.slotVentole} ventole`} · ${fmt(s.raffreddamento ?? 0)} W`
     case 'cpu': case 'gpu': return `hash ${fmtCorto(s.hash ?? 0)} · ${fmt(s.calore ?? 0)} W`
     case 'ventole': return `${fmt(s.raffreddamento ?? 0)} W l’una`
     case 'memoria': return `tiene ${fmt(s.ore ?? 0)} ore · ${pz(s.bonus ?? 0)}`

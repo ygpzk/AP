@@ -12,13 +12,19 @@
 // - GLI ANGOLI: un angolo (anche in gradi primi e secondi) in sessagesimali, sessadecimali, centesimali e radianti, col
 //   goniometro che lo disegna.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, esa } from './lcd.js'
 import * as icone from './icone.js'
 import { S, MODI, TASTI, LATI, ANG, num, dms, angolo, daRad, aRad, leggiNum, calcola, registra, risolvi, polari, fraDue, gauss, leggiAngolo } from '../../app/calcolatrice.js'
 import { ricorda } from '../../ricordi.js'
 import { txt, corto, destra, centro, pagine, impagina, scorrevole, senzaHtml, testata, striscia } from './pezzi.js'
 
 const salva = () => ricorda('calcolatrice', S)
+// (11.11, Alberto: «fai colori a 8bit su tutto»: pochi colori e con un senso, medi perché si leggano sull'arancione, sulla
+// carta e su «notte». Rosso: gli errori, AC e DEL che cancellano, il pezzo scelto del triangolo e l'angolo del goniometro;
+// verde: l'uguale; blu: il triangolo che si chiude, grigio quello qualunque. Il testo resta d'inchiostro)
+const ROSSO = esa('#cc0000'), VERDE = esa('#006600'), BLU = esa('#3366ff'), GRIGIO = esa('#999999'), BIANCO = esa('#ffffff')
+/** Un errore allineato a destra in xd: la fascia rossa col testo bianco (si legge su ogni sfondo, anche su «notte»). */
+const fasciaErrore = (l, xd, y, s) => { const w = Lcd.larghezza(s); l.riempi(xd - w - 2, y - 1, w + 4, 9, ROSSO); l.testo(xd - w, y, s, { col: BIANCO }) }
 const MODO = Object.keys(MODI) // gon, deg, rad
 const giraModo = (d) => { S.modo = MODO[(MODO.indexOf(S.modo) + d + MODO.length) % MODO.length]; salva() }
 const ang = (r) => txt(senzaHtml(angolo(r)))
@@ -35,8 +41,9 @@ const premi = (k) => {
 const prova = () => { if (!S.expr.trim()) return null; try { return { v: calcola(S.expr) } } catch (e) { return { errore: e.message } } }
 /** Una riga a scelta che si sposta saltando quelle che non si scelgono. */
 function passo(R, sel, d) { for (let i = 1; i <= R.length; i++) { const k = (sel + d * i + R.length * 2) % R.length; if (R[k].scegli !== false) return k } return sel }
-/** Una riga «nome ……… valore» (i puntini), rovesciata se è la scelta; con gira, il valore fra ◀ ▶ sulla riga scelta. */
-function riga(l, zona, { x0 = 10, x1 = 245, y, nome, val = '', on = false, gira = null, titolo = false, premi: clic = null, nmin = 1 }) {
+/** Una riga «nome ……… valore» (i puntini), rovesciata se è la scelta; con gira, il valore fra ◀ ▶ sulla riga scelta; col e
+ *  colNome: il colore del valore e del nome quando la riga non è la scelta (11.11: il «!» del triangolo, l'errore di Gauss). */
+function riga(l, zona, { x0 = 10, x1 = 245, y, nome, val = '', on = false, gira = null, titolo = false, premi: clic = null, nmin = 1, col = 1, colNome = 1 }) {
   const o = { inv: on }
   if (titolo) { l.testo(x0, y + 1, nome); for (let x = x0 + Lcd.larghezza(nome) + 4; x < x1; x += 2) l.px(x, y + 5); return }
   if (on) l.riempi(x0 - 2, y, x1 - x0 + 4, 9)
@@ -44,8 +51,8 @@ function riga(l, zona, { x0 = 10, x1 = 245, y, nome, val = '', on = false, gira 
   val = corto(val, Math.max(4, Math.floor((x1 - x0 - 6) / 6) - Math.min([...nome].length, nmin) - (gira && on ? 4 : 0)))
   const v = gira && on ? `◀ ${val} ▶` : val
   const vw = Lcd.larghezza(v), n = Math.max(1, Math.floor((x1 - x0 - vw - 6) / 6))
-  l.testo(x0, y + 1, corto(nome, n), o)
-  if (v) destra(l, x1, y + 1, v, o)
+  l.testo(x0, y + 1, corto(nome, n), on ? o : { col: colNome })
+  if (v) destra(l, x1, y + 1, v, on ? o : { col })
   if (clic) zona(x0 - 2, y, x1 - x0 + 4, 9, clic)
   if (gira && on) { zona(x1 - vw - 2, y - 1, 10, 11, () => gira(-1)); zona(x1 - 8, y - 1, 10, 11, () => gira(1)) }
 }
@@ -74,7 +81,9 @@ function tastierino(os, x) {
       if (t % 10 < 5) l.riempi(os.MARGINE + 4 + Lcd.larghezza(vis), 15, 4, 9)
       const p = prova(), ris = errore ? `! ${errore}` : !p ? (fatto !== null ? `= ${fatto}` : `ans = ${num(S.ans)}`) : p.errore ? '…' : `= ${num(p.v)}`
       const s = corto(txt(ris), 39)
-      if (lampo > 0 && lampo % 2) { l.riempi(W - os.MARGINE - Lcd.larghezza(s) - 4, 27, Lcd.larghezza(s) + 4, 9); destra(l, W - os.MARGINE - 2, 28, s, { inv: true }) }
+      // (11.11: l'uguale fatto lampeggia su una fascia verde, l'errore sta sulla fascia rossa)
+      if (errore) fasciaErrore(l, W - os.MARGINE - 2, 28, s)
+      else if (lampo > 0 && lampo % 2) { l.riempi(W - os.MARGINE - Lcd.larghezza(s) - 4, 27, Lcd.larghezza(s) + 4, 9, VERDE); destra(l, W - os.MARGINE - 2, 28, s, { col: BIANCO }) }
       else destra(l, W - os.MARGINE - 2, 28, s)
       // i tasti: 5 per fila, l'ultima fila ne ha 4 (lo = largo il doppio)
       TASTI.forEach((f, i) => {
@@ -82,8 +91,11 @@ function tastierino(os, x) {
         let xx = 8
         f.forEach((k, j) => {
           const w = i === 6 && k === '=' ? TX * 2 - 2 : TX - 2, on = i === r && j === c, eti = txt(ETI[k] ?? k)
-          if (on) l.riempi(xx, y, w, 11); else l.riquadro(xx, y, w, 11)
-          l.testo(xx + Math.round((w - Lcd.larghezza(eti)) / 2), y + 2, eti, { inv: on })
+          // (11.11: i tasti che cancellano rossi, l'uguale con la cornice verde, come sulle calcolatrici vere; il suo «=» resta
+          // d'inchiostro: il verde scuro su «notte» si leggeva poco)
+          const col = k === 'ac' || k === 'del' ? ROSSO : k === '=' ? VERDE : 1
+          if (on) l.riempi(xx, y, w, 11); else l.riquadro(xx, y, w, 11, col)
+          l.testo(xx + Math.round((w - Lcd.larghezza(eti)) / 2), y + 2, eti, on ? { inv: true } : { col: col === VERDE ? 1 : col })
           os.zona(xx, y, w, 11, () => { r = i; c = j; premiTasto(k) })
           xx += w + 2
         })
@@ -179,19 +191,31 @@ function disegnaTriangolo(l, x0, y0, w, h, r, scelto) {
   const k = Math.min((w - 16) / Math.max(1e-9, Mx - mx), (h - 18) / Math.max(1e-9, My - my))
   const P = (p) => [Math.round(x0 + 8 + (p[0] - mx) * k + ((w - 16) - (Mx - mx) * k) / 2), Math.round(y0 + h - 9 - (p[1] - my) * k)]
   const [pa, pb, pc] = [P(A), P(B), P(C)]
-  const lato = (p, q, grosso) => { linea(l, p[0], p[1], q[0], q[1]); if (grosso) { linea(l, p[0], p[1] - 1, q[0], q[1] - 1); linea(l, p[0] + 1, p[1], q[0] + 1, q[1]) } }
+  // (11.11: il triangolo che si chiude è blu, quello qualunque grigio; il pezzo scelto rosso, il lato più grosso e la lettera
+  // su una fascia rossa. I lati sono doppi: un filo colorato da un pixel sull'arancione quasi non si vedeva)
+  const tinta = r && !r.errore ? BLU : GRIGIO
+  const lato = (p, q, grosso) => {
+    linea2(l, p[0], p[1], q[0], q[1], grosso ? ROSSO : tinta)
+    if (grosso) { if (Math.abs(q[0] - p[0]) >= Math.abs(q[1] - p[1])) linea(l, p[0], p[1] + 1, q[0], q[1] + 1, ROSSO); else linea(l, p[0] - 1, p[1], q[0] - 1, q[1], ROSSO) }
+  }
   lato(pb, pc, scelto === 'a'); lato(pc, pa, scelto === 'b'); lato(pa, pb, scelto === 'c')
-  const metti = (s, p, on) => { const xx = Math.max(x0, Math.min(x0 + w - 6, p[0] - 2)), yy = Math.max(y0, Math.min(y0 + h - 8, p[1] - 3)); if (on) { l.riempi(xx - 1, yy - 1, 7, 9); l.testo(xx, yy, s, { inv: true }) } else { l.riempi(xx - 1, yy - 1, 7, 9, 0); l.testo(xx, yy, s) } }
+  const metti = (s, p, on) => { const xx = Math.max(x0, Math.min(x0 + w - 6, p[0] - 2)), yy = Math.max(y0, Math.min(y0 + h - 8, p[1] - 3)); if (on) { l.riempi(xx - 1, yy - 1, 7, 9, ROSSO); l.testo(xx, yy, s, { col: BIANCO }) } else { l.riempi(xx - 1, yy - 1, 7, 9, 0); l.testo(xx, yy, s) } }
   const m = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], cen = [(pa[0] + pb[0] + pc[0]) / 3, (pa[1] + pb[1] + pc[1]) / 3]
   const fuori = (p, d) => { const dx = p[0] - cen[0], dy = p[1] - cen[1], n = Math.hypot(dx, dy) || 1; return [p[0] + (dx / n) * d, p[1] + (dy / n) * d] }
   const dentro = (p, d) => { const dx = cen[0] - p[0], dy = cen[1] - p[1], n = Math.hypot(dx, dy) || 1; return [p[0] + (dx / n) * d, p[1] + (dy / n) * d] }
   metti('a', fuori(m(pb, pc), 6), scelto === 'a'); metti('b', fuori(m(pc, pa), 6), scelto === 'b'); metti('c', fuori(m(pa, pb), 6), scelto === 'c')
   metti('α', dentro(pa, 9), scelto === 'α'); metti('β', dentro(pb, 9), scelto === 'β'); metti('γ', dentro(pc, 9), scelto === 'γ')
 }
-function linea(l, x0, y0, x1, y1) {
+function linea(l, x0, y0, x1, y1, v = 1) {
   const dx = Math.abs(x1 - x0), dy = -Math.abs(y1 - y0), sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1
   let e = dx + dy
-  for (let i = 0; i < 2000; i++) { l.px(x0, y0); if (x0 === x1 && y0 === y1) return; const e2 = 2 * e; if (e2 >= dy) { e += dy; x0 += sx } if (e2 <= dx) { e += dx; y0 += sy } }
+  for (let i = 0; i < 2000; i++) { l.px(x0, y0, v); if (x0 === x1 && y0 === y1) return; const e2 = 2 * e; if (e2 >= dy) { e += dy; x0 += sx } if (e2 <= dx) { e += dx; y0 += sy } }
+}
+/** Una linea doppia (11.11: un filo colorato da un pixel, sull'arancione o su «notte», quasi non si vedeva): la seconda sopra
+ *  se la linea è piatta, a destra se è ripida. */
+function linea2(l, x0, y0, x1, y1, v) {
+  linea(l, x0, y0, x1, y1, v)
+  if (Math.abs(x1 - x0) >= Math.abs(y1 - y0)) linea(l, x0, y0 - 1, x1, y1 - 1, v); else linea(l, x0 + 1, y0, x1 + 1, y1, v)
 }
 
 export function vista(os) {
@@ -216,7 +240,7 @@ export function vista(os) {
       // il risultato mentre scrivi: grande, o l'errore, o ANS
       const p = prova()
       if (!p) destra(l, 245, 52, corto(`ans = ${txt(num(S.ans))}`, 38))
-      else if (p.errore) destra(l, 245, 52, corto(`! ${txt(p.errore)}`, 38))
+      else if (p.errore) fasciaErrore(l, 245, 52, corto(`! ${txt(p.errore)}`, 38)) // (11.11: sulla fascia rossa)
       else { const s = `= ${txt(num(p.v))}`, sc = Lcd.larghezza(s, 2) <= 235 ? 2 : 1; destra(l, 245, sc === 2 ? 50 : 52, corto(s, 38), { scala: sc }) }
       riga(l, x.zona, { y: 66, nome: 'angoli in', val: `${MODI[S.modo][0]} (${MODI[S.modo][1]})`, on: sc === 1, gira: giraModo, premi: () => { selC = 1; giraModo(1) } }) // (11.11: il clic sceglie e preme, come OK)
       if (!S.storia.length) { l.testo(10, 80, 'gli ultimi risultati vengono qui'); return }
@@ -283,7 +307,7 @@ export function vista(os) {
       const R = righeTri(), r = risolvi(S.tri)
       R.forEach((q, i) => {
         const val = q.k === 'ris' ? (r.errore ? (Object.keys(S.tri).length ? '!' : '') : `area ${num(r.area, 2)}`) : q.val
-        riga(l, x.zona, { x1: 140, y: 34 + i * 9, nome: q.nome, val: txt(val), on: i === selT, nmin: 8, gira: q.gira, premi: () => { selT = i; if (q.gira) q.gira(1); else datoTri(q, x) } })
+        riga(l, x.zona, { x1: 140, y: 34 + i * 9, nome: q.nome, val: txt(val), on: i === selT, nmin: 8, gira: q.gira, col: val === '!' ? ROSSO : 1, premi: () => { selT = i; if (q.gira) q.gira(1); else datoTri(q, x) } })
       })
       // il triangolo vero (o uno qualunque), e sotto cosa manca: l'errore lungo prende posto al triangolo (fino a 6 righe, poi «…»)
       const sotto = r.errore ? (Object.keys(S.tri).length ? r.errore : 'tre dati, almeno un lato') : r.seconda ? 'ci sono due soluzioni' : 'si chiude'
@@ -304,7 +328,7 @@ export function vista(os) {
   // ── le coordinate ──
   const C = () => Object.fromEntries(Object.entries(S.co).map(([k, v]) => [k, leggiNum(v)]))
   const dato = (k, nome) => ({ k, nome, val: S.co[k] ?? '', dato: true })
-  const esito = (nome, val) => ({ nome, val, scegli: false })
+  const esito = (nome, val, col = 1) => ({ nome, val, scegli: false, col })
   function righeCo() {
     const c = C(), p = polari(c), d = fraDue(c), g = S.co.vertici?.trim() ? gauss(S.co.vertici) : null
     return [
@@ -318,7 +342,7 @@ export function vista(os) {
       ...(d ? [esito('distanza AB', num(d.dist, 4)), esito('azimut AB', ang(d.az)), esito('reciproco BA', ang(d.reciproco))] : [esito('→', 'mancano dati')]),
       { titolo: true, nome: 'l’area con Gauss', scegli: false },
       { k: 'vertici', nome: 'i vertici', val: `${vertici().length}`, vertici: true },
-      ...(!g ? [] : g.errore ? [esito(`! ${g.errore}`, '')] : [esito('area', num(g.area, 4)), esito('perimetro', num(g.per, 4)), esito('verso', g.verso)]),
+      ...(!g ? [] : g.errore ? [esito(`! ${g.errore}`, '', ROSSO)] : [esito('area', num(g.area, 4)), esito('perimetro', num(g.per, 4)), esito('verso', g.verso)]),
     ]
   }
   let daK = 0
@@ -350,7 +374,7 @@ export function vista(os) {
     entra() { segueK() }, // (i vertici o la vecchia possono aver cambiato le righe)
     disegna(l, x) {
       const R = righeCo(), VIS = VIS_K, dk = Math.max(0, Math.min(daK, R.length - VIS)) // (una copia: lo stato lo tiene segueK)
-      R.slice(dk, dk + VIS).forEach((q, i) => riga(l, x.zona, { x1: 236, y: 34 + i * 9, nome: txt(q.nome), val: txt(q.val ?? ''), titolo: q.titolo, on: dk + i === selK, gira: q.gira, premi: q.scegli === false ? null : () => { selK = dk + i; segueK(); if (q.gira) q.gira(1); else datoCo(q, x) } }))
+      R.slice(dk, dk + VIS).forEach((q, i) => riga(l, x.zona, { x1: 236, y: 34 + i * 9, nome: txt(q.nome), val: txt(q.val ?? ''), titolo: q.titolo, on: dk + i === selK, gira: q.gira, colNome: q.col ?? 1, premi: q.scegli === false ? null : () => { selK = dk + i; segueK(); if (q.gira) q.gira(1); else datoCo(q, x) } }))
       const alta = VIS * 9 - 1, h = Math.max(6, Math.round((alta * VIS) / R.length)) // (il ritaglio lo fa pagine: qui l è spostato e non ce l'ha)
       l.vert(W - 9, 34, alta); l.riempi(W - 10, 34 + Math.round(((alta - h) * dk) / Math.max(1, R.length - VIS)), 3, h)
     },
@@ -382,9 +406,14 @@ export function vista(os) {
       const cx = 205, cy = 76, rr = 34, g = ((a.rad % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)
       for (let i = 0; i < 72; i++) { const q = (i / 72) * Math.PI * 2; l.px(Math.round(cx + Math.cos(q) * rr), Math.round(cy - Math.sin(q) * rr)) }
       for (let i = 0; i < 4; i++) { const q = (i * Math.PI) / 2; linea(l, Math.round(cx + Math.cos(q) * (rr - 3)), Math.round(cy - Math.sin(q) * (rr - 3)), Math.round(cx + Math.cos(q) * rr), Math.round(cy - Math.sin(q) * rr)) }
+      // (11.11) l'angolo è uno spicchio rosso pieno col suo raggio rosso: prima un arco a puntini d'inchiostro
+      for (let yy = -12; yy <= 12; yy++) for (let xx = -12; xx <= 12; xx++) {
+        if (xx * xx + yy * yy > 144) continue
+        const q = (Math.atan2(-yy, xx) + 2 * Math.PI) % (2 * Math.PI)
+        if (q <= g) l.px(cx + xx, cy + yy, ROSSO)
+      }
       linea(l, cx, cy, cx + rr, cy)
-      linea(l, cx, cy, Math.round(cx + Math.cos(g) * rr), Math.round(cy - Math.sin(g) * rr))
-      for (let i = 0; i <= 24; i++) { const q = (g * i) / 24; l.px(Math.round(cx + Math.cos(q) * 12), Math.round(cy - Math.sin(q) * 12)) } // (l'arco dell'angolo)
+      linea2(l, cx, cy, Math.round(cx + Math.cos(g) * rr), Math.round(cy - Math.sin(g) * rr), ROSSO)
       l.riempi(cx - 1, cy - 1, 3, 3)
     },
     tasto(k, x) {

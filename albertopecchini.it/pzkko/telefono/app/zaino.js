@@ -12,22 +12,23 @@ export const FILTRI = [['tutto', 'tutto'], ['usa', 'da usare'], ['tieni', 'da te
 export const tipoDi = (id) => (VENDIBILI.has(id) ? 'vendi' : PER_ID[id]?.tipo ?? 'tieni')
 export const resto = (ms) => { const m = Math.ceil(ms / 60000); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${m % 60} min` }
 
-/** I tasti di un pezzo: [{ eti, usa? , chat?, shop?, nero? }] (usa: si consuma qui; chat: il comando che lo fa; shop: lo shop). */
+/** I tasti di un pezzo: [{ eti, usa? , chat?, shop?, app?, nero? }] (usa: si consuma qui; chat: il comando che lo fa; shop: lo shop; app: l'app che lo apre). */
 export function azioniDi(id, x) {
   const t = tipoDi(id), b = []
   if (t === 'usa' && x.effetto) b.push({ eti: 'usa', usa: id })
   if (id === 'gratta') b.push({ eti: 'gratta', chat: 'gratta' })
   if (t === 'cassa') b.push({ eti: 'apri', chat: `apri ${id}` })
   if (t === 'vendi') b.push({ eti: 'vendi', chat: `vendi ${id} ${zaino.quanti(id)}` }, { eti: 'vendi tutto', chat: 'vendi tutto', nero: true })
+  if ((id === 'wallet-pzk' || id === 'chiavetta') && zaino.installata('decifratore')) b.push({ eti: 'decifra', app: 'decifratore' }) // (11.11: la scheda diceva «si apre con l'app decifratore» e non aveva un tasto per aprirla)
   if (x.prezzo) b.push({ eti: x.unico ? 'allo shop' : 'compra ancora', shop: true, nero: true })
   return b
 }
-/** Usa un pezzo da usare: si consuma e parte il suo effetto (31.10: lo fa la banca, 'chat.usa'). → il pezzo, o null. */
+/** Usa un pezzo da usare: si consuma e parte il suo effetto (31.10: lo fa la banca, 'chat.usa'). → il pezzo, null, o { errore }. */
 export async function usa(id) {
   const x = PER_ID[id]
   if (!x?.effetto || !zaino.ha(x.id)) return null
   const r = await pzk.fai('chat.usa', { id: x.id })
-  return r.ok ? x : null
+  return r.ok ? x : { errore: r.errore ?? 'non si può usare: riprova' } // (11.11: il motivo della banca, «niente rete: riprova», la galera…, si buttava via e lo zaino non sapeva dire perché)
 }
 /** Il nome senza l'articolo («un caffè» → «caffè»). */
 export const nomeCorto = (id) => { const x = PER_ID[id]; return x?.nome ? x.nome.replace(/^(un’|un |una |uno |il |la |l’)/i, '') : nomeDi(id) }

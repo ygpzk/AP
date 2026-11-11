@@ -210,7 +210,7 @@ Il premio giornaliero, L'esperienza e i livelli, Il rider
 Il controllo della build (workflow), Il bot dei bug, Vercel, Il progetto Vercel pzkko, Il server dei dati in casa, La banca sul server,
 Il contratto della banca, La regia del server, Il tunnel Tailscale, Vercel Blob, Il custode del server,
 Lo storico del server, Le API di pzkko, Le firme (API), Il meteo di Mantova (API), Il wallet (API), La borsa (API),
-I giocatori (API), Il canale (API), Il ponte firmato, albertopecchini.it, Better Call Pekko, rivaltasulmincio.it,
+I giocatori (API), Il canale (API), Il ponte firmato, Lo stato dei sistemi, L'hosting di Alberto, albertopecchini.it, Better Call Pekko, rivaltasulmincio.it,
 cascinafontana.xyz, Ing. Dario Donelli, Il credito nei siti dei clienti, Gli strumenti di albertopecchini.it,
 Le catture, Le copertine, Le figurine, Le mascotte, I burattini, L'aragosta e l'inchiostro, La cartina,
 Il generatore di email, Il compositore email, Lezioni (strumento), La nota in PDF, L'anteprima og, L'indirizzo .onion,

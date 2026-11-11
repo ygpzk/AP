@@ -12366,7 +12366,7 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 
 {{Vedi anche|Le app di pzk os|pzk os|Il cercapersone zero}}
 [[Categoria:Le app di pzk os]]` },
-  "Elenco dei commit": { data: "2026-11-11", fonti: ["README.md"], testo: `'''I 785 commit''' del [[Il repository AP|repository AP]] dal 2026-05-24 a oggi (l’ultimo: <code>d195e6e</code>, 2026-11-11). La lista completa, con filtri, sta in [[Speciale:UltimeModifiche|Ultime modifiche]]; la cronologia di ogni voce (la linguetta «Cronologia») elenca i commit che hanno toccato i suoi file. Generato da <code>git log</code> ogni volta che la wiki si aggiorna.
+  "Elenco dei commit": { data: "2026-11-11", fonti: ["README.md"], testo: `'''I 786 commit''' del [[Il repository AP|repository AP]] dal 2026-05-24 a oggi (l’ultimo: <code>732b789</code>, 2026-11-11). La lista completa, con filtri, sta in [[Speciale:UltimeModifiche|Ultime modifiche]]; la cronologia di ogni voce (la linguetta «Cronologia») elenca i commit che hanno toccato i suoi file. Generato da <code>git log</code> ogni volta che la wiki si aggiorna.
 
 == Per mese ==
 {| class="wikitable"
@@ -12393,10 +12393,11 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 | 190
 |-
 | 2026-11
-| 84
+| 85
 |}
 
 == Gli ultimi trenta ==
+* 2026-11-11 [https://github.com/albertoxpecchini/AP/commit/732b789 732b789] docs(wiki): pzkkopedia allineata, la miniera e il pezzo che non ci sta
 * 2026-11-11 [https://github.com/albertoxpecchini/AP/commit/d195e6e d195e6e] fix(pzk os): la miniera monta i pezzi comprati, e un agente per app ha corretto 198 errori
 * 2026-11-11 [https://github.com/albertoxpecchini/AP/commit/2d4b0a0 2d4b0a0] Catture aggiornate: pzkko
 * 2026-11-10 [https://github.com/albertoxpecchini/AP/commit/215c71d 215c71d] docs(wiki): il controllo delle pagine salta l'archivio della macchina del tempo
@@ -12426,7 +12427,6 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/65f5524 65f5524] docs(wiki): pzkkopedia allineata al bot dei bug (541f48c)
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/541f48c 541f48c] feat(tools): il bot dei bug di pzkko, che gira da solo a ogni push e due volte al giorno sul sito vero
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/f1454a7 f1454a7] docs(wiki): pzkkopedia allineata al bot dei bug (99f4342)
-* 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/99f4342 99f4342] feat(tools): il bot dei bug di pzkko, che gira da solo a ogni push e due volte al giorno sul sito vero
 
 == Dove si vede ==
 [[File:github.webp|thumb|none|380px|il repository AP su GitHub, con il numero dei commit]]

@@ -278,6 +278,8 @@ function footer({ route, compact = false }) {
         <div class="foot-legal" data-reveal="fade">
           <p class="foot-legal__id label">© ${year} ${esc(site.name)} · ${esc(legal)} · ${esc(site.location.city)} (${esc(site.location.province)}), Italia</p>
           <p class="foot-legal__credit label"><a class="uline" href="${esc(site.url)}" rel="author">Sito di ${esc(site.name)}</a> · ${esc(site.edition)}</p>
+          <!-- l'informatore dei sistemi (11.11.2026): src/client/stato.js lo riempie con /api/stato/; il dettaglio è su pzkko.it/stato/ -->
+          <a class="foot-legal__stato label" href="https://www.pzkko.it/stato/" data-stato data-tono="ignoto"><span class="stato__punto" aria-hidden="true"></span><span class="stato__testo">stato dei sistemi</span></a>
           <!-- Distintivo FrogDR col Domain Rating del dominio: è l'unica immagine
                caricata da un server esterno (vedi «Risorse di terze parti» in /cookie/). -->
           <a class="foot-legal__badge" href="https://frogdr.com/albertopecchini.it?utm_source=albertopecchini.it" target="_blank" rel="noopener"><img src="https://frogdr.com/albertopecchini.it/badge-dark-tiny.svg?round=1" alt="Domain Rating di albertopecchini.it misurato da FrogDR" width="224" height="20" loading="lazy" decoding="async"><span class="sr-only"> (nuova scheda)</span></a>

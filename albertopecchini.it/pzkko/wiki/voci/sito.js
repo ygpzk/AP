@@ -848,7 +848,7 @@ Per ora ce n'è uno, [[pzk$meeting]] (21.10.2026). PRODUCT.md (7.10) diceva: «Z
   },
 
   'La barra in alto': {
-    data: '2026-11-06',
+    data: '2026-11-11',
     fonti: ['albertopecchini.it/pzkko/barra/barra.js', 'albertopecchini.it/pzkko/barra/barra.css', 'albertopecchini.it/pzkko/barra/pagina.css', README],
     testo: `{{Citazione|fai una topbar con sezioni dove c'è la storia del sito, i gadget, elenchi di oggetti, achievement, account, info e copyright|Alberto, 26.10.2026}}
 {{Citazione|più in stile pzk, senza sfondo: pixel che escono dall'alto, tasti che sono pezzi di carta, scritte di vari font|Alberto, 26.10.2026}}
@@ -895,25 +895,31 @@ Si muove solo quando serve: alla prima pagina della visita cola giù; sotto il p
 == I suoni ==
 I pezzi di carta frusciano, e il loro link parte 120 ms dopo perché il fruscio si senta ([[I suoni dell'interfaccia]]). Con [[La musica|la musica]] accesa i link della barra passano da <code>vai</code>: la pagina si apre dentro [[La cornice|la cornice]], senza fermare la musica. La barra carica <code>suono/interfaccia.js</code>, quindi i suonini ci sono in ogni pagina. Il 27.10 un fix: «la barra cambia pagina anche quando il riquadro è rifiutato o si clicca due volte».
 
+Le pagine della barra (gadget, oggetti, traguardi, info) hanno nel piede, dall'11 novembre 2026, [[Lo stato dei sistemi|lo stato dei sistemi]]: la frase col pallino fermo che dice se il pc di Alberto è acceso e connesso, e porta a pzkko.it/stato/ (stili in <code>pagina.css</code>).
+
 {{Vedi anche|Gadget (pagina)|Oggetti (pagina)|Traguardi (pagina)|Info (pagina)|Pzkkopedia|La cornice}}
 [[Categoria:Il muro]]`,
   },
 
   'Gadget (pagina)': {
-    data: '2026-11-01',
+    data: '2026-11-11',
     fonti: ['albertopecchini.it/pzkko/gadget/index.html', 'albertopecchini.it/pzkko/barra/pagina.css', README],
     testo: `[[File:gadget.webp|thumb|pzkko.it/gadget/: tutto quello che si tocca sul muro, con il tasto per aprirlo]]
 '''Gadget''' (pzkko.it/gadget/, voce della [[La barra in alto|barra]] su cartone, carattere stencil) è la pagina con «tutto quello che si tocca sul muro», ognuno col tasto per aprirlo direttamente: [[Il wallet|il wallet]] (<code>/#wallet</code>) e [[Il cercapersone zero|il cercapersone zero]] (<code>/#chat</code>) in alto a sinistra; [[Le app di pzk os|le app del cercapersone]], «18, tutte in tasca» (chat, profilo, account, shop, pzkstore, sfide, quiz, quest, giocatori, zaino, miniera, foto, virtual, banca, bin·hex, calcoli, codice C, cucina; dal 1.11 ce ne sono anche lavatrice, decifratore e rapina nel menu di pzk os); [[I giochi|i giochi]] «coi $pzk, finti» (<code>/#roulette</code>, <code>#blackjack</code>, <code>#mine</code>, <code>#dado</code>, <code>#moneta</code>, <code>#virtual</code>); [[La regia|la regia]] e [[La petizione|la petizione]]. Le schede usano le piastrelle delle app di <code>art/chat-app*/</code> ([[Le icone di pzk os]]) e sono scritte a mano nell'HTML, col foglio col nastro di <code>barra/pagina.css</code>. È nella sitemap con priorità 0,5.
+
+Dall'11 novembre 2026 nel piede, sotto la firma, c'è [[Lo stato dei sistemi|lo stato dei sistemi]]: «● sistemi operativi · connessi dal pc di Alberto · controllato 2 min fa», che porta a pzkko.it/stato/.
 
 {{Vedi anche|La barra in alto|Le app di pzk os|I giochi}}
 [[Categoria:Il muro]]`,
   },
 
   'Oggetti (pagina)': {
-    data: '2026-10-26',
+    data: '2026-11-11',
     fonti: ['albertopecchini.it/pzkko/oggetti/index.html', 'albertopecchini.it/pzkko/oggetti/oggetti.js', 'albertopecchini.it/pzkko/chat/testi.js', 'albertopecchini.it/pzkko/chat/oggetti.js', README],
     testo: `[[File:oggetti.webp|thumb|pzkko.it/oggetti/: lo shop per reparto, il bottino, le facce]]
 '''Oggetti''' (pzkko.it/oggetti/, voce della [[La barra in alto|barra]] su post-it, a pennarello) è l'elenco di «tutto quello che si compra, si pesca, si caccia, si scava»: [[Lo shop|lo shop]] per [[I reparti dello shop|reparto]], il bottino con quanto spesso esce ([[I pesci|i pesci]], [[Le bestie|le bestie]], [[I reperti|i reperti]], la roba dell'[[Lo spazzino di uffici|ufficio]]), [[Le facce del profilo|le facce]] con rarità e prezzo, quelli tuoi segnati, la ricerca. <code>oggetti/oggetti.js</code> legge i dati veri di <code>chat/testi.js</code> e <code>chat/oggetti.js</code>: la stessa fonte dello [[Lo shop|shop]] del cercapersone e delle voci generate di pzkkopedia ([[Elenco degli oggetti]], [[Elenco dei pesci]], [[Elenco delle bestie]], [[Elenco dei reperti]]). I prezzi che contano, dal 31.10, sono quelli della [[La banca sul server|banca sul server]] (copie di questi file).
+
+Dall'11 novembre 2026 nel piede, sotto la firma, c'è [[Lo stato dei sistemi|lo stato dei sistemi]]: «● sistemi operativi · connessi dal pc di Alberto · controllato 2 min fa», che porta a pzkko.it/stato/.
 
 {{Vedi anche|Lo shop|Elenco degli oggetti|La barra in alto}}
 [[Categoria:Il muro]]
@@ -921,10 +927,12 @@ I pezzi di carta frusciano, e il loro link parte 120 ms dopo perché il fruscio 
   },
 
   'Traguardi (pagina)': {
-    data: '2026-10-26',
+    data: '2026-11-11',
     fonti: ['albertopecchini.it/pzkko/traguardi/index.html', 'albertopecchini.it/pzkko/traguardi/traguardi.js', 'albertopecchini.it/pzkko/chat/traguardi.js', README],
     testo: `[[File:traguardi.webp|thumb|pzkko.it/traguardi/: gli achievement, fatti e da fare]]
 '''Traguardi''' (pzkko.it/traguardi/, voce della [[La barra in alto|barra]] su carta rosa, carattere tondo) è la pagina degli achievement: «quelli fatti e quelli da fare». Legge <code>chat/traguardi.js</code>: 47 traguardi (erano 26 il 26.10 mattina) in sette gruppi (la banca, l'esperienza, la chat col bot, i giochi, testa e costanza, la cucina, il profilo), ognuno una funzione che legge [[Lo zaino|lo zaino]] e [[I $pzk|i soldi]] e dice a che punto sei, quindi valgono anche quelli fatti prima che esistessero. Col conto lo zaino è quello del conto; senza, quello di questa scheda del browser. Vedi [[I traguardi]] e [[Elenco dei traguardi]]; dallo zero si vedono anche nel [[Profilo (app)|profilo]].
+
+Dall'11 novembre 2026 nel piede, sotto la firma, c'è [[Lo stato dei sistemi|lo stato dei sistemi]]: «● sistemi operativi · connessi dal pc di Alberto · controllato 2 min fa», che porta a pzkko.it/stato/.
 
 {{Vedi anche|I traguardi|Elenco dei traguardi|La barra in alto}}
 [[Categoria:Il muro]]
@@ -932,7 +940,7 @@ I pezzi di carta frusciano, e il loro link parte 120 ms dopo perché il fruscio 
   },
 
   'Info (pagina)': {
-    data: '2026-10-26',
+    data: '2026-11-11',
     fonti: ['albertopecchini.it/pzkko/info/index.html', README],
     testo: `[[File:info.webp|thumb|pzkko.it/info/: cos'è, chi l'ha fatto, di chi è]]
 '''Info''' (pzkko.it/info/, voce della [[La barra in alto|barra]] su carta bianca, a mano) dice in un foglio «cos'è, chi l'ha fatto, di chi è»:
@@ -944,6 +952,8 @@ I pezzi di carta frusciano, e il loro link parte 120 ms dopo perché il fruscio 
 * '''la wiki''': «Arriva quando pzkko esce dalla beta» (dal 2.11.2026 c'è: [[Pzkkopedia]]);
 * '''copyright''': © 2026 Alberto Pecchini; i nomi e i marchi sui volantini sono dei loro proprietari.
 È anche la pagina «Sviluppatori» nel piè di pagina di pzkkopedia.
+
+Dall'11 novembre 2026 c'è anche «'''è acceso?'''»: i conti e la banca stanno su un server acceso sul pc di Alberto, non da Vercel; se il pc è spento la banca va in pausa e i conti aspettano. Com'è adesso lo dice [[Lo stato dei sistemi|lo stato dei sistemi]], che sta anche nel piede della pagina.
 
 {{Vedi anche|La barra in alto|I crediti di pzkko|Cosa si salva|Alberto Pecchini}}
 [[Categoria:Il muro]]`,

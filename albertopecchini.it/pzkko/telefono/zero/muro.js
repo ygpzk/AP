@@ -87,10 +87,10 @@ function vivo(tasto, os) {
   tasto.classList.add('os')
   const g = cv.getContext('2d', { alpha: false })
   const mezzo = document.createElement('canvas')
-  mezzo.width = 256; mezzo.height = 128
+  mezzo.width = 512; mezzo.height = 256 // (11.11: i pixel veri a doppia densità, os/lcd.js)
   const gm = mezzo.getContext('2d', { alpha: false })
   const misura = () => { const d = devicePixelRatio || 1, w = Math.max(1, Math.round(lcd.clientWidth * d)), h = Math.max(1, Math.round(lcd.clientHeight * d)); if (w !== cv.width || h !== cv.height) { cv.width = w; cv.height = h; return true } return false }
-  const disegna = () => { gm.imageSmoothingEnabled = false; gm.drawImage(os.lcd.canvas, 0, 0, 256, 128); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(mezzo, 0, 0, cv.width, cv.height) }
+  const disegna = () => { gm.imageSmoothingEnabled = false; gm.drawImage(os.lcd.canvas, 0, 0, 512, 256); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(mezzo, 0, 0, cv.width, cv.height) }
   misura()
   os.lcd.ascolta(disegna)
   new ResizeObserver(() => { if (misura()) disegna() }).observe(lcd)

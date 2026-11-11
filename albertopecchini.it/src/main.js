@@ -42,6 +42,8 @@ const initWrapped = onDemand('[data-wrapped]', 'initWrapped', () => import('./cl
 const initLive = onDemand('[data-live]', 'initLive', () => import('./client/live.js'))
 // la macchina del tempo: solo in /tempo/
 const initTempo = onDemand('[data-tempo]', 'initTempo', () => import('./client/tempo.js'))
+// l'informatore dei sistemi nel piè di pagina (è acceso il pc di Alberto?): in un pezzo a parte, dopo il resto
+const initStato = onDemand('[data-stato]', 'initStato', () => import('./client/stato.js'))
 
 const modules = [
   initTransitions,
@@ -73,6 +75,7 @@ const modules = [
   initWrapped,
   initLive,
   initTempo,
+  initStato,
   initParallax,
   initLume,
   initSpot,

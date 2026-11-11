@@ -8,7 +8,7 @@
 //
 //   node tools/cruscotto/cruscotto.mjs        qui, nella console che c'è
 
-import { execFile } from 'node:child_process'
+import { execFile, spawn } from 'node:child_process'
 import { statSync, statfsSync, existsSync } from 'node:fs'
 import http from 'node:http'
 import https from 'node:https'
@@ -16,6 +16,7 @@ import os from 'node:os'
 import { dirname, join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { CARTELLA, scrivi, leggi } from './diretta.mjs'
+import { limiti, riassunto } from './account.mjs'
 
 const QUI = dirname(fileURLToPath(import.meta.url))
 const VISTA = join(QUI, 'vista.mjs')
@@ -40,7 +41,8 @@ async function caricaVista() {
 }
 
 // ── le misure, raccolte in disparte ─────────────────────────────────────────
-const misure = { sistema: null, server: [], git: null, pubblici: null }
+const misure = { sistema: null, server: [], git: null, pubblici: null, storia: { cpu: [], ram: [] }, account: null, consumi: null, hosting: null }
+const STORIA = 120 // secondi di CPU e RAM per i grafici
 
 let cpuPrima = os.cpus()
 function sistema() {
@@ -63,7 +65,34 @@ function sistema() {
       dischi.push({ nome: d.slice(0, 2), liberi: s.bavail * s.bsize, totale: s.blocks * s.bsize })
     } catch {}
   }
-  misure.sistema = { cpu: totale ? attivo / totale : 0, ramLibera: os.freemem(), ramTotale: os.totalmem(), dischi, node: process.versions.node }
+  misure.sistema = { cpu: totale ? attivo / totale : 0, ramLibera: os.freemem(), ramTotale: os.totalmem(), dischi, node: process.versions.node, acceso: os.uptime(), nome: os.hostname(), cpus: ora.length }
+  const st = misure.storia
+  st.cpu.push(misure.sistema.cpu)
+  st.ram.push(1 - os.freemem() / os.totalmem())
+  if (st.cpu.length > STORIA) st.cpu.shift()
+  if (st.ram.length > STORIA) st.ram.shift()
+}
+
+// l'account di Claude (11.11.2026): i limiti da ~/.claude.json, i token contati da account.mjs in
+// un processo a parte (le trascrizioni sono più di un GB: qui non si blocca il disegno)
+let contando = false
+function account() {
+  try {
+    misure.account = limiti()
+    misure.consumi = riassunto()
+    // tutto quello che Alberto ospita: lo misura hosting.mjs (se c'è) in hosting.json
+    misure.hosting = leggi(join(CARTELLA, 'hosting.json'))
+  } catch {}
+}
+function contaToken() {
+  if (contando) return
+  contando = true
+  const p = spawn(process.execPath, [join(QUI, 'account.mjs'), '--conta'], { windowsHide: true, stdio: 'ignore' })
+  p.on('exit', () => {
+    contando = false
+    account()
+  })
+  p.on('error', () => (contando = false))
 }
 
 const SERVER = [
@@ -115,18 +144,30 @@ async function git() {
 
 // ── i tasti ─────────────────────────────────────────────────────────────────
 // gli altri tasti li decide la vista (vista.tasto), perché se ne aggiungano a regia aperta
-const tasti = { filtro: 'tutto', pausa: false, scorri: 0, sessione: null }
+const tasti = { filtro: 'tutto', pausa: false, scorri: 0, sessione: null, comando: null }
 let fermo = null // le righe del log congelate in pausa
 if (process.stdin.isTTY) {
   process.stdin.setRawMode(true)
   process.stdin.setEncoding('utf8')
   process.stdin.on('data', (k) => {
-    if (k === 'q' || k === '\u0003') esci()
+    // con la riga di comando aperta la «q» è una lettera; si esce anche con «:q»
+    if (k === '\u0003' || (k === 'q' && tasti.comando == null)) esci()
     const prima = tasti.sessione
     try {
       vista?.tasto?.(k, tasti)
     } catch {}
     if (tasti.sessione !== prima) git()
+    if (tasti.esci) esci()
+    if (tasti.aggiorna) {
+      // «:aggiorna» (o «r»): tutte le misure subito, senza aspettare il loro giro
+      tasti.aggiorna = false
+      server()
+      sito()
+      git()
+      account()
+      contaToken()
+      ospitati()
+    }
     disegna()
   })
 }
@@ -140,9 +181,20 @@ process.on('SIGINT', esci)
 // ── il giro ─────────────────────────────────────────────────────────────────
 let giro = 0
 let suonato = null
+let misura = ''
 function disegna() {
-  const W = Math.max(90, (out.columns || 150) - 1)
-  const H = Math.max(28, out.rows || 48)
+  // la finestra si misura a ogni giro: su Windows, se Alberto la stringe col mouse e il buffer
+  // non cambia, node non se ne accorge (out.columns restava 160 e il disegno usciva di lato)
+  let [cols, rows] = [out.columns || 150, out.rows || 48]
+  try {
+    ;[cols, rows] = out.getWindowSize()
+  } catch {}
+  if (`${cols}x${rows}` !== misura) {
+    misura = `${cols}x${rows}`
+    out.write(`${E}2J`)
+  }
+  const W = Math.max(90, cols - 1)
+  const H = Math.max(28, rows)
   giro++
   if (!vista) return out.write(`${E}H${E}2J la vista non si carica:\n${erroreVista}\n`)
   try {
@@ -173,5 +225,23 @@ setInterval(sistema, 1000)
 setInterval(server, 5000)
 setInterval(git, 10000)
 setInterval(sito, 60000)
+account()
+contaToken()
+setInterval(account, 20000)
+setInterval(contaToken, 60000)
+// tutto quello che Alberto ospita (hosting.mjs, ~5 s): ogni 5 minuti, in disparte, finché la regia è aperta
+let ospitando = false
+function ospitati() {
+  if (ospitando || !existsSync(join(QUI, 'hosting.mjs'))) return
+  ospitando = true
+  const p = spawn(process.execPath, [join(QUI, 'hosting.mjs')], { windowsHide: true, stdio: 'ignore' })
+  p.on('exit', () => {
+    ospitando = false
+    account()
+  })
+  p.on('error', () => (ospitando = false))
+}
+ospitati()
+setInterval(ospitati, 5 * 60 * 1000)
 setInterval(caricaVista, 700)
 setInterval(disegna, 250)

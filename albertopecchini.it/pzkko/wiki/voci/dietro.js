@@ -567,7 +567,7 @@ Per esempio i conti di ieri sera: <code>Stop-ScheduledTask pzkko-server</code>, 
   },
 
   'Le API di pzkko': {
-    data: '2026-10-31',
+    data: '2026-11-11',
     fonti: ['albertopecchini.it/pzkko/api/wallet.mjs', 'albertopecchini.it/pzkko/api/borsa.mjs', 'albertopecchini.it/pzkko/api/giocatori.mjs', 'albertopecchini.it/pzkko/api/meteo.mjs', 'albertopecchini.it/pzkko/api/firme.mjs', 'albertopecchini.it/pzkko/api/_server.mjs', 'albertopecchini.it/pzkko/games/live.js'],
     testo: `'''Le API di pzkko''' sono le funzioni serverless di [[Pzkko.it]] in <code>pzkko/api/*.mjs</code>, eseguite da [[Vercel]] e riesportate da <code>albertopecchini.it/api/*.js</code> finché la radice del progetto resta quella del sito ([[Il progetto Vercel pzkko]]). I file col trattino basso (<code>_server.mjs</code>, <code>_archivio.mjs</code>, <code>_borsa.mjs</code>, <code>_conti.mjs</code>, <code>_economia.mjs</code>, <code>_giocatori.mjs</code>) sono i pezzi comuni, non funzioni.
 
@@ -593,6 +593,8 @@ Per esempio i conti di ieri sera: <code>Stop-ScheduledTask pzkko-server</code>, 
 * dal 31 ottobre le decisioni (esiti, premi, zaino) le prende [[La banca sul server|la banca]] e la funzione del wallet le inoltra (<code>PUT /v1/api/&lt;nome&gt;</code>);
 * le funzioni durano al più 60 secondi (<code>maxDuration</code>); il limite del wallet è 900 richieste ogni 10 minuti;
 * in locale (<code>npm run dev:pzkko</code>) le serve <code>tools/dev.mjs</code> con l'archivio in memoria.
+
+Dall'11 novembre 2026 c'è anche <code>/api/stato/</code> (<code>stato.mjs</code>): se il pc di Alberto è acceso e connesso, la banca aperta, la macchina del tempo accesa e i siti su, in un minuto di cache ([[Lo stato dei sistemi]]).
 
 {{Vedi anche|Il ponte firmato|Il server dei dati in casa|Vercel|I conti|La borsa}}
 [[Categoria:Il server]]`,
@@ -681,19 +683,85 @@ Fu proprio questo consumo (due <code>head</code> ogni 3 secondi per istanza acce
   },
 
   'Il ponte firmato': {
-    data: '2026-10-31',
+    data: '2026-11-11',
     fonti: ['albertopecchini.it/pzkko/api/_server.mjs', 'albertopecchini.it/api/bcp.js'],
     testo: `'''Il ponte firmato''' è <code>pzkko/api/_server.mjs</code>: il modulo con cui le funzioni di [[Vercel]] parlano col [[Il server dei dati in casa|server dei dati in casa]]. Lo usano <code>_archivio.mjs</code> (i file JSON di pzkko), <code>firme.mjs</code> e <code>albertopecchini.it/api/bcp.js</code> (Better Call Pekko) quando nel progetto ci sono <code>PZKKO_SERVER_URL</code> (l'indirizzo del [[Il tunnel Tailscale|tunnel]], https) e <code>PZKKO_SERVER_SECRET</code>. Il 29 ottobre un fix ha fatto sì che «il segreto del server si legge anche incollato male» (spazi e virgolette intorno).
 
 == Come firma ==
 Ogni richiesta porta una firma HMAC-SHA256 con ora e nonce («niente richieste rimandate, niente server finti»); ogni risposta è firmata a sua volta e la funzione la rifiuta se la firma non torna. Scrive solo se l'ETag è ancora quello. Dal 31 ottobre fa anche da '''ponte''' per [[La banca sul server|la banca]]: <code>ponte</code> → <code>PUT /v1/api/&lt;nome&gt;</code>, così un'azione del browser (<code>pzk.fai</code>) arriva alla banca senza che il codice della banca stia su GitHub. Se il pc è spento, per 15 secondi alla volta risponde «in pausa».
 
+Dall'11 novembre 2026 c'è anche <code>chiedi(indirizzo)</code>: una chiamata firmata in sola lettura con un'attesa più corta (6 secondi, il parametro <code>scadenza</code> di <code>chiama</code>), per <code>GET /v1/salute</code> e la GET pubblica del wallet; la usa [[Lo stato dei sistemi]].
+
 {{Vedi anche|Il server dei dati in casa|La banca sul server|Le API di pzkko}}
 [[Categoria:Il server]]`,
   },
 
+  'Lo stato dei sistemi': {
+    data: '2026-11-11',
+    fonti: ['albertopecchini.it/pzkko/api/stato.mjs', 'albertopecchini.it/api/stato.js', 'albertopecchini.it/pzkko/api/_server.mjs', 'albertopecchini.it/pzkko/stato/index.html', 'albertopecchini.it/pzkko/stato/frase.js', 'albertopecchini.it/pzkko/stato/informatore.js', 'albertopecchini.it/src/client/stato.js', 'albertopecchini.it/src/templates/layout.js'],
+    testo: `{{Infobox
+| titolo = Lo stato dei sistemi
+| dove = pzkko.it/stato/, il piede delle pagine della barra, il piè di pagina di albertopecchini.it
+| dal = 11 novembre 2026
+| file = pzkko/api/stato.mjs, pzkko/stato/
+}}
+'''Lo stato dei sistemi''' è l'informatore che dice se [[Pzkko.it]] e gli altri siti girano connessi dal pc di [[Alberto Pecchini|Alberto]]: «● sistemi operativi · connessi dal pc di Alberto · controllato 2 min fa». È nato l'11 novembre 2026: «crea in ap e in pzk da qualche parte un informatore che dice che i sistemi vanno sempre connessi dal mio pc».
+
+== Da dove viene il dato ==
+Dal pc, attraverso [[Il ponte firmato|il ponte]] che c'era già, in sola lettura e senza niente salvato su [[Vercel]] (mai [[Vercel Blob]]). La funzione <code>/api/stato/</code> (<code>pzkko/api/stato.mjs</code>, riesportata da <code>api/stato.js</code>) fa quattro cose insieme:
+* '''il pc''': <code>GET /v1/salute</code> firmata al [[Il server dei dati in casa|server dei dati in casa]] (con <code>chiedi</code> di <code>_server.mjs</code>, al più 6 secondi): se risponde con la firma giusta, il pc è acceso, il [[Il tunnel Tailscale|tunnel]] va e il segreto torna; «acceso da» è da quando gira il server;
+* '''la banca''': la GET pubblica del wallet attraverso <code>/v1/api/wallet</code>, i totali come li vede chiunque ([[La banca sul server]]);
+* '''la macchina del tempo''': <code>/tempo/</code> attraverso il tunnel, senza firma ([[La macchina del tempo]]);
+* '''i siti''': albertopecchini.it, pzkko.it, rivaltasulmincio.it, cascinafontana.xyz, bettercallpekko.it e dariodonelli.vercel.app, misurati da Vercel (codice e millisecondi).
+Lo stato è <code>su</code>, <code>parziale</code> (il pc c'è, ma qualcos'altro no: la frase dice cosa) o <code>pc-spento</code>. L'indirizzo del tunnel e il nome del pc non escono mai. La risposta sta 60 secondi in cache sul CDN (<code>s-maxage=60, stale-while-revalidate=300</code>): al pc arriva al più una richiesta al minuto per regione, e <code>agg</code> è l'ora vera del controllo.
+
+Il progetto Vercel di albertopecchini.it non ha le variabili del server (<code>PZKKO_SERVER_URL</code>, <code>PZKKO_SERVER_SECRET</code>): lì la funzione gira la domanda a pzkko.it una volta sola (l'intestazione <code>x-pzk-stato-inoltro</code> impedisce i giri infiniti), così tutti e due i siti chiedono a <code>/api/stato/</code> e basta.
+
+== Dove si vede ==
+* '''pzkko.it/stato/''': un foglio come [[Info (pagina)|info]], con la frase, «il pc di casa» (server dei dati, banca, macchina del tempo) e «i siti», ognuno col pallino;
+* '''il piede''' di [[Gadget (pagina)|gadget]], [[Oggetti (pagina)|oggetti]], [[Traguardi (pagina)|traguardi]] e info, sotto la firma: la frase, che porta a /stato/. Non sul muro: la serranda non si tocca;
+* '''il piè di pagina di [[albertopecchini.it]]''', nella riga legale accanto a «Sito di Alberto Pecchini», che porta a pzkko.it/stato/.
+La frase la scrive un modulo solo, <code>pzkko/stato/frase.js</code>: pzkko lo carica così com'è (<code>stato/informatore.js</code>), albertopecchini.it lo mette nella build (<code>src/client/stato.js</code>, un pezzo a parte caricato solo dove c'è <code>[data-stato]</code>). Il pallino è fermo, niente alone che pulsa ([[Ferma quando è ferma]]): verde, giallo se qualcosa non va, rosso col pc spento, grigio se il controllo non risponde o è più vecchio di 20 minuti. Il testo si riscrive una volta al minuto («2 min fa» → «3 min fa»), il controllo si richiede ogni 5 minuti e solo con la scheda in vista.
+
+Lo stesso controllo visto dal pc, con anche i server locali e le attività pianificate, è [[L'hosting di Alberto]].
+
+{{Vedi anche|L'hosting di Alberto|Il ponte firmato|Il server dei dati in casa|Il tunnel Tailscale|Le API di pzkko}}
+[[Categoria:Il server]]`,
+  },
+
+  'L\'hosting di Alberto': {
+    data: '2026-11-11',
+    fonti: ['albertopecchini.it/tools/cruscotto/hosting.mjs'],
+    testo: `'''L'hosting di Alberto''' è <code>tools/cruscotto/hosting.mjs</code>: il controllo di tutto quello che Alberto ospita, nato l'11 novembre 2026 («rileva se tutto ciò che hosto vada»). Lo trova da solo, senza un elenco scritto a mano, e scrive <code>C:\\Users\\Alberto\\.cruscotto\\hosting.json</code>, che legge [[La regia di Claude|la regia]].
+
+== Cosa controlla ==
+{| class="wikitable"
+! gruppo !! da dove lo trova !! quando è su
+|-
+| sito || i siti di [[La macchina del tempo]] (<code>tools/tempo/siti.mjs</code>) e gli <code>url</code> del portfolio (<code>src/data/projects.js</code>), più l'apice senza www || 200; l'apice deve rimandare a www
+|-
+| api || le funzioni di <code>api/*.js</code>, ognuna sul suo dominio (<code>pzkko/api</code> → pzkko.it, bcp → bettercallpekko.it, il resto albertopecchini.it) || quelle del [[Il ponte firmato|ponte]] solo con 200 (la prova vera che il server di casa risponde attraverso Vercel); le altre se la funzione risponde (405 a una GET di un modulo, 401 di <code>/api/email-ai/</code> senza chiave)
+|-
+| tunnel || <code>tailscale status</code> e <code>tailscale funnel status --json</code> (le strade: <code>/</code> → 8787, <code>/tempo</code> → 8789, <code>/deutschland</code> → 8790) || il server dei dati risponde col 404 vuoto a chi non firma (è giusto); dal pc il tunnel passa dalla tailnet e prova poco
+|-
+| casa || le porte del tunnel, la [[La regia del server|regia del server]] (8788) e le attività pianificate della radice di Windows (<code>pzkko-server</code>, <code>tempo-server</code>) || risponde qualcosa / «In esecuzione»
+|-
+| sviluppo || Vite (5173) e il server di sviluppo di [[Deutschland]] (8790, e la sua strada nel tunnel) || accesi solo quando Alberto lavora: spenti non sono un guasto, e la regia non li conta
+|}
+Ogni controllo è <code>{ nome, gruppo, url, su, codice, ms, nota }</code>; il formato non si cambia, la regia lo legge. Una cartella dei Documenti con <code>vercel.json</code> che non somiglia a nessun dominio viene segnalata sotto la tabella.
+
+== Come si usa ==
+<code>node tools/cruscotto/hosting.mjs</code> (da <code>albertopecchini.it/</code>) stampa la tabella e scrive il file; <code>--giro</code> lo rifà ogni 60 secondi e mette una riga nel log della regia quando qualcosa cade o torna su; <code>--json</code> scrive soltanto. Guarda e basta: non riavvia niente e non tocca la banca né i dati.
+
+Il primo giro, l'11 novembre 2026 all'una di notte: tutto a posto tranne i server di sviluppo spenti e <code>/api/stato/</code> di pzkko.it, non ancora pubblicata ([[Lo stato dei sistemi]]). Il giro ha anche chiarito due cose: <code>/api/bcp/</code> su albertopecchini.it dice «in pausa» perché quel progetto non ha le variabili del server, ma non la usa nessuno (<code>/assistenza/</code> rimanda a bettercallpekko.it); e la strada <code>/deutschland</code> del tunnel dà 502 perché il server delle foto su 8790 serve solo per lo sviluppo (in produzione le foto vengono da B2, [[Il server delle foto di Deutschland]]).
+
+{{Vedi anche|Lo stato dei sistemi|La regia di Claude|Il server dei dati in casa|Il tunnel Tailscale|Vercel}}
+[[Categoria:Gli strumenti]]
+[[Categoria:Il server]]`,
+  },
+
   'albertopecchini.it': {
-    data: '2026-11-02',
+    data: '2026-11-11',
     fonti: ['albertopecchini.it/README.md', 'albertopecchini.it/src/templates/routes.js', 'albertopecchini.it/src/templates/layout.js', 'albertopecchini.it/src/templates/pages/home.js', 'albertopecchini.it/src/templates/pages/info.js', 'albertopecchini.it/src/templates/pages/stile.js', 'albertopecchini.it/src/data/site.js', 'albertopecchini.it/src/data/projects.js', 'albertopecchini.it/src/data/stile.js', 'albertopecchini.it/src/styles/tokens.css', 'albertopecchini.it/src/styles/base.css', 'albertopecchini.it/src/styles/components.css', 'albertopecchini.it/src/styles/layout.css', 'albertopecchini.it/src/styles/home.css', 'albertopecchini.it/src/styles/pages.css', 'albertopecchini.it/src/client/lume.js', 'albertopecchini.it/src/main.js', 'albertopecchini.it/plugins/site-pages.js', 'albertopecchini.it/vite.config.js'],
     testo: `{{Infobox
 | titolo = albertopecchini.it
@@ -728,6 +796,8 @@ Il titolo è «Diplomato geometra» (Geometra e Perito geometra sono titoli rise
 
 == Pubblicazione ==
 Progetto [[Vercel]] <code>albertopecchini.it</code>, Root Directory <code>albertopecchini.it</code>, ogni push su <code>main</code> in produzione; <code>albertopecchini.it</code> senza www rimanda a www con un 308. Esiste anche sull'[[L'indirizzo .onion|indirizzo .onion]], servito dal pc di Alberto. Il caso di studio del sito stesso è nel portfolio, con la pagina intera sull'iPhone 18 Pro a strisce; i case study di pzkko hanno il fun fact della [[La saracinesca di Bologna|saracinesca di Bologna]] e la sezione Tools con [[pzk$meeting]].
+
+Nella riga legale del piè di pagina, accanto a «Sito di Alberto Pecchini», dall'11 novembre 2026 c'è [[Lo stato dei sistemi|lo stato dei sistemi]] («● sistemi operativi · connessi dal pc di Alberto · controllato 2 min fa», <code>src/client/stato.js</code>, un pezzo a parte caricato solo dove c'è <code>[data-stato]</code>), che porta a pzkko.it/stato/.
 
 {{Vedi anche|Il repository AP|Gli strumenti di albertopecchini.it|Better Call Pekko|Pzkko.it|Vercel|Il credito nei siti dei clienti}}
 [[Categoria:I siti di Alberto]]`,
@@ -1050,9 +1120,18 @@ Le statistiche vengono dai commit già pubblici su GitHub, in ora italiana; nien
 [[Categoria:Gli strumenti]]`,
   },
 
+  'Agenti gratis': {
+    data: '2026-11-11',
+    fonti: ['albertopecchini.it/tools/pzkko/zero/agente-gratis.mjs'],
+    testo: `'''Agenti gratis''' è lo script che fa lavorare i subagenti del [[Il cercapersone zero|cercapersone zero]] (pzk os, le sue app) sui modelli gratis di FreeLLMAPI, il router locale, invece dei subagenti di Claude. Si lancia da albertopecchini.it con tools/pzkko/zero/agente-gratis.mjs: prende un compito, lo manda al router locale e scrive la risposta dove serve, così il lavoro sulle app non consuma i crediti di Claude. Le verifiche restano di Claude: il controllo di un'app passa da <code>prova.mjs</code> come sempre.
+
+== Vedi anche ==
+* [[La regia di Claude]]
+* [[Il cercapersone zero]]`,
+  },
   'La regia di Claude': {
     data: '2026-11-03',
-    fonti: ['albertopecchini.it/tools/cruscotto/cruscotto.mjs', 'albertopecchini.it/tools/cruscotto/vista.mjs', 'albertopecchini.it/tools/cruscotto/diretta.mjs', 'albertopecchini.it/tools/cruscotto/gancio.mjs', 'albertopecchini.it/tools/cruscotto/cruscotto.ps1', 'albertopecchini.it/tools/cruscotto/README.md'],
+    fonti: ['albertopecchini.it/tools/cruscotto/cruscotto.mjs', 'albertopecchini.it/tools/cruscotto/vista.mjs', 'albertopecchini.it/tools/cruscotto/diretta.mjs', 'albertopecchini.it/tools/cruscotto/gancio.mjs', 'albertopecchini.it/tools/cruscotto/cruscotto.ps1', 'albertopecchini.it/tools/cruscotto/README.md', 'albertopecchini.it/tools/cruscotto/modelli.mjs', 'albertopecchini.it/tools/cruscotto/account.mjs', 'albertopecchini.it/tools/cruscotto/hosting.mjs', 'albertopecchini.it/tools/cruscotto/regia-console.lnk', 'albertopecchini.it/tools/cruscotto/regia.ico', 'albertopecchini.it/tools/cruscotto/regia.png'],
     testo: `'''La regia di Claude''' è la finestra dove [[Alberto Pecchini|Alberto]] vede in diretta quello che [[Claude Code]] sta facendo, in qualsiasi lavoro: un cmd al centro dello schermo da 24 pollici (l'HP 24f). È nata il 3 novembre 2026 come cruscotto di [[La macchina del tempo]] («creami un cmd dove veda i progressi di quello che stai facendo, log in diretta e barre di download, aprilo al centro del desktop nello schermo da 24"»), e la sera stessa è diventata di tutti i lavori: «mostra quel cmd e impara per qualsiasi task di aprirlo, poi mentre che è aperto tu lavora per migliorarlo al massimo per i miei bisogni».
 
 == Cosa mostra ==
@@ -1060,6 +1139,9 @@ In cima lo stato di Claude: '''LAVORA''' (verde), '''TOCCA A TE''' (giallo, ha f
 
 == Come funziona ==
 I lavori scrivono in <code>C:\\Users\\Alberto\\.cruscotto</code> con <code>tools/cruscotto/diretta.mjs</code>: stati, barre, il piano, le note, il log. I ganci di Claude Code a livello utente (in qualsiasi progetto) lanciano <code>gancio.mjs</code> in background: a ogni richiesta la regia si apre se è chiusa (la fa nascere WMI, perché un figlio del gancio moriva con lui), e ogni strumento finisce nel log da solo. Ogni sessione scrive il suo file in <code>sessioni/</code> e firma le sue righe del log col suo «#sigla» (le prime quattro cifre del suo id): i ganci sono di tutto l'utente, e le prime sere le sessioni aperte insieme si rubavano lo stato. La fine del turno legge l'ultima risposta dalla trascrizione della sessione; una sessione vista per la prima volta a metà ripesca da lì anche la richiesta. I comandi di Claude ereditano <code>CLAUDE_CODE_SESSION_ID</code>, così anche le note e il piano scritti con <code>diretta.mjs</code> sono della sessione giusta. Il disegno e i tasti stanno in <code>vista.mjs</code>, che la finestra ricarica appena il file cambia: la si migliora mentre è aperta; quando cambia il guscio, <code>cruscotto.ps1 -Riavvia</code> la riapre. <code>cruscotto.ps1</code> riconosce lo schermo da 24 pollici dalle misure fisiche del monitor e spegne la «modifica rapida» della console, che a un clic bloccava il disegno.
+
+== I modelli gratis ==
+L'11 novembre 2026 Alberto ha installato FreeLLMAPI, un router che mette insieme i piani gratuiti di decine di fornitori di modelli (Kilo, OVH, AI Horde senza chiave; Groq, Google, OpenRouter e gli altri con una chiave gratuita) dietro un solo indirizzo sul suo computer, e poi: «in regia di claude lo voglio una dashboard fatta da te». È la finestra '''7 FREELLM''' (<code>tools/cruscotto/modelli.mjs</code> legge in sola lettura il database del router): in cima '''Usa ►''' col fornitore e il modello che hanno dato l'ultima risposta, poi il server acceso o spento, i fornitori, le richieste di oggi; sotto le ultime richieste e i fornitori del giorno, e ingrandita anche le 24 ore, i modelli più usati, i fornitori saltati e quelli fermi per i limiti. Dalla riga di comando <code>:freellm avvia</code>, <code>ferma</code> e <code>chiedi</code>: la risposta arriva nel log con il modello che l'ha data.
 
 {{Vedi anche|La macchina del tempo|Claude Code|Come lavora Alberto con Claude}}
 [[Categoria:Gli strumenti]]`,

@@ -3,9 +3,12 @@
 // (niente immagini da scaricare, niente retino: sagome pulite anche a 16 pixel). Un'icona di Alberto che qui non c'è
 // (art/chat-*, chat/icone.js) si prende dalla sua webp col retino di Bayer, come riserva. Le bitmap stanno in cache.
 //
-//   bitmap(nome, lato) → { w, h, bit } subito (se è SVG o già in cache), se no null e carica: quando arriva chiama chi s'è
+// Dall'11.11 a colori (la tavolozza a 8 bit di lcd.js, COLORI qui sotto) e ai pixel veri dello schermo (lato × D).
+//
+//   bitmap(nome, lato) → { w, h, d, px } subito (se è SVG o già in cache), se no null e carica: quando arriva chiama chi s'è
 //   messo in ascolto
 import { esiste, src } from '../../../chat/icone.js'
+import { D, colore } from './lcd.js'
 
 // i tracciati: ogni icona è una lista di percorsi SVG (riempiti), nel quadrato 16 × 16
 const SVG = {
@@ -73,6 +76,29 @@ const SVG = {
   matita: ['M11 1l4 4-9 9-5 1 1-5z M10 4l2 2-6 6-2-2z'],
   lucchetto: ['M3 7h10v8H3z M5 7V5a3 3 0 0 1 6 0v2H9V5a1 1 0 0 0-2 0v2z M7 9h2v3H7z'],
   rider: ['M5 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6z M11 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6z M7 12l2-6h3v1h-2l-1 3h3l-1 2z M9 3a2 2 0 1 1 0 .1z'],
+  // la cucina (os/cucina.js, 11.11): le webp chiare di burro, uova e parmigiano a un bit uscivano vuote nelle carte di «ordina»
+  burro: ['M1 6l3-3h11l-3 3z M1 7h11v6H1z M13 6l2-2v7l-2 2z'], // (il panetto: il sopra, il davanti, il fianco)
+  uova: ['M4.5 3C6.5 3 8 6 8 9s-1.5 5-3.5 5S1 12 1 9s1.5-6 3.5-6z M12 6c1.7 0 3 2 3 4.5S13.7 14 12 14s-3-1-3-3.5S10.3 6 12 6z'], // (due uova)
+  parmigiano: ['M1 13V9l13-5h1v9z M5 10h2v2H5z M10 8h2v2h-2z'], // (lo spicchio coi buchi)
+}
+
+
+// (11.11, Alberto: «colori a 8bit su tutto») i colori delle icone: uno per tracciato (o uno per tutti), presi dalla
+// tavolozza a 8 bit di lcd.js. Chi non ha colore resta dell'inchiostro del tema, come prima
+const COLORI = {
+  'app-chat': '#33ccff', 'app-profilo': '#ffcc66', 'app-account': '#99ccff', 'app-shop': '#ff6633', 'app-pzkstore': ['#3366ff', '#33cc33'],
+  'app-sfide': '#ffcc00', 'app-quiz': '#cc66ff', 'app-quest': ['#ffcc33', '#cc9966'], 'app-giocatori': '#66ccff', lente: '#99ccff',
+  'app-zaino': '#cc6633', 'app-miniera': '#cccccc', 'app-foto': '#ff6699', 'app-virtual': '#ffffff', 'app-banca': '#ffcc00',
+  'app-rapina': '#cc3333', sacco: '#cc9966', nonna: ['#cccccc', '#ffcc99', '#cc3366'], triangolo: '#33cc99', bussola: ['#cccccc', '#ff3300'],
+  goniometro: ['#66ccff', '#ff3300'], sirena: ['#ff3300', '#999999', '#ffcc00', '#ffcc00', '#ffcc00'], 'app-lavatrice': '#cccccc',
+  'app-decifratore': '#ffcc00', 'wallet-pzk': ['#996633', '#cc6633'], chiavetta: ['#3366ff', '#cccccc'], 'app-conversioni': '#33cc33',
+  'app-calcolatrice': '#999999', 'app-compilatore': '#3399ff', 'app-cucina': '#cccccc', 'app-home': '#ff9933', impostazioni: '#999999',
+  bot: '#cc9966', 'bot-pensa': '#cc9966', 'bot-ride': '#cc9966', 'bot-arrabbiato': '#ff6633', 'bot-morto': '#999999', 'bot-occhiolino': '#cc9966',
+  'bot-triste': '#6699cc', 'bot-ricco': '#ffcc00', 'chiocciola-oro': '#ffcc00',
+  gemma: '#33ccff', mina: '#666666', ciliegia: '#ff3333', limone: '#ffff33', sette: '#ff3300', campana: '#ffcc00', diamante: '#66ffff',
+  bar: '#ff3300', trifoglio: '#33cc33', anguria: '#ff3366', uva: '#9933cc', stella: '#ffcc00', dado: '#ffffff',
+  pzk: '#ffcc00', regalo: '#ff3366', clessidra: '#cc9966', teschio: '#ffffff', cornetto: '#ff3333', canna: '#996633',
+  trofeo: '#ffcc00', matita: '#ffcc00', lucchetto: '#ffcc00', rider: '#ff6633', burro: '#ffff99', uova: '#ffffcc', parmigiano: '#ffcc33',
 }
 
 const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
@@ -84,18 +110,33 @@ export const ascolta = (fn) => { ascolti.add(fn); return () => ascolti.delete(fn
 const tracciati = (nome) => { let v = SVG[nome]; while (typeof v === 'string') v = SVG[v]; return v ?? null }
 export const vettoriale = (nome) => !!tracciati(nome)
 
-/** La bitmap di un'icona SVG: riempita nel quadrato e ridotta a un bit (dove copre più di metà del pixel). */
+/** Dai pixel di una tela (rgba) agli indici della tavolozza: trasparente sotto metà, e il bordino d'inchiostro attorno alle
+ *  forme colorate (le icone gialle sul fondo arancione si perdevano). */
+function aIndici(dati, L, { bordo = true } = {}) {
+  const px = new Uint8Array(L * L)
+  for (let i = 0; i < L * L; i++) if (dati[i * 4 + 3] > 127) px[i] = colore(dati[i * 4], dati[i * 4 + 1], dati[i * 4 + 2])
+  if (bordo) {
+    const pieno = (x, y) => x >= 0 && y >= 0 && x < L && y < L && px[y * L + x] > 1
+    const out = px.slice()
+    for (let y = 0; y < L; y++) for (let x = 0; x < L; x++) if (!px[y * L + x] && (pieno(x - 1, y) || pieno(x + 1, y) || pieno(x, y - 1) || pieno(x, y + 1))) out[y * L + x] = 1
+    return out
+  }
+  return px
+}
+
+/** La bitmap di un'icona SVG, a colori e ai pixel veri (lato × D): ogni tracciato col suo colore, o l'inchiostro. */
 function daSvg(nome, lato) {
-  const cv = document.createElement('canvas')
-  cv.width = cv.height = lato
+  const L = lato * D, cv = document.createElement('canvas')
+  cv.width = cv.height = L
   const g = cv.getContext('2d', { willReadFrequently: true })
-  g.scale(lato / 16, lato / 16)
-  g.fillStyle = '#000'
-  for (const d of tracciati(nome)) g.fill(new Path2D(d), 'evenodd')
-  const dati = g.getImageData(0, 0, lato, lato).data
-  const bit = new Uint8Array(lato * lato)
-  for (let i = 0; i < lato * lato; i++) if (dati[i * 4 + 3] > 127) bit[i] = 1
-  return { w: lato, h: lato, bit }
+  g.scale(L / 16, L / 16)
+  const col = COLORI[nome], T = tracciati(nome)
+  T.forEach((d, i) => { const c = Array.isArray(col) ? col[i] ?? col[col.length - 1] : col; g.fillStyle = c ?? '#000'; g.fill(new Path2D(d), 'evenodd') })
+  const dati = g.getImageData(0, 0, L, L).data
+  let px
+  if (col) px = aIndici(dati, L)
+  else { px = new Uint8Array(L * L); for (let i = 0; i < L * L; i++) if (dati[i * 4 + 3] > 127) px[i] = 1 } // (senza colore: l'inchiostro, come prima)
+  return { w: lato, h: lato, d: D, px }
 }
 
 function carica(nome) {
@@ -108,8 +149,8 @@ function carica(nome) {
   immagini.set(nome, im)
   return im
 }
-/** La bitmap a un bit dell'icona, lato × lato. soglia: quanto scuro dev'essere un punto per diventare inchiostro (0–1), per le webp. */
-export function bitmap(nome, lato = 16, { soglia = 0.62 } = {}) {
+/** La bitmap dell'icona, lato × lato (pixel d'impaginazione), a colori: l'SVG se c'è, se no la webp di Alberto coi suoi colori. */
+export function bitmap(nome, lato = 16) {
   const k = `${nome}/${lato}`
   const c = cache.get(k)
   if (c && c !== 'carico') return c
@@ -117,29 +158,20 @@ export function bitmap(nome, lato = 16, { soglia = 0.62 } = {}) {
   if (!esiste(nome)) return null
   const im = carica(nome)
   if (!im.complete || !im.naturalWidth) { cache.set(k, 'carico'); return null }
-  const cv = document.createElement('canvas')
-  cv.width = cv.height = lato
+  const L = lato * D, cv = document.createElement('canvas')
+  cv.width = cv.height = L
   const g = cv.getContext('2d', { willReadFrequently: true })
   g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'
-  const s = Math.min(lato / im.naturalWidth, lato / im.naturalHeight), w = im.naturalWidth * s, h = im.naturalHeight * s
-  g.drawImage(im, (lato - w) / 2, (lato - h) / 2, w, h)
-  const d = g.getImageData(0, 0, lato, lato).data
-  const bit = new Uint8Array(lato * lato)
-  for (let y = 0; y < lato; y++) for (let x = 0; x < lato; x++) {
-    const o = (y * lato + x) * 4, a = d[o + 3] / 255
-    if (a < 0.3) continue
-    const lum = (0.299 * d[o] + 0.587 * d[o + 1] + 0.114 * d[o + 2]) / 255
-    const scuro = (1 - lum) * a
-    if (lato <= 16 ? scuro > 0.45 : scuro > (1 - soglia) + (BAYER[y & 3][x & 3] / 16) * soglia * 0.9) bit[y * lato + x] = 1
-  }
-  const b = { w: lato, h: lato, bit }
+  const s = Math.min(L / im.naturalWidth, L / im.naturalHeight), w = im.naturalWidth * s, h = im.naturalHeight * s
+  g.drawImage(im, (L - w) / 2, (L - h) / 2, w, h)
+  const b = { w: lato, h: lato, d: D, px: aIndici(g.getImageData(0, 0, L, L).data, L, { bordo: false }) } // (le webp di Alberto hanno già il bordo bianco)
   cache.set(k, b)
   return b
 }
 
-// ── le foto a un bit (29.10: il quiz e la galleria): la foto rimpicciolita a w × h, i livelli stirati, il retino di Bayer;
-// in cache per indirizzo e misura. → la bitmap, «carico» (poi() quando arriva) o «no» (non si carica, o il browser non la lascia
-// leggere) ──
+// ── le foto (29.10: il quiz e la galleria): rimpicciolite a w × h (ai pixel veri, w × D), a colori a 8 bit col retino di
+// Bayer; in cache per indirizzo e misura. → la bitmap, «carico» (poi() quando arriva) o «no» (non si carica, o il browser
+// non la lascia leggere) ──
 const foto_ = new Map() // url/w/h → bitmap | 'carico' | 'no'
 export function foto(url, w, h, poi = () => {}) {
   const k = `${url}/${w}/${h}`
@@ -150,34 +182,23 @@ export function foto(url, w, h, poi = () => {}) {
   im.crossOrigin = 'anonymous'; im.referrerPolicy = 'no-referrer'
   im.onload = () => {
     try {
-      const cv = document.createElement('canvas'), s = Math.min(w / im.naturalWidth, h / im.naturalHeight)
-      const fw = Math.max(1, Math.round(im.naturalWidth * s)), fh = Math.max(1, Math.round(im.naturalHeight * s))
-      cv.width = fw; cv.height = fh
+      const s = Math.min(w / im.naturalWidth, h / im.naturalHeight)
+      const fw = Math.max(1, Math.round(im.naturalWidth * s)), fh = Math.max(1, Math.round(im.naturalHeight * s)), PWf = fw * D, PHf = fh * D
+      const cv = document.createElement('canvas')
+      cv.width = PWf; cv.height = PHf
       const g = cv.getContext('2d', { willReadFrequently: true })
-      g.imageSmoothingQuality = 'high'; g.drawImage(im, 0, 0, fw, fh)
-      const d = g.getImageData(0, 0, fw, fh).data, lum = new Float32Array(fw * fh)
-      let lo = 1, hi = 0
-      for (let i = 0; i < fw * fh; i++) { const v = (0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]) / 255; lum[i] = v; lo = Math.min(lo, v); hi = Math.max(hi, v) }
-      const bit = new Uint8Array(fw * fh)
-      // la diffusione dell'errore (Floyd–Steinberg, a serpentina): sulle foto più dettaglio del retino di Bayer, che fa la griglia
-      const e = new Float32Array(fw * fh)
-      for (let i = 0; i < fw * fh; i++) e[i] = (lum[i] - lo) / Math.max(0.05, hi - lo)
-      for (let y = 0; y < fh; y++) {
-        const dx = y % 2 ? -1 : 1
-        for (let n = 0; n < fw; n++) {
-          const x = dx > 0 ? n : fw - 1 - n, i = y * fw + x, v = e[i], nero = v < 0.5
-          if (nero) bit[i] = 1
-          const err = v - (nero ? 0 : 1)
-          if (x + dx >= 0 && x + dx < fw) e[i + dx] += (err * 7) / 16
-          if (y + 1 < fh) { if (x - dx >= 0 && x - dx < fw) e[i + fw - dx] += (err * 3) / 16; e[i + fw] += (err * 5) / 16; if (x + dx >= 0 && x + dx < fw) e[i + fw + dx] += err / 16 }
-        }
+      g.imageSmoothingQuality = 'high'; g.drawImage(im, 0, 0, PWf, PHf)
+      const d = g.getImageData(0, 0, PWf, PHf).data, px = new Uint8Array(PWf * PHf)
+      for (let y = 0; y < PHf; y++) for (let x = 0; x < PWf; x++) {
+        const o = (y * PWf + x) * 4, t = (BAYER[y & 3][x & 3] / 16 - 0.47) * 40 // (il retino fra i 256 colori: le sfumature senza strisce)
+        const cl = (v) => Math.max(0, Math.min(255, v + t))
+        px[y * PWf + x] = colore(cl(d[o]), cl(d[o + 1]), cl(d[o + 2]))
       }
-      foto_.set(k, { w: fw, h: fh, bit })
+      foto_.set(k, { w: fw, h: fh, d: D, px })
     } catch { foto_.set(k, 'no') } // (la foto non si lascia leggere: niente)
     poi()
   }
-  im.onerror = () => { foto_.set(k, 'no'); poi() }
+  im.onerror = () => { foto_.set(k, 'no'); poi(); setTimeout(() => { if (foto_.get(k) === 'no') foto_.delete(k) }, 30000) } // (11.11: la rete caduta un momento lasciava il «?» per sempre; dopo 30 s il disegno dopo la richiede. Quella che il browser non lascia leggere, il catch, resta «no»)
   im.src = url
   return 'carico'
 }
-

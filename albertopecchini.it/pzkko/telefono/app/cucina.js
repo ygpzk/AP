@@ -94,6 +94,7 @@ export function votoDi([tipo, , o], par, mosse) {
 let coda = Promise.resolve()
 /** Apre una ricetta sulla banca. → Promise<{ ok, par: [i numeri di ogni passo] } | { ok: false, errore }> */
 export async function apri(r) {
+  await coda.catch(() => {}) // (11.11: un passo della ricetta di prima ancora in volo, INDIETRO e la stessa ricetta riaperta subito, poteva arrivare alla banca dopo l'apertura nuova e contare come il suo passo 0)
   coda = Promise.resolve()
   const d = await pzk.fai('cucina.apri', { ricetta: r.id })
   return d?.ok ? { ok: true, par: d.esito.par } : { ok: false, errore: d?.errore ?? 'la banca non risponde: riprova' }

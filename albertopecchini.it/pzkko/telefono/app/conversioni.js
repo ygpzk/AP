@@ -16,20 +16,22 @@ export function leggi(testo, b) {
   const neg = t.startsWith('-')
   if (neg || t.startsWith('+')) t = t.slice(1)
   const pre = /^0([BOX])/.exec(t)
-  if (pre) { b = { B: 2, O: 8, X: 16 }[pre[1]]; t = t.slice(2) }
-  if (!t) return { errore: 'scrivi un numero' }
+  // (11.11: in base 16 la B è una cifra: «0BAD» è 2989, non un binario sbagliato. 0X e 0O valgono sempre: X e O non sono cifre)
+  if (pre && !(pre[1] === 'B' && b === 16)) { b = { B: 2, O: 8, X: 16 }[pre[1]]; t = t.slice(2) }
+  // (11.11: anche con un errore si dice la base, che il prefisso può aver cambiato: bin·hex la scrive nella riga «scritto in»)
+  if (!t) return { errore: 'scrivi un numero', b }
   const [ip, fp = '', ...altro] = t.split(/[.,]/)
-  if (altro.length) return { errore: 'una virgola sola' }
+  if (altro.length) return { errore: 'una virgola sola', b }
   let int = 0n
   for (const c of ip || '0') {
     const v = CIFRE.indexOf(c)
-    if (v < 0 || v >= b) return { errore: `«${c}» non è una cifra in base ${b}` }
+    if (v < 0 || v >= b) return { errore: `«${c}» non è una cifra in base ${b}`, b }
     int = int * BigInt(b) + BigInt(v)
   }
   let fn = 0n, fd = 1n
   for (const c of fp) {
     const v = CIFRE.indexOf(c)
-    if (v < 0 || v >= b) return { errore: `«${c}» non è una cifra in base ${b}` }
+    if (v < 0 || v >= b) return { errore: `«${c}» non è una cifra in base ${b}`, b }
     fn = fn * BigInt(b) + BigInt(v); fd *= BigInt(b)
   }
   return { neg, int, fn, fd, fraz: fn > 0n, cifreFraz: fp.length, b }
@@ -84,7 +86,8 @@ export function passi(x, a) {
   if (a === 10) {
     const ci = intIn(x.int, da), cf = x.fraz ? frazIn(x, da).cifre.slice(0, x.cifreFraz || MAX_FRAZ) : ''
     const termini = [...ci].map((c, i) => [c, ci.length - 1 - i]).concat([...cf].map((c, i) => [c, -(i + 1)])).filter(([c]) => c !== '0')
-    out.push({ p: `ogni cifra per la sua potenza di ${da}, e si somma:` }, { tab: termini.slice(0, 40).map(([c, e]) => [`${c} × ${da}<sup>${e}</sup>`, fmt(CIFRE.indexOf(c) * da ** e)]) })
+    // (11.11: le potenze intere coi BigInt: con Number sopra 2^53 «F × 16^15» dava …705.000 invece di …704.640)
+    out.push({ p: `ogni cifra per la sua potenza di ${da}, e si somma:` }, { tab: termini.slice(0, 40).map(([c, e]) => [`${c} × ${da}<sup>${e}</sup>`, e >= 0 ? (BigInt(CIFRE.indexOf(c)) * BigInt(da) ** BigInt(e)).toLocaleString('it-IT') : fmt(CIFRE.indexOf(c) * da ** e)]) })
     if (termini.length > 40) out.push({ nota: '…e le altre, uguali.' })
     out.push({ fine: `= <b>${scritto(x, 10).vista}</b>` })
     return out
@@ -94,6 +97,9 @@ export function passi(x, a) {
   const div = []
   for (let n = x.int; n > 0n && div.length < 70; n /= BigInt(a)) div.push([`${n} : ${a}`, `${n / BigInt(a)}`, CIFRE[Number(n % BigInt(a))]])
   out.push({ p: `la parte intera si divide per ${a} finché resta 0; i resti, letti dal <b>basso</b> in alto, sono le cifre:` }, { tab: div.length ? div : [['0', '0', '0']], testa: ['divisione', 'quoziente', 'resto'] })
+  // (11.11: la tabella si ferma a 70 righe, e con 80 cifre verso il binario finiva a metà senza dirlo: le divisioni sono tante quante le cifre)
+  const tutte = x.int > 0n ? intIn(x.int, a).length : 0
+  if (tutte > div.length) out.push({ nota: `…e altre ${tutte - div.length} divisioni, uguali.` })
   if (x.fraz) {
     const mol = []
     let n = x.fn

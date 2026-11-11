@@ -7,9 +7,11 @@
 // - OK apre la MODIFICA: la faccia, il colore, la cornice e il motto, con l'anteprima del cartellino che cambia subito.
 // - LA FACCIA: la griglia di tutte le facce (quelle non tue sbiadite), sotto la grande col nome, la rarità e il prezzo.
 //   OK la mette o la compra (con un dialogo); le leggendarie chiuse dicono cosa manca.
-// Il colore, su un lcd a un bit, è una trama (TRAMA); la cornice si disegna davvero (nastro, oro, neon, pixel).
+// (11.11, Alberto: «fai colori a 8bit su tutto») il colore del cartellino è un colore vero (prima, sull'lcd a un bit, era
+// una trama): colora la cornice, che si disegna davvero (nastro, oro, neon, pixel) col bordino d'inchiostro. Verdi i $pzk
+// guadagnati e rossi i persi, le medaglie del podio, la rarità delle facce nel suo colore. Il resto del testo è d'inchiostro.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, esa, rgb, colore } from './lcd.js'
 import * as icone from './icone.js'
 import { txt, corto, destra, centro, sposta, testata, striscia } from './pezzi.js'
 import * as zaino from '../../../chat/zaino.js'
@@ -33,36 +35,58 @@ const pul = () => (pzk.sporchi() > 0 ? ' puliti' : '') // (si spendono solo quel
 const avOra = () => faccia(zaino.profilo().av, zaino.mestiere())
 /** Un'icona sempre: se la webp non è ancora arrivata, intanto la chiocciola (icone.ascolta ridisegna quando arriva). */
 const bm = (id, lato) => icone.bitmap(id, lato) ?? icone.bitmap('bot', lato)
-/** Un'icona sbiadita (le facce non tue): un pixel sì e uno no. */
-function sbiadita(l, b, x, y) { for (let j = 0; j < b.h; j++) for (let i = 0; i < b.w; i++) if (b.bit[j * b.w + i] && (i + j) % 2 === 0) l.px(x + i, y + j) }
+// ── i colori (11.11, Alberto: «fai colori a 8bit su tutto»): pochi, e solo dove dicono qualcosa ──
+const SU = '#33cc33', GIU = '#ff0000', XP = '#3399ff' // (i $pzk che entrano, quelli che escono, la barra degli xp)
+const MEDAGLIE = ['#ffcc33', '#cccccc', '#cc6633'] // (oro, argento e bronzo del podio)
+const lum = (c) => { const f = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4 }); return 0.2126 * f[0] + 0.7152 * f[1] + 0.0722 * f[2] }
+const stacco = (a, b) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) }
+let tema = null, toni = new Map()
+/** Lo sfondo di adesso (l è l'lcd vero, non quello spostato della pagina che scorre): i toni si rifanno quando cambia. */
+function sfondoDi(l) { if (l?.tema && l.tema !== tema) { tema = l.tema; toni = new Map() } }
+/** Un colore per il TESTO o per una barra, che si legga sullo sfondo scelto: lo stesso colore, scurito su un fondo chiaro e
+ *  schiarito su uno scuro finché stacca. (11.11: un solo verde non va: #33cc33 sulla carta e il rosso sull'arancione non si
+ *  leggevano, e un verde scuro su «notte» nemmeno. Verso il nero e non verso l'inchiostro: quello dell'arancione è bruno, e
+ *  il verde e il rosso diventavano tutti e due marroni.) → l'indice della tavolozza */
+function tono(hex) {
+  let i = toni.get(hex)
+  if (i !== undefined) return i
+  const f = tema?.fondo
+  const fondo = typeof f === 'function' ? f(261, 133) : f ?? [247, 161, 58] // (gli sfondi sfumati e a motivi: il loro mezzo, fuori dai puntini)
+  const meta = lum(fondo) > 0.18 ? 0 : 255, c = [1, 3, 5].map((k) => parseInt(hex.slice(k, k + 2), 16))
+  for (let t = 0; t <= 0.7001; t += 0.1) { i = colore(...c.map((v) => Math.round(v + (meta - v) * t))); if (stacco(rgb(i), fondo) >= 3) break }
+  toni.set(hex, i)
+  return i
+}
+/** Una medaglia tonda 7 × 7: il bordino d'inchiostro e dentro il colore. */
+const TONDA = ['..###..', '.#ooo#.', '#ooooo#', '#ooooo#', '#ooooo#', '.#ooo#.', '..###..']
+function medaglia(l, x, y, c) { TONDA.forEach((r, j) => [...r].forEach((p, i) => { if (p !== '.') l.px(x + i, y + j, p === '#' ? 1 : c) })) }
+/** Il colore di un numero che sale (verde) o scende (rosso); zero e niente restano d'inchiostro. */
+const verso = (x) => (x > 0 ? tono(SU) : x < 0 ? tono(GIU) : 1)
 
-// il colore del cartellino su un lcd a un bit: una trama per colore (nell'app giocatori gli altri lo vedono a colori)
-const TRAMA = {
-  verde: (x, y) => (x + y) % 2 === 0, giallo: (x, y) => x % 3 === 0 && y % 3 === 0, rosso: () => true, arancio: (x) => x % 2 === 0,
-  rosa: (x, y) => y % 2 === 0, viola: (x, y) => (x + y) % 3 === 0, blu: (x, y) => x % 2 === 0 || y % 2 === 0, bianco: () => false,
-}
+// (11.11) il colore del cartellino, vero: prima, sull'lcd a un bit, era una trama per colore (TRAMA)
+const tinta = (col) => esa(COLORI[col] ?? COLORI.verde)
 function campione(l, col, x, y, w = 13, h = 7, inv = false) {
-  const v = inv ? 0 : 1 // (dentro la fascia scura della riga scelta: rovesciato, se no scuro su scuro non si vede)
-  l.riquadro(x, y, w, h, v)
-  const t = TRAMA[col] ?? TRAMA.verde
-  for (let j = 1; j < h - 1; j++) for (let i = 1; i < w - 1; i++) if (t(i, j)) l.px(x + i, y + j, v)
+  l.riquadro(x, y, w, h, inv ? 0 : 1) // (dentro la fascia della riga scelta il bordino è del fondo, se no non si vede)
+  l.riempi(x + 1, y + 1, w - 2, h - 2, tinta(col))
 }
-/** La cornice del cartellino, disegnata: nastro (smussata), oro (doppia), neon (a puntini), pixel (spessa a gradini). */
-function cornice(l, tipo, x, y, w, h) {
+/** La cornice del cartellino, disegnata nel suo colore c col bordino d'inchiostro (un colore chiaro sulla carta non si vede
+ *  da solo): nastro (smussata, a nastro largo), oro (doppia, col colore in mezzo), neon (a puntini), pixel (spessa a gradini). */
+function cornice(l, tipo, x, y, w, h, c = 1) {
   if (tipo === 'nessuna') return
-  if (tipo === 'oro') { l.riquadro(x, y, w, h); l.riquadro(x + 2, y + 2, w - 4, h - 4); return }
+  if (tipo === 'oro') { l.riquadro(x, y, w, h); l.riquadro(x + 1, y + 1, w - 2, h - 2, c); l.riquadro(x + 2, y + 2, w - 4, h - 4); return }
   if (tipo === 'neon') {
-    for (let i = 1; i < w - 1; i += 2) { l.px(x + i, y); l.px(x + i, y + h - 1) }
-    for (let j = 1; j < h - 1; j += 2) { l.px(x, y + j); l.px(x + w - 1, y + j) }
-    l.cornice(x + 2, y + 2, w - 4, h - 4)
+    for (let i = 1; i < w - 1; i += 2) { l.px(x + i, y, c); l.px(x + i, y + h - 1, c) }
+    for (let j = 1; j < h - 1; j += 2) { l.px(x, y + j, c); l.px(x + w - 1, y + j, c) }
+    l.cornice(x + 2, y + 2, w - 4, h - 4, c); l.cornice(x + 3, y + 3, w - 6, h - 6)
     return
   }
   if (tipo === 'pixel') {
-    l.riempi(x + 3, y, w - 6, 2); l.riempi(x + 3, y + h - 2, w - 6, 2); l.riempi(x, y + 3, 2, h - 6); l.riempi(x + w - 2, y + 3, 2, h - 6)
-    for (const [a, b] of [[x + 1, y + 1], [x + w - 3, y + 1], [x + 1, y + h - 3], [x + w - 3, y + h - 3]]) l.riempi(a, b, 2, 2)
+    l.riempi(x + 3, y, w - 6, 2, c); l.riempi(x + 3, y + h - 2, w - 6, 2, c); l.riempi(x, y + 3, 2, h - 6, c); l.riempi(x + w - 2, y + 3, 2, h - 6, c)
+    for (const [a, b] of [[x + 1, y + 1], [x + w - 3, y + 1], [x + 1, y + h - 3], [x + w - 3, y + h - 3]]) l.riempi(a, b, 2, 2, c)
+    l.riquadro(x + 2, y + 2, w - 4, h - 4)
     return
   }
-  l.cornice(x, y, w, h)
+  l.cornice(x, y, w, h, c); l.cornice(x + 1, y + 1, w - 2, h - 2, c); l.cornice(x + 2, y + 2, w - 4, h - 4)
 }
 // ── il mio profilo dal server (il titolo, le posizioni in classifica): solo col conto ──
 // (di chi è e quando: cambiando conto restavano il titolo e le classifiche dell'altro, e non si rileggeva mai)
@@ -89,7 +113,7 @@ async function caricaIo(os) {
 // ── le pagine (y da 34 a 116; l è già spostato quando la pagina scorre) ──
 function pCartellino(l, k) {
   const pr = zaino.profilo(), c = pzk.conto(), liv = zaino.livello(), xp = zaino.xp(), da = zaino.xpPer(liv), a = zaino.xpPer(liv + 1)
-  cornice(l, pr.cor, 6, 33, 244, 84)
+  cornice(l, pr.cor, 6, 33, 244, 84, tinta(pr.col))
   l.bitmap(bm(avOra(), 32), 13, 39)
   // il bollino del livello sotto la faccia, nel suo posto da x 10 a 49 (dentro la cornice doppia, prima del nome a 52):
   // «liv 99» con due pixel d'aria, e solo il numero quando non ci sta (livello 100 e oltre; il ≤ 32 lo toglieva già dal 10)
@@ -107,20 +131,22 @@ function pCartellino(l, k) {
   const dm = Math.max(1, Math.min(2, rn.length)), posto = 3 - dm // (il motto comincia a 74 come sempre, a 83 se le note sono due righe)
   if (pr.mot) { const r = Lcd.acapo(txt(`"${pr.mot}"`), 32); r.slice(0, posto).forEach((s, i) => l.testo(52, 65 + (dm + i) * 9, i === posto - 1 && r.length > posto ? corto(`${s}…`, 32) : s)) } // (corto(s, 31) + «…» dava «……»)
   const p = Math.max(0, Math.min(1, (xp - da) / Math.max(1, a - da)))
-  l.riquadro(52, 94, 190, 5); l.riempi(53, 95, Math.round(188 * p * k), 3)
+  l.riquadro(52, 94, 190, 5); l.riempi(53, 95, Math.round(188 * p * k), 3, tono(XP)) // (11.11: la barra a colori, non più d'inchiostro)
   l.testo(52, 102, corto(`${f(xp - da)}/${f(a - da)} xp · ${f(xp)} in tutto`, 32))
 }
 function pSoldi(l) {
   const k = conti(pzk.conto()?.libro)
   const righe = [
     ['$pzk puliti', f(pzk.puliti())], ['sporchi (rapine)', pzk.sporchi() ? f(pzk.sporchi()) : '—'], ['EUR€', pzk.euro() >= 0.01 ? txt(pzk.fmtEur(pzk.euro())) : '—'],
-    ['guadagnati in tutto', segno(k.guadagnati)], [k.giochi < 0 ? 'persi ai giochi' : 'vinti ai giochi', segno(k.giochi)], ['lavoro e premi', f(k.lavoro)], ['spesi', k.spese ? `-${f(k.spese)}` : '0'],
+    // (11.11: i soldi che entrano verdi, quelli che escono rossi; il nome della riga dice lo stesso per chi non distingue i colori)
+    ['guadagnati in tutto', segno(k.guadagnati), verso(k.guadagnati)], [k.giochi < 0 ? 'persi ai giochi' : 'vinti ai giochi', segno(k.giochi), verso(k.giochi)],
+    ['lavoro e premi', f(k.lavoro), verso(k.lavoro)], ['spesi', k.spese ? `-${f(k.spese)}` : '0', verso(-k.spese)],
   ]
-  righe.forEach(([nome, v], i) => {
+  righe.forEach(([nome, v, col = 1], i) => {
     const y = 35 + i * 11, xa = 10 + Lcd.larghezza(nome) + 4, xb = 245 - Lcd.larghezza(v) - 4
     l.testo(10, y, nome)
     for (let x = xa; x < xb; x += 3) l.px(x, y + 6) // i puntini fra il nome e il numero
-    destra(l, 245, y, v)
+    destra(l, 245, y, v, { col })
   })
 }
 const GIOCHI = [['roulette', 'roulette'], ['blackjack', 'blackjack'], ['mine', 'mine'], ['dado', 'dadi'], ['moneta', 'testa/croce'], ['virtual', 'virtual']]
@@ -142,7 +168,7 @@ function pGiochi(l) {
     const [ma, vi, pu, to, mi] = v.map((x) => Number(x) || 0), y = 44 + i * 9
     l.testo(10, y, nome)
     if (!ma) { for (const xc of [112, 150, 200, 245]) destra(l, xc, y, '—'); return } // (mai giocato: un trattino per colonna)
-    destra(l, 112, y, f(ma)); destra(l, 150, y, pct(vi, ma)); destra(l, 200, y, segno(to - pu)); destra(l, 245, y, mi > 0 ? f(mi) : '—')
+    destra(l, 112, y, f(ma)); destra(l, 150, y, pct(vi, ma)); destra(l, 200, y, segno(to - pu), { col: verso(to - pu) }); destra(l, 245, y, mi > 0 ? f(mi) : '—')
   })
   l.orizz(8, 107, 240)
   l.testo(10, 109, `${f(k.mani)} mani · ${pct(k.vinte, k.mani)} vinte`)
@@ -176,6 +202,8 @@ function pClassifiche(l, k, t) {
   pos.forEach(([m, v], i) => {
     const y = 45 + i * 10
     destra(l, 50, y, `${f(v.pos)}°`) // (la colonna larga 40: «1.000°» passava il margine, ora al più «999,9K°»)
+    // (11.11) sul podio la medaglia: oro, argento, bronzo, tonda col bordino d'inchiostro, a sinistra del posto (che è corto)
+    if (v.pos >= 1 && v.pos <= 3) medaglia(l, 27, y, esa(MEDAGLIE[v.pos - 1]))
     const val = corto(db.valoreHtml(m, v.valore).replace(/<[^>]+>/g, ''), 12)
     destra(l, 245, y, val)
     // (6.11: i pari merito hanno lo stesso posto, come in classifica, e lo si dice; «(pari)» resta intero, si accorcia il nome)
@@ -210,6 +238,7 @@ export function vista(os) {
       if (ancora) os.ridisegna()
     },
     disegna(l, t) {
+      sfondoDi(l)
       const P = PAGINE[pag]
       // la testa: ◀ l'icona e il nome della pagina, i pallini, ▶ (tutto cliccabile: pezzi.js)
       testata(l, os, { icona: P.icona, nome: P.nome, n: PAGINE.length, pag, vai, va: (i) => { const d = i - pag; if (d) { pag = i; scorre = Math.sign(d) * 70; if (pag === 5 && daRileggere()) caricaIo(os) } } })
@@ -269,8 +298,8 @@ function modifica(os) {
     tic() { const prima = lampo; if (lampo > 0) lampo--; if (prima > 0 || attesa) os.ridisegna() }, // (anche la rotellina gira)
     disegna(l, t) {
       const p = pr()
-      // l'anteprima: il cartellino com'è adesso (lampeggia quando cambia)
-      cornice(l, p.cor, 6, 14, 244, 45)
+      // l'anteprima: il cartellino com'è adesso, nel suo colore (lampeggia quando cambia)
+      cornice(l, p.cor, 6, 14, 244, 45, tinta(p.col))
       l.bitmap(bm(avOra(), 32), 13, 20, { inv: lampo % 2 === 1 })
       l.testo(52, 18, corto(pzk.conto()?.nome ?? 'ospite', 16), { scala: 2 })
       campione(l, p.col, 52, 36); l.testo(70, 36, p.col)
@@ -340,6 +369,7 @@ function griglia(os) {
     esci() { via.forEach((x) => x()); via = [] },
     tic() { const prima = lampo; if (lampo > 0) lampo--; if (prima > 0 || attesa) os.ridisegna() }, // (anche la rotellina gira)
     disegna(l, t) {
+      sfondoDi(l)
       const tutte = facce(), uso = avOra(), n = tutte.length
       l.bitmap(icone.bitmap('app-profilo', 16), 8, 13)
       l.testo(28, 17, 'la faccia')
@@ -350,7 +380,7 @@ function griglia(os) {
         const b = bm(x.id, 16)
         if (x.mia) l.bitmap(b, cx + 1, cy + 1, { inv: on })
         else if (on) l.bitmap(b, cx + 1, cy + 1, { inv: true })
-        else sbiadita(l, b, cx + 1, cy + 1)
+        else l.bitmap(b, cx + 1, cy + 1, { sbiadita: true }) // (11.11: un pixel vero sì e uno no, coi suoi colori: os/lcd.js)
         if (x.id === uso) l.orizz(cx + 3, cy + LATO - 1, LATO - 6, on ? 0 : 1) // (la sottolineatura: quella in uso)
         if (!attesa) os.zona(cx, cy, LATO, LATO, () => { sel = i; premi() }) // (aspettando la banca il clic non fa partire altro)
       })
@@ -360,12 +390,14 @@ function griglia(os) {
       const yi = Y0 + Math.ceil(n / COL) * LATO + 3
       l.bitmap(bm(x.id, 32), 8, yi)
       // (11.11: si accorcia il nome, non la rarità: «rana (che ti guarda male) · comu…», «CARPA D’ORO DEI GONZAGA · leggen…»)
-      const rar = ` · ${x.rarita?.nome ?? ''}`
-      l.testo(46, yi + 1, corto(nomeAv(x.id), 33 - rar.length) + rar)
+      // (11.11: la rarità nel suo colore, quello della pagina /oggetti/, scurito sulla carta perché si legga)
+      const rar = x.rarita?.nome ?? '', testa = `${corto(nomeAv(x.id), 30 - rar.length)} · `
+      l.testo(46, yi + 1, testa)
+      l.testo(46 + Lcd.larghezza(testa) + 1, yi + 1, rar, { col: x.rarita?.colore ? tono(x.rarita.colore) : 1 })
       // (11.11: in galera o senza abbastanza puliti diceva lo stesso «OK e la compri», e OK non la comprava)
       const puoi = !pzk.inGalera() && x.prezzo <= pzk.puliti()
       const stato = x.mia ? (x.id === uso ? 'tua, ce l’hai addosso' : 'tua: OK e la metti') : x.bloccata ? `chiusa: ${x.bloccata}` : puoi ? `${intero(x.prezzo)} $pzk: OK e la compri` : `costa ${intero(x.prezzo)} $pzk`
-      l.testo(46, yi + 10, corto(stato, 33))
+      l.testo(46, yi + 10, corto(stato, 33), { col: !x.mia && !x.bloccata && !puoi ? tono(GIU) : 1 }) // (11.11: rosso quando non te la puoi comprare)
       // (la rotellina qui e non nella striscia in fondo, che coprirebbe la faccia grande)
       if (attesa) l.testo(46, yi + 19, corto(`${ruota(t)} ${attesa}…`, 33))
       else if (!x.mia && !x.bloccata) l.testo(46, yi + 19, corto(pzk.inGalera() ? `in galera fino alle ${ora(pzk.galera())}` : `ne hai ${intero(pzk.puliti())}${pul()}`, 33))

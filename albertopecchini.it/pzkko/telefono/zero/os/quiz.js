@@ -5,15 +5,19 @@
 // - L'INGRESSO: le regole in una riga, quante pagate restano oggi, il record, le giuste; sotto gli argomenti (↑ ↓, OK parte).
 // - LA DOMANDA: a che punto sei e i pallini (pieno giusta, x sbagliata), la barra dei 15 secondi che si accorcia (gli ultimi
 //   tre ticchettano), la difficoltà col premio, la serie; il testo; le quattro risposte A–D (↑ ↓ e OK, o i tasti a–d e 1–4;
-//   la scelta lunga scorre da sola). Le foto arrivano a un bit col retino di Bayer (se il browser non le lascia leggere, si tira
-//   a indovinare). Risposto: la giusta col ✓, la tua sbagliata con la x, al posto della domanda la spiegazione, in fondo il
+//   la scelta lunga scorre da sola). Le foto arrivano a colori, nei 256 della tavolozza (se il browser non le lascia leggere, si
+//   tira a indovinare). Risposto: la giusta col ✓, la tua sbagliata con la x, al posto della domanda la spiegazione, in fondo il
 //   premio; poi la prossima arriva da sola (2.11, Alberto: «fai che i quiz avanzino senza premere ogni volta enter»): 2,5 s
 //   dopo una giusta, 4,5 s dopo una sbagliata (c'è la spiegazione da leggere), con la barretta che si accorcia sopra
 //   l'esito; OK va avanti subito. INDIETRO chiede se lasciare la partita (si ferma l'attesa dell'esito, non il tempo della
 //   domanda: quello lo conta la banca).
 // - IL RIEPILOGO: quante giuste, i pallini, quanto hai preso, e i tasti argomenti e ancora.
+// (11.11, Alberto: «fai colori a 8bit su tutto») I colori dicono com'è andata, e basta: verde la giusta (il pallino, la riga
+// col ✓, l'esito, i soldi presi), rosso la sbagliata (il pallino con la x, la riga con la x, l'esito) e gli ultimi tre secondi
+// della barra del tempo. Il resto è d'inchiostro. Le scritte colorate stanno su una fascia col testo nero o bianco, che si
+// legge su tutti gli sfondi; il ✓ e la x restano per chi distingue male il verde dal rosso.
 // Le regole: os/REGOLE.md.
-import { Lcd, W, H } from './lcd.js'
+import { Lcd, W, H, C, esa } from './lcd.js'
 import * as icone from './icone.js'
 import { foto as fotoBitmap } from './icone.js'
 import * as zaino from '../../../chat/zaino.js'
@@ -27,6 +31,16 @@ const DOPO = { giusta: 2500, sbagliata: 4500 } // quanto resta l'esito prima del
 // (11.11) la banca non prende risposte date prima di 700 ms dalla domanda («troppo in fretta»): un OK di troppo appena
 // arrivata la domanda chiudeva la partita con quel dialogo. Prima di così la risposta aspetta, con la rotellina, e poi parte
 const PRIMA = 800
+// (11.11) i colori: fasce piene col loro testo fisso (nero sul verde, bianco sul rosso scuro), così non dipendono dallo sfondo
+// (l'inchiostro chiaro di «notte» sul verde non si leggeva); il rosso è scuro perché sull'arancione quello acceso spariva
+const VERDE = C.verde, ROSSO = esa('#cc0000'), SU_VERDE = C.nero, SU_ROSSO = C.bianco
+/** Il pallino di una risposta data (lato 7 nella domanda, 9 nel riepilogo): la cornice d'inchiostro, dentro verde pieno se
+ *  giusta, rosso con la x bianca se sbagliata (la x c'era già col bit unico: resta per chi non distingue i colori). */
+function pallino(l, x, y, lato, giusta) {
+  l.riquadro(x, y, lato, lato)
+  l.riempi(x + 1, y + 1, lato - 2, lato - 2, giusta ? VERDE : ROSSO)
+  if (!giusta) for (let k = 1; k < lato - 1; k++) { l.px(x + k, y + k, SU_ROSSO); l.px(x + lato - 1 - k, y + k, SU_ROSSO) }
+}
 
 // ── il riepilogo ──
 function fine(os, p, ancora, argomenti) {
@@ -54,9 +68,12 @@ function fine(os, p, ancora, argomenti) {
       // (il bonus lo paga la banca solo con cinque domande o più e almeno una pagata: si dice quello che è successo)
       // (11.11) su due righe: in una «non male: sapevi più di quanto s…» restava tagliata a metà parola
       Lcd.acapo(perfetta ? (p.bonus ? 'perfetto: il bonus è tuo.' : 'perfetto! (stavolta niente bonus)') : p.giuste >= p.n / 2 ? 'non male: sapevi più di quanto sembri.' : 'si impara anche sbagliando.', 32).slice(0, 2).forEach((r, i) => l.testo(48, 36 + i * 9, corto(r, 32)))
-      p.esiti.forEach((x, i) => { const xp = Math.round(W / 2 - (p.esiti.length * 12) / 2) + i * 12; if (x) l.riempi(xp, 54, 9, 9); else { l.riquadro(xp, 54, 9, 9); for (let k = 2; k < 7; k++) { l.px(xp + k, 54 + k); l.px(xp + 8 - k, 54 + k) } } })
-      centro(l, 70, corto(`+${fmt(p.guadagnato)} $pzk · +${p.xp} xp`, 38))
-      centro(l, 80, corto(`${quiz.restanti()} risposte pagate rimaste oggi`, 38))
+      p.esiti.forEach((x, i) => pallino(l, Math.round(W / 2 - (p.esiti.length * 12) / 2) + i * 12, 54, 9, x)) // (11.11 a colori: prima pieno o con la x, d'inchiostro)
+      // (11.11) i soldi presi su una fascia verde (col testo nero: si legge su ogni sfondo); senza soldi, d'inchiostro come prima
+      const preso = corto(`+${fmt(p.guadagnato)} $pzk · +${p.xp} xp`, 38)
+      if (p.guadagnato > 0) { const wp = Lcd.larghezza(preso) + 8; l.riempi(Math.round(W / 2 - wp / 2), 68, wp, 10, VERDE); centro(l, 70, preso, { col: SU_VERDE }) }
+      else centro(l, 70, preso)
+      centro(l, 81, corto(`${quiz.restanti()} risposte pagate rimaste oggi`, 38))
       bottoni(l, os.zona, { etichette: ['argomenti', 'ancora'], sel, y: 99, premi: (i) => { if (attesa) return; sel = i; premi(i) } })
       if (!striscia(l, { esito, attesa }, t)) centro(l, H - 9, '←→ sceglie · OK preme')
     },
@@ -140,13 +157,13 @@ function partita(os, p, arg, torna) {
       l.testo(10, 14, `domanda ${Math.min(p.i + (risposto ? 0 : 1), n)}/${n}`)
       for (let i = 0; i < n; i++) {
         const xp = W - 12 - (n - i) * 9
-        if (i < p.esiti.length) { if (p.esiti[i]) l.riempi(xp, 14, 7, 7); else { l.riquadro(xp, 14, 7, 7); for (let k = 1; k < 6; k++) { l.px(xp + k, 14 + k); l.px(xp + 6 - k, 14 + k) } } }
+        if (i < p.esiti.length) pallino(l, xp, 14, 7, p.esiti[i]) // (11.11 verde o rosso con la x)
         else if (i === p.esiti.length && !risposto) { if (t % 10 < 6) l.riquadro(xp, 14, 7, 7) } // (quella di adesso lampeggia)
         else l.px(xp + 3, 17)
       }
       // il tempo che resta
       const k = resto() / (quiz.TEMPO * 1000)
-      l.riquadro(10, 24, 208, 5); l.riempi(11, 25, Math.round(206 * k), 3)
+      l.riquadro(10, 24, 208, 5); l.riempi(11, 25, Math.round(206 * k), 3, resto() > 3000 ? VERDE : ROSSO) // (11.11 verde, rossa negli ultimi tre secondi, quelli che ticchettano)
       destra(l, 245, 23, `${Math.ceil(resto() / 1000)}"`)
       l.testo(10, 32, `${NOMI[d.diff]} · ${quiz.PAGA[d.diff]} $pzk`)
       if (p.serie > 1 || (risposto?.serie ?? 0) > 1) destra(l, 245, 32, `serie ${risposto ? risposto.serie : p.serie}`)
@@ -170,13 +187,15 @@ function partita(os, p, arg, torna) {
       d.risposte.forEach((r, i) => {
         const y = y0 + i * passo, on = !risposto && i === sel
         const segno = risposto ? (i === risposto.indiceGiusto ? '✓' : i === scelta ? 'x' : LETTERE[i]) : LETTERE[i]
-        if (on) l.riempi(xr - 4, y - 2, 245 - xr + 8, passo - 1)
+        // (11.11) risposto, la giusta su una fascia verde e la tua sbagliata su una rossa (prima: incorniciate, d'inchiostro)
+        const giu = risposto && i === risposto.indiceGiusto, tua = risposto && !giu && i === scelta
+        const fascia = on ? 1 : giu ? VERDE : tua ? ROSSO : 0, o = on ? { inv: true } : giu ? { col: SU_VERDE } : tua ? { col: SU_ROSSO } : {}
+        if (fascia) l.riempi(xr - 4, y - 2, 245 - xr + 8, passo - 1, fascia)
         const spazio = Math.floor((245 - xr - 11) / 6), testoR = txt(r)
         let vis = testoR
         if (testoR.length > spazio) vis = on ? (testoR + '   ' + testoR).slice(scorri % (testoR.length + 3), scorri % (testoR.length + 3) + spazio) : corto(testoR, spazio) // (la scelta lunga scorre)
-        l.testo(xr, y, segno, { inv: on })
-        l.testo(xr + 11, y, vis, { inv: on }) // (staccato dalla lettera: «A fibre», non «Afibre»)
-        if (risposto && (i === risposto.indiceGiusto || i === scelta)) l.riquadro(xr - 3, y - 2, 245 - xr + 6, passo - 1) // (la giusta e la tua, incorniciate)
+        l.testo(xr, y, segno, o)
+        l.testo(xr + 11, y, vis, o) // (staccato dalla lettera: «A fibre», non «Afibre»)
         if (!banca) os.zona(xr - 4, y - 2, 245 - xr + 8, passo - 1, () => { if (risposto) avanti(); else { sel = i; rispondi(i) } }) // (11.11) mentre la banca controlla il clic spostava la fascia su un'altra risposta: i tasti sono fermi, e il clic pure
       })
       if (img) l.testo(xr, 42, corto(txt(testo), Math.floor((245 - xr) / 6))) // (11.11) con txt anche qui, come senza foto: un carattere senza glifo non fa il quadratino
@@ -188,8 +207,9 @@ function partita(os, p, arg, torna) {
         const r = risposto, pezzi = r.giusta ? [`✓ ${r.pagato ? `+${fmt(r.premio)} $pzk` : 'giusto!'}`, `+${r.xp} xp`, r.serie > 1 && `serie ${r.serie}`, r.bonus && `perfetta +${fmt(r.bonus)}`] : [scelta === null ? '! tempo scaduto' : '! sbagliato']
         const riga = (...via) => [...pezzi.filter((x, i) => x && !via.includes(i)), `OK ${p.finita ? 'risultato' : 'avanti'}`].join(' · ')
         const s = [riga(), riga(2), riga(2, 1), riga(2, 1, 3)].find((x) => [...x].length <= 38) ?? riga(2, 1, 3)
-        l.riempi(10, H - 11, W - 20, 10); centro(l, H - 9, corto(s, 38), { inv: true })
-        if (via) l.riempi(10, H - 13, Math.round((W - 20) * Math.max(0, Math.min(1, (via - performance.now()) / viaDurata))), 1) // (quanto manca alla prossima)
+        const fondo = r.giusta ? VERDE : ROSSO // (11.11 l'esito sulla fascia del suo colore, col testo nero o bianco)
+        l.riempi(10, H - 11, W - 20, 10, fondo); centro(l, H - 9, corto(s, 38), { col: r.giusta ? SU_VERDE : SU_ROSSO })
+        if (via) l.riempi(10, H - 13, Math.round((W - 20) * Math.max(0, Math.min(1, (via - performance.now()) / viaDurata))), 1, fondo) // (quanto manca alla prossima)
         os.zona(10, H - 11, W - 20, 10, avanti)
       } else centro(l, H - 9, `↑↓ sceglie · OK risponde · o ${[...'abcd'].slice(0, d.risposte.length).join(' ')}`) // (11.11) nel vero o falso c e d non fanno niente: si dicono solo le lettere che ci sono
     },

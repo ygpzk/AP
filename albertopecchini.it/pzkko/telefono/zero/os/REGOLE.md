@@ -64,13 +64,16 @@ tenuti premuti.
 7. **I numeri, i PIN e gli indirizzi si scrivono con `os.cifre`** (caselle grandi, ↑ ↓ cambiano la cifra, ← → si spostano, le
    cifre anche dalla tastiera vera; `nascoste` per un PIN). Un segreto scritto a lettere (la chiave di amministrazione) usa
    `os.tastiera({ nascosto: true })`: sullo schermo solo asterischi. Un PIN nuovo si chiede due volte.
-   **Una misura** (un lato, una coordinata anche negativa, un angolo) si scrive con `os.numero`: i tasti grandi delle cifre,
-   il meno che cambia il segno, la virgola, e con `gradi: true` anche ° ' ". La tastiera di lettere non ha né il meno né la
-   virgola.
+   **Una misura** (un lato, una coordinata anche negativa, un angolo) si scrive con `os.numero`: dalla tastiera vera, il
+   meno che cambia il segno, il punto che diventa virgola, e con `gradi: true` anche ° ' " (il ° anche con «g»); un
+   carattere che non va dice perché, in fondo.
 8. **Senza conto non si entra** (os.js, `LIBERE`): ogni app che non è account o impostazioni apre l'account, e dopo
    l'accesso (`os.dopoAccesso`) si apre quella voluta. Un'app nuova non deve fare niente: lo fa `apri`.
-9. **Chi scrive testo usa la tastiera di sistema** (`os.tastiera`, con `simboli: true` le file di graffe, parentesi e
-   operatori, come vuole il codice C) oppure implementa carattere, cancella, invio e scrivendo, come la chat. Backspace
+9. **Niente tastiera sullo schermo.** (11.11, Alberto: «elimina la tastiera che uso quella del mio pc».) Chi scrive testo
+   usa `os.tastiera` (o `os.numero`): una riga dove compare quello che si scrive con la tastiera del computer; sul telefono,
+   toccando lo schermo, esce la tastiera del telefono (telefono.js, `conTastieraVera`). OK o Invio fatto, INDIETRO o Esc
+   annulla. Oppure l'app implementa carattere, cancella, invio e scrivendo, come la chat. Nessuna scritta dice più «scegli
+   la lettera con le frecce». Backspace
    cancella solo se `scrivendo()` è true, se no è INDIETRO. Dove Invio va a capo (l'editor di «codice C»), il tasto OK della
    tastiera vera è Ctrl+Invio.
 10. **Il tasto 3D che si abbassa e resta giù è del modello** (`zero.js`): le app non lo toccano.
@@ -130,12 +133,19 @@ si clicca si fa anche coi tasti.
    timer. Una riga preparata prima e disegnata dopo copia i valori che usa: lo stato può essere diventato null nel
    frattempo. (La barra del tempo della chat leggeva `m.tempo.fermo` quando `m.tempo` era già null: l'errore
    «reading 'fermo'» a ogni fotogramma.)
-9. **Un bit e basta.** Si disegna nel buffer (`px`, `riempi`, `testo`, `bitmap`…), mai sulla tela dell'lcd, mai a colori:
-   la tavolozza e la luminosità le fa il sistema, e la stessa immagine va sul 3D e sul tasto del muro.
+9. **I colori sono della tavolozza a 8 bit.** (11.11, Alberto: «aumenta la qualità dei pixel in dpi e fai colori a 8bit su
+   tutto».) Lo schermo ha 512 × 256 pixel veri, due per lato per ogni pixel dell'impaginazione (che resta 256 × 128), e 256
+   colori: nel buffer 0 è il fondo (lo sfondo scelto nelle impostazioni, anche a motivi o sfumato), 1 l'inchiostro del tema,
+   16–255 i colori (`colore(r, g, b)`, `esa('#rrggbb')` e i nomi di `C` in lcd.js; `px`, `riempi`, `testo({ col })`).
+   Si disegna nel buffer, mai sulla tela dell'lcd: la luminosità e lo sfondo le fa il sistema, e la stessa immagine va sul 3D
+   e sul tasto del muro. **Il testo resta d'inchiostro**: si legge su tutti gli sfondi (anche «notte», dove l'inchiostro è
+   chiaro, e «carta»). Un colore va dove dice qualcosa (una vincita verde, una perdita rossa, una carta di cuori) o dove è un
+   disegno; un colore chiaro su fondo chiaro non si legge: si prova con `--sfondo=notte` e `--sfondo=carta`.
 
 ## 5. Le icone
 
-1. **Le icone nuove sono tracciati SVG in `os/icone.js`** (la mappa `SVG`): viewBox 16 × 16, solo forme piene, niente
+1. **Le icone nuove sono tracciati SVG in `os/icone.js`** (la mappa `SVG`), col loro colore in `COLORI` (uno per
+   tracciato, o uno per tutti; il bordino d'inchiostro lo mette icone.js): viewBox 16 × 16, solo forme piene, niente
    contorni. Le forme stanno sulla griglia intera, e ogni dettaglio e ogni buco è largo almeno 1 unità. (Alberto: «rifai
    icone in svg consumando pochissimo».)
 2. **L'icona di un'app si chiama `app-<id>`.** Si usa a 16 (liste, titoli) e a 32 (le viste grandi): si guardano tutte e
@@ -147,7 +157,9 @@ si clicca si fa anche coi tasti.
    riquadri. Quelle dentro il testo (`:canna:`, `<img>`) la chat le toglie, e un tasto con la sola icona in fila non ha
    disegno. (6.11, Bighurra: «non vedo cosa devo replicare»: al meccanico l'icona da ricordare non compariva, e i cinque
    tasti per rispondere erano cinque «?».) Accanto all'icona va sempre il nome: una webp di riserva può arrivare tardi.
-6. **Lo schermo è a un bit: i colori si scrivono.** («i colori» del bidello: quattro parole colorate, tutte uguali.)
+6. **I colori si vedono, e si scrivono anche.** Dall'11.11 lo schermo è a colori: una parola colorata si scrive col suo
+   colore (`testo({ col })`), e accanto resta il nome per chi distingue male i colori. («i colori» del bidello: quattro
+   parole colorate, tutte uguali, quando lo schermo era a un bit.)
 
 ## 6. Le animazioni
 
@@ -156,7 +168,7 @@ si clicca si fa anche coi tasti.
 2. **Niente `setInterval` e niente `requestAnimationFrame` per disegnare.** Un `setTimeout` per la logica si spegne in
    `esci()`.
 3. **Si ridisegna solo mentre si anima.** Quando l'animazione finisce, `tic` smette di chiamare `ridisegna`: ogni
-   disegno rifà la tela 768 × 384, la trama del 3D e il tasto sul muro.
+   disegno rifà la tela 1536 × 768, la trama del 3D e il tasto sul muro.
 4. **Corte**, al massimo un secondo e mezzo, e mai di traverso ai tasti (3.6).
 5. **Un tempo di gioco non è un'animazione.** Quello che il giocatore deve guardare o aspettare (quattro secondi per
    ricordare, il ritardo del «veloce») si aspetta con `aspetta` di `chat/minigiochi.js`, mai con `ctx.dormi` o
@@ -204,7 +216,7 @@ node tools/pzkko/zero/prova.mjs --app=<id>
    volte, così si conferma anche un dialogo), e a ogni passo controlla da solo gli angoli stondati, il margine, i
    caratteri senza glifo, le icone che non ci sono, gli errori della pagina e il bip. Coi suoni accesi conta solo i suoni
    di `suono/interfaccia.js`, non la musica.
-2. **Poi si guardano tutte le foto dell'lcd**, `tools/pzkko/lavoro/zero/prova-app-<id>-*.png`. Sono 768 × 384, pixel per
+2. **Poi si guardano tutte le foto dell'lcd**, `tools/pzkko/lavoro/zero/prova-app-<id>-*.png`. Sono 1536 × 768 (tre texel per pixel vero), pixel per
    pixel. Il collaudo non vede il testo rovesciato fuori dalla fascia, le scritte sovrapposte e i suggerimenti che non
    dicono il vero: quelli si vedono solo guardando.
 3. **Di giorno e di notte:** il secondo comando è la notte.

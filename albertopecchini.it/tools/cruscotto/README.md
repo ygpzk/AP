@@ -13,7 +13,79 @@ node tools/cruscotto/diretta.mjs --piano "a|b|c" # i passi del lavoro
 node tools/cruscotto/diretta.mjs --passo 2       # il passo in corso (--passo fine)
 node tools/cruscotto/diretta.mjs --barra id "Nome" 3 10 "testo"   # una barra qualsiasi
 node tools/cruscotto/diretta.mjs --log "testo"   # una riga nel log
+node tools/cruscotto/account.mjs                 # limiti del piano e token (stampa)
 ```
+
+## Si apre dall'icona (11.11.2026)
+
+Alberto: «crea icona desktop per aprirla manualmente e disattiva avvio automatico». Sul desktop c'è
+**Regia di Claude** (`Desktop\Regia di Claude.lnk` → `cruscotto.ps1`, icona `regia.ico`, disegnata
+da `regia.png`: una finestra col titolo blu #007acc, un prompt e tre barre). I ganci non la aprono
+più da soli ma continuano a scrivere tutto, così quando la apri vedi già lo stato vero.
+`:automatica si` nella regia (o `{"apriDaSola": true}` in `~/.cruscotto/impostazioni.json`) la
+riaccende, `:automatica no` la rispegne.
+
+La console parte da `regia-console.lnk` (lo rifà `cruscotto.ps1` ogni volta): una console aperta da
+un collegamento ne prende l'icona, e così la barra di Windows ha quella della regia. La barra di
+Windows è chiesta scura (`DwmSetWindowAttribute` 20). Avviata da un collegamento, anche la console
+di PowerShell si chiamava «Regia di Claude» e lo script trovava sé stesso: ora si rinomina.
+
+In cima alla regia c'è una barra a schede, una per finestra, con quella in primo piano accesa: i
+finti `─ □ ×` di prima ripetevano quelli veri di Windows.
+
+## A finestre (11.11.2026)
+
+Alberto: «fai regia di claude come una cmd più controllabile e tech», «più forma di finestra»,
+«statistiche account». Sotto una barra del titolo (stato, progetto, ramo, pc acceso da quanto,
+orologio) le finestre col bordo e il numero:
+
+| | finestra | cosa |
+|---|---|---|
+| 1 | CLAUDE | richiesta, nota, strumento in corso o fine del turno, sessione, piano |
+| 2 | AGENTI | le sessioni e i loro agenti; in primo piano ↑↓ ne sceglie una e Invio la fissa |
+| 3 | ACCOUNT | il piano, i limiti veri (sessione 5h, settimana, settimana per modello) col reset, la ripartizione Claude Code/chat, i token di oggi e dei 7 giorni, i modelli, il grafico delle ultime 24 ore; ingrandita anche i 7 giorni uno per riga |
+| 4 | SISTEMA | grafici di CPU e RAM degli ultimi due minuti, dischi |
+| 5 | RETE | server di casa, sito e tunnel, tutto quello che Alberto ospita (`hosting.json`), git, strumenti e file della sessione |
+| | LAVORI | le barre, solo quando ce ne sono |
+| 6 | LOG | il log in diretta, coi filtri nel bordo e la posizione nel piede |
+| 7 | FREELLM | i modelli gratis di FreeLLMAPI: chi sta rispondendo adesso, server, fornitori, ultime richieste; ingrandita anche le 24 ore, i modelli di oggi, i fornitori saltati e quelli in pausa |
+
+Quella in primo piano ha il bordo doppio. `Tab`/`⇧Tab` o `1`…`7` la cambiano, `z` la ingrandisce,
+`Esc` toglie una cosa alla volta (aiuto, zoom, ricerca, sessione fissata), `?` l'aiuto.
+
+**La riga di comando** in fondo, come vim: `:` e il comando (Tab completa, ↑↓ ripescano quelli di
+prima), `/` cerca nel log. `:filtro`, `:cerca`, `:sessione <sigla>|tutte`, `:finestra`, `:zoom`,
+`:apri sito|pzkko|regia|tempo|vite|uso|tunnel|log|cartella` (browser o Esplora risorse),
+`:nota <testo>` (una riga di Alberto nel log), `:pausa`, `:aggiorna`, `:pulisci`, `:riavvia`, `:esci`.
+L'elenco intero è nell'aiuto, scritto da `COMANDI` in `vista.mjs`.
+
+**I limiti dell'account** vengono da `~/.claude.json` (`cachedUsageUtilization`): li aggiorna Claude
+Code quando li chiede al server, e la finestra dice di quanto sono vecchi. **I token** li conta
+`account.mjs --conta` dalle trascrizioni (`~/.claude/projects/**/*.jsonl`, più di un GB): lo lancia
+il guscio ogni minuto in un processo a parte, legge solo la parte nuova di ogni file e tiene le
+somme ora per ora degli ultimi 8 giorni in `~/.cruscotto/account.json` (la prima volta ~3 s, poi
+decine di millisecondi). Una risposta scritta su più righe si conta una volta.
+
+Le emoji e i caratteri larghi nelle richieste diventano «?»: prendono due colonne e spostavano il
+bordo destro. I grafici sono alti due righe con `▄` e `█`: gli altri ottavi (`▁▂▃▅▆▇`) Consolas non li ha.
+
+## FREELLM, i modelli gratis (11.11.2026)
+
+Alberto: «in regia di claude lo voglio una dashboard fatta da te». FreeLLMAPI è il router locale che
+mette insieme i piani gratuiti di tanti fornitori (`C:UsersAlbertoprogetti-esternireellmapi`,
+porta 3001, solo 127.0.0.1; si comanda anche con la skill utente `freellmapi`). `modelli.mjs` legge
+il suo SQLite in sola lettura col sqlite di Node, al massimo una volta al secondo: `requests` (ogni
+richiesta col fornitore e il modello che ha risposto), `request_attempts` (i fornitori saltati),
+`api_keys`, `rate_limit_cooldowns`; e prova la porta ogni 5 secondi. `node modelli.mjs` stampa i dati.
+
+La finestra sta sopra il LOG (solo se FreeLLMAPI è installato, lasciando al LOG le sue 8 righe):
+in cima **Usa ►** fornitore / modello dell'ultima risposta, poi lo stato del server, i fornitori
+(verdi se sani), le richieste di oggi; sotto, le ultime richieste a sinistra e i fornitori di oggi a
+destra. `7` e `z` (o `:freellm`) la ingrandiscono.
+
+`:freellm avvia` / `ferma` accendono e spengono il server (lo script della skill, senza la sua
+finestra cmd); `:freellm chiedi <testo>` fa una domanda e la risposta arriva nel LOG come righe
+`freellm`, con la riga «Modello usato». `:apri freellm` apre la dashboard web di FreeLLMAPI.
 
 ## Cosa mostra
 
@@ -45,7 +117,8 @@ In cima va la sessione a cui Alberto ha chiesto qualcosa per ultima fra quelle c
 aspettano): così non salta a ogni strumento quando ne lavorano due insieme. Se nessuna lavora,
 l'ultima che si è mossa.
 
-Suona quando Claude ha finito il turno o aspetta, in qualsiasi sessione. Tasti: `a` tutto, `c`
+Suona quando Claude ha finito il turno o aspetta, in qualsiasi sessione. Tasti (oltre a quelli
+delle finestre, sopra): `a` tutto, `c`
 solo Claude, `l` solo i lavori, `e` solo gli errori, `s` fissa una sessione (e poi la prossima,
 e di nuovo tutte: il log mostra solo le sue righe), `p` pausa, `↑` `↓` (e pagina su/giù) per
 scorrere, `x` toglie le barre dei lavori finiti e le sessioni chiuse, `q` esce. Un clic dentro
@@ -61,7 +134,8 @@ non la blocca più (la «modifica rapida» è spenta).
   primi quattro caratteri dell'id della sessione.
 - `gancio.mjs`: lo lanciano i ganci di Claude Code in `~/.claude/settings.json` (a livello
   utente, quindi in qualsiasi progetto e in tutte le sessioni aperte), in background:
-  `SessionStart` e `UserPromptSubmit` aprono la regia se è chiusa (via WMI,
+  `SessionStart` e `UserPromptSubmit` aprono la regia se è chiusa, ma solo con l'apertura
+  automatica accesa (dall'11.11.2026 è spenta: vedi «Si apre dall'icona»; via WMI,
   `Win32_Process.Create`: un figlio del gancio moriva con lui) e scrivono la richiesta;
   `PreToolUse` lo strumento in corso; `PostToolUseFailure` gli errori; `Notification` lo stato
   e il suono; `Stop` lo stato, il suono, la durata del turno e l'inizio della risposta (dalla
