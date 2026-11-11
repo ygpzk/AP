@@ -11,7 +11,7 @@ import { Lcd, W, H } from './lcd.js'
 import * as icone from './icone.js'
 import * as zaino from '../../../chat/zaino.js'
 import * as sfide from '../../../chat/sfide.js'
-import { fmt } from '../../../games/pzk.js'
+import { fmt, fmtCorto, serverOnline, fai as chiedi } from '../../../games/pzk.js'
 import { DOVE, aMezzanotte } from '../../app/sfide.js'
 import { corto, destra, centro, elenco, muovi, pagine } from './pezzi.js'
 
@@ -23,13 +23,23 @@ const bonusVero = (n) => Math.round(n * zaino.moltiplicatore() * (1 + zaino.bonu
 /** Dove si fa una sfida: [app, comando]; posta: i $pzk che il comando punta (slot 20), se ne punta. */
 const dove = (s) => { const [app, comando] = DOVE[s.id] ?? ['chat'], m = /^\S+ (\d+)$/.exec(comando ?? ''); return { app, comando, posta: m ? Number(m[1]) : 0 } }
 const NOMI = { negozio: 'lo shop', quiz: 'il quiz', missioni: 'le quest', chat: 'la chat' }
+/** Le sfide non ci sono perché la banca non risponde (e non perché le sta preparando): prepara() riprova a ogni disegno. */
+const muta = () => serverOnline() === false
 
 export function vista(os) {
   const st = { sel: 0, da: 0 }
   async function fai(r, x) {
     if (r.bonus) {
       const o = r.bonus
-      if (o.bonusRiscosso) return x.dì(true, `il bonus l’hai già preso: serie di ${o.serie}`)
+      if (o.bonusRiscosso) return x.dì(true, `bonus già preso · serie di ${o.serie}`) // (11.11: «il bonus l’hai già preso: serie di 7» non ci stava nella striscia)
+      if (!o.sfide.length) { // (11.11: «prima le tre sfide» quando le sfide non c'erano ancora. E «aspetta» non bastava: se la
+        // prima richiesta della banca era partita prima dell'accesso, o era stata rifiutata, non ne partiva un'altra e l'app restava
+        // per sempre su «la banca prepara le sfide…». OK le chiede di nuovo, con la stessa azione 'sfide.oggi', e dice cosa risponde)
+        const e = await x.aspetta('chiedo le sfide', () => chiedi('sfide.oggi'))
+        if (!e || !x.qui()) return
+        if (!e.ok) return x.dì(false, e.errore ?? 'la banca non risponde: riprova')
+        return sfide.oggi().sfide.length ? undefined : x.dì(false, 'la banca prepara le sfide: aspetta')
+      }
       if (!o.bonusPronto) return x.dì(false, 'prima le tre sfide')
       const e = await x.aspetta('riscuoto', () => sfide.riscuotiBonus())
       if (!e || !x.qui()) return
@@ -56,7 +66,7 @@ export function vista(os) {
   const aiuto = () => {
     const r = righe()[st.sel]
     if (!r) return ''
-    if (r.bonus) return r.bonus.bonusPronto ? 'OK prendi il bonus · ↑↓' : '↑↓ sceglie'
+    if (r.bonus) return r.bonus.bonusPronto ? 'OK prendi il bonus · ↑↓' : r.bonus.sfide.length ? '↑↓ sceglie' : 'OK chiede le sfide' // (11.11: con la sola riga del bonus ↑ ↓ non scelgono niente; OK le richiede)
     if (r.sfida.riscossa) return '✓ fatta · ↑↓ sceglie'
     if (r.sfida.pronta) return 'OK riscuoti · ↑↓ sceglie'
     const { app, comando, posta } = dove(r.sfida) // (dice cosa parte: in chat il comando va subito)
@@ -65,6 +75,7 @@ export function vista(os) {
   return pagine(os, {
     nome: 'sfide', app: 'sfide',
     ascolta: [(f) => zaino.ascolta(f)],
+    entra: () => { if (!sfide.oggi().sfide.length) chiedi('sfide.oggi') }, // (11.11: chat/sfide.js chiede il giorno una volta sola, anche se era per l'ospite o per un altro conto: aprendo l'app si richiede, e le sfide arrivano col conto)
     pagine: [{
       nome: 'le sfide di oggi', icona: 'app-sfide', aiuto,
       ok: (x) => { const r = righe()[st.sel]; if (r) fai(r, x) },
@@ -74,7 +85,7 @@ export function vista(os) {
         // in cima: la serie, oggi, i pallini, le nuove
         l.testo(10, 34, corto(`${o.serie} di fila · oggi ${fatte}/3`, 26))
         o.sfide.forEach((s, i) => { const xp = 170 + i * 9; if (s.riscossa) l.riempi(xp, 34, 7, 7); else if (s.pronta) { l.riquadro(xp, 34, 7, 7); l.riempi(xp, 37, 7, 4) } else l.riquadro(xp, 34, 7, 7) })
-        l.testo(10, 43, o.sfide.length ? `nuove fra ${aMezzanotte()}` : 'la banca prepara le sfide…') // (31.10: il giorno lo prepara la banca)
+        l.testo(10, 43, o.sfide.length ? `nuove fra ${aMezzanotte()}` : muta() ? 'la banca non risponde: riprovo…' : 'la banca prepara le sfide…') // (31.10: il giorno lo prepara la banca; 11.11: senza rete diceva che le preparava)
         elenco(l, x.zona, {
           voci: righe(), stato: st, y0: 53, alta: 63, passo: 21,
           clic: (r) => fai(r, x),
@@ -83,10 +94,17 @@ export function vista(os) {
             if (r.bonus) {
               const b = r.bonus
               l.bitmap(bm(b.bonusRiscosso ? 'stella' : 'regalo', 16), x0 - 2, y + 2, o2)
-              const stato = b.bonusRiscosso ? '✓' : b.bonusPronto ? 'prendi ▶' : ''
-              if (stato) destra(l, x0 + w, y + 2, stato, o2)
-              l.testo(x0 + 18, y + 2, corto(b.bonusRiscosso ? 'bonus del giorno: preso, a domani' : `bonus: ${fmt(bonusVero(b.bonusGiorno))} $pzk e una cassa`, Math.floor((w - 18 - Lcd.larghezza(stato) - 6) / 6)), o2)
-              l.testo(x0 + 18, y + 11, corto(b.bonusRiscosso ? `serie di ${b.serie}` : `fai tutte e tre${b.serie ? ` · domani la serie a ${b.serie + 1}` : ''}`, Math.floor((w - 18) / 6)), o2)
+              // (11.11: «prendi ▶» sta sulla seconda riga, a destra come il premio delle sfide: sulla prima tagliava «e una
+              // cassa» in «e una cas…». E la serie sale oggi, quando si prende il bonus: «domani la serie a 7» non ci stava, e
+              // a 7 di fila diceva 8. Quella vera è nel bonus del giorno di chat/sfide.js: +10 % a giorno di fila)
+              const su = b.bonusRiscosso ? '✓' : '', giu = b.bonusPronto && !b.bonusRiscosso ? 'prendi ▶' : ''
+              const poi = Math.round((b.bonusGiorno / sfide.BONUS_GIORNO.pzk - 1) * 10) + 1
+              if (su) destra(l, x0 + w, y + 2, su, o2)
+              if (giu) destra(l, x0 + w, y + 11, giu, o2)
+              const via = (s) => (s ? Lcd.larghezza(s) + 6 : 0)
+              l.testo(x0 + 18, y + 2, corto(b.bonusRiscosso ? 'bonus del giorno: preso, a domani' : `bonus: ${fmt(bonusVero(b.bonusGiorno))} $pzk e una cassa`, Math.floor((w - 18 - via(su)) / 6)), o2)
+              const sotto = b.bonusRiscosso ? `serie di ${b.serie}` : [b.bonusPronto ? '' : 'fai tutte e tre', b.serie && poi > b.serie ? `la serie va a ${poi}` : ''].filter(Boolean).join(' · ')
+              l.testo(x0 + 18, y + 11, corto(sotto, Math.floor((w - 18 - via(giu)) / 6)), o2)
               return
             }
             const s = r.sfida
@@ -95,10 +113,15 @@ export function vista(os) {
             destra(l, x0 + w, y + 2, stato, o2)
             l.testo(x0 + 18, y + 2, corto(`${s.nome}: ${s.testo}`, Math.floor((w - 18 - Lcd.larghezza(stato) - 6) / 6)), o2)
             // la barra, a che punto sei, il premio
-            const bw = 60, k = Math.max(0, Math.min(1, s.fatto / Math.max(1, s.target)))
+            // (11.11: i traguardi in $pzk crescono col livello: «123456/207000» finiva sotto il premio. La barra si accorcia, e
+            // se non basta i numeri si scrivono corti, 123,5K)
+            const premio = `+${fmt(s.premio.pzk)} · +${s.premio.xp} xp`, spazio = w - 18 - Lcd.larghezza(premio) - 9
+            let quanto = `${fmt(s.fatto)}/${fmt(s.target)}`
+            if (spazio - 4 - Lcd.larghezza(quanto) < 40) quanto = `${fmtCorto(s.fatto)}/${fmtCorto(s.target)}`
+            const bw = Math.max(16, Math.min(60, spazio - 4 - Lcd.larghezza(quanto))), k = Math.max(0, Math.min(1, s.fatto / Math.max(1, s.target)))
             l.riquadro(x0 + 18, y + 12, bw, 5, on ? 0 : 1); l.riempi(x0 + 19, y + 13, Math.round((bw - 2) * k), 3, on ? 0 : 1)
-            l.testo(x0 + 18 + bw + 4, y + 11, `${s.fatto}/${s.target}`, o2)
-            destra(l, x0 + w, y + 11, `+${fmt(s.premio.pzk)} · +${s.premio.xp} xp`, o2)
+            l.testo(x0 + 18 + bw + 4, y + 11, quanto, o2)
+            destra(l, x0 + w, y + 11, premio, o2)
           },
         })
       },

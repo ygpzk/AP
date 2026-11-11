@@ -52,7 +52,7 @@ let scelta = null // quella dove sta la croce
 let aspettaTesto = null // { risolvi, segnaposto }
 let coda = Promise.resolve()
 let salutato = false, ultimoGiorno = ''
-const inCorso = new Set()
+const inCorso = new Map() // chiave del comando → { mie: le sue schede, fatto: Promise della fine }
 let cambiato = () => {}
 let nSchede = 0 // quante schede ha scritto il bot da quando la pagina è aperta (per il collaudo: adesso)
 
@@ -62,6 +62,7 @@ export function pulisci(html) {
   return txt(String(html ?? '') // (txt: un carattere senza glifo diventa «?», mai il quadratino; anche i nomi degli altri)
     .replace(/<span class="c-carta coperta"><\/span>/gi, ' ■ ').replace(/<span class="c-carta[^"]*">/gi, ' ') // (le carte del blackjack staccate: prima «K♦7♣» tutto attaccato)
     .replace(/<\/b>\s*<small[^>]*>/gi, '</b> · ').replace(/<\/small>\s*(?=<(small|span)\b)/gi, '</small> · ') // (il nome e la riga piccola sotto: «La campana stonatati manca: livello 2» tutto attaccato)
+    .replace(/<\/span>\s*(?=<small\b)/gi, '</span> · ') // (11.11: il premio delle sfide, «320 $pzk+35 xp» tutto attaccato)
     .replace(/<s\b[^>]*>([^<]*)<\/s>\s*(<span class="c-v-sconto">[^<]*<\/span>)?/gi, '$1 → ') // (il prezzo in offerta: «40-20 %32 $pzk» diventa «40 → 32 $pzk»)
     // (6.11) le celle di una tabella staccate con « · »: prima erano incollate, e «classifica» scriveva «2pzkko liv. 52» per
     // dire 2°, pzkko, livello 5, valore 2 (si leggeva livello 52: «le classifiche dicono cose diverse da dentro i profili»)
@@ -116,7 +117,7 @@ function rulliDa(html) {
 }
 export function aggiorna(s, e) {
   const m = s.__msg
-  if (!m.fatto) { m.fatto = true; m.pensa = false; m.salta?.(); led.finisci() }
+  if (!m.fatto) { m.fatto = true; m.pensa = false; m.salta?.() } // (11.11: niente led.finisci qui: lo fa la coda di scheda dopo salta, e una scheda non ancora partita non l'ha acceso. Due finisci spegnevano il led di un'altra attesa)
   if (e.av) m.av = e.av
   m.e = { ...e }
   m.azioniObj = null // (le azioni nuove della scheda: prima restavano quelle di prima)
@@ -181,17 +182,18 @@ function riordina() {
 }
 /** Un comando nuovo mentre una scelta aspetta: le scelte in corso finiscono come allo scadere (null), così il gioco di
  *  prima chiude i conti (30.10: restava appeso per sempre, la puntata sul tavolo e «stai già facendo»). */
-function annulla() { for (const sc of [...scelte]) sc.fine(null, null) }
+function annulla() { for (const sc of [...scelte]) { sc.m.annullata = true; sc.fine(null, null) } } // (annullata: esegui, qui sotto)
 const manda = (cmd) => { annulla(); return esegui(cmd) }
 /** Un tasto di una scheda: fa anche da finto elemento per i comandi che lo toccano (innerHTML, classList, disabled). */
 function bottone(m, b) {
   // (6.11) l'icona di un tasto: il nome nudo («gemma») o fra due punti («:canna:»). Un tasto di sola icona, in fila, prende
-  // per scritta il nome dell'icona: prima restava vuoto e si disegnava «?» (i cinque tasti del turno da meccanico)
+  // per scritta il nome dell'icona: prima restava vuoto e si disegnava «?» (i cinque tasti del turno da meccanico).
+  // (11.11) un nome lungo si accorcia come quello delle azioni: in fila un tasto di più di 40 lettere usciva dallo schermo
   const grezza = String(b.eti ?? b.id), ic = iconaIn(icona(grezza)) || iconaIn(conIcone(grezza)) || null
   const o = {
-    dataset: { id: String(b.id) }, eti: pulisci(conIcone(grezza)) || (ic ? ic.replaceAll('-', ' ') : ''), icona: ic, stile: b.stile ?? '', disabled: false, premuto: false, style: {},
+    dataset: { id: String(b.id) }, eti: accorcia(pulisci(conIcone(grezza)) || (ic ? ic.replaceAll('-', ' ') : '')), icona: ic, stile: b.stile ?? '', disabled: false, premuto: false, style: {},
     get innerHTML() { return o.eti },
-    set innerHTML(v) { const i = iconaIn(v); if (i) { o.icona = i; o.eti = '' } else o.eti = pulisci(v); invalida(m) },
+    set innerHTML(v) { const i = iconaIn(v); if (i) { o.icona = i; o.eti = '' } else o.eti = accorcia(pulisci(v)); invalida(m) },
     classList: { add: (c) => { o[c] = true; invalida(m) }, remove: (c) => { o[c] = false; invalida(m) }, contains: (c) => !!o[c], toggle: (c, v) => { o[c] = v ?? !o[c]; invalida(m) } },
     querySelector: () => ({ style: {} }),
   }
@@ -275,13 +277,23 @@ const passaDaRotto = (c, testo) => c?.nomi[0] === 'lavora' || (c?.nomi[0] === 'c
 const passaPredittivo = (c, testo) => !zaino.pagerRotto() || (testo == null ? AZIONI_SCASSATO.some(([r]) => PER_NOME.get(analizza(r).nome) === c) : passaDaRotto(c, testo))
 const soloScassato = () => scheda({ colore: 'rosso', av: 'bot-triste', t: ':pager: cercapersone scassato', d: `col vetro rotto funzionano solo due cose: <code>lavora</code> e <code>compra cercapersone</code> (${pzkHtml(prezzoPager())}).`, azioni: AZIONI_SCASSATO })
 
+/** Un'app del telefono aperta da un comando (chat/comandi/app.js). (11.11) «telefono» chiede apriApp(null), il telefono con
+ *  tutte le app: os.apri(null) non apriva niente e la chat restava zitta; adesso è la home di pzk os. «pzkstore lavatrice»
+ *  chiede { app }: il pzkstore la apre col suo comando (come telefono.js), prima si apriva l'elenco e il tasto «la scheda nel
+ *  pzkstore» non la mostrava. E solo se la chat è ancora in cima: il comando aspetta la banca, e chi è già andato altrove
+ *  non si vede spuntare un'app sopra quella che usa (REGOLE.md 8.4) */
+function apriApp(app, { app: dentro } = {}) {
+  if (os.corrente() !== vistaUnica) return
+  if (!app) return os.home()
+  return os.apri(app, dentro ? { comando: dentro } : {})
+}
 function ctxDi(args, testo) {
   const mie = [] // (le schede di questo comando: se si rompe, i suoi rulli si fermano)
   const sua = (e) => { const s = scheda(e); mie.push(s.__msg); return s }
   const ctx = {
     __mie: mie, args, testo, zaino, pzk, dì: sua, scheda: sua, aggiorna, scegli, scrivi, smetti, caricaIcone, tempo, dormi, inVista, pensa, sistema, utente,
     nome, importo, caso, rnd, tra, durata, fmt, pzkHtml, eurHtml, icona, conIcone,
-    esegui, apriWallet: (sez) => pzk.apriWallet(sez), apriApp: (app) => os.apri(app), comandi: COMANDI, perNome: PER_NOME, categorie: CATEGORIE,
+    esegui, apriWallet: (sez) => pzk.apriWallet(sez), apriApp, comandi: COMANDI, perNome: PER_NOME, categorie: CATEGORIE,
     // (31.10) la banca, come nella chat grande (chat.js): fai chiede, no dice il suo no, morte racconta la morte che ha deciso lei
     fai: (cosa, a) => chat.chiedi(ctx, cosa, a), no: (r, cmd) => chat.rifiuto(ctx, r, cmd),
     morte: (m) => { ctx.__morteVista = true; chat.mostraMorte(sua, m) },
@@ -306,13 +318,26 @@ export async function esegui(riga, { muto = false, eti = null } = {}) {
   }
   const chiave = c.nomi[0]
   if (!muto && !eti) zaino.ricorda(riga)
+  // (11.11) lo stesso gioco riscritto mentre aspettava una scelta (blackjack 25 a mano aperta): annulla l'ha chiuso (adesso o
+  // con un comando di prima), ma il gioco chiude i conti con la banca e non è ancora finito. Prima la chat diceva «stai già facendo: finisci
+  // quello» di un gioco che non c'era più. Adesso si aspetta che finisca (al più 3 s) e si riparte. Se non finisce e non aspetta
+  // più nessun tasto, è rimasto appeso (le mine: chiuse da un altro comando non finiscono mai) e lascia il posto: prima «mine»
+  // restava «già in corso» fino a ricaricare la pagina, adesso la banca riprende il campo aperto. Il doppio OK su un comando
+  // che non aspettava niente (compra) resta fermo: le sue schede non avevano scelte da chiudere
+  const prima = inCorso.get(chiave)
+  if (prima?.mie.some((m) => m.annullata)) {
+    await Promise.race([prima.fatto, new Promise((r) => setTimeout(r, 3000))])
+    if (inCorso.get(chiave) === prima && !scelte.some((sc) => prima.mie.includes(sc.m))) inCorso.delete(chiave)
+  }
   if (c.attesa) {
     const m = zaino.manca(chiave)
     if (m > 0) { const s = scheda({ colore: 'ambra', av: 'bot-pensa', t: ':clessidra: calma', d: `«${chiave}» lo puoi rifare fra <b>${durata(m)}</b>.${zaino.effetto('caffe') ? '' : ' Un caffè dal negozio dimezza le attese.'}` }); tempo(s, Math.min(m, 60_000)); return }
   }
   if (inCorso.has(chiave)) { scheda({ colore: 'ambra', av: 'bot-arrabbiato', d: `stai già facendo «${chiave}»: finisci quello.` }); return }
-  inCorso.add(chiave)
   const ctx = ctxDi(args, testo)
+  let finito = null
+  const io = { mie: ctx.__mie, fatto: new Promise((r) => { finito = r }) }
+  inCorso.set(chiave, io)
   try {
     // (31.10) l'attesa, il conto dei comandi e il dado degli eventi li fa la banca dentro l'azione del comando (chat.js, esegui)
     await c.fai(ctx)
@@ -323,7 +348,8 @@ export async function esegui(riga, { muto = false, eti = null } = {}) {
     for (const m of ctx.__mie) m.rulli?.forEach((r) => { r.gira = false }) // (la slot rotta a metà: i rulli giravano per sempre e il tic ridisegnava)
     scheda({ colore: 'rosso', av: 'bot-arrabbiato', t: 'qualcosa si è rotto', d: `${e.message ?? e}` })
   } finally {
-    inCorso.delete(chiave)
+    if (inCorso.get(chiave) === io) inCorso.delete(chiave) // (se ha lasciato il posto, il posto è di un altro)
+    finito()
     os.ridisegna()
   }
 }
@@ -345,7 +371,8 @@ function azione(cmd, eti = null) {
 /** La tastiera sullo schermo: quello che si scrive va nella chat (un comando, o la risposta che un gioco aspetta). */
 function scriviComando(testo = '', titolo = null) {
   const att = aspettaTesto // (30.10: la risposta che arriva tardi, a scrivi già scaduto, non diventa un comando: si butta)
-  os.tastiera({ testo, titolo: titolo ?? (att ? 'la risposta' : 'scrivi un comando') }).then((t) => { if (t == null || !t.trim() || (att && aspettaTesto !== att)) return; riga = t; invia() })
+  // (11.11) e un comando scritto resta un comando: se intanto un evento aspettava una parola, invia lo dava come risposta
+  os.tastiera({ testo, titolo: titolo ?? (att ? 'la risposta' : 'scrivi un comando') }).then((t) => { if (t == null || !t.trim() || (att && aspettaTesto !== att)) return; if (att) { riga = t; invia() } else manda(t.trim()) })
 }
 /** I tasti che nella chat grande stavano DENTRO l'html (data-cmd): «compra» su ogni pezzo della vetrina, i nomi delle
  *  classifiche («tocca un nome»). Qui non si toccano: diventano tasti della scheda, col nome della cosa («compra Canna»). */
@@ -502,9 +529,9 @@ const rigaTesto = (s, x, opz) => ({ h: 9, d: (l, y) => l.testo(x, y, s, opz) })
 function impagina(m) {
   const R = []
   if (m.tipo === 'pensa') { R.push({ h: 12, d: (l, y, t) => { l.bitmap(icone.bitmap('bot-pensa', 16), 6, y - 2); l.testo(26, y + 1, '.'.repeat(1 + (Math.floor(t / 3) % 3))) } }); return R }
-  if (m.tipo === 'sistema') { for (const r of Lcd.acapo(m.testo, 42)) R.push({ h: 9, d: (l, y) => l.testo(Math.round(W / 2 - Lcd.larghezza(r) / 2), y, r) }); R.push({ h: 3, d() {} }); return R }
+  if (m.tipo === 'sistema') { for (const r of Lcd.acapo(m.testo, 40)) R.push({ h: 9, d: (l, y) => l.testo(Math.round(W / 2 - Lcd.larghezza(r) / 2), y, r) }); R.push({ h: 3, d() {} }); return R } // (11.11: a 42 colonne la riga era 251 px e usciva dal margine)
   if (m.tipo === 'tu') {
-    const righe = Lcd.acapo(m.testo, 36)
+    const righe = Lcd.acapo(txt(m.testo), 36) // (11.11: quello che si scrive dalla tastiera vera, «£» o «§» della tastiera italiana, non ha il glifo: «?», mai il quadratino)
     const w = Math.max(...righe.map((r) => Lcd.larghezza(r))) + 10, h = righe.length * 9 + 5
     R.push({ h: h + 3, d: (l, y) => { const x = W - 6 - w; l.cornice(x, y, w, h); righe.forEach((r, i) => l.testo(x + 5, y + 3 + i * 9, r)) } })
     return R
@@ -530,7 +557,7 @@ function impagina(m) {
   for (const sc of m.scelte?.length ? m.scelte : [null]) {
     if (sc?.griglia) {
       const n = sc.griglia === 'g5' ? 5 : 3, lato = 18
-      for (let r = 0; r < Math.ceil(sc.lista.length / n); r++) R.push({ h: lato + 1, sc, da: r * n, a: r * n + n - 1, d: (l, y) => { for (let c = 0; c < n; c++) { const b = sc.lista[r * n + c]; if (!b) continue; const x = X0 + c * (lato + 1), on = scelta === sc && sc.sel === r * n + c; if (on) l.riempi(x, y, lato, lato); else l.cornice(x, y, lato, lato); if (b.icona) l.bitmap(icone.bitmap(b.icona, 16), x + 1, y + 1, { inv: on }); else l.testo(x + 6, y + 5, b.bum ? '*' : b.eti.slice(0, 1), { inv: on }); zonaChat(x, y, lato, lato, () => clicca(sc, b)) } } })
+      for (let r = 0; r < Math.ceil(sc.lista.length / n); r++) R.push({ h: lato + 1, sc, da: r * n, a: r * n + n - 1, d: (l, y) => { for (let c = 0; c < n; c++) { const b = sc.lista[r * n + c]; if (!b) continue; const x = X0 + c * (lato + 1), on = scelta === sc && sc.sel === r * n + c; if (on) l.riempi(x, y, lato, lato); else if (b.disabled) puntini(l, x, y, lato, lato); else l.cornice(x, y, lato, lato); if (b.icona) l.bitmap(icone.bitmap(b.icona, 16), x + 1, y + 1, { inv: on }); else l.testo(x + 6, y + 5, b.bum ? '*' : b.eti.slice(0, 1), { inv: on }); zonaChat(x, y, lato, lato, () => clicca(sc, b)) } } })
       R.push({ h: 2, d() {} })
       continue
     }
@@ -547,7 +574,7 @@ function impagina(m) {
       const viva = !sc && attivaOra === m
       for (const b of fr) {
         const bw = Lcd.larghezza(b.eti || '?') + 8, on = sc ? scelta === sc && sc.lista[sc.sel] === b : viva && selOra?.b === b
-        const morta = !sc && (!viva || b.disabled)
+        const morta = sc ? b.disabled && !b.premuto : !viva || b.disabled // (11.11: i tasti di una scelta finita, o spenti dal gioco, restavano incorniciati come vivi e il clic non li prendeva: REGOLE.md 3.13)
         if (on || b.premuto) l.riempi(x, y, bw, 11); else if (morta || b.usato) puntini(l, x, y, bw, 11); else l.cornice(x, y, bw, 11) // (usato: un pezzo già premuto, minigiochi.js)
         l.testo(x + 4, y + 2, b.eti || '?', { inv: on || b.premuto })
         const bb = b
@@ -570,16 +597,30 @@ function segui() {
   const l = tasti(), t = l[quale(l)]
   if (t?.b) mostra(t.m, (r) => r.az?.includes(t.b))
 }
-function mostra(m, cerca) {
+/** La riga di un messaggio che cerca trova, e quanto c'è dal suo fondo al fondo della chat. → { riga, sotto } o null */
+function dove(m, cerca) {
   const k = msgs.indexOf(m)
-  if (k < 0) return
+  if (k < 0) return null
   let su = 0, riga = null
   for (const r of righeDi(m)) { if (cerca(r)) { riga = r; break } su += r.h }
-  if (!riga) return
+  if (!riga) return null
   let sotto = altezza(m) - su - riga.h // (dal fondo della riga al fondo della chat)
   for (let i = k + 1; i < msgs.length; i++) sotto += altezza(msgs[i])
+  return { riga, sotto }
+}
+function mostra(m, cerca) {
+  const p = dove(m, cerca)
+  if (!p) return
   const alta = fondo() - (BARRA + 1) - 12 // (12: in cima, da scorsi, c'è il bollino «↓ 3»; il tasto scelto ci finiva sotto)
-  scorri = Math.max(0, Math.min(sotto, Math.max(scorri, sotto + riga.h - alta)))
+  scorri = Math.max(0, Math.min(p.sotto, Math.max(scorri, p.sotto + p.riga.h - alta)))
+}
+/** La riga si vede tutta adesso? (11.11: con ↑ si leggevano i messaggi di prima, il tasto scelto della scheda finiva sopra lo
+ *  schermo e OK lo premeva lo stesso, senza vederlo: REGOLE.md 3.12. Adesso il primo OK lo riporta in vista, il secondo preme) */
+function siVede(m, cerca) {
+  const p = dove(m, cerca)
+  if (!p) return true
+  const y = fondo() + scorri - p.sotto - p.riga.h
+  return y >= BARRA + 1 && y + p.riga.h <= fondo()
 }
 
 /** Per il collaudo (tools/pzkko/zero/prova.mjs --turni): cosa aspetta la chat adesso e cosa dice l'ultima scheda. */
@@ -657,8 +698,9 @@ export function vista() {
           os.zona(x, yIn - 11, w, 10, () => { cur = tasto.k; tasto.fai() }) // (il clic preme subito)
           x += w + 3
         }
-        if (da > 0) l.testo(8, yIn - 10, '◀')
-        if (ultimo < pezzi.length - 1) l.testo(W - 13, yIn - 10, '▶')
+        // (11.11) ◀ ▶ si cliccano anche: il cursore va al primo tasto nascosto da quella parte, come con ← → (REGOLE.md, il clic)
+        if (da > 0) { l.testo(8, yIn - 10, '◀'); os.zona(7, yIn - 11, 9, 10, () => { cur = pezzi[da - 1].x.k }) }
+        if (ultimo < pezzi.length - 1) { l.testo(W - 13, yIn - 10, '▶'); os.zona(W - 14, yIn - 11, 8, 10, () => { cur = pezzi[ultimo + 1].x.k }) }
       }
       // mentre si scrive: i suggerimenti (chat/predittivo.js) sopra la riga
       if (riga && sugg) {
@@ -669,7 +711,7 @@ export function vista() {
       // la riga in fondo (dentro il margine: le punte dello schermo sono stondate): quello che si scrive, o cosa fanno i tasti
       l.orizz(6, yIn - 1, W - 12)
       if (riga) {
-        const max = Math.floor((W - 26) / 6), vis = riga.length > max ? riga.slice(-max) : riga
+        const max = Math.floor((W - 26) / 6), vis = txt(riga.length > max ? riga.slice(-max) : riga) // (txt: come il fumetto, un carattere senza glifo è «?»)
         l.testo(9, yIn + 3, '›'); l.testo(16, yIn + 3, vis)
         if (t % 10 < 5) l.riempi(16 + Lcd.larghezza(vis) + 2, yIn + 2, 5, 9)
       } else { const a = aiuto(); l.testo(Math.round(W / 2 - Lcd.larghezza(a) / 2), yIn + 3, a) }
@@ -677,8 +719,9 @@ export function vista() {
     tasto(n) {
       riordina()
       if (scelta?.dir?.[n]) { const sc = scelta, b = sc.dir[n]; sc.sel = sc.lista.indexOf(b); premi(sc, b); invalida(sc.m); return true } // (la freccia preme la sua direzione)
-      // (6.11) una risposta che si dà coi tasti O scrivendo (minigiochi.js, componi): se c'è una riga scritta, Invio manda quella
-      if (n === 'ok' && riga && aspettaTesto && scelta) { invia(); return true }
+      // (6.11) una risposta che si dà coi tasti O scrivendo (minigiochi.js, componi): se c'è una riga scritta, Invio manda quella.
+      // (11.11) anche con una scelta che non aspetta testo: Invio premeva il tasto scelto del gioco e la riga scritta restava lì
+      if (n === 'ok' && riga && scelta) { invia(); return true }
       if (scelta) {
         const sc = scelta, cols = sc.griglia === 'g5' ? 5 : sc.griglia === 'g3' ? 3 : sc.lista.length, N = sc.lista.length
         // (più scelte insieme, le mine: ↑ dalla prima riga e ↓ dall'ultima passano alla scelta di prima o di dopo)
@@ -687,7 +730,7 @@ export function vista() {
         else if (n === 'dx') { if (sc.griglia) sc.sel = (sc.sel + 1) % N; else vivo(sc, 1) }
         else if (n === 'su') { if (sc.griglia && r > 0) sc.sel -= cols; else if (prima) scelta = prima; else if (sc.griglia) sc.sel = (sc.sel - cols + N) % N; else scorri = Math.min(scorri + 16, maxScorri()) }
         else if (n === 'giu') { if (sc.griglia && !ultima) sc.sel = Math.min(N - 1, sc.sel + cols); else if (dopo) scelta = dopo; else if (sc.griglia) sc.sel = (sc.sel + cols) % N; else scorri = Math.max(0, scorri - 16) }
-        else if (n === 'ok') premi(sc, sc.lista[sc.sel])
+        else if (n === 'ok') { if (siVede(sc.m, (r) => r.sc === sc && sc.sel >= r.da && sc.sel <= r.a)) premi(sc, sc.lista[sc.sel]); else segui() } // (fuori schermo: prima si fa vedere)
         else if (n === 'indietro') { if (riga) { riga = ''; sugg = null } else os.togli() }
         invalida(sc.m)
         if (scelta && scelta !== sc) invalida(scelta.m)
@@ -707,7 +750,7 @@ export function vista() {
       // se no: il cursore sui tasti di adesso. ← → lo spostano (in tondo), OK preme proprio quello evidenziato
       const lista = tasti(), i = fissa(lista)
       if (n === 'sx' || n === 'dx') { if (lista.length) { cur = lista[(i + (n === 'dx' ? 1 : -1) + lista.length) % lista.length].k; scorri = 0; segui() } return true }
-      if (n === 'ok') { lista[i]?.fai(); return true }
+      if (n === 'ok') { const t = lista[i]; if (t?.b && !siVede(t.m, (r) => r.az?.includes(t.b))) segui(); else t?.fai(); return true } // (fuori schermo: prima si fa vedere)
       if (n === 'indietro') { os.togli(); return true }
       return false
     },

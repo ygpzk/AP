@@ -514,6 +514,12 @@ try {
       await bancaVera.metti((c) => { c.zaino.xp = 4000; c.zaino.stat = { pescati: 31, sfideFatte: 9, acquisti: 12, comandi: 80 }; c.pzk = 52340; c.libro = { lav: 60000, spe: 9000, g: { roulette: [12, 5, 5000, 6200, 900] } } }, 'nutria92')
       await page.evaluate(() => import('/games/pzk.js').then((p) => p.sincronizza())); await dorm(600)
     }
+    // --miniera-cugino (11.11, Alberto: «non posso montare i pezzi comprati»): la postazione del conto pzkko vero, col case
+    // da scarpe (mini, solo schede corte) montato e la rx del cugino (media) comprata ma che lì dentro non ci sta
+    if (process.argv.includes('--miniera-cugino')) {
+      await bancaVera.metti((c) => { c.pzk = 1736; c.zaino.miniera = { posseduti: { 'tavolo-sagra': 1, 'sedia-sgabello': 1, 'case-scarpe': 1, 'cpu-nonno': 1, 'ram-cassetto': 1, 'mem-ticchetta': 1, 'schermo-ragioniere': 1, 'tast-supermercato': 1, 'mouse-filo': 1, 'gpu-cugino': 1 }, montati: { tavolo: 'tavolo-sagra', sedia: 'sedia-sgabello', case: 'case-scarpe', cpu: 'cpu-nonno', ram: 'ram-cassetto', memoria: 'mem-ticchetta', schermo: { id: 'schermo-ragioniere', n: 1 }, tastiera: 'tast-supermercato', mouse: 'mouse-filo' }, dal: Date.now(), acc: 0 } })
+      await page.evaluate(() => import('/games/pzk.js').then((p) => p.sincronizza())); await dorm(600)
+    }
     if (process.argv.includes('--giocate')) {
       await bancaVera.metti((c) => { c.libro = { ...c.libro, lav: 10292.5, pre: 1160, spe: 10580, g: { 'chat-slot': [3, 0, 60, 0, 0], 'chat-blackjack': [1, 1, 400, 800, 400], blackjack: [5, 2, 865, 130, 50], roulette: [2, 2, 5000, 6000, 500] } } })
       await page.evaluate(() => import('/games/pzk.js').then((p) => p.sincronizza())); await dorm(600)

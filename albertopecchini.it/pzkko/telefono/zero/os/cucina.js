@@ -26,6 +26,7 @@ const TEMPO = { taglia: 12000, ordina: 14000, mescola: 7000, impasta: 5000, vers
 const PREMI = { taglia: 'OK quando il coltello è sulla riga', ordina: '←→ sceglie · OK nella pentola', mescola: 'gira: → ↓ ← ↑ e ancora', impasta: 'OK più in fretta che puoi', versa: 'OK apre · OK chiude nella fascia', cuoci: 'OK quando la lancetta è nella fascia' }
 const GIRO = ['dx', 'giu', 'sx', 'su'] // (in senso orario: a destra, giù, a sinistra, su)
 const NOME_M = { oro: 'medaglia d’oro', argento: 'medaglia d’argento', bronzo: 'medaglia di bronzo' }
+const ART = { tortelli: 'i', pilota: 'il', sbrisolona: 'la', luccio: 'il' } // (11.11: la nonna diceva «i torta sbrisolona!» e «i luccio in salsa!»)
 
 /** Un testo centrato nel riquadro x … x + w. */
 const centro0 = (l, x, w, y, s, scala = 1) => l.testo(x + Math.round((w - Lcd.larghezza(s, scala)) / 2), y, s, { scala })
@@ -99,6 +100,7 @@ function vistaRicetta(os, r, par) {
   /** OK (o il clic sulla scena) durante il gioco. */
   function colpo() {
     if (!g) return
+    if (ora() >= g.fino) return scaduto() // (11.11: un OK dopo lo scadere, prima del tic, mandava un tempo oltre il passo e la banca chiudeva la ricetta)
     const { tipo } = g
     if (tipo === 'taglia') {
       const x = coltello(), libere = g.righe.filter((q) => !q.fatto)
@@ -110,6 +112,7 @@ function vistaRicetta(os, r, par) {
     } else if (tipo === 'ordina') {
       const s = g.carte[g.sel]
       if (g.messe.has(s)) return
+      if (g.tocchi.length >= 40 || (g.tocchi.length + 1) * 120 > ms()) return // (11.11: più di 40 tocchi, o più svelti di uno ogni 120 ms, e la banca chiudeva la ricetta con «ingredienti sbagliati» o «troppo in fretta»: oltre 40 il voto è già 0)
       g.tocchi.push(s)
       if (s === g.o.seq[g.prossimo]) {
         g.messe.add(s)
@@ -153,7 +156,7 @@ function vistaRicetta(os, r, par) {
     },
     disegna(l, t) {
       testata(l, os, { icona: 'app-cucina', nome: corto(r.nome, 24), n: 1 })
-      if (G.fase !== 'fine') destra(l, 245, 18, `passo ${G.i + 1}/${r.passi.length}`)
+      if (G.fase !== 'fine' && G.fase !== 'apre') destra(l, 245, 18, `passo ${G.i + 1}/${r.passi.length}`) // (11.11: rifalla diceva «passo 5/5» mentre la nonna prepara quella nuova)
       if (G.fase === 'assaggia' || G.fase === 'apre') { // (aspettando la banca: la medaglia, o i numeri della ricetta nuova)
         l.bitmap(bm(r.piatto, 32), Math.round(W / 2 - 16), 44)
         centro(l, 84, G.fase === 'assaggia' ? 'la nonna assaggia' + '...'.slice(0, 1 + (Math.floor(t / 3) % 3)) : 'la nonna prepara' + '...'.slice(0, 1 + (Math.floor(t / 3) % 3)))
@@ -163,7 +166,7 @@ function vistaRicetta(os, r, par) {
       const [tipo, testo] = passo()
       if (G.fase === 'intro') {
         l.testo(10, 35, corto(txt(testo), 39))
-        fumetto(l, 48, G.i === 0 ? `i ${r.nome}! ${r.dove}. pronta?` : `ora: ${testo}.`)
+        fumetto(l, 48, G.i === 0 ? `${ART[r.id] ?? ''} ${r.nome}! ${r.dove}. pronta?`.trim() : `ora: ${testo}.`)
         centro(l, 92, corto(PREMI[tipo], 39))
         os.zona(10, 34, W - 20, 82, () => via())
         centro(l, H - 9, 'OK via! · INDIETRO le ricette')
@@ -182,12 +185,12 @@ function vistaRicetta(os, r, par) {
       }
       if (G.fase === 'fine') {
         const f = fine, m = f.m
-        l.bitmap(bm(r.piatto, 32), 10, 34)
+        l.bitmap(bm(r.piatto, 32), 10, 33) // (11.11: righe 33–64, i premi sotto da 66: a 64 il piatto bucava «niente premi»)
         l.testo(48, 35, m ? NOME_M[m[1]] : 'niente medaglia')
         l.testo(48, 45, `${Math.round(f.v * 100)} / 100`, { scala: 2 })
         if (f.record) l.testo(48 + Lcd.larghezza(`${Math.round(f.v * 100)} / 100`, 2) + 6, 50, 'record!')
-        const premi = [f.pzk || f.xp ? `+${f.pzk} $pzk · +${f.xp} xp` : m ? `oggi i premi li hai già presi (${PAGATE} al giorno)` : 'niente premi: riprova', f.piatto ? `${r.piatto} nello zaino` : ''].filter(Boolean).join(' · ')
-        righeCorte(premi, 39, 2).forEach((s, i) => l.testo(10, 64 + i * 9, s))
+        const premi = [f.pzk || f.xp ? `+${f.pzk} $pzk · +${f.xp} xp` : m ? `oggi i premi li hai già presi (${PAGATE} al giorno)` : 'niente premi: riprova', f.piatto ? `${nomeIng(r.piatto)} nello zaino` : ''].filter(Boolean).join(' · ') // (11.11: il nome del piatto, non l'id: «luccio-salsa nello zaino»)
+        righeCorte(premi, 39, 2).forEach((s, i) => l.testo(10, 66 + i * 9, s))
         fumetto(l, 83, m?.[1] === 'oro' ? 'come li faccio io. anzi meglio!' : m ? 'buoni! la prossima volta di più.' : 'questi al gatto. riproviamo?', 1) // (una riga sola, 33 lettere: sotto ci sono i tasti)
         const E = ['rifalla', 'le ricette']
         const ws = E.map((e) => Lcd.larghezza(e) + 8), tot = ws[0] + ws[1] + 4
@@ -323,14 +326,14 @@ export function vista(os) {
     disegna(l) {
       const c = stato()
       testata(l, os, { icona: 'app-cucina', nome: 'cucina', n: 1 })
-      destra(l, 245, 18, `pagate oggi ${Math.min(c.pagate, PAGATE)}/${PAGATE}`)
+      destra(l, 245, 18, `pagate oggi ${Math.min(Number(c.pagate) || 0, PAGATE)}/${PAGATE}`) // (11.11: uno zaino senza pagate o senza record non rompe il menu)
       l.bitmap(nonna(16), 10, 33)
       l.testo(30, 37, 'cosa cuciniamo? ricette del Mincio') // (dentro il margine: con «le» finiva a x 251)
       elenco(l, os.zona, {
         voci: RICETTE, stato: st, y0: 50, alta: 68, passo: 17, // (la fascia alta 16: l'icona da 16 rovesciata ci sta dentro)
         clic: (r) => comincia(os, r, v),
         riga(l, r, x0, y, w, on) {
-          const o = { inv: on }, rec = c.record[r.id], m = rec != null ? medaglia(rec) : null
+          const o = { inv: on }, rec = c.record?.[r.id], m =rec != null ? medaglia(rec) : null
           const dx = rec != null ? `${m ? `${m[1]} ` : ''}${Math.round(rec * 100)}` : `${r.passi.length} passi`
           l.bitmap(bm(r.piatto, 16), x0 - 2, y, o)
           l.testo(x0 + 18, y + 5, corto(r.nome, 22), o)

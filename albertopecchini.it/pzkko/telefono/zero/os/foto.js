@@ -21,9 +21,22 @@ function riquadro(l, os, id, x, y, w, h, piccola) {
   l.bitmap(b, x + Math.round((w - b.w) / 2), y + Math.round((h - b.h) / 2))
 }
 
+/** Il credito in n caratteri: «foto: autore · licenza», e «· Wikimedia Commons» solo se ci sta intero. Se non ci sta, si
+ *  accorcia l'autore e la licenza resta (11.11: tagliato a 34 caratteri, in 47 foto su 126 la licenza spariva e restava «· …»). */
+function creditoCorto(id, n) {
+  const p = txt(credito(id) ?? '').split(' · ')
+  if (p.length < 2) return corto(p[0], n)
+  const coda = ` · ${p[1]}`
+  let s = p[0] + coda
+  if ([...s].length > n) return [...coda].length > n - 8 ? corto(s, n) : corto(p[0], n - [...coda].length) + coda
+  for (const q of p.slice(2)) { const t = `${s} · ${q}`; if ([...t].length > n) break; s = t }
+  return s
+}
+
 // ── una foto a tutto schermo ──
 function grande(os) {
-  return {
+  const qui = () => os.corrente() === g // (le zone restano quelle vecchie fino al disegno dopo, 100 ms: un doppio clic in mezzo usciva dall'app, 11.11)
+  const g = {
     nome: 'foto-grande', app: 'foto', senzaBarra: true,
     entra() { this.via = [icone.ascolta(() => os.ridisegna())] },
     esci() { this.via?.forEach((f) => f()) },
@@ -31,10 +44,10 @@ function grande(os) {
       const id = IDS[sel], x = IMMAGINI[id]
       riquadro(l, os, id, 14, 2, 228, 106, false) // (dentro le punte stondate dello schermo)
       centro(l, 110, corto(`${sel + 1}/${IDS.length} · ${txt(x.cosa)}`, 38))
-      centro(l, 119, corto(txt(credito(id) ?? ''), 34))
-      os.zona(0, 0, W / 3, 108, () => { sel = (sel - 1 + IDS.length) % IDS.length })
-      os.zona(W / 3, 0, W / 3, 108, () => os.togli())
-      os.zona((2 * W) / 3, 0, W / 3, 108, () => { sel = (sel + 1) % IDS.length })
+      centro(l, 119, creditoCorto(id, 34))
+      os.zona(0, 0, W / 3, 108, () => { if (qui()) sel = (sel - 1 + IDS.length) % IDS.length })
+      os.zona(W / 3, 0, W / 3, 108, () => { if (qui()) os.togli() })
+      os.zona((2 * W) / 3, 0, W / 3, 108, () => { if (qui()) sel = (sel + 1) % IDS.length })
     },
     tasto(k) {
       if (k === 'sx' || k === 'su') sel = (sel - 1 + IDS.length) % IDS.length
@@ -44,6 +57,7 @@ function grande(os) {
       return true
     },
   }
+  return g
 }
 
 // ── la galleria ──
@@ -67,7 +81,7 @@ export function vista(os) {
     ascolta: [(f) => icone.ascolta(f)],
     pagine: [{
       nome: `le foto · ${IDS.length}`, icona: 'app-foto', aiuto: 'OK la guardi · le frecce scelgono',
-      ok: () => os.spingi(grande(os)),
+      ok: (x) => { if (x.qui()) os.spingi(grande(os)) }, // (un doppio clic apriva due foto grandi una sopra l'altra, e INDIETRO restava sulla foto, 11.11)
       entra: inVista,
       disegna(l, x) {
         const x0 = Math.round(W / 2 - (COL * CW) / 2)
@@ -76,8 +90,8 @@ export function vista(os) {
           if (k >= IDS.length) break
           const cx = x0 + (i % COL) * CW, cy = 34 + Math.floor(i / COL) * CH, on = k === sel
           riquadro(l, os, IDS[k], cx + 2, cy + 2, CW - 4, CH - 4, true)
-          if (on) { l.riquadro(cx, cy, CW, CH); l.riquadro(cx + 1, cy + 1, CW - 2, CH - 2) } // (la scelta: la cornice doppia)
-          x.zona(cx, cy, CW, CH, () => { if (sel === k) os.spingi(grande(os)); else sel = k })
+          if (on) { l.riquadro(cx, cy, CW, CH); l.riquadro(cx + 1, cy + 1, CW - 2, CH - 2); l.riquadro(cx + 2, cy + 2, CW - 4, CH - 4, 0) } // (la scelta: la cornice doppia, e un pixel chiaro fra cornice e foto: sulle foto scure la scelta era un blocco nero uguale alle altre, 11.11)
+          x.zona(cx, cy, CW, CH, () => { if (!x.qui()) return; sel = k; os.spingi(grande(os)) }) // (il clic sceglie e preme, come il menu: prima la prima volta sceglieva e basta, 11.11)
         }
         // la barra di scorrimento e cosa è quella scelta
         const tot = Math.ceil(IDS.length / COL), alta = RIGHE * CH, h = Math.max(6, Math.round((alta * RIGHE) / tot))

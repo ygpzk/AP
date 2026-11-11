@@ -68,7 +68,7 @@ const chiedendo = {} // da → la richiesta in corso (due OK di fila non la rifa
 function chiedi(da) {
   return (chiedendo[da] ??= (async () => {
     try {
-      const r = await fetch(`/api/borsa/?da=${da}`)
+      const r = await fetch(`/api/borsa/?da=${da}`, { signal: AbortSignal.timeout?.(20000) }) // (11.11: una rete che non risponde teneva la richiesta aperta per sempre, e la banca, anche riaperta, restava su «mi collego…» senza riprovare: dopo 20 secondi è «non c'è la rete»)
       const d = await r.json().catch(() => ({ ok: false }))
       borsa[da] = { d: { ...d, da }, quando: Date.now() }
     } catch { borsa[da] = { d: { ok: false, da, rete: true }, quando: Date.now() } }
@@ -139,10 +139,11 @@ export function vista(os) {
   // ── la borsa ──
   const grafico = {
     nome: 'la borsa', icona: 'pzk',
-    aiuto: () => (cursore !== null ? '←→ muove · OK o INDIETRO esce' : punti().length > 1 ? 'OK cursore · ↑↓ periodo · ←→ pagine' : '↑↓ periodo · ←→ pagine'), // (30.10: la stessa condizione di OK; prima «OK cursore» anche col periodo che caricava)
+    ok: () => premiGrafico(), // (11.11: il clic su «OK cursore» in fondo fa quello che dice, come OK; il tasto lo prende già tasto())
+    aiuto: () => (punti().length < 2 ? '↑↓ periodo · ←→ pagine' : cursore !== null ? '←→ muove · OK o INDIETRO esce' : 'OK cursore · ↑↓ periodo · ←→ pagine'), // (30.10: la stessa condizione di OK; prima «OK cursore» anche col periodo che caricava. 11.11: col cursore acceso e la borsa che poi non risponde, in fondo restava «←→ muove · OK o INDIETRO esce», ma tasto() spegne il cursore e ← cambiava pagina, INDIETRO chiudeva la banca)
     entra() { cursore = null; aggiorna() },
     tic(t) {
-      if (t % 600 === 0) aggiorna() // (ogni minuto, mentre si guarda)
+      if (t % 100 === 0) aggiorna() // (ogni minuto, mentre si guarda. 11.11: si guarda ogni dieci secondi se è vecchia, così «riprovo fra un minuto» riprova dopo un minuto; con t % 600 e il minuto di vecchia() ce ne volevano quasi due)
       if (cresce < 1) { cresce = Math.min(1, cresce + 0.2); return true }
       return t % 5 === 0 // (l'ultimo punto lampeggia)
     },
@@ -171,7 +172,7 @@ export function vista(os) {
       l.testo(10, 34, grande, { scala: 2 })
       l.testo(xe, 34, '€ per')
       l.testo(xe, 42, '$pzk')
-      const vari = cursore !== null ? vk / P[0][1] - 1 : { '24h': b.var24, '7g': b.var7g, '30g': b.var30g, tutto: b.tasso / 1 - 1 }[da()]
+      const vari = cursore !== null ? vk / P[0][1] - 1 : { '24h': b.var24, '7g': b.var7g, '30g': b.var30g, tutto: b.tasso / 1 - 1 }[da()] ?? b.tasso / P[0][1] - 1 // (11.11: una borsa più giovane del periodo non ha la variazione del server, e in alto restava un «-» da solo: allora quella dall'inizio della linea)
       destra(l, 245, 45, cursore !== null ? corto(quando(tk, da()), 20) : variazione(vari))
       // il grafico: da x 10 a 245, da y 54 a 104; l'area sotto la linea a puntini, l'apertura tratteggiata
       const X0 = 10, X1 = 245, Y0 = 55, Y1 = 104
@@ -198,8 +199,8 @@ export function vista(os) {
         if (cursore !== null) { for (let y = Y0 - 1; y <= Y1; y += 2) l.px(cx, y); l.riempi(cx - 2, cy - 2, 5, 5, 0); l.riquadro(cx - 2, cy - 2, 5, 5) }
         else if (t % 10 < 5) l.riempi(cx - 1, cy - 1, 3, 3)
       }
-      l.testo(10, 108, `min ${fmtTasso(lo)}`)
-      destra(l, 245, 108, `max ${fmtTasso(hi)}`)
+      l.testo(10, 108, `min ${tassoCorto(lo)}`) // (11.11: sei caratteri come il cambio grande: «min 100.1234» finiva sotto il «da …» di mezzo)
+      destra(l, 245, 108, `max ${tassoCorto(hi)}`)
       const tempo = cursore !== null ? `${k + 1}/${P.length}` : corto(`da ${quando(P[0][0], da())}`, 16) // (da quando parte la linea)
       centro(l, 108, tempo)
       x.zona(X0, Y0, X1 - X0, Y1 - Y0, premiGrafico)
@@ -228,10 +229,11 @@ export function vista(os) {
   const numeri = {
     nome: 'i numeri della borsa', icona: 'pzk', aiuto: '←→ pagine',
     entra: aggiorna,
+    tic(t) { if (t % 100 === 0) aggiorna() }, // (11.11: senza tic qui «riprovo fra un minuto» non riprovava mai, e i numeri restavano quelli di quando si era entrati)
     disegna(l, x, t) {
       const d = qualunque(da())
       if (!d) { centro(l, 70, `mi collego alla borsa${'...'.slice(0, (Math.floor(t / 4) % 3) + 1)}`); return }
-      if (!d.ok) { centro(l, 62, 'la borsa è chiusa'); centro(l, 74, d.offline ? 'apre quando il server ha il suo archivio' : 'non c’è la rete: riprovo fra un minuto'); return }
+      if (!d.ok) { centro(l, 62, 'la borsa è chiusa'); centro(l, 74, d.offline ? 'apre quando il server ha il suo archivio' : d.rete ? 'non c’è la rete: riprovo fra un minuto' : corto(d.errore ?? 'riprova più tardi', 38)); return } // (11.11: come la borsa; prima «non c'è la rete» anche quando il server rispondeva con un errore)
       const nata = d.nata ? new Date(d.nata).toLocaleDateString('it-IT', { ...ROMA, day: 'numeric', month: 'short', year: 'numeric' }) : ''
       const R = [
         ['1 $pzk', `${fmtTasso(d.tasso)} €`],

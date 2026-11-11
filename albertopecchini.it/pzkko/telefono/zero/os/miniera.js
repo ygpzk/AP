@@ -69,18 +69,34 @@ function grande(os, montati = null, titolo = 'la tua postazione') {
 // ── la scheda di un pezzo ──
 function schedaPezzo(os, id) {
   const p = M.pezzo(id)
-  let sel = 0, giu = 0, esito = null
-  const dì = (ok, testo) => { esito = { ok, testo: txt(testo), fino: Date.now() + 5000 }; if (!ok) os.suoni.bip('pagerGiu'); os.ridisegna() }
+  let scelto = 'compra', giu = 0, esito = null, attesa = null // (11.11: il tasto scelto si ricorda per nome, 3.12: dopo «monta» il cursore finiva su «smonta», e OK due volte lo smontava)
+  // (11.11) quello che non sta nella striscia si legge intero in un dialogo: «! costa 2500 $pzk: non ti bastano: h…» non
+  // diceva quanti ne hai, e gli avvisi del case nuovo («schede video: ne restano montate…») sparivano a metà
+  const dì = (ok, testo, dettagli = '') => {
+    const s = txt(dettagli ? `${testo} · ${dettagli}` : testo)
+    esito = { ok, testo: s, fino: Date.now() + 5000 }; if (!ok) os.suoni.bip('pagerGiu'); os.ridisegna()
+    if ([...s].length > 35 && os.corrente() === v) os.dialogo({ titolo: ok ? txt(testo) : 'non si può', testo: txt(ok ? dettagli : testo), tasti: ['ok'] })
+  }
+  // (11.11) la rotellina in fondo mentre risponde la banca (8.6): prima la scheda restava ferma, come se OK non avesse fatto niente
+  const banca = async (testo, f) => { attesa = testo; os.ridisegna(); try { return await f() } finally { attesa = null; os.ridisegna() } }
   const tasti = () => {
     const st = M.stato(), m = montatoDi(st.montati, p.cat), ho = st.posseduti?.[p.id] ?? 0, montato = m?.id === p.id
     const ci = montato ? { ok: true } : M.compatibile(p.cat, p.id, 1), multipla = M.CATEGORIE.find((k) => k.id === p.cat)?.multipla
     // «monta +1» solo se ce n'è un altro da montare e c'è posto (prima c'era anche con tutti montati o gli slot pieni)
-    const piu = montato && multipla && ho > m.n && M.compatibile(p.cat, p.id, m.n + 1).ok
-    const t = [{ eti: `compra ${fmt(p.prezzo)}`, fai: 'compra' }]
+    const altri = montato && multipla && ho > m.n, piu = altri && M.compatibile(p.cat, p.id, m.n + 1).ok
+    const t = [{ eti: `compra ${fmt(p.prezzo)}`, fai: 'compra', k: 'compra' }]
     if (montato ? piu : ho && ci.ok) t.push({ eti: montato ? 'monta +1' : 'monta', fai: 'monta' })
-    if (montato) t.push({ eti: 'smonta', fai: 'smonta' }); else if (ho) t.push({ eti: 'vendi', fai: 'vendi' })
-    return t
+    // (11.11, Alberto: «non posso montare i pezzi comprati»: una gpu media comprata col case da scarpe, e il tasto spariva
+    // senza dire niente) se ce l'hai ma non ci sta, «monta» c'è lo stesso: dice perché e porta al pezzo che lo fa stare
+    // (e così «monta +1»: la seconda scheda comprata col case da una scheda sola spariva uguale)
+    else if (altri) t.push({ eti: 'monta +1', fai: 'nonci' })
+    else if (!montato && ho && !ci.ok) t.push({ eti: 'monta', fai: 'nonci' })
+    if (montato) t.push({ eti: 'smonta', fai: 'smonta' })
+    // (11.11) «vendi» anche coi pezzi in più di uno montato: la banca li vende, ma il tasto c'era solo a pezzo smontato
+    if (ho > (montato ? m.n : 0)) t.push({ eti: 'vendi', fai: 'vendi' })
+    return t.map((x) => ({ ...x, k: x.k ?? x.eti }))
   }
+  const indice = (T) => Math.max(0, T.findIndex((x) => x.k === scelto)) // (se il tasto scelto non c'è più, il primo)
   // il testo che scorre: lo leggono disegna e tasto (↓ si ferma all'ultima riga, senza che disegna corregga giu)
   const VIS = 4
   const leggibile = () => {
@@ -95,25 +111,44 @@ function schedaPezzo(os, id) {
     try { await fai(t) } finally { occupato = false }
   }
   async function fai(t) {
-    const avvisi = (r) => (r.avvisi?.length ? ` · ${r.avvisi.join(' ')}` : '')
+    const avvisi = (r) => (r.avvisi?.length ? `${r.avvisi.join('. ')}.` : '')
     if (t.fai === 'compra') {
-      const s = await os.dialogo({ titolo: 'compri?', testo: `${p.nome} per ${fmt(p.prezzo)} $pzk.`, tasti: ['no', 'sì'] })
+      // (11.11) quanti ne tieni al massimo, come la banca (miniera.compra): uno, o le schede, le ventole e gli schermi che
+      // stanno nel case o sul tavolo più grande. Prima «compra» di un pezzo che avevi già chiedeva «compri?», e dopo il sì la
+      // banca diceva di no: adesso lo dice subito
+      const ho = M.stato().posseduti?.[p.id] ?? 0, dove = { gpu: ['case', 'slotGpu'], ventole: ['case', 'slotVentole'], schermo: ['tavolo', 'posti'] }[p.cat]
+      const tieni = dove ? Math.max(...M.catalogo(dove[0]).map((x) => x.stats[dove[1]] ?? 1)) : 1
+      if (ho >= tieni) return dì(false, tieni === 1 ? 'ce l’hai già: di due non te ne fai niente' : `ne hai già ${fmt(ho)}: più di ${fmt(tieni)} non ne monti`)
+      // (11.11) schede, ventole e schermi vanno accanto a quelli che hai: il nuovo ci deve stare insieme a loro (il secondo
+      // monitor col tavolo della sagra, che regge uno schermo solo, si comprava senza l'avviso)
+      const ci = M.compatibile(p.cat, p.id, ho + 1)
+      const s = await os.dialogo({ titolo: 'compri?', testo: `${p.nome} per ${fmt(p.prezzo)} $pzk.${ci.ok ? '' : ` Occhio: adesso non lo monti, ${ci.errore}.`}`, tasti: ['no', 'sì'] })
       if (s !== 'sì' || os.corrente() !== v) return
-      const r = await M.compra(p.id); if (os.corrente() !== v) return; if (!r.ok) return dì(false, r.errore ?? 'non si può'); os.suoni.sigla('miniera'); return dì(true, `comprato${avvisi(r)}`)
+      const r = await banca('compro', () => M.compra(p.id)); if (os.corrente() !== v) return; if (!r.ok) return dì(false, r.errore ?? 'non si può'); os.suoni.sigla('miniera'); return dì(true, 'comprato', avvisi(r))
     }
-    if (t.fai === 'monta') { const m = montatoDi(M.stato().montati, p.cat), r = await (m?.id === p.id ? M.monta(p.cat, p.id, m.n + 1) : M.monta(p.cat, p.id)); if (os.corrente() !== v) return; if (!r.ok) return dì(false, r.errore ?? 'non si può'); const n = montatoDi(M.stato().montati, p.cat)?.n ?? 1; return dì(true, `montato${n > 1 ? ` ×${n}` : ''}${avvisi(r)}`) }
-    if (t.fai === 'smonta') { const r = await M.smonta(p.cat); if (os.corrente() !== v) return; return r.ok ? dì(true, 'smontato') : dì(false, r.errore ?? 'non si può') }
+    if (t.fai === 'monta') { const m = montatoDi(M.stato().montati, p.cat), r = await banca('monto', () => (m?.id === p.id ? M.monta(p.cat, p.id, m.n + 1) : M.monta(p.cat, p.id))); if (os.corrente() !== v) return; if (!r.ok) return dì(false, r.errore ?? 'non si può'); const n = montatoDi(M.stato().montati, p.cat)?.n ?? 1; return dì(true, `montato${n > 1 ? ` ×${n}` : ''}`, avvisi(r)) }
+    if (t.fai === 'nonci') {
+      const m = montatoDi(M.stato().montati, p.cat), montato = m?.id === p.id
+      const ci = M.compatibile(p.cat, p.id, montato ? m.n + 1 : 1), q = montato ? null : M.perMontare(p.cat, p.id), y = q && M.pezzo(q.id)
+      if (ci.ok) return
+      const dopo = y ? (q.ho ? ` Hai già ${y.nome}: monta prima quello.` : ` Ci sta con ${y.nome} (${fmt(y.prezzo)} $pzk).`) : ''
+      const s = await os.dialogo({ titolo: 'non ci sta', testo: `${ci.errore}.${dopo}`, tasti: y ? ['no', `vai a ${nomeCat(q.cat)}`] : ['ok'] })
+      if (y && s === `vai a ${nomeCat(q.cat)}` && os.corrente() === v) os.spingi(schedaPezzo(os, q.id))
+      return
+    }
+    // (11.11) smontando il case escono anche schede e ventole: la banca lo dice negli avvisi, che prima qui si perdevano
+    if (t.fai === 'smonta') { const r = await banca('smonto', () => M.smonta(p.cat)); if (os.corrente() !== v) return; return r.ok ? dì(true, 'smontato', avvisi(r)) : dì(false, r.errore ?? 'non si può') }
     if (t.fai === 'vendi') {
       const s = await os.dialogo({ titolo: 'vendi?', testo: `${p.nome}: te lo ripagano meno di quanto costa.`, tasti: ['no', 'vendi'] })
       if (s !== 'vendi' || os.corrente() !== v) return
-      const r = await M.vendi(p.id); if (os.corrente() !== v) return; return r.ok ? dì(true, `venduto: +${fmt(r.reso ?? 0)} $pzk`) : dì(false, r.errore ?? 'non si può')
+      const r = await banca('vendo', () => M.vendi(p.id)); if (os.corrente() !== v) return; return r.ok ? dì(true, `venduto: +${fmt(r.reso ?? 0)} $pzk`) : dì(false, r.errore ?? 'non si può')
     }
   }
   const v = {
     nome: 'miniera-pezzo', app: 'miniera',
     entra() { v.via = [M.ascolta?.(() => os.ridisegna())] },
     esci() { v.via?.forEach((f) => f?.()) },
-    tic() { if (esito && Date.now() >= esito.fino) { esito = null; os.ridisegna() } },
+    tic() { if (attesa) os.ridisegna(); else if (esito && Date.now() >= esito.fino) { esito = null; os.ridisegna() } },
     disegna(l, t) {
       const st = M.stato(), m = montatoDi(st.montati, p.cat), ho = st.posseduti?.[p.id] ?? 0, montato = m?.id === p.id
       const b = disegno(p.id, false)
@@ -124,18 +159,17 @@ function schedaPezzo(os, id) {
       l.testo(52, 41, corto(statsTesto(p), 32))
       const righe = leggibile()
       scorrevole(l, righe, { y0: 57, vis: VIS, giu }) // (giu e sel li tiene in riga tasto: disegna non cambia lo stato, 4.8)
-      const T = tasti(), s = sel < T.length ? sel : 0 // (i tasti possono essere diminuiti: si disegna il primo)
-      bottoni(l, os.zona, { etichette: T.map((x) => x.eti), sel: s, y: 99, premi: (i) => { sel = i; premi(T[i]) } })
-      if (!striscia(l, { esito }, t)) centro(l, H - 9, `${T.length > 1 ? '←→ sceglie · ' : ''}OK preme${righe.length > VIS ? ' · ↑↓ legge' : ''}`)
+      const T = tasti() // (i tasti possono essere cambiati: si disegna quello scelto, o il primo)
+      bottoni(l, os.zona, { etichette: T.map((x) => x.eti), sel: indice(T), y: 99, premi: (i) => { scelto = T[i].k; premi(T[i]) } })
+      if (!striscia(l, { esito, attesa }, t)) centro(l, H - 9, `${T.length > 1 ? '←→ sceglie · ' : ''}OK preme${righe.length > VIS ? ' · ↑↓ legge' : ''}`)
     },
     tasto(k) {
-      const T = tasti(), fondo = Math.max(0, leggibile().length - VIS)
-      if (sel >= T.length) sel = 0
-      if (k === 'sx') sel = (sel - 1 + T.length) % T.length
-      else if (k === 'dx') sel = (sel + 1) % T.length
+      const T = tasti(), fondo = Math.max(0, leggibile().length - VIS), i = indice(T)
+      if (k === 'sx') scelto = T[(i - 1 + T.length) % T.length].k
+      else if (k === 'dx') scelto = T[(i + 1) % T.length].k
       else if (k === 'su') giu = Math.max(0, Math.min(giu, fondo) - 1)
       else if (k === 'giu') giu = Math.min(fondo, giu + 1)
-      else if (k === 'ok') premi(T[sel])
+      else if (k === 'ok') premi(T[i])
       else if (k === 'indietro') os.togli()
       else return false
       return true
@@ -162,7 +196,7 @@ function categoria(os, cat) {
           const o = { inv: on }, ho = M.stato().posseduti?.[p.id] ?? 0, montato = m?.id === p.id
           const b = disegno(p.id, true)
           l.bitmap(b, x0 - 2, y + 1, o)
-          const s = montato ? `montat${m.n > 1 ? `i ${m.n}` : 'o'}` : ho ? `ne hai ${ho}` : fmt(p.prezzo)
+          const s = montato ? `montat${m.n > 1 ? `i ${m.n}` : 'o'}` : ho ? `${M.compatibile(cat, p.id, 1).ok ? '' : '⚠ '}ne hai ${ho}` : fmt(p.prezzo) // (⚠: ce l'hai ma adesso non ci sta)
           destra(l, x0 + w, y + 2, s, o)
           l.testo(x0 + 22, y + 2, corto(p.nome, Math.floor((w - 22 - Lcd.larghezza(s) - 6) / 6)), o)
           l.testo(x0 + 22, y + 11, corto(statsTesto(p), Math.floor((w - 22) / 6)), o)
@@ -177,16 +211,29 @@ function categoria(os, cat) {
 // ── la scheda di un PC pronto ──
 function schedaPronto(os, id) {
   let esito = null
-  const dì = (ok, testo) => { esito = { ok, testo: txt(testo), fino: Date.now() + 5000 }; if (!ok) os.suoni.bip('pagerGiu'); os.ridisegna() }
+  // (11.11) come nella scheda di un pezzo: l'errore lungo («costa 7213 $pzk (i pezzi che ti mancano, già scontati): non ti
+  // bastano…») si legge intero in un dialogo, la striscia lo tagliava prima del perché
+  const dì = (ok, testo) => {
+    const s = txt(testo)
+    esito = { ok, testo: s, fino: Date.now() + 5000 }; if (!ok) os.suoni.bip('pagerGiu'); os.ridisegna()
+    if ([...s].length > 35 && os.corrente() === v) os.dialogo({ titolo: ok ? 'fatto' : 'non si può', testo: s, tasti: ['ok'] })
+  }
   const pc = () => M.PRONTI.find((x) => x.id === id)
+  // i posti che il PC pronto cambia nella postazione di adesso (quelli montati che vanno via o diventano un altro pezzo)
+  const cambia = (p) => { const m = M.stato().montati; return M.CATEGORIE.filter((k) => JSON.stringify(montatoDi(m, k.id)) !== JSON.stringify(montatoDi(p.pezzi ?? {}, k.id))) }
   let occupato = false
   async function compra() {
     if (occupato) return
     const p = pc()
-    const s = await os.dialogo({ titolo: p.prezzo ? 'compri?' : 'monti?', testo: p.prezzo ? `${p.nome}: compri i pezzi che non hai (${fmt(p.prezzo)} $pzk) e si monta tutto.` : `${p.nome}: hai già tutto, si monta.`, tasti: ['no', 'sì'] })
+    // (11.11) se è già la tua postazione, «monta» non chiede niente alla banca: lo dice
+    if (!p.prezzo && !cambia(p).length) return dì(true, 'è già la tua postazione')
+    // (11.11) il PC pronto prende il posto di tutta la postazione: il dialogo lo dice (8.6), prima la gpu montata spariva
+    // senza un avviso
+    const via = cambia(p).some((k) => montatoDi(M.stato().montati, k.id)) ? ' Quello che hai montato adesso si smonta (resta tuo).' : ''
+    const s = await os.dialogo({ titolo: p.prezzo ? 'compri?' : 'monti?', testo: (p.prezzo ? `${p.nome}: compri i pezzi che non hai (${fmt(p.prezzo)} $pzk) e si monta tutto.` : `${p.nome}: hai già tutto, si monta.`) + via, tasti: ['no', 'sì'] })
     if (s !== 'sì' || os.corrente() !== v) return
-    occupato = true
-    const r = await M.compraPronto(p.id).finally(() => { occupato = false }) // (31.10: la banca, coi suoi prezzi)
+    occupato = true; os.ridisegna() // (11.11: la rotellina mentre risponde la banca, 8.6)
+    const r = await M.compraPronto(p.id).finally(() => { occupato = false; os.ridisegna() }) // (31.10: la banca, coi suoi prezzi)
     if (os.corrente() !== v) return
     if (!r.ok) return dì(false, r.errore ?? 'non si può')
     os.suoni.sigla('miniera')
@@ -194,7 +241,10 @@ function schedaPronto(os, id) {
   }
   const v = {
     nome: 'miniera-pronto', app: 'miniera',
-    tic() { if (esito && Date.now() >= esito.fino) { esito = null; os.ridisegna() } },
+    // (11.11) ascolta lo zaino come la scheda di un pezzo: il prezzo («i pezzi che non hai») cambia con quello che compri
+    entra() { v.via = [M.ascolta?.(() => os.ridisegna())] },
+    esci() { v.via?.forEach((f) => f?.()) },
+    tic() { if (occupato) os.ridisegna(); else if (esito && Date.now() >= esito.fino) { esito = null; os.ridisegna() } },
     disegna(l, t) {
       const p = pc(), c = M.calcola(p.pezzi ?? {}), b = scena(p.pezzi ?? {}, true)
       l.bitmap(b, 8, 14); l.riquadro(7, 13, b.w + 2, b.h + 2)
@@ -206,9 +256,10 @@ function schedaPronto(os, id) {
       const dr = Lcd.acapo(txt(p.descr ?? ''), 39) // (sotto la miniatura; se è più lunga di due righe, la seconda finisce coi puntini)
       ;[dr[0] ?? '', dr.length > 2 ? corto(dr.slice(1).join(' '), 39) : dr[1] ?? ''].forEach((r, i) => l.testo(10, 80 + i * 9, r))
       bottoni(l, os.zona, { etichette: [p.prezzo ? 'compra e monta' : 'monta'], sel: 0, y: 99, premi: () => compra() })
-      if (!striscia(l, { esito }, t)) centro(l, H - 9, 'OK preme · ↓ la guardi grande')
+      if (!striscia(l, { esito, attesa: occupato ? 'monto il PC' : null }, t)) centro(l, H - 9, 'OK preme · ↓ la guardi grande')
     },
-    tasto(k) { if (k === 'ok') compra(); else if (k === 'indietro') os.togli(); else if (k === 'giu') os.spingi(grande(os, pc().pezzi ?? {}, pc().nome)); else return false; return true },
+    // (11.11) ↓ aspetta la banca: con la postazione grande sopra, l'esito di «compra e monta» (anche «non ti bastano») si perdeva
+    tasto(k) { if (k === 'ok') compra(); else if (k === 'indietro') os.togli(); else if (k === 'giu') { if (!occupato) os.spingi(grande(os, pc().pezzi ?? {}, pc().nome)) } else return false; return true },
   }
   return v
 }
@@ -219,7 +270,9 @@ export function vista(os) {
   const stP = { sel: 0, da: 0 }, stR = { sel: 0, da: 0 }
   const incassa = async (x) => {
     const c = M.calcola(), mat = M.maturati()
-    if (!c.completa) return x.dì(false, c.manca.length ? `mancano: ${c.manca.map(nomeCat).join(', ')}` : c.avvisi?.[0] ?? 'i pezzi non si incastrano')
+    // (11.11) quello maturato prima di smontare un pezzo resta (acc) e la banca lo paga anche a postazione spenta: prima qui
+    // OK diceva «mancano: case» e i $pzk restavano chiusi dentro finché non la rimontavi
+    if (!c.completa && mat < 0.5) return x.dì(false, c.manca.length ? `mancano: ${c.manca.map(nomeCat).join(', ')}` : c.avvisi?.[0] ?? 'i pezzi non si incastrano')
     if (mat < 0.5) return x.dì(false, 'non c’è ancora niente da incassare')
     const r = await x.aspetta('incasso', () => M.incassa()) // (31.10: conta la banca, con la sua ora)
     if (!r || !x.qui()) return
@@ -229,7 +282,7 @@ export function vista(os) {
   }
   const pPostazione = {
     nome: 'la postazione', icona: 'app-miniera',
-    aiuto: () => (M.calcola().completa ? 'OK incassa · ↓ la guardi · ←→ pagine' : '↓ la guardi · ←→ pagine'),
+    aiuto: () => (M.calcola().completa || M.maturati() >= 0.5 ? 'OK incassa · ↓ la guardi · ←→ pagine' : '↓ la guardi · ←→ pagine'),
     ok: incassa,
     tic: (t) => t % 10 === 0 && M.calcola().completa, // (i maturati crescono, una volta al secondo)
     disegna(l, x) {
@@ -251,7 +304,9 @@ export function vista(os) {
         // prima qui restava «mancano» con niente dopo)
         const manca = c.manca.length > 0, R = Lcd.acapo(txt(manca ? c.manca.map(nomeCat).join(', ') : c.avvisi?.[0] ?? 'i pezzi non si incastrano'), n)
         l.testo(x0, 34, manca ? 'spenta: mancano' : 'spenta, perché:')
-        ;[...R.slice(0, 4), ...(R.length > 5 ? [corto(R.slice(4).join(' '), n)] : R.slice(4, 5))].forEach((r, i) => l.testo(x0, 44 + i * 9, r)) // (la quinta riga coi puntini, se ce n'è ancora)
+        const resto = mat >= 0.5, max = resto ? 3 : 5 // (11.11: quello maturato prima di spegnerla si incassa lo stesso, e si vede qui sotto)
+        ;[...R.slice(0, max - 1), ...(R.length > max ? [corto(R.slice(max - 1).join(' '), n)] : R.slice(max - 1, max))].forEach((r, i) => l.testo(x0, 44 + i * 9, r)) // (l'ultima riga coi puntini, se ce n'è ancora)
+        if (resto) { l.testo(x0, 75, 'da incassare'); l.testo(x0, 84, corto(`${fmt(Math.floor(mat * 10) / 10)} $pzk`, n)) }
       }
       const avviso = c.completa || c.manca.length ? c.avvisi?.[0] : c.avvisi?.[1] // (il problema già scritto a destra non si ripete sotto)
       if (avviso) l.testo(10, 104, corto(`! ${avviso}`, 39))

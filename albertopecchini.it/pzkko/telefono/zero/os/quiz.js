@@ -9,7 +9,8 @@
 //   a indovinare). Risposto: la giusta col ✓, la tua sbagliata con la x, al posto della domanda la spiegazione, in fondo il
 //   premio; poi la prossima arriva da sola (2.11, Alberto: «fai che i quiz avanzino senza premere ogni volta enter»): 2,5 s
 //   dopo una giusta, 4,5 s dopo una sbagliata (c'è la spiegazione da leggere), con la barretta che si accorcia sopra
-//   l'esito; OK va avanti subito. INDIETRO chiede se lasciare la partita (il tempo intanto si ferma).
+//   l'esito; OK va avanti subito. INDIETRO chiede se lasciare la partita (si ferma l'attesa dell'esito, non il tempo della
+//   domanda: quello lo conta la banca).
 // - IL RIEPILOGO: quante giuste, i pallini, quanto hai preso, e i tasti argomenti e ancora.
 // Le regole: os/REGOLE.md.
 import { Lcd, W, H } from './lcd.js'
@@ -17,16 +18,19 @@ import * as icone from './icone.js'
 import { foto as fotoBitmap } from './icone.js'
 import * as zaino from '../../../chat/zaino.js'
 import * as quiz from '../../../chat/quiz.js'
-import { fmt } from '../../../games/pzk.js'
+import { fmt, fmtCorto } from '../../../games/pzk.js'
 import { txt, corto, destra, centro, elenco, muovi, pagine, striscia, bottoni } from './pezzi.js'
 
 const NOMI = ['', 'facile', 'media', 'difficile']
 const LETTERE = 'ABCD'
 const DOPO = { giusta: 2500, sbagliata: 4500 } // quanto resta l'esito prima della prossima domanda (OK la chiama subito)
+// (11.11) la banca non prende risposte date prima di 700 ms dalla domanda («troppo in fretta»): un OK di troppo appena
+// arrivata la domanda chiudeva la partita con quel dialogo. Prima di così la risposta aspetta, con la rotellina, e poi parte
+const PRIMA = 800
 
 // ── il riepilogo ──
 function fine(os, p, ancora, argomenti) {
-  let sel = 1, attesa = null, esito = null
+  let sel = 1, attesa = null, esito = null, suonata = false
   const perfetta = p.giuste === p.n
   // (come la x di pezzi.pagine: «ancora» prepara la partita nuova da qui, con la rotellina in fondo e l'esito se non ci sono domande)
   const x = {
@@ -42,17 +46,18 @@ function fine(os, p, ancora, argomenti) {
   const premi = (i) => { if (attesa) return; if (i === 0) argomenti(); else ancora(x) } // (preparando, niente doppie partite)
   const v = {
     nome: 'quiz-fine', app: 'quiz',
-    entra() { if (perfetta) os.suoni.sigla('sfide') },
+    entra() { if (perfetta && !suonata) { suonata = true; os.suoni.sigla('sfide') } }, // (11.11) una volta: entra torna anche quando si chiude un dialogo sopra (l'errore di «ancora»), e la sigla ripartiva
     tic() { const scaduto = esito && Date.now() >= esito.fino; if (scaduto) esito = null; if (attesa || scaduto) os.ridisegna() }, // (la rotellina gira, l'esito se ne va)
     disegna(l, t) {
       l.bitmap(icone.bitmap(perfetta ? 'bot-ride' : p.giuste >= p.n / 2 ? 'bot-ride' : 'bot-pensa', 32), 8, 16)
       l.testo(48, 17, `${p.giuste} su ${p.n}`, { scala: 2 })
       // (il bonus lo paga la banca solo con cinque domande o più e almeno una pagata: si dice quello che è successo)
-      l.testo(48, 36, corto(perfetta ? (p.bonus ? 'perfetto: il bonus è tuo.' : 'perfetto! (stavolta niente bonus)') : p.giuste >= p.n / 2 ? 'non male: sapevi più di quanto sembri.' : 'si impara anche sbagliando.', 33))
+      // (11.11) su due righe: in una «non male: sapevi più di quanto s…» restava tagliata a metà parola
+      Lcd.acapo(perfetta ? (p.bonus ? 'perfetto: il bonus è tuo.' : 'perfetto! (stavolta niente bonus)') : p.giuste >= p.n / 2 ? 'non male: sapevi più di quanto sembri.' : 'si impara anche sbagliando.', 32).slice(0, 2).forEach((r, i) => l.testo(48, 36 + i * 9, corto(r, 32)))
       p.esiti.forEach((x, i) => { const xp = Math.round(W / 2 - (p.esiti.length * 12) / 2) + i * 12; if (x) l.riempi(xp, 54, 9, 9); else { l.riquadro(xp, 54, 9, 9); for (let k = 2; k < 7; k++) { l.px(xp + k, 54 + k); l.px(xp + 8 - k, 54 + k) } } })
       centro(l, 70, corto(`+${fmt(p.guadagnato)} $pzk · +${p.xp} xp`, 38))
       centro(l, 80, corto(`${quiz.restanti()} risposte pagate rimaste oggi`, 38))
-      bottoni(l, os.zona, { etichette: ['argomenti', 'ancora'], sel, y: 99, premi: (i) => { sel = i; premi(i) } })
+      bottoni(l, os.zona, { etichette: ['argomenti', 'ancora'], sel, y: 99, premi: (i) => { if (attesa) return; sel = i; premi(i) } })
       if (!striscia(l, { esito, attesa }, t)) centro(l, H - 9, '←→ sceglie · OK preme')
     },
     tasto(k) {
@@ -75,16 +80,23 @@ function partita(os, p, arg, torna) {
   // (2.11) fermo: l'istante della risposta. Da lì i secondi e la barra del tempo restano dove sono: prima, con l'esito che si
   // ridisegna per la barretta dell'attesa, si vedeva il tempo correre ancora (10″, 7″…) su una domanda già risposta
   let fermo = 0
-  const resto = () => Math.max(0, quiz.TEMPO * 1000 - ((fermo || pausa || performance.now()) - inizio))
+  // (11.11) col dialogo «lasci?» il tempo qui si fermava, ma quello della banca no: dopo «no» si rispondeva giusto con 7" sullo
+  // schermo e la banca, già scaduta, dava «sbagliato». Ora il tempo corre anche col dialogo aperto, come sulla banca
+  const resto = () => Math.max(0, quiz.TEMPO * 1000 - ((fermo || performance.now()) - inizio))
   const nuova = () => { d = p.d; sel = 0; risposto = null; scelta = null; inizio = performance.now(); ultimoSec = quiz.TEMPO; scorri = 0; via = 0; fermo = 0 }
   nuova()
-  async function rispondi(i) {
+  let manda = null // (11.11) la risposta data prima di PRIMA ms: la manda il tic quando è ora (niente setTimeout)
+  function rispondi(i) {
     if (risposto || pausa || banca) return
     scelta = i; banca = 'controllo'; pausa = fermo = performance.now(); os.ridisegna()
-    const r = await quiz.rispondi(p, i)
+    if (i !== null && fermo - inizio < PRIMA) { manda = i; return } // (vedi PRIMA: intanto il tempo è fermo e gira la rotellina)
+    return controlla(i)
+  }
+  async function controlla(i) {
+    const r = await quiz.rispondi(p, i).catch(() => ({ errore: 'niente rete: riprova' })) // (11.11) come parti: un errore non lascia la rotellina per sempre, coi tasti fermi
     banca = null; pausa = 0
     if (os.corrente() !== v) return
-    if (r.errore) { os.togli(); return os.dialogo({ titolo: 'quiz', testo: r.errore, tasti: ['ok'] }) } // (la banca dice di no: la partita finisce qui)
+    if (r.errore) { os.togli(); os.suoni.bip('pagerGiu'); return os.dialogo({ titolo: 'quiz', testo: txt(r.errore), tasti: ['ok'] }) } // (la banca dice di no: la partita finisce qui; 11.11 col bip di errore, come quello dell'ingresso)
     p.esiti.push(r.giusta)
     if (r.bonus) p.bonus = r.bonus // (il riepilogo dice «il bonus è tuo» solo se chat/quiz.js l'ha pagato davvero)
     risposto = r
@@ -97,23 +109,23 @@ function partita(os, p, arg, torna) {
     via = 0 // (OK prima del tempo: l'attesa finisce qui, e il tic non la richiama)
     if (p.finita) { os.togli(); os.spingi(fine(os, p, (x) => parti(os, arg, torna, x, true), () => { os.togli() })); return } // («ancora» prepara dal riepilogo, con la rotellina)
     banca = 'prossima'; os.ridisegna()
-    const a = await quiz.prossima(p) // (il tempo della banca parte adesso, non mentre si leggeva l'esito)
+    const a = await quiz.prossima(p).catch(() => ({ errore: 'niente rete: riprova' })) // (il tempo della banca parte adesso, non mentre si leggeva l'esito)
     banca = null
     if (os.corrente() !== v) return
-    if (a !== true) { os.togli(); return os.dialogo({ titolo: 'quiz', testo: a.errore, tasti: ['ok'] }) }
+    if (a !== true) { os.togli(); os.suoni.bip('pagerGiu'); return os.dialogo({ titolo: 'quiz', testo: txt(a.errore), tasti: ['ok'] }) }
     nuova(); os.ridisegna()
   }
   async function lascia() {
     pausa = performance.now()
     const r = await os.dialogo({ titolo: 'lasci?', testo: 'la partita si perde: le risposte date restano contate.', tasti: ['no', 'lascia'] })
     if (r === 'lascia' && os.corrente() === v) { os.togli(); return } // (se sopra c'è altro non si toglie quello)
-    const ferma = performance.now() - pausa
-    if (!fermo) inizio += ferma; if (via) via += ferma; pausa = 0 // (col dialogo aperto anche l'attesa della prossima si ferma; a domanda risposta il tempo è già fermo)
+    if (via) via += performance.now() - pausa // (col dialogo aperto l'attesa della prossima si ferma; il tempo della domanda no, vedi resto)
+    pausa = 0
   }
   const v = {
     nome: 'quiz-domanda', app: 'quiz',
     tic(t) {
-      if (banca) return os.ridisegna() // (la rotellina in fondo)
+      if (banca) { if (manda !== null && performance.now() - inizio >= PRIMA) { const i = manda; manda = null; controlla(i) } return os.ridisegna() } // (la rotellina in fondo; e la risposta data troppo presto parte adesso)
       if (pausa) return // (in pausa non si anima niente: non si ridisegna)
       if (risposto) { if (!via) return; if (performance.now() >= via) return avanti(); return os.ridisegna() } // (la barretta dell'attesa; poi la prossima da sola)
       const s = Math.ceil(resto() / 1000)
@@ -145,8 +157,8 @@ function partita(os, p, arg, torna) {
         else if (img === 'no') { l.riquadro(10, 42, 96, 60); ['la foto', 'non si vede:', 'tira a', 'indovinare'].forEach((r, i) => l.testo(16, 52 + i * 9, r)) }
         else { l.bitmap(img, 10 + Math.round((96 - img.w) / 2), 42 + Math.round((60 - img.h) / 2)); l.riquadro(9, 41, 98, 62) }
       }
-      const testo = risposto
-        ? (risposto.giusta ? (risposto.nota ?? '') : `era: ${d.risposte[risposto.indiceGiusto]}.${risposto.nota && risposto.nota !== `era ${d.risposte[risposto.indiceGiusto]}.` ? ` ${risposto.nota}` : ''}`)
+      const testo = risposto // (11.11) giusta senza spiegazione: resta la domanda, prima il posto restava vuoto
+        ? (risposto.giusta ? (risposto.nota || d.q) : `era: ${d.risposte[risposto.indiceGiusto]}.${risposto.nota && risposto.nota !== `era ${d.risposte[risposto.indiceGiusto]}.` ? ` ${risposto.nota}` : ''}`)
         : d.q
       if (!img) { // (tre righe prima delle risposte: quello che non ci sta finisce con «…»)
         const nr = Math.floor(wr / 6), tutte = Lcd.acapo(txt(testo), nr), righe = tutte.slice(0, 3)
@@ -165,22 +177,28 @@ function partita(os, p, arg, torna) {
         l.testo(xr, y, segno, { inv: on })
         l.testo(xr + 11, y, vis, { inv: on }) // (staccato dalla lettera: «A fibre», non «Afibre»)
         if (risposto && (i === risposto.indiceGiusto || i === scelta)) l.riquadro(xr - 3, y - 2, 245 - xr + 6, passo - 1) // (la giusta e la tua, incorniciate)
-        os.zona(xr - 4, y - 2, 245 - xr + 8, passo - 1, () => { if (risposto) avanti(); else { sel = i; rispondi(i) } })
+        if (!banca) os.zona(xr - 4, y - 2, 245 - xr + 8, passo - 1, () => { if (risposto) avanti(); else { sel = i; rispondi(i) } }) // (11.11) mentre la banca controlla il clic spostava la fascia su un'altra risposta: i tasti sono fermi, e il clic pure
       })
-      if (img && !risposto) l.testo(xr, 42, corto(d.q, Math.floor((245 - xr) / 6)))
-      if (img && risposto) l.testo(xr, 42, corto(testo, Math.floor((245 - xr) / 6)))
+      if (img) l.testo(xr, 42, corto(txt(testo), Math.floor((245 - xr) / 6))) // (11.11) con txt anche qui, come senza foto: un carattere senza glifo non fa il quadratino
       // in fondo: l'esito, o cosa fare
       if (banca) { striscia(l, { attesa: banca === 'prossima' ? 'la prossima…' : 'la banca controlla…' }, t); return }
       if (risposto) {
-        const r = risposto, s = r.giusta ? `✓ ${r.pagato ? `+${fmt(r.premio)} $pzk` : 'giusto!'} · +${r.xp} xp${r.serie > 1 ? ` · serie ${r.serie}` : ''}${r.bonus ? ` · perfetta +${fmt(r.bonus)}` : ''}` : scelta === null ? '! tempo scaduto' : '! sbagliato'
-        l.riempi(10, H - 11, W - 20, 10); centro(l, H - 9, corto(`${s} · OK ${p.finita ? 'risultato' : 'avanti'}`, 38), { inv: true })
+        // (11.11) con la serie la riga non ci stava e il taglio si mangiava il tasto: «✓ +50 $pzk · +5 xp · serie 2 · OK ava…».
+        // Se non ci sta, via prima la serie (è già in alto a destra), poi gli xp, poi il bonus (lo dice il riepilogo): OK resta
+        const r = risposto, pezzi = r.giusta ? [`✓ ${r.pagato ? `+${fmt(r.premio)} $pzk` : 'giusto!'}`, `+${r.xp} xp`, r.serie > 1 && `serie ${r.serie}`, r.bonus && `perfetta +${fmt(r.bonus)}`] : [scelta === null ? '! tempo scaduto' : '! sbagliato']
+        const riga = (...via) => [...pezzi.filter((x, i) => x && !via.includes(i)), `OK ${p.finita ? 'risultato' : 'avanti'}`].join(' · ')
+        const s = [riga(), riga(2), riga(2, 1), riga(2, 1, 3)].find((x) => [...x].length <= 38) ?? riga(2, 1, 3)
+        l.riempi(10, H - 11, W - 20, 10); centro(l, H - 9, corto(s, 38), { inv: true })
         if (via) l.riempi(10, H - 13, Math.round((W - 20) * Math.max(0, Math.min(1, (via - performance.now()) / viaDurata))), 1) // (quanto manca alla prossima)
         os.zona(10, H - 11, W - 20, 10, avanti)
-      } else centro(l, H - 9, '↑↓ sceglie · OK risponde · o a b c d')
+      } else centro(l, H - 9, `↑↓ sceglie · OK risponde · o ${[...'abcd'].slice(0, d.risposte.length).join(' ')}`) // (11.11) nel vero o falso c e d non fanno niente: si dicono solo le lettere che ci sono
     },
     tasto(k) {
-      if (pausa || banca) return true
-      if (k === 'indietro') { lascia(); return true }
+      // (11.11) aspettando la banca INDIETRO esce, come nell'ingresso e nel riepilogo: con la rete che non risponde la rotellina
+      // girava per sempre e nessun tasto faceva niente. La risposta, se arriva, resta contata (vedi lascia)
+      if (banca) { if (k === 'indietro') os.togli(); return true }
+      if (pausa) return true
+      if (k === 'indietro') { if (risposto && p.finita) os.togli(); else lascia(); return true } // (11.11) finita non si perde niente: «la partita si perde» mentiva
       if (risposto) { if (k === 'ok') avanti(); return true }
       const n = d.risposte.length
       if (k === 'su') { sel = (sel - 1 + n) % n; scorri = 0 }
@@ -206,7 +224,10 @@ async function parti(os, arg, torna, x, sostituisci = false) {
   // (31.10) la banca prepara la partita e apre la prima domanda (il suo tempo parte lì): una rotellina sola per le due
   const p = await x.aspetta('preparo le domande', async () => { const q = await quiz.nuova(arg || null).catch(() => ({ errore: 'niente rete: riprova' })); if (q.errore) return q; const a = await quiz.prossima(q).catch(() => ({ errore: 'niente rete: riprova' })); return a === true ? q : a })
   if (!p || !x.qui()) return // (intanto è uscito, o sopra c'è altro: la partita non parte e il tempo non corre)
-  if (p.errore) { x.dì(false, p.errore); return }
+  if (p.errore) { // (11.11) quello che non sta nella striscia va in un dialogo: «servono almeno quattro giocatori n…» non diceva cosa
+    if ([...txt(p.errore)].length > 35) { os.suoni.bip('pagerGiu'); return void os.dialogo({ titolo: 'quiz', testo: txt(p.errore), tasti: ['ok'] }) }
+    x.dì(false, p.errore); return
+  }
   if (sostituisci) os.togli()
   os.spingi(partita(os, Object.assign(p, { esiti: [] }), arg, torna))
 }
@@ -226,7 +247,11 @@ export function vista(os) {
       disegna(l, x) {
         const rest = quiz.restanti()
         l.testo(10, 34, corto(`${quiz.PER_PARTITA} domande, ${quiz.TEMPO}" l’una: da ${quiz.PAGA[1]} a ${quiz.PAGA[3]} $pzk`, 39))
-        l.testo(10, 43, corto(rest ? `pagate oggi ${rest} · record ${quiz.record()} · giuste ${fmt(zaino.stat('quizGiusti'))}` : 'pagate finite: ti alleni, solo per gli xp', 39))
+        // (11.11) con mille giuste o più la riga passava i 39 caratteri e il taglio si mangiava il numero («giuste 1…»): se non
+        // ci sta, i numeri corti, poi senza «oggi»
+        const rec = quiz.record(), giu = zaino.stat('quizGiusti') ?? 0
+        const righe = [`pagate oggi ${rest} · record ${rec} · giuste ${fmt(giu)}`, `pagate oggi ${rest} · record ${rec} · giuste ${fmtCorto(giu)}`, `pagate ${rest} · record ${fmtCorto(rec)} · giuste ${fmtCorto(giu)}`]
+        l.testo(10, 43, corto(rest ? righe.find((s) => [...s].length <= 39) ?? righe[2] : 'pagate finite: ti alleni, solo per gli xp', 39))
         elenco(l, x.zona, {
           voci: argomenti(), stato: st, y0: 54, alta: 63, passo: 12,
           clic: (a) => via(a, x),

@@ -22,7 +22,7 @@ import { txt, corto, destra, centro, puntini, elenco, muovi, pagine, striscia } 
 const leggi = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || 'null') ?? d } catch { return d } }
 const scrivi = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} }
 const carrello = () => leggi(CHIAVE_CARRELLO, {})
-const righeCarrello = () => Object.entries(carrello()).filter(([id, n]) => PER_ID[id] && n > 0)
+const righeCarrello = () => Object.entries(carrello()).filter(([id, n]) => PER_ID[id] && n > 0 && !ce(PER_ID[id])) // (11.11: un pezzo unico comprato dalla scheda restava nel carrello: la banca lo salta, ma il totale lo contava e «paga» diceva «ti mancano»)
 const pezzi = () => righeCarrello().reduce((a, [, n]) => a + n, 0)
 const totale = () => righeCarrello().reduce((a, [id, n]) => a + mercato.prezzoDi(PER_ID[id]) * n, 0)
 const risparmio = () => righeCarrello().reduce((a, [id, n]) => a + (PER_ID[id].prezzo - mercato.prezzoDi(PER_ID[id])) * n, 0)
@@ -44,19 +44,29 @@ const ce = (x) => x.unico && zaino.ha(x.id)
 // le scelte della vetrina: restano finché la pagina è aperta
 let ordine = 'top', solo = false, cerca = '', ultima = 0
 
+/** (11.11, REGOLE 3.12: il cursore si ricorda per chiave) Se la lista cambia (l'ordine, «posso comprarli», un pezzo tolto dal
+ *  carrello) il cursore resta sulla stessa voce, o torna alla prima: prima restava al posto e finiva su un'altra (o su «paga»). */
+const chiaveDi = (vc) => (vc.opz ? 'opz' : vc.paga ? 'paga' : vc.svuota ? 'svuota' : vc.id)
+function segui(st, L) {
+  if (st.chiave != null) { const i = L.findIndex((vc) => chiaveDi(vc) === st.chiave); st.sel = i >= 0 ? i : 0 }
+  st.chiave = L[st.sel] ? chiaveDi(L[st.sel]) : null
+}
+
 /** Mette nel carrello; → il testo per la striscia. */
 function aggiungi(x, n) {
   if (ce(x)) return [false, 'ce l’hai già nello zaino']
   const prima = carrello()[x.id] ?? 0
+  if (!x.unico && prima >= 50) return [false, 'nel carrello ce ne sono già 50'] // (11.11: diceva «nel carrello» e non aggiungeva niente)
   metti(x.id, x.unico ? 1 : Math.min(50, prima + n))
-  return [true, `${x.nome} nel carrello (${pezzi()} pezz${pezzi() === 1 ? 'o' : 'i'})`]
+  const coda = ` nel carrello (${pezzi()} pezz${pezzi() === 1 ? 'o' : 'i'})`
+  return [true, corto(x.nome, Math.max(8, 35 - [...coda].length)) + coda] // (11.11: la striscia tiene 35 lettere, e un nome lungo tagliava via «nel carrello»)
 }
 
 // ── lo scontrino: si stampa una riga alla volta ──
 function scontrino(os, s, alla) {
   let stampate = 0
-  const righe = [...s.righe.map((r) => ({ a: `${r.n} × ${PER_ID[r.id].nome}`, b: fmt(r.tot) })), ...(s.risparmio ? [{ a: 'sconti di oggi', b: `-${fmt(s.risparmio)}` }] : [])]
-  const VIS = 4
+  const righe = [...s.righe.map((r) => ({ a: `${r.n} × ${PER_ID[r.id]?.nome ?? r.id}`, b: fmt(r.tot) })), ...(s.risparmio ? [{ a: 'sconti di oggi', b: `-${fmt(s.risparmio)}` }] : [])]
+  const VIS = 4 // (11.11: ?.nome: un id della banca che il catalogo non ha più rompeva lo scontrino dopo aver pagato)
   const v = {
     nome: 'negozio-scontrino', app: 'negozio',
     entra() { os.suoni.sigla('negozio') },
@@ -67,7 +77,7 @@ function scontrino(os, s, alla) {
       for (let x = 12; x < W - 12; x += 4) l.riempi(x, os.BARRA + 22, 2, 1) // il tratteggio dello scontrino
       const mostra = righe.slice(0, Math.min(stampate, VIS))
       mostra.forEach((r, i) => puntini(l, os.BARRA + 25 + i * 9, corto(r.a, 28), r.b, { x0: 14, x1: 241 }))
-      if (righe.length > VIS && stampate > VIS) l.testo(14, os.BARRA + 25 + VIS * 9, corto(`e altre ${righe.length - VIS} righe`, 37))
+      if (righe.length > VIS && stampate > VIS) l.testo(14, os.BARRA + 25 + VIS * 9, corto(righe.length - VIS === 1 ? 'e un’altra riga' : `e altre ${righe.length - VIS} righe`, 37)) // (11.11: «e altre 1 righe»)
       const yt = os.BARRA + 25 + (Math.min(righe.length, VIS) + (righe.length > VIS ? 1 : 0)) * 9 + 2
       if (stampate > righe.length) { for (let x = 12; x < W - 12; x += 4) l.riempi(x, yt, 2, 1); puntini(l, yt + 3, 'TOTALE $PZK', fmt(s.tot), { x0: 14, x1: 241 }) }
       if (stampate > righe.length + 1) centro(l, yt + 13, corto(`saldo: ${fmt(pzk.saldo())} $pzk`, 38))
@@ -88,8 +98,8 @@ function scontrino(os, s, alla) {
 }
 
 // ── la scheda di un prodotto ──
-function scheda(os, x, alla) {
-  let n = 1, giu = 0, sel = -1, esito = null
+function scheda(os, x, alla, avvisa = () => {}) {
+  let n = 1, giu = 0, sel = -1, esito = null, attesa = null
   const dì = (ok, testo) => { esito = { ok, testo: txt(testo), fino: Date.now() + 4000 }; if (!ok) os.suoni.bip('pagerGiu'); os.ridisegna() }
   const tot = () => mercato.prezzoDi(x) * (x.unico ? 1 : n)
   const bottoni = () => (ce(x) ? ['♥'] : x.unico ? ['♥', 'carrello', `compra ${fmt(tot())}`] : ['♥', '−', '+', 'carrello', `compra ${fmt(tot())}`])
@@ -99,18 +109,23 @@ function scheda(os, x, alla) {
   async function premi(b) {
     if (b === '♥') { cuore(x.id); return dì(true, preferiti().has(x.id) ? 'nei preferiti' : 'tolto dai preferiti') }
     if (b === '−') { n = Math.max(1, n - 1); return os.ridisegna() }
-    if (b === '+') { n = Math.min(50, n + 1); return os.ridisegna() }
+    if (b === '+') { if (n >= 50) return dì(false, 'al più 50 alla volta'); n++; return os.ridisegna() } // (11.11: a 50 non faceva niente e non diceva perché)
     if (b === 'carrello') { const [ok, t] = aggiungi(x, n); return dì(ok, t) }
     // compra ora: si conferma
     const no = nonPuoi(tot())
     if (no) return dì(false, no)
     const m = x.unico ? 1 : n
     const r = await os.dialogo({ titolo: 'compri?', icona: x.id, testo: `${m} × ${x.nome} per ${fmt(tot())} $pzk. Ne hai ${fmt(puliti())}${pul()}.`, tasti: ['no', 'sì'] })
-    if (r !== 'sì' || os.corrente() !== v) return
-    const s = await compraRighe([[x.id, m]]) // (comprando subito, il carrello resta com'è; 31.10: compra la banca)
-    if (s.manca) return dì(false, `ti mancano ${fmt(s.manca)} $pzk`)
-    if (s.errore) return dì(false, s.errore)
-    if (!s.righe.length) return dì(false, 'ce l’hai già')
+    if (r !== 'sì' || os.corrente() !== v || attesa) return
+    // (11.11: mentre la banca risponde, la rotellina e i tasti fermi: prima un secondo OK rifaceva il dialogo e comprava due volte)
+    attesa = 'compro…'; esito = null; os.ridisegna()
+    let s
+    try { s = await compraRighe([[x.id, m]]) } finally { attesa = null; os.ridisegna() } // (comprando subito, il carrello resta com'è; 31.10: compra la banca)
+    const male = s.manca ? `ti mancano ${fmt(s.manca)} $pzk` : s.errore ? s.errore : !s.righe.length ? 'ce l’hai già' : null
+    // (11.11: uscito mentre comprava: os.togli qui sotto toglieva la vetrina al posto della scheda. E con INDIETRO a metà la
+    // banca comprava lo stesso senza dirlo: ora l'esito va nella striscia della vetrina, se è lei in cima)
+    if (os.corrente() !== v) return avvisa(!male, male ?? `comprato: ${m} × ${corto(x.nome, 22)}`)
+    if (male) return dì(false, male)
     os.togli()
     os.spingi(scontrino(os, s, alla))
   }
@@ -118,7 +133,7 @@ function scheda(os, x, alla) {
     nome: 'negozio-scheda', app: 'negozio',
     entra() { v.via = [pzk.osserva(() => os.ridisegna()), zaino.ascolta(() => os.ridisegna()), icone.ascolta(() => os.ridisegna())]; tieni() },
     esci() { v.via?.forEach((f) => f()) },
-    tic() { if (esito && Date.now() >= esito.fino) { esito = null; os.ridisegna() } },
+    tic() { if (attesa) os.ridisegna(); else if (esito && Date.now() >= esito.fino) { esito = null; os.ridisegna() } }, // (la rotellina gira solo mentre si aspetta)
     disegna(l, t) {
       const B = bottoni(), sb = sel >= 0 && sel < B.length ? sel : B.length - 1 // (disegna non cambia sel: 4.8; i tasti possono essere diventati meno, comprando un pezzo unico)
       // la testa: l'icona grande, il nome, il reparto, il prezzo, quanti ne hai
@@ -131,11 +146,10 @@ function scheda(os, x, alla) {
       l.testo(xp, 33, p); if (s) l.testo(xp + Lcd.larghezza(p) + 6, 33, pct(s))
       l.testo(46, 42, corto(ce(x) ? 'ce l’hai già nello zaino' : `ne hai ${zaino.quanti(x.id)} · ${x.unico ? 'se ne ha uno solo' : 'fino a 50 alla volta'}`, 33))
       // la descrizione, che scorre
-      const d = desc(), VIS = 4
-      giu = Math.max(0, Math.min(giu, Math.max(0, d.length - VIS)))
-      d.slice(giu, giu + VIS).forEach((r, i) => l.testo(10, 52 + i * 9, r))
-      if (giu > 0) l.testo(W - 14, 52, '↑')
-      if (giu + VIS < d.length) l.testo(W - 14, 52 + (VIS - 1) * 9, '↓')
+      const d = desc(), VIS = 4, g = Math.min(giu, Math.max(0, d.length - VIS)) // (11.11: disegna non cambia giu, 4.8: lo tiene nei margini il tasto)
+      d.slice(g, g + VIS).forEach((r, i) => l.testo(10, 52 + i * 9, r))
+      if (g > 0) l.testo(W - 14, 52, '↑')
+      if (g + VIS < d.length) l.testo(W - 14, 52 + (VIS - 1) * 9, '↓')
       // quanti e il totale, e i tasti
       if (!ce(x)) l.testo(10, 89, corto(`${x.unico ? '' : `quanti ${n} · `}${fmt(tot())} $pzk${pzk.inGalera() ? ' · in galera' : tot() > puliti() ? ` · ti mancano ${fmt(tot() - puliti())}${pul()}` : ''}`, 39))
       const ws = B.map((b) => Lcd.larghezza(b) + 8), tutta = ws.reduce((a, w) => a + w, 0) + (B.length - 1) * 4
@@ -144,18 +158,19 @@ function scheda(os, x, alla) {
         const on = i === sb
         if (on) l.riempi(xb, 99, ws[i], 11); else l.cornice(xb, 99, ws[i], 11)
         l.testo(xb + 4, 101, b, { inv: on })
-        os.zona(xb, 97, ws[i], 15, () => { sel = i; premi(b) })
+        if (!attesa) os.zona(xb, 97, ws[i], 15, () => { sel = i; premi(b) }) // (aspettando la banca il clic non parte, come i tasti)
         xb += ws[i] + 4
       })
-      if (!striscia(l, { esito }, t)) centro(l, H - 9, d.length > VIS ? '←→ sceglie · OK preme · ↑↓ legge' : '←→ sceglie · OK preme')
+      if (!striscia(l, { esito, attesa }, t)) centro(l, H - 9, d.length > VIS ? '←→ sceglie · OK preme · ↑↓ legge' : '←→ sceglie · OK preme')
     },
     tasto(k) {
+      if (attesa) { if (k === 'indietro') os.togli(); return true } // (aspettando la banca non parte altro)
       const B = bottoni()
       tieni()
       if (k === 'sx') sel = (sel - 1 + B.length) % B.length
       else if (k === 'dx') sel = (sel + 1) % B.length
       else if (k === 'su') giu = Math.max(0, giu - 1)
-      else if (k === 'giu') giu++
+      else if (k === 'giu') giu = Math.min(giu + 1, Math.max(0, desc().length - 4))
       else if (k === 'ok') premi(B[sel])
       else if (k === 'indietro') os.togli()
       else return false
@@ -223,13 +238,14 @@ export function vista(os) {
       tic: (t) => rep === 'offerte' && st.da === 0 && t % 10 === 0, // (il conto alla rovescia)
       disegna(l, x) {
         const L = voci()
+        segui(st, L)
         elenco(l, x.zona, {
           voci: L, stato: st, y0: 33, alta: 85, passo: 17,
-          clic: (vc) => apri(vc),
+          clic: (vc) => { st.chiave = chiaveDi(vc); apri(vc, x) },
           riga(l, vc, x0, y, w, on) {
             const o = { inv: on }
             if (vc.opz) {
-              const s = rep === 'offerte' ? `finiscono fra ${contoAllaRovescia()}` : `ordina: ${ORDINI.find(([id]) => id === ordine)?.[1]}${solo ? ' · posso' : ''}`
+              const s = `${rep === 'offerte' ? `finiscono fra ${contoAllaRovescia()}` : `ordina: ${ORDINI.find(([id]) => id === ordine)?.[1]}`}${solo ? ' · posso' : ''}` // (11.11: nelle offerte il filtro acceso non si vedeva, e i prodotti sparivano senza dire perché)
               l.testo(x0, y + 5, corto(cerca ? `cerca «${cerca}» · ${s}` : s, Math.floor(w / 6)), o) // (niente ▶: qui → cambia reparto, le opzioni si aprono con OK)
               return
             }
@@ -246,20 +262,22 @@ export function vista(os) {
         if (L.length === 1) centro(l, 70, corto(cerca ? `niente per «${cerca}»` : solo ? 'niente che puoi comprare qui' : 'niente da mostrare', 38))
       },
       tasto(k, x) {
-        if (muovi(st, voci().length, k)) return true
-        if (k === 'ok') { apri(voci()[st.sel]); return true }
+        const L = voci()
+        segui(st, L)
+        if (muovi(st, L.length, k)) { st.chiave = chiaveDi(L[st.sel]); return true }
+        if (k === 'ok') { apri(L[st.sel], x); return true }
         if (k === 'indietro' && cerca) { cerca = ''; return true } // (INDIETRO toglie prima la ricerca)
         return false
       },
-      carattere(ch) { if (cerca.length < 20) { cerca += ch; st.sel = 0; st.da = 0 } },
+      carattere(ch) { if (cerca.length < 20) { cerca += ch; st.sel = 0; st.da = 0; st.chiave = null } },
       cancella() { cerca = cerca.slice(0, -1) },
       scrivendo: () => cerca.length > 0,
     }
   }
-  function apri(vc) {
+  function apri(vc, x) {
     if (!vc) return
     if (vc.opz) return os.spingi(opzioni(os))
-    os.spingi(scheda(os, vc, torna))
+    os.spingi(scheda(os, vc, torna, (ok, t) => { if (x.qui()) x.dì(ok, t) })) // (l'esito di un acquisto finito dopo INDIETRO)
   }
   // il carrello
   const stc = { sel: 0, da: 0 }
@@ -270,21 +288,25 @@ export function vista(os) {
       if (no) return x.dì(false, no) // (prima di compraRighe: col saldo sporco comprava solo le prime righe)
       const r = await os.dialogo({ titolo: 'paghi?', icona: 'app-shop', testo: `${pezzi()} pezz${pezzi() === 1 ? 'o' : 'i'} per ${fmt(t)} $pzk. Dopo te ne restano ${fmt(sal - t)}${pul()}.`, tasti: ['no', 'paga'] })
       if (r !== 'paga' || !x.qui()) return
-      const s = await compraRighe(righeCarrello(), (id) => metti(id, 0))
+      // (11.11: con la rotellina e i tasti fermi mentre paga la banca: prima un secondo OK su «paga» rifaceva il dialogo e pagava due volte)
+      const s = await x.aspetta('pago…', () => compraRighe(righeCarrello(), (id) => metti(id, 0)))
+      if (!s) return
       if (s.manca) return x.dì(false, `ti mancano ${fmt(s.manca)} $pzk`)
       if (s.errore) return x.dì(false, s.errore)
       if (!s.righe.length) return x.dì(false, 'ce l’hai già tutto')
-      stc.sel = 0
+      stc.sel = 0; stc.chiave = null
+      if (!x.qui()) return // (11.11: uscito mentre pagava, lo scontrino si apriva sopra un'altra app)
       return os.spingi(scontrino(os, s, torna))
     }
     if (vc.svuota) {
       const r = await os.dialogo({ titolo: 'svuoti?', testo: 'tutto il carrello torna sugli scaffali.', tasti: ['no', 'svuota'] })
-      if (r === 'svuota' && x.qui()) { scrivi(CHIAVE_CARRELLO, {}); stc.sel = 0; x.dì(true, 'carrello vuoto') }
+      if (r === 'svuota' && x.qui()) { scrivi(CHIAVE_CARRELLO, {}); stc.sel = 0; stc.chiave = null; x.dì(true, 'carrello vuoto') }
       return
     }
     const p = PER_ID[vc.id]
     const r = await os.dialogo({ titolo: corto(p.nome, 14), icona: p.id, testo: `${vc.n} nel carrello, ${fmt(mercato.prezzoDi(p) * vc.n)} $pzk.`, tasti: p.unico ? ['togli'] : ['togli', 'uno in meno', 'uno in più'] })
     if (!r || !x.qui()) return
+    if (r === 'uno in più' && vc.n >= 50) return x.dì(false, 'al più 50 alla volta') // (11.11: non aggiungeva e non diceva perché)
     metti(p.id, r === 'togli' ? 0 : r === 'uno in meno' ? vc.n - 1 : vc.n + 1)
   }
   const paginaCarrello = {
@@ -292,10 +314,11 @@ export function vista(os) {
     aiuto: () => (vociCarrello().length ? 'OK sceglie · ↑↓ · ←→ reparti' : '←→ reparti'),
     disegna(l, x) {
       const L = vociCarrello()
+      segui(stc, L)
       if (!L.length) { centro(l, 58, 'il carrello è vuoto.'); centro(l, 70, 'OK su un prodotto e «carrello»'); return }
       elenco(l, x.zona, {
         voci: L, stato: stc, y0: 33, alta: 64, passo: 16,
-        clic: (vc) => rigaCarrello(vc, x),
+        clic: (vc) => { stc.chiave = chiaveDi(vc); rigaCarrello(vc, x) },
         riga(l, vc, x0, y, w, on) {
           const o = { inv: on }
           if (vc.paga) { const t = totale(); l.testo(x0, y + 4, corto(nonPuoi(t) ?? `paga ${fmt(t)} $pzk`, Math.floor(w / 6)), o); return } // (niente ▶: qui → cambia pagina, si paga con OK)
@@ -314,7 +337,8 @@ export function vista(os) {
     },
     tasto(k, x) {
       const L = vociCarrello()
-      if (muovi(stc, L.length, k)) return true
+      segui(stc, L)
+      if (muovi(stc, L.length, k)) { stc.chiave = chiaveDi(L[stc.sel]); return true }
       if (k === 'ok' && L.length) { rigaCarrello(L[stc.sel], x); return true }
       return false
     },

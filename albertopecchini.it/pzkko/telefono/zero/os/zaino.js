@@ -23,34 +23,43 @@ const inCima = () => { const e = zaino.effetti().map(([id, t]) => `${nomeCorto(i
 
 // ── la scheda di un pezzo ──
 function scheda(os, id) {
-  let giu = 0, sel = 0, esito = null, ritorno = null
+  let giu = 0, sel = 0, esito = null, ritorno = null, attesa = null
   const dì = (ok, testo) => { esito = { ok, testo: txt(testo), fino: Date.now() + 5000 }; if (!ok) os.suoni.bip('pagerGiu'); os.ridisegna() }
   const x = PER_ID[id] ?? { id }
   const azioni = () => (zaino.quanti(id) ? azioniDi(id, x) : [])
   // cosa fa e il bonus, che scorrono: li leggono disegna e tasto (↓ si ferma all'ultima riga senza che disegna corregga giu)
   const leggibile = () => {
-    const cosa = x.cosa ?? (x.leggendario ? 'leggendario: ne esce uno ogni cento.' : x.schifo ? 'vale quasi niente, ma l’hai preso tu.' : 'si vende.')
+    const cosa = x.cosa ?? (x.leggendario ? 'leggendario: ne esce uno ogni cento.' : x.schifo ? 'vale quasi niente, ma l’hai preso tu.' : tipoDi(id) === 'vendi' ? 'si vende.' : 'non si vende: si tiene.') // (11.11: un pezzo che il catalogo non conosce era «da tenere» e diceva «si vende.»)
     const b = testoBonus(x.bonus)
     return { righe: impagina([{ testo: cosa }, ...(b ? [{ titolo: 'il bonus' }, { testo: `${b}${x.effetto ? ` · per ${resto(x.effetto)}` : x.unico ? ' · finché ce l’hai' : ''}` }] : [])]), vis: azioni().length ? 5 : 7 }
   }
   async function premi(a) {
-    if (!a) return
+    if (!a || attesa) return // (11.11: aspettando la banca un altro OK non ne consumava un secondo, 8.6)
     if (a.usa) {
-      const u = await usa(a.usa) // (31.10: usa la banca, 'chat.usa')
-      if (!u) return dì(false, 'non si può usare')
+      attesa = 'uso…'; esito = null; os.ridisegna()
+      let u
+      try { u = await usa(a.usa) } finally { attesa = null; os.ridisegna() } // (31.10: usa la banca, 'chat.usa')
+      if (os.corrente() !== v) return // (11.11: già uscito, niente suoni né esiti sopra un'altra vista, 8.4)
+      if (!u || u.errore) return dì(false, u?.errore ?? (!zaino.quanti(id) ? 'non ce l’hai più' : 'non si può usare: riprova')) // (11.11: prima sempre «non si può usare», senza dire perché)
       os.suoni.sigla('zaino')
       dì(true, `${nomeCorto(id)}: ${testoBonus(u.bonus)} per ${resto(u.effetto)}`)
       if (!zaino.quanti(id)) { clearTimeout(ritorno); ritorno = setTimeout(() => { ritorno = null; if (os.corrente() === v) os.togli() }, 1400) } // (finito: si torna allo zaino; esci lo spegne, 6.2)
       return
     }
+    if (a.chat === 'vendi tutto') { // (11.11: vende anche gli altri pezzi, non solo questo: dalla scheda dell'osso partiva anche il tesoro, senza chiedere, 8.6)
+      const n = zaino.oggetti().filter(([k]) => tipoDi(k) === 'vendi').reduce((s, [, q]) => s + q, 0)
+      const r = await os.dialogo({ titolo: 'vendi tutto?', icona: 'pzk', testo: `vende tutti i pesci, le bestie e i reperti dello zaino (${n} ${n === 1 ? 'pezzo' : 'pezzi'}), non solo questo.`, tasti: ['no', 'vendi'] })
+      if (r !== 'vendi' || os.corrente() !== v) return // (INDIETRO dà null; e si può essere già usciti)
+    }
     if (a.shop) return os.apri('negozio')
+    if (a.app) return os.apri(a.app) // (11.11: un tasto che apre un'app, come «decifra» del wallet cifrato, se azioniDi lo dà)
     os.apri('chat', { comando: a.chat })
   }
   const v = {
     nome: 'zaino-scheda', app: 'zaino',
     entra() { v.via = [zaino.ascolta(() => os.ridisegna()), icone.ascolta(() => os.ridisegna())] },
     esci() { v.via?.forEach((f) => f()); clearTimeout(ritorno); ritorno = null },
-    tic() { if (esito && Date.now() >= esito.fino) { esito = null; os.ridisegna() } },
+    tic() { if (attesa) os.ridisegna(); else if (esito && Date.now() >= esito.fino) { esito = null; os.ridisegna() } }, // (la rotellina gira solo mentre si aspetta)
     disegna(l, t) {
       const n = zaino.quanti(id), A = n ? azioniDi(id, x) : [], s = sel < A.length ? sel : 0 // (sel e giu li tiene in riga tasto: 4.8)
       l.bitmap(bm(id, 32), 8, 14)
@@ -61,10 +70,11 @@ function scheda(os, id) {
       const { righe, vis } = leggibile()
       scorrevole(l, righe, { y0: 46, vis, giu })
       const legge = righe.length > vis ? ' · ↑↓ legge' : '' // (↑↓ solo se c'è da scorrere)
-      if (A.length) bottoni(l, os.zona, { etichette: A.map((a) => a.eti), sel: s, y: 99, premi: (i) => { sel = i; premi(A[i]) } })
-      if (!striscia(l, { esito }, t)) centro(l, H - 9, !n ? 'non ce l’hai più · INDIETRO torna' : A.length > 1 ? `←→ sceglie · OK preme${legge}` : A.length ? `OK preme${legge}` : `INDIETRO torna${legge}`)
+      if (A.length) bottoni(l, attesa ? () => {} : os.zona, { etichette: A.map((a) => a.eti), sel: s, y: 99, premi: (i) => { sel = i; premi(A[i]) } }) // (aspettando la banca i clic non partono, come i tasti)
+      if (!striscia(l, { esito, attesa }, t)) centro(l, H - 9, !n ? 'non ce l’hai più · INDIETRO torna' : A.length > 1 ? `←→ sceglie · OK preme${legge}` : A.length ? `OK preme${legge}` : `INDIETRO torna${legge}`)
     },
     tasto(k) {
+      if (attesa) { if (k === 'indietro') os.togli(); return true } // (aspettando la banca non parte altro: 8.6)
       const A = azioni(), { righe, vis } = leggibile(), fondo = Math.max(0, righe.length - vis)
       if (sel >= A.length) sel = 0
       if (k === 'sx' && A.length) sel = (sel - 1 + A.length) % A.length
@@ -83,13 +93,20 @@ function scheda(os, id) {
 // ── le pagine: i filtri ──
 let ultima = 0
 export function vista(os) {
+  const allinea = [] // (11.11: il cursore si ricorda per chiave, REGOLE 3.12: venduto il tesoro, la riga scelta diventava la moneta che gli stava sotto)
   const pagina = ([filtro, nome]) => {
-    const st = { sel: 0, da: 0 }
+    const st = { sel: 0, da: 0, id: null }
     const voci = () => zaino.oggetti().filter(([id]) => filtro === 'tutto' || tipoDi(id) === filtro)
+    const segna = () => { st.id = voci()[st.sel]?.[0] ?? null }
+    allinea.push(() => { const L = voci(), i = L.findIndex(([k]) => k === st.id); st.sel = Math.max(0, i); st.id = L[st.sel]?.[0] ?? null }) // (non c'è più: si torna al primo)
     return {
-      get nome() { return filtro === 'tutto' ? `zaino · ${pezzi()} pezzi` : nome }, icona: ICONE[filtro] ?? 'app-zaino',
+      get nome() { const n = pezzi(); return filtro === 'tutto' ? `zaino · ${n} ${n === 1 ? 'pezzo' : 'pezzi'}` : nome }, icona: ICONE[filtro] ?? 'app-zaino', // (11.11: «1 pezzi»)
       aiuto: () => (voci().length ? 'OK apre · ↑↓ sceglie · ←→ filtri' : filtro === 'tutto' ? 'OK va allo shop · ←→ filtri' : '←→ filtri'),
-      ok: () => { if (!voci().length && filtro === 'tutto') os.apri('negozio') },
+      ok: () => { // (11.11: il clic su «OK apre» in fondo chiama ok, che con la lista piena non faceva niente; ora fa quello del tasto)
+        const L = voci()
+        if (L.length) os.spingi(scheda(os, L[Math.max(0, Math.min(st.sel, L.length - 1))][0]))
+        else if (filtro === 'tutto') os.apri('negozio')
+      },
       tic: (t) => t % 300 === 0 && zaino.effetti().length > 0, // (il tempo degli effetti, a minuti)
       disegna(l, x) {
         const cima = inCima(), y0 = cima ? 44 : 34
@@ -98,7 +115,7 @@ export function vista(os) {
         if (!L.length) { (filtro === 'tutto' ? ['lo zaino è vuoto:', 'lo shop vende, pesca caccia e scava', 'riempiono.'] : ['niente qui.']).forEach((r, i) => centro(l, 58 + i * 10, r)); return }
         elenco(l, x.zona, {
           voci: L, stato: st, y0, alta: 117 - y0, passo: 17,
-          clic: ([id]) => os.spingi(scheda(os, id)),
+          clic: ([id]) => { st.id = id; os.spingi(scheda(os, id)) },
           riga(l, [id, q], x0, y, w, on) {
             const o = { inv: on }
             l.bitmap(bm(id, 16), x0 - 2, y, o)
@@ -111,16 +128,16 @@ export function vista(os) {
       tasto(k) {
         const L = voci()
         st.sel = Math.max(0, Math.min(st.sel, L.length - 1)) // (la lista può essersi accorciata dopo l'ultimo disegno: L[st.sel] sarebbe undefined)
-        if (muovi(st, L.length, k)) return true
-        if (k === 'ok' && L.length) { os.spingi(scheda(os, L[st.sel][0])); return true }
-        return false
+        if (!muovi(st, L.length, k)) return false // (OK lo fa ok, lo stesso del clic in fondo)
+        segna(); return true
       },
     }
   }
   return pagine(os, {
     nome: 'zaino', app: 'zaino', iniziale: ultima,
     pagine: FILTRI.map(pagina),
-    ascolta: [(f) => zaino.ascolta(f), (f) => icone.ascolta(f)],
+    ascolta: [() => zaino.ascolta(() => allinea.forEach((a) => a())), (f) => zaino.ascolta(f), (f) => icone.ascolta(f)],
+    entra: () => allinea.forEach((a) => a()), // (anche al ritorno dalla scheda o dalla chat: mentre era coperta non ascoltava)
     esci: (x) => { ultima = x.pag },
   })
 }

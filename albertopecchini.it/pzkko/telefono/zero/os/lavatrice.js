@@ -78,12 +78,18 @@ const REGOLE = (pulizia) => [
 ]
 
 export function vista(os) {
-  let scelta = 0 // (0 = il massimo; l'indice in quantita())
+  let voluto = null // (null = il massimo; se no la quantità scelta. 11.11: si ricorda il numero e non il posto in quantita(),
+  // REGOLE.md 3.12: con gli sporchi cambiati da un'altra scheda i 20.000 scelti diventavano 45.000 senza che si premesse niente)
   let giuS = 0, giuR = 0
-  let giro = 0, salto = 0, eraGira = false
+  let giro = 0, salto = 0, eraGira = false, eraCome = null
 
   const qs = (s) => quantita(s.max)
-  const q = (s) => qs(s)[Math.min(scelta, qs(s).length - 1)] ?? 0
+  /** Il posto della quantità scelta fra quelle di adesso: il massimo, o la più grande che non supera quella scelta. */
+  const scelta = (s) => { const Q = qs(s); if (voluto === null) return 0; const i = Q.findIndex((v) => v <= voluto); return i < 0 ? Q.length - 1 : i }
+  const q = (s) => qs(s)[scelta(s)] ?? 0
+  /** ↑ (d = -1, di più) o ↓ (d = 1, di meno), dal tasto e dal clic sulle frecce. (11.11: gli sporchi possono essere
+   *  diminuiti e la scelta vecchia stare oltre la fine; il clic su ▲ la spostava lì senza che sullo schermo cambiasse niente) */
+  const muovi = (d) => { const s = stato(), Q = qs(s), i = Math.max(0, Math.min(Q.length - 1, scelta(s) + d)); voluto = i === 0 ? null : Q[i] }
   /** Com'è messa (decide cosa disegna la prima pagina e cosa fanno i tasti). */
   const come = (s) => (s.gira ? 'gira' : s.pronto ? 'pronta' : s.dentro ? 'galera' : s.sp > 0 ? 'ferma' : 'vuota')
 
@@ -98,7 +104,7 @@ export function vista(os) {
     const d = await x.aspetta('carico la lavatrice…', () => lava(n))
     if (!d || !x.qui()) return
     if (!d.ok) return x.dì(false, d.errore ?? 'non va: riprova')
-    scelta = 0
+    voluto = null
     os.suoni.sigla('lavatrice')
     x.dì(true, `lava: pronti alle ${ora(d.fatto?.lavaggio?.fino ?? Date.now() + DURATA)}`)
   }
@@ -129,6 +135,8 @@ export function vista(os) {
       const s = stato()
       if (eraGira && !s.gira && s.pronto) { os.suoni.sigla('lavatrice-pronta'); salto = 8 } // (finita mentre si guarda)
       eraGira = s.gira
+      const c = come(s)
+      if (c !== eraCome) { eraCome = c; ancora = true } // (11.11: la galera finisce col tempo, senza avvisi: restava «in galera» sullo schermo e OK apriva già il lavaggio)
       if (s.gira && t % 5 === 0) { giro++; ancora = true } // (due volte al secondo: il cestello e i secondi che corrono)
       if (salto > 0) { salto--; ancora = true }
       return ancora
@@ -173,9 +181,9 @@ export function vista(os) {
       l.testo(X0, 34, 'da lavare'); destra(l, X1, 34, corto(`hai ${corti(s.sp)} sporchi`, 18))
       const sn = fmt(n); l.testo(X0, 44, sn, { scala: 2 }); l.testo(X0 + 4 + Lcd.larghezza(sn, 2), 51, '$pzk')
       if (Q.length > 1 && s.pu >= COSTO) { // (senza la commissione ↑ ↓ non fanno niente: niente frecce, REGOLE.md 3.3)
-        const piu = scelta > 0, meno = scelta < Q.length - 1
-        if (piu) { l.testo(X1 - 6, 43, '▲'); x.zona(X1 - 9, 41, 12, 9, () => { scelta--; os.ridisegna() }) }
-        if (meno) { l.testo(X1 - 6, 52, '▼'); x.zona(X1 - 9, 51, 12, 9, () => { scelta++; os.ridisegna() }) }
+        const i = scelta(s), piu = i > 0, meno = i < Q.length - 1
+        if (piu) { l.testo(X1 - 6, 43, '▲'); x.zona(X1 - 9, 41, 12, 9, () => { muovi(-1); os.ridisegna() }) }
+        if (meno) { l.testo(X1 - 6, 52, '▼'); x.zona(X1 - 9, 51, 12, 9, () => { muovi(1); os.ridisegna() }) }
       }
       puntini(l, 63, 'commissione', `${fmt(COSTO)} · ${pct(COSTO, n)}`, { x0: X0, x1: X1 })
       puntini(l, 72, 'puliti dopo', corti(d.puliti), { x0: X0, x1: X1 })
@@ -192,29 +200,32 @@ export function vista(os) {
     tasto(k) {
       const s = stato()
       if (come(s) !== 'ferma' || s.pu < COSTO) return false
-      const n = qs(s).length
-      scelta = Math.min(scelta, n - 1) // (gli sporchi possono essere cambiati: qui e non nel disegno, REGOLE.md 4.8)
-      if (k === 'su') { scelta = Math.max(0, scelta - 1); return true }
-      if (k === 'giu') { scelta = Math.min(n - 1, scelta + 1); return true }
+      if (k === 'su') { muovi(-1); return true } // (gli sporchi possono essere cambiati: muovi lo guarda qui e non nel disegno, REGOLE.md 4.8)
+      if (k === 'giu') { muovi(1); return true }
       return false
     },
   }
 
-  const VIS = 9
+  const VIS = 9, VIS_S = 8 // (11.11: la storia va a coppie di righe e scorre di due; con 9 righe in fondo restava in cima la riga «-2000 puliti» senza la sua mossa)
+  // (11.11: la data davanti al nome tagliava la mossa più comune, «commissione della la…»: ora il nome sta da solo sulla
+  // prima riga e la data a destra dell'importo; 38 caratteri da x 10 finiscono a 237, prima delle frecce di scorrevole a 242)
+  const RIGA_S = 38
   const righeStoria = () => storia(pzk.conto()).flatMap((m) => {
-    const [nome, cosa, segno] = STORIA[m.tipo]
-    return [{ s: corto(`${quando(m.t)} · ${nome}`, 37) }, { s: corto(`   ${segno === 'meno' ? '-' : '+'}${fmt(m.n)} ${cosa}`, 37) }]
+    const [nome, cosa, segno] = STORIA[m.tipo], d = quando(m.t), piu = segno === 'meno' ? '-' : '+'
+    let a = `  ${piu}${fmt(m.n)} ${cosa}`
+    if (a.length + 1 + d.length > RIGA_S) a = `  ${piu}${corti(m.n)} ${cosa}` // (un bottino enorme: il numero corto, la data resta)
+    return [{ s: corto(nome, RIGA_S) }, { s: corto(a, RIGA_S - 1 - d.length).padEnd(RIGA_S - d.length) + d }]
   })
   const storiaPag = {
     nome: 'la storia', icona: 'clessidra',
-    aiuto: () => (righeStoria().length > VIS ? '↑↓ scorre · ←→ pagine' : '←→ pagine'),
+    aiuto: () => (righeStoria().length > VIS_S ? '↑↓ scorre · ←→ pagine' : '←→ pagine'),
     disegna(l) {
       const R = righeStoria()
       if (!R.length) { centro(l, 60, 'ancora niente coi soldi sporchi'); centro(l, 72, 'le rapine, i lavaggi: qui'); return }
-      giuS = scorrevole(l, R, { y0: 34, vis: VIS, giu: giuS })
+      giuS = scorrevole(l, R, { y0: 34, vis: VIS_S, giu: giuS })
     },
     tasto(k) {
-      const n = Math.max(0, righeStoria().length - VIS)
+      const n = Math.max(0, righeStoria().length - VIS_S)
       if (k === 'su') { giuS = Math.max(0, giuS - 2); return true }
       if (k === 'giu') { giuS = Math.min(n, giuS + 2); return true }
       return false
@@ -236,6 +247,6 @@ export function vista(os) {
     nome: 'lavatrice', app: 'lavatrice',
     pagine: [macchinaPag, storiaPag, regole],
     ascolta: [(f) => pzk.osserva(f), (f) => zaino.ascolta(f)],
-    entra: () => { eraGira = stato().gira },
+    entra: () => { const s = stato(); eraGira = s.gira; eraCome = come(s) },
   })
 }

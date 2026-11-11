@@ -22,6 +22,7 @@ const AL_GIORNO = 3
 const ROMA = { timeZone: 'Europe/Rome' }
 const ora = (t) => new Date(t).toLocaleTimeString('it-IT', { ...ROMA, hour: '2-digit', minute: '2-digit' })
 const nome = (id) => TIPI[id][1]
+const il = (id) => `${TIPI[id][0] === 'chiavetta' ? 'la' : 'il'} ${nome(id)}` // (11.11: «collego il chiavetta usb…»)
 const dentro = (id) => DENTRO[TIPI[id][0]]
 
 const REGOLE = [
@@ -38,7 +39,7 @@ const REGOLE = [
 ]
 
 // ── il codice da risolvere (la vista sopra la lista) ──
-function codice(os, id, v0) {
+function codice(os, id, v0, avvisa) {
   let v = v0, sel = 0, attesa = null, esito = null, fine = null, salto = 0
   const dì = (ok, testo) => { esito = { ok, testo: txt(testo), fino: Date.now() + 3000 }; os.ridisegna() }
   const qui = () => os.corrente() === g
@@ -52,15 +53,18 @@ function codice(os, id, v0) {
     const e = d.e
     if (e.bloccato) { fine = { bloccato: true, sparito: !!e.sparito }; os.suoni.sigla('decifratore-bloccato'); return }
     if (e.risolto) return paga()
+    if (!e.prova) { fine = { errore: 'la banca non ha mandato il codice dopo: riapri il pezzo' }; os.suoni.bip('pagerGiu'); return } // (11.11: senza codice il disegno cadeva su p.k)
     v = e; sel = 0
     if (e.giusta) { os.suoni.sigla('decifratore-giusto'); dì(true, `giusto: codice ${e.i + 1} di 3`) }
     else { os.suoni.bip('pagerGiu'); dì(false, 'sbagliato: ecco un altro codice') }
   }
   async function paga() {
+    if (attesa) return
     attesa = 'apro il pezzo…'; os.ridisegna()
     const d = await pzk.decifra(TIPI[id][0]).finally(() => { attesa = null; os.ridisegna() })
-    if (!qui()) return
-    if (!d?.ok) { fine = { errore: d?.errore ?? 'la banca non risponde: riprova' }; os.suoni.bip('pagerGiu'); return }
+    if (!qui()) { if (d?.ok) avvisa?.(`aperto: +${fmt(d.fatto?.n)} $pzk puliti`); return } // (11.11: con INDIETRO mentre la banca pagava, i $pzk arrivavano senza che nessuno lo dicesse)
+    // (11.11: senza rete «riprova» diceva il vero solo rifacendo i tre codici: il codice risolto resta sulla banca, OK chiede di nuovo i $pzk)
+    if (!d?.ok) { fine = { errore: d?.errore ?? 'la banca non risponde: riprova', paga: !d || !!d.offline }; os.suoni.bip('pagerGiu'); return }
     fine = { n: d.fatto?.n ?? 0 }
     salto = 10
     os.suoni.sigla('decifratore-aperto')
@@ -82,14 +86,15 @@ function codice(os, id, v0) {
         if (fine.n !== undefined) {
           centro(l, y0 + 44, 'aperto!', { scala: 2 })
           centro(l, y0 + 64, `+${fmt(fine.n)} $pzk puliti`)
-          centro(l, y0 + 75, 'dal fondo dei portafogli smarriti')
+          centro(l, y0 + 75, fine.n > 0 ? 'dal fondo dei portafogli smarriti' : 'il fondo dei portafogli smarriti è vuoto') // (11.11: la banca paga quello che c'è nel fondo, anche zero)
         } else {
           centro(l, y0 + 44, fine.errore ? 'non si apre' : 'bloccato', { scala: 2 })
-          const s = fine.errore ?? (fine.sparito ? `il ${nome(id)} non è più nello zaino` : `tre errori: il pezzo resta nello zaino. Riprova quando vuoi.`)
+          const s = fine.errore ?? (fine.sparito ? `${il(id)} non è più nello zaino` : `tre errori: il pezzo resta nello zaino. Riprova quando vuoi.`)
           Lcd.acapo(txt(s), 39).slice(0, 3).forEach((r, i) => centro(l, y0 + 64 + i * 9, r))
         }
-        const a = 'OK torna ai pezzi'
-        centro(l, H - 9, a); os.zona(Math.round(W / 2 - Lcd.larghezza(a) / 2) - 3, H - 11, Lcd.larghezza(a) + 6, 11, () => os.togli())
+        if (striscia(l, { esito: null, attesa }, t)) return
+        const a = fine.paga ? 'OK riprova · INDIETRO ai pezzi' : 'OK torna ai pezzi', a1 = a.split(' · ')[0]
+        centro(l, H - 9, a); os.zona(Math.round(W / 2 - Lcd.larghezza(a) / 2) - 3, H - 11, Lcd.larghezza(a1) + 6, 11, () => (fine.paga ? paga() : os.togli()))
         return
       }
       const p = v.prova, dom = DOMANDE[p.k]?.(p.codice) ?? { testo: 'qual è la risposta?', codice: p.codice }
@@ -116,7 +121,7 @@ function codice(os, id, v0) {
     tasto(k) {
       if (k === 'indietro') { os.togli(); return true } // (il pezzo resta nello zaino: riaprendolo, i codici ripartono)
       if (attesa) return true
-      if (fine) { if (k === 'ok') os.togli(); return true }
+      if (fine) { if (k === 'ok' || k === 'dx') { if (fine.paga) paga(); else os.togli() } return true } // (11.11: un tasto solo, OK e → fanno lo stesso)
       if (k === 'su' || k === 'giu') sel ^= 2
       else if (k === 'sx' || k === 'dx') sel ^= 1
       else if (k === 'ok') rispondi(sel)
@@ -129,29 +134,33 @@ function codice(os, id, v0) {
 
 // ── i pezzi ──
 export function vista(os) {
-  const st = { sel: 0, da: 0 }
+  const st = { sel: 0, da: 0, id: null }
+  // (11.11: il cursore si ricorda per chiave, REGOLE 3.12: con la sola chiavetta scelta, un wallet nuovo dal nastro le passava davanti e OK apriva lui)
+  // (11.11: anche senza un tasto premuto: la chiavetta scelta da sé aveva st.id null, e il wallet le passava davanti lo stesso; il pezzo sparito torna al primo)
+  const ipezzi = () => { const P = pezzi(), k = P.findIndex(([id]) => id === st.id); st.sel = k >= 0 ? k : st.id ? 0 : st.sel; st.id = P[Math.min(st.sel, P.length - 1)]?.[0] ?? null; return P }
+  const tieni = () => { st.id = pezzi()[st.sel]?.[0] ?? null }
   // perché oggi non si apre niente: [la riga sotto la lista, il messaggio corto in fondo quando si preme OK]
   const fermo = () => (pzk.inGalera() ? [`in galera fino alle ${ora(pzk.galera())}: i computer non si toccano`, `in galera fino alle ${ora(pzk.galera())}`] : decifratiOggi() >= AL_GIORNO ? ['tre al giorno: il decifratore si scalda. Domani', 'tre al giorno: torna domani'] : null)
   async function apriPezzo(x, id) {
     const no = fermo()
     if (no) return x.dì(false, no[1])
-    const d = await x.aspetta(`collego il ${nome(id)}…`, () => apri(id))
+    const d = await x.aspetta(`collego ${il(id)}…`, () => apri(id))
     if (!d || !x.qui()) return
     if (!d.ok) return x.dì(false, d.errore)
     if (!d.v?.prova) return x.dì(false, 'la banca non ha mandato il codice: riprova')
-    os.spingi(codice(os, id, d.v))
+    os.spingi(codice(os, id, d.v, (testo) => { if (x.qui()) { x.dì(true, testo); os.suoni.sigla('decifratore-aperto') } })) // (il pagamento finito dopo INDIETRO: lo dice la lista, se è lei in cima)
   }
   const lista = {
     nome: 'decifra', icona: 'app-decifratore',
     aiuto: () => (!pezzi().length || fermo() ? '←→ pagine' : pezzi().length > 1 ? 'OK decifra · ↑↓ sceglie · ←→ pagine' : 'OK decifra · ←→ pagine'),
-    ok(x) { const p = pezzi()[st.sel]; if (p) apriPezzo(x, p[0]) },
+    ok(x) { const p = ipezzi()[st.sel]; if (p) apriPezzo(x, p[0]) },
     disegna(l, x) {
       // oggi: tre caselle, piene quelle già aperte
       const n = Math.min(AL_GIORNO, decifratiOggi())
       l.testo(10, 34, 'aperti oggi')
       for (let i = 0; i < AL_GIORNO; i++) { const xx = 82 + i * 9; if (i < n) l.riempi(xx, 34, 7, 7); else l.riquadro(xx, 34, 7, 7) }
       destra(l, 245, 34, `${n} di ${AL_GIORNO}`)
-      const P = pezzi(), no = fermo()
+      const P = ipezzi(), no = fermo()
       if (!P.length) {
         l.bitmap(icone.bitmap('wallet-pzk', 32), 10, 50)
         l.testo(50, 50, 'niente da decifrare')
@@ -160,7 +169,7 @@ export function vista(os) {
       }
       elenco(l, x.zona, {
         voci: P, stato: st, y0: 46, alta: 40, passo: 20,
-        clic: ([id]) => apriPezzo(x, id),
+        clic: ([id]) => { st.id = id; apriPezzo(x, id) },
         riga(l, [id, q], x0, y, w, on) {
           const o = { inv: on }, [da, a] = dentro(id)
           l.bitmap(icone.bitmap(id, 16), x0 - 2, y + 2, o)
@@ -171,7 +180,7 @@ export function vista(os) {
       })
       Lcd.acapo(no?.[0] ?? 'tre codici per pezzo: al terzo errore si blocca', 39).slice(0, 2).forEach((r, i) => l.testo(10, 92 + i * 9, r))
     },
-    tasto(k) { return muovi(st, pezzi().length, k) },
+    tasto(k) { const n = ipezzi().length; if (!muovi(st, n, k)) return false; tieni(); return true },
   }
   let giu = 0
   const VIS = 9

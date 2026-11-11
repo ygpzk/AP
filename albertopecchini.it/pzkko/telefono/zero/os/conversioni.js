@@ -22,12 +22,26 @@ function righePassi(x, verso) {
   const out = []
   for (const b of passi(x, verso)) {
     if (b.p || b.nota) { out.push(...impagina([{ testo: sup(b.p ?? b.nota) }])); continue }
-    if (b.fine) { out.push({ s: '' }, { s: corto(sup(b.fine), 36), tipo: 'titolo' }); continue }
+    // (11.11: a 64 bit l'esito tagliato con «…» non si leggeva mai intero: va a capo, tutto nella fascia)
+    if (b.fine) { out.push({ s: '' }, ...Lcd.acapo(txt(sup(b.fine)), 36).map((s) => ({ s, tipo: 'titolo' }))); continue }
     const T = [...(b.testa ? [b.testa] : []), ...b.tab.map((r) => r.map(sup))]
     if (!T.length) continue // (0 verso il decimale: nessuna cifra da sommare, la tabella è vuota)
     const sep = T.some((r) => r.length === 2 && r[0].includes('×')) ? ' = ' : b.tab[0]?.length === 2 ? ' → ' : '   '
     const larghe = T[0].map((_, i) => Math.max(...T.map((r) => [...r[i]].length)))
-    T.forEach((r, k) => out.push({ s: corto(r.map((c, i) => (i < r.length - 1 ? c.padEnd(larghe[i]) : c)).join(k === 0 && b.testa ? '   ' : sep), 37) }))
+    // (11.11: coi numeri a 64 bit la riga «divisione quoziente resto» era più larga dello schermo e il «…» si mangiava il
+    // resto, la cifra che conta: se non ci sta, la colonna di mezzo se ne va (il quoziente è la divisione della riga dopo),
+    // e se ancora non basta si accorcia la prima; l'ultima resta sempre)
+    const stretta = T[0].length > 2 && larghe.reduce((a, n) => a + n, 0) + 3 * (larghe.length - 1) > 37
+    const L = stretta ? [larghe[0], larghe.at(-1)] : larghe
+    const n0 = Math.min(L[0], 37 - 3 - L.at(-1)) // (stretta: quanto resta alla prima colonna)
+    T.forEach((r, k) => {
+      const s = k === 0 && b.testa ? '   ' : sep
+      // (11.11: «F × 16^15 = 17.293.822.569.102.704.640» è 38 caratteri: il valore va sotto, allineato a destra, e non perde la coda)
+      if (r.length === 2 && larghe[0] + s.length + [...r[1]].length > 37) return out.push({ s: corto(r[0] + s.trimEnd(), 37) }, { s: corto(r[1], 37).padStart(37) })
+      if (!stretta) return out.push({ s: corto(r.map((c, i) => (i < r.length - 1 ? c.padEnd(larghe[i]) : c)).join(s), 37) })
+      const c0 = [...r[0]], primo = c0.length <= n0 ? r[0].padEnd(n0) : k === 0 && b.testa ? c0.slice(0, n0).join('') : corto(r[0], n0) // (la testa si taglia senza «…»)
+      out.push({ s: primo + s + r.at(-1) })
+    })
   }
   return out
 }
@@ -78,7 +92,8 @@ function vistaIntero(os, titolo, vista, testo) {
       if (!striscia(l, { esito }, t)) { l.testo(xa, H - 9, a); os.zona(xa - 3, H - 11, Lcd.larghezza('OK lo copia') + 6, 11, () => v.tasto('ok')) }
     },
     tasto(k) {
-      if (k === 'ok') { copia(testo).then((ok) => { esito = { ok, testo: ok ? 'copiato' : 'il browser non lo lascia copiare', fino: Date.now() + 3000 }; if (!ok) os.suoni.bip('pagerGiu'); os.ridisegna() }); return true }
+      // (11.11: dopo l'attesa del browser si guarda di essere ancora in cima: se no il bip dell'errore suonava nella vista di sotto)
+      if (k === 'ok') { copia(testo).then((ok) => { if (os.corrente() !== v) return; esito = { ok, testo: ok ? 'copiato' : 'il browser non lo lascia copiare', fino: Date.now() + 3000 }; if (!ok) os.suoni.bip('pagerGiu'); os.ridisegna() }); return true }
       if (k === 'indietro') { os.togli(); return true }
       return k === 'su' || k === 'giu' || k === 'sx' || k === 'dx'
     },
@@ -88,13 +103,20 @@ function vistaIntero(os, titolo, vista, testo) {
 
 export function vista(os) {
   const S = ricordo('conversioni', { testo: '42', da: 10, bit: 0, verso: 2 })
+  // (11.11: le scelte salvate possono essere rotte: una base che non c'è dava BigInt(undefined) nei passaggi, a ogni disegno)
+  S.da = NOME[S.da] ? Number(S.da) : 10; S.verso = NOME[S.verso] ? Number(S.verso) : 2; S.bit = BIT.includes(Number(S.bit)) ? Number(S.bit) : 0; S.testo = String(S.testo ?? '')
   const salva = () => ricorda('conversioni', S)
   const st = { sel: 0, da: 0 }
   let scrive = 0 // i risultati che si riscrivono da sinistra (0 → 4)
   const cambiato = () => { scrive = 0; salva() }
+  // (11.11: la base che si vede: con 0x 0b 0o davanti è quella del prefisso, come in leggi, anche quando una cifra è
+  // sbagliata e leggi non dice la base; con «0x1F» in decimale OK apriva i tasti dei numeri, «in decimale», senza A–F)
+  const base = () => { const x = leggi(S.testo, S.da); return x.b ?? { B: 2, O: 8, X: 16 }[/^[-+]?0([BOX])/.exec(S.testo.trim().replace(/[\s_']/g, '').toUpperCase())?.[1]] ?? S.da }
   const giraBase = (d) => {
-    const i = BASI.findIndex(([b]) => b === S.da), nuova = BASI[(i + d + BASI.length) % BASI.length][0], x = leggi(S.testo, S.da)
+    // (11.11: con 0x davanti la riga dice «esadecimale», e ▶ deve andare alla base dopo quella che si vede, non dopo S.da)
+    const x = leggi(S.testo, S.da), i = BASI.findIndex(([b]) => b === base()), nuova = BASI[(i + d + BASI.length) % BASI.length][0]
     if (!x.errore) S.testo = scritto(x, nuova).testo // (cambia la base: il numero si riscrive nella nuova, come l'app vecchia)
+    else S.testo = S.testo.replace(/^(\s*[-+]?0)[box]/i, '$1') // (11.11: con un errore non si riscrive, ma il prefisso se ne va, se no comanda lui e ◀ ▶ non cambiavano niente)
     S.da = nuova; cambiato()
   }
   const giraBit = (d) => { S.bit = BIT[(BIT.indexOf(S.bit) + d + BIT.length) % BIT.length]; cambiato() }
@@ -102,8 +124,9 @@ export function vista(os) {
   async function scrivi(x) {
     // (in decimale e in ottale i tasti grandi di os.numero, col meno e la virgola; il binario lungo e le lettere A–F
     // dell'esadecimale vogliono la tastiera, coi simboli per il meno e la virgola)
-    const titolo = `il numero, in ${NOME[S.da]}`
-    const s = S.da === 10 || S.da === 8 ? await os.numero({ titolo, testo: S.testo }) : await os.tastiera({ titolo, testo: S.testo, simboli: true })
+    const b = base(), titolo = `il numero, in ${NOME[b]}`
+    // (max 80 come la tastiera vera qui sotto: os.numero per ora si ferma a 24 senza dirlo, la correzione è in os.js)
+    const s = b === 10 || b === 8 ? await os.numero({ titolo, testo: S.testo, max: 80 }) :await os.tastiera({ titolo, testo: S.testo, simboli: true })
     if (s === null || !x.qui()) return
     S.testo = s.trim(); cambiato()
   }
@@ -112,7 +135,7 @@ export function vista(os) {
   function righe() {
     const x = leggi(S.testo, S.da), R = []
     R.push({ nome: 'numero', val: S.testo, numero: true, ok: scrivi, aiuto: 'OK scrive · ↑↓ righe' })
-    R.push({ nome: 'scritto in', val: NOME[x.b ?? S.da], gira: giraBase, aiuto: '←→ cambia · ↑↓ righe' })
+    R.push({ nome: 'scritto in', val: NOME[base()], gira: giraBase, aiuto: '←→ cambia · ↑↓ righe' })
     R.push({ nome: 'bit (compl. a 2)', val: S.bit ? `${S.bit}` : 'no', gira: giraBit, aiuto: '←→ cambia · ↑↓ righe' })
     if (x.errore) R.push({ nome: `! ${x.errore}`, val: '', aiuto: 'OK scrive il numero', ok: scrivi })
     else {
@@ -124,7 +147,8 @@ export function vista(os) {
           const bin = p.toString(2).padStart(S.bit, '0'), hex = intIn(p, 16).padStart(S.bit / 4, '0')
           R.push({ nome: `${S.bit} bit`, val: gruppi(bin, 4), risultato: true, ok: () => os.spingi(vistaIntero(os, `${S.bit} bit, complemento a 2`, gruppi(bin, 4), bin)), aiuto: 'OK lo vedi intero · ↑↓ righe' })
           R.push({ nome: `hex ${S.bit}`, val: gruppi(hex, 4), risultato: true, ok: () => os.spingi(vistaIntero(os, `hex su ${S.bit} bit`, gruppi(hex, 4), hex)), aiuto: 'OK lo vedi intero · ↑↓ righe' })
-          if (bin[0] === '1' && !x.neg && (x.b === 2 || x.b === 16)) R.push({ nome: 'letto col segno', val: String(p - (1n << BigInt(S.bit))), risultato: true, aiuto: '↑↓ righe' })
+          // (11.11: era l'unico risultato che con OK non si apriva intero)
+          if (bin[0] === '1' && !x.neg && (x.b === 2 || x.b === 16)) { const seg = String(p - (1n << BigInt(S.bit))); R.push({ nome: 'letto col segno', val: seg, risultato: true, ok: () => os.spingi(vistaIntero(os, `letto col segno su ${S.bit} bit`, seg, seg)), aiuto: 'OK lo vedi intero · ↑↓ righe' }) }
         }
       }
     }
@@ -142,7 +166,7 @@ export function vista(os) {
         const R = righe()
         elenco(l, x.zona, {
           voci: R, stato: st, y0: 34, alta: 80, passo: 10,
-          clic: (r) => r.ok?.(x),
+          clic: (r) => (r.ok ? r.ok(x) : r.gira?.(1)), // (il clic sulla riga fa quello che fa OK)
           riga(l, r, x0, y, w, on, k) {
             const o = { inv: on }
             l.testo(x0, y + 1, corto(r.nome, r.val ? 18 : 37), o)
@@ -173,13 +197,13 @@ export function vista(os) {
         const R = righe(), r = R[st.sel]
         if (k === 'su' || k === 'giu') { st.sel = (st.sel + (k === 'su' ? -1 : 1) + R.length) % R.length; return true }
         if ((k === 'sx' || k === 'dx') && r?.gira) { r.gira(k === 'sx' ? -1 : 1); return true }
-        if (k === 'ok') { r?.ok?.(x); return true }
+        if (k === 'ok') { if (r?.ok) r.ok(x); else r?.gira?.(1); return true } // (11.11: su «scritto in» e sui bit OK non faceva niente: va avanti come ▶)
         return k === 'sx' || k === 'dx' // (una pagina sola: le frecce di lato non fanno altro)
       },
       carattere(ch) { if (/^[0-9a-zA-Z.,+\-_' ]$/.test(ch) && S.testo.length < 80) { S.testo += ch; st.sel = 0; cambiato() } },
       cancella() { S.testo = S.testo.slice(0, -1); st.sel = 0; cambiato() },
       scrivendo: () => st.sel === 0 && S.testo.length > 0,
-      invio(x) { const r = righe()[st.sel]; r?.ok?.(x) },
+      invio(x) { const r = righe()[st.sel]; if (r?.ok) r.ok(x); else r?.gira?.(1) },
     }],
   })
 }

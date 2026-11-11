@@ -183,6 +183,25 @@ export function piena(ora = Date.now()) {
   return c.completa && c.perOra > 0 && maturatiDi(s, ora) >= c.perOra * c.capienzaOre - 1e-6
 }
 
+/** (11.11, Alberto: «non posso montare i pezzi comprati») Il pezzo non ci sta: quale altro pezzo cambiare perché ci stia.
+ *  Prima uno che hai già, poi il meno caro da comprare. → { cat, id, ho } o null (ci sta già, o niente lo fa stare) */
+export function perMontare(cat, id) {
+  if (!PER_ID[id] || compatibile(cat, id, 1).ok) return null
+  const s = leggi()
+  let meglio = null
+  for (const c of ['case', 'tavolo', 'gpu', 'ventole', 'schermo']) {
+    if (c === cat) continue
+    for (const y of catalogo(c)) {
+      const m = { ...s.montati, [c]: scritto(c, y.id, 1), [cat]: scritto(cat, id, 1) }
+      if (c === 'case' || c === 'tavolo') adatta(m)
+      if (incastri(m, cat).length || !posto(m, cat)) continue
+      const ho = (s.posseduti[y.id] ?? 0) > 0, costo = ho ? 0 : y.prezzo
+      if (!meglio || costo < meglio.costo) meglio = { cat: c, id: y.id, ho, costo }
+    }
+  }
+  return meglio && { cat: meglio.cat, id: meglio.id, ho: meglio.ho }
+}
+
 /** Un'azione della miniera sulla banca. → { ok, …esito } o { ok: false, errore, manca? } */
 async function fai(cosa, args = {}) {
   const d = await pzk.fai(cosa, args)

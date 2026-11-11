@@ -39,6 +39,19 @@ const REGOLE = [
 const chiave = () => `pzkko-zero-rapina:${pzk.conto()?.ind ?? ''}`
 const visto = () => { try { return localStorage.getItem(chiave()) ?? '' } catch { return '' } }
 const vedi = (codice) => { try { localStorage.setItem(chiave(), codice) } catch {} }
+// (11.11) gli errori del colpo della banca (api/wallet.mjs) in 35 caratteri, quelli che stanno nella striscia in fondo: «un colpo
+// al giorno: il prossimo dalle 14:30» perdeva proprio l'ora, «nessun colpo aperto con questo cod…» la fine
+const breve = (e) => {
+  const s = String(e ?? '')
+  return s.replace(/^un colpo al giorno: il prossimo dalle (.+)$/, 'il prossimo colpo dalle $1')
+    .replace(/^per i colpi il conto deve avere almeno 48 ore$/, 'serve un conto di almeno 48 ore')
+    .replace(/^nessun colpo aperto con questo codice$/, 'nessun colpo aperto con quel codice')
+    .replace(/^la banda è piena: al massimo in quattro$/, 'banda piena: al più in quattro')
+    .replace(/^il via lo dà chi ha organizzato il colpo$/, 'il via lo dà chi organizza')
+    .replace(/^(.+) è in galera: il colpo non parte$/, (_, nome) => `in galera: ${corto(nome, 20)}`)
+    .replace(/^da solo no: serve almeno un complice$/, 'da solo no: serve un complice') // (11.11: la banca lo dice se il complice è uscito intanto)
+    .replace(/^la cauzione è \d+ \$pzk puliti: ne hai (.+)$/, (_, n) => `servono ${fmt(CAUZIONE)} puliti: ne hai ${corti(Number(n))}`) // (11.11: coi puliti che qui sembravano bastare la banca diceva «la cauzione è 3000 $pzk puliti: ne hai …», 40 e più: il numero spariva)
+}
 
 export function vista(os) {
   let S = { colpo: null, cassa: null, rete: true }, giro = 0
@@ -51,10 +64,11 @@ export function vista(os) {
     if (X?.attesa) return // (30.10: mentre «via» o un'altra richiesta aspetta il server niente stato: l'esito suonava due volte)
     const mio = ++giro, d = await pzk.colpo('stato')
     if (mio !== giro || X?.attesa) return
-    if (!d?.ok) { S.rete = false; os.ridisegna(); return }
+    if (!d?.ok) { S.rete = false; if (X?.qui()) os.ridisegna(); return }
     const prima = S.colpo
     S = { colpo: d.colpo, cassa: d.cassa, rete: true }
     allinea()
+    if (!X?.qui()) return // (11.11: uscito dall'app mentre la banca rispondeva, la sirena suonava lo stesso: REGOLE.md 8.4)
     if (prima?.stato === 'aperto' && d.colpo?.stato === 'fatto' && !scasso) esito(d.colpo.esito) // (il via l'ha dato un altro)
     os.ridisegna()
   }
@@ -66,17 +80,17 @@ export function vista(os) {
   async function fai(cosa, x, codice = '') {
     if (cosa === 'vai') {
       const n = S.colpo?.membri?.length ?? 0
-      if (n < 2) return x.dì(false, 'da solo no: serve almeno un complice')
+      if (n < 2) return x.dì(false, 'da solo no: serve un complice') // (11.11: «…serve almeno un compli…» non stava nella striscia)
       const r = await os.dialogo({ titolo: 'si va?', testo: `riesce ${PROB[n]} volte su cento. Se va male sono ${ORE_GALERA} ore di galera per tutti, e la multa.`, icona: 'app-rapina', tasti: ['no', 'via!'] })
       if (r !== 'via!' || !x.qui()) return
     }
     const d = await x.aspetta({ apri: 'apro il colpo…', entra: 'entro nella banda…', esci: 'esco dal colpo…', vai: 'si va…' }[cosa], () => pzk.colpo(cosa, codice))
     if (!d || !x.qui()) return
-    if (!d.ok) return x.dì(false, d.errore ?? 'non va: riprova')
+    if (!d.ok) return x.dì(false, breve(d.errore ?? 'non va: riprova'))
     if ('colpo' in d) S.colpo = d.colpo
+    if (cosa === 'vai' && d.colpo?.esito) scasso = { fino: 10, esito: d.colpo.esito } // (11.11: prima di allinea: presi, la galera dava due pagine e la cassaforte si scassinava coi ◀ ▶ in testata)
     allinea()
-    if (cosa === 'vai' && d.colpo?.esito) scasso = { fino: 10, esito: d.colpo.esito }
-    else if (cosa === 'apri') x.dì(true, 'aperto: dai il codice ai complici')
+    if (cosa === 'apri') x.dì(true, 'aperto: dai il codice ai complici')
     else if (cosa === 'entra') x.dì(true, 'sei nella banda: aspetta il via')
     else if (cosa === 'esci') x.dì(true, 'sei fuori dal colpo')
     stato()
@@ -89,12 +103,12 @@ export function vista(os) {
     fai('entra', x, c)
   }
   async function cauzione(x) {
-    if (pzk.puliti() < CAUZIONE) return x.dì(false, `la cauzione è ${fmt(CAUZIONE)} puliti: ne hai ${fmt(pzk.puliti())}`)
+    if (pzk.puliti() < CAUZIONE) return x.dì(false, `servono ${fmt(CAUZIONE)} puliti: ne hai ${corti(pzk.puliti())}`) // (11.11: «…ne hai …», il numero non stava nella striscia)
     const r = await os.dialogo({ titolo: 'la cauzione', testo: `${fmt(CAUZIONE)} $pzk puliti alla cassa di pzk, ed esci subito.`, icona: 'lucchetto', tasti: ['no', 'paga'] })
     if (r !== 'paga' || !x.qui()) return
     const d = await x.aspetta('pago la cauzione…', () => pzk.cauzione())
     if (!d || !x.qui()) return
-    if (!d.ok) return x.dì(false, d.errore ?? 'non va: riprova')
+    if (!d.ok) return x.dì(false, breve(d.errore ?? 'non va: riprova'))
     os.suoni.sigla('moneta')
     x.dì(true, 'fuori: cauzione pagata')
     S.colpo = null
@@ -103,13 +117,17 @@ export function vista(os) {
   }
   /** Le zone del clic, spente mentre si aspetta il server (come i tasti: niente doppi invii). */
   const zona = (x) => (...a) => { if (!x.attesa) x.zona(...a) }
+  /** Salta la cassaforte che si scassina (l'esito subito) o il lampeggiante dei presi: un tasto, o il clic sulla scena (11.11). */
+  const salta = () => { if (scasso) { const e = scasso.esito; scasso = null; esito(e); allinea() } else retata = 0; os.ridisegna() }
   const lavatrice = () => (zaino.installata('lavatrice') ? os.apri('lavatrice') : os.apri('pzkstore', { comando: 'lavatrice' }))
 
   // ── com'è messo il colpo (decide cosa disegna la prima pagina e cosa fanno i tasti) ──
   const come = () => (scasso ? 'scasso' : pzk.inGalera() ? 'galera' : S.colpo?.stato === 'fatto' && S.colpo.io && S.colpo.esito?.ok && S.colpo.codice !== visto() ? 'riuscito' : S.colpo?.stato === 'aperto' && S.colpo.io ? 'aperto' : 'cassa')
+  const scaduto = () => !(S.colpo?.scade > Date.now())
   const azioni = () => {
     const c = come(), k = S.colpo
-    if (c === 'aperto') return k.capo ? [{ eti: `via! ${PROB[Math.max(2, k.membri.length)]} %`, fai: (x) => fai('vai', x) }, { eti: 'esci dal colpo', fai: (x) => fai('esci', x) }] : [{ eti: 'esci dal colpo', fai: (x) => fai('esci', x) }]
+    // (11.11) scaduto, il via non parte più («troppo tardi») e la banca tiene il colpo aperto finché non si esce: resta solo «esci»
+    if (c === 'aperto') return k.capo && !scaduto() ? [{ eti:`via! ${PROB[Math.max(2, k.membri.length)]} %`, fai: (x) => fai('vai', x) }, { eti: 'esci dal colpo', fai: (x) => fai('esci', x) }] : [{ eti: 'esci dal colpo', fai: (x) => fai('esci', x) }]
     if (c === 'riuscito') return [{ eti: zaino.installata('lavatrice') ? 'alla lavatrice' : 'la lavatrice', fai: lavatrice }, { eti: 'va bene', fai: () => { vedi(S.colpo?.codice ?? ''); allinea() } }]
     return []
   }
@@ -131,7 +149,7 @@ export function vista(os) {
       if (scossa > 0) { scossa--; ancora = true }
       if (retata > 0) { retata--; ancora = true }
       const c = come()
-      if ((c === 'aperto' || c === 'galera') && t % 30 === 0) stato() // (ogni tre secondi)
+      if ((c === 'aperto' || c === 'galera' || (c === 'cassa' && !S.rete)) && t % 30 === 0) stato() // (ogni tre secondi; 11.11: anche la cassa che «non risponde: riprovo», che non riprovava mai)
       if (c === 'galera' && t % 50 === 0) { scossa = 4; ancora = true } // (ogni cinque secondi chi è dentro scuote le sbarre)
       if (c === 'aperto' && t % 10 === 0) ancora = true // (i secondi che corrono)
       return ancora
@@ -147,6 +165,7 @@ export function vista(os) {
         l.riempi(cx - 1, cy - 1, 3, 3)
         centro(l, 98, 'si scassina la cassa…')
         l.riquadro(68, 108, 120, 6); l.riempi(70, 110, Math.round((116 * (10 - scasso.fino)) / 10), 2)
+        zona(x)(os.MARGINE, 32, W - 2 * os.MARGINE, 86, salta) // (11.11: «un tasto salta», e il clic pure)
         return
       }
       if (c === 'galera' && retata > 0) {
@@ -156,6 +175,7 @@ export function vista(os) {
         l.bitmap(icone.bitmap('sirena', 32), 112, 38, { inv: on })
         centro(l, 78, 'presi!', { scala: 3, inv: on })
         centro(l, 104, 'arrivano i carabinieri', { inv: on })
+        zona(x)(os.MARGINE, 32, W - 2 * os.MARGINE, 86, salta)
         return
       }
       if (c === 'galera') {
@@ -192,8 +212,10 @@ export function vista(os) {
         const quanto = k.scade - Date.now()
         l.testo(96, 46, quanto > 0 ? `scade fra ${mmss(quanto)}` : 'scaduto')
         l.testo(96, 55, `banda ${n}/4 · riesce ${PROB[Math.max(2, n)]} %`)
-        k.membri.forEach((m, i) => { const xx = 10 + (i % 2) * 118, y = 70 + Math.floor(i / 2) * 9; l.testo(xx, y, corto(`• ${m.nome}${i ? '' : ' (capo)'}`, 19)) })
-        if (n < 2 || !k.capo) centro(l, 89, n < 2 ? `serve almeno un complice${'...'.slice(0, (Math.floor(t / 5) % 3) + 1)}` : 'aspetta il via di chi organizza…')
+        k.membri.forEach((m, i) => { const xx = 10 + (i % 2) * 118, y = 70 + Math.floor(i / 2) * 9; l.testo(xx, y, i ? corto(`• ${m.nome}`, 19) : `• ${corto(m.nome, 10)} (capo)`) }) // (11.11: un nome di 20 lettere si mangiava «(capo)»)
+        if (scaduto()) centro(l, 89, 'scaduto: esci, e se vuoi rifallo') // (11.11: «aspetta il via» e «via!» non dicevano il vero)
+        else if (!S.rete) centro(l, 89, 'la banca non risponde: riprovo') // (11.11: senza rete il colpo aperto non lo diceva)
+        else if (n < 2 || !k.capo) centro(l, 89, n < 2 ? `serve almeno un complice${'...'.slice(0, (Math.floor(t / 5) % 3) + 1)}` : 'aspetta il via di chi organizza…')
         bottoni(l, zona(x), { etichette: A.map((a) => a.eti), sel: Math.min(bott, A.length - 1), y: 101, premi: (i) => { bott = i; A[i].fai(x) } })
         return
       }
@@ -212,9 +234,9 @@ export function vista(os) {
     },
     tasto(k, x) {
       const c = come()
-      if (c === 'scasso') { const e = scasso.esito; scasso = null; esito(e); allinea(); return k !== 'indietro' } // (un tasto salta: l'esito subito)
+      if (c === 'scasso') { salta(); return k !== 'indietro' } // (un tasto salta: l'esito subito)
       if (c === 'cassa') { if (muovi(scelta, VOCI.length, k)) return true; if (k === 'ok') { VOCI[scelta.sel].fai(x); return true } return false }
-      if (c === 'galera' && retata > 0) { retata = 0; return k !== 'indietro' } // (un tasto salta il lampeggiante)
+      if (c === 'galera' && retata > 0) { retata = 0; return k !== 'indietro' && k !== 'sx' && k !== 'dx' } // (un tasto salta il lampeggiante; 11.11: ← → lo saltano e sfogliano, come dicono ◀ ▶ in testata)
       if (c === 'galera') { if (k === 'ok') { cauzione(x); return true } return false }
       const A = azioni()
       if (!A.length) return false
@@ -235,10 +257,11 @@ export function vista(os) {
       ;[2, 3, 4].forEach((n, i) => {
         const y = 45 + i * 9
         l.testo(22, y, String(n)); l.testo(70, y, `${PROB[n]} %`)
-        destra(l, 240, y, S.cassa != null ? `${fmt(Math.round(bottino(S.cassa, n)))} $pzk` : '…')
+        destra(l, 240, y, S.cassa != null ? `${fmt(Math.round(bottino(S.cassa, n)))} $pzk` : S.rete ? '…' : i ? '' : 'la banca non risponde') // (11.11: senza rete «…» per sempre)
       })
       scorrevole(l, impagina(REGOLE), { y0: 74, vis: 5, giu })
     },
+    tic(t) { if (!S.rete && t % 30 === 0) stato(); return false }, // (11.11: la cassa la richiedeva solo la pagina del colpo: qui la tabella non tornava più)
     tasto(k) {
       if (k === 'su') { giu = Math.max(0, giu - 1); return true }
       if (k === 'giu') { giu = Math.min(giu + 1, Math.max(0, impagina(REGOLE).length - 5)); return true } // (il fondo qui, non nel disegno)
@@ -249,9 +272,11 @@ export function vista(os) {
   // LE PAGINE: col colpo aperto, riuscito o mentre si scassina, ← → scelgono i tasti in fondo: allora la pagina è una sola
   // (niente ◀ ▶ in testata: ogni freccia sullo schermo deve fare quello che dice). Si toglie solo stando sul colpo.
   const PAG = [colpo, regole]
-  let X = null
+  let X = null, era = null
   function allinea() {
-    const sola = ['aperto', 'riuscito', 'scasso'].includes(come())
+    const c = come()
+    if (c !== era) { era = c; bott = 0 } // (11.11: il tasto scelto è per chiave: uscito dal colpo con «esci», il colpo nuovo partiva con «esci» già scelto)
+    const sola = ['aperto', 'riuscito', 'scasso'].includes(c)
     if (!sola) { PAG[1] = regole; return }
     if (!X || X.pag === 0) PAG.length = 1
   }

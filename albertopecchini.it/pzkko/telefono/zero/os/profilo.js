@@ -11,7 +11,7 @@
 // Le regole: os/REGOLE.md.
 import { Lcd, W, H } from './lcd.js'
 import * as icone from './icone.js'
-import { txt, corto, destra, centro, sposta, testata } from './pezzi.js'
+import { txt, corto, destra, centro, sposta, testata, striscia } from './pezzi.js'
 import * as zaino from '../../../chat/zaino.js'
 import * as pzk from '../../../games/pzk.js'
 import * as db from '../../../chat/db.js'
@@ -21,6 +21,11 @@ import { COLORI, CORNICI, facce, faccia, nomeAv, compraFaccia, salva } from '../
 
 // ── i pezzi piccoli ──
 const f = (x) => pzk.fmtCorto(Math.round(x ?? 0))
+// (11.11) il prezzo e il saldo di una faccia, interi: col corto 1.498 e 1.500 erano tutti e due «1,5K», e «costa 1,5K e ne
+// hai 1,5K» non diceva perché non si compra
+const intero = (x) => pzk.fmt(Math.round(x ?? 0))
+/** La rotellina che gira mentre si aspetta la banca. */
+const ruota = (t) => ['|', '/', '-', '\\'][(t ?? 0) % 4]
 const segno = (x) => `${x > 0 ? '+' : ''}${pzk.fmtCorto(Math.round(x ?? 0))}`
 const pct = (a, b) => (b ? `${Math.round((100 * a) / b)}%` : '—')
 const ora = (t) => new Date(t).toLocaleTimeString('it-IT', { timeZone: 'Europe/Rome', hour: '2-digit', minute: '2-digit' })
@@ -71,8 +76,10 @@ async function caricaIo(os) {
   if (!c) { io = null; ioDi = null; return }
   const mio = ++giroIo, prima = ioOk() // (lo stesso conto: intanto resta quello di prima, niente «carico» che lampeggia)
   io = prima ?? 'carico'; ioDi = c.ind; ioT = Date.now(); os.ridisegna()
-  let d = null
-  try { d = await db.io() } catch {}
+  // (11.11: db.io non ha un tempo massimo, e se la rete non rispondeva restava «carico...» per sempre, anche tornando sulla
+  // pagina: daRileggere non rilegge mentre carica. Dopo 15 secondi è «il server non risponde», e la volta dopo si riprova)
+  let d = null, timer = null
+  try { d = await Promise.race([db.io(), new Promise((r) => { timer = setTimeout(() => r({ ok: false, errore: 'il server non risponde' }), 15_000) })]) } catch {} finally { clearTimeout(timer) }
   if (mio !== giroIo) return
   io = d?.ok && d.profilo ? d.profilo : prima ?? { ok: false, errore: d?.errore ?? 'il server non risponde' }
   ioT = Date.now()
@@ -91,9 +98,14 @@ function pCartellino(l, k) {
   l.testo(52, 39, corto(c?.nome ?? 'ospite', 16), { scala: 2 })
   const dal = c?.creato && !Number.isNaN(new Date(c.creato).getTime()) ? ` · dal ${new Date(c.creato).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''
   l.testo(52, 56, corto(c ? `${c.ind}${dal}` : 'sessione: niente si salva', 32)) // (la data solo se c'è: senza, era «dal Invalid Date»)
-  const note = [ioOk()?.titolo, pzk.inGalera() && `in galera fino alle ${new Date(pzk.galera()).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}`, pzk.sporchi() && `${f(pzk.sporchi())} sporchi`].filter(Boolean)
-  if (note.length) l.testo(52, 65, corto(note.join(' · '), 32))
-  if (pr.mot) { const r = Lcd.acapo(txt(`"${pr.mot}"`), 32); r.slice(0, 2).forEach((s, i) => l.testo(52, 74 + i * 9, i === 1 && r.length > 2 ? corto(`${s}…`, 32) : s)) } // (corto(s, 31) + «…» dava «……»)
+  // (11.11: tutte in una riga tagliata a 32 diventavano «pino · in galera fino alle 06:5…», e gli sporchi sparivano. Ora i
+  // pezzi restano interi e vanno a capo fra l'uno e l'altro, al più due righe; il motto prende le righe che restano fino a 83)
+  const note = [ioOk()?.titolo, pzk.inGalera() && `in galera fino alle ${ora(pzk.galera())}`, pzk.sporchi() && `${f(pzk.sporchi())} sporchi`].filter(Boolean).map((s) => corto(s, 32))
+  const rn = []
+  for (const s of note) { const u = rn.length - 1; if (u >= 0 && [...`${rn[u]} · ${s}`].length <= 32) rn[u] += ` · ${s}`; else rn.push(s) }
+  rn.slice(0, 2).forEach((s, i) => l.testo(52, 65 + i * 9, s))
+  const dm = Math.max(1, Math.min(2, rn.length)), posto = 3 - dm // (il motto comincia a 74 come sempre, a 83 se le note sono due righe)
+  if (pr.mot) { const r = Lcd.acapo(txt(`"${pr.mot}"`), 32); r.slice(0, posto).forEach((s, i) => l.testo(52, 65 + (dm + i) * 9, i === posto - 1 && r.length > posto ? corto(`${s}…`, 32) : s)) } // (corto(s, 31) + «…» dava «……»)
   const p = Math.max(0, Math.min(1, (xp - da) / Math.max(1, a - da)))
   l.riquadro(52, 94, 190, 5); l.riempi(53, 95, Math.round(188 * p * k), 3)
   l.testo(52, 102, corto(`${f(xp - da)}/${f(a - da)} xp · ${f(xp)} in tutto`, 32))
@@ -159,7 +171,7 @@ function pClassifiche(l, k, t) {
   if (d === 'carico' || d === null) { l.testo(Math.round(W / 2 - Lcd.larghezza('carico...') / 2), 64, 'carico' + '.'.repeat(1 + (Math.floor(t / 3) % 3))); return } // (fermo a sinistra: i puntini crescono senza far ballare la parola)
   if (d.ok === false) { centro(l, 56, corto(d.errore, 38)); centro(l, 70, 'riprovo quando torni qui.'); return }
   const pos = Object.entries(d.posizioni ?? {}).filter(([m]) => db.METRICHE[m]).sort((a, b) => a[1].pos - b[1].pos).slice(0, 7)
-  l.testo(10, 34, corto(`su ${f(d.giocatori)} giocatori`, 38))
+  l.testo(10, 34, corto(`su ${f(d.giocatori)} ${d.giocatori === 1 ? 'giocatore' : 'giocatori'}`, 38)) // (11.11: da soli era «su 1 giocatori»)
   if (!pos.length) { centro(l, 64, 'ancora in nessuna classifica: gioca!'); return }
   pos.forEach(([m, v], i) => {
     const y = 45 + i * 10
@@ -224,11 +236,20 @@ export function vista(os) {
 
 // ── la modifica: l'anteprima del cartellino e quattro righe ──
 function modifica(os) {
-  let sel = 0, lampo = 0, via = []
+  let sel = 0, lampo = 0, via = [], attesa = null
   const pr = () => zaino.profilo()
   // (31.10) il profilo lo salva la banca (app/profilo.js, salva): ←→ cambiano subito sulla banca; un no si dice in un dialogo
-  const salvaQui = (cambia, lampi) => salva(cambia).then((e) => { if (os.corrente() !== v) return; if (e.ok) lampo = lampi; else os.dialogo({ titolo: 'niente', testo: e.errore, tasti: ['ok'] }) })
-  const giro = (lista, k, d) => { const i = Math.max(0, lista.indexOf(pr()[k])); salvaQui({ [k]: lista[(i + d + lista.length) % lista.length] }, 4) }
+  // (11.11) mentre la banca risponde la rotellina in fondo, e i tasti non fanno partire un altro salvataggio: due → di fila
+  // leggevano tutti e due il colore vecchio e salvavano lo stesso, un passo solo per due tasti
+  const salvaQui = async (cambia, lampi) => {
+    if (attesa) return
+    attesa = 'salvo sulla banca'; os.ridisegna()
+    let e
+    try { e = await salva(cambia) } catch { e = { ok: false, errore: 'la banca non risponde: riprova' } } finally { attesa = null; os.ridisegna() }
+    if (os.corrente() !== v) return
+    if (e.ok) lampo = lampi; else os.dialogo({ titolo: 'niente', testo: e.errore, tasti: ['ok'] })
+  }
+  const giro = (lista, k, d) => { if (attesa) return; const i = Math.max(0, lista.indexOf(pr()[k])); salvaQui({ [k]: lista[(i + d + lista.length) % lista.length] }, 4) }
   const righe = [
     { nome: 'faccia', valore: () => corto(nomeAv(avOra()), 18), apri: () => os.spingi(griglia(os)), aiuto: 'OK o → sceglie la faccia' },
     { nome: 'colore', valore: () => pr().col, cambia: (d) => giro(Object.keys(COLORI), 'col', d), aiuto: '←→ cambia il colore' },
@@ -245,8 +266,8 @@ function modifica(os) {
     nome: 'profilo-modifica', app: 'profilo',
     entra() { via = [zaino.ascolta(() => os.ridisegna()), icone.ascolta(() => os.ridisegna())] },
     esci() { via.forEach((x) => x()); via = [] },
-    tic() { if (lampo > 0) { lampo--; os.ridisegna() } },
-    disegna(l) {
+    tic() { const prima = lampo; if (lampo > 0) lampo--; if (prima > 0 || attesa) os.ridisegna() }, // (anche la rotellina gira)
+    disegna(l, t) {
       const p = pr()
       // l'anteprima: il cartellino com'è adesso (lampeggia quando cambia)
       cornice(l, p.cor, 6, 14, 244, 45)
@@ -263,13 +284,15 @@ function modifica(os) {
         if (on) l.testo(W - 15, y, '▶', { inv: true })
         l.testo(x, y, val, { inv: on })
         if (r.nome === 'colore') campione(l, pr().col, x - (frecce ? 28 : 18), y, 13, 7, on)
+        if (attesa) return // (aspettando la banca il clic non fa partire altro, come i tasti)
         os.zona(6, y - 2, W - 12, 11, () => { sel = j; fai(r) })
         if (frecce) { os.zona(x - 13, y - 2, 11, 11, () => r.cambia(-1)); os.zona(W - 18, y - 2, 12, 11, () => r.cambia(1)) }
       })
-      centro(l, H - 9, righe[sel].aiuto)
+      if (!striscia(l, { attesa }, t)) centro(l, H - 9, righe[sel].aiuto)
     },
     tasto(n) {
       const r = righe[sel]
+      if (attesa) { if (n === 'indietro') os.togli(); return true } // (aspettando la banca non parte altro)
       if (n === 'su') sel = (sel - 1 + righe.length) % righe.length
       else if (n === 'giu') sel = (sel + 1) % righe.length
       else if (n === 'sx') { if (r.cambia) r.cambia(-1) }
@@ -286,18 +309,26 @@ function modifica(os) {
 // ── la faccia: la griglia di tutte, e sotto quella scelta in grande ──
 function griglia(os) {
   const COL = 11, LATO = 18, X0 = Math.round((W - COL * LATO) / 2), Y0 = 31
-  let sel = Math.max(0, facce().findIndex((x) => x.id === avOra())), lampo = 0, via = []
+  let sel = Math.max(0, facce().findIndex((x) => x.id === avOra())), lampo = 0, via = [], attesa = null
+  /** La banca, con la rotellina: intanto i tasti e i clic non fanno partire un altro acquisto. */
+  async function banca(testo, fai) {
+    attesa = testo; os.ridisegna()
+    try { return await fai() } catch { return { ok: false, errore: 'la banca non risponde: riprova' } } finally { attesa = null; os.ridisegna() }
+  }
   async function premi() {
     const x = facce()[sel]
-    if (!x) return
-    if (x.mia) { const e = await salva({ av: x.id }); if (os.corrente() !== v) return; if (e.ok) lampo = 6; else await os.dialogo({ titolo: 'niente', testo: e.errore, tasti: ['ok'] }); return }
+    if (!x || attesa) return
+    if (x.mia) {
+      if (avOra() === x.id) { lampo = 6; return } // (11.11: ce l'hai già addosso, niente da salvare; avOra come la scritta «ce l’hai addosso», anche per il bot di quando non ne hai scelta una)
+      const e = await banca('la metto', () => salva({ av: x.id })); if (os.corrente() !== v) return; if (e.ok) lampo = 6; else await os.dialogo({ titolo: 'niente', testo: e.errore, tasti: ['ok'] }); return
+    }
     if (x.bloccata) { await os.dialogo({ titolo: 'chiusa', testo: `${nomeAv(x.id)}, ${x.rarita.nome}: ${x.bloccata}.`, icona: 'lucchetto', tasti: ['ok'] }); return }
     // (compraFaccia la fa la banca: solo i puliti, e in galera niente. Lo si dice prima, non col saldo che ha dentro gli sporchi)
-    const no = pzk.inGalera() ? `sei in galera fino alle ${ora(pzk.galera())}: non si compra. Si esce con la cauzione, nell’app rapina.` : x.prezzo > pzk.puliti() ? `costa ${f(x.prezzo)} $pzk e ne hai ${f(pzk.puliti())}${pul()}.` : null
+    const no = pzk.inGalera() ? `sei in galera fino alle ${ora(pzk.galera())}: non si compra. Si esce con la cauzione, nell’app rapina.` : x.prezzo > pzk.puliti() ? `costa ${intero(x.prezzo)} $pzk e ne hai ${intero(pzk.puliti())}${pul()}.` : null
     if (no) { await os.dialogo({ titolo: 'niente', testo: no, icona: pzk.inGalera() ? 'lucchetto' : 'pzk', tasti: ['ok'] }); return }
-    const r = await os.dialogo({ titolo: corto(nomeAv(x.id), 14), testo: `${x.rarita.nome}. La compri per ${f(x.prezzo)} $pzk? Ne hai ${f(pzk.puliti())}${pul()}.`, icona: x.id, tasti: ['no', 'sì'] })
-    if (r !== 'sì' || os.corrente() !== v) return
-    const e = await compraFaccia(x.id)
+    const r = await os.dialogo({ titolo: corto(nomeAv(x.id), 14), testo: `${x.rarita.nome}. La compri per ${intero(x.prezzo)} $pzk? Ne hai ${intero(pzk.puliti())}${pul()}.`, icona: x.id, tasti: ['no', 'sì'] })
+    if (r !== 'sì' || os.corrente() !== v || attesa) return
+    const e = await banca('la compro', () => compraFaccia(x.id))
     if (os.corrente() !== v) return
     if (!e.ok) { await os.dialogo({ titolo: 'niente', testo: e.errore, icona: e.bloccata ? 'lucchetto' : 'pzk', tasti: ['ok'] }); return }
     lampo = 10
@@ -307,8 +338,8 @@ function griglia(os) {
     nome: 'profilo-faccia', app: 'profilo',
     entra() { via = [zaino.ascolta(() => os.ridisegna()), pzk.osserva(() => os.ridisegna()), icone.ascolta(() => os.ridisegna())] },
     esci() { via.forEach((x) => x()); via = [] },
-    tic() { if (lampo > 0) { lampo--; os.ridisegna() } },
-    disegna(l) {
+    tic() { const prima = lampo; if (lampo > 0) lampo--; if (prima > 0 || attesa) os.ridisegna() }, // (anche la rotellina gira)
+    disegna(l, t) {
       const tutte = facce(), uso = avOra(), n = tutte.length
       l.bitmap(icone.bitmap('app-profilo', 16), 8, 13)
       l.testo(28, 17, 'la faccia')
@@ -321,24 +352,35 @@ function griglia(os) {
         else if (on) l.bitmap(b, cx + 1, cy + 1, { inv: true })
         else sbiadita(l, b, cx + 1, cy + 1)
         if (x.id === uso) l.orizz(cx + 3, cy + LATO - 1, LATO - 6, on ? 0 : 1) // (la sottolineatura: quella in uso)
-        os.zona(cx, cy, LATO, LATO, () => { sel = i; premi() })
+        if (!attesa) os.zona(cx, cy, LATO, LATO, () => { sel = i; premi() }) // (aspettando la banca il clic non fa partire altro)
       })
       // quella scelta, in grande, col nome, la rarità e cosa fa OK
       const x = tutte[sel]
       if (!x) return
       const yi = Y0 + Math.ceil(n / COL) * LATO + 3
       l.bitmap(bm(x.id, 32), 8, yi)
-      l.testo(46, yi + 1, corto(`${nomeAv(x.id)} · ${x.rarita.nome}`, 33))
-      const stato = x.mia ? (x.id === uso ? 'tua, ce l’hai addosso' : 'tua: OK e la metti') : x.bloccata ? `chiusa: ${x.bloccata}` : `${f(x.prezzo)} $pzk: OK e la compri`
+      // (11.11: si accorcia il nome, non la rarità: «rana (che ti guarda male) · comu…», «CARPA D’ORO DEI GONZAGA · leggen…»)
+      const rar = ` · ${x.rarita?.nome ?? ''}`
+      l.testo(46, yi + 1, corto(nomeAv(x.id), 33 - rar.length) + rar)
+      // (11.11: in galera o senza abbastanza puliti diceva lo stesso «OK e la compri», e OK non la comprava)
+      const puoi = !pzk.inGalera() && x.prezzo <= pzk.puliti()
+      const stato = x.mia ? (x.id === uso ? 'tua, ce l’hai addosso' : 'tua: OK e la metti') : x.bloccata ? `chiusa: ${x.bloccata}` : puoi ? `${intero(x.prezzo)} $pzk: OK e la compri` : `costa ${intero(x.prezzo)} $pzk`
       l.testo(46, yi + 10, corto(stato, 33))
-      if (!x.mia && !x.bloccata) l.testo(46, yi + 19, corto(pzk.inGalera() ? `in galera fino alle ${ora(pzk.galera())}` : `ne hai ${f(pzk.puliti())}${pul()}`, 33))
+      // (la rotellina qui e non nella striscia in fondo, che coprirebbe la faccia grande)
+      if (attesa) l.testo(46, yi + 19, corto(`${ruota(t)} ${attesa}…`, 33))
+      else if (!x.mia && !x.bloccata) l.testo(46, yi + 19, corto(pzk.inGalera() ? `in galera fino alle ${ora(pzk.galera())}` : `ne hai ${intero(pzk.puliti())}${pul()}`, 33))
     },
     tasto(k) {
       const n = facce().length
+      if (attesa) { if (k === 'indietro') os.togli(); return true } // (aspettando la banca non parte altro)
       if (k === 'sx') sel = (sel - 1 + n) % n
       else if (k === 'dx') sel = (sel + 1) % n
-      else if (k === 'su') sel = (sel - COL + n) % n
-      else if (k === 'giu') sel = (sel + COL) % n
+      else if ((k === 'su' || k === 'giu') && n) { // (11.11: la stessa colonna anche girando in tondo; con (sel ± COL) % n, se le facce non sono un multiplo di 11, si saltava di colonna)
+        const file = Math.ceil(n / COL), c = sel % COL, d = k === 'su' ? -1 : 1
+        let r = Math.floor(sel / COL)
+        do r = (r + d + file) % file; while (r * COL + c >= n) // (l'ultima fila corta: si salta alla fila dopo che ha quella colonna)
+        sel = r * COL + c
+      }
       else if (k === 'ok') premi()
       else if (k === 'indietro') os.togli()
       else return false

@@ -21,12 +21,16 @@ const STATI = { pronta: 'da fare', 'in corso': 'in corso', fatta: 'finita', bloc
 const bm = (id, lato) => icone.bitmap(id, lato) ?? icone.bitmap('app-quest', lato)
 const premioTesto = (p) => `+${fmt(p.pzk)} $pzk · +${p.xp} xp${p.oggetto ? ` · ${nomeDi(p.oggetto)}` : ''}`
 /** Il premio di una quest come arriva: i $pzk li paga la banca (il moltiplicatore del livello e dei bonus «paga»). */
-const premioVero = (p) => ({ ...p, pzk: Math.round(p.pzk * zaino.moltiplicatore() * 2) / 2 })
+const premioVero = (p) => ({ ...p, pzk: Math.round(p.pzk * zaino.moltiplicatore() * 2) / 2, xp: Math.round(p.xp * (1 + zaino.bonus('xp'))) }) // (11.11: anche l'xp, coi bonus «xp» come daiXp della banca)
+/** Le quest con una scelta già partita verso la banca (11.11: INDIETRO esce mentre la banca decide; rientrando, una seconda
+ *  scelta partiva lo stesso, e la banca la giocava sul passo DOPO, perché la scelta è solo il numero della riga). */
+const inVolo = new Set()
 
 // ── la storia ──
 function storia(os, id, esitoPrima = null) {
   let tempo = 'testo', t0 = performance.now(), st = { sel: 0, da: 0 }, esito = null, vista = missioni.vista(id), finito = false
-  const dì = (ok, testo) => { esito = { ok, testo: txt(testo), fino: Date.now() + 5000 }; os.ridisegna() }
+  let pagato = null // (11.11: il premio che la banca ha pagato davvero, appena finita; il riquadro diceva +306 e la striscia +300: rifatto col livello nuovo, dopo l'xp)
+  const dì = (ok, testo) => { esito = { ok, testo: txt(testo), fino: Date.now() + 5000 }; if (!ok) os.suoni.bip('pagerGiu'); os.ridisegna() } // (11.11: il bip dell'errore, come il dì di pagine nell'elenco: qui «la banca non risponde» era muto)
   const avviso = (e) => {
     if (!e) return
     const r = [e.speso ? `hai pagato ${e.speso} $pzk` : '', e.perso ? `hai perso ${e.perso} $pzk` : '', e.consumato ? `hai usato ${nomeDi(e.consumato)}` : '', e.caso === 'ko' ? 'non è andata bene…' : e.caso === 'ok' ? 'è andata!' : ''].filter(Boolean)
@@ -38,30 +42,50 @@ function storia(os, id, esitoPrima = null) {
   const scelte = () => [...vista.scelte, { lascia: true }]
   // (31.10) la scelta la gioca la banca (chat/missioni.js): intanto la rotellina in fondo, e i tasti non mandano un'altra scelta
   let attesa = null
+  const allaBanca = async (testo, fai) => { // (la rotellina, e la quest segnata in volo finché la banca non risponde)
+    attesa = testo; inVolo.add(id); os.ridisegna()
+    try { return await fai() } finally { attesa = null; inVolo.delete(id) }
+  }
+  const zona = (...a) => { if (!attesa) os.zona(...a) } // (11.11: aspettando la banca i clic non partono, come i tasti: il clic su una riga spostava la scelta sotto la rotellina)
+  const ancoraInVolo = () => inVolo.has(id) && (dì(false, 'la banca risponde ancora: aspetta'), true)
   async function scegli(s) {
-    if (attesa) return
+    if (attesa || ancoraInVolo()) return
     if (s.lascia) {
       const r = await os.dialogo({ titolo: 'la lasci?', testo: 'la puoi ricominciare da capo; gli oggetti usati non tornano.', tasti: ['no', 'lascia'] })
-      if (r !== 'lascia' || os.corrente() !== v) return
-      attesa = 'la lascio'; os.ridisegna()
-      const e = await missioni.abbandona(id); attesa = null
+      if (r !== 'lascia' || os.corrente() !== v || ancoraInVolo()) return
+      const e = await allaBanca('la lascio', () => missioni.abbandona(id))
       if (os.corrente() !== v) return
       if (!e.ok) return dì(false, e.errore)
       os.togli()
       return
     }
     if (!s.ok) return dì(false, s.motivo)
-    attesa = 'la banca decide'; os.ridisegna()
-    const r = await missioni.scegli(id, s.i); attesa = null
+    const r = await allaBanca('la banca decide', () => missioni.scegli(id, s.i))
     if (os.corrente() !== v) return
     if (!r.ok) return dì(false, r.errore)
     if (r.esito.fine) os.suoni.sigla('missioni')
     vista = r.vista; tempo = 'testo'; t0 = performance.now(); st = { sel: 0, da: 0 }; finito = false
     esito = null; avviso(r.esito)
-    if (r.esito.fine) dì(true, `quest finita: ${premioTesto(r.esito.premio)}${r.esito.livello ? ` · livello ${r.esito.livello}!` : ''}`)
+    if (r.esito.fine) { pagato = r.esito.premio; dì(true, `quest finita${r.esito.livello ? ` · livello ${r.esito.livello}!` : ''} · ${premioTesto(pagato)}`) } // (11.11: il livello prima del premio: in fondo lo tagliava «…», e il premio intero sta nel riquadro)
+  }
+  // (11.11) lo zaino cambia anche da fuori: la risposta di una scelta partita prima di INDIETRO, la chat che va avanti con
+  // la stessa quest, i $pzk che arrivano. La pagina segue la banca: le scelte erano quelle del passo vecchio, e la banca
+  // giocava il numero della riga sul passo nuovo
+  let via = null
+  function segui() {
+    if (attesa || vista.fatta) return
+    const n = missioni.vista(id)
+    if (!n) return
+    if (n.nonIniziata) { if (os.corrente() === v) os.togli(); return } // (lasciata altrove: qui non c'è più niente da scegliere)
+    const altro = n.t !== vista.t || n.passi !== vista.passi
+    vista = n
+    if (altro) { tempo = 'testo'; t0 = performance.now(); st = { sel: 0, da: 0 }; finito = false }
+    os.ridisegna()
   }
   const v = {
     nome: 'quest-storia', app: 'missioni',
+    entra() { via = zaino.ascolta(segui); segui() }, // (anche al ritorno da un dialogo: intanto non ascoltava)
+    esci() { via?.(); via = null },
     tic(t) {
       let ancora = false
       if (tempo === 'testo' && !finito) { if (scritto() >= 1) finito = true; else if (t % 2 === 0) os.suoni.bip('cursore'); ancora = true } // (il testo si scrive col ticchettio)
@@ -78,9 +102,14 @@ function storia(os, id, esitoPrima = null) {
         const R = righe(), tutto = R.join('\n').length, mostra = finito ? tutto : Math.round(tutto * scritto())
         let n = 0
         R.forEach((r, i) => { const vis = r.slice(0, Math.max(0, mostra - n)); n += r.length + 1; l.testo(10, 35 + i * 9, vis) })
-        if (vista.fatta) { const y = Math.min(35 + R.length * 9 + 4, 94); l.cornice(8, y, W - 16, 22); l.testo(12, y + 3, 'il premio'); l.testo(12, y + 12, corto(premioTesto(premioVero(m.premio)), 38)) } // (su due righe: l'oggetto del premio non si taglia)
+        if (vista.fatta) { // (su due righe: l'oggetto del premio non si taglia; 11.11: in una riga sola «+380 $pzk · +70 xp · tè freddo alla p…», e la chiave del civico 28 pure: i soldi salgono accanto a «il premio», l'oggetto ha la riga sua)
+          const y = Math.min(35 + R.length * 9 + 4, 94), p = pagato ?? premioVero(m.premio), soldi = `+${fmt(p.pzk)} $pzk · +${p.xp} xp`
+          l.cornice(8, y, W - 16, 22)
+          l.testo(12, y + 3, corto(p.oggetto ? `il premio: ${soldi}` : 'il premio', 38))
+          l.testo(12, y + 12, corto(p.oggetto ? `+ ${nomeDi(p.oggetto)}` : soldi, 38))
+        }
       } else {
-        elenco(l, os.zona, {
+        elenco(l, zona, {
           voci: scelte(), stato: st, y0: 34, alta: 82, passo: 20,
           clic: (s) => scegli(s),
           riga(l, s, x0, y, w, on) {
@@ -92,13 +121,13 @@ function storia(os, id, esitoPrima = null) {
           },
         })
       }
+      if (tempo === 'testo') zona(6, 32, W - 12, H - 32, () => v.tasto('ok')) // (11.11: prima della striscia: con l'esito in fondo il clic sul testo non faceva niente, OK sì)
       if (striscia(l, { esito, attesa }, t)) return
-      const a = vista.fatta ? 'OK torna alle quest' : tempo === 'scelte' ? 'OK sceglie · ↑↓ · INDIETRO rilegge' : finito ? 'OK le scelte · INDIETRO all’elenco' : 'OK fa vedere tutto'
+      const a = tempo === 'testo' && !finito ? 'OK fa vedere tutto' : vista.fatta ? 'OK torna alle quest' : tempo === 'scelte' ? 'OK sceglie · ↑↓ · INDIETRO rilegge' : 'OK le scelte · INDIETRO all’elenco' // (11.11: rileggendo la fine diceva «OK torna alle quest» mentre il testo si scriveva, e OK lo finiva soltanto)
       centro(l, H - 9, a)
-      if (tempo === 'testo') os.zona(6, 32, W - 12, H - 32, () => v.tasto('ok'))
     },
     tasto(k) {
-      if (attesa) return true // (la banca sta rispondendo: niente doppie scelte)
+      if (attesa) { if (k === 'indietro') os.togli(); return true } // (la banca sta rispondendo: niente doppie scelte; 11.11: INDIETRO esce lo stesso, come nelle app a pagine: una banca che non risponde ti teneva dentro)
       if (tempo === 'testo') {
         if (k === 'ok') { if (!finito) finito = true; else if (vista.fatta) os.togli(); else { tempo = 'scelte'; st.sel = 0 } }
         else if (k === 'indietro') os.togli()
@@ -122,7 +151,7 @@ export function vista(os) {
     if (m.stato === 'bloccata') {
       const daComprare = (m.richiede ?? []).filter((o) => !zaino.ha(o) && OGGETTI[o]?.prezzo)
       const r = await os.dialogo({ titolo: 'bloccata', icona: 'lucchetto', testo: `ti manca: ${m.manca.join(', ')}.`, tasti: daComprare.length ? ['ok', 'allo shop'] : ['ok'] })
-      if (r === 'allo shop' && x.qui()) os.apri('negozio')
+      if (r === 'allo shop' && x.qui()) os.apri('negozio', { comando: daComprare[0] }) // (11.11: il pezzo che manca, per lo shop che apre la sua scheda; senza, lo shop si apriva sulle offerte e il pomodoro andava cercato)
       return
     }
     if (m.stato === 'pronta' && m.consuma?.length) {

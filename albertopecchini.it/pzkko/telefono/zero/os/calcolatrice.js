@@ -36,10 +36,12 @@ const prova = () => { if (!S.expr.trim()) return null; try { return { v: calcola
 /** Una riga a scelta che si sposta saltando quelle che non si scelgono. */
 function passo(R, sel, d) { for (let i = 1; i <= R.length; i++) { const k = (sel + d * i + R.length * 2) % R.length; if (R[k].scegli !== false) return k } return sel }
 /** Una riga «nome ……… valore» (i puntini), rovesciata se è la scelta; con gira, il valore fra ◀ ▶ sulla riga scelta. */
-function riga(l, zona, { x0 = 10, x1 = 245, y, nome, val = '', on = false, gira = null, titolo = false, premi: clic = null }) {
+function riga(l, zona, { x0 = 10, x1 = 245, y, nome, val = '', on = false, gira = null, titolo = false, premi: clic = null, nmin = 1 }) {
   const o = { inv: on }
   if (titolo) { l.testo(x0, y + 1, nome); for (let x = x0 + Lcd.larghezza(nome) + 4; x < x1; x += 2) l.px(x, y + 5); return }
   if (on) l.riempi(x0 - 2, y, x1 - x0 + 4, 9)
+  // (11.11) anche il valore si taglia: un numero di 24 cifre usciva a sinistra dello schermo; nmin lettere del nome restano
+  val = corto(val, Math.max(4, Math.floor((x1 - x0 - 6) / 6) - Math.min([...nome].length, nmin) - (gira && on ? 4 : 0)))
   const v = gira && on ? `◀ ${val} ▶` : val
   const vw = Lcd.larghezza(v), n = Math.max(1, Math.floor((x1 - x0 - vw - 6) / 6))
   l.testo(x0, y + 1, corto(nome, n), o)
@@ -50,13 +52,13 @@ function riga(l, zona, { x0 = 10, x1 = 245, y, nome, val = '', on = false, gira 
 
 // ── il tastierino ──
 function tastierino(os, x) {
-  let r = 6, c = 0, lampo = 0, errore = null
+  let r = 6, c = 0, lampo = 0, errore = null, fatto = null // (fatto: il risultato dell'ultimo uguale; 11.11, 1÷0 = diceva «ans = 0»: ∞ in ANS non va)
   const fila = (i) => TASTI[i]
   function premiTasto(k) {
-    errore = null
+    errore = null; fatto = null
     if (k === '=') {
       if (!S.expr.trim()) return
-      try { registra(); lampo = 6 } catch (e) { errore = e.message; os.suoni.bip('pagerGiu') }
+      try { fatto = num(registra()); lampo = 6 } catch (e) { errore = e.message; os.suoni.bip('pagerGiu') }
       return
     }
     premi(k)
@@ -70,7 +72,7 @@ function tastierino(os, x) {
       const e = [...txt(S.expr)], vis = e.length > 37 ? '…' + e.slice(-36).join('') : e.join('')
       l.testo(os.MARGINE + 3, 16, vis)
       if (t % 10 < 5) l.riempi(os.MARGINE + 4 + Lcd.larghezza(vis), 15, 4, 9)
-      const p = prova(), ris = errore ? `! ${errore}` : !p ? `ans = ${num(S.ans)}` : p.errore ? '…' : `= ${num(p.v)}`
+      const p = prova(), ris = errore ? `! ${errore}` : !p ? (fatto !== null ? `= ${fatto}` : `ans = ${num(S.ans)}`) : p.errore ? '…' : `= ${num(p.v)}`
       const s = corto(txt(ris), 39)
       if (lampo > 0 && lampo % 2) { l.riempi(W - os.MARGINE - Lcd.larghezza(s) - 4, 27, Lcd.larghezza(s) + 4, 9); destra(l, W - os.MARGINE - 2, 28, s, { inv: true }) }
       else destra(l, W - os.MARGINE - 2, 28, s)
@@ -98,8 +100,8 @@ function tastierino(os, x) {
       else return false
       return true
     },
-    carattere(ch) { if (AMMESSI.test(ch)) { errore = null; S.expr += ch === '*' ? '×' : ch === '/' ? '÷' : ch; salva() } },
-    cancella() { S.expr = S.expr.slice(0, -1); salva() },
+    carattere(ch) { if (AMMESSI.test(ch)) { errore = null; fatto = null; S.expr += ch === '*' ? '×' : ch === '/' ? '÷' : ch; salva() } },
+    cancella() { errore = null; fatto = null; S.expr = S.expr.slice(0, -1); salva() },
     scrivendo: () => S.expr.length > 0,
     invio() { premiTasto('=') },
   }
@@ -141,14 +143,20 @@ function vistaVertici(os) {
     const L = vertici()
     if (x.nuovo) L.push(`${a} ; ${b}`); else L[x.i] = `${a} ; ${b}`
     S.co.vertici = L.join('\n'); salva()
+    if (x.nuovo) sel = L.length // (11.11: il cursore resta su «+ aggiungi», così OK OK aggiunge ancora; prima finiva sul vertice nuovo e OK lo cambiava)
   }
   const v = {
     nome: 'calcolatrice-vertici', app: 'calcolatrice',
     disegna(l) {
       testata(l, os, { icona: 'bussola', nome: 'i vertici di Gauss', n: 1 })
       const L = R(), VIS = 9, da = Math.max(0, Math.min(sel - VIS + 1, L.length - VIS)), dd = Math.max(0, Math.min(da, sel))
-      L.slice(dd, dd + VIS).forEach((x, i) => riga(l, os.zona, { y: 34 + i * 9, nome: x.nome, val: x.val ?? '', on: dd + i === sel, premi: () => { sel = dd + i; fai(x) } }))
-      centro(l, H - 9, 'OK cambia · ↑↓ sceglie · INDIETRO torna')
+      L.slice(dd, dd + VIS).forEach((x, i) => riga(l, os.zona, { x1: L.length > VIS ? 236 : 245, y: 34 + i * 9, nome: x.nome, val: x.val ?? '', on: dd + i === sel, nmin: 10, premi: () => { sel = dd + i; fai(x) } }))
+      if (L.length > VIS) { // (11.11: dal settimo vertice la lista scorre: la barra come le coordinate)
+        const alta = VIS * 9 - 1, h = Math.max(6, Math.round((alta * VIS) / L.length))
+        l.vert(W - 9, 34, alta); l.riempi(W - 10, 34 + Math.round(((alta - h) * dd) / Math.max(1, L.length - VIS)), 3, h)
+      }
+      const q = L[sel] // (11.11: il suggerimento dice cosa fa OK sulla riga scelta: «cambia» anche su «togli l'ultimo» mentiva)
+      centro(l, H - 9, `${q?.nuovo ? 'OK aggiunge' : q?.togli ? 'OK toglie' : 'OK cambia'} · ↑↓ sceglie`)
     },
     tasto(k) {
       const L = R()
@@ -210,7 +218,7 @@ export function vista(os) {
       if (!p) destra(l, 245, 52, corto(`ans = ${txt(num(S.ans))}`, 38))
       else if (p.errore) destra(l, 245, 52, corto(`! ${txt(p.errore)}`, 38))
       else { const s = `= ${txt(num(p.v))}`, sc = Lcd.larghezza(s, 2) <= 235 ? 2 : 1; destra(l, 245, sc === 2 ? 50 : 52, corto(s, 38), { scala: sc }) }
-      riga(l, x.zona, { y: 66, nome: 'angoli in', val: `${MODI[S.modo][0]} (${MODI[S.modo][1]})`, on: sc === 1, gira: giraModo, premi: () => { selC = 1 } })
+      riga(l, x.zona, { y: 66, nome: 'angoli in', val: `${MODI[S.modo][0]} (${MODI[S.modo][1]})`, on: sc === 1, gira: giraModo, premi: () => { selC = 1; giraModo(1) } }) // (11.11: il clic sceglie e preme, come OK)
       if (!S.storia.length) { l.testo(10, 80, 'gli ultimi risultati vengono qui'); return }
       S.storia.slice(0, 4).forEach(([ex, r], i) => {
         const y = 77 + i * 9, on = sc === 2 + i, vv = `= ${txt(r)}`
@@ -222,7 +230,7 @@ export function vista(os) {
       if (selC >= R.length) selC = 0
       if (k === 'su' || k === 'giu') { selC = (selC + (k === 'su' ? -1 : 1) + R.length) % R.length; return true }
       if ((k === 'sx' || k === 'dx') && R[selC]?.k === 'modo') { giraModo(k === 'sx' ? -1 : 1); return true }
-      if (k === 'ok') { const r = R[selC]; if (r?.k === 'storia') riprendi(r.i); else if (r?.k === 'expr') os.spingi(tastierino(os, x)); return true }
+      if (k === 'ok') { const r = R[selC]; if (r?.k === 'storia') riprendi(r.i); else if (r?.k === 'expr') os.spingi(tastierino(os, x)); else if (r?.k === 'modo') giraModo(1); return true } // (11.11: OK sulla riga ◀ ▶ la cambia, come le impostazioni: prima non faceva niente)
       return false
     },
     // (la tastiera vera: chi scrive va al tastierino con quello che ha scritto, e lì Invio è l'uguale; qui Invio è OK)
@@ -275,7 +283,7 @@ export function vista(os) {
       const R = righeTri(), r = risolvi(S.tri)
       R.forEach((q, i) => {
         const val = q.k === 'ris' ? (r.errore ? (Object.keys(S.tri).length ? '!' : '') : `area ${num(r.area, 2)}`) : q.val
-        riga(l, x.zona, { x1: 140, y: 34 + i * 9, nome: q.nome, val: txt(val), on: i === selT, gira: q.gira, premi: () => { selT = i; if (!q.gira) datoTri(q, x) } })
+        riga(l, x.zona, { x1: 140, y: 34 + i * 9, nome: q.nome, val: txt(val), on: i === selT, nmin: 8, gira: q.gira, premi: () => { selT = i; if (q.gira) q.gira(1); else datoTri(q, x) } })
       })
       // il triangolo vero (o uno qualunque), e sotto cosa manca: l'errore lungo prende posto al triangolo (fino a 6 righe, poi «…»)
       const sotto = r.errore ? (Object.keys(S.tri).length ? r.errore : 'tre dati, almeno un lato') : r.seconda ? 'ci sono due soluzioni' : 'si chiude'
@@ -288,7 +296,7 @@ export function vista(os) {
       const R = righeTri()
       if (k === 'su' || k === 'giu') { selT = (selT + (k === 'su' ? -1 : 1) + R.length) % R.length; return true }
       if ((k === 'sx' || k === 'dx') && R[selT].gira) { R[selT].gira(k === 'sx' ? -1 : 1); return true }
-      if (k === 'ok') { datoTri(R[selT], x); return true }
+      if (k === 'ok') { if (R[selT].gira) R[selT].gira(1); else datoTri(R[selT], x); return true } // (11.11: OK su «angoli in» li cambia)
       return false
     },
   }
@@ -321,6 +329,11 @@ export function vista(os) {
     if (selK >= R.length || R[selK].scegli === false) selK = passo(R, selK, 1)
     if (selK < daK) daK = Math.max(0, selK - 1) // (si vede anche il titolo sopra)
     if (selK >= daK + VIS_K) daK = selK - VIS_K + 1
+    // (11.11) e i risultati subito sotto (→ B, la distanza, l'area di Gauss): l'area veniva dopo «i vertici», l'ultima riga
+    // che si sceglie, e la finestra non ci arrivava mai
+    let fine = selK
+    while (fine + 1 < R.length && R[fine + 1].scegli === false && !R[fine + 1].titolo) fine++
+    if (fine >= daK + VIS_K) daK = Math.min(selK, fine - VIS_K + 1)
     daK = Math.max(0, Math.min(daK, R.length - VIS_K))
   }
   async function datoCo(r, x) {
@@ -337,7 +350,7 @@ export function vista(os) {
     entra() { segueK() }, // (i vertici o la vecchia possono aver cambiato le righe)
     disegna(l, x) {
       const R = righeCo(), VIS = VIS_K, dk = Math.max(0, Math.min(daK, R.length - VIS)) // (una copia: lo stato lo tiene segueK)
-      R.slice(dk, dk + VIS).forEach((q, i) => riga(l, x.zona, { x1: 236, y: 34 + i * 9, nome: txt(q.nome), val: txt(q.val ?? ''), titolo: q.titolo, on: dk + i === selK, gira: q.gira, premi: q.scegli === false ? null : () => { selK = dk + i; segueK(); if (!q.gira) datoCo(q, x) } }))
+      R.slice(dk, dk + VIS).forEach((q, i) => riga(l, x.zona, { x1: 236, y: 34 + i * 9, nome: txt(q.nome), val: txt(q.val ?? ''), titolo: q.titolo, on: dk + i === selK, gira: q.gira, premi: q.scegli === false ? null : () => { selK = dk + i; segueK(); if (q.gira) q.gira(1); else datoCo(q, x) } }))
       const alta = VIS * 9 - 1, h = Math.max(6, Math.round((alta * VIS) / R.length)) // (il ritaglio lo fa pagine: qui l è spostato e non ce l'ha)
       l.vert(W - 9, 34, alta); l.riempi(W - 10, 34 + Math.round(((alta - h) * dk) / Math.max(1, R.length - VIS)), 3, h)
     },
@@ -345,7 +358,7 @@ export function vista(os) {
       const R = righeCo()
       if (k === 'su' || k === 'giu') { selK = passo(R, selK, k === 'su' ? -1 : 1); segueK(); return true }
       if ((k === 'sx' || k === 'dx') && R[selK]?.gira) { R[selK].gira(k === 'sx' ? -1 : 1); return true }
-      if (k === 'ok') { datoCo(R[selK], x); return true }
+      if (k === 'ok') { if (R[selK]?.gira) R[selK].gira(1); else datoCo(R[selK], x); return true } // (11.11: OK su «angoli in» li cambia)
       return false
     },
   }
@@ -358,13 +371,13 @@ export function vista(os) {
     aiuto: () => (selA === 0 ? '←→ cambia · ↑↓ righe' : 'OK scrivi · ↑↓ righe'),
     disegna(l, x) {
       const nomeDa = DA.find(([k]) => k === S.ang.da)?.[1] ?? ''
-      riga(l, x.zona, { x1: 160, y: 34, nome: 'da', val: nomeDa, on: selA === 0, gira: giraDa, premi: () => { selA = 0 } })
-      riga(l, x.zona, { x1: 160, y: 43, nome: 'l’angolo', val: txt(S.ang.v || 'scrivi'), on: selA === 1, premi: () => { selA = 1; scriviAngolo(x) } })
+      riga(l, x.zona, { x1: 160, y: 34, nome: 'da', val: nomeDa, on: selA === 0, gira: giraDa, premi: () => { selA = 0; giraDa(1) } })
+      riga(l, x.zona, { x1: 160, y: 43, nome: 'l’angolo', val: txt(S.ang.v || 'scrivi'), on: selA === 1, nmin: 8, premi: () => { selA = 1; scriviAngolo(x) } })
       const a = leggiAngolo(S.ang.v, S.ang.da)
       if (!a) { Lcd.acapo('scrivi un angolo: in sessagesimali anche coi gradi, i primi e i secondi (35°30\'15")', 25).forEach((s, i) => l.testo(10, 58 + i * 9, s)); return }
       if (a.errore) { Lcd.acapo(txt(a.errore), 25).forEach((s, i) => l.testo(10, 58 + i * 9, s)); return }
       const R = [['sessages.', txt(dms(a.gradi))], ['sessadec.', `${txt(num(a.gradi, 6))}°`], ['centesim.', `${txt(num(daRad(a.rad, 'gon'), 6))} gon`], ['radianti', `${txt(num(a.rad, 8))}`]]
-      R.forEach(([n, v], i) => riga(l, x.zona, { x1: 160, y: 58 + i * 12, nome: n, val: corto(v, 16) }))
+      R.forEach(([n, v], i) => riga(l, x.zona, { x1: 160, y: 58 + i * 12, nome: n, val: corto(v, 16), nmin: 9 }))
       // il goniometro: il cerchio, lo zero a destra, il raggio dell'angolo (in senso antiorario, come a scuola)
       const cx = 205, cy = 76, rr = 34, g = ((a.rad % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)
       for (let i = 0; i < 72; i++) { const q = (i / 72) * Math.PI * 2; l.px(Math.round(cx + Math.cos(q) * rr), Math.round(cy - Math.sin(q) * rr)) }
@@ -377,7 +390,7 @@ export function vista(os) {
     tasto(k, x) {
       if (k === 'su' || k === 'giu') { selA = 1 - selA; return true }
       if ((k === 'sx' || k === 'dx') && selA === 0) { giraDa(k === 'sx' ? -1 : 1); return true }
-      if (k === 'ok') { if (selA === 1) scriviAngolo(x); return true }
+      if (k === 'ok') { if (selA === 1) scriviAngolo(x); else giraDa(1); return true } // (11.11: OK su «da» la cambia)
       return false
     },
   }

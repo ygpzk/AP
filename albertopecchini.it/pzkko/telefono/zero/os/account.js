@@ -21,6 +21,9 @@ const valida = (t) => t && !Number.isNaN(new Date(t).getTime())
 const ora = (t) => (valida(t) ? new Date(t).toLocaleTimeString('it-IT', { ...ROMA, hour: '2-digit', minute: '2-digit' }) : '--:--')
 const data = (t, conOra = false) => (valida(t) ? new Date(t).toLocaleString('it-IT', { ...ROMA, day: 'numeric', month: 'short', ...(conOra ? { hour: '2-digit', minute: '2-digit' } : { year: 'numeric' }) }) : '')
 const fmt = (x) => pzk.fmt(x ?? 0), eur = (x) => pzk.fmtEur(x ?? 0)
+/** Quanto si riceve cambiando n, solo da mostrare: arrotondato all'ingiù come fa la banca (wallet.mjs, «a favore della
+ *  cassa»). (11.11: arrotondato al più vicino, il «ricevi» della conferma prometteva un centesimo o mezzo $pzk in più) */
+const riceve = (verso, n, t) => (verso === 'pzk' ? Math.floor(n * t * 100 + 1e-9) / 100 : Math.floor((n / t) * 2 + 1e-9) / 2)
 /** Una riga «nome ........ valore» (i puntini fra i due, come il profilo). */
 function riga(l, y, nome, v) {
   const xa = 10 + Lcd.larghezza(nome) + 4, xb = 245 - Lcd.larghezza(v) - 4
@@ -47,7 +50,8 @@ function quota(os, verso) {
     let p = 0, avviso = 0
     const tot = () => (verso === 'pzk' ? pzk.puliti() : pzk.euro()) // (30.10: solo i puliti, come il server: col saldo intero la quota contava anche gli sporchi)
     const quanto = () => { const v = (p / 100) * tot(); return verso === 'pzk' ? Math.round(v * 2) / 2 : Math.round(v * 100) / 100 }
-    const fatto = () => { if (quanto() > 0) { os.togli(); risolvi(quanto()) } else avviso = 15 }
+    // (11.11: e se non si riceve niente non si cambia: mezzo $pzk a 0,0123 sono 0,00 EUR€, e la banca li prendeva lo stesso)
+    const fatto = () => { if (quanto() > 0 && riceve(verso, quanto(), pzk.tasso()) > 0) { os.togli(); risolvi(quanto()) } else avviso = 15 }
     const q = {
       nome: 'account-quota', app: 'account',
       tic() { if (avviso > 0) { avviso--; os.ridisegna() } },
@@ -61,10 +65,13 @@ function quota(os, verso) {
         for (let k = 0; k <= 20; k++) os.zona( // (il clic sulla barra: a passi del 5 %)
           X + Math.round((L * k) / 20) - 6, Y - 2, 12, 18, () => { p = k * 5 })
         centro(l, Y + 22, `${p}%`, { scala: 2 })
-        const dai = verso === 'pzk' ? `dai ${fmt(n)} $pzk (di ${fmt(tot())}${pzk.sporchi() ? ' puliti' : ''})` : `dai ${eur(n)} EUR€ (di ${eur(tot())})`
-        const ricevi = verso === 'pzk' ? `ricevi ${eur(n * t)} EUR€` : `ricevi ${fmt(Math.round((n / t) * 2) / 2)} $pzk`
+        const di = (f) => (verso === 'pzk' ? `dai ${fmt(n)} $pzk (di ${f(tot())}${pzk.sporchi() ? ' puliti' : ''})` : `dai ${eur(n)} EUR€ (di ${f(tot())})`)
+        // (11.11: con quasi un miliardo di puliti la riga finiva in «(di 987.530.865 p…»: il totale si accorcia, 987,5M)
+        const dai = [...di(verso === 'pzk' ? fmt : eur)].length > 39 ? di(pzk.fmtCorto) : di(verso === 'pzk' ? fmt : eur)
+        const ricevi = verso === 'pzk' ? `ricevi ${eur(riceve(verso, n, t))} EUR€` : `ricevi ${fmt(riceve(verso, n, t))} $pzk`
         centro(l, Y + 42, corto(dai, 39)); centro(l, Y + 52, corto(`${ricevi} · a ${t.toFixed(4)}`, 39))
-        const a = avviso ? 'scegli quanto: almeno qualcosa' : '←→ 10% · ↑↓ 1% · OK converte'
+        const a = avviso ? (n > 0 ? 'troppo poco: non ricevi niente' : 'scegli quanto: almeno qualcosa') :'←→ 10% · ↑↓ 1% · OK converte'
+        if (avviso) l.riempi(10, H - 11, W - 20, 10) // (11.11: l'avviso rovesciato senza la sua fascia era spento su spento, invisibile)
         centro(l, H - 9, a, { inv: !!avviso })
       },
       tasto(k) {
@@ -91,14 +98,19 @@ export function vista(os) {
   const muto = { zona: () => {} }
   let oz = os // (le zone delle righe: a pagina ferma quelle vere, mentre scorre di lato nessuna)
   const invio = { ind: '', chi: null, quanti: '' } // la pagina invia: l'indirizzo (sei cifre), chi è (o 'cerco'), quanti
-  const dì = (ok, testo) => { esito = { ok, testo: txt(testo), fino: Date.now() + 5000 }; if (!ok) os.suoni.bip('pagerGiu'); os.ridisegna() }
+  const qui = () => os.corrente() === v
+  // (11.11: il bip dell'errore e le sigle solo se l'account è ancora in cima: con INDIETRO durante l'attesa la risposta
+  // arrivava dopo, sulla home, e suonava senza nessuna scritta che dicesse cosa)
+  const dì = (ok, testo) => { esito = { ok, testo: txt(testo), fino: Date.now() + 5000 }; if (!ok && qui()) os.suoni.bip('pagerGiu'); os.ridisegna() }
+  const sigla = (s) => { if (qui()) os.suoni.sigla(s) }
+  /** La pagina invia da capo. (11.11: uscendo e rientrando con un altro conto restavano l'indirizzo e i $pzk scelti dal primo) */
+  const svuota = () => { invio.ind = ''; invio.chi = null; invio.quanti = ''; sel = 0 }
   /** Il server: la rotellina in fondo, e intanto i tasti non fanno partire altro. → la risposta, o null se c'era già un'attesa. */
   async function aspetta(testo, fai) {
     if (attesa) return null
     attesa = testo; esito = null; os.ridisegna()
     try { return await fai() } finally { attesa = null; os.ridisegna() }
   }
-  const qui = () => os.corrente() === v
 
   // ── senza conto: crea o entra ──
   async function crea() {
@@ -130,9 +142,9 @@ export function vista(os) {
   }
   async function dentro(r, nuovo) {
     if (!r.ok) return dì(false, r.offline ? 'il conto è in pausa: per ora valgono i 1.000 della sessione' : r.errore ?? 'non è andata')
-    pag = 0; sel = 0
-    os.suoni.sigla('account')
+    pag = 0; svuota()
     if (!qui()) return
+    os.suoni.sigla('account')
     await os.dialogo({ titolo: nuovo ? 'benvenuto' : 'ciao', icona: 'app-account', tasti: ['ok'], testo: nuovo ? `${txt(r.conto.nome)}, il tuo indirizzo è ${r.conto.ind}. Si parte con 1.000 $pzk.` : `${txt(r.conto.nome)}, bentornato.` })
     if (pzk.conto()) os.dopoAccesso()
   }
@@ -143,31 +155,32 @@ export function vista(os) {
     if (!qui()) return
     if (d === 'sincronizza') {
       const r = await aspetta('sincronizzo', () => pzk.sincronizza())
-      if (r) dì(r.ok, r.ok ? `sincronizzato: 1 $pzk = ${pzk.tasso().toFixed(4)} €` : r.errore)
+      if (r) dì(r.ok, r.ok ? `sincronizzato: 1 $pzk = ${pzk.tasso().toFixed(4)} €` : r.errore ?? 'non è andata')
     } else if (d === 'esci') {
       const s = await os.dialogo({ titolo: 'esci?', testo: 'per rientrare servono il nome e il PIN, e senza conto il cercapersone è chiuso.', icona: 'lucchetto', tasti: ['no', 'esci'] })
       if (s !== 'esci' || !qui()) return
       const r = await aspetta('esco', () => pzk.esci().then(() => ({ ok: true })))
-      if (r) { sel = 0; dì(true, 'sei uscito dal conto') }
+      if (r) { svuota(); dì(true, 'sei uscito dal conto') }
     }
   }
   async function cambia() {
     const d = await os.dialogo({ titolo: 'il cambio', testo: 'da quale moneta parti?', tasti: ['EUR€ → $pzk', '$pzk → EUR€'] })
     if (!d || !qui()) return
     const verso = d.startsWith('$') ? 'pzk' : 'eur'
-    if ((verso === 'pzk' ? pzk.puliti() : pzk.euro()) <= 0) return dì(false, verso === 'eur' ? 'non hai EUR€ da cambiare' : pzk.sporchi() ? 'gli sporchi non si cambiano: prima lavali' : 'non hai $pzk da cambiare') // (i puliti: gli sporchi il server non li cambia)
+    // (11.11: con meno di un centesimo di EUR€ il cursore dava sempre 0 e diceva solo «almeno qualcosa», senza il perché)
+    if (verso === 'pzk' ? pzk.puliti() <= 0 : pzk.euro() < 0.01) return dì(false, verso === 'eur' ? 'non hai EUR€ da cambiare' : pzk.sporchi() ? 'gli sporchi non si cambiano: prima lavali' : 'non hai $pzk da cambiare') // (i puliti: gli sporchi il server non li cambia)
     const n = await quota(os, verso)
     if (!n || !qui()) return
     const t = pzk.tasso()
-    const testo = verso === 'pzk' ? `dai ${fmt(n)} $pzk e ricevi ${eur(n * t)} EUR€, a ${t.toFixed(4)}.` : `dai ${eur(n)} EUR€ e ricevi ${fmt(Math.round((n / t) * 2) / 2)} $pzk, a ${t.toFixed(4)}.`
+    const testo = verso === 'pzk' ? `dai ${fmt(n)} $pzk e ricevi ${eur(riceve(verso, n, t))} EUR€, a ${t.toFixed(4)}.` : `dai ${eur(n)} EUR€ e ricevi ${fmt(riceve(verso, n, t))} $pzk, a ${t.toFixed(4)}.`
     const s = await os.dialogo({ titolo: 'converti?', testo, tasti: ['no', 'sì'] })
     if (s !== 'sì' || !qui()) return
     const r = await aspetta('converto', () => pzk.converti(verso, n))
     if (!r) return
-    if (!r.ok) return dì(false, r.errore)
+    if (!r.ok) return dì(false, r.errore ?? 'non è andata')
     const x = r.fatto
     dì(true, x.da === 'pzk' ? `${fmt(x.n)} $pzk → ${eur(x.eur)} EUR€` : `${eur(x.eur)} EUR€ → ${fmt(x.n)} $pzk`)
-    os.suoni.sigla('wallet')
+    sigla('wallet')
   }
   async function scegliIndirizzo() {
     const s = await os.cifre({ titolo: 'a chi: l’indirizzo, pzk e sei cifre', n: 6, prima: 'pzk', testo: invio.ind })
@@ -194,10 +207,10 @@ export function vista(os) {
     if (s !== 'sì' || !qui()) return
     const r = await aspetta('invio', () => pzk.invia(a, n))
     if (!r) return
-    if (!r.ok) return dì(false, r.errore)
+    if (!r.ok) return dì(false, r.errore ?? 'non è andata')
     dì(true, `${fmt(r.fatto.n)} $pzk a ${r.fatto.nome} (${r.fatto.a})`)
-    os.suoni.sigla('moneta')
-    invio.ind = ''; invio.chi = null; invio.quanti = ''; sel = 0
+    sigla('moneta')
+    svuota()
   }
   async function cambiaIndirizzo() {
     const c = pzk.conto()
@@ -207,7 +220,7 @@ export function vista(os) {
     const ok = await os.dialogo({ titolo: 'sicuro?', testo: `pzk${s}: dopo non si cambia più.`, icona: 'lucchetto', tasti: ['no', 'sì'] })
     if (ok !== 'sì' || !qui()) return
     const r = await aspetta('cambio l’indirizzo', () => pzk.cambiaIndirizzo(s))
-    if (r) dì(r.ok, r.ok ? `fatto: ora sei ${pzk.conto()?.ind}` : r.errore)
+    if (r) dì(r.ok, r.ok ? `fatto: ora sei ${pzk.conto()?.ind}` : r.errore ?? 'non è andata')
   }
   async function cambiaPin() {
     const vecchio = await os.cifre({ titolo: 'il PIN di adesso', n: 4, nascoste: true })
@@ -218,7 +231,7 @@ export function vista(os) {
     if (di2 === null || !qui()) return
     if (nuovo !== di2) return dì(false, 'i due PIN nuovi non sono uguali')
     const r = await aspetta('cambio il PIN', () => pzk.cambiaPin(vecchio, nuovo))
-    if (r) dì(r.ok, r.ok ? 'PIN cambiato' : r.errore)
+    if (r) dì(r.ok, r.ok ? 'PIN cambiato' : r.errore ?? 'non è andata')
   }
   function instagram() {
     if (pzk.premioPreso()) return dì(true, 'il regalo l’hai già avuto: grazie')
@@ -236,10 +249,12 @@ export function vista(os) {
     {
       nome: 'il conto', icona: 'app-account', aiuto: 'OK sincronizza o esci · ←→ pagine', ok: azioniConto,
       disegna(l, c) {
-        l.testo(10, 34, corto(c.nome, 19), { scala: 2 })
+        l.testo(10, 34, corto(c.nome, 20), { scala: 2 }) // (11.11: 20 lettere a scala 2 sono 238 px, da 10 a 248: con 19 un nome di 20 perdeva l'ultima)
         l.testo(10, 51, corto(`${c.ind}${valida(c.creato) ? ` · nato il ${data(c.creato)}` : ''}`, 39))
-        const r = [['$pzk puliti', fmt(c.puliti ?? c.pzk)]]
-        if (c.sporchi) r.push(['sporchi (rapine)', fmt(c.sporchi)])
+        // (11.11: i puliti e gli sporchi di pzk.js, come il cambio e invia: c.puliti resta vecchio quando il canale cambia
+        // solo i $pzk, e un conto salvato senza c.puliti mostrava fra i puliti anche gli sporchi)
+        const r = [['$pzk puliti', fmt(pzk.puliti())]]
+        if (pzk.sporchi()) r.push(['sporchi (rapine)', fmt(pzk.sporchi())])
         r.push(['EUR€', eur(c.eur)], [`cambio delle ${ora(pzk.sincronizzato())}`, `1 $pzk = ${pzk.tasso().toFixed(4)} €`], ['invii', c.invii ? 'aperti' : valida(c.inviiDa) ? `dal ${data(c.inviiDa, true)}` : 'non ancora']) // (senza la data: «non ancora», non «dal»)
         r.forEach(([n, v], i) => riga(l, 63 + i * 10, n, v))
       },
@@ -281,7 +296,7 @@ export function vista(os) {
         righe(l, oz, [
           { nome: 'a chi', valore: invio.ind ? `pzk${invio.ind}` : 'scegli' },
           { nome: 'quanti', valore: invio.quanti ? `${fmt(Number(invio.quanti))} $pzk` : 'scegli' },
-          { nome: 'invia', valore: invio.ind && invio.quanti ? 'pronto' : '' },
+          { nome: 'invia', valore: invio.ind && invio.quanti && Number(invio.quanti) <= pzk.puliti() ? 'pronto' : '' }, // (11.11: diceva «pronto» anche con più $pzk di quelli che hai)
         ], sel, 36, 24, (i) => { sel = i; PAGINE[3].fai() })
         if (chi) l.testo(16, 47, corto(chi, 38), { inv: false })
         if (invio.quanti && Number(invio.quanti) > pzk.puliti()) l.testo(16, 71, corto(`ne hai solo ${fmt(pzk.puliti())}${pzk.sporchi() ? ' puliti' : ''}`, 38))
@@ -292,7 +307,8 @@ export function vista(os) {
     },
     {
       nome: 'altro', icona: 'lucchetto',
-      aiuto: () => ['OK cambia l’indirizzo', 'OK cambia il PIN', 'OK apre instagram'][sel] + ' · ↑↓',
+      // (11.11: con l'indirizzo già scelto o il regalo già preso, «OK cambia l'indirizzo» e «OK apre instagram» non erano veri)
+      aiuto: () => ((sel === 0 && pzk.conto()?.indCambiato) || (sel === 2 && pzk.premioPreso()) ? '↑↓ sceglie · ←→ pagine' : ['OK cambia l’indirizzo', 'OK cambia il PIN', 'OK apre instagram'][sel] + ' · ↑↓'),
       disegna(l, c) {
         righe(l, oz, [
           { nome: 'indirizzo', valore: c.indCambiato ? `${c.ind} (tuo)` : `${c.ind} · cambialo` },
@@ -311,8 +327,9 @@ export function vista(os) {
     },
   ]
   const vai = (d) => {
-    pag = (pag + d + PAGINE.length) % PAGINE.length; scorre = d * 70; sel = 0; primaMossa = 0
-    if (pag === 2 && pzk.scaduto()) aspetta('aggiorno il cambio', () => pzk.sincronizza()) // (il cambio vecchio si rifà da solo)
+    pag = (pag + d + PAGINE.length) % PAGINE.length; scorre = Math.sign(d) * 70; sel = 0; primaMossa = 0 // (11.11: col clic su un pallino lontano d era 3 o 4, e la pagina partiva da 280 px, fuori schermo)
+    // (il cambio vecchio si rifà da solo; 11.11: e se la banca non risponde lo si dice, prima la rotellina spariva e basta)
+    if (pag === 2 && pzk.scaduto()) aspetta('aggiorno il cambio', () => pzk.sincronizza()).then((r) => { if (r && !r.ok && qui()) dì(false, r.errore ?? 'non è andata') })
   }
 
   const v = {

@@ -16,6 +16,8 @@ import { txt, corto, destra, centro, testata, striscia, elenco, muovi } from './
 
 // (S è quello dell'app vecchia: lo stesso codice e lo stesso input, anche aperte tutte e due)
 const salva = () => ricorda('compilatore', S)
+for (const k of ['codice', 'input']) if (typeof S[k] !== 'string') S[k] = String(S[k] ?? '') // (11.11: un ricordo rovinato, null, rompeva split a ogni disegno)
+S.codice = S.codice.replace(/\r\n?/g, '\n').replace(/\t/g, '    ') // (11.11: un codice incollato coi tab nell'editor vecchio: il tab si disegnava largo quattro e contava uno, il cursore finiva fuori posto e su un «?»)
 let ultimo = null, inCorso = false // l'ultima esecuzione (come l'app vecchia: si perde chiudendo la pagina)
 const VIS = 9, COL = 36 // le righe e le colonne di codice che si vedono
 
@@ -56,7 +58,7 @@ function vistaOutput(os) {
   const righe = () => {
     const u = ultimo, R = [], metti = (L, err = false) => R.push(...L.map((s) => ({ s, err })))
     if (!u) return [{ s: 'ancora niente: dal menu, esegui.' }]
-    if (u.rete) return aPezzi(u.testo).map((s) => ({ s }))
+    if (u.rete) return Lcd.acapo(txt(u.testo), 37).map((s) => ({ s })) // (11.11: è una frase, a capo sulle parole; a pezzi diceva «sei off» e sotto «line?»)
     const s = (u.ms / 1000).toLocaleString('it-IT', { maximumFractionDigits: 1 })
     if (u.messaggi) metti(aPezzi(u.messaggi), true)
     if (u.compilato) { metti(u.out ? aPezzi(u.out) : ['(non ha stampato niente)']); if (u.err) metti(aPezzi(u.err), true) }
@@ -79,12 +81,12 @@ function vistaOutput(os) {
       const R = righe(), g = Math.max(0, Math.min(giu, R.length - VIS)) // (una copia: giu lo tiene giusto tasto)
       R.slice(g, g + VIS).forEach((r, i) => {
         const y = 34 + i * 9
-        if (r.err) { l.riempi(8, y - 1, Lcd.larghezza(r.s) + 4, 9); l.testo(10, y, r.s, { inv: true }) } // (gli errori rovesciati)
+        if (r.err && r.s) { l.riempi(8, y - 1, Lcd.larghezza(r.s) + 4, 9); l.testo(10, y, r.s, { inv: true }) } // (gli errori rovesciati; 11.11: la riga vuota no, era un quadratino nero)
         else l.testo(10, y, r.s)
       })
       if (g > 0) l.testo(W - 14, 34, '↑')
       if (g + VIS < R.length) l.testo(W - 14, 34 + (VIS - 1) * 9, '↓')
-      centro(l, H - 9, R.length > VIS ? '↑↓ legge · OK di nuovo · INDIETRO' : 'OK di nuovo · INDIETRO torna')
+      centro(l, H - 9, !ultimo ? 'OK esegui · INDIETRO torna' : R.length > VIS ? '↑↓ legge · OK di nuovo · INDIETRO' : 'OK di nuovo · INDIETRO torna') // (11.11: «di nuovo» anche quando non era mai partito)
     },
     tasto(k) {
       if (inCorso) { if (k === 'indietro') os.togli(); return true }
@@ -104,7 +106,7 @@ async function esegui(os) {
   inCorso = true; ultimo = null
   os.ridisegna()
   try { ultimo = await compila(S.codice, S.input) } finally { inCorso = false }
-  os.suoni.bip(ultimo?.compilato ? 'pager' : 'pagerGiu')
+  if (os.corrente()?.app === 'compilatore') os.suoni.bip(ultimo?.compilato ? 'pager' : 'pagerGiu') // (11.11: finito con l'app chiusa, suonava dentro un'altra app o a cercapersone chiuso)
   os.ridisegna()
 }
 
@@ -208,7 +210,10 @@ export function vista(os) {
         l.testo(xc, y, pezzo)
         if (a.length > s0 + col) l.testo(242, y, '›')
         if (s0 > 0 && a.length) l.px(xc - 2, y + 3)
-        os.zona(22 + p * 6, y - 1, 222 - p * 6, 9, () => { r = k; c = Math.min(L[k].length, s0 + 18); segui() })
+        for (let j = 0; j <= col; j++) { // (11.11: il clic mette il cursore sulla lettera cliccata, non a metà riga; oltre la fine, in fondo)
+          const xa = j ? xc + j * 6 - 1 : 23 + p * 6, xb = j < col ? xc + j * 6 + 5 : 244
+          os.zona(xa, y - 1, xb - xa, 9, () => { r = k; c = Math.min(L[k].length, s0 + j); segui() })
+        }
       }
       l.vert(22 + p * 6, 33, VIS * 9)
       // il cursore: la casella rovesciata, a lampi

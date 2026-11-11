@@ -76,7 +76,7 @@ function disegnaSchermo(l, s, x0, y0, mezzo, inCampo = false) {
 // ── il campionato: la partita di adesso, la fase, il pagamento della finita ──
 function campionato(os, avvisa) {
   const suona = (nome) => os.suoni.sigla(nome) // (l'interruttore dei suoni lo guarda os.suoni, non l'app: regola 7.4)
-  const c = { corrente: fase(), P: null, voce: '', schermo: new SchermoUnBit(), ultimoT: performance.now(), evento: null, suona }
+  const c = { corrente: fase(), P: null, voce: '', schermo: new SchermoUnBit(), ultimoT: performance.now(), evento: null, campo: false, suona }
   c.P = partita(c.corrente.indice)
   // (31.10) la fase è cambiata, o si sono chiuse le giocate (CHIUDE prima del fischio: lo dice la banca)
   c.cambiata = (f) => f.indice !== c.corrente.indice || f.fase !== c.corrente.fase || giocateAperte(f) !== giocateAperte(c.corrente)
@@ -85,7 +85,9 @@ function campionato(os, avvisa) {
     c.corrente = fase()
     if (prima.indice !== c.corrente.indice) {
       // la finita la paga la banca: si aspetta la sua risposta e la striscia dice com'è andata
-      SC.fine(prima.indice).then((r) => { if (!r) return; avvisa(r.torna > 0, r.torna > 0 ? `${r.casa}–${r.ospite} ${r.risultato}: +${fmt(r.torna)} $pzk` : `${r.casa}–${r.ospite} ${r.risultato}: niente, stavolta`); if (r.torna > 0) suona('virtual-vinta'); SC.viste() })
+      // (11.11: la banca può metterci qualche secondo; se intanto l'app è chiusa non si suona fuori e non si segna vista:
+      // la vinta la dice entrando, con le altre non viste)
+      SC.fine(prima.indice).then((r) => { if (!r || os.corrente()?.app !== 'virtual') return; avvisa(r.torna > 0, r.torna > 0 ? `${r.casa}–${r.ospite} ${r.risultato}: +${fmt(r.torna)} $pzk` : `${r.casa}–${r.ospite} ${r.risultato}: niente, stavolta`); if (r.torna > 0) suona('virtual-vinta'); SC.viste() })
       c.P = partita(c.corrente.indice); c.voce = ''
     } else if (prima.fase !== c.corrente.fase && c.corrente.fase === 'partita') { suona('virtual-fischio'); c.voce = '' }
     // (il palinsesto a ogni cambio: le quote della banca, e dal fischio la cronaca)
@@ -99,7 +101,10 @@ function campionato(os, avvisa) {
     if (c.cambiata(f)) c.aggiorna(); else c.corrente = f
     c.P = c.corrente.fase === 'partita' ? SC.cronaca(c.corrente.indice) : partita(c.corrente.indice) // (con quello che la banca ha detto)
     const now = performance.now(), P = c.P, t = c.t()
-    c.schermo.disegna(P, { fase: c.corrente.fase === 'partita' && P.cronaca ? 'partita' : 'scommesse', t, ridotto: false, dt: Math.min(0.5, (now - c.ultimoT) / 1000) })
+    // (11.11) in campo solo se lo schermino ha disegnato il campo: al fischio, finché la cronaca non arriva, disegna ancora
+    // l'attesa coi cartelli, e la resa dell'erba la faceva una poltiglia di puntini (di notte non si leggeva niente)
+    c.campo = c.corrente.fase === 'partita' && !!P.cronaca
+    c.schermo.disegna(P, { fase: c.campo ? 'partita' : 'scommesse', t, ridotto: false, dt: Math.min(0.5, (now - c.ultimoT) / 1000) })
     c.ultimoT = now
     const e = c.schermo.evento
     if (e !== c.evento) {
@@ -119,7 +124,9 @@ function campionato(os, avvisa) {
   }
   c.tabellone = () => {
     const P = c.P, t = c.t()
-    if (c.corrente.fase === 'partita' && !P.cronaca) return { punti: '0-0', sotto: 'si comincia' } // (la cronaca della banca sta arrivando)
+    // (la cronaca della banca sta arrivando; 11.11: senza rete diceva «si comincia» per tutto il minuto, e non cominciava
+    // niente: come la finestra grande, «aspetto la banca»)
+    if (c.corrente.fase === 'partita' && !P.cronaca) return { punti: '0-0', sotto: pzk.serverOnline() === false ? 'la banca non risponde' : c.corrente.t > 3 ? 'aspetto la banca' : 'si comincia' }
     if (c.corrente.fase === 'partita') {
       const pt = punteggioA(P, Math.max(0, t)), sosp = P.eventi.find((e) => e.tipo === 'sospesa' && e.t <= t)
       const mn = sosp ? 'sospesa' : minuto(t).scritta
@@ -136,7 +143,7 @@ function grande(os, c) {
   return {
     nome: 'virtual-grande', app: 'virtual', senzaBarra: true,
     tic() { c.fotogramma(); os.ridisegna() },
-    disegna(l) { disegnaSchermo(l, c.schermo, Math.round(W / 2 - LARG / 2), Math.round(H / 2 - ALT / 2), false, c.corrente.fase === 'partita'); os.zona(0, 0, W, H, () => os.togli()) },
+    disegna(l) { disegnaSchermo(l, c.schermo, Math.round(W / 2 - LARG / 2), Math.round(H / 2 - ALT / 2), false, c.campo); os.zona(0, 0, W, H, () => os.togli()) },
     tasto(k) { if (k === 'indietro' || k === 'ok' || k === 'su') os.togli(); return true },
   }
 }
@@ -144,8 +151,10 @@ function grande(os, c) {
 // ── le pagine ──
 let ultima = 0
 export function vista(os) {
-  let x0 = null
-  const avvisa = (ok, testo) => x0?.dì(ok, testo)
+  let x0 = null, rinviato = null
+  // (11.11) la finita pagata mentre è aperta la partita grande: la striscia finiva sotto, coperta, e in 5 secondi spariva
+  // senza essere vista; ora aspetta che si torni alle pagine
+  const avvisa = (ok, testo) => { if (x0 && os.corrente() !== v) rinviato = [ok, testo]; else x0?.dì(ok, testo) }
   const c = campionato(os, avvisa)
   SC.avvia()
   const stQ = { sel: 0, da: 0 }, stS = { sel: 0, da: 0 }
@@ -161,6 +170,12 @@ export function vista(os) {
     else if (pagate.length) avvisa(false, `${pagate.length > 1 ? `${pagate.length} partite finite` : 'la partita è finita'}: niente, stavolta`)
     SC.viste()
   })
+  // (11.11) quello che non sta nella striscia si legge intero in un dialogo, come nella miniera: «su una partita al più
+  // 10.000 $pzk: ne hai già…» o la galera sparivano a metà
+  const dì = (x, ok, testo) => {
+    x.dì(ok, testo)
+    if ([...txt(testo)].length > 35 && x.qui()) os.dialogo({ titolo: ok ? 'virtual' : 'non si può', testo: txt(testo), icona: 'app-virtual', tasti: ['ok'] })
+  }
   const mie = (id) => SC.diPartita(c.corrente.indice).filter((b) => b.id === id && !b.pagata).reduce((a, b) => a + b.puntata, 0)
   // (31.10) la giocata la fa la banca: la rotellina in fondo finché risponde, e intanto nessun'altra richiesta (x.aspetta)
   async function punta(id, x) {
@@ -168,8 +183,10 @@ export function vista(os) {
     if (!aperte()) return x.dì(false, c.corrente.fase === 'scommesse' ? 'giocate chiuse: sulla prossima' : 'in corso: si punta sulla prossima')
     const v = SC.S.fiche, r = await x.aspetta('la banca…', () => SC.punta(c.P, id, v))
     if (!r || !x.qui()) return // (un'altra richiesta in volo, o l'app non è più in cima: regola 8.4)
-    if (r.ricaricato) return x.dì(true, `altri ${fmt(pzk.INIZIALE)} $pzk finti: punta`)
-    if (!r.ok) return x.dì(false, r.motivo === 'secco' ? pzk.perche() : r.motivo === 'chiuse' ? 'giocate chiuse: sulla prossima' : r.motivo === 'banca' ? r.errore : r.motivo === 'nonbastano' ? `non ti bastano: hai ${fmt(pzk.saldo())} $pzk` : 'hai finito i $pzk')
+    // (11.11) col conto la ricarica è il sussidio della banca, non «$pzk finti» (quelli sono dell'ospite)
+    if (r.ricaricato) return x.dì(true, pzk.proprietario() === 's' ? `altri ${fmt(pzk.INIZIALE)} $pzk finti: punta` : 'arriva il sussidio: punta')
+    // (11.11) il perché vero lo dice pzk.nonBasta: in galera o coi soldi sporchi diceva «non ti bastano: hai 73.500 $pzk»
+    if (!r.ok) return dì(x, false, r.motivo === 'secco' ? pzk.perche() || 'hai finito i $pzk' : r.motivo === 'chiuse' ? 'giocate chiuse: sulla prossima' : r.motivo === 'banca' ? r.errore : pzk.nonBasta())
     c.suona('virtual-fiche')
     c.voce = `${PER_PUNTATA.get(id).nome} a ${q(r.quota)}: se va, ${fmt(Math.round(r.puntata * r.quota * 2) / 2)} $pzk`
     x.dì(true, `${fmt(v)} su ${PER_PUNTATA.get(id).nome} a ${q(r.quota)}`)
@@ -178,7 +195,7 @@ export function vista(os) {
     if (!aperte()) return x.dì(false, c.corrente.fase === 'scommesse' ? 'le giocate sono chiuse' : 'la partita è in corso')
     const t = await x.aspetta('la banca…', () => SC.togli(c.corrente.indice))
     if (!t || !x.qui()) return
-    x.dì(t.ok, t.ok ? `tolta la fiche da ${fmt(t.v)}` : t.errore)
+    dì(x, t.ok, t.ok ? `tolta la fiche da ${fmt(t.v)}` : t.errore)
   }
   const pPartita = {
     nome: 'la partita', icona: 'app-virtual',
@@ -186,14 +203,17 @@ export function vista(os) {
     tic: (t) => { c.fotogramma(); return true }, // (lo schermino si muove sempre)
     disegna(l, x) {
       const P = c.P, tb = c.tabellone()
-      disegnaSchermo(l, c.schermo, 8, 34, true, c.corrente.fase === 'partita'); l.riquadro(7, 33, LARG / 2 + 2, ALT / 2 + 2)
+      disegnaSchermo(l, c.schermo, 8, 34, true, c.campo); l.riquadro(7, 33, LARG / 2 + 2, ALT / 2 + 2)
       x.zona(7, 33, LARG / 2 + 2, ALT / 2 + 2, () => os.spingi(grande(os, c)))
       const xd = 8 + LARG / 2 + 8, n = Math.floor((245 - xd) / 6)
       l.testo(xd, 34, corto(`${P.casa.sigla} - ${P.ospite.sigla}`, n))
       l.testo(xd, 45, tb.punti, { scala: 2 })
       l.testo(xd, 62, corto(tb.sotto, n))
       l.testo(xd, 72, corto(`${P.casa.citta}: ${METEO[P.meteo.tipo] ?? ''}, ${P.meteo.temp}°`, n))
-      Lcd.acapo(txt(c.voce || `${P.casa.nome} contro ${P.ospite.nome}`), n).slice(0, 2).forEach((r, i) => l.testo(xd, 84 + i * 9, r))
+      // (11.11: due righe, e se non basta «…» in fondo: «sospesa: la squadra di casa è rimasta chiusa negli spogliatoi. 3–0 a
+      // tavolino» perdeva la coda senza segno)
+      const vv = Lcd.acapo(txt(c.voce || `${P.casa.nome} contro ${P.ospite.nome}`), n)
+      ;[vv[0], vv.length > 2 ? corto(vv.slice(1).join(' '), n) : vv[1]].forEach((r, i) => r && l.testo(xd, 84 + i * 9, r))
       l.testo(10, 104, corto(`forze ${P.forze.casa}-${P.forze.ospite} · 1 ${q(P.quote['1'])}  X ${q(P.quote.X)}  2 ${q(P.quote['2'])}`, 39)) // (sotto la telecronaca, non addosso)
     },
     tasto(k) { if (k === 'giu') { os.spingi(grande(os, c)); return true } return false },
@@ -226,9 +246,9 @@ export function vista(os) {
             return
           }
           if (v.togli) { l.testo(xx, y + 2, 'togli l’ultima fiche', o); return }
-          const m = mie(v.p.id), qq = q(c.P.quote[v.p.id])
+          const m = mie(v.p.id), qq = q(partita(c.corrente.indice).quote[v.p.id]) // (11.11: con le quote della banca appena arrivate: c.P lo rinfresca solo lo schermino)
           destra(l, xx + w, y + 2, qq, o)
-          l.testo(xx, y + 2, corto(`${v.p.nome}${m ? ` · ${fmt(m)} sopra` : ''}`, 18), o)
+          l.testo(xx, y + 2, corto(`${v.p.nome}${m ? ` · ${fmt(m)} sopra` : ''}`, 17), o) // (11.11: 17, non 18: «5 sop…meno di» toccava la colonna dopo)
           l.testo(xx + 108, y + 2, corto(v.p.dice, Math.floor((w - 108 - Lcd.larghezza(qq) - 6) / 6)), o)
         },
       })
@@ -241,7 +261,7 @@ export function vista(os) {
   }
   const pSchedina = {
     nome: 'la schedina', icona: 'app-quiz',
-    aiuto: '↑↓ scorre · ←→ pagine',
+    aiuto: () => (SC.S.schedina.length ? '↑↓ scorre · ←→ pagine' : '←→ pagine'), // (11.11: vuota, ↑↓ non scorrono niente)
     disegna(l, x) {
       const L = [...SC.S.schedina].reverse().slice(0, 30)
       if (!L.length) { centro(l, 60, 'la schedina è vuota:'); centro(l, 70, 'punta dalle quote'); return }
@@ -263,7 +283,7 @@ export function vista(os) {
     nome: 'virtual', app: 'virtual', iniziale: ultima,
     pagine: [pPartita, pQuote, pSchedina],
     ascolta: [(f) => SC.ascolta(f), (f) => pzk.ascolta(f)],
-    entra: (x) => { x0 = x; c.aggiorna(); SC.palinsesto(); scadute() },
+    entra: (x) => { x0 = x; if (rinviato) { x.dì(...rinviato); rinviato = null } c.aggiorna(); SC.palinsesto(); scadute() },
     esci: (x) => { ultima = x.pag },
   })
   return v

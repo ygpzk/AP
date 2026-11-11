@@ -64,6 +64,7 @@ function sceltaMetrica(os, poi) {
 function scheda(os, ind) {
   const r = richiesta(() => db.profilo(ind))
   let giu = 0
+  const pronta = () => (r.st === 'ok' || r.st === 'carico') && !!r.d?.ok && !!r.d.profilo // (arrivata, o quella di prima mentre si ricarica)
   // mandare $pzk non si disfa: si conferma, con quanto e a chi (8.6)
   async function manda(p) {
     const s = await os.dialogo({ titolo: 'mandi $pzk?', icona: 'pzk', testo: `mandi ${DONO} $pzk a ${corto(p.nome, 20)} (${p.ind})? Non tornano indietro.`, tasti: ['no', 'sì'] })
@@ -72,10 +73,12 @@ function scheda(os, ind) {
   }
   const v = {
     nome: 'giocatori-scheda', app: 'giocatori',
-    entra() { if (!r.st) r.carica(os) },
+    // (11.11: si ricarica anche tornando, dalla chat dopo «manda» o da un dialogo: restava la scheda di prima, coi $pzk vecchi;
+    // la memoria di chat/db.js tiene dieci secondi e si svuota quando il mio conto cambia. Intanto resta quella di prima)
+    entra() { if (r.st !== 'carico') r.carica(os) },
     tic(t) { if (r.st === 'carico' && t % 3 === 0) os.ridisegna() },
     disegna(l, t) {
-      if (r.st !== 'ok') { l.bitmap(icone.bitmap('app-giocatori', 16), 8, 14); l.testo(28, 18, corto(ind, 30)); l.orizz(6, 31, W - 12); if (r.st === 'no') fuori(l, r.d); else carico(l, t); centro(l, H - 9, 'INDIETRO torna'); return }
+      if (!pronta()) { l.bitmap(icone.bitmap('app-giocatori', 16), 8, 14); l.testo(28, 18, corto(ind, 30)); l.orizz(6, 31, W - 12); if (r.st === 'no') fuori(l, r.d); else carico(l, t); centro(l, H - 9, 'INDIETRO torna'); return }
       const p = r.d.profilo, s = p.s ?? {}, mio = conto()?.ind === p.ind
       l.bitmap(bm(facciaDi(p), 32), 8, 14)
       l.testo(46, 14, corto(p.nome, 33))
@@ -99,7 +102,7 @@ function scheda(os, ind) {
     tasto(k) {
       if (k === 'su') giu = Math.max(0, giu - 1)
       else if (k === 'giu') giu++
-      else if (k === 'ok') { const p = r.d?.profilo; if (r.st === 'ok' && p && conto()?.ind !== p.ind) manda(p) }
+      else if (k === 'ok') { const p = pronta() && r.d.profilo; if (p && conto()?.ind !== p.ind) manda(p) }
       else if (k === 'indietro') os.togli()
       else return k === 'sx' || k === 'dx'
       return true
@@ -110,15 +113,20 @@ function scheda(os, ind) {
 
 // ── le pagine ──
 export function vista(os) {
-  const top = richiesta((m) => db.top(m, 25)), news = richiesta(() => db.notizie()), trova = richiesta((s) => db.cerca(s)), io = richiesta(() => Promise.all([db.io('xp'), db.statistiche()]).then(([a, b]) => ({ ok: true, io: a, stats: b })))
+  const top = richiesta((m) => db.top(m, 25).then((d) => (d?.ok ? { ...d, metrica: m } : d))), news = richiesta(() => db.notizie()), trova = richiesta((s) => db.cerca(s)), io = richiesta(() => Promise.all([db.io('xp'), db.statistiche()]).then(([a, b]) => ({ ok: true, io: a, stats: b })))
   const stC = { sel: 0, da: 0 }, stN = { sel: 0, da: 0 }, stR = { sel: 0, da: 0 }
   let giuIo = 0, attesaCerca = 0
   const apriScheda = (ind) => os.spingi(scheda(os, ind))
-  const cercaOra = () => { clearTimeout(attesaCerca); if (!q.trim()) { trova.st = null; trova.d = null; trova.q = ''; os.ridisegna(); return } attesaCerca = setTimeout(() => { trova.q = q.trim(); trova.carica(os, trova.q) }, 300) }
+  // (11.11: trova.n++ scarta la risposta di una ricerca vecchia ancora in viaggio: svuotando la riga con INDIETRO a metà
+  // attesa, i trovati di «bi» tornavano sotto «cerca:» vuoto, e OK apriva uno di quelli)
+  const cercaOra = () => { clearTimeout(attesaCerca); trova.n++; if (!q.trim()) { trova.st = null; trova.d = null; trova.q = ''; os.ridisegna(); return } attesaCerca = setTimeout(() => { trova.q = q.trim(); trova.carica(os, trova.q) }, 300) }
   const animaCarico = (r) => (t) => r.st === 'carico' && t % 3 === 0
   // scelta la classifica, il primo in lista: subito se c'è già, se no quando arriva (il carico lo fa l'entra della pagina, una volta)
   const primo = (d) => { stC.sel = d?.top?.length ? 1 : 0; stC.da = 0 }
   const scegliMetrica = () => os.spingi(sceltaMetrica(os, () => { if (top.m === metrica && top.st === 'ok' && !top.vecchia()) primo(top.d); else top.poi = primo }))
+  // (11.11: la classifica di prima resta mentre si ricarica, se è della stessa metrica: tornando da una scheda dopo dieci
+  // secondi la lista spariva durante il carico, e la scelta tornava in cima, su «cambia classifica»)
+  const listaTop = () => (top.st !== 'no' && top.d?.ok && top.d.metrica === metrica ? top.d.top ?? [] : [])
 
   const pClassifiche = {
     nome: 'le classifiche', icona: 'trofeo',
@@ -126,14 +134,14 @@ export function vista(os) {
     tic: animaCarico(top),
     aiuto: () => (stC.sel === 0 ? 'OK cambia classifica · ←→ pagine' : 'OK apre la scheda · ↑↓ · ←→ pagine'),
     disegna(l, x, t) {
-      const lista = top.st === 'ok' ? top.d.top : []
+      const lista = listaTop()
       const voci = [{ scegli: true }, ...lista]
       elenco(l, x.zona, {
         voci, stato: stC, y0: 33, alta: 85, passo: 17,
         clic: (g) => (g.scegli ? scegliMetrica() : apriScheda(g.ind)),
         riga(l, g, x0, y, w, on) {
           const o = { inv: on }
-          if (g.scegli) { l.testo(x0, y + 5, corto(db.METRICHE[metrica][0], 24), o); if (top.st === 'ok') destra(l, x0 + w, y + 5, `${top.d.giocatori} in banca`, o); return } // (niente ▶: qui → sfoglia le pagine, la classifica si cambia con OK)
+          if (g.scegli) { l.testo(x0, y + 5, corto(db.METRICHE[metrica][0], 24), o); if (lista.length || top.st === 'ok') destra(l, x0 + w, y + 5, `${top.d.giocatori ?? 0} in banca`, o); return } // (niente ▶: qui → sfoglia le pagine, la classifica si cambia con OK)
           // il podio: i primi tre col numero rovesciato
           const ps = String(g.pos)
           if (g.pos <= 3) { l.riempi(x0 - 2, y + 3, 14, 11, on ? 0 : 1); l.testo(x0 + 5 - Math.round(Lcd.larghezza(ps) / 2), y + 5, ps, { inv: !on }) } else destra(l, x0 + 11, y + 5, ps, o)
@@ -148,9 +156,9 @@ export function vista(os) {
       else if (top.st === 'ok' && !lista.length) centro(l, 70, corto(`nessuno ha ancora niente in «${db.METRICHE[metrica][0]}»`, 38))
     },
     tasto(k) {
-      const n = 1 + (top.st === 'ok' ? top.d.top.length : 0)
+      const lista = listaTop(), n = 1 + lista.length
       if (muovi(stC, n, k)) return true
-      if (k === 'ok') { if (stC.sel === 0) scegliMetrica(); else { const g = top.st === 'ok' && top.d.top[stC.sel - 1]; if (g) apriScheda(g.ind) } return true }
+      if (k === 'ok') { if (stC.sel === 0) scegliMetrica(); else { const g = lista[stC.sel - 1]; if (g) apriScheda(g.ind) } return true }
       return false
     },
   }
@@ -159,9 +167,9 @@ export function vista(os) {
     nome: 'le notizie', icona: 'app-giocatori',
     entra: () => { if (news.vecchia()) news.carica(os) },
     tic: animaCarico(news),
-    aiuto: 'OK apre chi è · ↑↓ · ←→ pagine',
+    aiuto: () => (news.d?.notizie?.length ? 'OK apre chi è · ↑↓ · ←→ pagine' : '←→ pagine'), // (11.11: senza notizie, o col server spento, OK non apre niente e il suggerimento lo diceva lo stesso)
     disegna(l, x, t) {
-      if (news.st === 'carico' && !news.d) return carico(l, t)
+      if (news.st === 'carico' && !news.d?.ok) return carico(l, t) // (11.11: ricaricando dopo una risposta fallita diceva «non è ancora successo niente»)
       if (news.st === 'no') return fuori(l, news.d)
       const lista = news.d?.notizie ?? []
       if (!lista.length) return centro(l, 66, 'in banca non è ancora successo niente.')
@@ -184,9 +192,9 @@ export function vista(os) {
 
   const pCerca = {
     nome: 'cerca', icona: 'lente',
-    entra: () => { if (q.trim() && trova.q !== q.trim()) cercaOra() }, // (la ricerca fermata dall'esci riparte tornando)
+    entra: () => { if (q.trim() && (trova.q !== q.trim() || trova.st === 'no')) cercaOra() }, // (la ricerca fermata dall'esci riparte tornando; 11.11: anche quella fallita, come le altre pagine, se no «non risponde» restava finché non si riscriveva)
     tic: animaCarico(trova),
-    aiuto: () => (q ? 'OK apre · ↑↓ · INDIETRO toglie' : 'scrivi un nome, o OK sulla riga in cima'),
+    aiuto: () => (!q ? 'scrivi un nome, o OK sulla riga in cima' : stR.sel === 0 ? 'OK scrive · ↑↓ · INDIETRO toglie' : 'OK apre · ↑↓ · INDIETRO toglie'), // (11.11: sulla riga in cima OK riapre la tastiera, non apre un trovato)
     disegna(l, x, t) {
       const lista = trova.st === 'ok' ? trova.d.trovati : []
       elenco(l, x.zona, {
@@ -195,7 +203,7 @@ export function vista(os) {
         riga(l, g, x0, y, w, on) {
           const o = { inv: on }
           if (g.campo) { // (il cursore dopo quello scritto; vuoto, il suggerimento comincia dopo il cursore: copriva la «u», 4.6)
-            const s = q ? `cerca «${q}»` : 'cerca:', xc = x0 + Lcd.larghezza(s) + 2
+            const s = q ? `cerca «${txt(q)}»` : 'cerca:', xc = x0 + Lcd.larghezza(s) + 2
             l.testo(x0, y + 5, s, o)
             if (!q) l.testo(xc + 7, y + 5, 'un nome, o pzk123456', o)
             if (on && t % 10 < 5) l.riempi(xc, y + 4, 4, 9, 0)
@@ -213,15 +221,15 @@ export function vista(os) {
     tasto(k) {
       const n = 1 + (trova.st === 'ok' ? trova.d.trovati.length : 0)
       if (muovi(stR, n, k)) return true
-      if (k === 'ok') { if (stR.sel === 0) scrivi(); else apriScheda(trova.d.trovati[stR.sel - 1].ind); return true }
+      if (k === 'ok') { if (stR.sel === 0) scrivi(); else { const g = trova.st === 'ok' && trova.d.trovati?.[stR.sel - 1]; if (g) apriScheda(g.ind) } return true } // (11.11: con la ricerca a metà o fallita la riga scelta può non esserci più)
       if (k === 'indietro' && q) { q = ''; stR.sel = 0; cercaOra(); return true }
       return false
     },
     carattere(ch) { if (q.length < 20) { q += ch; stR.sel = 0; cercaOra() } },
-    cancella() { q = q.slice(0, -1); cercaOra() },
+    cancella() { q = [...q].slice(0, -1).join(''); stR.sel = 0; cercaOra() }, // (11.11: come carattere, la scelta torna sulla riga in cima: restava sul posto di un trovato che non c'è più)
     scrivendo: () => q.length > 0,
   }
-  async function scrivi() { const s = await os.tastiera({ testo: q, titolo: 'cerca un giocatore' }); if (s !== null) { q = s.trim().slice(0, 20); stR.sel = 0; cercaOra() } }
+  async function scrivi() { const s = await os.tastiera({ testo: q, titolo: 'cerca un giocatore' }); if (s !== null && os.corrente() === app) { q = s.trim().slice(0, 20); stR.sel = 0; cercaOra() } } // (8.4: dopo l'attesa, solo se si è ancora qui)
 
   const pIo = {
     nome: 'io', icona: 'bot',
@@ -235,7 +243,7 @@ export function vista(os) {
       const nuove = daVedere(), tot = nuove.reduce((a, v) => a + v.n, 0)
       const prima = c ? ultime.filter((v) => v.g < oggi).slice(-6).reverse().map((v) => ({ g: v.g, s: v.s, ev: L.evento(v.ev), testo: pzkTesto(v.n) }))
         : [1, 2, 3, 4, 5, 6].map((i) => { const g = L.giornoPiu(oggi, -i), y = L.giornata(seme, g); return { g, s: y.salute, ev: y.evento, testo: pctTesto(y.evento.pct) } })
-      const p = io.st === 'ok' && io.d.io?.ok ? io.d.io : null, st = io.st === 'ok' && io.d.stats?.ok ? io.d.stats.stats : null
+      const p = io.st !== 'no' && io.d?.io?.ok ? io.d.io : null, st = io.st !== 'no' && io.d?.stats?.ok ? io.d.stats.stats : null // (11.11: quelli di prima restano mentre si ricarica: il profilo spariva e il testo saltava sotto chi leggeva)
       const blocchi = [
         ...(nuove.length ? [{ titolo: 'urgente · la tua lumachina' }, { testo: nuove.length === 1 ? 'si è svegliata e ha deciso lei:' : `mentre non c’eri ha vissuto ${nuove.length} giornate:` },
           ...nuove.map((v) => ({ punto: `${giornoBreve(v.g)} · ${L.evento(v.ev)?.titolo ?? v.ev}: ${pzkTesto(v.n)} (${pctTesto(v.pct)})` })), { testo: `in tutto ${pzkTesto(tot)}. OK: ho capito.` }] : []),
@@ -254,9 +262,10 @@ export function vista(os) {
     tasto(k) { if (k === 'su') { giuIo = Math.max(0, giuIo - 1); return true } if (k === 'giu') { giuIo++; return true } return false },
   }
 
-  return pagine(os, {
+  const app = pagine(os, {
     nome: 'giocatori', app: 'giocatori', iniziale: ultima,
     pagine: [pClassifiche, pNotizie, pCerca, pIo],
     esci: (x) => { ultima = x.pag; clearTimeout(attesaCerca) }, // (la ricerca in attesa non parte a app chiusa: 6.2)
   })
+  return app
 }
