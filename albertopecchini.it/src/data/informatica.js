@@ -11,15 +11,15 @@
 
 export const informatica = {
   path: '/servizi/informatica/',
-  title: 'Assistenza informatica a Mantova — PC, stampanti, Windows e Office',
+  title: 'Assistenza informatica — PC, stampanti, Windows e Office',
   description:
-    'Pulizia da virus, file doppioni, riordino cartelle, stampanti, audio e driver, installazione di Windows (da XP a 11, LTSC, Server) e di Office, ripristino, cambio di sistema, impaginazione e conversione di documenti. A Rivalta sul Mincio e Mantova.',
+    'Pulizia da virus, file doppioni, riordino cartelle, stampanti, audio e driver, installazione di Windows (da XP a 11, LTSC, Server) e di Office, ripristino, cambio di sistema, impaginazione e conversione di documenti. Anche da remoto.',
 
   head: {
     label: 'Assistenza informatica',
     title: 'Computer che funzionano, file al loro posto.',
     accent: ['posto'],
-    lead: 'Virus, stampanti, driver, Windows e Office, file doppioni e documenti da sistemare. Per privati, famiglie e piccoli uffici, a Rivalta sul Mincio, a Mantova e nei dintorni.',
+    lead: 'Virus, stampanti, driver, Windows e Office, file doppioni e documenti da sistemare. Per privati, famiglie e piccoli uffici, anche da remoto.',
   },
 
   // L'ordine dei gruppi nella pagina; i servizi li sceglie `group` in services.js.

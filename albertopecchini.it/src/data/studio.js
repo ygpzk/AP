@@ -4,7 +4,7 @@
 export const bio = {
   headline: 'Un tecnico che scrive codice, un grafico che sa leggere una sezione.',
   paragraphs: [
-    'Mi chiamo Alberto Pecchini e lavoro a Mantova. Ho studiato Costruzioni, Ambiente e Territorio, ho passato tre anni nell’ufficio tecnico di un’azienda di strutture in legno e oggi frequento il corso di laurea in Costruzioni e gestione del territorio a Modena.',
+    'Mi chiamo Alberto Pecchini. Ho studiato Costruzioni, Ambiente e Territorio, ho passato tre anni nell’ufficio tecnico di un’azienda di strutture in legno e oggi frequento il corso di laurea in Costruzioni e gestione del territorio.',
     'Nel frattempo ho imparato a progettare e sviluppare siti web, prima per curiosità e poi per i primi clienti. La grafica è arrivata per necessità: ogni tavola e ogni interfaccia hanno bisogno di gerarchie chiare.',
     'Non le considero tre attività separate. È lo stesso mestiere — misurare, ordinare, rendere leggibile — applicato a tre materiali diversi.',
   ],
@@ -43,7 +43,7 @@ export const photos = {
 }
 
 export const facts = [
-  { label: 'Base', value: 'Mantova, Lombardia' },
+  { label: 'Base', value: 'Italia' },
   { label: 'Attivo dal', value: '2023' },
   { label: 'Formazione', value: 'Diploma CAT · Laurea in corso' },
   { label: 'Lingue', value: 'Italiano · Inglese C1 (IELTS)' },
@@ -51,10 +51,10 @@ export const facts = [
 ]
 
 export const timeline = [
-  { year: '2021', title: 'I.T.T. «Carlo d’Arco», Mantova', text: 'Inizio del percorso in Costruzioni, Ambiente e Territorio: disegno tecnico, topografia, estimo, gestione del cantiere.', tag: 'Formazione' },
-  { year: '2023', title: 'Ufficio tecnico, reparto legno', text: 'Prima di tre sessioni di PCTO in Caem Group a Castellucchio: modellazione 3D di tettoie, preventivi, archivio tecnico. Strutture in lamellare e X-LAM.', tag: 'Tecnico' },
+  { year: '2021', title: 'I.T.T. «Carlo d’Arco»', text: 'Inizio del percorso in Costruzioni, Ambiente e Territorio: disegno tecnico, topografia, estimo, gestione del cantiere.', tag: 'Formazione' },
+  { year: '2023', title: 'Ufficio tecnico, reparto legno', text: 'Prima di tre sessioni di PCTO in Caem Group: modellazione 3D di tettoie, preventivi, archivio tecnico. Strutture in lamellare e X-LAM.', tag: 'Tecnico' },
   { year: '2024', title: 'Dublino, inglese C1', text: 'Corso intensivo al CES di Dublino e certificazione IELTS. Documentazione tecnica e strumenti di sviluppo si leggono in inglese: meglio farlo bene.', tag: 'Formazione' },
-  { year: '2026', title: 'Primi siti per clienti', text: 'Online il sito dello studio dell’ing. Dario Donelli; in proprio, l’atlante digitale di Rivalta sul Mincio e il sito di Cascina Fontana, l’azienda agricola di famiglia. React, Vite, TypeScript, JavaScript vanilla.', tag: 'Web' },
+  { year: '2026', title: 'Primi siti per clienti', text: 'Online il sito dello studio dell’ing. Dario Donelli; in proprio, il sito di Cascina Fontana, l’azienda agricola di famiglia. React, Vite, TypeScript, JavaScript vanilla.', tag: 'Web' },
   { year: '2026', title: 'Diploma CAT', text: 'Diploma di Costruzioni, Ambiente e Territorio dopo cinque anni di AutoCAD, rilievo strumentale ed estimo.', tag: 'Tecnico' },
   { year: '2026', title: 'Università di Modena e Reggio Emilia', text: 'Immatricolazione al corso di laurea in Costruzioni e gestione del territorio, Dipartimento di Ingegneria «Enzo Ferrari».', tag: 'Formazione' },
   { year: '2026', title: 'Collaborazione con Gabriele Lucia', text: 'Al Dipartimento di Ingegneria «Enzo Ferrari» di UNIMORE ho conosciuto Gabriele Lucia, che lì studia Ingegneria Informatica: sviluppatore e grafico come me, con lui collaboro su progetti web.', tag: 'Web' },
@@ -94,7 +94,7 @@ export const profile = {
     },
     {
       period: '2021 — 2026',
-      title: 'I.T.T. «Carlo d’Arco», Mantova',
+      title: 'I.T.T. «Carlo d’Arco»',
       role: 'Diploma di Costruzioni, Ambiente e Territorio',
       detail: [
         'Disegno tecnico e progettazione architettonica in AutoCAD, dal rilievo alle tavole esecutive.',
@@ -111,14 +111,14 @@ export const profile = {
     {
       period: 'dic 2023',
       title: 'Formazione generale e specifica dei lavoratori — rischio basso',
-      role: 'LTO Mantova · ForMa Formazione Mantova, in accordo con ATS Val Padana · 4 ore, e-learning',
+      role: 'ForMa Formazione · 4 ore, e-learning',
       detail: ['Accordo Stato-Regioni 21 dicembre 2011, art. 37 D.lgs. 81/08: rischio elettrico, cadute dall’alto, microclima e illuminazione, videoterminali, organizzazione del lavoro, primo soccorso, antincendio ed esodo.'],
     },
   ],
   experience: [
     {
       period: '2023 — 2026',
-      title: 'Caem Group S.p.A., Castellucchio (MN)',
+      title: 'Caem Group S.p.A.',
       role: 'Ufficio tecnico, reparto strutture in legno — tre percorsi PCTO',
       detail: [
         'Modellazione 3D di tettoie e coperture in lamellare e X-LAM con AutoCAD e cadwork.',
@@ -132,20 +132,12 @@ export const profile = {
       role: 'Progetto, design e sviluppo · React, Vite, SVG',
       detail: [
         'Sito a pagina singola in bianco e nero, costruito sulla targa dello studio.',
-        'Apertura animata allo scorrimento in solo CSS e carta della provincia di Mantova in SVG.',
+        'Apertura animata allo scorrimento in solo CSS e carta del territorio in SVG.',
         'Mappa OpenStreetMap senza cookie di profilazione; dominio e pubblicazione su Vercel.',
       ],
     },
-    {
-      period: '2026',
-      title: 'Rivalta sul Mincio — atlante digitale del paese',
-      role: 'Progetto, design e sviluppo · Vite, TypeScript, Leaflet, OpenStreetMap',
-      detail: [
-        '184 luoghi da OpenStreetMap, aggiornati con uno script che conserva identificativi e storico.',
-        'Pagine HTML statiche generate al build, senza framework; meteo in tempo reale da funzioni Vercel.',
-        'Cinquanta fotografie originali dei luoghi del paese.',
-      ],
-    },
+    // 12.11.2026: tolto l'atlante digitale del paese (dice dove abito); il progetto è nascosto anche
+    // dal portfolio (NASCOSTI in projects.js)
     {
       period: '2026',
       title: 'Cascina Fontana — sito dell’azienda agricola di famiglia',
@@ -175,7 +167,7 @@ export const profile = {
   ],
   certifications: [
     { title: 'English Advanced C1', issuer: 'Centre of English Studies, Dublino', year: '2024' },
-    { title: 'Sicurezza dei lavoratori — rischio basso, 4 ore', issuer: 'LTO Mantova · ForMa Formazione Mantova', year: '2023' },
+    { title: 'Sicurezza dei lavoratori — rischio basso, 4 ore', issuer: 'ForMa Formazione', year: '2023' },
   ],
   extra: ['Patente A1 e B · automunito', 'Disponibile a trasferte', 'Volontariato educativo 2024 — 2025'],
 }

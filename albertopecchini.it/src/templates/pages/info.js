@@ -417,8 +417,6 @@ export function profiloPage() {
           </div>
           <div class="cv__contact">
             <p><a href="mailto:${site.contact.email}">${esc(site.contact.email)}</a></p>
-            <p><a href="tel:${site.contact.phone.replace(/\s/g, '')}">${esc(site.contact.phone)}</a></p>
-            <p>${esc(site.location.city)}, Italia</p>
             <p><a href="/">${esc(site.url.replace('https://', ''))}</a></p>
           </div>
         </header>

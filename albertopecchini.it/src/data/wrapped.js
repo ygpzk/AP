@@ -749,7 +749,7 @@ export const wrapped = {
           tipo: 'schede',
           voci: [
             { titolo: 'Scuola', testo: 'verifica 386 · prof 308 · inglese 217 · studiare 201 · storia 199 · italiano 176 · interroga 148 · gita 145' },
-            { titolo: 'Fuori dalla scuola', testo: 'foto 356 · mamma 260 · video 146 · euro 105 · lavoro 105 · soldi 86 · macchina 69 · mantova 68' },
+            { titolo: 'Fuori dalla scuola', testo: 'foto 356 · mamma 260 · video 146 · euro 105 · lavoro 105 · soldi 86 · macchina 69' },
             { titolo: 'Espressioni', testo: '«la verifica» 225 · «dio cane» 109 · «ma che cazzo» 64 · «rotto il cazzo» 59' },
           ],
         },

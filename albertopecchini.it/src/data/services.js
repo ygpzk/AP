@@ -134,8 +134,8 @@ export const bundles = [
 
 export const faq = [
   {
-    q: 'Lavori solo a Mantova?',
-    a: 'Per rilievi, cantieri e pratiche mi muovo tra Mantova e le province vicine: serve essere sul posto. Siti web e grafica li seguo da remoto in tutta Italia, con incontri in videochiamata.',
+    q: 'Lavori anche da remoto?',
+    a: 'Per rilievi, cantieri e pratiche serve essere sul posto, e ci mettiamo d’accordo. Siti web e grafica li seguo da remoto in tutta Italia, con incontri in videochiamata.',
   },
   {
     q: 'Come si calcola un preventivo?',

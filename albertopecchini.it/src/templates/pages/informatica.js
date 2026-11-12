@@ -13,12 +13,10 @@ import { head } from './info.js'
 const area = serviceAreas.find((a) => a.key === 'informatica')
 const numbered = area.services.map((s, i) => ({ ...s, n: `${area.letter}.${String(i + 1).padStart(2, '0')}` }))
 
-const cifre = site.contact.phone.replace(/\D/g, '')
 const contactHref = `/contatti/?tipo=${encodeURIComponent(it.cta.tipo)}#modulo`
-const whatsappHref = `https://wa.me/${cifre}?text=${encodeURIComponent('Ciao Alberto, ho un problema con il computer: ')}`
 
 const facts = [
-  { label: 'Dove', value: `${site.location.city}, Mantova e dintorni · da remoto` },
+  { label: 'Dove', value: 'Anche da remoto' },
   { label: 'Per chi', value: 'Privati, famiglie, piccoli uffici' },
   { label: 'Risposta', value: site.contact.reply },
   { label: it.gift.label, value: 'Installazione di Windows o Office in regalo sopra i 50 €' },
@@ -156,8 +154,6 @@ export function informaticaPage() {
           <p class="lead">${esc(it.cta.text)}</p>
           <div class="itk__actions">
             ${button({ href: contactHref, label: 'Scrivimi' })}
-            ${button({ href: whatsappHref, label: 'WhatsApp', variant: 'ghost', iconName: 'arrowUpRight', external: true })}
-            ${button({ href: `tel:+${cifre}`, label: `Chiama ${site.contact.phone}`, variant: 'ghost', iconName: 'arrowUpRight' })}
           </div>
         </div>
       </div>
@@ -176,7 +172,7 @@ export const informaticaLd = () => [
     description: it.description,
     url: abs(it.path),
     provider: { '@id': abs('/#studio') },
-    areaServed: { '@type': 'AdministrativeArea', name: 'Provincia di Mantova' },
+    areaServed: { '@type': 'Country', name: 'Italia' },
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: 'Assistenza informatica',

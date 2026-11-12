@@ -111,14 +111,14 @@ function hero() {
       <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
       <div class="container hero__wrap" data-ink>
         <div class="hero__eyebrow" data-reveal="up" style="--d:40ms">
-          <span class="pill"><span class="hero__avatar"><img src="${photos.avatar.src}" width="${photos.avatar.width}" height="${photos.avatar.height}" sizes="1.5rem" alt="" decoding="async" fetchpriority="high"></span>${esc(site.location.city)}<span class="hero__coords"> · ${COORDS}</span></span>
+          <span class="pill"><span class="hero__avatar"><img src="${photos.avatar.src}" width="${photos.avatar.width}" height="${photos.avatar.height}" sizes="1.5rem" alt="" decoding="async" fetchpriority="high"></span>${esc(site.title)}</span>
           <span class="pill" data-ink-bed><span class="dot${site.availability.open ? ' dot--live' : ''}" aria-hidden="true"></span>${esc(site.availability.label)}</span>
         </div>
         <!-- il nome gigante com'era (Archivo stretto, il cognome in contorno che
              l'aragosta riempie d'inchiostro: client/ink.js), più piccolo di prima -->
         <p class="hero__name" aria-hidden="true"><span class="hero__word"><span>${esc(site.firstName)}</span></span> <span class="hero__word hero__word--2"><span data-ink-word>${esc(site.lastName)}</span></span></p>
-        <h1 class="hero__title" id="hero-title" data-reveal="words" style="--d:140ms"><span class="sr-only">${esc(site.name)} — ${site.roles.map((r) => esc(r.label)).join(', ')} a ${esc(site.location.city)}. </span>${splitWords('Casa, sito, marchio. Un solo referente.', { accent: ['referente.'] })}</h1>
-        <p class="hero__lead" data-reveal="up" style="--d:460ms">Diplomato geometra a ${esc(site.location.city)}: rilevo e disegno edifici, scrivo siti web a mano, costruisco marchi. Lo stesso metodo, la stessa cura.</p>
+        <h1 class="hero__title" id="hero-title" data-reveal="words" style="--d:140ms"><span class="sr-only">${esc(site.name)} — ${site.roles.map((r) => esc(r.label)).join(', ')}. </span>${splitWords('Casa, sito, marchio. Un solo referente.', { accent: ['referente.'] })}</h1>
+        <p class="hero__lead" data-reveal="up" style="--d:460ms">Diplomato geometra: rilevo e disegno edifici, scrivo siti web a mano, costruisco marchi. Lo stesso metodo, la stessa cura.</p>
         <div class="hero__actions" data-reveal="up" style="--d:540ms">
           ${button({ href: cta.href, label: cta.label, size: 'lg', magnetic: true })}
           ${button({ href: '/portfolio/', label: 'Guarda i lavori', variant: 'ghost', size: 'lg' })}
@@ -274,6 +274,7 @@ function strip() {
 // Quattro foto prese lungo la strada (la prima, due in mezzo, l'ultima) e il link.
 
 function tempo() {
+  return '' // 12.11.2026: la macchina del tempo non è più online (dentro ci sono numero e luoghi)
   const conFoto = versioni.filter((v) => v.d)
   if (!conFoto.length) return ''
   const prime = conFoto[0]
@@ -441,7 +442,7 @@ export const signature = () => html`
   <div class="sign" role="img" aria-label="Firma di ${esc(site.name)}">
     <span class="sign__text" aria-hidden="true">${esc(site.name)}</span>
     <svg class="sign__stroke" viewBox="0 0 300 40" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M4 26C60 8 120 34 170 20s88-10 126 2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-    <span class="label sign__meta">${esc(site.title)} · ${esc(site.location.city)}</span>
+    <span class="label sign__meta">${esc(site.title)}</span>
   </div>
 `
 

@@ -40,7 +40,7 @@ export function projectCard(p, { span = 6, lazy = true, headingLevel = 3, previe
           <p class="card__meta label"><span class="card__code">${esc(p.code)}</span><span>${esc(p.categories.map(catLabel).join(' · '))}</span><span>${p.year}</span></p>
           <${H} class="card__title"><span class="card__title-text">${esc(p.title)}</span><span class="card__arrow" aria-hidden="true">${icon('arrowUpRight')}</span></${H}>
           <p class="card__sub">${esc(p.subtitle)}</p>
-          <p class="card__foot label"><span>${esc(p.location)}</span><span>${esc(p.types.slice(0, 2).join(' · '))}</span></p>
+          <p class="card__foot label"><span>${esc(p.types.slice(0, 2).join(' · '))}</span></p>
         </div>
       </a>
       ${sampleMark(p)}

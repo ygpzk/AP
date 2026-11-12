@@ -38,11 +38,11 @@ const websiteLd = () => ({
 
 const crumbs = (...items) => breadcrumbLd([{ label: 'Home', href: '/' }, ...items])
 
-export const routes = [
+const tutteLeRotte = [
   {
     path: '/',
     priority: 1,
-    title: `${site.name} — Disegno tecnico, Web Design e Grafica a Mantova`,
+    title: `${site.name} — Disegno tecnico, Web Design e Grafica`,
     description: site.description,
     render: homePage,
     jsonld: () => [websiteLd(), personLd(), serviceLd()],
@@ -170,7 +170,7 @@ export const routes = [
     path: '/contatti/',
     priority: 0.9,
     title: 'Contatti — parliamo del progetto',
-    description: 'Scrivimi per un rilievo, una pratica, un sito web o un’identità visiva. Studio a Mantova, risposta entro un giorno lavorativo.',
+    description: 'Scrivimi per un rilievo, una pratica, un sito web o un’identità visiva. Risposta entro un giorno lavorativo.',
     render: contattiPage,
     hideCta: true, // la pagina è già la chiamata all'azione: niente CTA che rimanda a sé stessa
     // Turnstile serve solo qui: lo script non viene caricato sulle altre pagine.
@@ -289,6 +289,12 @@ export const routes = [
     hideCta: true,
   },
 ]
+
+// 12.11.2026 (Alberto: «togli social, numeri, indirizzi e luoghi»): fuori dal sito la macchina del
+// tempo (le copie dei siti vecchi hanno numero, WhatsApp, Instagram e il paese) e le due pagine di
+// Pekko, che vivono su bettercallpekko.it (vercel.json le rimanda lì). I file restano nel repository.
+export const FUORI = (p) => p === '/tempo/' || p.startsWith('/tempo/') || p === assistenza.path || p === assistenza.contatti
+export const routes = tutteLeRotte.filter((r) => !FUORI(r.path))
 
 // ── bettercallpekko.it ───────────────────────────────────────────────────────
 // Il dominio della parodia è un progetto Vercel a parte, costruito dallo stesso

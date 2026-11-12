@@ -17,16 +17,8 @@ import { logo, monogram, signature, splitWords, icon, button, puppet, mascot } f
 
 const abs = (path) => site.url + path
 
-// Coordinate della sede ricavate da `site.location`, così da non doverle
-// aggiornare a mano in due posti. Fermate al primo (≈ 1,8 km): indicano il
-// paese, non la casa — coerente con l'indirizzo che non viene pubblicato.
-const dms = (v, [pos, neg]) => {
-  const a = Math.abs(v)
-  const d = Math.floor(a)
-  const m = Math.round((a - d) * 60)
-  return `${d}°${String(m).padStart(2, '0')}′${v < 0 ? neg : pos}`
-}
-const COORDS = `${dms(site.location.lat, ['N', 'S'])} · ${dms(site.location.lon, ['E', 'W'])}`
+// Dal 12.11.2026 niente coordinate né luoghi sul sito: COORDS resta per chi lo importa, ma vuoto.
+const COORDS = ''
 
 export function layout({ route, title, description, body, assets, jsonld = [], headerTheme = 'paper', pageClass, ogImage = '/og.png', noindex = false, hideCta = false, head = '' }) {
   const fullTitle = route.path === '/' ? title : `${title} — ${site.name}`
@@ -170,12 +162,7 @@ function mobileMenu(route) {
           <div class="menu__block" style="--i:6">
             <p class="label">Contatti</p>
             <p><a href="mailto:${site.contact.email}">${esc(site.contact.email)}</a></p>
-            <p><a href="tel:${site.contact.phone.replace(/\s/g, '')}">${esc(site.contact.phone)}</a></p>
             <p class="menu__note">${esc(site.contact.reply)}</p>
-          </div>
-          <div class="menu__block" style="--i:7">
-            <p class="label">Social</p>
-            <ul class="menu__social">${site.social.map((s) => `<li><a class="pill menu__pill" href="${s.url}" target="_blank" rel="noopener">${esc(s.label)}<span class="sr-only"> (nuova scheda)</span></a></li>`)}</ul>
           </div>
           <div class="menu__block menu__block--cta" style="--i:8">
             ${button({ href: cta.href, label: cta.label, size: 'lg' })}
@@ -183,7 +170,6 @@ function mobileMenu(route) {
         </div>
       </div>
       <div class="menu__foot container--wide label">
-        <span>${esc(site.location.city)} · ${COORDS}</span>
         <span><span class="dot dot--accent" aria-hidden="true"></span>${esc(site.availability.label)}</span>
       </div>
     </div>
@@ -202,7 +188,6 @@ function mobileMenu(route) {
 function footer({ route, compact = false }) {
   const year = new Date().getFullYear()
   const mail = `mailto:${site.contact.email}`
-  const tel = `tel:${site.contact.phone.replace(/\s/g, '')}`
   const pages = [{ label: 'Home', href: '/' }, ...nav.map(({ label, href }) => ({ label, href }))]
   const legal = site.legal.albo ? `${site.legal.albo.collegio} · n. ${site.legal.albo.numero}` : site.legal.note
   const label = compact ? closing.labelCompact : closing.label
@@ -213,7 +198,6 @@ function footer({ route, compact = false }) {
     { label: 'Crediti immagini', href: '/crediti/' },
     { label: 'Stile', href: '/stile/' },
     { label: 'L’aragosta', href: '/aragosta/' },
-    { label: 'La macchina del tempo', href: '/tempo/' },
   ]
   const flink = (p) => `<a class="foot-link" href="${p.href}"${isCurrent(route, p.href) && p.href !== '/' ? ' aria-current="page"' : ''}>${esc(p.label)}</a>`
 
@@ -235,7 +219,6 @@ function footer({ route, compact = false }) {
           <div class="foot-col foot-col--brand">
             ${logo()}
             <p class="foot-col__tag">${esc(site.tagline)}</p>
-            <p class="foot-col__place label">${esc(site.location.city)} (${esc(site.location.province)}) · ${COORDS}</p>
           </div>
           <nav class="foot-col" aria-label="Pagine del sito">
             <p class="foot-col__head label">Pagine</p>
@@ -245,16 +228,11 @@ function footer({ route, compact = false }) {
             <p class="foot-col__head label">Contatti</p>
             <ul class="foot-col__list">
               <li><a class="foot-link" href="${mail}">${esc(site.contact.email)}</a></li>
-              <li><a class="foot-link" href="${tel}">${esc(site.contact.phone)}</a></li>
               <li class="foot-col__note">${esc(site.contact.hours)} · ${esc(site.contact.reply)}</li>
               <li class="foot-col__note">${esc(site.location.area)}</li>
             </ul>
           </div>
           <div class="foot-col">
-            <p class="foot-col__head label">Social</p>
-            <ul class="foot-col__list">
-              ${site.social.map((s) => `<li><a class="foot-link" href="${s.url}" target="_blank" rel="noopener">${esc(s.label)}<span class="foot-link__ext" aria-hidden="true">${icon('arrowUpRight')}</span><span class="sr-only"> (nuova scheda)</span></a></li>`)}
-            </ul>
             <p class="foot-col__head label">Note</p>
             <ul class="foot-col__list">${notes.map((n) => `<li>${flink(n)}</li>`)}</ul>
           </div>
@@ -276,7 +254,7 @@ function footer({ route, compact = false }) {
         </div>
 
         <div class="foot-legal" data-reveal="fade">
-          <p class="foot-legal__id label">© ${year} ${esc(site.name)} · ${esc(legal)} · ${esc(site.location.city)} (${esc(site.location.province)}), Italia</p>
+          <p class="foot-legal__id label">© ${year} ${esc(site.name)} · ${esc(legal)}</p>
           <p class="foot-legal__credit label"><a class="uline" href="${esc(site.url)}" rel="author">Sito di ${esc(site.name)}</a> · ${esc(site.edition)}</p>
           <!-- l'informatore dei sistemi (11.11.2026): src/client/stato.js lo riempie con /api/stato/; il dettaglio è su pzkko.it/stato/ -->
           <a class="foot-legal__stato label" href="https://www.pzkko.it/stato/" data-stato data-tono="ignoto"><span class="stato__punto" aria-hidden="true"></span><span class="stato__testo">stato dei sistemi</span></a>
@@ -329,9 +307,8 @@ export const personLd = () => ({
   jobTitle: site.roles.map((r) => r.label),
   description: site.description,
   email: `mailto:${site.contact.email}`,
-  address: { '@type': 'PostalAddress', addressLocality: site.location.city, addressRegion: site.location.region, postalCode: site.location.cap, addressCountry: site.location.country },
+  address: { '@type': 'PostalAddress', addressCountry: site.location.country },
   knowsAbout: ['Rilievo topografico', 'Catasto', 'AutoCAD', 'BIM', 'Web design', 'Sviluppo frontend', 'Brand identity', 'Graphic design', 'Assistenza informatica', 'Microsoft Windows', 'Microsoft Office'],
-  sameAs: site.social.map((s) => s.url),
 })
 
 export const serviceLd = () => ({
@@ -344,12 +321,10 @@ export const serviceLd = () => ({
   description: site.description,
   founder: { '@id': abs('/#person') },
   email: site.contact.email,
-  telephone: site.contact.phone,
   priceRange: '€€',
-  // Nessuno `streetAddress`: l'indirizzo di casa resta fuori dai dati strutturati.
-  address: { '@type': 'PostalAddress', addressLocality: site.location.city, addressRegion: site.location.province, postalCode: site.location.cap, addressCountry: site.location.country },
-  geo: { '@type': 'GeoCoordinates', latitude: site.location.lat, longitude: site.location.lon },
-  areaServed: ['Mantova', 'Lombardia', 'Emilia-Romagna', 'Veneto', 'Italia'],
+  // Niente indirizzo, città né coordinate (12.11.2026)
+  address: { '@type': 'PostalAddress', addressCountry: site.location.country },
+  areaServed: ['Italia'],
   // Nessun `openingHoursSpecification`: si riceve su appuntamento, non a orari fissi.
   availableLanguage: 'it',
   hasOfferCatalog: {

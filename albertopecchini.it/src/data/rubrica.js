@@ -67,7 +67,10 @@ export const senders = loadSenderProfiles()
   .profiles.filter((p) => KINDS[p.key])
   .map((p) => {
     const { order, ...kind } = KINDS[p.key]
-    const footer = getFooter(p.footerId)
+    // 12.11.2026: la pagina /email/ è pubblica, quindi la firma ci arriva senza telefono
+    // (in tools/email-generator/profiles/footers.json resta intera, per le email vere)
+    const intera = getFooter(p.footerId)
+    const footer = intera && JSON.parse(JSON.stringify(intera, (k, v) => (Array.isArray(v) ? v.filter((x) => !(x && typeof x === 'object' && (x.type === 'phone' || /^tel:/.test(x.href || '')))) : v)))
     return {
       key: p.key,
       label: p.label,

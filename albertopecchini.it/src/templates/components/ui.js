@@ -533,7 +533,7 @@ export function dataSheet(project, { compact = false } = {}) {
   const rows = [
     ['Cliente', project.client],
     ['Settore', project.sector],
-    ['Località', project.location],
+    project.location && ['Località', project.location],
     ['Anno', project.period || project.year],
     ['Tipologia', project.types.slice(0, compact ? 3 : 99).join(' · ')],
     !compact && ['Servizi', project.services.join(' · ')],

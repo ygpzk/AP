@@ -98,7 +98,7 @@ export const typefaces = [
     key: 'mono',
     name: 'Geist Mono',
     axis: 'wght 100–900',
-    alphabet: 'abcdefghijklmnopqrstuvwxyz 0123456789 · — / 45°14′N',
+    alphabet: 'abcdefghijklmnopqrstuvwxyz 0123456789 · — / 90°00′N',
     note: 'Etichette, pillole, coordinate, cartigli e il terminale della home: il carattere dei terminali, a 13 px, tutto minuscolo come il resto del sito.',
   },
 ]
@@ -190,7 +190,7 @@ export const zoo = [
 // scena che funziona come quella vera (src/client/ink.js).
 export const aragosta = {
   name: 'L’aragosta di fiume',
-  trait: 'Il gambero rosso del Mincio. Dorme sopra «Disponibile per nuovi incarichi»; se stai fermo si sveglia di colpo, prende l’annaffiatoio azzurro e versa inchiostro nella prima I. Il cognome è un recipiente solo: il liquido corre da una lettera all’altra, ondeggia quando sposti il piano e gocciola sul righello.',
+  trait: 'Il gambero rosso di fiume. Dorme sopra «Disponibile per nuovi incarichi»; se stai fermo si sveglia di colpo, prende l’annaffiatoio azzurro e versa inchiostro nella prima I. Il cognome è un recipiente solo: il liquido corre da una lettera all’altra, ondeggia quando sposti il piano e gocciola sul righello.',
   facts: [
     { value: '2,2 s', label: 'fermi, e si sveglia' },
     { value: '< 3 s', label: 'per riempirlo' },
@@ -216,5 +216,5 @@ export const puppetPlaces = [
   { where: 'Home e /aragosta/', what: 'L’aragosta dorme sopra la disponibilità e, se stai fermo, riempie d’inchiostro il cognome (più piccolo di prima); in /aragosta/ la tavola com’era, a grandezza naturale.' },
   { where: 'Piè di pagina', what: 'La chiocciola e la tartaruga ai lati della firma, l’airone e la gazza alle ali, la vespa che si libra sopra.' },
   { where: '404', what: 'La gazza tiene nel becco la pagina che manca, e scappa lungo la quota.' },
-  { where: 'Contatti', what: 'L’airone del Mincio accanto alla carta, che guarda la sede.' },
+  { where: 'Contatti', what: 'L’airone di fiume, che guarda chi scrive.' },
 ]

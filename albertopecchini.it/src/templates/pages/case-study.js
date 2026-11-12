@@ -171,7 +171,6 @@ export function caseStudyPage(p) {
           <dl class="cs-hero__meta" data-reveal="up">
             <div><dt class="label">Cliente</dt><dd>${esc(p.client)}</dd></div>
             <div><dt class="label">Settore</dt><dd>${esc(p.sector)}</dd></div>
-            <div><dt class="label">Località</dt><dd>${esc(p.location)}</dd></div>
             <div><dt class="label">Area</dt><dd><a href="${area.href}">${esc(area.label)}</a></dd></div>
           </dl>
         </div>
@@ -306,5 +305,4 @@ export const caseStudyLd = (p, abs) => ({
   creator: { '@id': abs('/#person') },
   genre: allAreas[p.area].label,
   keywords: [...p.types, ...p.technologies].join(', '),
-  locationCreated: { '@type': 'Place', name: p.location },
 })

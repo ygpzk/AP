@@ -25,7 +25,7 @@ function cartiglio() {
         <tr class="cart__title"><th scope="row">Oggetto</th><td>L’aragosta e l’inchiostro</td></tr>
         <tr><th scope="row">Tavola</th><td>01 — l’hero della home com’era, dal 18.9 al ${DATA}</td></tr>
         <tr><th scope="row">Scala</th><td>1:1 · foglio 1440 × 900 px · 1 px = 1 mm per il liquido</td></tr>
-        <tr><th scope="row">Disegnato</th><td>${esc(site.name)} · ${esc(site.location.city)} · ${COORDS}</td></tr>
+        <tr><th scope="row">Disegnato</th><td>${esc(site.name)}</td></tr>
         <tr><th scope="row">Caratteri</th><td>Archivo 86% · Cascadia Code · Instrument Serif</td></tr>
         <tr class="cart__rev"><th scope="row">Rev. A</th><td>${DATA} · il sito ha il vestito nuovo, questa tavola resta com’era</td></tr>
       </tbody>
@@ -43,7 +43,7 @@ function heroVecchio() {
             <span class="hv__avatar"><span class="hv__avatar-ph"><img src="${photos.avatar.src}" width="${photos.avatar.width}" height="${photos.avatar.height}" sizes="2.75rem" alt="" decoding="async"></span>${site.availability.open ? '<span class="hv__avatar-dot" aria-hidden="true"></span>' : ''}</span>
             <span class="hv__hi-text">Ciao, sono</span>
           </p>
-          <p class="hv__place label">${esc(site.location.city)} — Italia<span class="hv__coords"> · ${COORDS}</span></p>
+          <p class="hv__place label">Italia</p>
           <p class="hv__avail label" data-ink-bed><span class="dot${site.availability.open ? ' dot--live' : ''}" aria-hidden="true"></span>${esc(site.availability.label)}</p>
         </div>
 
@@ -60,7 +60,7 @@ function heroVecchio() {
               <strong class="hv__stamp">Falso</strong>
             </p>
             <p class="hv__claim">Ne basta <em class="serif-i">uno.</em></p>
-            <p class="hv__lead">Diplomato geometra a ${esc(site.location.city)}: rilevo e disegno edifici, scrivo siti web a mano, costruisco marchi. Con lo stesso metodo e la stessa cura.</p>
+            <p class="hv__lead">Diplomato geometra: rilevo e disegno edifici, scrivo siti web a mano, costruisco marchi. Con lo stesso metodo e la stessa cura.</p>
             <div class="hv__actions">
               ${button({ href: cta.href, label: cta.label, size: 'lg' })}
               ${button({ href: '/', label: 'La home di adesso', variant: 'ghost', size: 'lg' })}

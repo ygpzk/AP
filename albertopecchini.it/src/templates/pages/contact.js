@@ -74,7 +74,6 @@ function dialer() {
 }
 
 export function contattiPage() {
-  const osm = `https://www.openstreetmap.org/?mlat=${site.location.lat}&mlon=${site.location.lon}#map=13/${site.location.lat}/${site.location.lon}`
   return html`
     <section class="cnt">
       <div class="container">
@@ -86,16 +85,13 @@ export function contattiPage() {
               <h1 class="cnt__title" data-reveal="words">${splitWords('Parliamo del progetto.', { accent: ['progetto.'] })}</h1>
               ${figurina('contatti', { className: 'cnt__fig', lazy: false })}
             </div>
-            <p class="lead" data-reveal="up">Due righe bastano: cosa ti serve, dove, entro quando. ${esc(site.contact.reply)}</p>
+            <p class="lead" data-reveal="up">Due righe bastano: cosa ti serve ed entro quando. ${esc(site.contact.reply)}</p>
 
             <p class="cnt__avail label" data-reveal="up"><span class="dot${site.availability.open ? ' dot--live' : ''}"></span>${esc(site.availability.label)}${site.availability.from ? ` — da ${esc(site.availability.from)}` : ''}</p>
 
             <dl class="cnt__list" data-reveal="up">
               <div><dt class="label">Email</dt><dd><a class="cnt__big" href="mailto:${site.contact.email}">${esc(site.contact.email)}</a></dd></div>
-              <div><dt class="label">Telefono</dt><dd><a class="cnt__big" href="tel:${site.contact.phone.replace(/\s/g, '')}">${esc(site.contact.phone)}</a></dd></div>
-              <div><dt class="label">Dove sono</dt><dd>${esc(site.location.city)} (${esc(site.location.province)}) · ${esc(site.location.cap)}<br><span class="cnt__muted">Di persona a Mantova e provincia, da remoto in tutta Italia</span></dd></div>
-              <div><dt class="label">Orari</dt><dd>${esc(site.contact.hours)}<br><span class="cnt__muted">Scrivimi o chiamami e fissiamo giorno e ora</span></dd></div>
-              <div><dt class="label">Social</dt><dd><ul class="cnt__social">${site.social.map((s) => `<li><a href="${s.url}" target="_blank" rel="noopener">${esc(s.label)}${icon('arrowUpRight')}<span class="sr-only"> (nuova scheda)</span></a></li>`)}</ul></dd></div>
+              <div><dt class="label">Orari</dt><dd>${esc(site.contact.hours)}<br><span class="cnt__muted">Scrivimi e fissiamo giorno e ora</span></dd></div>
             </dl>
           </div>
 
@@ -150,40 +146,6 @@ export function contattiPage() {
       </div>
     </section>
 
-    <section class="section ccall" aria-labelledby="ccall-title">
-      <div class="container ccall__grid">
-        <div class="ccall__copy">
-          <p class="label" data-reveal="fade"><span class="sec-head__index">☎</span>Telefono</p>
-          <h2 class="h2" id="ccall-title" data-reveal="words">${splitWords('Preferisci a voce?', { accent: ['voce'] })}</h2>
-          <p class="lead" data-reveal="up">Il numero è già composto: tocca il tasto verde e parliamo del progetto. Per sopralluoghi e incontri fissiamo insieme giorno e ora.</p>
-          <p class="ccall__num" data-reveal="up"><a class="cnt__big" href="tel:${site.contact.phone.replace(/\s/g, '')}">${esc(site.contact.phone)}</a><span class="cnt__muted">${esc(site.contact.hours)}</span></p>
-        </div>
-        <figure class="ccall__phone" data-reveal="up">
-          ${dialer()}
-          <figcaption>${iphoneCredit()}</figcaption>
-        </figure>
-      </div>
-    </section>
-
-    <section class="section cmap" data-theme="tint" aria-labelledby="cmap-title">
-      <div class="container cmap__grid">
-        <div class="cmap__copy">
-          <p class="label"><span class="sec-head__index">⌖</span>Area operativa</p>
-          <h2 class="h2" id="cmap-title" data-reveal="words">${splitWords('Dove lavoro', { accent: ['lavoro'] })}</h2>
-          <p class="lead" data-reveal="up">${esc(site.location.area)}.</p>
-          <ul class="cmap__legend" data-reveal="up">
-            <li><span class="label">10 km</span>Sopralluogo in giornata, senza costi di trasferta</li>
-            <li><span class="label">25 km</span>Rilievi e cantieri seguiti con continuità</li>
-            <li><span class="label">50 km</span>Su incarico, con trasferta concordata</li>
-            <li><span class="label">Oltre</span>Web e grafica da remoto, in tutta Italia</li>
-          </ul>
-          <p class="label cmap__coords">${COORDS}</p>
-          ${button({ href: osm, label: 'Apri in OpenStreetMap', variant: 'ghost', iconName: 'arrowUpRight', external: true })}
-        </div>
-        <div class="cmap__map">${media({ art: 'areamap', base: '/media/mappa/area-operativa.webp', sede: { name: site.location.city, lat: site.location.lat, lon: site.location.lon, coords: COORDS }, alt: `Carta illustrata dell’area operativa: il lago di Garda, il Mincio, i laghi di Mantova e il Po, con la sede a ${site.location.city} e raggi di 10, 25 e 50 chilometri` }, { ratio: '4/3', caption: 'FIG. 01 — Area operativa · proiezione equirettangolare · scala grafica in carta' })}
-          ${puppet('airone', { className: 'cmap__heron', gaze: '.cmap .a-sede' })}
-        </div>
-      </div>
-    </section>
+    <!-- 12.11.2026: tolte la sezione del telefono (tastierino) e quella della mappa: niente numeri né luoghi sul sito -->
   `
 }

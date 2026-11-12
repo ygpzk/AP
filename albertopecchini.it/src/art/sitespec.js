@@ -147,7 +147,7 @@ function screen(x, y, s, d) {
   // saluto
   o += Ci(d.avatar[0] + 22, d.avatar[1] + 22, 22, ` fill="${C.paper3}" stroke="${C.minio}" stroke-width="1.5"`) + `<path d="M${n(d.avatar[0] + 9)} ${n(d.avatar[1] + 9)}l26 26m0 -26l-26 26" stroke="${C.ink}" stroke-width="${n(hair * 0.7)}" opacity=".4"/>` + Ci(d.avatar[0] + 39, d.avatar[1] + 39, 6, ` fill="${GREEN}" stroke="${C.paper}" stroke-width="2"`)
   o += T(d.hi[0], d.hi[1], 'ciao, sono', { size: d.hi[2], family: SERIF, italic: true, spacing: '-0.02em' })
-  if (d.place) o += T(d.place[0], d.place[1], 'rivalta sul mincio — italia · 45°14′n · 10°41′e', { fill: C.graphite, size: 14 })
+  if (d.place) o += T(d.place[0], d.place[1], 'italia', { fill: C.graphite, size: 14 })
   o += Ci(d.avail.dot[0] + 4, d.avail.dot[1] + 4, 4, ` fill="${GREEN}"`)
   for (const [ax, ab, txt] of d.avail.lines) o += T(ax, ab, txt, { size: 14 })
 

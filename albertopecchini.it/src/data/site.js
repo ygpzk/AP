@@ -29,28 +29,21 @@ export const site = {
   // Riga sotto il nome nel footer: gli ambiti, in breve.
   tagline: 'Disegno tecnico · Web · Grafica · Informatica',
   description:
-    'Alberto Pecchini, diplomato geometra, web designer e graphic designer in provincia di Mantova. Rilievi, CAD e modellazione 3D, siti web su misura, identità visive e assistenza informatica: un solo interlocutore, dallo stato di fatto alla messa online.',
+    'Alberto Pecchini, diplomato geometra, web designer e graphic designer. Rilievi, CAD e modellazione 3D, siti web su misura, identità visive e assistenza informatica: un solo interlocutore, dallo stato di fatto alla messa online.',
   activeSince: 2023,
   edition: 'Portfolio 2026 — Ed. 01',
 
-  // Sede e area operativa (le coordinate sono quelle di Rivalta sul Mincio)
+  // Dal 12.11.2026 il sito non dice dove abito: niente città, indirizzo, CAP, coordinate, mappe
+  // (Alberto: «togli social, numeri, indirizzi e luoghi»). I template che li usavano non li mostrano più,
+  // e tools/privacy.mjs ferma la build se qualcosa ricompare in dist/.
   location: {
-    city: 'Rivalta sul Mincio',
-    province: 'MN',
-    region: 'Lombardia',
     country: 'IT',
-    // Indirizzo completo: NON viene pubblicato in footer né in contatti.
-    // Serve a identificare il titolare del trattamento nella privacy policy.
-    address: 'Via Belvedere 1',
-    cap: '46040',
-    lat: 45.2286,
-    lon: 10.6786,
-    area: 'Mantova e provincia · Lombardia, Emilia e Veneto · da remoto in tutta Italia',
+    area: 'In tutta Italia, anche da remoto',
   },
 
   contact: {
     email: 'pzkko@yahoo.com',
-    phone: '+39 351 0355506',
+    phone: null, // niente numeri sul sito (12.11.2026)
     hours: 'Su appuntamento',
     reply: 'Rispondo entro un giorno lavorativo.',
   },
@@ -68,10 +61,7 @@ export const site = {
     updated: '2026-10-07',
   },
 
-  social: [
-    { key: 'instagram', label: 'Instagram', handle: '@albertoxpecchini', url: 'https://www.instagram.com/albertoxpecchini/' },
-    { key: 'github', label: 'GitHub', handle: 'ygpzk', url: 'https://github.com/ygpzk' },
-  ],
+  social: [], // niente social sul sito (12.11.2026)
 
   // `from` indica da quando si è liberi: lasciarlo vuoto se la disponibilità
   // è immediata, altrimenti il footer annuncia una data già passata o futura.

@@ -419,7 +419,8 @@ const museoPhotos = {
   ],
 }
 
-const allProjects = [
+// tutti, anche i nascosti (NASCOSTI più sotto): li usa bettercallpekko.it, che è un sito a parte
+export const allProjects = [
   // ═══ TECNICO ═══════════════════════════════════════════════════════════════
   {
     slug: 'recupero-annesso-rustico',
@@ -996,7 +997,7 @@ const allProjects = [
     slug: 'cascina-fontana',
     code: 'AP-26-W02',
     title: 'Cascina Fontana',
-    subtitle: 'Sessantatré biolche tra l’Oglio e il Mincio',
+    subtitle: 'Sessantatré biolche, un’azienda di famiglia',
     area: 'web',
     categories: ['web'],
     types: ['Sito web', 'UI/UX', 'Sviluppo frontend', 'Responsive'],
@@ -1006,9 +1007,9 @@ const allProjects = [
     year: 2026,
     services: ['Architettura dei contenuti', 'Testi', 'Fotografia', 'Web design', 'Sviluppo frontend'],
     technologies: ['Vite', 'HTML', 'CSS', 'JavaScript', 'AVIF/WebP', 'Vercel'],
-    summary: 'Il sito dell’azienda agricola della mia famiglia, a Rodigo: cinque pagine in HTML, CSS e JavaScript vanilla, nove fotografie scattate da me e nessun servizio di terzi.',
+    summary: 'Il sito dell’azienda agricola della mia famiglia: cinque pagine in HTML, CSS e JavaScript vanilla, nove fotografie scattate da me e nessun servizio di terzi.',
     description:
-      'Cascina Fontana è l’azienda agricola della mia famiglia, a Rodigo, in provincia di Mantova, avviata nel 2007. Porta il latte alla filiera del Grana Padano DOP, coltiva mais, frumento ed erba medica su sessantatré biolche e vende fieno, legna da ardere e fiori direttamente in cascina, su appuntamento.',
+      'Cascina Fontana è l’azienda agricola della mia famiglia, avviata nel 2007. Porta il latte alla filiera del Grana Padano DOP, coltiva mais, frumento ed erba medica su sessantatré biolche e vende fieno, legna da ardere e fiori direttamente in cascina, su appuntamento.',
     goal: 'Far sapere a chi cerca fieno, legna o fiori in zona cosa produce la cascina e in quale mese, e portarlo a una telefonata.',
     problem:
       'Un’azienda senza punto vendita né orari fissi, che non vuole pubblicare l’indirizzo perché la cascina è anche casa. La versione precedente, un’applicazione React in quattro lingue con il tema a sensore orario, pesava più di quanto servisse a cinque pagine e raccontava origini che nessun documento conferma.',
@@ -1120,17 +1121,17 @@ const allProjects = [
     services: ['Architettura dei contenuti', 'Web design', 'Sviluppo frontend', 'Cartografia', 'Dominio e pubblicazione'],
     technologies: ['React', 'Vite', 'CSS scroll-driven', 'SVG', 'OpenStreetMap', 'Vercel'],
     summary:
-      'Il sito dello studio tecnico dell’Ing. Dario Donelli a Rivalta sul Mincio: una pagina sola in bianco e nero, costruita sulla targa dello studio, con una carta del territorio disegnata a mano.',
+      'Il sito dello studio tecnico dell’Ing. Dario Donelli: una pagina sola in bianco e nero, costruita sulla targa dello studio, con una carta del territorio disegnata a mano.',
     description:
-      'Dario Donelli è ingegnere edile-architetto, iscritto all’Ordine di Mantova dal 2010, con studio a Rivalta sul Mincio, alle porte del Parco del Mincio. Segue di persona ogni incarico, dal progetto alle strutture fino alla chiusura del cantiere, per privati e opere civili in provincia.',
-    goal: 'Far capire in pochi secondi, a chi deve costruire, ristrutturare o mettere in sicurezza un edificio nel mantovano, chi è lo studio, cosa fa e come contattarlo.',
+      'Dario Donelli è ingegnere edile-architetto, iscritto all’Ordine dal 2010. Segue di persona ogni incarico, dal progetto alle strutture fino alla chiusura del cantiere, per privati e opere civili in provincia.',
+    goal: 'Far capire in pochi secondi, a chi deve costruire, ristrutturare o mettere in sicurezza un edificio, chi è lo studio, cosa fa e come contattarlo.',
     problem:
       'Uno studio di una persona sola, senza un archivio di lavori fotografati né numeri da esibire. Il rischio era un sito generico, uguale a quello di qualsiasi studio tecnico, o riempito di referenze non verificabili.',
     strategy:
       'Ho preso come riferimento la targa sull’ingresso dello studio: incisione nera su metallo chiaro, filetti sottili, nessun colore. Da lì vengono il bianco e nero, il nome in maiuscolo e la «D» del logo che torna come punto elenco, marcatore e cursore. Al posto delle referenze ho messo dati verificabili: l’iscrizione all’albo, la sede, il territorio su una carta.',
     development: [
       { title: 'Targa', text: 'L’apertura è alta tre schermi: mentre si scorre, il nome atterra in alto, entra la targa e il manifesto compare riga per riga. È tutto CSS legato allo scorrimento, senza librerie; su telefono o con il movimento ridotto diventa un’apertura statica con gli stessi elementi.' },
-      { title: 'Carta', text: 'Ho disegnato in SVG una carta della provincia di Mantova, con la proiezione corretta alla latitudine dello studio: 21 comuni, il Mincio, i laghi, il parco, i raggi da 5 a 20 km, scala grafica e rosa dei venti. Accanto, la fotografia della sede con tre punti che raccontano l’ingresso.' },
+      { title: 'Carta', text: 'Ho disegnato in SVG una carta del territorio, con la proiezione corretta alla latitudine dello studio: i comuni, i fiumi, i laghi, i raggi da 5 a 20 km, scala grafica e rosa dei venti. Accanto, la fotografia della sede con tre punti che raccontano l’ingresso.' },
       { title: 'Dati', text: 'Testi, recapiti, credenziali d’albo e dati societari stanno in un unico file, separati dall’impaginazione. La mappa di dettaglio usa OpenStreetMap al posto di Google: nessuna chiave, nessun cookie di profilazione, nessun banner.' },
     ],
     result:
@@ -1174,7 +1175,7 @@ const allProjects = [
     year: 2026,
     services: ['Direzione artistica', 'Immagini generate con l’IA', 'Web design', 'Sviluppo frontend', 'Gioco in 3D'],
     technologies: ['HTML', 'CSS', 'JavaScript', 'SVG', 'three.js', 'Rapier', 'gpt-image-2', 'Vercel'],
-    summary: 'Una saracinesca coperta di volantini, uno per ogni sito e social, con i tagliandi da strappare, la sera all’ora di Mantova e una roulette in 3D. Una pagina sola, senza build.',
+    summary: 'Una saracinesca coperta di volantini, uno per ogni sito e social, con i tagliandi da strappare, la sera all’ora vera e una roulette in 3D. Una pagina sola, senza build.',
     description:
       'pzkko è il nome che uso in rete, da «Pekko», il mio soprannome. pzkko.it mette in un posto solo i miei siti e i miei social e, a poco a poco, i giochi e gli strumenti che faccio per divertimento. Non è il sito dello studio: è il posto dove provo quello che lì non starebbe.',
     goal: 'Dare a chi mi cerca un indirizzo solo per trovare i miei siti e i miei contatti, e a me un muro dove attaccare le idee nuove.',
@@ -1184,7 +1185,7 @@ const allProjects = [
       'Ho preso come riferimento la foto di una saracinesca chiusa a Bologna, coperta di graffiti e di manifesti. Ogni sito, social e gioco è un volantino attaccato col nastro, e in mezzo c’è la roba degli altri, come su un muro vero. La lamiera, la carta, i nastri e le illustrazioni sono immagini generate con gpt-image-2; l’insegna e il muro del palazzo sono disegnati in SVG; i testi sui fogli sono HTML vero, che si legge e si seleziona.',
     development: [
       { title: 'Volantini', text: 'Ogni foglio è una carta fotografata vuota, coi bordi misurati, e sopra il testo in HTML in unità del foglio, così si legge a ogni larghezza. I volantini dei social finiscono coi tagliandi da strappare: toccarne uno lo stacca e copia il contatto. La disposizione a pile la calcola uno script che misura i fogli in Chromium.' },
-      { title: 'La sera', text: 'La pagina calcola alba e tramonto di Mantova con l’algoritmo della NOAA, senza chiamate in rete, e vive a quell’ora da qualunque posto la si guardi: da quaranta minuti prima del tramonto il muro imbrunisce, poi si accende l’insegna al neon, coi tubi che sfarfallano, e di notte passano i fari delle auto.' },
+      { title: 'La sera', text: 'La pagina calcola alba e tramonto con l’algoritmo della NOAA, senza chiamate in rete, e vive a quell’ora da qualunque posto la si guardi: da quaranta minuti prima del tramonto il muro imbrunisce, poi si accende l’insegna al neon, coi tubi che sfarfallano, e di notte passano i fari delle auto.' },
       { title: 'Roulette', text: 'Il volantino della roulette apre una finestra con la ruota in 3D, disegnata con three.js, e la pallina mossa da un motore fisico vero, Rapier: si ferma dove si ferma. Si gioca a soldi finti su tutte le 157 puntate della roulette europea; una prova senza browser ha fatto 4.122 giri senza un errore.' },
     ],
     // La foto vera da cui è nato il muro, con la sua Live Photo (tools/pzkko/storia/storia.mjs); la storia intera,
@@ -1618,7 +1619,13 @@ const allProjects = [
 // dal rombo ◇ (l'avviso si regola con `showSampleNotice` in site.js).
 export const showSamples = false
 
-const published = showSamples ? allProjects : allProjects.filter((p) => !p.sample)
+// 12.11.2026 (Alberto: «togli social, numeri, indirizzi e luoghi»): niente località sui progetti, e i
+// due lavori che dicono dove abito (il sito del paese e il museo del paese) non si pubblicano.
+// Le schede qui sopra restano intere: per rimetterli basta svuotare NASCOSTI e togliere il map.
+export const NASCOSTI = ['rivaltasulmincio-it', MUSEO]
+const published = (showSamples ? allProjects : allProjects.filter((p) => !p.sample))
+  .filter((p) => !NASCOSTI.includes(p.slug))
+  .map(({ location, ...p }) => p)
 
 // Con le tavole spente i progetti escono senza `sheets`: il case study mostra la
 // galleria di `images` e withSheets() è vuoto, quindi niente /portfolio/tavole/.

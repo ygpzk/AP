@@ -132,7 +132,7 @@ function foot() {
       <p>${esc(A.piede.legale)}</p>
       <p>${esc(A.piede.ia)}</p>
       <p>${esc(A.piede.aggiornato)} · ${esc(A.piede.visitatore)}<span class="counter" data-counter>-------</span> · <span data-online>?</span> online now · Copyright © 2006–${new Date().getFullYear()} Pekko. All rights reserved. No rights reversed.</p>
-      <p class="credit"><a href="${esc(site.url)}" rel="author">Site by ${esc(site.name)}</a> · ${esc(site.location.city)} (${esc(site.location.province)}), Italy</p>
+      <p class="credit"><a href="${esc(site.url)}" rel="author">Site by ${esc(site.name)}</a></p>
       ${BCP && frogdr()}
     </footer>
     <div class="pop" data-eula-pop hidden role="dialog" aria-modal="true" aria-label="Terms of Use">

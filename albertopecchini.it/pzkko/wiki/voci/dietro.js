@@ -1088,7 +1088,9 @@ Un burattino di carta come quelli del piè di pagina, due passaggi di [[gpt-imag
   'La macchina del tempo': {
     data: '2026-11-03',
     fonti: ['albertopecchini.it/tools/tempo/tempo.mjs', 'albertopecchini.it/tools/tempo/siti.mjs', 'albertopecchini.it/tools/tempo/giro.mjs', 'albertopecchini.it/tools/tempo/scarica.mjs', 'albertopecchini.it/tools/tempo/cruscotto.mjs', 'albertopecchini.it/tools/tempo/cruscotto.ps1', 'albertopecchini.it/tools/tempo/diretta.mjs', 'albertopecchini.it/tools/tempo/prova.mjs', 'albertopecchini.it/tools/tempo/istantanea.mjs', 'albertopecchini.it/tools/tempo/confronta.mjs', 'albertopecchini.it/tools/tempo/README.md', 'albertopecchini.it/src/templates/pages/tempo.js', 'albertopecchini.it/src/templates/pages/tempo-pezzi.js', 'albertopecchini.it/src/client/tempo.js', 'albertopecchini.it/src/styles/tempo.css', 'albertopecchini.it/src/data/tempo.js', 'albertopecchini.it/src/templates/routes.js'],
-    testo: `'''La macchina del tempo''' è la pagina <code>/tempo/</code> di [[albertopecchini.it]]: una copia della Wayback Machine di Internet Archive con dentro tutte le versioni dei siti di Alberto, una per giorno di lavoro. Nata il 3 novembre 2026 per il solo albertopecchini.it («fai proprio una copia di Wayback Machine (Internet Archive), niente altri strumenti, metti la barra sopra e l'istogramma in base ai commit di github»), lo stesso giorno è diventata l'archivio di cinque siti: «fai anche tutti i commit di cascina fontana e rivalta sul mincio con stesse funzioni attuali e senza bug + anche pzk e bcp che sono dentro al repo AP», con «la barra in alto con un selettore del repo» e «più statistiche nel commit», ripercorrendo «i momenti di quando committavo senza violare la mia privacy».
+    testo: `''Dal 12 novembre 2026 la pagina non è più online: le copie dei siti vecchi avevano dentro i dati personali che [[Il controllo dei dati personali|il controllo dei dati personali]] tiene fuori dal sito. L'archivio resta sul computer di casa.''
+
+'''La macchina del tempo''' è la pagina <code>/tempo/</code> di [[albertopecchini.it]]: una copia della Wayback Machine di Internet Archive con dentro tutte le versioni dei siti di Alberto, una per giorno di lavoro. Nata il 3 novembre 2026 per il solo albertopecchini.it («fai proprio una copia di Wayback Machine (Internet Archive), niente altri strumenti, metti la barra sopra e l'istogramma in base ai commit di github»), lo stesso giorno è diventata l'archivio di cinque siti: «fai anche tutti i commit di cascina fontana e rivalta sul mincio con stesse funzioni attuali e senza bug + anche pzk e bcp che sono dentro al repo AP», con «la barra in alto con un selettore del repo» e «più statistiche nel commit», ripercorrendo «i momenti di quando committavo senza violare la mia privacy».
 
 == I siti ==
 * [[albertopecchini.it]]: il repository AP fuori pzkko e Better Call Pekko, dal 24 maggio 2026 («Add files from Figma Make»), 108 giorni.
@@ -1129,6 +1131,34 @@ Le statistiche vengono dai commit già pubblici su GitHub, in ora italiana; nien
 * [[La regia di Claude]]
 * [[Il cercapersone zero]]`,
   },
+  'La guardia DDoS': {
+    data: '2026-11-12',
+    fonti: ['albertopecchini.it/tools/cruscotto/ddos.mjs'],
+    testo: `'''La guardia DDoS''' è la finestra cmd che tiene d'occhio i siti di [[Alberto Pecchini|Alberto]] contro gli attacchi: nata la notte del 12 novembre 2026 («apri un cmd per rilevare attacchi ddos in regia di claude ADESSO»), accanto alla [[La regia di Claude|regia di Claude]]. Si lancia da albertopecchini.it con <code>node tools/cruscotto/ddos.mjs</code>.
+
+== Cosa guarda ==
+Ogni 20 secondi, per ogni progetto su Vercel, chiede al firewall se c'è un attacco in corso e se la modalità «Attack Challenge» è accesa; poi apre ogni dominio e ne misura codice e tempo di risposta. Diventa rossa con un 429, un 5xx, un sito che non risponde, una risposta oltre i 2,5 secondi o il firewall che blocca qualcuno. Un sito messo in pausa apposta è grigio, non rosso. Quando qualcosa cambia scrive una riga nel log della regia.
+
+Guarda e basta: non cambia niente su Vercel. La chiave è quella della riga di comando di Vercel, che si rinnova da sola.
+
+{{Vedi anche|La regia di Claude|Il controllo dei dati personali}}
+[[Categoria:Gli strumenti]]`,
+  },
+
+  'Il controllo dei dati personali': {
+    data: '2026-11-12',
+    fonti: ['albertopecchini.it/tools/privacy.mjs'],
+    testo: `'''Il controllo dei dati personali''' è il passo della build di [[albertopecchini.it]] che tiene fuori dal sito social, numeri di telefono, indirizzi e luoghi. Nato il 12 novembre 2026, quando Alberto ha spento il sito di colpo e poi l'ha voluto «uguale a prima ma senza social, numeri, indirizzi e luoghi».
+
+== Come funziona ==
+Alla fine della build <code>tools/privacy.mjs</code> toglie da dist/ i file che li contengono (le copie dei siti vecchi della [[La macchina del tempo|macchina del tempo]], le loro foto, la carta dell'area operativa, le pagine di [[Better Call Pekko]] che hanno il loro dominio) e poi legge ogni file di testo rimasto. Se trova un profilo social, un numero, una via o un paese, elenca file e riga e '''ferma la build''': su Vercel resta online la versione di prima. A mano: <code>node tools/privacy.mjs dist --tutto</code>.
+
+Nei dati del sito la città, l'indirizzo, le coordinate, il telefono e i social sono vuoti; i progetti escono senza località, e due lavori legati al paese non si pubblicano più (<code>NASCOSTI</code> in projects.js). L'email resta: serve al modulo dei contatti.
+
+{{Vedi anche|La guardia DDoS|albertopecchini.it}}
+[[Categoria:Gli strumenti]]`,
+  },
+
   'La regia di Claude': {
     data: '2026-11-03',
     fonti: ['albertopecchini.it/tools/cruscotto/cruscotto.mjs', 'albertopecchini.it/tools/cruscotto/vista.mjs', 'albertopecchini.it/tools/cruscotto/diretta.mjs', 'albertopecchini.it/tools/cruscotto/gancio.mjs', 'albertopecchini.it/tools/cruscotto/cruscotto.ps1', 'albertopecchini.it/tools/cruscotto/README.md', 'albertopecchini.it/tools/cruscotto/modelli.mjs', 'albertopecchini.it/tools/cruscotto/account.mjs', 'albertopecchini.it/tools/cruscotto/hosting.mjs', 'albertopecchini.it/tools/cruscotto/regia-console.lnk', 'albertopecchini.it/tools/cruscotto/regia.ico', 'albertopecchini.it/tools/cruscotto/regia.png'],

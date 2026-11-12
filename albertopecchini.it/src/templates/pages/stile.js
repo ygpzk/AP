@@ -65,11 +65,11 @@ function heroBoard(b) {
           ${button({ href: cta.href, label: cta.label, size: 'sm', iconName: null })}
         </header>
         <div class="bd-hero__main">
-          <div class="bd-hero__pills" data-bd="up"><span class="pill">${esc(site.location.city)} · ${COORDS}</span><span class="pill"><span class="dot dot--live" aria-hidden="true"></span>${esc(site.availability.label)}</span></div>
+          <div class="bd-hero__pills" data-bd="up"><span class="pill"><span class="dot dot--live" aria-hidden="true"></span>${esc(site.availability.label)}</span></div>
           <p class="bd-hero__name" aria-hidden="true"><span>${esc(site.firstName)}</span> <span>${esc(site.lastName)}</span></p>
           <p class="sr-only">${esc(site.name)}</p>
           <p class="bd-hero__title" data-bd="up" style="--d:120ms">Casa, sito, marchio. Un solo ${em('referente.')}</p>
-          <p class="bd-hero__lead" data-bd="up" style="--d:220ms">Diplomato geometra a ${esc(site.location.city)}: rilevo e disegno edifici, scrivo siti web a mano, costruisco marchi. Lo stesso metodo, la stessa cura.</p>
+          <p class="bd-hero__lead" data-bd="up" style="--d:220ms">Diplomato geometra: rilevo e disegno edifici, scrivo siti web a mano, costruisco marchi. Lo stesso metodo, la stessa cura.</p>
           <div class="bd-hero__actions" data-bd="up" style="--d:320ms">${button({ href: cta.href, label: cta.label, size: 'lg' })}${button({ href: '/portfolio/', label: 'Guarda i lavori', variant: 'ghost', size: 'lg' })}</div>
           <p class="bd-hero__copy" data-bd="fade" style="--d:420ms">Premi <kbd>C</kbd> per copiare la mia email</p>
           <div class="bd-term" data-bd="up" style="--d:520ms" aria-hidden="true">

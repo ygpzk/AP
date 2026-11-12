@@ -169,6 +169,13 @@ export default function sitePages() {
         await write('sitemap.xml', renderSitemap())
         await write('robots.txt', renderRobots())
       }
+      // 12.11.2026: fuori i file di public/ che dicono dove abito o il numero (tools/privacy.mjs),
+      // poi il controllo: se in dist/ resta un dato personale la build si ferma.
+      if (!BCP) {
+        const { ripulisci, controlla } = await import(pathToFileURL(path.resolve(config.root, 'tools/privacy.mjs')).href)
+        await ripulisci(outDir)
+        if (!controlla(outDir)) throw new Error('privacy: dati personali in dist/ (node tools/privacy.mjs dist per vederli)')
+      }
       // il manifest di Vite non serve online
       await fs.rm(path.join(outDir, '.vite'), { recursive: true, force: true })
 

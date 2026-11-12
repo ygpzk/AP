@@ -29,7 +29,7 @@ const legalShell = ({ crumb, href, title, intro, sections }) => html`
 `
 
 export function privacyPage() {
-  const owner = `${esc(site.legal.owner)}, ${esc(site.location.address)}, ${esc(site.location.cap)} ${esc(site.location.city)} (${esc(site.location.province)})${site.legal.piva ? ` — P. IVA ${esc(site.legal.piva)}` : ''}`
+  const owner = `${esc(site.legal.owner)}${site.legal.piva ? ` — P. IVA ${esc(site.legal.piva)}` : ''}`
   return legalShell({
     crumb: 'Privacy',
     href: '/privacy/',

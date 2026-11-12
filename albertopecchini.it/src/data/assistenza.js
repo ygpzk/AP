@@ -17,7 +17,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { site } from './site.js'
-import { projects } from './projects.js'
+import { allProjects as projects } from './projects.js'
 
 // Con SITE=bcp (la build del progetto Vercel di bettercallpekko.it) le due pagine
 // stanno alla radice del dominio; altrimenti vivono dentro il sito serio.
@@ -25,13 +25,11 @@ export const BCP = typeof process !== 'undefined' && process.env?.SITE === 'bcp'
 const PATH = BCP ? '/' : '/assistenza/'
 const CONTATTI = BCP ? '/contact/' : '/contatti/assistenza/'
 
-const cifre = site.contact.phone.replace(/\D/g, '') // 393510355506
-const nazionale = cifre.replace(/^39/, '')
-// Il numero come lo scrivono gli spot americani: 351-035-5506.
-const bello = nazionale.length === 10 ? `${nazionale.slice(0, 3)}-${nazionale.slice(3, 6)}-${nazionale.slice(6)}` : site.contact.phone
+// Dal 12.11.2026 niente numero né luogo (Alberto: «togli social, numeri, indirizzi e luoghi»):
+// dove c'era il numero c'è il modulo dei contatti, e «chiama» porta lì.
+const bello = 'use the contact form'
 
-// Solo il comune: l'indirizzo di casa non si pubblica (richiesta di Alberto, 29.09.2026).
-const DOVE = `${site.location.city} (${site.location.province}), Italy`
+const DOVE = 'Italy'
 
 // I siti veri di Alberto, dal portfolio (src/data/projects.js): stesso indirizzo e
 // stessa cattura a pagina intera (rifatta ogni ora da tools/catture), raccontati
@@ -53,22 +51,22 @@ export const assistenza = {
   api: '/api/bcp/',
   lang: 'en',
   nome: 'Better Call Pekko',
-  titolo: 'In Computer Trouble? Better Call Pekko! — I’m the computer guy (and I make websites). Computer repair & web design in Rivalta sul Mincio (Mantova, Italy)',
+  titolo: 'In Computer Trouble? Better Call Pekko! — I’m the computer guy (and I make websites). Computer repair & web design in Italy',
   descrizione:
-    'pekko fixes computers: virus removal, duplicate files, printers that wont print, drivers, windows and office installs, phones, wi-fi. and he makes real websites, hand-coded: rivaltasulmincio.it, cascinafontana.xyz, ing. dario donelli, pzkko.it. rivalta sul mincio (mantova), house calls and remote help. si parla italiano.',
+    'pekko fixes computers: virus removal, duplicate files, printers that wont print, drivers, windows and office installs, phones, wi-fi. and he makes real websites, hand-coded: rivaltasulmincio.it, cascinafontana.xyz, ing. dario donelli, pzkko.it. house calls and remote help. si parla italiano.',
   titoloContatti: 'Contact Pekko — free consultation, si parla italiano',
-  descrizioneContatti: 'phone, whatsapp, e-mail or the form: tell pekko what ur computer did and get an answer within 1 business day. rivalta sul mincio (mantova, italy), house calls and remote help.',
+  descrizioneContatti: 'e-mail or the form: tell pekko what ur computer did and get an answer within 1 business day. house calls and remote help.',
 
   telefono: bello,
-  tel: `tel:${site.contact.phone.replace(/\s/g, '')}`,
-  whatsapp: `https://wa.me/${cifre}?text=${encodeURIComponent('Hi Pekko! My computer did something terrible: ')}`,
+  tel: CONTATTI,
+  whatsapp: CONTATTI,
   email: site.contact.email,
   dove: DOVE,
-  mappa: `https://www.openstreetmap.org/?mlat=${site.location.lat}&mlon=${site.location.lon}#map=13/${site.location.lat}/${site.location.lon}`,
+  mappa: CONTATTI,
   paypal: 'https://www.paypal.biz/albertoxpecchini',
-  instagram: site.social.find((s) => s.key === 'instagram')?.url || '',
-  github: site.social.find((s) => s.key === 'github')?.url || '',
-  nascita: '06/28/2006',
+  instagram: '',
+  github: '',
+  nascita: '',
   slogan: 'IT’S ALL GOOD, MAN!',
 
   menu: [
@@ -86,7 +84,7 @@ export const assistenza = {
     { label: 'Contact', href: CONTATTI, contatti: true },
   ],
 
-  striscia: `${bello} ● SI PARLA ITALIANO ● RIVALTA SUL MINCIO (MN) ● I’M THE COMPUTER GUY ● I ALSO MAKE WEBSITES, REAL ONES ● IT’S ALL GOOD, MAN! ● WWW.BETTERCALLPEKKO.IT`,
+  striscia: `${bello} ● SI PARLA ITALIANO ● I’M THE COMPUTER GUY ● I ALSO MAKE WEBSITES, REAL ONES ● IT’S ALL GOOD, MAN! ● WWW.BETTERCALLPEKKO.IT`,
 
   popup: {
     barra: 'FREE CONSULTATION — Pekko, the computer guy',
@@ -338,11 +336,7 @@ export const assistenza = {
   social: {
     titolo: 'FIND PEKKO ON',
     reti: [
-      { nome: 'Instagram', href: site.social.find((s) => s.key === 'instagram')?.url || CONTATTI, colore: '#c13584', nota: '@albertoxpecchini' },
-      { nome: 'GitHub', href: site.social.find((s) => s.key === 'github')?.url || CONTATTI, colore: '#333', nota: 'the code of this site' },
-      { nome: 'WhatsApp', href: `https://wa.me/${cifre}`, colore: '#25a244', nota: bello },
       { nome: 'E-mail', href: `mailto:${site.contact.email}`, colore: '#2e5fb8', nota: 'msn is dead. rip' },
-      { nome: 'Phone', href: `tel:${site.contact.phone.replace(/\s/g, '')}`, colore: '#e21212', nota: 'call. like its 2009' },
       { nome: 'PayPal', href: 'https://www.paypal.biz/albertoxpecchini', colore: '#003087', nota: 'donate a coffee' },
     ],
   },
