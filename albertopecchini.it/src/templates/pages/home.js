@@ -311,7 +311,7 @@ function tempo() {
 }
 
 // ── Il manifesto a tutta larghezza ───────────────────────────────────────────
-// La frase a sinistra, Alberto scontornato a destra (la foto «curioso», l'iPhone bianco) (come il «The most
+// La frase a sinistra, Alberto scontornato a destra (dal 12.11.2026 il selfie in bianco e nero) (come il «The most
 // important technology…» di reflection).
 
 function banner() {

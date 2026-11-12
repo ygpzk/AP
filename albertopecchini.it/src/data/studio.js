@@ -35,13 +35,15 @@ export const photos = {
     height: 1735,
     alt: 'Alberto Pecchini si fa un selfie allo specchio, in bianco e nero, con una felpa nera con la scritta Scotland',
   },
-  // L'iPhone bianco: il manifesto della home.
+  // Il manifesto della home. Fino al 12.11.2026 era la foto a colori con l'iPhone bianco
+  // (curioso-1600, resta nel repository ma non va online: VIA in tools/privacy.mjs); ora è lo
+  // stesso selfie in bianco e nero, tagliato al petto nello stesso formato (1600×1130).
   curious: {
-    src: '/media/studio/curioso-1600.webp',
-    small: '/media/studio/curioso-900.webp',
+    src: '/media/studio/ritratto-bn-banner-1600.webp',
+    small: '/media/studio/ritratto-bn-banner-900.webp',
     width: 1600,
     height: 1130,
-    alt: 'Alberto Pecchini guarda incuriosito lo schermo di un vecchio iPhone bianco che tiene in mano',
+    alt: 'Alberto Pecchini si fa un selfie allo specchio, in bianco e nero',
   },
 }
 
