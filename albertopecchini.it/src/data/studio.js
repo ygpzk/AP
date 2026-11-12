@@ -10,14 +10,17 @@ export const bio = {
   ],
 }
 
-// Fotografie reali in public/media/studio/. Ritratto e avatar vengono dalla
-// stessa fototessera (1240×1594), scontornata con tools/scontorna.mjs: fondo
-// trasparente, il volto è quello della foto. Il ritratto ha sopra la testa un
-// margine vuoto, perché la parallasse sposta l'immagine del 7% nel riquadro.
+// Fotografie reali in public/media/studio/. Dal 12.11.2026 ritratto e avatar vengono
+// dal selfie allo specchio in bianco e nero (mirror, qui sotto), non più dalla
+// fototessera (Alberto: «togli anche la foto e metti quella b&w nuova»): il ritratto
+// è specchio-1600 portato a 1000 di larghezza e appoggiato in fondo a un 1000×1250
+// trasparente, così sopra la testa resta il margine per la parallasse (7%); l'avatar
+// è il quadrato del volto (740 px da x 140, y 30) ridotto a 192. La fototessera resta
+// nel repository ma non va online (VIA in tools/privacy.mjs).
 export const photos = {
-  portrait: { src: '/media/studio/fototessera.webp', width: 1000, height: 1250, alt: 'Alberto Pecchini in primo piano, di fronte, con un maglione blu scuro', caption: 'FIG. 01 — Ritratto' },
-  // La testa della stessa fototessera, in un quadrato, per il saluto in cima alla home.
-  avatar: { src: '/media/studio/fototessera-avatar.webp', width: 192, height: 192, alt: '' },
+  portrait: { src: '/media/studio/ritratto-bn.webp', width: 1000, height: 1250, alt: 'Alberto Pecchini si fa un selfie allo specchio, in bianco e nero', caption: 'FIG. 01 — Ritratto' },
+  // Il volto dello stesso selfie, in un quadrato, per il saluto in cima alla home.
+  avatar: { src: '/media/studio/ritratto-bn-avatar.webp', width: 192, height: 192, alt: '' },
   // Scontornate (fondo trasparente). Le misure sono della versione grande; `small`
   // è la variante per i telefoni.
   // Il selfie allo specchio, in bianco e nero: in /studio/ esce dal riquadro scuro

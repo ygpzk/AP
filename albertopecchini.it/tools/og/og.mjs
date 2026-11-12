@@ -20,14 +20,7 @@ const root = resolve(here, '../..')
 const W = 1200
 const H = 630
 
-// coordinate al primo, come nel piè di pagina (indicano il paese, non la casa)
-const dms = (v, [pos, neg]) => {
-  const a = Math.abs(v)
-  const d = Math.floor(a)
-  const m = Math.round((a - d) * 60)
-  return `${d}°${String(m).padStart(2, '0')}′${v < 0 ? neg : pos}`
-}
-const coords = `${dms(site.location.lat, ['N', 'S'])} · ${dms(site.location.lon, ['E', 'W'])}`
+// 12.11.2026: niente paese né coordinate nell'anteprima (tools/privacy.mjs)
 
 const font = (p) => pathToFileURL(join(root, 'node_modules', p)).href
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -79,7 +72,7 @@ body::before{content:'';position:absolute;inset:0;
     <circle cx="23.5" cy="5" r="1.9" fill="#007acc" stroke="none"/>
   </svg>
   <span>${esc(site.edition)}</span>
-  <span class="r">${esc(site.location.city)} (${esc(site.location.province)}) · ${esc(coords)}</span>
+  <span class="r"></span>
 </header>
 <h1 class="name"><span>${esc(site.firstName)}</span><span class="out">${esc(site.lastName)}</span></h1>
 <p class="claim">${claim}</p>

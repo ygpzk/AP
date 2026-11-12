@@ -31,6 +31,7 @@ export const VIA = [
   'media/progetti/museo-mestieri-del-fiume', // progetto nascosto (src/data/projects.js, NASCOSTI)
   'media/tavole/museo-mestieri-del-fiume',
   'media/web/rivalta-*', // il sito del paese: progetto nascosto
+  'media/studio/fototessera*', // la fototessera: dal 12.11.2026 il ritratto è il selfie in bianco e nero
 ]
 
 const TESTO = new Set(['.html', '.js', '.mjs', '.json', '.xml', '.txt', '.webmanifest', '.css', '.svg', '.md', '.vcf', '.ics'])

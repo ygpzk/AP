@@ -12366,7 +12366,7 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 
 {{Vedi anche|Le app di pzk os|pzk os|Il cercapersone zero}}
 [[Categoria:Le app di pzk os]]` },
-  "Elenco dei commit": { data: "2026-11-12", fonti: ["README.md"], testo: `'''I 787 commit''' del [[Il repository AP|repository AP]] dal 2026-05-24 a oggi (l’ultimo: <code>a3ba291</code>, 2026-11-11). La lista completa, con filtri, sta in [[Speciale:UltimeModifiche|Ultime modifiche]]; la cronologia di ogni voce (la linguetta «Cronologia») elenca i commit che hanno toccato i suoi file. Generato da <code>git log</code> ogni volta che la wiki si aggiorna.
+  "Elenco dei commit": { data: "2026-11-12", fonti: ["README.md"], testo: `'''I 790 commit''' del [[Il repository AP|repository AP]] dal 2026-05-24 a oggi (l’ultimo: <code>45a21a0</code>, 2026-11-12). La lista completa, con filtri, sta in [[Speciale:UltimeModifiche|Ultime modifiche]]; la cronologia di ogni voce (la linguetta «Cronologia») elenca i commit che hanno toccato i suoi file. Generato da <code>git log</code> ogni volta che la wiki si aggiorna.
 
 == Per mese ==
 {| class="wikitable"
@@ -12393,10 +12393,13 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 | 190
 |-
 | 2026-11
-| 86
+| 89
 |}
 
 == Gli ultimi trenta ==
+* 2026-11-12 [https://github.com/albertoxpecchini/AP/commit/45a21a0 45a21a0] Merge remote-tracking branch 'origin/main' into albertopecchini.it
+* 2026-11-12 [https://github.com/albertoxpecchini/AP/commit/a39acf1 a39acf1] fix(sito): via social, numeri, indirizzi e luoghi; guardia DDoS
+* 2026-11-11 [https://github.com/albertoxpecchini/AP/commit/e2e617f e2e617f] Catture aggiornate: Alberto Pecchini
 * 2026-11-11 [https://github.com/albertoxpecchini/AP/commit/a3ba291 a3ba291] feat(pzk os, regia): stato dei sistemi, agenti gratis, cruscotto con account e hosting
 * 2026-11-11 [https://github.com/albertoxpecchini/AP/commit/732b789 732b789] docs(wiki): pzkkopedia allineata, la miniera e il pezzo che non ci sta
 * 2026-11-11 [https://github.com/albertoxpecchini/AP/commit/d195e6e d195e6e] fix(pzk os): la miniera monta i pezzi comprati, e un agente per app ha corretto 198 errori
@@ -12424,9 +12427,6 @@ Ogni partita: 8 domande, 15 secondi l’una; ogni risposta giusta paga 20/40/80 
 * 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/0a2e5e8 0a2e5e8] feat(pzkko): la macchinetta delle sigarette sulla serranda e pzkko.it/deutschland, la galleria del viaggio a Monaco e Stoccarda con JMA
 * 2026-11-09 [https://github.com/albertoxpecchini/AP/commit/39d41eb 39d41eb] feat(pzkko): la saracinesca alleggerita, solo 2D (6.11)
 * 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/e168cea e168cea] docs(wiki): pzkkopedia allineata al biglietto dell'ospite (d6ff9ab)
-* 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/d6ff9ab d6ff9ab] fix(pzkko): l'ospite appena arrivato aspetta il biglietto della banca prima di ogni azione (niente più 401 a ogni visita nuova)
-* 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/65f5524 65f5524] docs(wiki): pzkkopedia allineata al bot dei bug (541f48c)
-* 2026-11-06 [https://github.com/albertoxpecchini/AP/commit/541f48c 541f48c] feat(tools): il bot dei bug di pzkko, che gira da solo a ogni push e due volte al giorno sul sito vero
 
 == Dove si vede ==
 [[File:github.webp|thumb|none|380px|il repository AP su GitHub, con il numero dei commit]]
