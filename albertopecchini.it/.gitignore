@@ -59,5 +59,3 @@ tools/lezioni/__pycache__/
 tools/tempo/lavoro/
 
 
-# resti locali di pzkko (fuori da git, non tracciati)
-tools/pzkko/
