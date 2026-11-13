@@ -1,12 +1,12 @@
 {
-  "commit": "4aa3892",
-  "data": "2026-11-12",
-  "generata": "2026-11-13T01:55:15.710Z",
-  "voci": 1088,
-  "commit_totali": 792,
+  "commit": "828930f",
+  "data": "2026-11-13",
+  "generata": "2026-11-13T15:36:12.823Z",
+  "voci": 1089,
+  "commit_totali": 793,
   "moduli": {
     "principale": 55,
-    "sito": 59,
+    "sito": 60,
     "scena": 61,
     "giochi": 40,
     "cercapersone": 45,

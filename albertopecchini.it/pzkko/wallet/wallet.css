@@ -6,9 +6,9 @@
 
 /* il dialog prende tutta la finestra: il portafoglio sta nel mezzo, grande quanto entra (per leggere bene gli schermi), e
    quando la carta dei moduli è fuori si scorre per vederla; un clic fuori dal portafoglio lo chiude */
-.wallet{position:fixed;inset:0;margin:0;width:100vw;height:100dvh;max-width:none;max-height:none;padding:2dvh 0;border:0;background:none;overflow:hidden auto;overscroll-behavior:contain;scrollbar-width:none;
+.wallet{touch-action:manipulation;position:fixed;inset:0;margin:0;width:100vw;height:100dvh;max-width:none;max-height:none;padding:2dvh 0;border:0;background:none;overflow:hidden auto;overscroll-behavior:contain;scrollbar-width:none;
   color:#e9e4d8;font:400 14px/1.35 "Fake Receipt",monospace;--led:#46ff7d;--ambra:#ffb02e;--lcd:#9fb48a;--mono:"Fake Receipt",monospace;--fa:"Fake Receipt",monospace;--marker:"Fake Receipt",monospace}
-.wallet::backdrop{background:rgba(12,10,8,.55);backdrop-filter:blur(2px)}
+.wallet::backdrop{background:rgba(12,10,8,.55);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
 .wallet[open]{display:flex;flex-direction:column;align-items:center;animation:w-apre .34s cubic-bezier(.22,1,.36,1)}
 .wallet::-webkit-scrollbar{display:none}
 .wallet.chiude{animation:w-chiude .2s ease-in forwards}

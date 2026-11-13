@@ -7,6 +7,8 @@
 :root{--carta:#f4efe2;--inchiostro:#1c1a14;--rosso:#a50d25;--blu:#1446a0;--fa:"Anton",Impact,sans-serif;--marker:"Permanent Marker","Comic Sans MS",cursive;color-scheme:light}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%}
+html{-webkit-text-size-adjust:100%}
+body{-webkit-tap-highlight-color:transparent}
 body{background:#5f5b55 url(/art/muro.webp) center top/900px repeat;color:var(--inchiostro);font:400 16px/1.55 "Special Elite","Courier New",monospace}
 body::before{content:"";position:fixed;inset:0;z-index:-1;background:rgba(20,16,12,.45)}
 .foglio{position:relative;width:min(100% - 32px,980px);margin:calc(var(--barra,44px) + 34px) auto 40px;padding:34px clamp(18px,4vw,48px) 40px;background:var(--carta);
@@ -34,7 +36,7 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;background:rgba(20,16,
 .cerca:focus{outline:3px solid #ffd400;outline-offset:1px}
 .piede{width:min(100% - 32px,980px);margin:0 auto 40px;color:#f1efe8;font-size:13px;text-align:center;text-shadow:0 1px 2px #000}
 .piede a{color:#ffd400}
-@media (max-width:600px){.foglio{transform:none}.foglio::before,.foglio::after{width:80px}}
+@media (max-width:600px){.foglio{transform:none}.foglio::before,.foglio::after{width:80px}.foglio::before{left:-12px}.foglio::after{right:-12px}} /* (13.11: a -22px il nastro di destra usciva dallo schermo e su iPhone la pagina si allargava di 9 px) */
 a.scheda{color:inherit;text-decoration:none;transition:transform .12s,box-shadow .12s}
 a.scheda:hover,a.scheda:focus-visible{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--inchiostro);outline:none}
 .scheda.tuo{background:#fff6c9}

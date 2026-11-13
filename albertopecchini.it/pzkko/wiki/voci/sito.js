@@ -1221,11 +1221,33 @@ Da VS Code, '''F5''' avvia il sito serio su 5173; <code>npm run online</code> (C
     data: '2026-10-27',
     fonti: ['albertopecchini.it/pzkko/favicon.png', 'albertopecchini.it/pzkko/og.jpg', 'albertopecchini.it/pzkko/tools/lezioni/og.jpg', README],
     testo: `[[File:/og.jpg|thumb|og.jpg, l'anteprima dei link condivisi di pzkko.it (1200 × 630)]]
-'''La favicon e l'og''' di [[pzkko.it]]: <code>favicon.png</code> (64 × 64) e <code>apple-touch-icon.png</code> sono l'adesivo con la chiocciola sulla lamiera: [[La chiocciola gigante africana|la chiocciola]] resta qui, non nell'[[L'insegna|insegna]]. Il 27.10.2026 l'icona del telefono è stata rifatta, «con la sagoma raddrizzata e il bordo omogeneo» (commit 99aaf00). <code>og.jpg</code> (1200 × 630) è l'anteprima per i link condivisi; [[pzk$meeting]] ha la sua, <code>tools/lezioni/og.jpg</code>, da una lezione inventata, e [[La storia del muro|la storia]] <code>art/storia/og.jpg</code>. Sul sito serio l'anteprima è generata da [[L'anteprima og|tools/og]] coi testi di <code>site.js</code>; qui è un'immagine fissa. Le pagine della [[La barra in alto|barra]] usano <code>og.jpg</code> con <code>og:site_name</code> «pzkko». Il <code>theme-color</code> è <code>#3a3631</code> (il muro) e <code>#665d56</code> per la wiki.
+'''La favicon e l'og''' di [[pzkko.it]]: <code>favicon.png</code> (64 × 64) e <code>apple-touch-icon.png</code> sono l'adesivo con la chiocciola sulla lamiera: [[La chiocciola gigante africana|la chiocciola]] resta qui, non nell'[[L'insegna|insegna]]. Il 27.10.2026 l'icona del telefono è stata rifatta, «con la sagoma raddrizzata e il bordo omogeneo» (commit 99aaf00). <code>og.jpg</code> (1200 × 630) è l'anteprima per i link condivisi; [[pzk$meeting]] ha la sua, <code>tools/lezioni/og.jpg</code>, da una lezione inventata, e [[La storia del muro|la storia]] <code>art/storia/og.jpg</code>. Sul sito serio l'anteprima è generata da [[L'anteprima og|tools/og]] coi testi di <code>site.js</code>; qui è un'immagine fissa. Le pagine della [[La barra in alto|barra]] usano <code>og.jpg</code> con <code>og:site_name</code> «pzkko». Il <code>theme-color</code> dal 13.11.2026 è <code>#0e0d0c</code> su tutte le pagine con la barra, il nero della vernice che cola ([[pzkko su iPhone]]).
 
 {{Vedi anche|La chiocciola gigante africana|L'anteprima og|L'insegna}}
 [[Categoria:Il muro]]
 [[Categoria:Le immagini]]`,
+  },
+
+  'Pzkko su iPhone': {
+    data: '2026-11-13',
+    fonti: ['albertopecchini.it/pzkko/manifest.webmanifest', INDEX, 'albertopecchini.it/pzkko/barra/pagina.css', 'albertopecchini.it/pzkko/barra/barra.css'],
+    testo: `'''pzkko su iPhone''' (13.11.2026, [[Alberto Pecchini|Alberto]]: «ottimizza pzk per iphone in modo incantevole») sono le correzioni fatte guardando [[pzkko.it]] a 390 punti di larghezza, col tocco e con la tacca.
+
+== Dalla schermata Home ==
+<code>manifest.webmanifest</code> e i meta <code>apple-mobile-web-app-capable</code>, <code>apple-mobile-web-app-status-bar-style</code> (<code>black-translucent</code>) e <code>apple-mobile-web-app-title</code> sono su tutte le pagine con [[La barra in alto|la barra]]: con «Aggiungi alla schermata Home» di Safari il muro si apre a tutto schermo, senza la barra degli indirizzi, con l'adesivo della chiocciola come icona ([[La favicon e l'og]]). La pagina arriva fin sotto la tacca, e la vernice della barra cola da lì. Per questo il <code>theme-color</code> è diventato <code>#0e0d0c</code>, il nero della vernice, anche dentro Safari.
+
+== Cosa è stato corretto ==
+* '''le pagine della barra''' (gadget, oggetti, traguardi, info, stato): il nastro di destra del foglio (<code>barra/pagina.css</code>) usciva dallo schermo e la pagina si allargava di 9 px, quindi si poteva trascinare di lato; sul telefono i nastri ora stanno a 12 px dal bordo;
+* '''la tacca nei giochi''': [[La finestra dei giochi|le finestre dei giochi]], che sul telefono sono a tutto schermo, tengono conto di <code>safe-area-inset-top</code> e dei lati, non solo del fondo;
+* '''il doppio tocco''': <code>touch-action:manipulation</code> sui link e sui tasti del muro, nei giochi e nel [[Il wallet|wallet]]: due tocchi svelti sulle fiches non ingrandiscono più la pagina;
+* '''lo sfocato''' dietro le finestre ha anche il nome <code>-webkit-backdrop-filter</code>, per i Safari prima del 18;
+* '''la fila della barra''', che sul telefono scorre col dito, non tira più dietro il gesto «indietro» di Safari (<code>overscroll-behavior-x:contain</code>).
+
+== Come è stato provato ==
+Con un Chromium a 390 × 844, tocco e nome di Safari su iPhone: misura le larghezze e i tocchi, ma non è il motore di Safari. La tacca e la modalità a tutto schermo vanno guardate su un iPhone vero.
+
+{{Vedi anche|La barra in alto|La favicon e l'og|La finestra dei giochi}}
+[[Categoria:Il muro]]`,
   },
 
   'Il manuale del Landini': {

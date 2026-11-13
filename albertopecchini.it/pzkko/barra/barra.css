@@ -40,7 +40,7 @@
 .barra-colata{position:absolute;left:0;right:0;top:env(safe-area-inset-top);height:120px;overflow:hidden;pointer-events:none}
 .barra-colata canvas{display:block;height:120px;image-rendering:pixelated}
 
-.barra ul{position:relative;display:flex;align-items:flex-start;gap:10px;margin:0 auto;max-width:100%;padding:17px 12px 24px;list-style:none;overflow-x:auto;scrollbar-width:none;pointer-events:none}
+.barra ul{position:relative;display:flex;align-items:flex-start;gap:10px;margin:0 auto;max-width:100%;padding:17px 12px 24px;list-style:none;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;pointer-events:none}
 .barra ul::-webkit-scrollbar{display:none}
 /* ogni pezzo sta storto a modo suo e gira intorno al punto dov'è attaccato */
 .barra li{flex:none;position:relative;transform:translateY(var(--y,0px)) rotate(var(--r,0deg));transform-origin:var(--nx,50%) -4px;transition:transform .22s cubic-bezier(.2,1.5,.4,1)}
