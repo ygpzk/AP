@@ -18,7 +18,7 @@
 import { spawn } from 'node:child_process'
 import { readFileSync, existsSync } from 'node:fs'
 import net from 'node:net'
-import * as browser from '../pzkko/browser.mjs'
+import * as browser from '../browser.mjs'
 import { SITI, prefisso, fileIstantanea } from './siti.mjs'
 import { stato as diretta, log } from './diretta.mjs'
 

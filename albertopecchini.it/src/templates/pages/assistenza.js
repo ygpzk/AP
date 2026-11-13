@@ -346,7 +346,6 @@ function bottoni88() {
     ['btn-cascina', S[1].url, 'cascinafontana.xyz'],
     ['btn-donelli', S[2].url, 'Ing. Dario Donelli'],
     ['btn-ap', site.url, 'Alberto Pecchini, the serious website'],
-    ['btn-pzkko', S.find((s) => s.slug === 'pzkko-it').url, 'pzkko.it, the wall'],
     ['btn-bcp', `${A.dominio}/`, 'Better Call Pekko!!!'],
     ['btn-hand', '#websites', 'Hand coded'],
     ['btn-cookie', '#websites', '0 cookies, 0 trackers'],
@@ -370,7 +369,6 @@ function bottoni88() {
 function websites() {
   const S = W.siti
   const [serio] = S.filter((s) => s.slug === 'albertopecchini-it')
-  const [muro] = S.filter((s) => s.slug === 'pzkko-it')
   return html`
     <section class="sec" id="websites">
       <h2>${i3(W.titolo, 'b', 34)}<small>${esc(W.sotto)}</small></h2>
@@ -382,8 +380,6 @@ function websites() {
           <div class="c300">
             ${ad(serio.ad, serio.alt, { w: 300, h: 250, href: serio.url, ext: true, title: 'The serious website (opens in a new window)' })}
             <p class="note" style="text-align:center">same guy, different font · <a href="${esc(site.url)}" target="_blank" rel="noopener">the serious website »</a></p>
-            ${ad(muro.ad, muro.alt, { w: 300, h: 250, href: muro.url, ext: true, title: `${muro.dominio} (opens in a new window)` })}
-            <p class="note" style="text-align:center">same guy, on a wall · <a href="${esc(muro.url)}" target="_blank" rel="noopener">pzkko.it »</a></p>
             ${ad('ad-web-cantiere', 'No website? Pekko is already digging. Free consultation', { w: 300, h: 100, href: ctaWeb })}
             <div style="margin-top:8px">${webring()}</div>
             <div class="wid" style="margin-top:8px"><h4>Want one?</h4>free consultation, written quote item by item, 1 person from start 2 finish. <a href="${ctaWeb}">tell pekko about ur site »</a></div>

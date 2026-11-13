@@ -80,24 +80,6 @@ export const SITI = [
     costruisci: 'npm',
   },
   {
-    id: 'pzkko',
-    ordine: 4,
-    nome: 'pzkko.it',
-    url: 'https://www.pzkko.it',
-    github: 'https://github.com/ygpzk/AP',
-    repo: null,
-    ramo: 'HEAD',
-    linea: ['HEAD'],
-    cima: ['albertopecchini.it/pzkko/'],
-    // dal 7.10.2026 pzkko.it è la cartella albertopecchini.it/pzkko, file statici senza build
-    percorsi: ['albertopecchini.it/pzkko'],
-    da: '2026-10-07',
-    radice: (casa) => join(casa, 'albertopecchini.it/pzkko'),
-    // le funzioni di Vercel e il codice del server di casa non sono pagine: nell'archivio non vanno
-    escludi: ['api', 'server', 'tools', 'vercel.json'],
-    costruisci: (dir) => (existsSync(join(dir, 'index.html')) ? dir : null),
-  },
-  {
     id: 'bcp',
     ordine: 5,
     nome: 'bettercallpekko.it',

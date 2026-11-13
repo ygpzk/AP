@@ -54,10 +54,10 @@ tools/lezioni/__pycache__/
 *.njsproj
 *.sln
 *.sw?
-tools/pzkko/lavoro/
 
 # la macchina del tempo: le versioni ricostruite, una alla volta
 tools/tempo/lavoro/
 
-# Deutschland: la cache di Python di riconosci.py
-tools/pzkko/deutschland/__pycache__/
+
+# resti locali di pzkko (fuori da git, non tracciati)
+tools/pzkko/

@@ -39,7 +39,7 @@ function provenienza(v) {
 // ── Il database iniziale: src/data/bcp-seed.js (lo stampa anche il template) ──
 
 import { seed as SEED } from '../src/data/bcp-seed.js'
-import { archivioServer, serverGiu, serverOpzioni } from '../pzkko/api/_server.mjs'
+import { archivioServer, serverGiu, serverOpzioni } from './_server.mjs'
 
 // ── Archivio: il server di Alberto, oppure memoria (solo in locale), oppure niente ────
 

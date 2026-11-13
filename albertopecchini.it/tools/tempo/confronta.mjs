@@ -13,7 +13,7 @@ import { createReadStream, existsSync, statSync, mkdirSync, writeFileSync } from
 import { createRequire } from 'node:module'
 import { dirname, join, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import * as browser from '../pzkko/browser.mjs'
+import * as browser from '../browser.mjs'
 import { SITI, SITO, LAVORO, fileIstantanea, dominio } from './siti.mjs'
 
 const sharp = createRequire(join(SITO, 'tools/catture/package.json'))('sharp')

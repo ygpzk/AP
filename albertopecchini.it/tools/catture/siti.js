@@ -83,35 +83,4 @@ export const siti = {
     catture: casa('dd'),
   },
 
-  'pzkko-it': {
-    // il muro vive all'ora di Mantova: ?ora=12:00&notte=0 lo tiene di giorno, ?ora=22:00&notte=1 a notte piena. L'ora
-    // serve alla scena 3D, che mette il sole dove sta davvero: col solo ?notte=0, di sera, era una notte con le luci
-    // spente e la cattura usciva nera (fino al 21.10, quando il giro di GitHub cadeva di sera).
-    // Dal 18.10 la home è una scena 3D, che arriva dopo il caricamento (col movimento ridotto senza il volo): le catture
-    // della finestra la aspettano pronta, se no erano il nero del caricamento (21.10). Le pagine intere sono il muro di
-    // sempre (?muro=1): la scena è una tela fissa grande quanto la finestra, a strisce non si fotografa.
-    // Su GitHub non c'è scheda video: la scena gira in software (SwiftShader), lenta, e la pagina non arrivava mai a
-    // «rete ferma» entro i 60 s di goto. Si carica fino al documento (carica) e la scena si aspetta fino a 3 minuti
-    carica: 'domcontentloaded',
-    prima: async (page) => {
-      await page
-        .waitForFunction(() => document.documentElement.dataset.scena === 'pronta' || !document.documentElement.classList.contains('scena-carico'), { timeout: 180_000, polling: 1000 })
-        .catch(() => console.log(`! ${page.url()}: la scena 3D non è arrivata`))
-      await page.evaluate(() => scrollTo(0, 0))
-      await new Promise((r) => setTimeout(r, 2000))
-    },
-    catture: [
-      ...casa('pzk', '/?ora=12:00&notte=0').map((c) => (c.formato.endsWith('Tall') ? { ...c, percorso: '/?ora=12:00&notte=0&muro=1' } : c)),
-      { file: 'pzk-notte-desktop.webp', percorso: '/?ora=22:00&notte=1', formato: 'desktop' },
-      {
-        file: 'pzk-roulette-tablet.webp',
-        // #roulette apre la finestra appena la pagina è pronta
-        percorso: '/?ora=12:00&notte=0#roulette',
-        formato: 'tablet',
-        viewport: [820, 1093],
-        prima: (page) => page.waitForSelector('dialog[open] canvas', { timeout: 20_000 }),
-      },
-      { file: 'pzk-404-mobile.webp', percorso: '/404/?ora=12:00&notte=0', formato: 'mobile' },
-    ],
-  },
 }

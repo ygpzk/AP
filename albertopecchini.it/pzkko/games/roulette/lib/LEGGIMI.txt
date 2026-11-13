@@ -1,1 +1,0 @@
-three.js r186 (MIT) e Rapier 0.21 (Apache 2.0), copiati da tools/pzkko/roulette/motore.mjs.

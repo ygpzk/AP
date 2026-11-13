@@ -1,11 +1,10 @@
-// npm run online — i tre dev server, raggiungibili anche da fuori con indirizzi fissi
+// npm run online — i due dev server, raggiungibili anche da fuori con indirizzi fissi
 // (dev tunnels di Microsoft, lo stesso servizio delle porte inoltrate di VS Code):
 //
 //   albertopecchini.it   :5173   npm run dev
 //   bettercallpekko.it   :5181   npm run dev:bcp
-//   pzkko.it             :5182   npm run dev:pzkko
 //
-// Accende i server che non sono già accesi, poi ospita il tunnel «pzkko» e stampa i tre
+// Accende i server che non sono già accesi, poi ospita il tunnel «pzkko» e stampa i due
 // indirizzi. Il tunnel è anonimo: chi ha il link entra (alla prima visita Microsoft mostra un
 // avviso: «Continue»). Gli indirizzi restano gli stessi finché il tunnel esiste: scade dopo
 // 30 giorni; se manca lo si ricrea da qui, ma allora cambiano. Ctrl+C spegne tunnel e server
@@ -23,7 +22,6 @@ const TUNNEL = 'pzkko'
 const SITI = [
   { nome: 'albertopecchini.it', tag: 'ap', port: 5173, args: ['node_modules/vite/bin/vite.js', '--port', '5173', '--strictPort'] },
   { nome: 'bettercallpekko.it', tag: 'bcp', port: 5181, args: ['tools/dev.mjs', 'bcp'] },
-  { nome: 'pzkko.it', tag: 'pzk', port: 5182, args: ['tools/dev.mjs', 'pzkko'] },
 ]
 
 const devtunnel = (() => {
@@ -36,7 +34,7 @@ const devtunnel = (() => {
 })()
 const dt = (...args) => spawnSync(devtunnel, args, { encoding: 'utf8' })
 
-console.log('online: tre dev server e il tunnel «%s»\n', TUNNEL)
+console.log('online: due dev server e il tunnel «%s»\n', TUNNEL)
 
 // 1. login (una volta per computer) e tunnel con le tre porte
 // («Not logged in» contiene anche lui «logged in»: prima passava per un accesso, e il tunnel si chiedeva da anonimo)

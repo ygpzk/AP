@@ -35,7 +35,6 @@ Richiede **Node 20.19 o superiore** (in produzione gira su Node 24) e npm.
 npm install
 npm run dev       # sviluppo su http://localhost:5173 (se la porta è occupata Vite ne sceglie un’altra)
 npm run dev:bcp   # bettercallpekko.it su http://localhost:5181 (SITE=bcp, visite e like in memoria)
-npm run dev:pzkko # pzkko.it su http://localhost:5182 (la cartella pzkko/ così com’è)
 npm run online    # i tre insieme, anche da fuori con indirizzi fissi (Ctrl+Alt+O in VS Code)
 npm run build     # genera dist/: pagine, sitemap.xml, robots.txt, 404.html, miniature
 npm run preview   # serve dist/ in locale, come farebbe l’hosting
