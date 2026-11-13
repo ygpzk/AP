@@ -1517,4 +1517,27 @@ Il bordo bianco di carta è '''nel disegno''', aggiunto da <code>pixel.mjs</code
 {{Vedi anche|Google Fonts|Codice C (app)|albertopecchini.it}}
 [[Categoria:Gli strumenti]]`,
   },
+
+  'Il € che gira': {
+    data: '2026-11-13',
+    fonti: ['albertopecchini.it/public/live/euro/index.html', 'albertopecchini.it/public/live/euro/euro.webp'],
+    testo: `{{Infobox
+| titolo = Il € che gira
+| dove = albertopecchini.it/live/euro/
+| dal = 13 novembre 2026
+| file = public/live/euro/index.html
+}}
+'''Il € che gira''' è una pagina di [[albertopecchini.it]] fatta per essere un livello web in Camo Studio (o una sorgente browser in OBS): un € nero in 3D, lucido, che gira lento su se stesso e torna uguale ogni 8 secondi.
+
+== Com'è fatto ==
+* <code>euro.webp</code>: WebP animata con trasparenza, 640×640, 200 fotogrammi a 25 al secondo (3,3 MB). Il giro è di 360° esatti, quindi il loop non ha scatti.
+* il € è disegnato in 3D vero da uno script fuori dal repository (<code>ruota.mjs</code>, fra le pratiche di Alberto): il glifo di Arial Bold diventa una mappa di distanze, viene estruso con i bordi smussati e reso con lo sphere tracing, un worker per core, con riflessi verdi e un lampo di luce quando la faccia passa davanti.
+* <code>index.html</code>: fondo trasparente, il € riempie il lato corto della finestra; con <code>?verde</code> il fondo diventa il verde euroshit (#00ff14) con una sfumatura.
+* la pagina ha <code>noindex</code>: non è una pagina da cercare, è un attrezzo per le dirette.
+
+Dallo stesso script viene anche la foto profilo animata di Discord (GIF 512×512 col fondo verde e l'ombra), che non è sul sito.
+
+{{Vedi anche|albertopecchini.it}}
+[[Categoria:Gli strumenti]]`,
+  },
 }

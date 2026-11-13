@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>€ che gira</title>
+<style>
+  /* livello web per Camo / OBS (13.11.2026): € nero 3D che gira, loop di 8 s.
+     sfondo trasparente; ?verde → fondo verde euroshit su tutta la finestra */
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+  body { display: grid; place-items: center; }
+  img { width: 100vmin; height: 100vmin; object-fit: contain; display: block; }
+  .verde body { background: radial-gradient(ellipse at 50% 45%, #2bff3a 0, #00ff14 55%, #00b40e 100%); }
+</style>
+</head>
+<body>
+<img src="euro.webp" alt="€">
+<script>if (new URLSearchParams(location.search).has('verde')) document.documentElement.className = 'verde'</script>
+</body>
+</html>
