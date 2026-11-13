@@ -34,7 +34,6 @@ Richiede **Node 20.19 o superiore** (in produzione gira su Node 24) e npm.
 ```bash
 npm install
 npm run dev       # sviluppo su http://localhost:5173 (se la porta è occupata Vite ne sceglie un’altra)
-npm run dev:bcp   # bettercallpekko.it su http://localhost:5181 (SITE=bcp, visite e like in memoria)
 npm run online    # i tre insieme, anche da fuori con indirizzi fissi (Ctrl+Alt+O in VS Code)
 npm run build     # genera dist/: pagine, sitemap.xml, robots.txt, 404.html, miniature
 npm run preview   # serve dist/ in locale, come farebbe l’hosting
@@ -93,7 +92,6 @@ albertopecchini.it/
 │     ├─ figurine/         figurine ritagliate (<nome>.webp con trasparenza), generate da tools/figurine; tasto-*.webp sono le sagome dei tasti, chrome-*.webp le mini immagini del piè di pagina
 │     ├─ mascotte/         lumaca.webp e tartaruga.webp, le mascotte, e lumaca/ airone/ gazza/ vespa/, i pezzi dei burattini, generati da tools/mascotte
 │     ├─ aragosta/         i pezzi dell’aragosta di fiume della home (corpo, coda, chele, antenne, annaffiatoio), da tools/aragosta
-│     ├─ assistenza/       ritagli, sfondi, foto stock, avatar e annunci (ad-*.jpg|gif) di «Better Call Pekko», da tools/assistenza
 │     ├─ mockup/           cornici dei dispositivi dal file Figma (MacBook, iPad, iPhone) e l’iPhone 18 Pro vettoriale
 │     ├─ progetti/         una cartella per progetto: fotografie NN.webp (griglia) e NN-full.webp (lightbox), copertina.webp e vista-NN.webp illustrate
 │     ├─ studio/           fotografie reali (fototessera, avatar, figura scontornata)
@@ -108,15 +106,13 @@ albertopecchini.it/
 │  │  ├─ method.js         le sette fasi del metodo
 │  │  ├─ studio.js         biografia, fotografie, fatti, timeline, approccio, valori, strumenti, curriculum
 │  │  ├─ stack.js          /studio/: gli strumenti con cui gira il sito (nome, cosa fa, colori, tracciato del marchio da Simple Icons)
-│  │  ├─ tempo-libero.js   /studio/: Better Call Saul e bettercallpekko.it con la legenda dei riferimenti, domande personali (risposte vuote = non pubblicate)
+│  │  ├─ tempo-libero.js   /studio/: domande personali (risposte vuote = non pubblicate)
 │  │  ├─ stile.js          sistema visivo: tavole, palette, ruoli, caratteri, scala, spazi, raggi, movimento
 │  │  ├─ figurine.js       generato da tools/figurine: nomi e misure delle figurine ritagliate
 │  │  ├─ mascotte.js       generato da tools/mascotte: misure, occhi e naso delle mascotte
 │  │  ├─ burattini-pezzi.js  generato da tools/mascotte: misure, perni e occhi dei pezzi dei burattini
 │  │  ├─ aragosta.js       a mano: montaggio e pose dell’aragosta della home (aragosta-pezzi.js è generato da tools/aragosta)
 │  │  ├─ burattini.js      a mano: il montaggio dei burattini (dove si attacca ogni pezzo, quanto gira, cosa segue)
-│  │  ├─ assistenza.js     contenuti (in inglese) delle pagine «Better Call Pekko» (/assistenza/, /contatti/assistenza/)
-│  │  ├─ assistenza-media.js  generato da tools/assistenza: misure delle immagini di public/media/assistenza/
 │  ├─ templates/
 │  │  ├─ routes.js         tabella delle rotte (percorso, title, description, dati strutturati) + sitemap, robots, miniature
 │  │  ├─ layout.js         <html> completo: head, header (marchio · voci · pillola) e footer (invito, colonne, burattini), JSON-LD, firma
@@ -195,8 +191,6 @@ albertopecchini.it/
 | `/wrapped5BT/` | Il Wrapped 5BT: frame 9:16 con 74 slide verticali a scatto sulla chat di classe (nove capitoli, ognuna col pannello «Come si calcola»), contenuti da `src/data/wrapped.js` e numeri da [`tools/wrapped`](tools/wrapped/README.md). Fuori da menu, sitemap e indicizzazione |
 | `/privacy/` · `/cookie/` | Note legali |
 | `/crediti/` | Crediti e fonti delle immagini (testi in `src/data/crediti.js`), linkata nel footer |
-| `/assistenza/` | «Better Call Pekko»: l’assistenza informatica come il sito americano del 2008 di un «computer guy at law», tutto in inglese — 960 px fissi, colonna blu coi tasti gialli, video di consulenza, annunci di aziende che non esistono, profilo «About Pekko» in stile MySpace, listino 2009, forum phpBB, telefonini e provider del 2009, pagamenti e donazioni PayPal, e-card, coupon, commenti in stile SMS, webcam coi filtri brutti, colonne pubblicitarie ai lati dello schermo, pop-up d’ingresso; Alberto qui si chiama **Pekko** e il nome vero resta solo nel credito del footer. Pagina **autonoma** (`standalone` in `routes.js`): niente guscio del sito, stile e script in linea in `src/templates/pages/assistenza.js`; contenuti in `src/data/assistenza.js`, immagini da [`tools/assistenza`](tools/assistenza/README.md). Ogni banner porta a `/contatti/assistenza/`, tranne quelli della sezione **«Pekko makes websites»** (dal 29.09.2026), che portano ai siti veri: Pekko Explorer 6 (un browser del 2008 con una scheda per sito e la cattura vera da scorrere), gli annunci dei siti, l’infografica del metodo, servizi web, FAQ, «other stuff» (disegno, 3D, grafica), webring e bottoni 88×31; nella colonna destra «DID U KNOW???» con fatti veri; codice Konami (o cinque clic sulla tartaruga) per il segreto |
-| `/contatti/assistenza/` | I contatti dell’assistenza, stesso stile e stessa lingua: telefono, WhatsApp, email e un modulo che parla con `api/contatti.js` come quello di `/contatti/` (`modulo: 'assistenza'`, voci in inglese per tipo di guaio e urgenza) |
 | `/email/` | Compositore email, strumento privato: non è nei menu né nella sitemap, ha `noindex` e si apre solo dal link con la chiave (vedi [Compositore email online](#compositore-email-online)) |
 | `404.html` | Pagina non trovata (servita in automatico da Vercel) |
 
@@ -485,7 +479,6 @@ Le stesse informazioni sono pubblicate nella pagina [`/crediti/`](https://www.al
 | Mascotte: chiocciola gigante africana e tartaruga di terra | `public/media/mascotte/` | Generate con **openai/gpt-image-2** su Replicate — [`tools/mascotte`](tools/mascotte/README.md); gli occhi mobili sono disegnati dal codice del sito |
 | Burattini: chiocciola, airone, gazza, vespa | `public/media/mascotte/{lumaca,airone,gazza,vespa}/` | Generati con **openai/gpt-image-2** su Replicate (l’animale intero con la chiocciola, e fino al 18.10.2026 la tartaruga, come riferimento di stile, poi i pezzi con l’intero come riferimento) — [`tools/mascotte`](tools/mascotte/README.md); montaggio, occhi e movimenti sono del codice del sito |
 | Aragosta di fiume della home (con l’annaffiatoio) | `public/media/aragosta/` | Generata con **openai/gpt-image-2** su Replicate (intera con la chiocciola come riferimento di stile, poi i pezzi con l’intera come riferimento) — [`tools/aragosta`](tools/aragosta/README.md); montaggio, occhi, getto, inchiostro e gocce sono del codice del sito |
-| Ingredienti e annunci di «Better Call Pekko» (/assistenza/) | `public/media/assistenza/` | Gli ingredienti (ritagli di Alberto in completi sgargianti e da web designer, balli per le silhouette, foto stock finte, icone lucide «Web 2.0», oggetti, avatar, quattro sfondi) sono generati con **openai/gpt-image-2** su Replicate, il volto dalla fototessera data come riferimento; gli annunci `ad-*` sono composti a strati in HTML da [`tools/assistenza`](tools/assistenza/README.md) (testo, starburst e nastri del sito) e fotografati con il browser headless; i banner `ad-web-*` e i bottoni `btn-*` (88×31) sono disegnati in vettoriale nel canvas di **Claude Design** e resi da `tools/assistenza/design.mjs`; le GIF montano i fotogrammi con ffmpeg; `shot-bcp.webp` è una cattura della pagina stessa |
 | Fondo della carta dell’area operativa (/contatti/) | `public/media/mappa/area-operativa.webp` | Generato con **openai/gpt-image-2** su Replicate dal riferimento di lago e fiumi di `areamap({ solo: 'acque' })`; reticolo, raggi, città, nomi e scala restano vettoriali, da `areamap({ base })` in `src/art/misc.js` — `tools/cartina/cartina.mjs` |
 | Ritratto e avatar | `public/media/studio/fototessera*.webp` | Fototessera di Alberto Pecchini, scontornata con bria/remove-background su Replicate (volto non ritoccato) |
 | Figura scontornata di /studio/ | `public/media/studio/curioso-*.webp` | Fotografia di Alberto Pecchini, scontornata con l’IA su Replicate |
@@ -581,9 +574,7 @@ Su `main` scrive anche il workflow delle catture (`.github/workflows/catture.yml
 
 Domini di produzione: `www.albertopecchini.it` e `albertopecchini.it` (che rimanda a www con un 308). Gli indirizzi `*.vercel.app` del progetto sono protetti da Vercel Authentication (accesso solo con login Vercel), i domini personalizzati no.
 
-**bettercallpekko.it** è il dominio delle sole pagine «Better Call Pekko» (`/assistenza/` e `/contatti/assistenza/`): un **secondo progetto Vercel** collegato allo stesso repository, con Root Directory `albertopecchini.it` e la variabile d’ambiente `SITE=bcp`. Con quella variabile la build produce solo la parodia alla radice (`/`), i contatti in `/contact/`, una `404.html` sua, `robots.txt` e `sitemap.xml` presi da `public/bcp/` e, di `public/`, soltanto `media/assistenza/`, `media/web/` (le catture dei siti veri, per la sezione «Pekko makes websites»), le due mascotte e le icone (`plugins/site-pages.js`, `bcpRoutes` in `routes.js`; i percorsi li sceglie `src/data/assistenza.js`). Le funzioni di `api/` ci sono anche lì: nel nuovo progetto vanno copiate le variabili del modulo di contatto (`RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM`, `CALLMEBOT_PHONE`, `CALLMEBOT_APIKEY`, ed eventualmente `TURNSTILE_SECRET_KEY`, aggiungendo il dominio al widget su Cloudflare). Le due pagine restano raggiungibili anche sul sito serio, con canonical sul dominio e fuori dalla sitemap (`sitemap: false`). Nel piè di pagina delle tre pagine (home, contatti, 404) c’è il **distintivo di FrogDR** col Domain Rating del dominio, con il codice dato da FrogDR (link e immagine da `frogdr.com`): compare solo nella build `SITE=bcp`, non nella copia `/assistenza/` del sito serio (`frogdr()` in `src/templates/pages/assistenza.js`).
 
-Per attivarlo: su Vercel «Add New Project» dallo stesso repository `albertoxpecchini/AP`, Root Directory `albertopecchini.it`, framework Vite, variabile `SITE=bcp` (Production e Preview), poi Settings → Domains con `bettercallpekko.it` e `www.bettercallpekko.it` (www che rimanda all’apice); nel DNS di Aruba i record che Vercel indica (A sull’apice, CNAME su www). In locale: `npm run dev:bcp` (sviluppo su :5181, col database in memoria: mai nel Blob vero) oppure `SITE=bcp npm run build && npm run preview`.
 
 `vercel.json` imposta URL puliti con barra finale (come i percorsi generati), cache di un anno sugli asset con hash, cache di trenta giorni su `media/` e `art/`, e le intestazioni `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`. `404.html` viene servita in automatico.
 

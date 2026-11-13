@@ -419,7 +419,7 @@ const museoPhotos = {
   ],
 }
 
-// tutti, anche i nascosti (NASCOSTI più sotto): li usa bettercallpekko.it, che è un sito a parte
+// tutti, anche i nascosti (NASCOSTI più sotto)
 export const allProjects = [
   // ═══ TECNICO ═══════════════════════════════════════════════════════════════
   {

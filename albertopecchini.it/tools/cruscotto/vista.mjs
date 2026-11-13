@@ -35,7 +35,7 @@ const ROSSO = 203
 const GIALLO = 221
 const BLU = 75
 const CIANO = 81
-const COLORE = { ap: 33, rivalta: 71, cascina: 172, pzkko: 170, bcp: 178, claude: 81, alberto: 221, scarico: 75, prova: 117, tempo: 250, giro: 250, freellm: 43 }
+const COLORE = { ap: 33, rivalta: 71, cascina: 172, claude: 81, alberto: 221, scarico: 75, prova: 117, tempo: 250, giro: 250, freellm: 43 }
 const STRUMENTO = { Bash: 75, PowerShell: 75, Edit: 114, Write: 114, MultiEdit: 114, NotebookEdit: 114, Read: 248, Grep: 180, Glob: 180, Agent: 141, Task: 141, Skill: 141, WebFetch: 117, WebSearch: 117, Artifact: 213 }
 const colore = (chi = '') => {
   if (chi.startsWith('claude-')) return STRUMENTO[chi.slice(7)] ?? (chi.includes('mcp__') ? 213 : 81)

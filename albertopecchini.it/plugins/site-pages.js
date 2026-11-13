@@ -35,17 +35,6 @@ const withPageCss = (html, href) => {
   return links.length ? html.replace('</head>', `${links.join('\n')}\n</head>`) : html
 }
 
-// SITE=bcp costruisce il sito di bettercallpekko.it (progetto Vercel a parte, stesso
-// repository): solo le rotte di `bcpRoutes`, niente sitemap/robots generati (stanno
-// in public/bcp/), e di public/ solo ciò che quelle pagine usano.
-// EXTERNAL: i siti col loro dominio, la cartella dei file da mettere alla radice e
-// le parti di public/ da copiare.
-const EXTERNAL = {
-  // media/web: le catture dei siti veri (rifatte ogni ora dal bot) per la sezione Websites.
-  bcp: { label: 'bettercallpekko.it', dir: 'bcp', public: ['media/assistenza', 'media/web', 'media/mascotte/lumaca.webp', 'media/mascotte/tartaruga.webp', 'favicon.svg', 'favicon-32.png', 'apple-touch-icon.png'] },
-}[process.env.SITE]
-const BCP = Boolean(EXTERNAL)
-
 export default function sitePages() {
   let config
 
@@ -64,7 +53,6 @@ export default function sitePages() {
         appType: isPreview ? 'mpa' : 'custom',
         build: {
           manifest: true,
-          copyPublicDir: !BCP,
           rolldownOptions: { input: { main: ENTRY_JS, style: ENTRY_CSS, ...Object.fromEntries(PAGE_CSS.map((p) => [path.basename(p.entry, '.css'), p.entry])) } },
         },
       }
@@ -142,9 +130,8 @@ export default function sitePages() {
         await fs.writeFile(target, body)
       }
 
-      // srcset e versioni ridotte delle immagini (non per le pagine autonome di Pekko,
-      // larghe 960 px fissi, che vogliono i loro JPEG a densità doppia)
-      const images = BCP ? null : responsiveImages({ root: config.root, outDir, logger: config.logger })
+      // srcset e versioni ridotte delle immagini
+      const images = responsiveImages({ root: config.root, outDir, logger: config.logger })
       let count = 0
       let sheets = false
       for (const route of routes) {
@@ -156,32 +143,23 @@ export default function sitePages() {
       }
       // Le tavole vere (PDF, DWG, SVG) si pubblicano solo se una pagina le mostra: con
       // showSheets spento (src/data/projects.js) restano nel repository, non online.
-      if (!BCP && !sheets) await fs.rm(path.join(outDir, 'media/tavole'), { recursive: true, force: true })
+      if (!sheets) await fs.rm(path.join(outDir, 'media/tavole'), { recursive: true, force: true })
       const variants = images ? await images.flush() : null
-      let thumbs = []
-      if (BCP) {
-        const pub = path.resolve(config.root, 'public')
-        for (const f of EXTERNAL.public) await fs.cp(path.join(pub, f), path.join(outDir, f), { recursive: true })
-        for (const f of await fs.readdir(path.join(pub, EXTERNAL.dir))) await fs.copyFile(path.join(pub, EXTERNAL.dir, f), path.join(outDir, f))
-      } else {
-        thumbs = artFiles(await artCss())
-        for (const file of thumbs) await write(file.path, file.body)
-        await write('sitemap.xml', renderSitemap())
-        await write('robots.txt', renderRobots())
-      }
+      const thumbs = artFiles(await artCss())
+      for (const file of thumbs) await write(file.path, file.body)
+      await write('sitemap.xml', renderSitemap())
+      await write('robots.txt', renderRobots())
       // 12.11.2026: fuori i file di public/ che dicono dove abito o il numero (tools/privacy.mjs),
       // poi il controllo: se in dist/ resta un dato personale la build si ferma.
-      if (!BCP) {
         const { ripulisci, controlla } = await import(pathToFileURL(path.resolve(config.root, 'tools/privacy.mjs')).href)
         await ripulisci(outDir)
         if (!controlla(outDir)) throw new Error('privacy: dati personali in dist/ (node tools/privacy.mjs dist per vederli)')
-      }
       // il manifest di Vite non serve online
       await fs.rm(path.join(outDir, '.vite'), { recursive: true, force: true })
 
-      config.logger.info(`\n  site-pages · ${count} pagine · ${thumbs.length} miniature · ${BCP ? `${EXTERNAL.label} (SITE=${process.env.SITE})` : 'sitemap.xml · robots.txt'}`)
+      config.logger.info(`\n  site-pages · ${count} pagine · ${thumbs.length} miniature · sitemap.xml · robots.txt`)
       if (variants) config.logger.info(`  site-pages · immagini ridotte: ${variants.made} nuove, ${variants.cached} dalla cache`)
-      const todo = BCP ? [] : placeholderReport()
+      const todo = placeholderReport()
       if (todo.length) {
         config.logger.warn(
           `\n  site-pages · ${todo.length} dati ancora segnaposto in src/data (da compilare prima della messa online):\n` +

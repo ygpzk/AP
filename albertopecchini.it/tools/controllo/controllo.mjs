@@ -3,7 +3,6 @@
 // .github/workflows/build.yml; in locale:
 //
 //   npm run build && node tools/controllo/controllo.mjs                 # dist/
-//   SITE=bcp npx vite build --outDir dist-bcp && SITE=bcp node tools/controllo/controllo.mjs dist-bcp
 //
 // In ogni pagina HTML guarda che ci siano:
 //  · il credito all'autore, un link esattamente a https://www.albertopecchini.it
@@ -24,8 +23,6 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const OUT = resolve(ROOT, process.argv[2] || 'dist')
 const SITE = 'https://www.albertopecchini.it'
 const CI = Boolean(process.env.GITHUB_ACTIONS)
-// la build di bettercallpekko.it (SITE=bcp, come per vite build) non contiene le pagine del sito serio
-const BCP = process.env.SITE === 'bcp'
 
 // Pagine senza il credito per scelta: il compositore email è uno strumento
 // privato (noindex, raggiungibile solo col link che porta la chiave), non una
@@ -83,7 +80,7 @@ function internal(ref, base) {
   if (/^https?:\/\//i.test(ref)) {
     url = new URL(ref)
     // gli indirizzi assoluti del sito serio si controllano solo nella sua build
-    if (url.host !== 'www.albertopecchini.it' || BCP) return null
+    if (url.host !== 'www.albertopecchini.it') return null
   } else if (ref.startsWith('//')) {
     return null
   } else {
@@ -147,7 +144,7 @@ const sitemap = join(OUT, 'sitemap.xml')
 if (existsSync(sitemap)) {
   for (const [, loc] of readFileSync(sitemap, 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)) {
     const url = new URL(loc)
-    if (!BCP && url.origin !== SITE) problem('/sitemap.xml', `indirizzo fuori dal sito: ${loc}`)
+    if (url.origin !== SITE) problem('/sitemap.xml', `indirizzo fuori dal sito: ${loc}`)
     else if (!exists(url.pathname)) problem('/sitemap.xml', `pagina inesistente: ${loc}`)
   }
 }

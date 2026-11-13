@@ -777,7 +777,6 @@ function haRouter(s, sha) {
     try {
       const j = JSON.parse(execFileSync('git', ['show', `${sha}:${p}`], { cwd: cartellaGit(s), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }))
       const dip = { ...j.dependencies, ...j.devDependencies }
-      if (s.id === 'bcp' || s.id === 'pzkko') return false
       return ['react-router', 'react-router-dom', 'vue-router', '@tanstack/react-router', 'wouter'].some((k) => dip[k])
     } catch {}
   }

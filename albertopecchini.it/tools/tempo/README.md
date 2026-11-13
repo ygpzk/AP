@@ -11,7 +11,6 @@ del campo dell'indirizzo), ognuno col suo repository:
 | `rivalta` | rivaltasulmincio.it | ygpzk/rivaltasulmincio | main, `--first-parent` | 9.5.2026 |
 | `cascina` | cascinafontana.xyz | ygpzk/cascinafontana | tutti i rami (`--all`) | 16.4.2026 |
 | `pzkko` | pzkko.it | ygpzk/AP, `albertopecchini.it/pzkko` | HEAD | 7.10.2026 |
-| `bcp` | bettercallpekko.it | ygpzk/AP, lo stesso Vite con `SITE=bcp` | HEAD | 28.9.2026 |
 
 Le definizioni stanno in `siti.mjs`. Cascina Fontana ha `main` che ricomincia da zero il 16
 luglio 2026: i commit di aprile e maggio (il sito statico, Next.js, il «RESET») vivono solo

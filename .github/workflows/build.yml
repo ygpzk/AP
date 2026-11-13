@@ -1,6 +1,5 @@
-# Controllo della build. A ogni push (e nelle pull request) costruisce i due siti
-# che escono da questo repository, albertopecchini.it e bettercallpekko.it
-# (SITE=bcp), e controlla le pagine generate con albertopecchini.it/tools/controllo/:
+# Controllo della build. A ogni push (e nelle pull request) costruisce il sito
+# che esce da questo repository, albertopecchini.it, e controlla le pagine generate con albertopecchini.it/tools/controllo/:
 # credito col www, link e immagini interni, titoli, dati mancanti nei template,
 # sitemap. Se
 # qualcosa non va, il commit prende la ❌ e GitHub manda un'email.
@@ -62,13 +61,3 @@ jobs:
 
       - name: Controllo di albertopecchini.it
         run: node tools/controllo/controllo.mjs dist
-
-      - name: Build di bettercallpekko.it
-        env:
-          SITE: bcp
-        run: npx vite build --outDir dist-bcp
-
-      - name: Controllo di bettercallpekko.it
-        env:
-          SITE: bcp
-        run: node tools/controllo/controllo.mjs dist-bcp

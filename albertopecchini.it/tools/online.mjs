@@ -1,11 +1,10 @@
-// npm run online — i due dev server, raggiungibili anche da fuori con indirizzi fissi
+// npm run online — il dev server, raggiungibile anche da fuori con indirizzi fissi
 // (dev tunnels di Microsoft, lo stesso servizio delle porte inoltrate di VS Code):
 //
 //   albertopecchini.it   :5173   npm run dev
-//   bettercallpekko.it   :5181   npm run dev:bcp
 //
-// Accende i server che non sono già accesi, poi ospita il tunnel «pzkko» e stampa i due
-// indirizzi. Il tunnel è anonimo: chi ha il link entra (alla prima visita Microsoft mostra un
+// Accende i server che non sono già accesi, poi ospita il tunnel «pzkko» e stampa
+// l'indirizzo. Il tunnel è anonimo: chi ha il link entra (alla prima visita Microsoft mostra un
 // avviso: «Continue»). Gli indirizzi restano gli stessi finché il tunnel esiste: scade dopo
 // 30 giorni; se manca lo si ricrea da qui, ma allora cambiano. Ctrl+C spegne tunnel e server
 // accesi da qui. In VS Code: Ctrl+Alt+O (attività «online» in .vscode/tasks.json).
@@ -21,7 +20,6 @@ const ROOT = path.resolve(import.meta.dirname, '..')
 const TUNNEL = 'pzkko'
 const SITI = [
   { nome: 'albertopecchini.it', tag: 'ap', port: 5173, args: ['node_modules/vite/bin/vite.js', '--port', '5173', '--strictPort'] },
-  { nome: 'bettercallpekko.it', tag: 'bcp', port: 5181, args: ['tools/dev.mjs', 'bcp'] },
 ]
 
 const devtunnel = (() => {
@@ -46,7 +44,7 @@ if (/not logged in/i.test(utente) || !/logged in/i.test(utente)) {
 let info = dt('show', TUNNEL, '--json')
 if (info.status !== 0) {
   console.log(`devtunnel: il tunnel «${TUNNEL}» non c'è più, lo ricreo (gli indirizzi cambiano)`)
-  const c = dt('create', TUNNEL, '--allow-anonymous', '--expiration', '30d', '--labels', 'ap-dev', '--description', 'dev server di albertopecchini.it, bettercallpekko.it e pzkko.it')
+  const c = dt('create', TUNNEL, '--allow-anonymous', '--expiration', '30d', '--labels', 'ap-dev', '--description', 'dev server di albertopecchini.it')
   if (c.status !== 0) { console.error(c.stdout, c.stderr); process.exit(1) }
   info = dt('show', TUNNEL, '--json')
 }

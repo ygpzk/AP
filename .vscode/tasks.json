@@ -20,7 +20,7 @@
     },
     {
       "label": "online",
-      "detail": "i due dev server (albertopecchini.it, bettercallpekko.it) con gli indirizzi pubblici fissi — Ctrl+Alt+O",
+      "detail": "il dev server (albertopecchini.it) con gli indirizzi pubblici fissi — Ctrl+Alt+O",
       "type": "shell",
       "command": "npm run online",
       "options": { "cwd": "${workspaceFolder}/albertopecchini.it" },

@@ -79,25 +79,6 @@ export const SITI = [
     radice: (casa) => casa,
     costruisci: 'npm',
   },
-  {
-    id: 'bcp',
-    ordine: 5,
-    nome: 'bettercallpekko.it',
-    url: 'https://www.bettercallpekko.it',
-    github: 'https://github.com/ygpzk/AP',
-    repo: null,
-    ramo: 'HEAD',
-    linea: ['HEAD'],
-    cima: ['albertopecchini.it/'],
-    // dal 28.9.2026 Better Call Pekko è un progetto a parte: lo stesso Vite del sito con SITE=bcp
-    // fuori quello che produce la macchina del tempo: le foto di BCP stanno in public/media/tempo/bcp/,
-    // e ogni loro commit diventava un «giorno» nuovo di Better Call Pekko (3.11.2026)
-    percorsi: [':(glob)albertopecchini.it/**/*bcp*', ':(glob)albertopecchini.it/**/*bcp*/**', ':(glob)albertopecchini.it/**/*assistenza*', ':(glob)albertopecchini.it/**/*assistenza*/**', ':!albertopecchini.it/public/media/tempo', ':!albertopecchini.it/public/tempo', ':!albertopecchini.it/src/data/tempo', ':!albertopecchini.it/tools/tempo'],
-    da: '2026-09-28',
-    radice: (casa) => join(casa, 'albertopecchini.it'),
-    costruisci: 'npm',
-    env: { SITE: 'bcp' },
-  },
 ]
 
 // l'archivio pubblico sul server di casa, come site.archivio in src/data/site.js: i link delle

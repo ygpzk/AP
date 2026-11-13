@@ -6,9 +6,8 @@
 import ap from './tempo/ap.js'
 import rivalta from './tempo/rivalta.js'
 import cascina from './tempo/cascina.js'
-import bcp from './tempo/bcp.js'
 
-export const siti = [ap, rivalta, cascina, bcp].filter((s) => s.versioni.length)
+export const siti = [ap, rivalta, cascina].filter((s) => s.versioni.length)
 
 // la home (src/templates/pages/home.js) racconta le versioni di albertopecchini.it
 export const versioni = ap.versioni

@@ -17,8 +17,6 @@ import { tempoPage, tempoRotte } from './pages/tempo.js'
 import { tavolePage, sheetCount, hasSheets } from './pages/tavole.js'
 import { emailPage } from './pages/email.js'
 import { wrapped5btPage } from './pages/wrapped5bt.js'
-import { assistenzaPage, assistenzaContattiPage, assistenzaNotFoundPage } from './pages/assistenza.js'
-import { assistenza, BCP } from '../data/assistenza.js'
 import { informaticaPage, informaticaLd } from './pages/informatica.js'
 import { informatica } from '../data/informatica.js'
 import { unimore, materiaPath, bloccoPath, esercizioPath } from '../data/unimore.js'
@@ -121,7 +119,7 @@ const tutteLeRotte = [
     jsonld: () => [crumbs({ label: 'Servizi', href: '/servizi/' }), serviceLd()],
   },
   {
-    // L'area D dei servizi da vicino: la versione seria di «Better Call Pekko».
+    // L'area D dei servizi da vicino.
     path: informatica.path,
     priority: 0.8,
     title: informatica.title,
@@ -241,30 +239,6 @@ const tutteLeRotte = [
     noFooter: true,
     hideCta: true,
   },
-  {
-    // «Better Call Pekko»: l'assistenza informatica come il sito americano del
-    // 2008 di Pekko, «the computer guy», tutto in inglese. Pagine autonome
-    // (standalone): niente guscio del portfolio, stile e script in linea nel
-    // template. Ogni banner porta a /contatti/assistenza/, mai a /contatti/.
-    path: assistenza.path,
-    priority: 0.6,
-    title: assistenza.titolo,
-    description: assistenza.descrizione,
-    render: assistenzaPage,
-    standalone: true,
-    // Le due pagine hanno il loro dominio (bettercallpekko.it, vedi bcpRoutes) e la
-    // loro sitemap (public/bcp/): fuori da quella del sito serio.
-    sitemap: false,
-  },
-  {
-    path: assistenza.contatti,
-    priority: 0.5,
-    title: assistenza.titoloContatti,
-    description: assistenza.descrizioneContatti,
-    render: assistenzaContattiPage,
-    standalone: true,
-    sitemap: false,
-  },
   // Unimore: materie, blocchi ed esercizi, ancora senza contenuti → fuori da motori e sitemap.
   { path: unimore.path, title: unimore.title, description: unimore.description, render: unimorePage, noindex: true, sitemap: false, hideCta: true },
   ...unimore.materie.flatMap((m) => [
@@ -291,24 +265,12 @@ const tutteLeRotte = [
 ]
 
 // 12.11.2026 (Alberto: «togli social, numeri, indirizzi e luoghi»): fuori dal sito la macchina del
-// tempo (le copie dei siti vecchi hanno numero, WhatsApp, Instagram e il paese) e le due pagine di
-// Pekko, che vivono su bettercallpekko.it (vercel.json le rimanda lì). I file restano nel repository.
-export const FUORI = (p) => p === '/tempo/' || p.startsWith('/tempo/') || p === assistenza.path || p === assistenza.contatti
+// tempo (le copie dei siti vecchi hanno numero, WhatsApp, Instagram e il paese). I file restano nel repository.
+export const FUORI = (p) => p === '/tempo/' || p.startsWith('/tempo/')
 export const routes = tutteLeRotte.filter((r) => !FUORI(r.path))
 
-// ── bettercallpekko.it ───────────────────────────────────────────────────────
-// Il dominio della parodia è un progetto Vercel a parte, costruito dallo stesso
-// repository con SITE=bcp: il sito è fatto solo di queste pagine, con i percorsi
-// alla radice (src/data/assistenza.js sceglie / e /contact/). Le immagini che
-// servono e i file di public/bcp/ (robots.txt, sitemap.xml) li copia il plugin.
-export const bcpRoutes = [
-  { path: '/', priority: 1, title: assistenza.titolo, description: assistenza.descrizione, render: assistenzaPage, standalone: true },
-  { path: '/contact/', priority: 0.8, title: assistenza.titoloContatti, description: assistenza.descrizioneContatti, render: assistenzaContattiPage, standalone: true },
-  { path: '/404/', file: '404.html', is404: true, noindex: true, title: '404 — Better Call Pekko', description: 'Page not found. Better call Pekko.', render: assistenzaNotFoundPage, standalone: true },
-]
-
-/** Le rotte del sito che si sta costruendo o servendo. */
-export const activeRoutes = BCP ? bcpRoutes : routes
+/** Le rotte del sito. */
+export const activeRoutes = routes
 
 const normalize = (pathname) => {
   let p = pathname.replace(/index\.html$/, '')

@@ -1,5 +1,4 @@
 // Ricezione dei moduli di contatto: /contatti/ (modulo «contatti») e
-// /contatti/assistenza/ (modulo «assistenza», la pagina «Better Call Pekko»).
 //
 // Funzione serverless Vercel, runtime Node. Il percorso è /api/contatti e gira
 // sotto lo stesso dominio del sito: nessuna dipendenza da installare e i dati
@@ -41,28 +40,6 @@ const FORMS = {
       'Altro',
     ],
     extra: { name: 'budget', label: 'Budget', options: ['Da definire insieme', 'Fino a 1.000 €', '1.000 — 3.000 €', '3.000 — 6.000 €', 'Oltre 6.000 €'] },
-  },
-  assistenza: {
-    subject: 'Richiesta di assistenza',
-    head: 'Better Call Pekko · MOD. 02',
-    types: [
-      'Virus / slow PC',
-      'Duplicate files & messy folders',
-      'Printer or scanner not working',
-      'Speakers, sound, microphone, drivers',
-      'Windows install or restore',
-      'Office install or problems',
-      'Change operating system',
-      'Documents: layout or format conversion',
-      'Backup & data recovery',
-      'Wi-Fi & home network',
-      'Phone full or slow',
-      'New PC setup',
-      'I want a website!!!',
-      'Logo or graphics',
-      'Some other computer trouble',
-    ],
-    extra: { name: 'urgenza', label: 'Urgenza', options: ['Whenever', 'This week', 'By tomorrow', 'NOW, it’s an emergency!!!'] },
   },
 }
 

@@ -4,7 +4,6 @@
 //  campo `group`); qui ci sono i gruppi, le versioni di Windows e Office, il
 //  regalo del primo intervento, come si svolge un intervento, le regole e le FAQ.
 //
-//  È la versione seria di «Better Call Pekko» (/assistenza/): stesse cose, dette
 //  come nel resto del sito. Windows e Office si installano sempre con una licenza
 //  valida del cliente: il regalo è il lavoro, mai una copia.
 // ─────────────────────────────────────────────────────────────────────────────

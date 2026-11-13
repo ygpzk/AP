@@ -2,9 +2,7 @@
 // Lo trova da solo, senza un elenco scritto a mano:
 //   sito    i domini dei siti: quelli della macchina del tempo (tools/tempo/siti.mjs) e dei progetti del portfolio
 //           (`url` in src/data/projects.js), più l'apice senza www, che deve rimandare a www
-//   api     le funzioni di api/*.js, ognuna sul dominio dove serve (pzkko/api → pzkko.it, bcp → bettercallpekko.it, il resto
-//           su albertopecchini.it). Quelle del ponte verso il server di casa (ponte / archivioServer di
-//           pzkko/api/_server.mjs) sono la prova vera: 200 da Vercel vuol dire pc acceso, tunnel su, firma giusta
+//   api     le funzioni di api/*.js, tutte su albertopecchini.it
 //   tunnel  le strade di Tailscale Funnel (`tailscale funnel status --json`): / → 8787, /tempo → 8789, … (dal pc il
 //           tunnel passa dalla tailnet e prova poco: la prova vera resta /api/wallet/ di pzkko.it)
 //   casa    i server su 127.0.0.1 (le porte del tunnel, la regia 8788, vite 5173) e le attività pianificate della
@@ -73,7 +71,7 @@ async function siti() {
 // le funzioni di api/: il dominio dove servono e se passano dal server di casa
 function api(dominiSiti) {
   const dir = join(SITO, 'api')
-  const ap = 'www.albertopecchini.it', pzk = 'www.pzkko.it', bcp = 'www.bettercallpekko.it'
+  const ap = 'www.albertopecchini.it'
   const out = []
   let file = []
   try { file = readdirSync(dir).filter((f) => /^[a-z0-9-]+\.js$/.test(f)) } catch {}
@@ -81,16 +79,11 @@ function api(dominiSiti) {
     const nome = f.replace(/\.js$/, '')
     let testo = ''
     try { testo = readFileSync(join(dir, f), 'utf8') } catch {}
-    // (chi riesporta pzkko/api/x.mjs: si guarda dentro quello)
-    const rie = /from '\.\.\/pzkko\/api\/([a-z0-9-]+\.mjs)'/.exec(testo)
-    let dentro = testo
-    if (rie) try { dentro = readFileSync(join(SITO, 'pzkko/api', rie[1]), 'utf8') } catch {}
+    const dentro = testo
     const casa = /\bponte\(|archivioServer/.test(dentro)
     // solo POST (moduli, IA): una GET deve ricevere un «no» dalla funzione, non un errore di Vercel
     const soloPost = /req\.method !== 'POST'/.test(dentro) && !/req\.method === 'GET'/.test(dentro)
-    // (/assistenza/ di albertopecchini.it rimanda a bettercallpekko.it: lì /api/bcp/ dice «on vacation», ma non la usa
-    // nessuno, perché quel progetto non ha le variabili del server di casa; si misura solo dove serve)
-    const domini = rie ? [pzk] : nome === 'bcp' ? [bcp] : [ap]
+    const domini = [ap]
     for (const d of domini) if (dominiSiti.has(d)) out.push({ nome: `${d.replace(/^www\./, '')}/api/${nome}/`, gruppo: 'api', url: `https://${d}/api/${nome}/`, atteso: 'api', casa, soloPost, rie: !!rie })
   }
   return out
@@ -210,10 +203,10 @@ async function misura(c) {
         let j = null
         try { j = JSON.parse(r.corpo) } catch {}
         if (r.codice === 503 && j?.offline) {
-          // su albertopecchini.it le variabili del server non ci sono (sono nei progetti pzkko e bcp): la funzione dice
+          // su albertopecchini.it le variabili del server non ci sono (il ponte verso il server di casa non è più usato): la funzione dice
           // «in pausa» subito, senza nemmeno provarci; altrove vuol dire pc spento o tunnel giù
           o.nota = host(c.url) === 'www.albertopecchini.it'
-            ? 'in pausa: il progetto Vercel albertopecchini.it non ha PZKKO_SERVER_URL/SECRET (ce le hanno pzkko e bcp)'
+            ? 'in pausa: il progetto Vercel albertopecchini.it non ha PZKKO_SERVER_URL/SECRET'
             : 'in pausa: il server di casa non risponde a Vercel (pc spento, tunnel giù o segreto sbagliato)'
         } else o.nota = o.su ? 'passa dal server di casa: risponde attraverso Vercel' : `passa dal server di casa: ${r.codice}`
       } else if (c.soloPost) {

@@ -24,10 +24,8 @@ export const VIA = [
   'tempo', // le copie intere dei siti vecchi (macchina del tempo)
   'media/tempo', // le loro foto
   'media/mappa', // la carta dell'area operativa con la sede
-  'media/assistenza', // le immagini di bettercallpekko.it: hanno il loro sito
   'assistenza',
   'contatti/assistenza',
-  'bcp', // i file di bettercallpekko.it
   'media/progetti/museo-mestieri-del-fiume', // progetto nascosto (src/data/projects.js, NASCOSTI)
   'media/tavole/museo-mestieri-del-fiume',
   'media/web/rivalta-*', // il sito del paese: progetto nascosto
