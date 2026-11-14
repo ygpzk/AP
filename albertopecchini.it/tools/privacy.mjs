@@ -21,8 +21,6 @@ import { fileURLToPath } from 'node:url'
 
 // file e cartelle di dist/ (cioè di public/) da non pubblicare
 export const VIA = [
-  'tempo', // le copie intere dei siti vecchi (macchina del tempo)
-  'media/tempo', // le loro foto
   'media/mappa', // la carta dell'area operativa con la sede
   'assistenza',
   'contatti/assistenza',
