@@ -46,7 +46,7 @@ const marchio = html`
   </a>
 `
 
-// il credito di ogni pagina (CLAUDE.md): qui non c'è il piè di pagina del sito, la barra è il guscio
+// il link al sito: qui non c'è il piè di pagina del sito, la barra è il guscio
 const credito = `<a class="wb__credit" href="${esc(site.url)}" rel="author">Sito di ${esc(site.name)}</a>`
 
 const privacy = () => `<p class="wb__privacy">Ore e giorni in ora italiana, presi dai commit già pubblici su GitHub. Niente nomi né indirizzi email: degli autori si conta solo se c’era un assistente, e i commit automatici (le catture dei siti) non contano fra i momenti. Nelle pagine di allora l’indirizzo di casa e i numeri che non uso più non compaiono. Aggiornato il ${esc(lunga(aggiornato))}.</p>`

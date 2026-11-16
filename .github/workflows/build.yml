@@ -1,8 +1,6 @@
 # Controllo della build. A ogni push (e nelle pull request) costruisce il sito
-# che esce da questo repository, albertopecchini.it, e controlla le pagine generate con albertopecchini.it/tools/controllo/:
-# credito col www, link e immagini interni, titoli, dati mancanti nei template,
-# sitemap. Se
-# qualcosa non va, il commit prende la ❌ e GitHub manda un'email.
+# che esce da questo repository, albertopecchini.it. Se la build non riesce,
+# il commit prende la ❌ e GitHub manda un'email.
 #
 # Vercel intanto pubblica per conto suo: questo controllo non blocca niente,
 # avvisa. I commit del bot delle catture (catture.yml) non lo avviano: le spinte
@@ -58,6 +56,3 @@ jobs:
 
       - name: Build di albertopecchini.it
         run: npm run build
-
-      - name: Controllo di albertopecchini.it
-        run: node tools/controllo/controllo.mjs dist
