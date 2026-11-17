@@ -4,7 +4,7 @@
 export const bio = {
   headline: 'Un tecnico che scrive codice, un grafico che sa leggere una sezione.',
   paragraphs: [
-    'Mi chiamo Alberto Pecchini. Ho studiato Costruzioni, Ambiente e Territorio, ho passato tre anni nell’ufficio tecnico di un’azienda di strutture in legno e oggi frequento il corso di laurea in Costruzioni e gestione del territorio.',
+    'Mi chiamo Alberto Pecchini. Ho studiato Costruzioni, Ambiente e Territorio, ho passato tre anni nell’ufficio tecnico di un’azienda di strutture in legno e oggi frequento il corso di laurea in Costruzioni e gestione del territorio, a doppio titolo tra l’Università di Modena e Reggio Emilia e quella di San Marino.',
     'Nel frattempo ho imparato a progettare e sviluppare siti web, prima per curiosità e poi per i primi clienti. La grafica è arrivata per necessità: ogni tavola e ogni interfaccia hanno bisogno di gerarchie chiare.',
     'Non le considero tre attività separate. È lo stesso mestiere — misurare, ordinare, rendere leggibile — applicato a tre materiali diversi.',
   ],
@@ -50,7 +50,7 @@ export const photos = {
 export const facts = [
   { label: 'Base', value: 'Italia' },
   { label: 'Attivo dal', value: '2023' },
-  { label: 'Formazione', value: 'Diploma CAT · Laurea in corso' },
+  { label: 'Formazione', value: 'Diploma CAT · Laurea a doppio titolo in corso' },
   { label: 'Lingue', value: 'Italiano · Inglese C1 (IELTS)' },
   { label: 'Lavoro', value: 'In sede e da remoto' },
 ]
@@ -63,6 +63,8 @@ export const timeline = [
   { year: '2026', title: 'Diploma CAT', text: 'Diploma di Costruzioni, Ambiente e Territorio dopo cinque anni di AutoCAD, rilievo strumentale ed estimo.', tag: 'Tecnico' },
   { year: '2026', title: 'Università di Modena e Reggio Emilia', text: 'Immatricolazione al corso di laurea in Costruzioni e gestione del territorio, Dipartimento di Ingegneria «Enzo Ferrari».', tag: 'Formazione' },
   { year: '2026', title: 'Collaborazione con Gabriele Lucia', text: 'Al Dipartimento di Ingegneria «Enzo Ferrari» di UNIMORE ho conosciuto Gabriele Lucia, che lì studia Ingegneria Informatica: sviluppatore e grafico come me, con lui collaboro su progetti web.', tag: 'Web' },
+  // 11.11.2026: certificato di iscrizione UNIRSM e piano di studi approvato (programma di mobilità studenti UNIMORE)
+  { year: '2026', title: 'Doppio titolo con l’Università di San Marino', text: 'Iscrizione all’Università degli Studi della Repubblica di San Marino nel programma a doppio titolo del corso: Analisi matematica e geometria, Fisica e Disegno sono nel piano di studi di tutti e due gli atenei.', tag: 'Formazione' },
 ]
 
 export const approach = [
@@ -89,13 +91,22 @@ export const tools = [
 // fatto davvero nell'incarico. Senza `detail` la voce resta su una riga sola.
 export const profile = {
   summary:
-    'Diplomato in Costruzioni, Ambiente e Territorio e studente di Costruzioni e gestione del territorio all’Università di Modena e Reggio Emilia. Unisco la formazione tecnica su progettazione, rilievo e disegno allo sviluppo di interfacce web curate e veloci e alla progettazione grafica: rilevo, disegno e metto online, senza passare il lavoro di mano.',
+    'Diplomato in Costruzioni, Ambiente e Territorio e studente di Costruzioni e gestione del territorio all’Università di Modena e Reggio Emilia, a doppio titolo con l’Università di San Marino. Unisco la formazione tecnica su progettazione, rilievo e disegno allo sviluppo di interfacce web curate e veloci e alla progettazione grafica: rilevo, disegno e metto online, senza passare il lavoro di mano.',
   education: [
     {
       period: '2026 — oggi',
       title: 'Università di Modena e Reggio Emilia',
       role: 'Corso di laurea in Costruzioni e gestione del territorio · Dip. di Ingegneria «Enzo Ferrari»',
-      detail: ['Area costruzioni, rilievo del territorio e gestione del processo edilizio.'],
+      detail: [
+        'Laurea professionalizzante, classe L-P01: Professioni tecniche per l’edilizia e il territorio.',
+        'Primo anno: Analisi matematica e geometria, Fisica, Disegno, Topografia, Elementi di diritto privato e agrario, Inglese; laboratori di Informatica e statistica, di Chimica e materiali da costruzione, di Topografia.',
+      ],
+    },
+    {
+      period: '2026 — oggi',
+      title: 'Università degli Studi della Repubblica di San Marino',
+      role: 'Doppio titolo UNIMORE–UNIRSM · Costruzioni e gestione del territorio · Dip. di Economia, Scienze, Ingegneria e Design',
+      detail: ['Dall’11 novembre 2026 nel programma di mobilità per gli studenti UNIMORE: Analisi matematica e geometria, Fisica e Disegno nel piano di studi.'],
     },
     {
       period: '2021 — 2026',
@@ -134,11 +145,12 @@ export const profile = {
     {
       period: '2026',
       title: 'Ing. Dario Donelli — sito dello studio tecnico',
-      role: 'Progetto, design e sviluppo · React, Vite, SVG',
+      // 10.11.2026: il sito è diventato l'archivio dei lavori dello studio (repository dariodonelli-)
+      role: 'Progetto, design e sviluppo · React, Vite, PDF.js',
       detail: [
-        'Sito a pagina singola in bianco e nero, costruito sulla targa dello studio.',
-        'Apertura animata allo scorrimento in solo CSS e carta del territorio in SVG.',
-        'Mappa OpenStreetMap senza cookie di profilazione; dominio e pubblicazione su Vercel.',
+        'Sito in bianco e nero costruito sulla targa dello studio: in apertura nome, recapiti e un carosello di undici lavori.',
+        'Archivio di 34 lavori dal 2010 in quattro categorie, ognuno con la sua pagina, le tavole PDF originali e le fotografie.',
+        'Dati personali sfumati dentro i PDF e nelle foto, metadati rimossi; online su Vercel in attesa del dominio definitivo.',
       ],
     },
     // 12.11.2026: tolto l'atlante digitale del paese (dice dove abito); il progetto è nascosto anche

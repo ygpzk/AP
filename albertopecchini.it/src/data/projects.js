@@ -1110,36 +1110,37 @@ export const allProjects = [
     slug: 'dario-donelli',
     code: 'AP-26-W04',
     title: 'Ing. Dario Donelli',
-    subtitle: 'Un sito composto come la targa dello studio',
+    subtitle: 'L’archivio di uno studio tecnico, composto come la sua targa',
     area: 'web',
     categories: ['web'],
-    types: ['Sito web', 'UI/UX', 'Identità visiva', 'Sviluppo frontend'],
+    types: ['Sito web', 'Archivio dei lavori', 'UI/UX', 'Identità visiva', 'Sviluppo frontend'],
     client: 'Ing. Dario Donelli',
     sector: 'Ingegneria e progettazione edilizia',
     location: 'Rivalta sul Mincio, Rodigo (MN)',
     year: 2026,
-    services: ['Architettura dei contenuti', 'Web design', 'Sviluppo frontend', 'Cartografia', 'Dominio e pubblicazione'],
-    technologies: ['React', 'Vite', 'CSS scroll-driven', 'SVG', 'OpenStreetMap', 'Vercel'],
+    // 10.11.2026: da pagina singola ad archivio dei lavori (repository dariodonelli-, commit bde6a5b)
+    services: ['Architettura dei contenuti', 'Web design', 'Sviluppo frontend', 'Schede dei lavori', 'Oscuramento dei dati personali', 'Dominio e pubblicazione'],
+    technologies: ['React', 'Vite', 'Prerender', 'PDF.js', 'Lenis', 'Vercel'],
     summary:
-      'Il sito dello studio tecnico dell’Ing. Dario Donelli: una pagina sola in bianco e nero, costruita sulla targa dello studio, con una carta del territorio disegnata a mano.',
+      'Il sito dello studio tecnico dell’Ing. Dario Donelli, in bianco e nero come la targa dello studio: undici lavori in apertura e l’archivio di tutti i 34 lavori dal 2010, ognuno con la sua pagina, le tavole originali e le fotografie.',
     description:
       'Dario Donelli è ingegnere edile-architetto, iscritto all’Ordine dal 2010. Segue di persona ogni incarico, dal progetto alle strutture fino alla chiusura del cantiere, per privati e opere civili in provincia.',
     goal: 'Far capire in pochi secondi, a chi deve costruire, ristrutturare o mettere in sicurezza un edificio, chi è lo studio, cosa fa e come contattarlo.',
     problem:
-      'Uno studio di una persona sola, senza un archivio di lavori fotografati né numeri da esibire. Il rischio era un sito generico, uguale a quello di qualsiasi studio tecnico, o riempito di referenze non verificabili.',
+      'Uno studio di una persona sola, con sedici anni di lavori sparsi in cartelle di tavole e fotografie. Il rischio era un sito generico, uguale a quello di qualsiasi studio tecnico, o riempito di referenze non verificabili; e le tavole vere, con i cartigli pieni di indirizzi, codici fiscali e firme, non si potevano pubblicare così com’erano.',
     strategy:
-      'Ho preso come riferimento la targa sull’ingresso dello studio: incisione nera su metallo chiaro, filetti sottili, nessun colore. Da lì vengono il bianco e nero, il nome in maiuscolo e la «D» del logo che torna come punto elenco, marcatore e cursore. Al posto delle referenze ho messo dati verificabili: l’iscrizione all’albo, la sede, il territorio su una carta.',
+      'Ho preso come riferimento la targa sull’ingresso dello studio: incisione nera su metallo chiaro, filetti sottili, nessun colore. Da lì vengono il bianco e nero e il nome in maiuscolo. Al posto delle referenze ci sono i lavori veri: dall’elenco consegnato dallo studio e dai cartigli delle tavole, 34 schede con anno, categoria, committente e prestazione, senza un dato che i materiali non contengano.',
     development: [
-      { title: 'Targa', text: 'L’apertura è alta tre schermi: mentre si scorre, il nome atterra in alto, entra la targa e il manifesto compare riga per riga. È tutto CSS legato allo scorrimento, senza librerie; su telefono o con il movimento ridotto diventa un’apertura statica con gli stessi elementi.' },
-      { title: 'Carta', text: 'Ho disegnato in SVG una carta del territorio, con la proiezione corretta alla latitudine dello studio: i comuni, i fiumi, i laghi, i raggi da 5 a 20 km, scala grafica e rosa dei venti. Accanto, la fotografia della sede con tre punti che raccontano l’ingresso.' },
-      { title: 'Dati', text: 'Testi, recapiti, credenziali d’albo e dati societari stanno in un unico file, separati dall’impaginazione. La mappa di dettaglio usa OpenStreetMap al posto di Google: nessuna chiave, nessun cookie di profilazione, nessun banner.' },
+      { title: 'Apertura', text: 'La prima schermata dice l’essenziale: il nome, le due righe della targa, telefono ed email e un carosello di undici lavori, da sfogliare con le frecce, con il mouse sull’immagine o con il dito. I lavori in apertura non li sceglie il gusto ma un punteggio: numero di fotografie, anno, presenza del prima e dopo.' },
+      { title: 'Archivio', text: 'I 34 lavori stanno in quattro categorie — Strutture, Edilizia, Agricoltura, Industria — con un filtro. Ogni lavoro ha un indirizzo suo, già pronto sul server: la scheda, il racconto e il visualizzatore, con le tavole PDF originali che si ingrandiscono restando nitide e una striscia di miniature per passare da una tavola o da una foto all’altra.' },
+      { title: 'Riservatezza', text: 'Ogni cartiglio è stato misurato a mano: indirizzi, codici fiscali, partite IVA, telefoni, dati catastali, timbri e firme sono sfumati dentro il PDF, non solo coperti sullo schermo. Dalle fotografie sono spariti targhe, numeri civici e volti, e con loro i metadati del telefono. Dei committenti privati resta il cognome.' },
     ],
     result:
-      'Il sito è online su Vercel e sta passando al dominio dariodonelli.com: una pagina sola, senza cookie di profilazione, con circa 90 kB di codice compresso oltre alle fotografie.',
+      'Il sito è online all’indirizzo provvisorio dariodonelli.vercel.app, in attesa del dominio definitivo da scegliere con lo studio: una pagina principale e 34 schede dei lavori, generate in anticipo, con le tavole originali al posto delle fotografie dei fogli.',
     metrics: [
-      { value: '22', label: 'Località sulla carta' },
-      { value: '0', label: 'Cookie di profilazione' },
-      { value: '90 kB', label: 'Codice compresso' },
+      { value: '34', label: 'Lavori in archivio' },
+      { value: '4', label: 'Categorie' },
+      { value: '11', label: 'Lavori in apertura' },
     ],
     web: {
       url: 'https://dariodonelli.vercel.app',
@@ -1149,7 +1150,7 @@ export const allProjects = [
       tablet: shot('dd-tablet.webp', 720, 1036, 'Home page di dariodonelli.vercel.app su tablet'),
       mobile: shot('dd-mobile.webp', 600, 1298, 'Home page di dariodonelli.vercel.app su smartphone'),
       mobileTall: shot('dd-mobile-tall.webp', 600, 4000, 'Home page di dariodonelli.vercel.app su smartphone, pagina intera'),
-      palette: ['#F6F6F4', '#000000', '#4A4A4A', '#FFFFFF', '#EBEBE8'],
+      palette: ['#FAF9F6', '#1B1A17', '#4E4B45', '#F2F0EA', '#E3DFD7'], // i token di src/index.css del sito (10.11.2026)
     },
     cover: shot('dd-desktop.webp', 1200, 750, 'Home page di dariodonelli.vercel.app'),
     images: [
