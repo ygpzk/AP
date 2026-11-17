@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="it" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pzkko (@pzkko) · pzkko.it</title>
+<meta name="description" content="pzkko, il profilo per svago di Alberto Pecchini: il profilo di Discord dal vivo, giochini, programmini e tutti i social. Il sito principale è albertopecchini.it.">
+<meta name="theme-color" content="#f4fdce">
+<link rel="canonical" href="https://pzkko.it/">
+<meta property="og:type" content="profile">
+<meta property="og:site_name" content="pzkko.it">
+<meta property="og:title" content="pzkko">
+<meta property="og:description" content="Il profilo per svago di Alberto Pecchini: Discord dal vivo, giochini, programmini e social.">
+<meta property="og:image" content="https://pzkko.it/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Il profilo di pzkko">
+<meta property="og:url" content="https://pzkko.it/">
+<meta property="og:locale" content="it_IT">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@900&family=Noto+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="preconnect" href="https://api.lanyard.rest" crossorigin>
+<link rel="preconnect" href="https://cdn.discordapp.com">
+<script>try{if(localStorage.getItem('pzkko-theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}</script>
+<script type="module" src="/assets/app.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"ProfilePage","mainEntity":{"@type":"Person","name":"Alberto Pecchini","alternateName":"pzkko","url":"https://pzkko.it/","mainEntityOfPage":"https://www.albertopecchini.it","sameAs":["https://www.albertopecchini.it","https://github.com/ygpzk","https://www.instagram.com/albertoxpecchini/","https://www.instagram.com/pzkko/","https://www.tiktok.com/@albertoxpecchini","https://x.com/ygpzk","https://www.youtube.com/@alberto-h7y3h","https://www.twitch.tv/pzkko","https://discord.com/users/459791358899519498"]}}</script>
+</head>
+<body>
+<main class="profile" aria-label="Profilo di pzkko">
+  <div class="controls">
+    <button id="lang-btn" class="ctrl" type="button" aria-haspopup="menu" aria-expanded="false"><img id="lang-flag" src="https://flagcdn.com/24x18/it.png" alt="" width="20" height="15" style="border-radius:2px"><span id="lang-code" style="font-family:ui-monospace,Consolas,monospace;font-size:12px">IT</span></button>
+    <button id="theme-btn" class="ctrl" type="button" style="width:36px;padding:0;justify-content:center"></button>
+  </div>
+
+  <aside class="card" id="card">
+    <div class="banner"><img id="banner" alt="" draggable="false"></div>
+    <div class="avatar" id="avatar-box" role="img">
+      <img id="avatar" class="avatar__img" src="/me.png" alt="" draggable="false">
+      <img id="deco" class="avatar__deco" alt="" hidden draggable="false">
+      <span id="status" class="avatar__status"></span>
+    </div>
+    <div class="bubble" id="bubble" hidden tabindex="0"><div class="bubble__text"></div></div>
+
+    <div class="card__body">
+      <h1 class="dname" id="dname">pzkko</h1>
+      <div class="uname"><span id="uname">pzkko</span><span class="gtag" id="gtag" hidden></span></div>
+      <div class="badges" id="badges"></div>
+      <div class="actions">
+        <a id="msg" class="btn btn--msg" href="https://discord.com/users/459791358899519498" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.9 2 11.7c0 2.6 1.3 4.9 3.4 6.5L4.6 21.4a.6.6 0 0 0 .8.7l3.9-1.6c.9.2 1.8.3 2.7.3 5.5 0 10-3.9 10-8.7S17.5 3 12 3z"/></svg><span id="msg-label">Messaggio</span></a>
+        <button id="copy-btn" class="btn btn--icon" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+        <button id="more-btn" class="btn btn--icon" type="button" aria-haspopup="menu" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+      </div>
+      <div class="card-activity" id="card-activity" aria-live="polite"></div>
+      <section class="sec" id="bio-sec"><h2 class="sec__h" id="h-profile">Profilo</h2><p class="sec__p" id="bio"></p></section>
+      <section class="sec"><h2 class="sec__h" id="h-since">Membro da</h2><p class="sec__p" id="since"></p></section>
+      <section class="sec"><h2 class="sec__h" id="h-conns">Collegamenti</h2><ul class="conns" id="conns"></ul></section>
+      <section class="sec"><h2 class="sec__h" id="h-socials">Altri social</h2><div class="icons" id="social-icons"></div></section>
+    </div>
+  </aside>
+
+  <section class="panel">
+    <div class="tabs" id="tabs" role="tablist" aria-label="pzkko"></div>
+    <div class="tabpanel" id="panel-board" role="tabpanel" aria-labelledby="tab-board"></div>
+    <div class="tabpanel" id="panel-projects" role="tabpanel" aria-labelledby="tab-projects" hidden></div>
+    <div class="tabpanel" id="panel-activity" role="tabpanel" aria-labelledby="tab-activity" hidden></div>
+    <div class="tabpanel" id="panel-social" role="tabpanel" aria-labelledby="tab-social" hidden></div>
+  </section>
+</main>
+<footer class="foot" id="foot">pzkko.it — il profilo per svago di Alberto Pecchini · il sito principale è <a href="https://www.albertopecchini.it">albertopecchini.it</a></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<noscript><p class="foot">pzkko.it ha bisogno di JavaScript per mostrare il profilo dal vivo. Il sito principale è <a href="https://www.albertopecchini.it">albertopecchini.it</a>.</p></noscript>
+</body>
+</html>
