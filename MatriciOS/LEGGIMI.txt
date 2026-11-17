@@ -1,0 +1,30 @@
+MATRICI-OS  -  Terminale didattico sulle matrici
+================================================
+
+COME SI AVVIA
+  Doppio clic su MatriciOS.exe. Fine.
+  Non serve installare niente: funziona su qualsiasi PC Windows 10/11.
+  Puoi copiare MatriciOS.exe dove vuoi (anche su una chiavetta USB).
+
+COSA CONTIENE
+  - 11 lezioni che partono da zero (cos'è una matrice -> prodotto righe per colonne)
+  - 100 esercizi base in 10 sezioni (dimensioni, posizione a_ij, tipi di matrici,
+    diagonali e traccia, quadrate speciali, uguaglianza, trasposta, somma,
+    prodotto per scalare, prodotto righe per colonne)
+  - Sfida rapida (10 domande a caso), Ripasso errori, Progressi con XP e rango
+  - Suoni e 4 colori del terminale (verde, ambra, blu, bianco) nelle OPZIONI
+
+COMANDI (solo tastiera)
+  Frecce o W/S per muoversi, INVIO per confermare, ESC per tornare indietro.
+  Negli esercizi: A/B/C/D (o 1-4), V/F, numeri + INVIO, H per l'aiuto.
+  Dimensioni: 2x3     Posizioni: 2 3
+
+SALVATAGGIO
+  Automatico, nel file MatriciOS_salvataggio.txt accanto al programma.
+  Cancellalo per ricominciare da zero (oppure PROGRESSI -> R).
+  Se la cartella non e' scrivibile, il file va in %APPDATA%\MatriciOS.
+
+PER MODIFICARE IL PROGRAMMA
+  I sorgenti sono nella cartella src\ (C#). Dopo una modifica fai doppio clic
+  su build.bat: ricompila MatriciOS.exe con il compilatore gia' presente in Windows
+  e lancia un autotest che controlla le risposte dei 100 esercizi.
