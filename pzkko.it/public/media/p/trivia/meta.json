@@ -1,0 +1,72 @@
+{
+ "key": "trivia",
+ "cover": {
+  "w": 1280,
+  "h": 720
+ },
+ "video": {
+  "file": "loop.mp4",
+  "w": 960,
+  "h": 540,
+  "seconds": 6.3
+ },
+ "shots": [
+  {
+   "file": "01.webp",
+   "w": 1422,
+   "h": 800,
+   "it": "",
+   "en": ""
+  },
+  {
+   "file": "02.webp",
+   "w": 1422,
+   "h": 800,
+   "it": "",
+   "en": ""
+  },
+  {
+   "file": "03.webp",
+   "w": 1422,
+   "h": 800,
+   "it": "",
+   "en": ""
+  },
+  {
+   "file": "04.webp",
+   "w": 1422,
+   "h": 800,
+   "it": "",
+   "en": ""
+  },
+  {
+   "file": "05.webp",
+   "w": 1422,
+   "h": 800,
+   "it": "",
+   "en": ""
+  },
+  {
+   "file": "06.webp",
+   "w": 1422,
+   "h": 800,
+   "it": "",
+   "en": ""
+  },
+  {
+   "file": "07.webp",
+   "w": 1422,
+   "h": 800,
+   "it": "",
+   "en": ""
+  },
+  {
+   "file": "08.webp",
+   "w": 780,
+   "h": 1688,
+   "it": "",
+   "en": ""
+  }
+ ],
+ "notes": "Catture vere del progetto in funzione; didascalie da scrivere."
+}

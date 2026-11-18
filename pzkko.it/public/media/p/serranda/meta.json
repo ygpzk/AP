@@ -1,0 +1,72 @@
+{
+  "key": "serranda",
+  "cover": {
+    "w": 1280,
+    "h": 720
+  },
+  "video": {
+    "file": "loop.mp4",
+    "w": 960,
+    "h": 540,
+    "seconds": 8.2
+  },
+  "shots": [
+    {
+      "file": "01.webp",
+      "w": 1600,
+      "h": 1000,
+      "it": "Di giorno: l’insegna e la prima fila di volantini, uno per sito",
+      "en": "By day: the sign and the first row of flyers, one per site"
+    },
+    {
+      "file": "02.webp",
+      "w": 1600,
+      "h": 1000,
+      "it": "I social: ogni volantino ha i tagliandi da strappare col contatto",
+      "en": "The socials: every flyer has tear-off tabs with the contact"
+    },
+    {
+      "file": "03.webp",
+      "w": 1600,
+      "h": 1000,
+      "it": "I giochi e gli strumenti: roulette, dado, blackjack, mine, moneta, pzk$meeting",
+      "en": "Games and tools: roulette, dice, blackjack, mines, coin, pzk$meeting"
+    },
+    {
+      "file": "04.webp",
+      "w": 1440,
+      "h": 810,
+      "it": "Di notte il muro si scurisce e resta la luce dei lampioni",
+      "en": "At night the wall goes dark, lit only by the street lamps"
+    },
+    {
+      "file": "05.webp",
+      "w": 1600,
+      "h": 735,
+      "it": "Il muro in 3D (three.js): la facciata, l’insegna a scatola, la lampada e le ombre del sole",
+      "en": "The wall in 3D (three.js): the façade, the box sign, the lamp and real sun shadows"
+    },
+    {
+      "file": "06.webp",
+      "w": 1600,
+      "h": 735,
+      "it": "Il 3D di sera: le lettere al neon accese e il cono del lampione",
+      "en": "The 3D scene in the evening: neon letters on and the street-lamp cone"
+    },
+    {
+      "file": "07.webp",
+      "w": 740,
+      "h": 1600,
+      "it": "Sul telefono: due volantini per riga",
+      "en": "On the phone: two flyers per row"
+    },
+    {
+      "file": "08.webp",
+      "w": 740,
+      "h": 1600,
+      "it": "Sul telefono, i volantini dei giochi",
+      "en": "On the phone, the game flyers"
+    }
+  ],
+  "notes": "Il sito vero, fatto ripartire in locale dalla storia di git (commit 6593e7b, versione 4.0.0 «chiocciola zero», l’ultima col muro pieno) e fotografato con Edge senza rete. Per la privacy sono sfocati dal vivo nella pagina: numero di telefono ed email (volantini whatsapp ed e-mail, tagliandi compresi), il nome del paese e i testi dei volantini «rivalta sul mincio» e «cascina fontana», la riga dello studio sul volantino Donelli, il manifesto dello starlink (nomina il comune), gli adesivi con le foto degli amici, il cartello stradale, il promemoria del dentista, il cartello delle zucche e lo scontrino. La copertina e le due viste 3D sono ritagliate sopra quei testi, quindi senza sfocature (nel 3D i volantini sono fotografie e non si potevano sfocare nella pagina). La zona bassa del muro (manifesti 5-8) non è in galleria: troppe sfocature. loop.mp4: il muro di notte che scorre, coi fari di un’auto che passa."
+}

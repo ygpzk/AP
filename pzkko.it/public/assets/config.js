@@ -2,22 +2,28 @@
 
 export const CONFIG = {
   // L'ID utente Discord. I dati dal vivo (avatar, decorazione, stato, Spotify,
-  // giochi, stato personalizzato) arrivano da Lanyard: bisogna restare nel server
-  // https://discord.gg/lanyard.
+  // giochi, stato personalizzato, stile del nome) arrivano da Lanyard: bisogna
+  // restare nel server https://discord.gg/lanyard.
   discordId: '459791358899519498',
 
-  // Il profilo pubblico (banner, tema, bio, badge, collegamenti) arriva da
-  // dcdn.dstn.to; se non risponde si usano i valori qui sotto, presi il 17.11.2026.
+  // Il profilo pubblico (banner, tema, bio, badge, collegamenti, effetto e cornice)
+  // arriva da dcdn.dstn.to; se non risponde si usano i valori qui sotto, presi il 18.11.2026.
   profileApi: 'https://dcdn.dstn.to/profile/',
   profile: {
     username: 'pzkko',
     displayName: 'pzkko',
     avatar: 'd4c872e1182f1e7ed9ef6d54cf17666b',
-    banner: 'c80cfe7ab2c618a7ced2e688fdfc80ff',
+    banner: 'a_ec2559d3be64aa2b509c96f456b28d19',
     bannerColor: '#110f10',
     theme: ['#ccff00', '#9d00ff'],
     bio: 'alberto, from italy. trained surveyor, now studying construction & land management on a dual degree between italy and san marino. i also design and build websites and brand identities, hand-written code, no frameworks. building with claude code daily: custom skills, tools and too many side projects.',
     decoration: 'a_820da11285b1a68ad94c18fd9dcf8ca8',
+    // lo stile del nome: carattere 17 (Pricedown), effetto 1 (tinta unita)
+    nameStyle: { font_id: 17, effect_id: 1, colors: [] },
+    // gli oggetti da collezione (SKU di Discord): effetto del profilo, cornice, decorazione
+    effectSku: '1341506443978735616',
+    frameSku: '1509183144786657413',
+    decorationSku: '1466993897333985337',
     guild: { tag: 'NODE', id: '425824580918181889', badge: 'de1a71e54518bf5b4b1e271f823093a0' },
     badges: [
       { id: 'premium', icon: '7294f50817c5fe9fd98631d230ac2e5d', description: 'Subscriber since 11/11/26', link: 'https://discord.com/settings/premium' },
@@ -26,12 +32,15 @@ export const CONFIG = {
       { id: 'legacy_username', icon: '6de6d34650760ba5551a79732e98ed60', description: 'Originally known as Pzkko#1631' },
     ],
     connections: [
-      { type: 'domain', name: 'pzkko.it', id: 'pzkko.it' },
-      { type: 'github', name: 'ygpzk', id: '254122358' },
-      { type: 'steam', name: 'ygpzk', id: '76561198971719489' },
-      { type: 'twitch', name: 'pzkko', id: '502284033' },
+      { type: 'domain', name: 'pzkko.it', id: 'pzkko.it', verified: true },
+      { type: 'github', name: 'ygpzk', id: '254122358', verified: true },
+      { type: 'steam', name: 'ygpzk', id: '76561198971719489', verified: true },
+      { type: 'twitch', name: 'pzkko', id: '502284033', verified: true },
     ],
   },
+
+  // Dove Discord dà nome, immagini e misure di effetto, cornice e decorazione.
+  collectiblesApi: 'https://discord.com/api/v9/collectibles-products/',
 
   // Il sito principale, quello serio.
   mainSite: { url: 'https://www.albertopecchini.it', label: 'albertopecchini.it' },
@@ -41,13 +50,40 @@ export const CONFIG = {
   // codice del sito, es. 'pzkko'. Vuoto = niente contatore e niente script.
   goatcounter: '',
 
-  updated: '2026-11-17',
+  updated: '2026-11-18',
 }
 
-const SI = 'https://cdn.simpleicons.org'
+// Gli oggetti da collezione come li dà Discord, di riserva se la sua API non risponde
+// (presi il 18.11.2026). La cornice ha due livelli, dietro e davanti alla scheda.
+const CDN = 'https://cdn.discordapp.com'
+export const COLLECTIBLES = {
+  '1341506443978735616': {
+    name: 'Dreamy (Green)', type: 1,
+    thumb: `${CDN}/assets/content/ca21f227ee69461169d762514ab0a6406d03274e4c01e970b8de7a491f19e9f1`,
+    still: `${CDN}/assets/content/3c169ebbea33e4e9af70624b4ca6bf7962ca2529c157e61d40431872718d0828`,
+    width: 450, height: 880,
+    layers: [
+      { src: `${CDN}/assets/content/1be63b5afd7e3c4b91563697c1dd41f753d5805529938c5613770979a936242e`, loop: false, duration: 2880, start: 0, loopDelay: 0 },
+      { src: `${CDN}/assets/content/be21b3b0c5cf9260db3d3daefe555011863dec60a7935edc9d73ac7d96deddd9`, loop: true, duration: 2880, start: 3280, loopDelay: 4000 },
+    ],
+  },
+  '1509183144786657413': {
+    name: 'Crystals (Peridot)', type: 3, inner: 1200, top: 304, bottom: 0, side: 56,
+    layers: [{ id: '1514423455905349705', order: 'front' }, { id: '1514423458833109165', order: 'back' }],
+  },
+  '1466993897333985337': { name: 'Neon Glow (Amethyst)', type: 0 },
+}
 
-// I social. `icon` è lo slug di simpleicons.org; `dark` il colore del marchio
-// col tema scuro quando quello normale è nero, `light` col tema chiaro.
+// I caratteri dei nomi di Discord (display name styles): id → famiglia, peso, spaziatura.
+// Presi dal client di Discord; l'11 è gg sans, quello di tutti.
+export const NAME_FONTS = {
+  3: ['Sakura', 400, '.04em'], 4: ['Jellybean', 400, '0'], 6: ['Modern', 500, '.01em'], 7: ['Medieval', 400, '.02em'],
+  8: ['8Bit', 400, '.02em'], 10: ['Vampyre', 400, '.01em'], 12: ['Tempo', 600, '.03em'], 13: ['Monkey Bars', 700, '0'],
+  14: ['Mainframe', 700, '.03em'], 15: ['Headbang', 400, '0'], 16: ['Journal', 700, '0'], 17: ['Pricedown', 700, '0'],
+}
+
+// I social. `icon` è il nome dell'icona in icons.js; `dark` il colore col tema scuro
+// quando quello del marchio è nero, `light` col tema chiaro quando è troppo chiaro.
 export const SOCIALS = [
   { key: 'discord', name: 'Discord', handle: 'pzkko', url: 'https://discord.com/users/459791358899519498', icon: 'discord' },
   { key: 'instagram', name: 'Instagram', handle: 'albertoxpecchini', url: 'https://www.instagram.com/albertoxpecchini/', icon: 'instagram' },
@@ -57,53 +93,39 @@ export const SOCIALS = [
   { key: 'youtube', name: 'YouTube', handle: 'alberto-h7y3h', url: 'https://www.youtube.com/@alberto-h7y3h', icon: 'youtube' },
   { key: 'threads', name: 'Threads', handle: 'albertoxpecchini', url: 'https://www.threads.net/@albertoxpecchini', icon: 'threads', dark: 'ffffff' },
   { key: 'twitch', name: 'Twitch', handle: 'pzkko', url: 'https://www.twitch.tv/pzkko', icon: 'twitch' },
-  { key: 'kick', name: 'Kick', handle: 'albertoxpecchini', url: 'https://kick.com/albertoxpecchini', icon: 'kick', light: '3a9b0e' },
+  { key: 'kick', name: 'Kick', handle: 'albertoxpecchini', url: 'https://kick.com/albertoxpecchini', icon: 'kick', light: '2f9b0e' },
   { key: 'steam', name: 'Steam', handle: 'ygpzk', url: 'https://steamcommunity.com/profiles/76561198971719489', icon: 'steam', dark: 'ffffff' },
-  { key: 'spotify', name: 'Spotify', handle: 'pzkko', url: 'https://open.spotify.com/user/qeefs44bv4bpoa7dk8epagrxf', icon: 'spotify' },
+  { key: 'spotify', name: 'Spotify', handle: 'pzkko', url: 'https://open.spotify.com/user/qeefs44bv4bpoa7dk8epagrxf', icon: 'spotify', light: '169c46' },
   { key: 'reddit', name: 'Reddit', handle: 'u/yungpzkko', url: 'https://www.reddit.com/user/yungpzkko/', icon: 'reddit' },
   { key: 'pinterest', name: 'Pinterest', handle: 'albertoxpecchini', url: 'https://www.pinterest.com/albertoxpecchini/', icon: 'pinterest' },
-  { key: 'snapchat', name: 'Snapchat', handle: 'albertoxpecchini', url: 'https://www.snapchat.com/add/albertoxpecchini', icon: 'snapchat', light: 'd4b800' },
+  { key: 'snapchat', name: 'Snapchat', handle: 'albertoxpecchini', url: 'https://www.snapchat.com/add/albertoxpecchini', icon: 'snapchat', light: 'b89f00' },
   { key: 'telegram', name: 'Telegram', handle: 'albertopecchini', url: 'https://t.me/albertopecchini', icon: 'telegram' },
   { key: 'github', name: 'GitHub', handle: 'ygpzk', url: 'https://github.com/ygpzk', icon: 'github', dark: 'ffffff' },
 ]
-export const iconUrl = (s, dark) => `${SI}/${s.icon}${dark && s.dark ? '/' + s.dark : !dark && s.light ? '/' + s.light : ''}`
 
-// I progetti per svago. `cover` è un'immagine in /media/ oppure il nome di una
-// copertina disegnata in covers.js. I testi stanno in i18n.js sotto `projects`.
+// I progetti per svago. Immagini e filmati sono catture vere dei progetti in funzione:
+// stanno in /media/p/<key>/ e le elenca media.js (lo riscrive `npm run media`).
+// `kind`: game (giochi), tool (programmi), site (siti). `tags`: [nome, icona di icons.js
+// oppure colore]. I testi stanno in i18n.js sotto `projects`.
 const GH = 'https://github.com/ygpzk/AP/tree/main'
 export const PROJECTS = [
-  { key: 'matricios', title: 'MatriciOS', cover: 'matricios', tags: ['C#', 'Windows', 'Terminal'], code: `${GH}/MatriciOS` },
-  { key: 'lezioni', title: 'Lezioni', cover: '/media/lezioni.webp', tags: ['Python', 'Whisper', 'LaTeX'], code: `${GH}/albertopecchini.it/tools/lezioni` },
-  { key: 'zero', title: 'Cercapersone zero', cover: 'zero', tags: ['three.js', 'JavaScript', 'LCD 1-bit'] },
-  { key: 'giochini', title: 'Giochini', cover: '/media/giochini.webp', media: ['/media/giochini-manifesto.webp'], tags: ['three.js', 'chiptune', '$pzk'] },
-  { key: 'serranda', title: 'La serranda', cover: '/media/serranda.webp', media: ['/media/serranda-intera.webp'], tags: ['HTML', 'CSS', 'gpt-image-2'] },
-  { key: 'wrapped', title: 'Wrapped 5BT', cover: 'wrapped', tags: ['Node.js', 'WhatsApp'], url: 'https://www.albertopecchini.it/wrapped5BT/', code: `${GH}/albertopecchini.it/tools/wrapped` },
-  { key: 'email', title: 'Email', cover: 'email', tags: ['Node.js', 'HTML email'], code: `${GH}/albertopecchini.it/tools/email-generator` },
-  { key: 'pulizia', title: 'Pulizia', cover: 'pulizia', tags: ['Node.js', 'PowerShell'] },
-  { key: 'parole', title: 'Parole', cover: 'parole', tags: ['React', 'TypeScript'] },
-  { key: 'trivia', title: 'Trivia', cover: 'trivia', tags: ['React', 'TypeScript'] },
+  { key: 'zero', title: 'Cercapersone zero', kind: 'game', featured: true, tags: [['three.js', 'threejs'], ['JavaScript', 'javascript'], ['LCD 1-bit', '#ff8a1a']] },
+  { key: 'giochini', title: 'Giochini', kind: 'game', tags: [['three.js', 'threejs'], ['chiptune', '#9d00ff'], ['$pzk', '#7cc400']] },
+  { key: 'serranda', title: 'La serranda', kind: 'site', tags: [['HTML', 'html5'], ['CSS', 'css'], ['gpt-image-2', '#10a37f']] },
+  { key: 'matricios', title: 'MatriciOS', kind: 'tool', tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['Terminal', '#3fb950']], code: `${GH}/MatriciOS`, download: 'https://github.com/ygpzk/AP/raw/main/MatriciOS/MatriciOS.exe' },
+  { key: 'lezioni', title: 'Lezioni', kind: 'tool', tags: [['Python', 'python'], ['Whisper', '#10a37f'], ['LaTeX', 'latex']], code: `${GH}/albertopecchini.it/tools/lezioni` },
+  { key: 'parole', title: 'Parole', kind: 'game', tags: [['React', 'react'], ['TypeScript', 'typescript']] },
+  { key: 'trivia', title: 'Trivia', kind: 'game', tags: [['React', 'react'], ['TypeScript', 'typescript']] },
+  { key: 'wrapped', title: 'Wrapped 5BT', kind: 'tool', tags: [['Node.js', 'nodejs'], ['WhatsApp', '#25d366']], url: 'https://www.albertopecchini.it/wrapped5BT/', code: `${GH}/albertopecchini.it/tools/wrapped` },
+  { key: 'email', title: 'Email', kind: 'tool', tags: [['Node.js', 'nodejs'], ['HTML email', 'html5']], code: `${GH}/albertopecchini.it/tools/email-generator` },
+  { key: 'pulizia', title: 'Pulizia', kind: 'tool', tags: [['Node.js', 'nodejs'], ['PowerShell', 'powershell']] },
 ]
 
-const DV = 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons'
-// Gli strumenti, in pillole come i ruoli di Discord.
+// Gli strumenti, in pillole come i ruoli di Discord: [nome, icona di icons.js].
 export const TOOLS = [
-  { title: 'HTML', icon: `${DV}/html5/html5-original.svg` },
-  { title: 'CSS', icon: `${DV}/css3/css3-original.svg` },
-  { title: 'JavaScript', icon: `${DV}/javascript/javascript-original.svg` },
-  { title: 'TypeScript', icon: `${DV}/typescript/typescript-original.svg` },
-  { title: 'React', icon: `${DV}/react/react-original.svg` },
-  { title: 'Node.js', icon: `${DV}/nodejs/nodejs-original.svg` },
-  { title: 'Vite', icon: `${DV}/vitejs/vitejs-original.svg` },
-  { title: 'three.js', icon: `${SI}/threedotjs`, dark: `${SI}/threedotjs/ffffff` },
-  { title: 'C#', icon: `${DV}/csharp/csharp-original.svg` },
-  { title: 'Python', icon: `${DV}/python/python-original.svg` },
-  { title: 'PowerShell', icon: `${DV}/powershell/powershell-original.svg` },
-  { title: 'Claude Code', icon: `${SI}/claude` },
-  { title: 'AutoCAD', icon: `${SI}/autocad`, dark: `${SI}/autocad/ffffff` },
-  { title: 'Figma', icon: `${DV}/figma/figma-original.svg` },
-  { title: 'FFmpeg', icon: `${SI}/ffmpeg` },
-  { title: 'Vercel', icon: `${SI}/vercel`, dark: `${SI}/vercel/ffffff` },
-  { title: 'Git', icon: `${DV}/git/git-original.svg` },
+  ['HTML', 'html5'], ['CSS', 'css'], ['JavaScript', 'javascript'], ['TypeScript', 'typescript'], ['React', 'react'], ['Node.js', 'nodejs'],
+  ['Vite', 'vite'], ['three.js', 'threejs'], ['C#', 'csharp'], ['Python', 'python'], ['PowerShell', 'powershell'], ['Claude Code', 'claude'],
+  ['AutoCAD', 'autocad'], ['Figma', 'figma'], ['FFmpeg', 'ffmpeg'], ['Vercel', 'vercel'], ['Git', 'git'],
 ]
 
 export const LANGS = [

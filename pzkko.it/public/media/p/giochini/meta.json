@@ -1,0 +1,65 @@
+{
+  "key": "giochini",
+  "cover": {
+    "w": 1280,
+    "h": 720
+  },
+  "video": {
+    "file": "loop.mp4",
+    "w": 960,
+    "h": 540,
+    "seconds": 9
+  },
+  "shots": [
+    {
+      "file": "01.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "Roulette: le fiches sul tavolo prima del giro, la ruota è in 3D",
+      "en": "Roulette: chips on the table before the spin, the wheel is 3D"
+    },
+    {
+      "file": "02.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "Blackjack: tre caselle giocate contro il banco, regole di Las Vegas",
+      "en": "Blackjack: three boxes played against the dealer, Las Vegas rules"
+    },
+    {
+      "file": "03.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "Mine: cinque gemme trovate, incassare 99,5 $pzk o andare avanti",
+      "en": "Mines: five gems found, cash out 99.5 $pzk or keep going"
+    },
+    {
+      "file": "04.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "Dado (sic bo): 3-3-5 sotto la campana di vetro, «11 grande» paga",
+      "en": "Dice (sic bo): 3-3-5 under the glass bell, “11 big” pays"
+    },
+    {
+      "file": "05.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "Testa o croce: è uscita testa, lascia o raddoppia",
+      "en": "Heads or tails: it came up heads, take it or double"
+    },
+    {
+      "file": "06.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "Virtual: la partita in diretta sullo schermino a pixel, con le quote",
+      "en": "Virtual: the match live on the little pixel screen, with the odds"
+    },
+    {
+      "file": "07.webp",
+      "w": 740,
+      "h": 1600,
+      "it": "Sul telefono la roulette va a tutto schermo",
+      "en": "On the phone the roulette goes full screen"
+    }
+  ],
+  "notes": "I sei giochi veri, giocati in locale dal commit 77d823e (26.10.2026, quando i $pzk erano ancora nella sessione del browser: 1.000 finti, nessun server). Ogni foto è una mano giocata davvero dallo script: puntate, giro, esito. Dietro la finestra si intravede il muro (stesse sfocature della serranda). loop.mp4: un montaggio a tagli netti di quattro registrazioni vere (la pallina della roulette, le carte del blackjack, i dadi sotto la campana, la moneta che vola). La partita di virtual è una di quelle che il gioco genera ogni cinque minuti dal seme dell’orario; le squadre hanno i nomi storpiati del gioco."
+}
