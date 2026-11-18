@@ -16,28 +16,52 @@ function crystal(w, h, tone, id) {
     <path d="M${-w / 2} 0 L${-w / 2} ${-sh} L${mid} ${-h} L${w / 2} ${-sh} L${w / 2} 0" fill="none" stroke="#0a6b2c" stroke-opacity=".35" stroke-width="1"/>`
 }
 
-function crystalsSvg(W) {
+// W: larghezza dell'SVG (la scheda va da P a W - P). roomL / roomR: quanto spazio libero c'è
+// fuori dalla scheda a sinistra e a destra; i cristalli non vanno mai oltre. ceil: la zona
+// dei pulsanti (lingua, tema) sopra la scheda, dove i cristalli restano bassi.
+function crystalsSvg(W, roomL, roomR, ceil) {
   const r = rand(4242)
+  const P = 14, L = P, R = W - P
   const base = 58 // dove sta il bordo alto della scheda, dentro l'SVG
+  const deg = Math.PI / 180
   const items = []
+  // inclina il cristallo quanto basta perché la punta resti nello spazio libero
+  const add = (c) => {
+    const right = R + roomR - c.x - c.w / 2, left = c.x - (L - roomL) - c.w / 2
+    const lim = (v) => Math.asin(Math.max(-1, Math.min(1, v / c.h))) / deg
+    c.a = Math.max(-lim(left), Math.min(lim(right), c.a))
+    if (ceil) {
+      const tip = c.x + Math.sin(c.a * deg) * c.h
+      if (Math.max(c.x, tip) + c.w / 2 > ceil.x0 && Math.min(c.x, tip) - c.w / 2 < ceil.x1) {
+        c.h = Math.min(c.h, (c.y - ceil.y) / Math.cos(c.a * deg))
+        if (c.h < 8) return
+        c.w = Math.min(c.w, c.h * 0.5)
+      }
+    }
+    items.push(c)
+  }
   // il grappolo sul bordo alto: più fitto e più alto verso il centro-sinistra e a destra
-  let x = -6
-  while (x < W + 6) {
-    const t = x / W
-    const tall = 0.55 + 0.45 * Math.max(Math.exp(-((t - 0.32) ** 2) / 0.03), Math.exp(-((t - 0.86) ** 2) / 0.02), 0.35)
-    const h = (28 + r() * 46) * tall + 10
-    const w = 10 + r() * 16
-    const a = (r() - 0.5) * 50
-    items.push({ x, y: base + 6 + r() * 8, w, h, a, tone: r(), z: r() })
-    if (r() < 0.55) items.push({ x: x + w * 0.4, y: base + 10, w: w * 0.6, h: h * (0.45 + r() * 0.3), a: a + (r() - 0.5) * 50, tone: r(), z: r() + 1 })
-    x += w * (0.55 + r() * 0.5)
+  let x = L + 4
+  while (x < R - 4) {
+    const t = (x - L) / (R - L)
+    const tall = 0.55 + 0.45 * Math.max(Math.exp(-((t - 0.3) ** 2) / 0.03), Math.exp(-((t - 0.84) ** 2) / 0.02), 0.35)
+    const h = (30 + r() * 44) * tall + 12
+    const w = 8 + r() * 9
+    const a = (r() - 0.5) * 44
+    add({ x, y: base + 6 + r() * 8, w, h, a, tone: r(), z: r() })
+    if (r() < 0.55) add({ x: x + w * 0.4, y: base + 10, w: w * 0.65, h: h * (0.45 + r() * 0.3), a: a + (r() - 0.5) * 44, tone: r(), z: r() + 1 })
+    x += w * (0.6 + r() * 0.5)
   }
-  // i fianchi, in alto: puntano verso l'esterno
-  for (let i = 0; i < 7; i++) {
-    const y = base + 18 + i * 17 + r() * 8, w = 8 + r() * 10, h = (34 - i * 3.5) * (0.7 + r() * 0.5)
-    items.push({ x: 6, y, w, h, a: -78 + (r() - 0.5) * 30, tone: r(), z: r() })
-    items.push({ x: W - 6, y: y + 6, w, h: h * 0.9, a: 78 + (r() - 0.5) * 30, tone: r(), z: r() })
+  // i fianchi, in alto: puntano in fuori, solo dove c'è spazio
+  const side = (edge, dir, room) => {
+    for (let i = 0; i < 6; i++) {
+      const y = base + 20 + i * 18 + r() * 6, w = 7 + r() * 6, ang = 50 + r() * 18
+      const h = Math.min((30 - i * 3.6) * (0.75 + r() * 0.4), (room - 4 - w / 2 + 3) / Math.sin(ang * deg))
+      if (h >= 14) items.push({ x: edge, y, w, h, a: dir * ang, tone: r(), z: r() })
+    }
   }
+  side(L + 3, -1, roomL)
+  side(R - 3, 1, roomR)
   items.sort((p, q) => p.z - q.z)
   const defs = items.map((c, i) => {
     const l = 62 + c.tone * 20
@@ -47,6 +71,7 @@ function crystalsSvg(W) {
   const shapes = items.map((c, i) => `<g class="fx-crystal" style="--i:${i % 9}" transform="translate(${c.x.toFixed(1)} ${c.y.toFixed(1)}) rotate(${c.a.toFixed(1)})">${crystal(c.w, c.h, c.tone, i)}</g>`).join('')
   const glints = Array.from({ length: 6 }, (_, i) => {
     const gx = 20 + r() * (W - 40), gy = base - 14 - r() * 40
+    if (ceil && gx > ceil.x0 - 10 && gx < ceil.x1 + 10) return ''
     return `<path class="fx-glint" style="--g:${i}" transform="translate(${gx.toFixed(1)} ${gy.toFixed(1)})" d="M0 -7C1 -1 1 -1 7 0C1 1 1 1 0 7C-1 1 -1 1 -7 0C-1 -1 -1 -1 0 -7Z" fill="#f6ffe4"/>`
   }).join('')
   return `<svg xmlns="${NS}" viewBox="0 0 ${W} 200" width="${W}" height="200" aria-hidden="true"><defs>${defs}<filter id="cGlow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g filter="url(#cGlow)">${shapes}</g>${glints}</svg>`
@@ -76,15 +101,26 @@ export function mountEffect(card) {
   card.prepend(top)
   card.appendChild(burst)
 
-  let lastW = 0
+  // da 900 px in su a destra della scheda ci sono le schede del pannello: lì niente cristalli
+  const wide = matchMedia('(min-width: 900px)')
+  let key = ''
   const draw = () => {
-    const W = Math.round(card.getBoundingClientRect().width + 28)
-    if (Math.abs(W - lastW) < 2) return
-    lastW = W
-    top.innerHTML = crystalsSvg(W)
+    const b = card.getBoundingClientRect()
+    const W = Math.round(b.width + 28)
+    const roomL = Math.max(0, Math.min(40, Math.floor(b.left)))
+    const roomR = wide.matches ? 0 : Math.max(0, Math.min(40, Math.floor(document.documentElement.clientWidth - b.right)))
+    // i pulsanti sopra la scheda (sul telefono stanno proprio lì)
+    const c = document.querySelector('.controls')?.getBoundingClientRect()
+    const ceil = c && c.width && c.left < b.right + 14 && c.right > b.left - 14 && c.bottom > b.top - 90 && c.top < b.top
+      ? { x0: Math.round(c.left - b.left + 6), x1: Math.round(c.right - b.left + 22), y: Math.round(58 + c.bottom - b.top + 4) } : null
+    const k = `${W}|${roomL}|${roomR}|${ceil ? ceil.x0 + ',' + ceil.x1 + ',' + ceil.y : ''}`
+    if (k === key) return
+    key = k
+    top.innerHTML = crystalsSvg(W, roomL, roomR, ceil)
   }
   draw()
   new ResizeObserver(draw).observe(card)
+  addEventListener('resize', () => requestAnimationFrame(draw))
 
   let playing = false, last = 0
   const play = () => {

@@ -75,16 +75,16 @@ body {
   position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  max-width: 1080px;
+  width: min(1080px, calc(100% - 80px));
   margin: 72px auto 24px;
   border-radius: 14px;
   background: linear-gradient(var(--ov), var(--ov)), linear-gradient(180deg, var(--p) 0%, var(--a) 100%);
   box-shadow: var(--shadow);
 }
 @media (min-width: 900px) { .profile { grid-template-columns: 360px minmax(0, 1fr); } }
-@media (max-width: 899px) { .profile { margin: 64px 12px 16px; } }
+@media (max-width: 899px) { .profile { width: auto; margin: 64px 16px 16px; } }
 
-.controls { position: absolute; top: -48px; right: 0; display: flex; gap: 8px; }
+.controls { position: absolute; top: -48px; right: 0; z-index: 6; display: flex; gap: 8px; }
 .ctrl {
   display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 10px;
   border-radius: 10px; background: var(--btn-2); color: var(--text); font-weight: 600; font-size: 14px;
@@ -101,7 +101,7 @@ body {
 
 .avatar { position: absolute; left: 16px; top: 82px; width: 132px; height: 132px; z-index: 3; }
 .avatar__img { width: 132px; height: 132px; border-radius: 50%; border: 6px solid var(--ring); background: var(--ring); object-fit: cover; display: block; box-sizing: border-box; }
-.avatar__deco { position: absolute; left: -14px; top: -14px; width: 160px; height: 160px; pointer-events: none; }
+.avatar__deco { position: absolute; left: -14px; top: -14px; width: 160px; height: 160px; max-width: none; pointer-events: none; }
 .avatar__status { position: absolute; right: 4px; bottom: 4px; width: 30px; height: 30px; }
 
 .bubble {
@@ -261,7 +261,7 @@ body {
 /* ── l'effetto del profilo ──────────────────────────────────────────────── */
 .fx-crystals { position: absolute; left: -14px; right: -14px; top: -58px; height: 200px; z-index: 4; pointer-events: none; }
 .fx-crystals svg { display: block; overflow: visible; }
-.fx-crystal { animation: crystal-breathe 5s ease-in-out infinite; animation-delay: calc(var(--i) * -.6s); transform-box: fill-box; }
+.fx-crystal { animation: crystal-breathe 5s ease-in-out infinite; animation-delay: calc(var(--i) * -.6s); }
 @keyframes crystal-breathe { 50% { filter: brightness(1.12) saturate(1.1); } }
 .fx-glint { opacity: 0; transform-box: fill-box; transform-origin: center; animation: glint 4.5s ease-in-out infinite; animation-delay: calc(var(--g) * .75s); }
 @keyframes glint { 0%, 70%, 100% { opacity: 0; scale: .3; } 80% { opacity: 1; scale: 1; } 90% { opacity: 0; scale: .6; } }
