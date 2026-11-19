@@ -1319,7 +1319,12 @@ html.auto .fari,html.auto .freni,html.auto .neonauto,html.auto .riflessi{display
 const cosa = new URLSearchParams(location.search).get('apri')
 const GIOCHI = ['roulette', 'blackjack', 'mine', 'dado', 'moneta', 'virtual']
 if (GIOCHI.includes(cosa)) import(`/games/${cosa}/${cosa}.js`).then((m) => m.apri()).catch((e) => console.warn('gioco non aperto', e))
-else if (cosa === 'zero' || cosa === 'chat') { const q = new URLSearchParams(location.search), app = cosa === 'chat' ? 'chat' : /^[a-z]{2,20}$/.test(q.get('app') ?? '') ? q.get('app') : null; import('/telefono/telefono.js').then((t) => t.apri(app, q.get('comando') ? { comando: q.get('comando').slice(0, 80) } : {})) }.catch((e) => console.warn('cercapersone non aperto', e))
+else if (cosa === 'zero' || cosa === 'chat') {
+  const q = new URLSearchParams(location.search)
+  const app = cosa === 'chat' ? 'chat' : /^[a-z]{2,20}$/.test(q.get('app') ?? '') ? q.get('app') : null
+  const opz = q.get('comando') ? { comando: q.get('comando').slice(0, 80) } : {}
+  import('/telefono/telefono.js').then((t) => t.apri(app, opz)).catch((e) => console.warn('cercapersone non aperto', e))
+}
 </script>
 </body>
 </html>

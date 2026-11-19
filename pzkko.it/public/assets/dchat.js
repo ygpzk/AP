@@ -295,6 +295,8 @@ export function monta(el, { finestra }) {
     if (e.target.closest('[data-conto]')) apriConto()
   })
   pzk.osserva(stato)
+  // il canale diretto con la banca: quello che cambia da un altro dispositivo (o nel cercapersone) arriva subito
+  import('/games/live.js').catch(() => {})
   zaino.ascolta?.(stato)
   // tornando dal cercapersone o da un tavolo: il conto e lo zaino si rileggono
   addEventListener('pzkko-app-chiusa', () => { try { pzk.ricarica() } catch {} Promise.resolve(pzk.sincronizza?.()).catch(() => {}).finally(stato) })
