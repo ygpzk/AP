@@ -2,43 +2,57 @@
 // Le catture vere dei progetti in public/media/p/, con misure, didascalie e impronta del file.
 export const MEDIA = {
  "email": {
-  "cover": "/media/p/email/cover.webp?v=80c91e27",
+  "cover": "/media/p/email/cover.webp?v=be2810ae",
   "video": null,
   "shots": [
+   {
+    "src": "/media/p/email/os-01.webp?v=be2810ae",
+    "w": 1280,
+    "h": 720,
+    "it": "Posta OS: il menù, nello stesso terminale di Matrici OS",
+    "en": "Posta OS: the menu, in the same terminal as Matrici OS"
+   },
+   {
+    "src": "/media/p/email/os-02.webp?v=b5c75a58",
+    "w": 1280,
+    "h": 720,
+    "it": "Posta OS: una email nuova, il mittente",
+    "en": "Posta OS: a new email, choosing the sender"
+   },
    {
     "src": "/media/p/email/01.webp?v=3a5adb05",
     "w": 1280,
     "h": 1582,
-    "it": "",
-    "en": ""
+    "it": "L’anteprima col pulsante «copia email»",
+    "en": "The preview with the “copy email” button"
    },
    {
     "src": "/media/p/email/02.webp?v=b6e776ad",
     "w": 1280,
     "h": 1329,
-    "it": "",
-    "en": ""
+    "it": "L’email generata",
+    "en": "The generated email"
    },
    {
     "src": "/media/p/email/03.webp?v=5eefffe2",
     "w": 1280,
     "h": 870,
-    "it": "",
-    "en": ""
+    "it": "Il rapporto della generazione",
+    "en": "The run report"
    },
    {
     "src": "/media/p/email/04.webp?v=496a66b0",
     "w": 1040,
     "h": 585,
-    "it": "",
-    "en": ""
+    "it": "Il programma nel terminale",
+    "en": "The program in the terminal"
    },
    {
     "src": "/media/p/email/05.webp?v=5ab57494",
     "w": 780,
     "h": 1688,
-    "it": "",
-    "en": ""
+    "it": "L’email sul telefono",
+    "en": "The email on a phone"
    }
   ]
  },
@@ -168,57 +182,57 @@ export const MEDIA = {
     "src": "/media/p/matricios/01.webp?v=dd8d91f1",
     "w": 902,
     "h": 720,
-    "it": "",
-    "en": ""
+    "it": "L’avvio: i controlli di sistema e l’accesso",
+    "en": "Boot: system checks and login"
    },
    {
     "src": "/media/p/matricios/02.webp?v=d8a8be73",
     "w": 902,
     "h": 720,
-    "it": "",
-    "en": ""
+    "it": "Il menu principale",
+    "en": "The main menu"
    },
    {
     "src": "/media/p/matricios/03.webp?v=3267a5cb",
     "w": 902,
     "h": 720,
-    "it": "",
-    "en": ""
+    "it": "Lezione 11: il prodotto righe per colonne",
+    "en": "Lesson 11: row-by-column multiplication"
    },
    {
     "src": "/media/p/matricios/04.webp?v=61dbd552",
     "w": 902,
     "h": 720,
-    "it": "",
-    "en": ""
+    "it": "Un esercizio risolto: risposta esatta, +10 XP",
+    "en": "A solved exercise: right answer, +10 XP"
    },
    {
     "src": "/media/p/matricios/05.webp?v=dee4238d",
     "w": 902,
     "h": 720,
-    "it": "",
-    "en": ""
+    "it": "I 100 esercizi nelle 10 sezioni",
+    "en": "The 100 exercises in 10 sections"
    },
    {
     "src": "/media/p/matricios/06.webp?v=f9374e2b",
     "w": 902,
     "h": 720,
-    "it": "",
-    "en": ""
+    "it": "I progressi: XP, rango e sezioni completate",
+    "en": "Progress: XP, rank and completed sections"
    },
    {
     "src": "/media/p/matricios/07.webp?v=9a9d76fd",
     "w": 902,
     "h": 720,
-    "it": "",
-    "en": ""
+    "it": "Il terminale ambra",
+    "en": "The amber terminal"
    },
    {
     "src": "/media/p/matricios/08.webp?v=12c653c3",
     "w": 902,
     "h": 720,
-    "it": "",
-    "en": ""
+    "it": "Il terminale blu",
+    "en": "The blue terminal"
    }
   ]
  },
@@ -235,50 +249,98 @@ export const MEDIA = {
     "src": "/media/p/parole/01.webp?v=035ec71c",
     "w": 1422,
     "h": 800,
-    "it": "",
-    "en": ""
+    "it": "La scelta della modalità",
+    "en": "Choosing the mode"
    },
    {
     "src": "/media/p/parole/02.webp?v=104df262",
     "w": 1422,
     "h": 800,
-    "it": "",
-    "en": ""
+    "it": "Una partita in corso",
+    "en": "A game in progress"
    },
    {
     "src": "/media/p/parole/03.webp?v=38f47357",
     "w": 1422,
     "h": 800,
-    "it": "",
-    "en": ""
+    "it": "Parola indovinata: nuovo record",
+    "en": "Word guessed: new record"
    },
    {
     "src": "/media/p/parole/04.webp?v=bfa9b2af",
     "w": 1422,
     "h": 800,
-    "it": "",
-    "en": ""
+    "it": "La classifica",
+    "en": "The leaderboard"
    },
    {
     "src": "/media/p/parole/05.webp?v=3e80f2c8",
     "w": 1422,
     "h": 800,
-    "it": "",
-    "en": ""
+    "it": "Il tutorial: il sistema di colori",
+    "en": "The tutorial: how the colours work"
    },
    {
     "src": "/media/p/parole/06.webp?v=965a5d4d",
     "w": 1422,
     "h": 800,
-    "it": "",
-    "en": ""
+    "it": "Il tema chiaro",
+    "en": "The light theme"
    },
    {
     "src": "/media/p/parole/07.webp?v=8a43c791",
     "w": 780,
     "h": 1684,
-    "it": "",
-    "en": ""
+    "it": "Sul telefono, a sei lettere",
+    "en": "On a phone, six letters"
+   }
+  ]
+ },
+ "pulizia": {
+  "cover": "/media/p/pulizia/cover.webp?v=f7b783cd",
+  "video": null,
+  "shots": [
+   {
+    "src": "/media/p/pulizia/os-01.webp?v=f7b783cd",
+    "w": 1280,
+    "h": 720,
+    "it": "Pulizia OS: il menù, nello stesso terminale di Matrici OS",
+    "en": "Pulizia OS: the menu, in the same terminal as Matrici OS"
+   },
+   {
+    "src": "/media/p/pulizia/os-02.webp?v=3443cac8",
+    "w": 1280,
+    "h": 720,
+    "it": "Pulizia OS: l’analisi, che guarda e riferisce",
+    "en": "Pulizia OS: the analysis, which looks and reports"
+   },
+   {
+    "src": "/media/p/pulizia/os-03.webp?v=af50e842",
+    "w": 1280,
+    "h": 720,
+    "it": "Pulizia OS: le dieci prove di sicurezza",
+    "en": "Pulizia OS: the ten safety tests"
+   },
+   {
+    "src": "/media/p/pulizia/01.webp?v=24c5ffb6",
+    "w": 1280,
+    "h": 720,
+    "it": "«pulizia»: guarda e riferisce, senza toccare niente",
+    "en": "“pulizia”: it looks and reports, touching nothing"
+   },
+   {
+    "src": "/media/p/pulizia/02.webp?v=b82796a3",
+    "w": 1280,
+    "h": 720,
+    "it": "«pulizia prove»: le otto prove di sicurezza",
+    "en": "“pulizia prove”: the eight safety tests"
+   },
+   {
+    "src": "/media/p/pulizia/03.webp?v=44be2018",
+    "w": 1280,
+    "h": 720,
+    "it": "«pulizia aiuto»: tutti i comandi",
+    "en": "“pulizia aiuto”: every command"
    }
   ]
  },
@@ -362,57 +424,57 @@ export const MEDIA = {
     "src": "/media/p/trivia/01.webp?v=90563aa9",
     "w": 1422,
     "h": 800,
-    "it": "",
-    "en": ""
+    "it": "La home del quiz",
+    "en": "The quiz home"
    },
    {
     "src": "/media/p/trivia/02.webp?v=e1d02957",
     "w": 1422,
     "h": 800,
-    "it": "",
-    "en": ""
+    "it": "La scelta dei capitoli",
+    "en": "Choosing the chapters"
    },
    {
     "src": "/media/p/trivia/03.webp?v=eb18a9b1",
     "w": 1422,
     "h": 800,
-    "it": "",
-    "en": ""
+    "it": "Una domanda a scelta multipla",
+    "en": "A multiple-choice question"
    },
    {
     "src": "/media/p/trivia/04.webp?v=2ad0d2dd",
     "w": 1422,
     "h": 800,
-    "it": "",
-    "en": ""
+    "it": "Vero o falso, risposta corretta",
+    "en": "True or false, right answer"
    },
    {
     "src": "/media/p/trivia/05.webp?v=094068e2",
     "w": 1422,
     "h": 800,
-    "it": "",
-    "en": ""
+    "it": "Una domanda a completamento",
+    "en": "A fill-in question"
    },
    {
     "src": "/media/p/trivia/06.webp?v=4861e5cb",
     "w": 1422,
     "h": 800,
-    "it": "",
-    "en": ""
+    "it": "La pagella a fine partita",
+    "en": "The report card at the end"
    },
    {
     "src": "/media/p/trivia/07.webp?v=165d4969",
     "w": 1422,
     "h": 800,
-    "it": "",
-    "en": ""
+    "it": "La classifica",
+    "en": "The leaderboard"
    },
    {
     "src": "/media/p/trivia/08.webp?v=a5579c02",
     "w": 780,
     "h": 1688,
-    "it": "",
-    "en": ""
+    "it": "Sul telefono",
+    "en": "On a phone"
    }
   ]
  },
@@ -424,57 +486,57 @@ export const MEDIA = {
     "src": "/media/p/wrapped/01.webp?v=01ee9842",
     "w": 780,
     "h": 1688,
-    "it": "",
-    "en": ""
+    "it": "La copertina: 51.748 messaggi",
+    "en": "The cover: 51,748 messages"
    },
    {
     "src": "/media/p/wrapped/02.webp?v=bfcc53e4",
     "w": 780,
     "h": 1688,
-    "it": "",
-    "en": ""
+    "it": "Quanto abbiamo scritto davvero",
+    "en": "How much we really wrote"
    },
    {
     "src": "/media/p/wrapped/03.webp?v=1145bc73",
     "w": 780,
     "h": 1688,
-    "it": "",
-    "en": ""
+    "it": "Tradotto in pagine e minuti",
+    "en": "Translated into pages and minutes"
    },
    {
     "src": "/media/p/wrapped/04.webp?v=2619707c",
     "w": 780,
     "h": 1688,
-    "it": "",
-    "en": ""
+    "it": "Quattro anni, mese per mese",
+    "en": "Four years, month by month"
    },
    {
     "src": "/media/p/wrapped/05.webp?v=7c14630e",
     "w": 780,
     "h": 1688,
-    "it": "",
-    "en": ""
+    "it": "Anno per anno",
+    "en": "Year by year"
    },
    {
     "src": "/media/p/wrapped/06.webp?v=130c8713",
     "w": 780,
     "h": 1688,
-    "it": "",
-    "en": ""
+    "it": "Il mese record",
+    "en": "The record month"
    },
    {
     "src": "/media/p/wrapped/07.webp?v=01ac8c2a",
     "w": 1300,
     "h": 400,
-    "it": "",
-    "en": ""
+    "it": "Lo script nel terminale, su una chat inventata",
+    "en": "The script in the terminal, on a made-up chat"
    },
    {
     "src": "/media/p/wrapped/08.webp?v=6f0c60c4",
     "w": 1280,
     "h": 720,
-    "it": "",
-    "en": ""
+    "it": "La pagina sul computer",
+    "en": "The page on a computer"
    }
   ]
  },

@@ -1,0 +1,30 @@
+PULIZIA-OS v1.0
+===============
+
+Il programma di pulizia dentro lo stesso terminale di MatriciOS (stessi file
+Term.cs e Sfx.cs: la cornice, i colori, i menu', i suoni).
+
+Guarda la cartella di un progetto (quella con index.html, src\ e public\) e
+riferisce, senza toccare niente:
+
+  - le cartelle che si rifanno con la build (dist, build, cache)
+  - i moduli di src\ che nessuno importa, partendo dalle entrate
+    (gli script di index.html, src\main.*, src\index.*)
+  - i file di public\ che nessun testo del progetto nomina
+  - i file doppi (li dice e basta)
+
+PULISCI mette tutto da parte in .pulizia\quarantena\<data>\ dentro il
+progetto, dopo la conferma scritta: non cancella niente. RIPRISTINA rimette
+ogni pezzo dov'era. PROVE fa le dieci prove di sicurezza su un progettino
+finto in una cartella temporanea. Non esce mai dalla cartella scelta.
+
+Le cartelle protette (file chiamati con un nome costruito, che nessun testo
+nomina per intero) si scrivono in PuliziaOS_dati.txt, una riga
+«protetta=public/cartella».
+
+Rispetto al programma di prima (Node): qui non ci sono i benchmark delle pagine,
+il git gc e il compito pianificato ogni due giorni.
+
+Uso: PuliziaOS.exe [cartella del progetto]
+build.bat lo ricompila col compilatore gia' presente in Windows e lancia le
+prove (PuliziaOS.exe --selftest).

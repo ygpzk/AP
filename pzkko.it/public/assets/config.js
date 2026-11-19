@@ -108,17 +108,25 @@ export const SOCIALS = [
 // `kind`: game (giochi), tool (programmi), site (siti). `tags`: [nome, icona di icons.js
 // oppure colore]. I testi stanno in i18n.js sotto `projects`.
 const GH = 'https://github.com/ygpzk/AP/tree/main'
+// Posta OS e Pulizia OS stanno nel ramo del sito, accanto a pzkko.it
+const OS = 'https://github.com/ygpzk/AP/tree/albertopecchini.it', RAW = 'https://github.com/ygpzk/AP/raw/albertopecchini.it'
+// `play`: le cose che girano dentro il sito, [etichetta, indirizzo] (si aprono in una finestra sopra il profilo).
+// `art`: la miniatura, [colore 1, colore 2, carattere della scritta, motivo dello sfondo].
 export const PROJECTS = [
-  { key: 'zero', title: 'Cercapersone zero', kind: 'game', featured: true, tags: [['three.js', 'threejs'], ['JavaScript', 'javascript'], ['LCD 1-bit', '#ff8a1a']] },
-  { key: 'giochini', title: 'Giochini', kind: 'game', tags: [['three.js', 'threejs'], ['chiptune', '#9d00ff'], ['$pzk', '#7cc400']] },
-  { key: 'serranda', title: 'La serranda', kind: 'site', tags: [['HTML', 'html5'], ['CSS', 'css'], ['gpt-image-2', '#10a37f']] },
-  { key: 'matricios', title: 'MatriciOS', kind: 'tool', tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['Terminal', '#3fb950']], code: `${GH}/MatriciOS`, download: 'https://github.com/ygpzk/AP/raw/main/MatriciOS/MatriciOS.exe' },
-  { key: 'lezioni', title: 'Lezioni', kind: 'tool', tags: [['Python', 'python'], ['Whisper', '#10a37f'], ['LaTeX', 'latex']], code: `${GH}/albertopecchini.it/tools/lezioni` },
-  { key: 'parole', title: 'Parole', kind: 'game', tags: [['React', 'react'], ['TypeScript', 'typescript']] },
-  { key: 'trivia', title: 'Trivia', kind: 'game', tags: [['React', 'react'], ['TypeScript', 'typescript']] },
-  { key: 'wrapped', title: 'Wrapped 5BT', kind: 'tool', tags: [['Node.js', 'nodejs'], ['WhatsApp', '#25d366']], url: 'https://www.albertopecchini.it/wrapped5BT/', code: `${GH}/albertopecchini.it/tools/wrapped` },
-  { key: 'email', title: 'Email', kind: 'tool', tags: [['Node.js', 'nodejs'], ['HTML email', 'html5']], code: `${GH}/albertopecchini.it/tools/email-generator` },
-  { key: 'pulizia', title: 'Pulizia', kind: 'tool', tags: [['Node.js', 'nodejs'], ['PowerShell', 'powershell']] },
+  { key: 'zero', title: 'PZK Zero', kind: 'game', featured: true, art: ['#ff8a1a', '#7a2d00', 'Mainframe', 'griglia'], tags: [['three.js', 'threejs'], ['JavaScript', 'javascript'], ['LCD 1-bit', '#ff8a1a']],
+    play: [['PZK Zero', '/serranda/?apri=zero'], ['Chat', '/serranda/?apri=chat']] },
+  { key: 'giochini', title: 'Casinò $pzk', kind: 'game', art: ['#0f7a3a', '#052612', 'Pricedown', 'rombi'], tags: [['three.js', 'threejs'], ['chiptune', '#9d00ff'], ['$pzk', '#7cc400']],
+    play: [['Roulette', '/serranda/?apri=roulette'], ['Blackjack', '/serranda/?apri=blackjack'], ['Mine', '/serranda/?apri=mine'], ['Dado', '/serranda/?apri=dado'], ['Testa o croce', '/serranda/?apri=moneta'], ['Virtual', '/serranda/?apri=virtual']] },
+  { key: 'serranda', title: 'Il Muro', kind: 'site', art: ['#8d9499', '#2f3336', 'Headbang', 'lamiera'], tags: [['HTML', 'html5'], ['CSS', 'css'], ['gpt-image-2', '#10a37f']],
+    play: [['Il Muro', '/serranda/']] },
+  { key: 'matricios', title: 'Matrici OS', kind: 'tool', art: ['#0d3b1e', '#020a05', '8Bit', 'righe'], tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['Terminal', '#3fb950']], code: `${GH}/MatriciOS`, download: 'https://github.com/ygpzk/AP/raw/main/MatriciOS/MatriciOS.exe' },
+  { key: 'lezioni', title: 'pzk$meeting', kind: 'tool', art: ['#ffd60a', '#b88700', 'Tempo', 'punti'], tags: [['Python', 'python'], ['Whisper', '#10a37f'], ['LaTeX', 'latex']], code: `${GH}/albertopecchini.it/tools/lezioni`,
+    play: [['pzk$meeting', '/tools/lezioni/']] },
+  { key: 'parole', title: 'Parole', kind: 'game', art: ['#e8501c', '#3b0f24', 'Jellybean', 'tessere'], tags: [['React', 'react'], ['TypeScript', 'typescript']] },
+  { key: 'trivia', title: 'Trivia', kind: 'game', art: ['#16c05a', '#062b16', 'Medieval', 'colonne'], tags: [['React', 'react'], ['TypeScript', 'typescript']] },
+  { key: 'wrapped', title: '5BT Wrapped', kind: 'tool', art: ['#1f6feb', '#0a0f1e', 'Modern', 'barre'], tags: [['Node.js', 'nodejs'], ['WhatsApp', '#25d366']], url: 'https://www.albertopecchini.it/wrapped5BT/', code: `${GH}/albertopecchini.it/tools/wrapped` },
+  { key: 'email', title: 'Posta OS', kind: 'tool', art: ['#9d00ff', '#2a0047', 'Monkey Bars', 'buste'], tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['HTML email', 'html5']], code: `${OS}/PostaOS`, download: `${RAW}/PostaOS/PostaOS.exe` },
+  { key: 'pulizia', title: 'Pulizia OS', kind: 'tool', art: ['#ccff00', '#5d7a00', 'Vampyre', 'scintille'], tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['Terminal', '#3fb950']], code: `${OS}/PuliziaOS`, download: `${RAW}/PuliziaOS/PuliziaOS.exe` },
 ]
 
 // Gli strumenti, in pillole come i ruoli di Discord: [nome, icona di icons.js].

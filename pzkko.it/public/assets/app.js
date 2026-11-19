@@ -390,18 +390,27 @@ function nowWidget() {
 
 // ─── i progetti: copertine, filmati, ruoli ───────────────────────────────────
 const rolesHtml = (list) => `<div class="roles">${list.map(([name, ic]) => `<span class="role">${ICONS[ic] ? brand(ic) : `<i style="--c:${esc(ic || 'var(--muted)')}"></i>`}${esc(name)}</span>`).join('')}</div>`
-const archived = (p) => !p.url && !p.code && !p.download
-function mediaHtml(p, { eager = false, chips = true } = {}) {
-  const m = MEDIA[p.key]
-  if (!m) return `<span class="media__ph">${esc(p.title)}</span>`
-  const n = m.shots.length
-  return `<img src="${esc(m.cover)}" alt="" width="1280" height="720" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" draggable="false">
-    ${m.video ? `<video muted loop playsinline preload="none" disableremoteplayback data-src="${esc(m.video.src)}" aria-hidden="true" tabindex="-1"></video>` : ''}
-    ${chips ? `<span class="chip chip--tl">${I[p.kind] || ''}${esc(ui().kind[p.kind] || '')}</span>${m.video || n ? `<span class="chip chip--br">${m.video ? `${I.play}${clock(m.video.seconds * 1000)}` : ''}${m.video && n ? ' · ' : ''}${n ? `${I.image}${n}` : ''}</span>` : ''}` : ''}`
+const archived = (p) => !p.url && !p.code && !p.download && !p.play
+function mediaHtml(p, { eager = false, chips = true, video = true } = {}) {
+  const m = MEDIA[p.key], n = m?.shots.length || 0
+  const [c1, c2, font, pat] = p.art || ['#9d00ff', '#2a0047', 'Pricedown', 'punti']
+  const ink = lum(hex2rgb(c1)) > 0.45 ? '#141414' : '#ffffff'
+  return `<span class="art" data-pat="${esc(pat)}" style="--c1:${esc(c1)};--c2:${esc(c2)};--ink:${ink};--af:'${esc(font)}';--fs:${Math.min(11.5, 104 / Math.max(...p.title.split(' ').map((w) => w.length))).toFixed(1)}cqw">
+      <span class="art__title">${esc(p.title)}</span>
+      ${m ? `<span class="art__shot"><img src="${esc(m.cover)}" alt="" width="1280" height="720" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" draggable="false">${m.video && video ? `<video muted loop playsinline preload="none" disableremoteplayback data-src="${esc(m.video.src)}" aria-hidden="true" tabindex="-1"></video>` : ''}</span>` : ''}
+    </span>
+    ${chips ? `<span class="chip chip--tl">${I[p.kind] || ''}${esc(ui().kind[p.kind] || '')}</span>${m && (m.video || n) ? `<span class="chip chip--br">${m.video ? `${I.play}${clock(m.video.seconds * 1000)}` : ''}${m.video && n ? ' · ' : ''}${n ? `${I.image}${n}` : ''}</span>` : ''}` : ''}`
+}
+// i tasti di un progetto: quello che gira dentro il sito (play), poi il sito fuori, lo scaricabile, il codice
+function playHtml(p, all = false) {
+  if (!p.play) return ''
+  const u = ui(), verb = p.kind === 'game' ? u.play : u.open
+  const one = ([label, href], i) => `<button type="button" class="btn ${i === 0 ? 'btn--msg' : 'btn--ghost'}" data-app="${esc(href)}" data-app-title="${esc(label)}">${i === 0 || !all ? I.play.replace('width="12" height="12"', 'width="14" height="14"') : ''}${esc(all && p.play.length > 1 ? label : verb)}</button>`
+  return (all ? p.play : p.play.slice(0, 1)).map(one).join('')
 }
 function linksHtml(p, primary = false) {
   const u = ui()
-  return `${p.url ? `<a class="btn ${primary ? 'btn--msg' : 'btn--ghost'}" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(u.open)} ${I.ext}</a>` : ''}${p.download ? `<a class="btn ${primary && !p.url ? 'btn--msg' : 'btn--ghost'}" href="${esc(p.download)}" rel="noopener">${I.down}${esc(u.download)}</a>` : ''}${p.code ? `<a class="btn btn--ghost" href="${esc(p.code)}" target="_blank" rel="noopener">${brand('github', { dark: 'ffffff' }).replace('<svg ', '<svg width="16" height="16" ')}${esc(u.code)}</a>` : ''}`
+  return `${p.url ? `<a class="btn ${primary && !p.play ? 'btn--msg' : 'btn--ghost'}" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(u.open)} ${I.ext}</a>` : ''}${p.download ? `<a class="btn ${primary && !p.url && !p.play ? 'btn--msg' : 'btn--ghost'}" href="${esc(p.download)}" rel="noopener">${I.down}${esc(u.download)}</a>` : ''}${p.code ? `<a class="btn btn--ghost" href="${esc(p.code)}" target="_blank" rel="noopener">${brand('github', { dark: 'ffffff' }).replace('<svg ', '<svg width="16" height="16" ')}${esc(u.code)}</a>` : ''}`
 }
 // i filmati: al passaggio del mouse sul computer, quando la scheda è in vista sul telefono
 let autoIO = null
@@ -432,8 +441,8 @@ function wireMedia(root) {
 const makeAutoIO = () => new IntersectionObserver((es) => { for (const e of es) e.isIntersecting && !modal ? playMedia(e.target) : stopMedia(e.target) }, { threshold: 0.7 })
 
 // ─── le schede a destra ──────────────────────────────────────────────────────
-const TABS = ['board', 'projects', 'activity', 'social']
-const SLUG = { board: 'bacheca', projects: 'progetti', activity: 'attivita', social: 'social' }
+const TABS = ['board', 'projects', 'chat', 'activity', 'social']
+const SLUG = { board: 'bacheca', projects: 'progetti', chat: 'chat', activity: 'attivita', social: 'social' }
 let activeTab = 'board', filter = 'all'
 function renderTabs() {
   $('#tabs').innerHTML = TABS.map((k) => `<button class="tab" role="tab" id="tab-${k}" aria-controls="panel-${k}" aria-selected="${k === activeTab}" tabindex="${k === activeTab ? 0 : -1}" data-tab="${k}">${esc(ui().tabs[k])}${k === 'projects' ? `<span class="tab__n">${PROJECTS.length}</span>` : ''}</button>`).join('') + '<span class="tabs__ink" aria-hidden="true"></span>'
@@ -487,14 +496,14 @@ function renderBoard() {
         <h2 class="hero__title">${esc(feat.title)}</h2>
         <p>${esc(tx.card)}</p>
         ${rolesHtml(feat.tags)}
-        <div class="hero__actions"><button type="button" class="btn btn--msg" data-open="${feat.key}">${esc(u.details)}</button>${linksHtml(feat)}</div>
+        <div class="hero__actions">${playHtml(feat)}<button type="button" class="btn ${feat.play ? 'btn--ghost' : 'btn--msg'}" data-open="${feat.key}">${esc(u.details)}</button>${linksHtml(feat)}</div>
       </div>
     </article>
     <div class="widget rise" style="--i:1" id="now-widget">${nowWidget()}</div>
     <div class="widget rise" style="--i:2"><div class="widget__h"><span>${esc(u.aboutTitle)}</span></div><p>${esc(u.aboutText)}</p></div>
     <div class="widget span2 rise" style="--i:3">
       <div class="widget__h"><span>${esc(u.others)}</span><button type="button" class="link" data-goto="projects">${esc(u.seeAll)} →</button></div>
-      <div class="strip">${others.map((p) => `<button type="button" class="mini" data-open="${p.key}"><span class="mini__thumb media">${mediaHtml(p, { chips: false }).replace(/<video[^>]*><\/video>/, '')}</span><span><b>${esc(p.title)}</b><span class="sub">${esc(u.kind[p.kind] || '')}</span></span></button>`).join('')}</div>
+      <div class="strip">${others.map((p) => `<button type="button" class="mini" data-open="${p.key}"><span class="mini__thumb media">${mediaHtml(p, { chips: false, video: false })}</span><span><b>${esc(p.title)}</b><span class="sub">${esc(u.kind[p.kind] || '')}</span></span></button>`).join('')}</div>
     </div>
     <div class="widget span2 rise" style="--i:4"><div class="widget__h"><span>${esc(u.tools)}</span></div>${rolesHtml(TOOLS)}</div>
     <div class="widget main-site span2 rise" style="--i:5">
@@ -512,7 +521,7 @@ function projectCard(p, i) {
       <h3 class="pcard__title">${esc(p.title)}${archived(p) ? `<span class="tag">${esc(u.archived)}</span>` : ''}</h3>
       <p class="pcard__desc">${esc(tx.card)}</p>
       ${rolesHtml(p.tags)}
-      <div class="pcard__actions"><button type="button" class="btn btn--msg" data-open="${p.key}">${esc(u.details)}</button>${linksHtml(p)}</div>
+      <div class="pcard__actions">${playHtml(p)}<button type="button" class="btn ${p.play ? 'btn--ghost' : 'btn--msg'}" data-open="${p.key}">${esc(u.details)}</button>${linksHtml(p)}</div>
     </div></article>`
 }
 function renderProjects() {
@@ -557,13 +566,26 @@ function renderSocial() {
     <a class="srow span2 main-site rise" href="${esc(CONFIG.mainSite.url)}" target="_blank" rel="noopener"><span class="srow__ico">${I.globe}</span><span class="srow__txt"><span class="srow__name">${esc(u.mainTitle)}</span><span class="srow__handle">${esc(CONFIG.mainSite.label)}</span></span><span class="srow__go">${I.ext}</span></a>
     ${SOCIALS.map(row).join('')}</div>`
 }
+// la chat col bot pzk: il modulo (e il motore dei comandi) si scarica solo quando si apre la scheda
+let chatMounted = false
+function renderChat() {
+  if (chatMounted) return
+  chatMounted = true
+  const root = $('#panel-chat')
+  root.innerHTML = '<div class="dc dc--attesa"><div class="dc__scrive"><i></i><i></i><i></i></div></div>'
+  if (!$('link[data-chat-css]')) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/chat/chat.css'; l.dataset.chatCss = '1'; document.head.prepend(l) }
+  import('./dchat.js').then((m) => m.monta(root, { finestra: openApp })).catch((e) => { console.error(e); chatMounted = false; root.innerHTML = `<p class="fine">${esc(ui().nothing)}</p>` })
+}
 function renderPanel() {
   if (activeTab === 'board') renderBoard()
   else if (activeTab === 'projects') renderProjects()
+  else if (activeTab === 'chat') renderChat()
   else if (activeTab === 'activity') renderActivity()
   else renderSocial()
 }
 document.addEventListener('click', (e) => {
+  const ap = e.target.closest('[data-app]')
+  if (ap) { openApp(ap.dataset.app, ap.dataset.appTitle); return }
   const o = e.target.closest('[data-open]')
   if (o) { openProject(o.dataset.open, { from: o.classList.contains('media') ? o : o.closest('.pcard, .hero')?.querySelector('.media') }); return }
   const g = e.target.closest('[data-goto]')
@@ -614,7 +636,7 @@ function openProject(key, { from = null, push = true } = {}) {
       <div class="pv__body">
         <div class="pv__head">
           <div style="min-width:0;flex:1 1 280px"><span class="pv__kind">${esc(u.kind[p.kind] || '')}${archived(p) ? ` · ${esc(u.archived)}` : ''}</span><h2 class="pv__title" id="pv-title">${esc(p.title)}</h2>${rolesHtml(p.tags)}</div>
-          ${p.url || p.code || p.download ? `<div class="pv__links">${linksHtml(p, true)}</div>` : ''}
+          ${p.url || p.code || p.download || p.play ? `<div class="pv__links">${playHtml(p, true)}${linksHtml(p, true)}</div>` : ''}
         </div>
         <div class="widget"><div class="widget__h"><span>${esc(u.overview)}</span></div><p>${esc(tx.full)}</p></div>
         <div class="grid2">
@@ -698,6 +720,41 @@ function closeProject({ instant = false, pop = true } = {}) {
   last?.focus?.({ preventScroll: true })
 }
 
+// ─── le app vere (il muro, i giochi, il cercapersone) in una finestra dentro il sito ──
+let appWin = null
+function openApp(href, title = '') {
+  if (!/^\/[a-z]/.test(href) || appWin) return
+  closeMenus(); closeSearch()
+  for (const el of $$('.media.is-playing')) stopMedia(el)
+  $('.pv video')?.pause()
+  const u = ui(), box = document.createElement('div')
+  box.className = 'app'
+  box.setAttribute('role', 'dialog')
+  box.setAttribute('aria-modal', 'true')
+  box.setAttribute('aria-label', title)
+  box.innerHTML = `<div class="app__bar"><span class="app__dot"></span><b>${esc(title)}</b><span class="app__sub">pzkko.it${esc(href.split('?')[0])}</span>
+      <a class="ctrl" href="${esc(href)}" target="_blank" rel="noopener" title="${esc(u.open)}" aria-label="${esc(u.open)}">${I.ext}</a>
+      <button type="button" class="ctrl" data-close title="${esc(u.close)}" aria-label="${esc(u.close)}">${I.close.replace('width="18" height="18"', 'width="16" height="16"')}</button></div>
+    <iframe class="app__frame" src="${esc(href)}" title="${esc(title)}" allow="fullscreen; autoplay; gamepad; clipboard-write"></iframe>`
+  box.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeApp() })
+  history.pushState({ app: href }, '')
+  document.body.appendChild(box)
+  document.documentElement.style.overflow = 'hidden'
+  appWin = { box, last: document.activeElement }
+  requestAnimationFrame(() => box.classList.add('is-on'))
+  $('iframe', box).focus()
+}
+function closeApp({ pop = true } = {}) {
+  if (!appWin) return
+  const { box, last } = appWin
+  appWin = null
+  box.classList.remove('is-on')
+  setTimeout(() => { box.parentNode?.removeChild(box); if (!modal && !appWin) document.documentElement.style.overflow = '' }, 200)
+  if (pop) history.back()
+  last?.focus?.({ preventScroll: true })
+  window.dispatchEvent(new Event('pzkko-app-chiusa'))
+}
+
 // ─── gli indirizzi: #progetti, #progetti/zero… e il tasto «indietro» ─────────
 function parseHash() {
   const [a, b] = decodeURIComponent(location.hash.slice(1)).split('/')
@@ -705,6 +762,7 @@ function parseHash() {
   return { tab, proj: tab === 'projects' && PROJECTS.some((p) => p.key === b) ? b : null }
 }
 function route() {
+  if (appWin) { closeApp({ pop: false }); return }
   const { tab, proj } = parseHash()
   if (tab && tab !== activeTab) showTab(tab, { url: false })
   if (proj) openProject(proj, { push: false })
@@ -765,7 +823,7 @@ const norm = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCa
 function searchItems() {
   const u = ui()
   return [
-    ...TABS.map((k) => ({ group: u.pages, label: u.tabs[k], ico: I.search, run: () => showTab(k) })),
+    ...TABS.map((k) => ({ group: u.pages, label: u.tabs[k], ico: k === 'chat' ? I.chat.replace('width="18" height="18"', 'width="15" height="15"') : I.search, run: () => showTab(k) })),
     { group: u.pages, label: u.mainTitle, sub: CONFIG.mainSite.label, ico: I.globe, run: () => window.open(CONFIG.mainSite.url, '_blank', 'noopener') },
     ...PROJECTS.map((p) => ({ group: u.tabs.projects, label: p.title, sub: u.kind[p.kind], words: `${p.tags.map((x) => x[0]).join(' ')} ${t().projects[p.key].card}`, ico: MEDIA[p.key] ? `<img src="${esc(MEDIA[p.key].cover)}" alt="">` : I[p.kind], run: () => { showTab('projects'); openProject(p.key) } })),
     ...SOCIALS.map((s) => ({ group: u.tabs.social, label: s.name, sub: s.handle, ico: brand(s.icon, s), run: () => window.open(s.url, '_blank', 'noopener') })),

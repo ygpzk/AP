@@ -48,6 +48,30 @@ nel sito.
 - `src/site.css`: Tailwind v4 e i componenti.
 - `scripts/media.mjs`: scrive `media.js` dalle cartelle di `public/media/p/`.
 
+## I progetti veri dentro il sito (18.11)
+
+Il muro, il cercapersone e i tavoli sono quelli veri, col codice dell’ultimo commit
+prima che pzkko uscisse dal repository (`a5e42f1`), rimessi agli stessi indirizzi:
+`public/art`, `games`, `telefono`, `chat`, `scena`, `suono`, `wallet`, `barra`,
+`petizione`, `regia` e le pagine `gadget`, `oggetti`, `traguardi`, `info`, `storia`,
+`stato`, `tools/lezioni`. La vecchia home è `public/serranda/` (`/serranda/`).
+
+- `/serranda/?apri=zero` apre il cercapersone (PZK Zero), `?apri=chat` la sua chat,
+  `?apri=roulette` (blackjack, mine, dado, moneta, virtual) un tavolo. Dal profilo
+  si aprono in una finestra sopra la pagina (`openApp` in `app.js`).
+- `public/assets/dchat.js`: la scheda **Chat**, il bot pzk vestito da canale di
+  Discord. I comandi sono quelli veri di `chat/comandi/` (53), con gli stessi
+  soldi e lo stesso zaino del cercapersone e dei tavoli.
+- `api/`: le funzioni di Vercel, ponti firmati verso la banca che gira sul pc
+  (`C:\pzkko-server`, attraverso Tailscale Funnel). Servono due variabili nel
+  progetto Vercel: `PZKKO_SERVER_URL` e `PZKKO_SERVER_SECRET`. Senza, o col pc
+  spento, il sito dice «in pausa» e si gioca coi 1.000 $pzk della sessione.
+  Con l’account (app Account del cercapersone) i progressi si salvano nella
+  banca e sono gli stessi nella chat, nel cercapersone e ai tavoli.
+- Tolti rispetto a quel commit: i volantini col numero di telefono e con
+  l’indirizzo e-mail, il nome del paese nei testi, gli adesivi con le foto degli
+  amici, Deutschland e la wiki.
+
 ## Comandi
 
 ```sh
@@ -55,6 +79,7 @@ npm install
 npm run build   # genera public/assets/site.css
 npm run dev     # lo rigenera a ogni modifica
 npm run media   # riscrive public/assets/media.js dopo aver cambiato le catture
+npm run serve   # il sito in locale con le funzioni di api/ (porta 5080) e la banca del pc
 ```
 
 Vercel esegue `npm run build` e pubblica `public/` (vedi `vercel.json`).

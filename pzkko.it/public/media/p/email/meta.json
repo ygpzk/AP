@@ -7,40 +7,54 @@
  "video": null,
  "shots": [
   {
+   "file": "os-01.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "Posta OS: il menù, nello stesso terminale di Matrici OS",
+   "en": "Posta OS: the menu, in the same terminal as Matrici OS"
+  },
+  {
+   "file": "os-02.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "Posta OS: una email nuova, il mittente",
+   "en": "Posta OS: a new email, choosing the sender"
+  },
+  {
    "file": "01.webp",
    "w": 1280,
    "h": 1582,
-   "it": "",
-   "en": ""
+   "it": "L’anteprima col pulsante «copia email»",
+   "en": "The preview with the “copy email” button"
   },
   {
    "file": "02.webp",
    "w": 1280,
    "h": 1329,
-   "it": "",
-   "en": ""
+   "it": "L’email generata",
+   "en": "The generated email"
   },
   {
    "file": "03.webp",
    "w": 1280,
    "h": 870,
-   "it": "",
-   "en": ""
+   "it": "Il rapporto della generazione",
+   "en": "The run report"
   },
   {
    "file": "04.webp",
    "w": 1040,
    "h": 585,
-   "it": "",
-   "en": ""
+   "it": "Il programma nel terminale",
+   "en": "The program in the terminal"
   },
   {
    "file": "05.webp",
    "w": 780,
    "h": 1688,
-   "it": "",
-   "en": ""
+   "it": "L’email sul telefono",
+   "en": "The email on a phone"
   }
  ],
- "notes": "Catture vere del progetto in funzione; didascalie da scrivere."
+ "notes": "Catture vere del progetto in funzione."
 }

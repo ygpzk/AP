@@ -2,11 +2,12 @@
   "name": "pzkko.it",
   "private": true,
   "type": "module",
-  "description": "pzkko.it: pagina personale con il profilo di Discord dal vivo (Lanyard), la cornice e l'effetto veri e i progetti per svago.",
+  "description": "pzkko.it: il profilo di Discord dal vivo, la chat col bot pzk e i progetti veri (il muro, il cercapersone, i tavoli) che girano dentro il sito.",
   "scripts": {
     "build": "tailwindcss -i src/site.css -o public/assets/site.css --minify",
     "dev": "tailwindcss -i src/site.css -o public/assets/site.css --watch",
-    "media": "node scripts/media.mjs"
+    "media": "node scripts/media.mjs",
+    "serve": "node scripts/dev.mjs"
   },
   "engines": {
     "node": ">=20"
