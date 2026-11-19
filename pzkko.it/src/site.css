@@ -753,3 +753,18 @@ dialog.tel.pieno .t-nav button { font: 600 15px/1 var(--font-sans); letter-spaci
 .dc__mlink:hover { text-decoration: underline; }
 @media (prefers-reduced-motion: reduce) { .dc__msg, .dc__saldo.batte { animation: none; } .dc__list { scroll-behavior: auto; } .dc__mbox, .dc__modal { transition: none; } }
 @media (max-width: 899px) { .dc__inizio h3 { font-size: 22px; } .dc__saldo { margin-left: auto; } }
+
+/* ══ 19.11 · i caratteri del muro: i tavoli e i fogli (games/) si aprono sopra il profilo e li vogliono ══ */
+@font-face { font-family: "Anton"; src: url(/fonts/anton.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Special Elite"; src: url(/fonts/special-elite.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Permanent Marker"; src: url(/fonts/permanent-marker.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Fake Receipt"; src: url(/fonts/fake-receipt.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+
+/* parole in chat: la griglia dentro la scheda */
+.dc-pa { display: grid; gap: 4px; width: max-content; margin: 2px 0 4px; }
+.dc-pa__r { display: grid; grid-template-columns: repeat(var(--n), 34px); gap: 4px; }
+.dc-pa__c { display: grid; place-items: center; height: 34px; border-radius: 6px; background: color-mix(in srgb, var(--text-base) 10%, transparent); font: 700 17px/1 var(--font-sans); text-transform: uppercase; color: var(--text); }
+.dc-pa__c.g { background: #248046; color: #fff; }
+.dc-pa__c.c { background: #f0b232; color: #1a1a1a; }
+.dc-pa__c.n { background: #4e5058; color: #fff; }
+.dc__act { flex: 0 0 auto; }

@@ -237,62 +237,43 @@ export const MEDIA = {
   ]
  },
  "parole": {
-  "cover": "/media/p/parole/cover.webp?v=291510ab",
-  "video": {
-   "src": "/media/p/parole/loop.mp4?v=2e27abcb",
-   "w": 960,
-   "h": 540,
-   "seconds": 8
-  },
+  "cover": "/media/p/parole/cover.webp?v=fa10c167",
+  "video": null,
   "shots": [
    {
-    "src": "/media/p/parole/01.webp?v=035ec71c",
-    "w": 1422,
-    "h": 800,
-    "it": "La scelta della modalità",
-    "en": "Choosing the mode"
+    "src": "/media/p/parole/01.webp?v=919945c6",
+    "w": 1280,
+    "h": 720,
+    "it": "Si sceglie quante lettere e la puntata",
+    "en": "Pick the word length and the stake"
    },
    {
-    "src": "/media/p/parole/02.webp?v=104df262",
-    "w": 1422,
-    "h": 800,
-    "it": "Una partita in corso",
-    "en": "A game in progress"
+    "src": "/media/p/parole/02.webp?v=a4474a92",
+    "w": 1280,
+    "h": 720,
+    "it": "Il secondo tentativo, scritto e non ancora mandato",
+    "en": "The second guess, typed and not sent yet"
    },
    {
-    "src": "/media/p/parole/03.webp?v=38f47357",
-    "w": 1422,
-    "h": 800,
-    "it": "Parola indovinata: nuovo record",
-    "en": "Word guessed: new record"
+    "src": "/media/p/parole/03.webp?v=fa10c167",
+    "w": 1280,
+    "h": 720,
+    "it": "Presa al terzo: la banca paga ×4",
+    "en": "Got it on the third try: the bank pays ×4"
    },
    {
-    "src": "/media/p/parole/04.webp?v=bfa9b2af",
-    "w": 1422,
-    "h": 800,
-    "it": "La classifica",
-    "en": "The leaderboard"
+    "src": "/media/p/parole/04.webp?v=2478f718",
+    "w": 1280,
+    "h": 720,
+    "it": "La stessa partita nella chat",
+    "en": "The same game in the chat"
    },
    {
-    "src": "/media/p/parole/05.webp?v=3e80f2c8",
-    "w": 1422,
-    "h": 800,
-    "it": "Il tutorial: il sistema di colori",
-    "en": "The tutorial: how the colours work"
-   },
-   {
-    "src": "/media/p/parole/06.webp?v=965a5d4d",
-    "w": 1422,
-    "h": 800,
-    "it": "Il tema chiaro",
-    "en": "The light theme"
-   },
-   {
-    "src": "/media/p/parole/07.webp?v=8a43c791",
-    "w": 780,
-    "h": 1684,
-    "it": "Sul telefono, a sei lettere",
-    "en": "On a phone, six letters"
+    "src": "/media/p/parole/05.webp?v=f52cfc19",
+    "w": 390,
+    "h": 844,
+    "it": "Sul telefono",
+    "en": "On a phone"
    }
   ]
  },
@@ -412,67 +393,48 @@ export const MEDIA = {
   ]
  },
  "trivia": {
-  "cover": "/media/p/trivia/cover.webp?v=f4460109",
-  "video": {
-   "src": "/media/p/trivia/loop.mp4?v=14623f9b",
-   "w": 960,
-   "h": 540,
-   "seconds": 6.3
-  },
+  "cover": "/media/p/trivia/cover.webp?v=c40ab4c5",
+  "video": null,
   "shots": [
    {
-    "src": "/media/p/trivia/01.webp?v=90563aa9",
-    "w": 1422,
-    "h": 800,
-    "it": "La home del quiz",
-    "en": "The quiz home"
+    "src": "/media/p/trivia/01.webp?v=4412c3c9",
+    "w": 1280,
+    "h": 720,
+    "it": "La scelta dell’argomento",
+    "en": "Choosing the topic"
    },
    {
-    "src": "/media/p/trivia/02.webp?v=e1d02957",
-    "w": 1422,
-    "h": 800,
-    "it": "La scelta dei capitoli",
-    "en": "Choosing the chapters"
+    "src": "/media/p/trivia/02.webp?v=68b67377",
+    "w": 1280,
+    "h": 720,
+    "it": "Una domanda, col tempo che cala",
+    "en": "A question, with the timer running down"
    },
    {
-    "src": "/media/p/trivia/03.webp?v=eb18a9b1",
-    "w": 1422,
-    "h": 800,
-    "it": "Una domanda a scelta multipla",
-    "en": "A multiple-choice question"
+    "src": "/media/p/trivia/03.webp?v=e840a631",
+    "w": 1280,
+    "h": 720,
+    "it": "Vero o falso: risposta giusta, pagata",
+    "en": "True or false: right answer, paid"
    },
    {
-    "src": "/media/p/trivia/04.webp?v=2ad0d2dd",
-    "w": 1422,
-    "h": 800,
-    "it": "Vero o falso, risposta corretta",
-    "en": "True or false, right answer"
+    "src": "/media/p/trivia/04.webp?v=c40ab4c5",
+    "w": 1280,
+    "h": 720,
+    "it": "Una domanda con la foto",
+    "en": "A photo question"
    },
    {
-    "src": "/media/p/trivia/05.webp?v=094068e2",
-    "w": 1422,
-    "h": 800,
-    "it": "Una domanda a completamento",
-    "en": "A fill-in question"
-   },
-   {
-    "src": "/media/p/trivia/06.webp?v=4861e5cb",
-    "w": 1422,
-    "h": 800,
+    "src": "/media/p/trivia/05.webp?v=eef824e1",
+    "w": 1280,
+    "h": 720,
     "it": "La pagella a fine partita",
     "en": "The report card at the end"
    },
    {
-    "src": "/media/p/trivia/07.webp?v=165d4969",
-    "w": 1422,
-    "h": 800,
-    "it": "La classifica",
-    "en": "The leaderboard"
-   },
-   {
-    "src": "/media/p/trivia/08.webp?v=a5579c02",
-    "w": 780,
-    "h": 1688,
+    "src": "/media/p/trivia/06.webp?v=cbd64e5f",
+    "w": 390,
+    "h": 844,
     "it": "Sul telefono",
     "en": "On a phone"
    }

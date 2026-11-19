@@ -724,7 +724,7 @@ function closeProject({ instant = false, pop = true } = {}) {
 // ─── quello che gira QUI, sopra il profilo: il cercapersone 3D (telefono/telefono.js, con pzk os) e i tavoli veri
 // (games/<gioco>/<gioco>.js). Niente finestra e niente muro dietro: sono gli stessi moduli della chat, quindi il conto,
 // i soldi e lo zaino sono gli stessi nello stesso momento ──
-const TAVOLI = ['roulette', 'blackjack', 'mine', 'dado', 'moneta', 'virtual']
+const TAVOLI = ['roulette', 'blackjack', 'mine', 'dado', 'moneta', 'virtual', 'parole', 'trivia']
 let zeroBtn = null
 /** Il cercapersone vivo della bacheca: la foto a sfondo trasparente con pzk os acceso sul vetro. Un solo elemento, che a
  *  ogni ridisegno della bacheca torna al suo posto. */

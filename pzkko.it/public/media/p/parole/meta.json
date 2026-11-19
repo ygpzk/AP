@@ -4,62 +4,42 @@
   "w": 1280,
   "h": 720
  },
- "video": {
-  "file": "loop.mp4",
-  "w": 960,
-  "h": 540,
-  "seconds": 8
- },
  "shots": [
   {
    "file": "01.webp",
-   "w": 1422,
-   "h": 800,
-   "it": "La scelta della modalità",
-   "en": "Choosing the mode"
+   "w": 1280,
+   "h": 720,
+   "it": "Si sceglie quante lettere e la puntata",
+   "en": "Pick the word length and the stake"
   },
   {
    "file": "02.webp",
-   "w": 1422,
-   "h": 800,
-   "it": "Una partita in corso",
-   "en": "A game in progress"
+   "w": 1280,
+   "h": 720,
+   "it": "Il secondo tentativo, scritto e non ancora mandato",
+   "en": "The second guess, typed and not sent yet"
   },
   {
    "file": "03.webp",
-   "w": 1422,
-   "h": 800,
-   "it": "Parola indovinata: nuovo record",
-   "en": "Word guessed: new record"
+   "w": 1280,
+   "h": 720,
+   "it": "Presa al terzo: la banca paga ×4",
+   "en": "Got it on the third try: the bank pays ×4"
   },
   {
    "file": "04.webp",
-   "w": 1422,
-   "h": 800,
-   "it": "La classifica",
-   "en": "The leaderboard"
+   "w": 1280,
+   "h": 720,
+   "it": "La stessa partita nella chat",
+   "en": "The same game in the chat"
   },
   {
    "file": "05.webp",
-   "w": 1422,
-   "h": 800,
-   "it": "Il tutorial: il sistema di colori",
-   "en": "The tutorial: how the colours work"
-  },
-  {
-   "file": "06.webp",
-   "w": 1422,
-   "h": 800,
-   "it": "Il tema chiaro",
-   "en": "The light theme"
-  },
-  {
-   "file": "07.webp",
-   "w": 780,
-   "h": 1684,
-   "it": "Sul telefono, a sei lettere",
-   "en": "On a phone, six letters"
+   "w": 390,
+   "h": 844,
+   "it": "Sul telefono",
+   "en": "On a phone"
   }
  ],
- "notes": "Catture vere del progetto in funzione."
+ "notes": "Catture vere del gioco nuovo (19.11.2026) in funzione, contro la banca vera."
 }

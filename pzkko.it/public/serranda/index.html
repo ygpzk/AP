@@ -1317,7 +1317,7 @@ html.auto .fari,html.auto .freni,html.auto .neonauto,html.auto .riflessi{display
 <!-- (18.11) dal profilo: /serranda/?apri=roulette (blackjack, mine, dado, moneta, virtual), ?apri=zero, ?apri=chat -->
 <script type="module">
 const cosa = new URLSearchParams(location.search).get('apri')
-const GIOCHI = ['roulette', 'blackjack', 'mine', 'dado', 'moneta', 'virtual']
+const GIOCHI = ['roulette', 'blackjack', 'mine', 'dado', 'moneta', 'virtual', 'parole', 'trivia']
 if (GIOCHI.includes(cosa)) import(`/games/${cosa}/${cosa}.js`).then((m) => m.apri()).catch((e) => console.warn('gioco non aperto', e))
 else if (cosa === 'zero' || cosa === 'chat') {
   const q = new URLSearchParams(location.search)

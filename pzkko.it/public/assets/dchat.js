@@ -34,7 +34,8 @@ const TAVOLI = [
   { id: 'slot', nome: 'Slot' },
   { id: 'dadi', nome: 'Dadi' },
   { id: 'virtual', nome: 'Virtual', cmd: 'virtual' },
-  { id: 'quiz', nome: 'Quiz', cmd: 'quiz' },
+  { id: 'parole', nome: 'Parole', cmd: 'parole', icona: 'quiz' },
+  { id: 'quiz', nome: 'Trivia', cmd: 'quiz' },
 ]
 
 let radice = null, lista = null, campo = null, pop = null, apriQui = () => {}
@@ -301,6 +302,47 @@ async function tavolo(g) {
   return esegui(`${g.id} ${n}${su ? ` ${su}` : ''}`)
 }
 
+// ── parole: indovina la parola in sei tentativi, in chat. La parola la tiene la banca ('parole.*'): qui la griglia sta
+// nella scheda e i tentativi si scrivono nella riga dei messaggi. È la stessa partita del foglio (games/parole/): una
+// lasciata aperta lì si riprende qui, e viceversa ──
+const PAROLE_PAGA = { 5: [20, 8, 4, 2.5, 1.5, 1], 6: [25, 10, 5, 3, 2, 1.2] }
+const volte = (v) => `×${v.toLocaleString('it-IT')}`
+function grigliaParole(v, scritta = '') {
+  const righe = v.righe.map(([p, c]) => `<div class="dc-pa__r">${[...p].map((l, i) => `<span class="dc-pa__c ${c[i]}">${esc(l)}</span>`).join('')}</div>`)
+  for (let r = v.righe.length; r < (v.max ?? 6); r++) righe.push(`<div class="dc-pa__r">${Array.from({ length: v.lettere }, (_, i) => `<span class="dc-pa__c">${r === v.righe.length ? esc(scritta[i] ?? '') : ''}</span>`).join('')}</div>`)
+  return `<div class="dc-pa" style="--n:${v.lettere}">${righe.join('')}</div>`
+}
+async function paroleQui(args = []) {
+  let v = pzk.tavoloBanca('parole')
+  if (v?.fase !== 'gioco') {
+    // una partita nuova: «/parole 50», «/parole 50 6», o coi tasti
+    let n = importo(args[0]), lettere = args[1] === '6' || args[0] === '6' ? 6 : 5
+    if (!Number.isFinite(n) || n < 5) {
+      const s0 = scheda({ colore: 'blu', av: 'bot-occhiolino', t: ':quiz: parole', d: 'indovina la parola italiana in sei tentativi. Verde: lettera giusta al posto giusto. Giallo: c’è, ma altrove. Prima la prendi, più torna.', campi: PAROLE_PAGA[5].map((x, i) => [`al ${i + 1}°`, volte(x)]), pie: `hai ${fmt(pzk.saldo())} $pzk · quanto punti?` })
+      n = Number(await scegli(s0, [5, 25, 100, 500].map((x) => ({ id: String(x), eti: `${x} $pzk`, stile: x === 25 ? 'oro' : '' })), 60_000))
+      if (!n) return
+      lettere = Number(await scegli(s0, [{ id: '5', eti: '5 lettere', stile: 'oro' }, { id: '6', eti: `6 lettere (fino a ${volte(PAROLE_PAGA[6][0])})` }], 60_000))
+      if (!lettere) return
+    }
+    const r = await pzk.fai('parole.inizia', { puntata: n, lettere })
+    if (!r?.ok) return scheda({ colore: 'rosso', av: 'bot-triste', t: ':quiz: parole', d: esc(r?.errore ?? 'la banca non risponde: riprova.'), azioni: pzk.conto() ? [] : [['account', ':app-account: accedi', 'oro']] })
+    v = r.esito.vede
+  }
+  const testo = (x, extra = '') => ({ colore: 'blu', t: `:quiz: parole · ${x.lettere} lettere`, html: grigliaParole(x), d: extra, pie: `puntata ${fmt(x.puntata)} $pzk · se la prendi ora ${volte(x.paga[x.righe.length] ?? 0)} · scrivi la parola nella riga qui sotto («basta» per arrenderti)` })
+  const s = scheda(testo(v, v.righe.length ? `tentativo ${v.righe.length + 1} di ${v.max}.` : 'scrivi la prima parola.'))
+  while (v.fase === 'gioco') {
+    const t = (await scrivi(180_000, { segnaposto: `una parola di ${v.lettere} lettere…` }))?.trim().toLowerCase()
+    if (t == null) { aggiorna(s, { ...testo(v, 'ti ho aspettato tre minuti: la parola resta aperta.'), pie: 'scrivi /parole per riprenderla', azioni: [['parole', ':quiz: riprendi', 'oro']] }); return }
+    const r = t === 'basta' || t === '/basta' ? await pzk.fai('parole.arrendi') : await pzk.fai('parole.prova', { parola: t.replace(/^\//, '') })
+    if (!r?.ok) { aggiorna(s, testo(v, `<b>«${esc(t)}»</b>: ${esc(r?.errore ?? 'la banca non risponde')}.`)); continue }
+    v = r.esito.vede
+    if (v.fase === 'gioco') aggiorna(s, testo(v, `tentativo ${v.righe.length + 1} di ${v.max}.`))
+  }
+  const presa = v.esito === 'presa'
+  aggiorna(s, { colore: presa ? 'verde' : 'rosso', av: presa ? 'bot-ride' : 'bot-triste', t: `:quiz: parole · ${presa ? `presa al ${v.righe.length}°` : `era «${esc(v.parola)}»`}`, html: grigliaParole(v), d: presa ? `tornano ${pzkHtml(v.torna)} (${volte(v.paga[v.righe.length - 1])}).` : `${pzkHtml(v.puntata)} andati.`, azioni: [[`parole ${v.puntata}${v.lettere === 6 ? ' 6' : ''}`, ':quiz: un’altra', 'oro']] })
+  stato()
+}
+
 // ── il conto, in un riquadro come quelli di Discord: accedi o crea, nome e PIN ──
 let riquadro = null
 function chiudiRiquadro() { if (!riquadro) return; const r = riquadro; riquadro = null; r.classList.remove('is-on'); setTimeout(() => r.remove(), 160); campo?.focus({ preventScroll: true }) }
@@ -360,6 +402,7 @@ const apriConto = () => contoQui()
 
 // ── i comandi che esistono solo qui (il conto): stanno fra i suggerimenti come gli altri ──
 const LOCALI = [
+  { nomi: ['parole', 'parola', 'wordle'], cat: 'giochi', icona: 'quiz', breve: 'indovina la parola italiana in sei tentativi: parole 50 (o parole 50 6 per sei lettere)', uso: 'parole [puntata] [5|6]', fai: (args) => paroleQui(args) },
   { nomi: ['account', 'accedi', 'entra', 'login', 'conto', 'registrati'], cat: 'soldi', icona: 'app-account', breve: 'accedi o crea il conto: i progressi si salvano nella banca', uso: 'account', fai: () => contoQui() },
   { nomi: ['esci', 'logout'], cat: 'soldi', icona: 'app-account', breve: 'esci dal conto e torni alla sessione di prova', uso: 'esci',
     async fai() {
@@ -390,7 +433,7 @@ export async function esegui(riga_, { muto = false, eti = null } = {}) {
   if (!n) return
   if (!muto) utente(eti ?? `/${riga_.replace(/^\/+/, '')}`)
   const locale = PER_LOCALE.get(n)
-  if (locale) { await locale.fai(); stato(); return }
+  if (locale) { await locale.fai(args); stato(); return }
   const c = PER_NOME.get(n)
   if (zaino.pagerRotto() && !passaDaRotto(c, testo)) return soloScassato()
   if (!c) {
@@ -487,7 +530,7 @@ export function monta(el, { qui: apri }) {
   el.innerHTML = `<div class="dc">
     <header class="dc__head"><span class="dc__canale"><i>#</i>pzk-bot</span><span class="dc__topic" data-salva></span>
       <span class="dc__saldo" data-saldo></span><button type="button" class="btn btn--msg dc__conto" data-conto>Accedi</button></header>
-    <div class="dc__att" role="group" aria-label="i tavoli, qui in chat">${TAVOLI.map((g) => { const ic = PER_NOME.get(g.id)?.icona; return `<button type="button" class="dc__act" data-tavolo="${g.id}">${ic && esiste(ic) ? icona(ic) : ''}<span>${esc(g.nome)}</span></button>` }).join('')}</div>
+    <div class="dc__att" role="group" aria-label="i tavoli, qui in chat">${TAVOLI.map((g) => { const ic = g.icona ?? PER_NOME.get(g.id)?.icona; return `<button type="button" class="dc__act" data-tavolo="${g.id}">${ic && esiste(ic) ? icona(ic) : ''}<span>${esc(g.nome)}</span></button>` }).join('')}</div>
     <div class="dc__list" role="log" aria-live="polite" tabindex="0"><div class="dc__inizio"><i>#</i><h3>Ti diamo il benvenuto in #pzk-bot!</h3><p>Questo è l’inizio del canale #pzk-bot: il bot dei $pzk, coi comandi veri del cercapersone. Tutto gira qui in chat.</p></div><div class="dc__giorno">${new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())}</div></div>
     <div class="dc__pop" role="listbox" hidden></div>
     <form class="dc__form"><span class="dc__slash">/</span><input class="dc__input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" maxlength="120" placeholder="Messaggio #pzk-bot · scrivi / per i comandi" aria-label="scrivi un comando"><button type="submit" class="dc__invia" aria-label="invia">➤</button></form>

@@ -73,6 +73,17 @@ prima che pzkko uscisse dal repository (`a5e42f1`), rimessi agli stessi indirizz
   lavatrice sono schede (`virtualQui`, `storeQui`, `lavatriceQui`). Solo `/telefono`
   apre il cercapersone, sopra la pagina. I caratteri sono gg sans dappertutto e gg
   mono solo nel codice.
+- **Parole e Trivia rifatti da zero in stile pzk (19.11).** `public/games/parole/` e
+  `public/games/trivia/` sono due fogli col nastro come i tavoli (`games/foglio.css`: la
+  finestra, la testata, il saldo, il tasto nero), aperti con `qui:parole` e `qui:trivia`.
+  Sono loro i progetti «Parole» e «Trivia» del profilo: le versioni React del vecchio
+  sito non sono più mostrate. Non decidono niente: Parole chiede alla banca
+  (`parole.inizia`, `parole.prova`, `parole.arrendi`: la parola segreta, il dizionario e i
+  pagamenti stanno in `C:\pzkko-serveranca`, fuori dal repository), Trivia usa il
+  motore dei quiz che la banca aveva già (`chat/quiz.js` → `quiz.*`). In chat: `/parole`
+  (la stessa partita del foglio) e `/quiz`. I caratteri del muro (Anton, Special Elite,
+  Permanent Marker) sono dichiarati in `site.css`, così i tavoli aperti sopra il profilo
+  li hanno.
 - `/serranda/?apri=zero` (`?apri=chat`, `?apri=roulette`…) funziona ancora come
   indirizzo diretto, ma il profilo non lo usa più.
 - `api/`: le funzioni di Vercel, ponti firmati verso la banca che gira sul pc
