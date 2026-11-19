@@ -490,7 +490,7 @@ function renderBoard() {
   const root = $('#panel-board')
   root.innerHTML = `<div class="grid2">
     <article class="hero span2 rise">
-      <button type="button" class="hero__media media" data-open="${feat.key}" data-auto="1" aria-label="${esc(`${u.details}: ${feat.title}`)}">${mediaHtml(feat, { eager: true })}</button>
+      ${feat.key === 'zero' ? '<div class="hero__media hero__zero" data-zero-slot></div>' : `<button type="button" class="hero__media media" data-open="${feat.key}" data-auto="1" aria-label="${esc(`${u.details}: ${feat.title}`)}">${mediaHtml(feat, { eager: true })}</button>`}
       <div class="hero__body">
         <div class="widget__h" style="margin:0">${I.star}<span>${esc(u.featured)}</span></div>
         <h2 class="hero__title">${esc(feat.title)}</h2>
@@ -511,6 +511,7 @@ function renderBoard() {
       <div class="cta"><p>${esc(u.mainText)}</p><a class="btn btn--msg" href="${esc(CONFIG.mainSite.url)}" target="_blank" rel="noopener">${esc(u.mainCta)} ${I.ext}</a></div>
     </div>
   </div>`
+  $('[data-zero-slot]', root)?.append(zeroButton())
   wireMedia(root)
 }
 function projectCard(p, i) {
@@ -574,7 +575,7 @@ function renderChat() {
   const root = $('#panel-chat')
   root.innerHTML = '<div class="dc dc--attesa"><div class="dc__scrive"><i></i><i></i><i></i></div></div>'
   if (!$('link[data-chat-css]')) { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = '/chat/chat.css'; l.dataset.chatCss = '1'; document.head.prepend(l) }
-  import('./dchat.js').then((m) => m.monta(root, { finestra: openApp })).catch((e) => { console.error(e); chatMounted = false; root.innerHTML = `<p class="fine">${esc(ui().nothing)}</p>` })
+  import('./dchat.js').then((m) => m.monta(root, { qui: openHere })).catch((e) => { console.error(e); chatMounted = false; root.innerHTML = `<p class="fine">${esc(ui().nothing)}</p>` })
 }
 function renderPanel() {
   if (activeTab === 'board') renderBoard()
@@ -585,7 +586,7 @@ function renderPanel() {
 }
 document.addEventListener('click', (e) => {
   const ap = e.target.closest('[data-app]')
-  if (ap) { openApp(ap.dataset.app, ap.dataset.appTitle); return }
+  if (ap) { ap.dataset.app.startsWith('qui:') ? openHere(ap.dataset.app.slice(4)) : openApp(ap.dataset.app, ap.dataset.appTitle); return }
   const o = e.target.closest('[data-open]')
   if (o) { openProject(o.dataset.open, { from: o.classList.contains('media') ? o : o.closest('.pcard, .hero')?.querySelector('.media') }); return }
   const g = e.target.closest('[data-goto]')
@@ -720,7 +721,39 @@ function closeProject({ instant = false, pop = true } = {}) {
   last?.focus?.({ preventScroll: true })
 }
 
-// ─── le app vere (il muro, i giochi, il cercapersone) in una finestra dentro il sito ──
+// ─── quello che gira QUI, sopra il profilo: il cercapersone 3D (telefono/telefono.js, con pzk os) e i tavoli veri
+// (games/<gioco>/<gioco>.js). Niente finestra e niente muro dietro: sono gli stessi moduli della chat, quindi il conto,
+// i soldi e lo zaino sono gli stessi nello stesso momento ──
+const TAVOLI = ['roulette', 'blackjack', 'mine', 'dado', 'moneta', 'virtual']
+let zeroBtn = null
+/** Il cercapersone vivo della bacheca: la foto a sfondo trasparente con pzk os acceso sul vetro. Un solo elemento, che a
+ *  ogni ridisegno della bacheca torna al suo posto. */
+function zeroButton() {
+  if (zeroBtn) return zeroBtn
+  const b = zeroBtn = document.createElement('button')
+  b.type = 'button'
+  b.className = 'chat-tasto zero'
+  b.setAttribute('aria-label', 'PZK Zero')
+  b.innerHTML = '<img src="/art/zero/zero-piccolo.webp" alt="" width="1344" height="776" decoding="async" draggable="false"><span class="ct-lcd" aria-hidden="true"></span><span class="ct-led" aria-hidden="true"></span>'
+  b.addEventListener('click', () => openHere('zero'))
+  const idle = window.requestIdleCallback ?? ((f) => setTimeout(f, 600))
+  idle(() => {
+    import('/chat/chat.js').then((c) => c.prepara(b)).catch((e) => console.warn('cercapersone non acceso', e))
+    // il 3D si scalda da solo quando la pagina è tranquilla (non col risparmio dati né sui telefoni): la prima apertura parte senza attese
+    if (!navigator.connection?.saveData && matchMedia('(hover: hover) and (min-width: 900px)').matches) setTimeout(() => idle(() => { fetch('/art/zero/zero.glb', { priority: 'low' }).catch(() => {}); import('/telefono/zero/zero.js').catch(() => {}) }), 2500)
+  }, { timeout: 2500 })
+  return b
+}
+function openHere(what, { app = null, comando = null } = {}) {
+  closeMenus(); closeSearch()
+  for (const el of $$('.media.is-playing')) stopMedia(el)
+  if (what === 'chat') { if (modal) closeProject(); showTab('chat', { focus: true }); return Promise.resolve() }
+  if (TAVOLI.includes(what)) return import(`/games/${what}/${what}.js`).then((m) => m.apri()).catch((e) => { console.error(e); toast(ui().nothing) })
+  const da = zeroBtn?.isConnected && activeTab === 'board' && !modal ? zeroBtn : null
+  return import('/telefono/telefono.js').then((t) => t.apri(app, { ...(da && { da }), ...(comando && { comando }) })).catch((e) => { console.error(e); toast(ui().nothing) })
+}
+
+// ─── le pagine intere (il muro, pzk$meeting) in una finestra dentro il sito ──
 let appWin = null
 function openApp(href, title = '') {
   if (!/^\/[a-z]/.test(href) || appWin) return
@@ -891,6 +924,7 @@ function closeSearch() {
 }
 $('#search-btn').addEventListener('click', openSearch)
 addEventListener('keydown', (e) => {
+  if (document.querySelector('dialog[open]')) return
   const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '')
   if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'k') { e.preventDefault(); qs ? closeSearch() : openSearch() }
   else if (e.key === '/' && !typing && !modal && !qs && !e.ctrlKey && !e.metaKey) { e.preventDefault(); openSearch() }

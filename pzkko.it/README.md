@@ -56,12 +56,25 @@ prima che pzkko uscisse dal repository (`a5e42f1`), rimessi agli stessi indirizz
 `petizione`, `regia` e le pagine `gadget`, `oggetti`, `traguardi`, `info`, `storia`,
 `stato`, `tools/lezioni`. La vecchia home è `public/serranda/` (`/serranda/`).
 
-- `/serranda/?apri=zero` apre il cercapersone (PZK Zero), `?apri=chat` la sua chat,
-  `?apri=roulette` (blackjack, mine, dado, moneta, virtual) un tavolo. Dal profilo
-  si aprono in una finestra sopra la pagina (`openApp` in `app.js`).
+- **Tutto gira sopra il profilo (19.11).** Il cercapersone 3D e i tavoli non stanno
+  più in una finestra col muro dietro: `openHere` in `app.js` carica gli stessi moduli
+  (`telefono/telefono.js`, `games/<gioco>/<gioco>.js`) nella pagina del profilo. In
+  `config.js` i tasti `play` che cominciano con `qui:` (`qui:zero`, `qui:roulette`…)
+  passano da lì; gli indirizzi veri (`/serranda/`, `/tools/lezioni/`) si aprono ancora
+  nella finestra (`openApp`). In bacheca il cercapersone è vivo: la foto a sfondo
+  trasparente con pzk os acceso sul vetro (`zeroButton`, vestito da `chat/chat.js`
+  → `prepara`), e aprendosi il 3D parte da lì. Lo sfondo del cercapersone aperto è
+  trasparente (`dialog.tel::backdrop` in `site.css`).
 - `public/assets/dchat.js`: la scheda **Chat**, il bot pzk vestito da canale di
   Discord. I comandi sono quelli veri di `chat/comandi/` (53), con gli stessi
-  soldi e lo stesso zaino del cercapersone e dei tavoli.
+  soldi e lo stesso zaino del cercapersone e dei tavoli. **Tutto resta in chat**:
+  il conto si apre in un riquadro (`contoQui`, comandi `/account` e `/esci`), i
+  tavoli partono dalla barra in alto (`tavolo`), il virtual, il pzkstore e la
+  lavatrice sono schede (`virtualQui`, `storeQui`, `lavatriceQui`). Solo `/telefono`
+  apre il cercapersone, sopra la pagina. I caratteri sono gg sans dappertutto e gg
+  mono solo nel codice.
+- `/serranda/?apri=zero` (`?apri=chat`, `?apri=roulette`…) funziona ancora come
+  indirizzo diretto, ma il profilo non lo usa più.
 - `api/`: le funzioni di Vercel, ponti firmati verso la banca che gira sul pc
   (`C:\pzkko-server`, attraverso Tailscale Funnel). Servono due variabili nel
   progetto Vercel: `PZKKO_SERVER_URL` e `PZKKO_SERVER_SECRET`. Senza, o col pc

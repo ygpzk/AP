@@ -399,7 +399,7 @@ export function crea({ dlg, ledEl }) {
       // (9.11) mai più stretta di TASTI: lo schermo e TUTTI i tasti (da x −2 a 73,5, INDIETRO finisce a 69,5), spostata a
       // destra quanto serve. Prima a 1440 × 900 INDIETRO usciva a metà dal bordo destro, e sotto i 1100 px non c'era più
       const TASTI = [-2, 73.5]
-      const fw = Math.min(104.5, Math.max((36 * w) / h, w / 19, TASTI[1] - TASTI[0]))
+      const fw = Math.min(122, Math.max((46 * w) / h, w / 13.5, TASTI[1] - TASTI[0])) // (19.11, Alberto: «leggermente più lontano dai miei occhi»: prima 104,5 · 36 · w/19)
       const xc = Math.max(32, TASTI[1] - fw / 2)
       x0 = xc - fw / 2; x1 = xc + fw / 2; yc = 13.7
     }

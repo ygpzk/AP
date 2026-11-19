@@ -110,13 +110,14 @@ export const SOCIALS = [
 const GH = 'https://github.com/ygpzk/AP/tree/main'
 // Posta OS e Pulizia OS stanno nel ramo del sito, accanto a pzkko.it
 const OS = 'https://github.com/ygpzk/AP/tree/albertopecchini.it', RAW = 'https://github.com/ygpzk/AP/raw/albertopecchini.it'
-// `play`: le cose che girano dentro il sito, [etichetta, indirizzo] (si aprono in una finestra sopra il profilo).
+// `play`: le cose che girano dentro il sito, [etichetta, indirizzo]. «qui:zero», «qui:roulette»…: sopra il profilo, senza
+// finestra (openHere in app.js); un indirizzo vero (/serranda/): nella finestra dentro il sito (openApp).
 // `art`: la miniatura, [colore 1, colore 2, carattere della scritta, motivo dello sfondo].
 export const PROJECTS = [
   { key: 'zero', title: 'PZK Zero', kind: 'game', featured: true, art: ['#ff8a1a', '#7a2d00', 'Mainframe', 'griglia'], tags: [['three.js', 'threejs'], ['JavaScript', 'javascript'], ['LCD 1-bit', '#ff8a1a']],
-    play: [['PZK Zero', '/serranda/?apri=zero'], ['Chat', '/serranda/?apri=chat']] },
+    play: [['PZK Zero', 'qui:zero'], ['Chat', 'qui:chat']] },
   { key: 'giochini', title: 'Casinò $pzk', kind: 'game', art: ['#0f7a3a', '#052612', 'Pricedown', 'rombi'], tags: [['three.js', 'threejs'], ['chiptune', '#9d00ff'], ['$pzk', '#7cc400']],
-    play: [['Roulette', '/serranda/?apri=roulette'], ['Blackjack', '/serranda/?apri=blackjack'], ['Mine', '/serranda/?apri=mine'], ['Dado', '/serranda/?apri=dado'], ['Testa o croce', '/serranda/?apri=moneta'], ['Virtual', '/serranda/?apri=virtual']] },
+    play: [['Roulette', 'qui:roulette'], ['Blackjack', 'qui:blackjack'], ['Mine', 'qui:mine'], ['Dado', 'qui:dado'], ['Testa o croce', 'qui:moneta'], ['Virtual', 'qui:virtual']] },
   { key: 'serranda', title: 'Il Muro', kind: 'site', art: ['#8d9499', '#2f3336', 'Headbang', 'lamiera'], tags: [['HTML', 'html5'], ['CSS', 'css'], ['gpt-image-2', '#10a37f']],
     play: [['Il Muro', '/serranda/']] },
   { key: 'matricios', title: 'Matrici OS', kind: 'tool', art: ['#0d3b1e', '#020a05', '8Bit', 'righe'], tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['Terminal', '#3fb950']], code: `${GH}/MatriciOS`, download: 'https://github.com/ygpzk/AP/raw/main/MatriciOS/MatriciOS.exe' },

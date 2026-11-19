@@ -4,6 +4,11 @@
 // «ctx» e le schede diventano gli embed di Discord, coi tasti veri, le griglie dei minigiochi, i rulli e le barre del tempo.
 // I soldi e lo zaino sono gli stessi del cercapersone e dei tavoli: con l'account si salvano nella banca, senza si gioca
 // coi 1.000 $pzk della sessione.
+// TUTTO IN CHAT (19.11, Alberto: «non farmi uscire e andare al flipper, tutto qui gira, 100% qui tutto in chat»): quello che
+// nel cercapersone è un'app qui è una scheda. Il conto si apre e si crea in un riquadro come quelli di Discord (contoQui),
+// i tavoli partono dalla barra in alto (tavolo: quanto, su cosa, e parte il comando), il virtual, il pzkstore e la
+// lavatrice sono schede coi tasti (virtualQui, storeQui, lavatriceQui). Solo «/telefono» apre il cercapersone 3D, e lo apre
+// sopra questa pagina, senza andare da nessuna parte.
 
 import * as pzk from '/games/pzk.js'
 import * as zaino from '/chat/zaino.js'
@@ -18,10 +23,21 @@ const { fmt, pzkHtml, eurHtml, nome, importo, caso, rnd, tra, durata, analizza, 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
 const RIDOTTO = matchMedia('(prefers-reduced-motion: reduce)')
 const TINTE = { rosso: '#f23f43', verde: '#23a55a', oro: '#f0b232', ambra: '#e67e22', blu: '#5865f2', viola: '#9b59b6', grigio: '#80848e' }
-// le attività: i tavoli e il cercapersone veri, che si aprono in una finestra sopra il profilo
-const ATTIVITA = [['PZK Zero', '/serranda/?apri=zero', 'telefono'], ['Roulette', '/serranda/?apri=roulette', 'roulette'], ['Blackjack', '/serranda/?apri=blackjack', 'carte'], ['Mine', '/serranda/?apri=mine', 'bomba'], ['Dado', '/serranda/?apri=dado', 'dadi'], ['Testa o croce', '/serranda/?apri=moneta', 'moneta'], ['Virtual', '/serranda/?apri=virtual', 'pallone']]
+// la barra dei tavoli: ognuno parte qui in chat. su: le puntate fra cui scegliere dopo la cifra ([id, scritta, stile]);
+// cmd: il comando che fa già tutto da sé
+const TAVOLI = [
+  { id: 'roulette', nome: 'Roulette', su: [['rosso', 'rosso', 'rosso'], ['nero', 'nero', 'nero'], ['pari'], ['dispari'], ['basso', '1–18'], ['alto', '19–36']] },
+  { id: 'blackjack', nome: 'Blackjack' },
+  { id: 'mine', nome: 'Mine', su: [['3', '3 mine'], ['5', '5 mine'], ['10', '10 mine'], ['20', '20 mine']] },
+  { id: 'dado', nome: 'Dado', su: [['piccolo'], ['grande'], ['pari'], ['dispari'], ['triple']] },
+  { id: 'moneta', nome: 'Testa o croce', su: [['testa'], ['croce']] },
+  { id: 'slot', nome: 'Slot' },
+  { id: 'dadi', nome: 'Dadi' },
+  { id: 'virtual', nome: 'Virtual', cmd: 'virtual' },
+  { id: 'quiz', nome: 'Quiz', cmd: 'quiz' },
+]
 
-let radice = null, lista = null, campo = null, pop = null, apriFinestra = () => {}
+let radice = null, lista = null, campo = null, pop = null, apriQui = () => {}
 let coda = Promise.resolve(), aspettaTesto = null, scelte = [], salutato = false
 const inCorso = new Map()
 
@@ -40,13 +56,33 @@ function riga(classe, html) {
   return el
 }
 export function utente(testo) {
-  return riga('dc__msg--tu', `<img class="dc__av" src="${esc(avatarMio())}" alt=""><div class="dc__body"><div class="dc__meta"><b>${esc(nome())}</b><time>${ora()}</time></div><div class="dc__txt">${esc(testo)}</div></div>`)
+  const m = /^(\/[^\s]+)(.*)$/s.exec(testo)
+  const corpo = m ? `<span class="dc__slashcmd">${esc(m[1])}</span>${esc(m[2])}` : conIcone(esc(testo))
+  return riga('dc__msg--tu', `<img class="dc__av" src="${esc(avatarMio())}" alt=""><div class="dc__body"><div class="dc__meta"><b>${esc(nome())}</b><time>${ora()}</time></div><div class="dc__txt">${corpo}</div></div>`)
 }
 export function sistema(testo) { return riga('dc__msg--sis', `<div class="dc__sis">${conIcone(testo)}</div>`) }
+
+// ── qui, non nel cercapersone: le frasi dei comandi che mandavano all'app account o al pzkstore del cercapersone ──
+const QUI = [
+  [/crealo o entra nell[’']app account del cercapersone/gi, 'crealo o entra con <code>/account</code>'],
+  [/Crea il conto nell[’']app account del cercapersone/g, 'Crea il conto con <code>/account</code>'],
+  [/crealo nel cercapersone \(app account\)/gi, 'crealo con /account'],
+  [/crealo nell[’']app account/gi, 'crealo con <code>/account</code>'],
+  [/Entra nel wallet per tenerli/g, 'Con <code>/account</code> li tieni'],
+  [/← → scelgono un tasto, OK lo preme, oppure scrivi tu\./g, 'premi un tasto, oppure scrivi <code>/</code> e scegli.'],
+  [/apro l[’']account/g, 'ti apro l’account qui'],
+  [/, o nell[’']app <b>pzkstore<\/b> del cercapersone, con tutte le schede/g, ''],
+  [/apri il <b>pzkstore<\/b> del cercapersone \(o scrivi (<code>[^<]+<\/code>)\)/g, 'scrivi $1'],
+]
+const qui = (t) => QUI.reduce((x, [a, b]) => x.replace(a, b), String(t))
+const quiAzioni = (azioni) => azioni
+  .filter(([cmd, eti]) => !(cmd === 'pzkstore' && /apri il pzkstore/.test(eti ?? ''))) // (l'elenco è già il pzkstore)
+  .map(([cmd, eti, stile]) => (cmd === 'telefono' && /conto|account/.test(eti ?? '') ? ['account', ':app-account: crea il conto', stile] : [cmd, eti, stile]))
 
 // ── le schede del bot: gli embed ──
 function disegna(s, e) {
   const m = s.__msg
+  e = { ...e, ...(e.d && { d: qui(e.d) }), ...(e.html && { html: qui(e.html) }), ...(e.pie && { pie: qui(e.pie) }), ...(e.azioni && { azioni: quiAzioni(e.azioni) }) }
   m.e = { ...e }
   s.className = `c-scheda ${e.colore ?? 'grigio'}`
   s.style.setProperty('--tinta', e.colore === 'arcobaleno' ? '#f0b232' : TINTE[e.colore] ?? TINTE.grigio)
@@ -160,9 +196,181 @@ export async function pensa(ms = 700) {
 const RICOMPRA = /^(cercapersone|pager)$/i
 const passaDaRotto = (c, testo) => c?.nomi[0] === 'lavora' || (c?.nomi[0] === 'compra' && RICOMPRA.test(testo.trim()))
 const soloScassato = () => scheda({ colore: 'rosso', av: 'bot-triste', t: ':pager: cercapersone scassato', d: `col vetro rotto funzionano solo due cose: <code>lavora</code> e <code>compra cercapersone</code> (${pzkHtml(prezzoDi(PER_ID.pager))}).`, azioni: [['lavora', ':rider: lavora', 'oro'], ['compra cercapersone', ':pager: compra il nuovo']] })
-// le app del cercapersone e il conto si aprono nel cercapersone vero, nella finestra sopra il profilo
-const apriApp = (app, { app: dentro } = {}) => apriFinestra(`/serranda/?apri=zero${app ? `&app=${encodeURIComponent(app)}` : ''}${dentro ? `&comando=${encodeURIComponent(dentro)}` : ''}`, 'PZK Zero')
-const apriConto = () => apriFinestra('/serranda/?apri=zero&app=account', 'Account')
+// ── le app del cercapersone, qui in chat ──
+/** Quello che un comando chiede di aprire nel cercapersone, in chat: lo shop è il negozio, il virtual, il pzkstore e la
+ *  lavatrice hanno la loro scheda; senza app («/telefono») si apre il cercapersone 3D sopra la pagina. Le poche app che
+ *  esistono solo sul cercapersone lo dicono, col tasto per aprirlo lì. */
+function apriApp(app, { app: dentro } = {}) {
+  if (!app) return apriQui('zero')
+  if (app === 'account') return contoQui()
+  if (app === 'negozio') return esegui('negozio', { muto: true })
+  if (app === 'virtual') return virtualQui()
+  if (app === 'pzkstore') return storeQui(dentro)
+  if (app === 'lavatrice') return lavatriceQui()
+  return scheda({ colore: 'grigio', av: 'bot-pensa', t: `:telefono: «${esc(app)}» è un’app del cercapersone`, d: 'in chat non ha una scheda sua: si apre sul cercapersone, qui sopra, senza cambiare pagina.', azioni: [[`qui:zero:${app}`, ':telefono: apri sul cercapersone', 'oro']] })
+}
+
+/** Il pzkstore: senza app l'elenco (quello di «installa»), con un'app la sua scheda e il tasto per comprarla. */
+async function storeQui(id) {
+  const st = await import('/telefono/app/pzkstore.js')
+  const x = id ? st.PER_ID[id] : null
+  if (!x) return esegui('installa', { muto: true })
+  const ha = zaino.installata(x.id)
+  return scheda({
+    colore: 'blu', t: `:${x.icona}: ${x.nome}`, d: `${x.breve}\n${(x.come ?? []).map((t, i) => `${i + 1}. ${t}`).join('\n')}`,
+    campi: [['prezzo', x.prezzo ? pzkHtml(x.prezzo) : 'gratis'], ['puliti', pzkHtml(pzk.puliti())]],
+    azioni: ha ? (x.id === 'lavatrice' ? [['lavatrice', ':app-lavatrice: apri', 'oro']] : [[`qui:zero:${x.id}`, ':telefono: apri sul cercapersone', 'oro']]) : [[`installa ${x.id}`, `compra (${fmt(x.prezzo)})`, 'oro']],
+    pie: ha ? 'ce l’hai già' : pzk.conto() ? 'si paga coi $pzk puliti, una volta sola' : 'serve il conto: /account',
+  })
+}
+
+/** La lavatrice dei soldi sporchi: gira, è pronta da ritirare, o chiede quanti lavarne. */
+async function lavatriceQui() {
+  const L = await import('/telefono/app/lavatrice.js')
+  const st = L.stato()
+  if (st.gira) return scheda({ colore: 'blu', t: ':app-lavatrice: la lavatrice gira', d: `dentro ci sono ${pzkHtml(st.lav.n)}: puliti alle <b>${L.ora(st.lav.fino)}</b>, fra ${L.mmss(st.lav.fino - Date.now())}.`, azioni: [['lavatrice', 'guarda di nuovo']] })
+  if (st.pronto) {
+    const r = await L.ritira()
+    return scheda(r.ok ? { colore: 'verde', av: 'bot-ride', t: ':app-lavatrice: lavaggio finito', d: `${pzkHtml(r.n)} adesso sono puliti.` } : { colore: 'rosso', av: 'bot-triste', d: esc(r.errore ?? 'la banca non risponde: riprova') })
+  }
+  if (st.dentro) return scheda({ colore: 'rosso', av: 'bot-triste', t: ':app-lavatrice: sei in galera', d: 'da dentro la lavatrice non parte.' })
+  if (st.max < 1) return scheda({ colore: 'grigio', t: ':app-lavatrice: niente da lavare', d: 'non hai soldi sporchi: arrivano con le rapine.' })
+  const s = scheda({ colore: 'ambra', t: ':app-lavatrice: quanti ne lavi?', d: `hai ${pzkHtml(st.sp)} sporchi e ${pzkHtml(st.pu)} puliti. Un lavaggio costa <b>${fmt(L.COSTO)} puliti</b>, dura dieci minuti e ne lava al più ${fmt(L.MAX)}.` })
+  const tagli = [...new Set([st.max, Math.floor(st.max / 2), 10000, 5000].filter((v) => v >= 1 && v <= st.max))].sort((a, b) => b - a).slice(0, 4)
+  const q = Number(await scegli(s, tagli.map((v) => ({ id: String(v), eti: fmt(v), stile: v === st.max ? 'oro' : '' })), 60_000))
+  if (!q) return
+  const r = await L.lava(q)
+  return scheda(r?.ok ? { colore: 'verde', av: 'bot-occhiolino', t: ':app-lavatrice: gira', d: `${pzkHtml(q)} in lavatrice${r.fatto?.lavaggio?.fino ? `: puliti alle <b>${L.ora(r.fatto.lavaggio.fino)}</b>` : ''}.`, pie: `−${fmt(L.COSTO)} $pzk puliti di commissione` } : { colore: 'rosso', av: 'bot-triste', d: esc(r?.errore ?? 'non è andata') })
+}
+
+/** Il virtual: la partita di adesso con le quote, la giocata coi tasti (su cosa, quanto), e a partita finita com'è andata. */
+const virtualAttese = new Set()
+async function virtualQui() {
+  const [P, SC] = await Promise.all([import('/games/virtual/partita.js'), import('/games/virtual/schedina.js')])
+  SC.avvia()
+  await SC.palinsesto()
+  for (const c of await SC.riscuoti().catch(() => [])) virtualEsito(P, c)
+  const f = P.fase(), p = P.partita(f.indice)
+  const titolo = `:app-virtual: ${esc(p.casa.nome)} – ${esc(p.ospite.nome)}`
+  const mie = SC.diPartita(f.indice).filter((b) => !b.pagata)
+  const giocate = mie.length ? `\nle tue giocate: ${mie.map((b) => `<b>${esc(P.PER_PUNTATA.get(b.id)?.nome ?? b.id)}</b> ${fmt(b.puntata)} a ${SC.fmtQuota(b.quota)}`).join(', ')}.` : ''
+  if (mie.length) virtualAspetta(P, SC, f.indice)
+  if (!P.aperte(f)) {
+    const inCampo = f.fase === 'partita', pt = inCampo ? P.punteggioA(SC.cronaca(f.indice), f.t) : null
+    return scheda({ colore: 'verde', t: titolo, d: `${inCampo ? `in campo: <b>${pt.casa}–${pt.ospite}</b> al ${P.minuto(f.t).scritta}` : 'le giocate sono chiuse: fischio d’inizio'}. La prossima partita si gioca fra ${durata(f.manca + (inCampo ? 0 : P.DURATA))}.${giocate}`, azioni: [['virtual', ':app-virtual: guarda di nuovo']] })
+  }
+  const q = (id) => SC.fmtQuota(p.quote[id])
+  const s = scheda({
+    colore: 'verde', t: titolo, d: `il campionato inventato: una partita ogni cinque minuti. Le giocate chiudono fra <b>${durata(f.manca - P.CHIUDE)}</b>.${giocate}`,
+    campi: [[`1 · ${esc(p.casa.sigla)}`, q('1')], ['X · pareggio', q('X')], [`2 · ${esc(p.ospite.sigla)}`, q('2')], ['over 2,5', q('O2.5')], ['under 2,5', q('U2.5')]],
+    pie: `hai ${fmt(pzk.saldo())} $pzk · da ${fmt(SC.S.limiti.min)} a ${fmt(SC.S.limiti.giocata)} a giocata`,
+  })
+  const id = await scegli(s, [['1', `1 · ${q('1')}`], ['X', `X · ${q('X')}`], ['2', `2 · ${q('2')}`], ['O2.5', `over 2,5 · ${q('O2.5')}`], ['U2.5', `under 2,5 · ${q('U2.5')}`]].map(([i, eti]) => ({ id: i, eti })), Math.max(1000, f.manca - P.CHIUDE))
+  if (!id) return
+  const n = Number(await scegli(s, [10, 50, 100, 500].filter((v) => v <= SC.S.limiti.giocata).map((v) => ({ id: String(v), eti: `${v} $pzk`, stile: v === 50 ? 'oro' : '' })), 60_000))
+  if (!n) return
+  const r = await SC.punta(p, id, n)
+  if (!r.ok) return scheda({ colore: 'rosso', av: 'bot-triste', t: ':app-virtual: giocata rifiutata', d: { chiuse: 'le giocate si sono appena chiuse.', secco: esc(pzk.perche?.() ?? 'non hai $pzk.'), ricarica: 'stanno arrivando altri $pzk: riprova fra un attimo.', nonbastano: 'non ti bastano i $pzk.', finiti: 'hai finito i $pzk.' }[r.motivo] ?? esc(r.errore ?? 'la banca non risponde.'), azioni: [['virtual', ':app-virtual: riprova']] })
+  virtualAspetta(P, SC, p.indice)
+  return scheda({ colore: 'verde', av: 'bot-occhiolino', t: ':app-virtual: giocata presa', d: `${pzkHtml(r.puntata)} su <b>${esc(P.PER_PUNTATA.get(id)?.nome ?? id)}</b> a ${SC.fmtQuota(r.quota)}: se entra tornano ${pzkHtml(Math.round(r.puntata * r.quota * 10) / 10)}.`, azioni: [['virtual', ':app-virtual: un’altra giocata']], pie: `${esc(p.casa.nome)} – ${esc(p.ospite.nome)} · il risultato te lo dico qui` })
+}
+function virtualEsito(P, c) {
+  const vinto = c.torna > 0
+  scheda({ colore: vinto ? 'oro' : 'grigio', av: vinto ? 'bot-ride' : 'bot-triste', t: `:app-virtual: ${esc(c.casa?.nome ?? c.casa)} – ${esc(c.ospite?.nome ?? c.ospite)}: ${c.risultato ? P.scriviRisultato(c.risultato) : 'finita'}`, d: vinto ? `hai giocato ${pzkHtml(c.giocato)} e ne tornano ${pzkHtml(c.torna)}.` : `hai giocato ${pzkHtml(c.giocato)}: stavolta niente.`, azioni: [['virtual', ':app-virtual: la prossima']] })
+  stato()
+}
+/** A partita finita la banca paga: lo si chiede allora, e si dice com'è andata (una volta per partita). */
+function virtualAspetta(P, SC, indice) {
+  if (virtualAttese.has(indice)) return
+  virtualAttese.add(indice)
+  const fine = (indice + 1) * P.CICLO - P.adesso()
+  setTimeout(async () => { const c = await SC.fine(indice).catch(() => null); virtualAttese.delete(indice); if (c) virtualEsito(P, c) }, Math.max(0, fine) + 1200)
+}
+
+/** Un tavolo dalla barra: quanto, su cosa (se il gioco lo chiede), e parte il comando vero. */
+async function tavolo(g) {
+  if (g.cmd) return esegui(g.cmd, { eti: `/${g.cmd}` })
+  const c = PER_NOME.get(g.id)
+  if (!c) return
+  if (zaino.pagerRotto()) return soloScassato()
+  const s = scheda({ colore: 'blu', av: 'bot-occhiolino', t: `:${c.icona}: ${g.nome}`, d: esc(c.breve ?? ''), pie: `hai ${fmt(pzk.saldo())} $pzk · quanto punti?` })
+  const n = await scegli(s, [10, 50, 100, 500].map((v) => ({ id: String(v), eti: `${v} $pzk`, stile: v === 50 ? 'oro' : '' })), 60_000)
+  if (!n) return
+  let su = ''
+  if (g.su) { su = await scegli(s, g.su.map(([id, eti, stile]) => ({ id, eti: eti ?? id, stile })), 60_000); if (!su) return }
+  return esegui(`${g.id} ${n}${su ? ` ${su}` : ''}`)
+}
+
+// ── il conto, in un riquadro come quelli di Discord: accedi o crea, nome e PIN ──
+let riquadro = null
+function chiudiRiquadro() { if (!riquadro) return; const r = riquadro; riquadro = null; r.classList.remove('is-on'); setTimeout(() => r.remove(), 160); campo?.focus({ preventScroll: true }) }
+function contoQui() {
+  const c = pzk.conto()
+  if (c?.nome) return scheda({ colore: 'verde', av: 'bot-occhiolino', t: `:app-account: ${esc(c.nome)}`, campi: [['$pzk', pzkHtml(pzk.saldo())], ['EUR€', eurHtml(pzk.euro())], ['indirizzo', `<code>${esc(c.ind ?? '—')}</code>`], ['livello', `:livello: ${zaino.livello()}`]], pie: 'salvataggio attivo: soldi, zaino e livelli stanno nella banca, e li ritrovi qui, sul cercapersone e ai tavoli', azioni: [['saldo', ':pzk: saldo'], ['profilo', ':livello: profilo'], ['esci', 'esci dal conto', 'rosso']] })
+  if (riquadro) return
+  const r = riquadro = document.createElement('div')
+  r.className = 'dc__modal'
+  r.innerHTML = `<form class="dc__mbox" role="dialog" aria-modal="true" aria-labelledby="dc-mt" novalidate>
+      <button type="button" class="dc__mx" data-chiudi aria-label="chiudi">✕</button>
+      <h3 id="dc-mt">Il tuo account</h3>
+      <p class="dc__msub">Con l’account i $pzk, lo zaino e i livelli si salvano nella banca: li ritrovi qui, sul cercapersone e ai tavoli, da ogni dispositivo.</p>
+      <div class="dc__seg"><button type="button" data-modo="entra" aria-pressed="true">Accedi</button><button type="button" data-modo="crea" aria-pressed="false">Crea account</button></div>
+      <label>Nome<i>*</i><input name="nome" type="text" maxlength="20" autocomplete="username" autocapitalize="off" spellcheck="false" required></label>
+      <label>PIN · 4 cifre<i>*</i><input name="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" required></label>
+      <label data-solo-crea hidden>Di nuovo il PIN<i>*</i><input name="pin2" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password"></label>
+      <p class="dc__mnota" data-solo-crea hidden>Il PIN non si recupera: tienilo a mente.</p>
+      <p class="dc__merr" role="alert" hidden></p>
+      <footer><button type="button" class="dc__mlink" data-chiudi>Annulla</button><button type="submit" class="c-b oro">Accedi</button></footer>
+    </form>`
+  radice.querySelector('.dc').append(r)
+  const f = r.querySelector('form'), err = r.querySelector('.dc__merr'), invio = r.querySelector('[type=submit]')
+  let modo = 'entra'
+  const sbaglio = (t) => { err.textContent = t; err.hidden = !t }
+  r.addEventListener('click', (e) => {
+    if (e.target === r || e.target.closest('[data-chiudi]')) return chiudiRiquadro()
+    const b = e.target.closest('[data-modo]')
+    if (!b) return
+    modo = b.dataset.modo
+    for (const x of r.querySelectorAll('[data-modo]')) x.setAttribute('aria-pressed', String(x === b))
+    for (const x of r.querySelectorAll('[data-solo-crea]')) x.hidden = modo !== 'crea'
+    invio.textContent = modo === 'crea' ? 'Crea account' : 'Accedi'
+    f.pin.autocomplete = modo === 'crea' ? 'new-password' : 'current-password'
+    sbaglio('')
+  })
+  r.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Escape') chiudiRiquadro() })
+  for (const i of [f.pin, f.pin2]) i.addEventListener('input', () => { i.value = i.value.replace(/\D/g, '').slice(0, 4) })
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    const n = f.nome.value.trim(), pin = f.pin.value
+    if (n.length < 2) return sbaglio('scrivi il nome del conto.')
+    if (!/^\d{4}$/.test(pin)) return sbaglio('il PIN è di 4 cifre.')
+    if (modo === 'crea' && f.pin2.value !== pin) return sbaglio('i due PIN non sono uguali.')
+    invio.disabled = true; sbaglio('')
+    let d
+    try { d = await (modo === 'crea' ? pzk.crea(n, pin) : pzk.entra(n, pin)) } catch { d = { ok: false, errore: 'niente rete: riprova' } }
+    invio.disabled = false
+    if (!d?.ok) return sbaglio(d?.errore ?? 'la banca non risponde: riprova.')
+    chiudiRiquadro()
+    Promise.resolve(zaino.sincronizza?.()).catch(() => {}).finally(stato)
+    scheda({ colore: 'verde', av: 'bot-ride', t: `:app-account: ${modo === 'crea' ? 'conto aperto' : 'bentornato'}, ${esc(pzk.conto()?.nome ?? n)}`, d: `da adesso si salva tutto nella banca: hai ${pzkHtml(pzk.saldo())}.`, azioni: [['saldo', ':pzk: saldo'], ['giornaliero', ':regalo: premio del giorno', 'oro']] })
+  })
+  requestAnimationFrame(() => { r.classList.add('is-on'); f.nome.focus({ preventScroll: true }) })
+}
+const apriConto = () => contoQui()
+
+// ── i comandi che esistono solo qui (il conto): stanno fra i suggerimenti come gli altri ──
+const LOCALI = [
+  { nomi: ['account', 'accedi', 'entra', 'login', 'conto', 'registrati'], cat: 'soldi', icona: 'app-account', breve: 'accedi o crea il conto: i progressi si salvano nella banca', uso: 'account', fai: () => contoQui() },
+  { nomi: ['esci', 'logout'], cat: 'soldi', icona: 'app-account', breve: 'esci dal conto e torni alla sessione di prova', uso: 'esci',
+    async fai() {
+      const c = pzk.conto()
+      if (!c?.nome) return scheda({ colore: 'grigio', d: 'non sei in nessun conto: stai giocando con la sessione di prova.', azioni: [['account', ':app-account: accedi', 'oro']] })
+      await pzk.esci()
+      stato()
+      return scheda({ colore: 'grigio', av: 'bot-triste', t: ':app-account: uscito', d: `il conto <b>${esc(c.nome)}</b> resta nella banca con tutto dentro. Adesso giochi con la sessione di prova, che non si salva.`, azioni: [['account', ':app-account: accedi di nuovo', 'oro']] })
+    } },
+]
+const PER_LOCALE = new Map(LOCALI.flatMap((c) => c.nomi.map((n) => [n, c])))
 
 function ctxDi(args, testo) {
   const mie = []
@@ -181,6 +389,8 @@ export async function esegui(riga_, { muto = false, eti = null } = {}) {
   const { nome: n, args, testo } = analizza(riga_)
   if (!n) return
   if (!muto) utente(eti ?? `/${riga_.replace(/^\/+/, '')}`)
+  const locale = PER_LOCALE.get(n)
+  if (locale) { await locale.fai(); stato(); return }
   const c = PER_NOME.get(n)
   if (zaino.pagerRotto() && !passaDaRotto(c, testo)) return soloScassato()
   if (!c) {
@@ -215,7 +425,7 @@ export async function esegui(riga_, { muto = false, eti = null } = {}) {
 }
 
 // ── la riga dove si scrive, coi suggerimenti dei comandi come su Discord ──
-const visibili = () => COMANDI.filter((c) => !c.nascosto)
+const visibili = () => [...LOCALI, ...COMANDI.filter((c) => !c.nascosto)]
 let sel = 0, trovati = []
 function suggerisci() {
   const v = campo.value
@@ -240,6 +450,7 @@ function completa(i) {
   const vuole = /[<[]/.test(c.uso ?? '') && !/^\S+\s*\[/.test(c.uso ?? '')
   pop.hidden = true; trovati = []
   if (vuole) { campo.value = `/${c.nomi[0]} `; campo.focus() } else { campo.value = ''; esegui(c.nomi[0]) }
+  suggerisci()
 }
 function manda() {
   const t = campo.value.trim()
@@ -252,23 +463,32 @@ function manda() {
 function stato() {
   if (!radice) return
   const c = pzk.conto()
-  radice.querySelector('[data-saldo]').innerHTML = `${fmt(pzk.saldo())} $pzk`
+  const saldo = radice.querySelector('[data-saldo]'), n = fmt(pzk.saldo())
+  if (saldo.dataset.n !== n) { // il saldo che cambia si fa notare un attimo
+    if (saldo.dataset.n && !RIDOTTO.matches) { saldo.classList.remove('batte'); void saldo.offsetWidth; saldo.classList.add('batte') }
+    saldo.dataset.n = n
+    saldo.innerHTML = `${esiste('pzk') ? icona('pzk') : ''}<b>${n}</b>`
+    saldo.title = `${n} $pzk`
+  }
   const b = radice.querySelector('[data-conto]')
   b.textContent = c?.nome ? c.nome : 'Accedi'
+  b.classList.toggle('dentro', !!c?.nome)
   b.title = c?.nome ? 'il tuo account: i progressi si salvano nella banca' : 'accedi o crea un account per salvare i progressi'
-  radice.querySelector('[data-salva]').textContent = c?.nome ? 'salvataggio attivo' : 'sessione di prova · senza account non si salva'
+  const sal = radice.querySelector('[data-salva]')
+  sal.textContent = c?.nome ? 'salvataggio attivo' : 'sessione di prova · senza account non si salva'
+  sal.classList.toggle('salva', !!c?.nome)
 }
 
-/** Monta la chat dentro `el`. `finestra(indirizzo, titolo)` apre una cosa vera (un tavolo, il cercapersone) sopra il profilo. */
-export function monta(el, { finestra }) {
+/** Monta la chat dentro `el`. `qui(cosa, { app })` apre il cercapersone 3D sopra la pagina (solo per «/telefono»). */
+export function monta(el, { qui: apri }) {
   if (radice) return
-  apriFinestra = finestra
+  apriQui = apri
   radice = el
   el.innerHTML = `<div class="dc">
     <header class="dc__head"><span class="dc__canale"><i>#</i>pzk-bot</span><span class="dc__topic" data-salva></span>
       <span class="dc__saldo" data-saldo></span><button type="button" class="btn btn--msg dc__conto" data-conto>Accedi</button></header>
-    <div class="dc__att" role="group" aria-label="attività">${ATTIVITA.map(([t, href, ic]) => `<button type="button" class="dc__act" data-href="${href}" data-titolo="${esc(t)}">${esiste(ic) ? icona(ic) : ''}<span>${esc(t)}</span></button>`).join('')}</div>
-    <div class="dc__list" role="log" aria-live="polite" tabindex="0"></div>
+    <div class="dc__att" role="group" aria-label="i tavoli, qui in chat">${TAVOLI.map((g) => { const ic = PER_NOME.get(g.id)?.icona; return `<button type="button" class="dc__act" data-tavolo="${g.id}">${ic && esiste(ic) ? icona(ic) : ''}<span>${esc(g.nome)}</span></button>` }).join('')}</div>
+    <div class="dc__list" role="log" aria-live="polite" tabindex="0"><div class="dc__inizio"><i>#</i><h3>Ti diamo il benvenuto in #pzk-bot!</h3><p>Questo è l’inizio del canale #pzk-bot: il bot dei $pzk, coi comandi veri del cercapersone. Tutto gira qui in chat.</p></div><div class="dc__giorno">${new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date())}</div></div>
     <div class="dc__pop" role="listbox" hidden></div>
     <form class="dc__form"><span class="dc__slash">/</span><input class="dc__input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="send" maxlength="120" placeholder="Messaggio #pzk-bot · scrivi / per i comandi" aria-label="scrivi un comando"><button type="submit" class="dc__invia" aria-label="invia">➤</button></form>
     <div class="dc__rapidi">${[['giornaliero', ':regalo: premio'], ['lavora', ':rider: lavora'], ['pesca', ':canna: pesca'], ['saldo', ':pzk: saldo'], ['zaino', ':zaino: zaino'], ['negozio', 'negozio'], ['aiuto', ':quiz: aiuto']].filter(([c]) => PER_NOME.has(c)).map(([c, e]) => `<button type="button" class="c-b" data-cmd="${c}">${conIcone(e)}</button>`).join('')}</div>
@@ -287,19 +507,20 @@ export function monta(el, { finestra }) {
     const p = e.target.closest('[data-parola]')
     if (p) { utente(p.dataset.parola); aspettaTesto?.risolvi(p.dataset.parola); return }
     const cmd = e.target.closest('[data-cmd]')
-    if (cmd && !cmd.disabled) { esegui(cmd.dataset.cmd, { eti: cmd.textContent.trim() || cmd.dataset.cmd }); return }
+    if (cmd && !cmd.disabled) {
+      if (cmd.dataset.cmd.startsWith('qui:')) { const [, cosa, app] = cmd.dataset.cmd.split(':'); apriQui(cosa, { app: app || null }); return }
+      esegui(cmd.dataset.cmd, { eti: cmd.textContent.trim() || cmd.dataset.cmd }); return
+    }
     const cm = e.target.closest('.dc__cmd')
     if (cm) { completa(+cm.dataset.i); return }
-    const at = e.target.closest('.dc__act')
-    if (at) { apriFinestra(at.dataset.href, at.dataset.titolo); return }
-    if (e.target.closest('[data-conto]')) apriConto()
+    const at = e.target.closest('[data-tavolo]')
+    if (at) { tavolo(TAVOLI.find((g) => g.id === at.dataset.tavolo)); return }
+    if (e.target.closest('[data-conto]')) contoQui()
   })
   pzk.osserva(stato)
   // il canale diretto con la banca: quello che cambia da un altro dispositivo (o nel cercapersone) arriva subito
   import('/games/live.js').catch(() => {})
   zaino.ascolta?.(stato)
-  // tornando dal cercapersone o da un tavolo: il conto e lo zaino si rileggono
-  addEventListener('pzkko-app-chiusa', () => { try { pzk.ricarica() } catch {} Promise.resolve(pzk.sincronizza?.()).catch(() => {}).finally(stato) })
   addEventListener('storage', () => { try { pzk.ricarica() } catch {} stato() })
   stato()
   if (!salutato) { salutato = true; salutoIniziale(ctxDi([], '')) }

@@ -306,7 +306,8 @@ a.conn:hover { background: var(--box-2); }
 .tag { display: inline-flex; padding: 2px 7px; border-radius: 6px; font-size: 11px; font-weight: 700; line-height: 1.4; background: var(--box-2); color: var(--muted); white-space: nowrap; }
 
 /* la striscia degli altri progetti */
-.strip { display: flex; gap: 12px; margin: 0 -16px -6px; padding: 2px 16px 10px; overflow-x: auto; scroll-snap-type: x proximity; scroll-padding-inline: 16px; scrollbar-width: none; }
+.strip { display: flex; gap: 12px; margin: 0 -16px -6px; padding: 2px 16px 10px; overflow-x: auto; scroll-snap-type: x proximity; scroll-padding-inline: 16px; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); }
 .strip::-webkit-scrollbar { display: none; }
 .mini { flex: 0 0 168px; scroll-snap-align: start; display: flex; flex-direction: column; gap: 8px; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; min-width: 0; }
 .mini__thumb { position: relative; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; background: #111; box-shadow: var(--shadow-sm); }
@@ -647,3 +648,108 @@ a.conn:hover { background: var(--box-2); }
 }
 
 @media (max-width: 430px) { .tabs { gap: 15px; } .tab { font-size: 14px; } .tab__n { margin-left: 4px; padding: 1px 5px; } }
+
+/* ══ 19.11 · tutto qui: il cercapersone vivo in bacheca, il 3D sopra il profilo, la chat tutta in gg sans ══ */
+
+/* ── il cercapersone vivo (lo stesso tasto del muro: la foto a sfondo trasparente, pzk os acceso sul vetro) ── */
+.chat-tasto { position: relative; display: block; width: 100%; height: auto; aspect-ratio: 336 / 194; padding: 0; border: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  filter: drop-shadow(0 10px 16px rgba(20, 10, 40, .34)); transition: scale .35s cubic-bezier(.2, 1.3, .4, 1); }
+.chat-tasto img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: contain; pointer-events: none; }
+.chat-tasto .ct-lcd { position: absolute; display: block; overflow: hidden; background: #f7a13a; box-shadow: inset 0 0 3px rgba(0, 0, 0, .45); }
+.chat-tasto .ct-lcd canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+.chat-tasto.zero:not(.vestito) .ct-lcd, .chat-tasto.zero:not(.vestito) .ct-led { visibility: hidden; }
+.chat-tasto .ct-led { position: absolute; min-width: 3px; min-height: 3px; border-radius: 50%; background: transparent; }
+.chat-tasto.msg .ct-led { background: #ff3b2e; box-shadow: 0 0 6px #ff3b2e, 0 0 12px rgba(255, 59, 46, .6); animation: zled 1.6s steps(2, jump-none) infinite; }
+.chat-tasto .ct-led.lavora { background: #ff4a3a; box-shadow: 0 0 5px #ff3b2e, 0 0 11px rgba(255, 59, 46, .65); animation: none; opacity: 1; }
+.chat-tasto .ct-crepe { position: absolute; inset: 0; z-index: 55; width: 100%; height: 100%; object-fit: cover; pointer-events: none; display: none; }
+.chat-tasto.scassato .ct-crepe { display: block; }
+.chat-tasto:focus-visible { outline: 3px solid var(--ring, #5865f2); outline-offset: 6px; border-radius: 12px; }
+.chat-tasto:active { scale: .97; }
+@media (hover: hover) { .chat-tasto:hover { scale: 1.035; } }
+@keyframes zled { 50% { opacity: .2; } }
+@keyframes zfloat { 50% { translate: 0 -6px; } }
+
+/* in bacheca: niente copertina e niente sfondo, il cercapersone sta sulla scheda */
+.hero__zero { display: grid; place-items: center; aspect-ratio: auto; min-height: 220px; padding: 26px 18px 30px; background: none; cursor: default; overflow: visible; }
+.hero__zero .chat-tasto { width: min(92%, 500px); transform: rotate(-2.5deg); animation: zfloat 6s ease-in-out infinite; }
+.hero:has(.hero__zero) { overflow: visible; }
+@media (max-width: 760px) { .hero__zero { min-height: 0; padding: 22px 14px 8px; } .hero__zero .chat-tasto { width: min(96%, 420px); } }
+@media (prefers-reduced-motion: reduce) { .hero__zero .chat-tasto { animation: none; } .chat-tasto { transition: none; } }
+
+/* il cercapersone aperto: sfondo trasparente (il profilo resta dietro, nitido), la stessa ombra del tasto per tutto il volo */
+dialog.tel::backdrop { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+dialog.tel .z-tela, dialog.tel .z-tela.ombra { filter: drop-shadow(0 10px 16px rgba(20, 10, 40, .34)); will-change: contents; }
+dialog.tel.pieno .t-nav button { font: 600 15px/1 var(--font-sans); letter-spacing: .02em; text-transform: none; }
+
+/* ── la chat: gg sans dappertutto (i numeri allineati), gg mono solo nel codice, come su Discord ── */
+.dc { --mono: var(--font-sans); font-family: var(--font-sans); font-synthesis: none; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+.dc :where(button, input) { font-family: var(--font-sans); }
+.dc code, .dc kbd, .dc pre { font-family: var(--font-mono); }
+.dc__head { min-height: 48px; box-shadow: 0 1px 0 var(--line); border-bottom: 0; }
+.dc__canale { font-weight: 600; letter-spacing: -.005em; }
+.dc__topic { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; }
+.dc__topic.salva::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok) 25%, transparent); flex: 0 0 auto; }
+.dc__saldo { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px 4px 6px; border-radius: 999px; background: color-mix(in srgb, var(--led) 12%, transparent); font: 600 14px/1 var(--font-sans); font-variant-numeric: tabular-nums; color: var(--led); }
+.dc__saldo b { font-weight: 700; }
+.dc__saldo .emo { height: 18px; margin: 0; vertical-align: 0; }
+.dc__saldo.batte { animation: dcbatte .5s cubic-bezier(.2, 1.4, .4, 1); }
+@keyframes dcbatte { 30% { scale: 1.12; background: color-mix(in srgb, var(--led) 30%, transparent); } }
+.dc__conto.dentro { background: var(--box-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+.dc__conto.dentro::before { content: ""; display: inline-block; width: 8px; height: 8px; margin-right: 6px; border-radius: 50%; background: var(--ok); }
+.dc__act { border-radius: 8px; font-size: 14px; font-weight: 500; padding: 0 12px 0 8px; }
+.dc__act:active { transform: translateY(0) scale(.97); }
+.dc__list { scroll-behavior: smooth; scrollbar-color: color-mix(in srgb, var(--text-base) 28%, transparent) transparent; }
+.dc__msg { position: relative; animation: dcarriva .22s cubic-bezier(.2, .8, .2, 1) backwards; }
+@keyframes dcarriva { from { opacity: 0; transform: translateY(6px); } }
+.dc__meta b { font-weight: 500; }
+.dc__meta time { font-weight: 500; }
+.dc__msg--tu .dc__txt { font-family: var(--font-sans); font-size: 16px; }
+.dc__slashcmd { padding: 0 3px; border-radius: 4px; background: color-mix(in srgb, #5865f2 18%, transparent); color: var(--blu); font-weight: 500; }
+.dc .pzk, .dc .eur { font-family: var(--font-sans); font-weight: 600; font-variant-numeric: tabular-nums; }
+.dc .c-scheda { border-radius: 4px; padding: 10px 16px 14px 12px; box-shadow: 0 1px 2px rgba(0, 0, 0, .06); animation-duration: .28s; }
+.dc .c-titolo { font-weight: 600; }
+.dc .c-campi dt { font-weight: 600; font-size: 13px; color: var(--text); }
+.dc .c-campi dd { font-variant-numeric: tabular-nums; }
+.dc .c-carta { font: 600 17px/1 var(--font-sans); border-radius: 6px; }
+.dc .c-b { font-weight: 500; font-size: 14px; border-radius: 8px; transition: background .15s, transform .1s, opacity .15s; }
+.dc .c-b.premuto { outline: 2px solid var(--blu); }
+.dc__slash { font: 700 14px/1 var(--font-sans); }
+.dc__form { box-shadow: inset 0 0 0 1px var(--line); transition: box-shadow .15s; }
+.dc__form:focus-within { box-shadow: inset 0 0 0 1px color-mix(in srgb, #5865f2 55%, transparent); }
+.dc__cmd b { font-weight: 600; }
+.dc__cmd code { font-size: 12px; opacity: .85; }
+
+/* l'inizio del canale e la riga della data, come in cima a ogni canale di Discord */
+.dc__inizio { padding: 18px 16px 4px; }
+.dc__inizio i { display: grid; place-items: center; width: 68px; height: 68px; margin-bottom: 10px; border-radius: 50%; background: color-mix(in srgb, var(--text-base) 14%, transparent); font: 400 44px/1 var(--font-sans); font-style: normal; color: var(--text); }
+.dc__inizio h3 { margin: 0 0 6px; font: 700 28px/1.15 var(--font-sans); letter-spacing: -.01em; overflow-wrap: anywhere; }
+.dc__inizio p { margin: 0; font-size: 15px; line-height: 1.4; color: var(--muted); }
+.dc__giorno { display: flex; align-items: center; gap: 8px; margin: 18px 16px 2px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.dc__giorno::before, .dc__giorno::after { content: ""; flex: 1 1 auto; height: 1px; background: var(--line); }
+
+/* il riquadro dell'account: un modale di Discord dentro la chat */
+.dc__modal { position: absolute; inset: 0; z-index: 9; display: grid; place-items: center; padding: 14px; background: rgba(0, 0, 0, 0); transition: background .16s; overflow-y: auto; }
+.dc__modal.is-on { background: rgba(0, 0, 0, .5); }
+.dc__mbox { position: relative; width: min(100%, 420px); padding: 22px 22px 0; border-radius: 12px; background: var(--menu); color: var(--text); box-shadow: 0 18px 50px -12px rgba(0, 0, 0, .55), 0 0 0 1px var(--line); opacity: 0; transform: scale(.94); transition: opacity .16s, transform .22s cubic-bezier(.2, 1.2, .3, 1); }
+.dc__modal.is-on .dc__mbox { opacity: 1; transform: none; }
+.dc__mbox h3 { margin: 0 34px 6px 0; font: 700 22px/1.2 var(--font-sans); }
+.dc__msub { margin: 0 0 16px; font-size: 14px; line-height: 1.4; color: var(--muted); }
+.dc__mx { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border: 0; border-radius: 8px; background: none; color: var(--muted); font-size: 16px; cursor: pointer; }
+.dc__mx:hover { background: var(--box-3); color: var(--text); }
+.dc__seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: 16px; border-radius: 10px; background: color-mix(in srgb, var(--text-base) 9%, transparent); }
+.dc__seg button { min-height: 34px; border: 0; border-radius: 7px; background: none; color: var(--muted); font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
+.dc__seg button[aria-pressed=true] { background: var(--menu); color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
+.dc__mbox label { display: block; margin-bottom: 14px; font-size: 14px; font-weight: 600; color: var(--text); }
+.dc__mbox label i { margin-left: 3px; font-style: normal; color: #f23f43; }
+.dc__mbox label[hidden], .dc__mbox p[hidden] { display: none; }
+.dc__mbox input { display: block; width: 100%; height: 44px; margin-top: 8px; padding: 0 12px; border: 1px solid color-mix(in srgb, var(--text-base) 22%, transparent); border-radius: 8px; background: color-mix(in srgb, var(--text-base) 5%, transparent); color: var(--text); font-size: 16px; font-weight: 400; outline: none; transition: border-color .15s, box-shadow .15s; }
+.dc__mbox input:focus { border-color: #5865f2; box-shadow: 0 0 0 1px #5865f2; }
+.dc__mbox input[type=password] { letter-spacing: .3em; }
+.dc__mnota { margin: -6px 0 14px; font-size: 13px; color: var(--muted); }
+.dc__merr { margin: -4px 0 14px; font-size: 14px; font-weight: 500; color: var(--rosso, #d83c3e); }
+.dc__mbox footer { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin: 6px -22px 0; padding: 14px 22px; border-radius: 0 0 12px 12px; background: color-mix(in srgb, var(--text-base) 6%, transparent); }
+.dc__mbox footer .c-b { min-height: 38px; padding: 2px 18px; }
+.dc__mlink { min-height: 38px; padding: 0 14px; border: 0; background: none; color: var(--text); font-size: 14px; font-weight: 500; cursor: pointer; }
+.dc__mlink:hover { text-decoration: underline; }
+@media (prefers-reduced-motion: reduce) { .dc__msg, .dc__saldo.batte { animation: none; } .dc__list { scroll-behavior: auto; } .dc__mbox, .dc__modal { transition: none; } }
+@media (max-width: 899px) { .dc__inizio h3 { font-size: 22px; } .dc__saldo { margin-left: auto; } }
