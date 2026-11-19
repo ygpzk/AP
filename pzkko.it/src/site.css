@@ -716,8 +716,20 @@ dialog.tel.pieno .t-nav button { font: 600 15px/1 var(--font-sans); letter-spaci
 .dc__slash { font: 700 14px/1 var(--font-sans); }
 .dc__form { box-shadow: inset 0 0 0 1px var(--line); transition: box-shadow .15s; }
 .dc__form:focus-within { box-shadow: inset 0 0 0 1px color-mix(in srgb, #5865f2 55%, transparent); }
-.dc__cmd b { font-weight: 600; }
-.dc__cmd code { font-size: 12px; opacity: .85; }
+/* i suggerimenti dei comandi, come il selettore di Discord: l'icona, /nome con gli argomenti, sotto la descrizione */
+.dc__pop { padding: 4px 6px 6px; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--text-base) 28%, transparent) transparent; overscroll-behavior: contain; }
+.dc__cat { position: sticky; top: -4px; z-index: 1; margin: 0 -6px; padding: 10px 14px 6px; background: var(--menu); line-height: 1.2; letter-spacing: .03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dc__cmd { align-items: center; gap: 10px; min-height: 44px; padding: 5px 8px; font-family: var(--font-sans); line-height: 1.25; }
+.dc__cmd-ico { display: grid; place-items: center; width: 28px; height: 28px; flex: 0 0 28px; border-radius: 8px; background: color-mix(in srgb, var(--text-base) 9%, transparent); }
+.dc__cmd-ico .emo { display: block; width: 22px; height: 22px; margin: 0; object-fit: contain; vertical-align: 0; }
+.dc__cmd-ico i { font: 700 15px/1 var(--font-sans); font-style: normal; color: var(--muted); }
+.dc__cmd-txt { display: flex; flex-direction: column; gap: 1px; flex: 1 1 auto; min-width: 0; }
+.dc__cmd-riga { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+.dc__cmd b { flex: 0 1 auto; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dc__cmd code { flex: 0 1 auto; min-width: 0; padding: 0; background: none !important; font: 400 12px/1.3 var(--font-mono); color: var(--muted); opacity: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dc__cmd > span:last-child { margin-left: 0; padding-left: 0; }
+.dc__cmd .dc__cmd-desc { display: block; color: var(--muted); font-size: 12.5px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dc__cmd[aria-selected=true] .dc__cmd-desc { color: var(--text); opacity: .8; }
 
 /* l'inizio del canale e la riga della data, come in cima a ogni canale di Discord */
 .dc__inizio { padding: 18px 16px 4px; }
@@ -727,31 +739,7 @@ dialog.tel.pieno .t-nav button { font: 600 15px/1 var(--font-sans); letter-spaci
 .dc__giorno { display: flex; align-items: center; gap: 8px; margin: 18px 16px 2px; font-size: 12px; font-weight: 600; color: var(--muted); }
 .dc__giorno::before, .dc__giorno::after { content: ""; flex: 1 1 auto; height: 1px; background: var(--line); }
 
-/* il riquadro dell'account: un modale di Discord dentro la chat */
-.dc__modal { position: absolute; inset: 0; z-index: 9; display: grid; place-items: center; padding: 14px; background: rgba(0, 0, 0, 0); transition: background .16s; overflow-y: auto; }
-.dc__modal.is-on { background: rgba(0, 0, 0, .5); }
-.dc__mbox { position: relative; width: min(100%, 420px); padding: 22px 22px 0; border-radius: 12px; background: var(--menu); color: var(--text); box-shadow: 0 18px 50px -12px rgba(0, 0, 0, .55), 0 0 0 1px var(--line); opacity: 0; transform: scale(.94); transition: opacity .16s, transform .22s cubic-bezier(.2, 1.2, .3, 1); }
-.dc__modal.is-on .dc__mbox { opacity: 1; transform: none; }
-.dc__mbox h3 { margin: 0 34px 6px 0; font: 700 22px/1.2 var(--font-sans); }
-.dc__msub { margin: 0 0 16px; font-size: 14px; line-height: 1.4; color: var(--muted); }
-.dc__mx { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border: 0; border-radius: 8px; background: none; color: var(--muted); font-size: 16px; cursor: pointer; }
-.dc__mx:hover { background: var(--box-3); color: var(--text); }
-.dc__seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: 16px; border-radius: 10px; background: color-mix(in srgb, var(--text-base) 9%, transparent); }
-.dc__seg button { min-height: 34px; border: 0; border-radius: 7px; background: none; color: var(--muted); font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
-.dc__seg button[aria-pressed=true] { background: var(--menu); color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
-.dc__mbox label { display: block; margin-bottom: 14px; font-size: 14px; font-weight: 600; color: var(--text); }
-.dc__mbox label i { margin-left: 3px; font-style: normal; color: #f23f43; }
-.dc__mbox label[hidden], .dc__mbox p[hidden] { display: none; }
-.dc__mbox input { display: block; width: 100%; height: 44px; margin-top: 8px; padding: 0 12px; border: 1px solid color-mix(in srgb, var(--text-base) 22%, transparent); border-radius: 8px; background: color-mix(in srgb, var(--text-base) 5%, transparent); color: var(--text); font-size: 16px; font-weight: 400; outline: none; transition: border-color .15s, box-shadow .15s; }
-.dc__mbox input:focus { border-color: #5865f2; box-shadow: 0 0 0 1px #5865f2; }
-.dc__mbox input[type=password] { letter-spacing: .3em; }
-.dc__mnota { margin: -6px 0 14px; font-size: 13px; color: var(--muted); }
-.dc__merr { margin: -4px 0 14px; font-size: 14px; font-weight: 500; color: var(--rosso, #d83c3e); }
-.dc__mbox footer { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin: 6px -22px 0; padding: 14px 22px; border-radius: 0 0 12px 12px; background: color-mix(in srgb, var(--text-base) 6%, transparent); }
-.dc__mbox footer .c-b { min-height: 38px; padding: 2px 18px; }
-.dc__mlink { min-height: 38px; padding: 0 14px; border: 0; background: none; color: var(--text); font-size: 14px; font-weight: 500; cursor: pointer; }
-.dc__mlink:hover { text-decoration: underline; }
-@media (prefers-reduced-motion: reduce) { .dc__msg, .dc__saldo.batte { animation: none; } .dc__list { scroll-behavior: auto; } .dc__mbox, .dc__modal { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .dc__msg, .dc__saldo.batte { animation: none; } .dc__list { scroll-behavior: auto; } }
 @media (max-width: 899px) { .dc__inizio h3 { font-size: 22px; } .dc__saldo { margin-left: auto; } }
 
 /* ══ 19.11 · i caratteri del muro: i tavoli e i fogli (games/) si aprono sopra il profilo e li vogliono ══ */
@@ -768,3 +756,14 @@ dialog.tel.pieno .t-nav button { font: 600 15px/1 var(--font-sans); letter-spaci
 .dc-pa__c.c { background: #f0b232; color: #1a1a1a; }
 .dc-pa__c.n { background: #4e5058; color: #fff; }
 .dc__act { flex: 0 0 auto; }
+
+/* ══ 19.11 · il conto nella scheda: «Entra» verde per chi non ha un conto, il nome e i $pzk per chi è dentro ══ */
+.actions--acc { margin-top: 8px; }
+.btn--join { background: #248046; color: #fff; }
+.btn--join:hover { background: #1a6334; }
+.btn--join:active { background: #15562b; }
+.acc { min-width: 0; gap: 8px; font-variant-numeric: tabular-nums; }
+.acc small { margin-left: auto; padding-left: 8px; font-size: 12px; font-weight: 500; opacity: .85; overflow: hidden; text-overflow: ellipsis; }
+.acc__dot { flex: 0 0 auto; width: 10px; height: 10px; border-radius: 50%; background: var(--ok, #23a55a); }
+.acc__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+.acc__pzk { margin-left: auto; padding-left: 8px; color: var(--muted); }

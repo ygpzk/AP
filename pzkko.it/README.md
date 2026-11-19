@@ -79,7 +79,7 @@ prima che pzkko uscisse dal repository (`a5e42f1`), rimessi agli stessi indirizz
   Sono loro i progetti «Parole» e «Trivia» del profilo: le versioni React del vecchio
   sito non sono più mostrate. Non decidono niente: Parole chiede alla banca
   (`parole.inizia`, `parole.prova`, `parole.arrendi`: la parola segreta, il dizionario e i
-  pagamenti stanno in `C:\pzkko-serveranca`, fuori dal repository), Trivia usa il
+  pagamenti stanno in `C:\pzkko-server\banca`, fuori dal repository), Trivia usa il
   motore dei quiz che la banca aveva già (`chat/quiz.js` → `quiz.*`). In chat: `/parole`
   (la stessa partita del foglio) e `/quiz`. I caratteri del muro (Anton, Special Elite,
   Permanent Marker) sono dichiarati in `site.css`, così i tavoli aperti sopra il profilo
@@ -95,6 +95,39 @@ prima che pzkko uscisse dal repository (`a5e42f1`), rimessi agli stessi indirizz
 - Tolti rispetto a quel commit: i volantini col numero di telefono e con
   l’indirizzo e-mail, il nome del paese nei testi, gli adesivi con le foto degli
   amici, Deutschland e la wiki.
+
+## L’accesso con l’email (19.11)
+
+Niente password e niente PIN: si entra con l’email e un codice di sei cifre che
+arriva per posta. Il codice vale dieci minuti e in quei dieci minuti è di chi
+l’ha chiesto (richiederlo rimanda lo stesso, e ci si entra anche da un altro
+dispositivo); poi ne esce uno nuovo. Accedere e registrarsi sono la stessa
+strada: se l’email non ha un conto, dopo il codice si chiede solo il nome.
+
+Il riquadro è uno solo, fatto come quelli di Discord, e lo aprono il profilo, la
+chat, il cercapersone e i tavoli: `public/accesso/accesso.js` (con
+`accesso.css`, che sta in piedi da solo). Dentro ci sono:
+
+- **l’invito** (`invito`), come quello di un server di Discord: esce all’arrivo
+  per chi non ha un conto, una volta per visita e non più di una ogni dodici
+  ore. I numeri sono veri: quanti conti ci sono e se la banca risponde;
+- **l’accesso** (`accedi`): email, codice, nome;
+- **le novità** (`novita`), come il «Novità» di Discord: una volta per versione
+  (`NOVITA.v` in `accesso.js`), dopo l’accesso o all’arrivo di chi è già dentro;
+- **il regalo di instagram** (`premio`): 2.000 $pzk a chi mi segue su tutti e
+  due i profili. Instagram non dice a un sito chi segue chi, quindi si scrive
+  il proprio nome, la banca scrive ad Alberto (email, e Discord se c’è il
+  webhook) e lui decide dal tasto della lettera, che apre `/?premio=…`
+  (`decidi`). Col sì i $pzk partono subito.
+
+I codici, le lettere e le email stanno sulla banca, sul pc di Alberto
+(`C:\pzkko-server\banca\posta.mjs`, in SMTP): se il pc è spento non si entra.
+L’email non torna mai intera al browser. Le scritte dell’accesso sono in
+italiano e in inglese; le altre lingue del profilo vedono l’inglese.
+
+Nella scheda del profilo c’è il tasto del conto: verde «Entra» per chi è fuori,
+il nome e i $pzk per chi è dentro (col menu: novità, regalo, esci). In chat:
+`/account`, `/regalo`, `/novita`.
 
 ## Comandi
 

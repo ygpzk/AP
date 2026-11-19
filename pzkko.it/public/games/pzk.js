@@ -223,16 +223,13 @@ export function dalCanale(s) {
  */
 export const fai = (cosa, args = {}) => chiama({ a: 'fai', cosa, args })
 
-/** Entra con nome e PIN. → { ok, errore? } */
-export async function entra(nome, pin) {
-  const d = await chiama({ a: 'entra', nome, pin })
-  if (d.ok) prendi(d)
-  return d
-}
-/** Crea un conto (con la chiave di amministrazione per i nomi riservati). → { ok, errore? } */
-export async function crea(nome, pin, key) {
-  const d = await chiama({ a: 'crea', nome, pin, ...(key && { key }) })
-  if (d.ok) prendi(d)
+// SI ENTRA CON L'EMAIL (19.11, Alberto: «no password, solo codici di verifica via email»; il riquadro è accesso/accesso.js).
+/** Chiede alla banca di mandare a quell'email il codice di sei cifre (vale dieci minuti). → { ok, email (mascherata), fino } */
+export const codice = (email) => chiama({ a: 'codice', email })
+/** Entra col codice. Se l'email non ha un conto risponde { ok, nuovo } senza far entrare: si richiama col `nome`, e il conto nasce. */
+export async function accedi(email, cod, nome) {
+  const d = await chiama({ a: 'accedi', email, codice: cod, ...(nome != null && { nome }) })
+  if (d.ok && d.token) prendi(d)
   return d
 }
 function prendi(d) {
@@ -287,7 +284,6 @@ export async function colpo(op, codice = '') {
   return chiama({ a: 'colpo', op, codice })
 }
 export const cambiaIndirizzo = (nuovo, key) => azione({ a: 'indirizzo', nuovo, ...(key && { key }) })
-export const cambiaPin = (vecchio, nuovo) => azione({ a: 'pin', vecchio, nuovo })
 /** Chi è a questo indirizzo (per controllare prima di inviare). → { ok, conto: { nome, ind } } */
 export async function chiE(ind) { try { return await (await fetch(`${API}?ind=${encodeURIComponent(ind)}`, { signal: AbortSignal.timeout?.(25_000) })).json() } catch { return { ok: false, errore: 'niente rete' } } } // (11.11: anche qui un tempo massimo, come manda)
 
@@ -322,41 +318,27 @@ export function rigaEuro({ classe = 'pzk-eur' } = {}) {
   return a
 }
 
-// ── il regalo per chi mi segue su Instagram: 1.000 $pzk, una volta per conto (o per ospite), li dà la banca. Un sito non può
-// sapere chi segue chi, quindi ci si fida: il link apre il profilo e, tornati qui, i $pzk arrivano ──
+// ── il regalo per chi mi segue su tutti e due i profili di instagram (19.11): 2.000 $pzk, una volta per conto. Un sito non può
+// sapere chi segue chi: si scrive il proprio instagram (accesso/accesso.js, premio), la banca avvisa Alberto, che guarda fra i
+// follower e decide. Prima erano 1.000 sulla fiducia, tornando dal profilo ──
 export const INSTAGRAM = 'https://www.instagram.com/albertoxpecchini/'
-export const PREMIO_IG = 1000
-export const premioPreso = () => !!attuale()?.ig
-export function premioInstagram() {
-  if (premioPreso()) return false
-  chiama({ a: 'ig' })
-  return true
-}
-/** Il link «seguimi su instagram: +1.000 $pzk» per i giochi e il wallet; `fatto()` quando arrivano i $pzk. Sparisce dopo il regalo. */
+export const PREMIO_IG = 2000
+/** La richiesta del regalo: { ig, stato: 'attesa' | 'dato' | 'no' } o null. */
+export const seguo = () => W?.conto.seguo ?? null
+export const premioPreso = () => seguo()?.stato === 'dato'
+/** Chiede il regalo col proprio nome di instagram (serve il conto). → { ok, errore? } */
+export const chiediPremio = (ig) => azione({ a: 'seguo', ig })
+/** Il link «seguimi su instagram: +2.000 $pzk» per i giochi: apre il riquadro del regalo. `fatto()` quando arrivano i $pzk.
+ *  Sparisce quando la richiesta è partita. */
 export function linkInstagram({ classe = 'pzk-ig', fatto } = {}) {
   const a = document.createElement('a')
-  a.href = INSTAGRAM
-  a.target = '_blank'
-  a.rel = 'noopener'
+  a.href = '#regalo'
   a.className = classe
-  a.title = 'si apre il profilo instagram: tornando qui arrivano i $pzk'
+  a.title = 'si apre il regalo: scrivi il tuo instagram, Alberto controlla e arrivano i $pzk'
   a.innerHTML = `seguimi su instagram: <b>+${fmt(PREMIO_IG)} $pzk</b>`
-  const aggiorna = () => { a.hidden = premioPreso() }
-  a.addEventListener('click', () => {
-    if (premioPreso()) return
-    let dato = false
-    const dai = () => {
-      if (dato) return
-      dato = true
-      document.removeEventListener('visibilitychange', torna)
-      if (premioInstagram()) fatto?.()
-      aggiorna()
-    }
-    // si torna dal profilo (la scheda di instagram si chiude o si cambia app); se la pagina non si è mai nascosta, dopo un po'
-    const torna = () => { if (!document.hidden) setTimeout(dai, 500) }
-    document.addEventListener('visibilitychange', torna)
-    setTimeout(dai, 8000)
-  })
+  let era = premioPreso()
+  const aggiorna = () => { const st = seguo()?.stato; a.hidden = st === 'dato' || st === 'attesa'; if (!era && premioPreso()) { era = true; fatto?.() } }
+  a.addEventListener('click', (e) => { e.preventDefault(); import('../accesso/accesso.js').then((m) => m.premio()) })
   osserva(aggiorna)
   aggiorna()
   return a
@@ -368,7 +350,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) sinc
 
 // IN LOCALE SEMPRE DENTRO COL CONTO PZKKO (29.10, Alberto: «fai che in local abbia sempre il log fatto con pzkko»): sul server
 // di prova (localhost e gli indirizzi numerici: tools/dev.mjs) chi non è già dentro come pzkko entra da solo, col token che il
-// server di prova chiede alla banca (/__dev/accesso). Niente PIN nel codice; online quell'indirizzo non esiste. ?ospite
+// server di prova chiede alla banca (/__dev/accesso). Online quell'indirizzo non esiste. ?ospite
 // nell'indirizzo lascia senza conto (per provare il lucchetto del cercapersone)
 const LOCALE = /^(localhost|127\.0\.0\.1|\d+\.\d+\.\d+\.\d+)$/.test(location.hostname) && !new URLSearchParams(location.search).has('ospite')
 if (LOCALE && W?.conto?.nome?.toLowerCase() !== 'pzkko') {

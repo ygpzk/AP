@@ -5,7 +5,7 @@
 // I soldi e lo zaino sono gli stessi del cercapersone e dei tavoli: con l'account si salvano nella banca, senza si gioca
 // coi 1.000 $pzk della sessione.
 // TUTTO IN CHAT (19.11, Alberto: «non farmi uscire e andare al flipper, tutto qui gira, 100% qui tutto in chat»): quello che
-// nel cercapersone è un'app qui è una scheda. Il conto si apre e si crea in un riquadro come quelli di Discord (contoQui),
+// nel cercapersone è un'app qui è una scheda. Il conto si apre e si crea nel riquadro dell’accesso (accesso/accesso.js: l’email e un codice, contoQui),
 // i tavoli partono dalla barra in alto (tavolo: quanto, su cosa, e parte il comando), il virtual, il pzkstore e la
 // lavatrice sono schede coi tasti (virtualQui, storeQui, lavatriceQui). Solo «/telefono» apre il cercapersone 3D, e lo apre
 // sopra questa pagina, senza andare da nessuna parte.
@@ -343,67 +343,38 @@ async function paroleQui(args = []) {
   stato()
 }
 
-// ── il conto, in un riquadro come quelli di Discord: accedi o crea, nome e PIN ──
-let riquadro = null
-function chiudiRiquadro() { if (!riquadro) return; const r = riquadro; riquadro = null; r.classList.remove('is-on'); setTimeout(() => r.remove(), 160); campo?.focus({ preventScroll: true }) }
-function contoQui() {
+// ── il conto: si entra col riquadro dell'accesso (accesso/accesso.js, 19.11: l'email e il codice che arriva per posta,
+// niente PIN), lo stesso del profilo e del cercapersone. Qui resta la scheda di chi è già dentro, e quella di dopo ──
+const accesso = () => import('../accesso/accesso.js')
+let entrando = false
+const regaloAzione = () => { const st = pzk.seguo()?.stato; return st === 'dato' || st === 'attesa' ? [] : [['regalo', `:regalo: +${fmt(pzk.PREMIO_IG)} $pzk`, 'oro']] }
+async function contoQui() {
   const c = pzk.conto()
-  if (c?.nome) return scheda({ colore: 'verde', av: 'bot-occhiolino', t: `:app-account: ${esc(c.nome)}`, campi: [['$pzk', pzkHtml(pzk.saldo())], ['EUR€', eurHtml(pzk.euro())], ['indirizzo', `<code>${esc(c.ind ?? '—')}</code>`], ['livello', `:livello: ${zaino.livello()}`]], pie: 'salvataggio attivo: soldi, zaino e livelli stanno nella banca, e li ritrovi qui, sul cercapersone e ai tavoli', azioni: [['saldo', ':pzk: saldo'], ['profilo', ':livello: profilo'], ['esci', 'esci dal conto', 'rosso']] })
-  if (riquadro) return
-  const r = riquadro = document.createElement('div')
-  r.className = 'dc__modal'
-  r.innerHTML = `<form class="dc__mbox" role="dialog" aria-modal="true" aria-labelledby="dc-mt" novalidate>
-      <button type="button" class="dc__mx" data-chiudi aria-label="chiudi">✕</button>
-      <h3 id="dc-mt">Il tuo account</h3>
-      <p class="dc__msub">Con l’account i $pzk, lo zaino e i livelli si salvano nella banca: li ritrovi qui, sul cercapersone e ai tavoli, da ogni dispositivo.</p>
-      <div class="dc__seg"><button type="button" data-modo="entra" aria-pressed="true">Accedi</button><button type="button" data-modo="crea" aria-pressed="false">Crea account</button></div>
-      <label>Nome<i>*</i><input name="nome" type="text" maxlength="20" autocomplete="username" autocapitalize="off" spellcheck="false" required></label>
-      <label>PIN · 4 cifre<i>*</i><input name="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" required></label>
-      <label data-solo-crea hidden>Di nuovo il PIN<i>*</i><input name="pin2" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password"></label>
-      <p class="dc__mnota" data-solo-crea hidden>Il PIN non si recupera: tienilo a mente.</p>
-      <p class="dc__merr" role="alert" hidden></p>
-      <footer><button type="button" class="dc__mlink" data-chiudi>Annulla</button><button type="submit" class="c-b oro">Accedi</button></footer>
-    </form>`
-  radice.querySelector('.dc').append(r)
-  const f = r.querySelector('form'), err = r.querySelector('.dc__merr'), invio = r.querySelector('[type=submit]')
-  let modo = 'entra'
-  const sbaglio = (t) => { err.textContent = t; err.hidden = !t }
-  r.addEventListener('click', (e) => {
-    if (e.target === r || e.target.closest('[data-chiudi]')) return chiudiRiquadro()
-    const b = e.target.closest('[data-modo]')
-    if (!b) return
-    modo = b.dataset.modo
-    for (const x of r.querySelectorAll('[data-modo]')) x.setAttribute('aria-pressed', String(x === b))
-    for (const x of r.querySelectorAll('[data-solo-crea]')) x.hidden = modo !== 'crea'
-    invio.textContent = modo === 'crea' ? 'Crea account' : 'Accedi'
-    f.pin.autocomplete = modo === 'crea' ? 'new-password' : 'current-password'
-    sbaglio('')
-  })
-  r.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Escape') chiudiRiquadro() })
-  for (const i of [f.pin, f.pin2]) i.addEventListener('input', () => { i.value = i.value.replace(/\D/g, '').slice(0, 4) })
-  f.addEventListener('submit', async (e) => {
-    e.preventDefault()
-    const n = f.nome.value.trim(), pin = f.pin.value
-    if (n.length < 2) return sbaglio('scrivi il nome del conto.')
-    if (!/^\d{4}$/.test(pin)) return sbaglio('il PIN è di 4 cifre.')
-    if (modo === 'crea' && f.pin2.value !== pin) return sbaglio('i due PIN non sono uguali.')
-    invio.disabled = true; sbaglio('')
-    let d
-    try { d = await (modo === 'crea' ? pzk.crea(n, pin) : pzk.entra(n, pin)) } catch { d = { ok: false, errore: 'niente rete: riprova' } }
-    invio.disabled = false
-    if (!d?.ok) return sbaglio(d?.errore ?? 'la banca non risponde: riprova.')
-    chiudiRiquadro()
-    Promise.resolve(zaino.sincronizza?.()).catch(() => {}).finally(stato)
-    scheda({ colore: 'verde', av: 'bot-ride', t: `:app-account: ${modo === 'crea' ? 'conto aperto' : 'bentornato'}, ${esc(pzk.conto()?.nome ?? n)}`, d: `da adesso si salva tutto nella banca: hai ${pzkHtml(pzk.saldo())}.`, azioni: [['saldo', ':pzk: saldo'], ['giornaliero', ':regalo: premio del giorno', 'oro']] })
-  })
-  requestAnimationFrame(() => { r.classList.add('is-on'); f.nome.focus({ preventScroll: true }) })
+  if (c?.nome) return scheda({ colore: 'verde', av: 'bot-occhiolino', t: `:app-account: ${esc(c.nome)}`, campi: [['$pzk', pzkHtml(pzk.saldo())], ['EUR€', eurHtml(pzk.euro())], ['indirizzo', `<code>${esc(c.ind ?? '—')}</code>`], ['livello', `:livello: ${zaino.livello()}`], ...(c.email ? [['email', esc(c.email)]] : [])], pie: 'salvataggio attivo: soldi, zaino e livelli stanno nella banca, e li ritrovi qui, sul cercapersone e ai tavoli', azioni: [['saldo', ':pzk: saldo'], ['profilo', ':livello: profilo'], ...regaloAzione(), ['esci', 'esci dal conto', 'rosso']] })
+  if (entrando) return
+  entrando = true
+  let r
+  try { r = await (await accesso()).accedi() } catch { r = { ok: false } } finally { entrando = false }
+  campo?.focus({ preventScroll: true })
+  if (!r?.ok) return
+  Promise.resolve(zaino.sincronizza?.()).catch(() => {}).finally(stato)
+  scheda({ colore: 'verde', av: 'bot-ride', t: `:app-account: ${r.nuovo ? 'conto aperto' : 'bentornato'}, ${esc(pzk.conto()?.nome ?? '')}`, d: `da adesso si salva tutto nella banca: hai ${pzkHtml(pzk.saldo())}.`, azioni: [['saldo', ':pzk: saldo'], ['giornaliero', ':regalo: premio del giorno', 'oro'], ...regaloAzione()] })
+}
+async function regaloQui() {
+  await (await accesso()).premio()
+  campo?.focus({ preventScroll: true }); stato()
+  const s = pzk.seguo()
+  if (s?.stato === 'attesa') return scheda({ colore: 'blu', av: 'bot-occhiolino', t: ':regalo: richiesta mandata', d: `ho scritto ad Alberto che lo segui come <b>@${esc(s.ig)}</b>. Appena controlla fra i follower arrivano ${pzkHtml(pzk.PREMIO_IG)}, e ti scrive per email.` })
+  if (s?.stato === 'dato') return scheda({ colore: 'verde', av: 'bot-ride', t: ':regalo: regalo arrivato', d: `i ${pzkHtml(pzk.PREMIO_IG)} del follow sono sul conto. grazie!`, azioni: [['saldo', ':pzk: saldo']] })
 }
 const apriConto = () => contoQui()
 
 // ── i comandi che esistono solo qui (il conto): stanno fra i suggerimenti come gli altri ──
 const LOCALI = [
   { nomi: ['parole', 'parola', 'wordle'], cat: 'giochi', icona: 'quiz', breve: 'indovina la parola italiana in sei tentativi: parole 50 (o parole 50 6 per sei lettere)', uso: 'parole [puntata] [5|6]', fai: (args) => paroleQui(args) },
-  { nomi: ['account', 'accedi', 'entra', 'login', 'conto', 'registrati'], cat: 'soldi', icona: 'app-account', breve: 'accedi o crea il conto: i progressi si salvano nella banca', uso: 'account', fai: () => contoQui() },
+  { nomi: ['account', 'accedi', 'entra', 'login', 'conto', 'registrati'], cat: 'soldi', icona: 'app-account', breve: 'entra o crea il conto con l’email (niente password): i progressi si salvano nella banca', uso: 'account', fai: () => contoQui() },
+  { nomi: ['regalo', 'instagram', 'ig', 'seguimi'], cat: 'soldi', icona: 'regalo', breve: 'seguimi su tutti e due i profili di instagram e scrivi il tuo: 2.000 $pzk in regalo', uso: 'regalo', fai: () => regaloQui() },
+  { nomi: ['novita', 'novità', 'news'], cat: 'soldi', icona: 'app-account', breve: 'le novità del sito', uso: 'novita', fai: async () => { await (await accesso()).novita(); campo?.focus({ preventScroll: true }) } },
   { nomi: ['esci', 'logout'], cat: 'soldi', icona: 'app-account', breve: 'esci dal conto e torni alla sessione di prova', uso: 'esci',
     async fai() {
       const c = pzk.conto()

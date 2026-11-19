@@ -1,0 +1,140 @@
+/* L'ACCESSO DI PZKKO.IT (19.11): il riquadro di accesso.js, fatto come quelli di Discord (scuro, gg sans, il blu di
+   Discord). Sta in piedi da solo: lo aprono il profilo, la chat, il cercapersone e i tavoli, anche sul muro, dove il foglio
+   di stile del profilo non c'è. */
+@font-face { font-family: "gg sans"; font-weight: 400; font-display: swap; src: url("/fonts/ggsans-400.woff2") format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 500; font-display: swap; src: url("/fonts/ggsans-500.woff2") format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 600; font-display: swap; src: url("/fonts/ggsans-600.woff2") format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 700; font-display: swap; src: url("/fonts/ggsans-700.woff2") format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 800; font-display: swap; src: url("/fonts/ggsans-800.woff2") format("woff2"); }
+@font-face { font-family: "gg mono"; font-weight: 700; font-display: swap; src: url("/fonts/ggmono-700.woff2") format("woff2"); }
+
+dialog.ax { --f: "gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif; --blu: #5865f2; --blu-h: #4752c4; --blu-a: #3c45a5; --sfondo: #313338; --campo: #1e1f22; --testo: #dbdee1; --forte: #f2f3f5; --piano: #b5bac1; --muto: #949ba4; --rosso: #fa777c; --verde: #23a55a;
+  position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 12px; border: 0; background: transparent; color: var(--testo);
+  display: grid; place-items: center; overflow: hidden; font: 400 16px/1.375 var(--f); -webkit-font-smoothing: antialiased; color-scheme: dark; }
+dialog.ax:not([open]) { display: none; }
+dialog.ax::backdrop { background: rgba(0, 0, 0, .72); animation: ax-velo .18s ease-out; }
+dialog.ax.via { opacity: 0; transition: opacity .13s; }
+dialog.ax.via::backdrop { opacity: 0; transition: opacity .13s; }
+dialog.ax * { box-sizing: border-box; }
+.ax-box { position: relative; width: min(100%, 440px); max-height: 100%; overflow-y: auto; overscroll-behavior: contain; padding: 32px 32px 24px; border-radius: 12px; background: var(--sfondo); box-shadow: 0 0 0 1px rgba(255, 255, 255, .04), 0 24px 60px -12px rgba(0, 0, 0, .7); outline: 0; animation: ax-entra .22s cubic-bezier(.2, .9, .3, 1.15); scrollbar-width: thin; scrollbar-color: #1a1b1e transparent; }
+.ax-box.largo { width: min(100%, 520px); padding: 0 0 20px; }
+.ax-passo { animation: ax-passo .2s ease-out; }
+@keyframes ax-velo { from { opacity: 0; } }
+@keyframes ax-entra { from { opacity: 0; transform: scale(.9); } }
+@keyframes ax-passo { from { opacity: 0; transform: translateY(6px); } }
+
+.ax-x { position: absolute; top: 14px; right: 14px; z-index: 2; display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--muto); cursor: pointer; transition: color .15s, background .15s; }
+.ax-x:hover, .ax-x:focus-visible { color: var(--forte); background: rgba(255, 255, 255, .07); outline: 0; }
+.ax-box h2 { margin: 0 0 8px; font: 700 24px/1.25 var(--f); color: var(--forte); text-align: center; text-wrap: balance; }
+.ax-s { margin: 0 0 20px; color: var(--piano); text-align: center; text-wrap: pretty; }
+.ax-s b, .ax-cose b, .ax-nov li b { color: var(--forte); font-weight: 600; }
+.ax-s code { padding: 1px 5px; border-radius: 4px; background: var(--campo); font: 700 14px/1 "gg mono", Consolas, monospace; color: var(--forte); }
+
+/* i campi */
+.ax-campo { display: block; margin: 0 0 8px; }
+.ax-campo > span:first-child { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; color: var(--piano); }
+.ax-campo.ko > span:first-child { color: var(--rosso); }
+.ax-campo input { display: block; width: 100%; height: 44px; padding: 0 12px; border: 1px solid transparent; border-radius: 8px; background: var(--campo); color: var(--testo); font: 400 16px/1 var(--f); outline: 0; transition: border-color .15s; }
+.ax-campo input:focus { border-color: var(--blu); }
+.ax-campo.ko input { border-color: var(--rosso); }
+.ax-campo input::placeholder { color: #5c5e66; }
+.ax-campo input.ax-cifre { height: 56px; padding: 0 0 0 .42em; text-align: center; font: 700 28px/1 "gg mono", Consolas, monospace; letter-spacing: .42em; }
+.ax-chiocciola { display: flex; align-items: center; border: 1px solid transparent; border-radius: 8px; background: var(--campo); transition: border-color .15s; }
+.ax-chiocciola:focus-within { border-color: var(--blu); }
+.ax-chiocciola i { padding-left: 12px; font-style: normal; font-weight: 600; color: var(--muto); }
+.ax-chiocciola input, .ax-chiocciola input:focus { border: 0; padding-left: 3px; background: none; }
+.ax-err { margin: 0 0 8px; font-size: 14px; color: var(--rosso); }
+.ax-err b { font-weight: 700; }
+.ax-err[hidden] { display: none; }
+.ax-tempo { margin: 0 0 4px; font-size: 13px; color: var(--muto); font-variant-numeric: tabular-nums; }
+.ax-tempo.ok { color: var(--verde); }
+.ax-nota { margin: 14px 0 0; font-size: 12px; line-height: 1.35; color: var(--muto); text-align: center; text-wrap: pretty; }
+
+/* i tasti */
+.ax-b { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 44px; margin-top: 12px; padding: 0 16px; border: 0; border-radius: 8px; background: var(--blu); color: #fff; font: 500 16px/1.2 var(--f); cursor: pointer; transition: background .15s, transform .08s; }
+.ax-b:hover { background: var(--blu-h); }
+.ax-b:active { background: var(--blu-a); transform: translateY(1px); }
+.ax-b:focus-visible, .ax-link:focus-visible, .ax-profili a:focus-visible { outline: 2px solid #00a8fc; outline-offset: 2px; }
+.ax-b:disabled { opacity: .6; cursor: default; }
+.ax-b.gira { color: transparent; position: relative; }
+.ax-b.gira::after { content: ""; position: absolute; width: 24px; height: 6px; border-radius: 3px; background: radial-gradient(circle 3px, #fff 96%, transparent) 0 0 / 9px 6px repeat-x; animation: ax-punti .9s steps(4) infinite; }
+@keyframes ax-punti { 50% { opacity: .35; } }
+.ax-b.verde { background: #248046; }
+.ax-b.verde:hover { background: #1a6334; }
+.ax-b.rosso { background: transparent; box-shadow: inset 0 0 0 1px #da373c; color: #fa777c; }
+.ax-b.rosso:hover { background: #da373c; color: #fff; }
+.ax-link { display: block; margin: 12px auto 0; padding: 2px 4px; border: 0; background: none; color: #00a8fc; font: 500 14px/1.3 var(--f); cursor: pointer; }
+.ax-link:hover:not(:disabled) { text-decoration: underline; }
+.ax-link:disabled { color: var(--muto); cursor: default; }
+.ax-riga { display: flex; justify-content: space-between; gap: 12px; margin: 0; }
+.ax-riga .ax-link { margin: 12px 0 0; }
+
+/* l'invito */
+.ax-inv { text-align: center; }
+.ax-av { display: block; width: 84px; height: 84px; margin: 0 auto 14px; border-radius: 28px; object-fit: cover; background: var(--campo); box-shadow: 0 8px 20px -6px rgba(0, 0, 0, .6); }
+.ax-da { margin: 0 0 4px; color: var(--piano); }
+.ax-inv h2 { margin-bottom: 8px; font-size: 28px; font-weight: 800; }
+.ax-conta { display: flex; justify-content: center; gap: 16px; margin: 0 0 16px; font-size: 14px; color: var(--piano); }
+.ax-conta span { display: inline-flex; align-items: center; gap: 6px; }
+.ax-conta span[hidden] { display: none; }
+.ax-conta b { font-weight: 400; }
+.ax-punto { width: 10px; height: 10px; border-radius: 50%; background: var(--verde); }
+.ax-punto.grigio { background: #80848e; }
+.ax-punto.spento { background: #f0b232; }
+.ax-inv .ax-s { margin-bottom: 14px; font-size: 15px; }
+.ax-cose { display: grid; gap: 8px; margin: 0 0 6px; padding: 14px; border-radius: 8px; background: #2b2d31; list-style: none; text-align: left; font-size: 15px; color: var(--testo); }
+.ax-cose li { display: flex; align-items: center; gap: 12px; }
+.ax-cose i { flex: 0 0 28px; display: grid; place-items: center; height: 28px; border-radius: 50%; background: rgba(88, 101, 242, .22); color: #c9cdfb; font: 700 14px/1 var(--f); font-style: normal; }
+
+/* il benvenuto */
+.ax-ben { text-align: center; }
+.ax-festa { position: relative; width: 64px; margin: 0 auto 14px; }
+.ax-festa img { display: block; width: 64px; height: 64px; border-radius: 50%; object-fit: cover; }
+.ax-festa b { position: absolute; left: 50%; bottom: -8px; translate: -50% 0; padding: 3px 8px; border-radius: 10px; background: var(--verde); color: #fff; font-size: 12px; font-weight: 700; white-space: nowrap; box-shadow: 0 0 0 3px var(--sfondo); animation: ax-salta .5s .25s cubic-bezier(.2, 1.6, .4, 1) backwards; }
+@keyframes ax-salta { from { opacity: 0; translate: -50% 10px; scale: .6; } }
+.ax-punti { display: grid; gap: 8px; margin: 0 0 6px; padding: 0; list-style: none; text-align: left; font-size: 15px; color: var(--piano); }
+.ax-punti li { position: relative; padding-left: 26px; }
+.ax-punti li::before { content: "✓"; position: absolute; left: 4px; color: var(--verde); font-weight: 700; }
+
+/* le novità, come il «Novità» di Discord */
+.ax-nov > * { margin-left: 24px; margin-right: 24px; }
+.ax-nov header { display: flex; align-items: baseline; gap: 10px; margin: 0; padding: 20px 56px 14px 24px; }
+.ax-nov header h2 { margin: 0; font-size: 20px; text-align: left; }
+.ax-nov time { font-size: 12px; color: var(--muto); }
+.ax-foto { display: block; width: calc(100% - 48px); height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: top; border-radius: 8px; background: var(--campo); }
+.ax-nov h3 { display: flex; align-items: center; gap: 10px; margin-top: 22px; margin-bottom: 8px; font: 700 15px/1.2 var(--f); letter-spacing: .02em; text-transform: uppercase; }
+.ax-nov h3::after { content: ""; flex: 1; height: 1px; background: currentColor; opacity: .7; }
+.ax-nov h3.verde { color: #2dc770; }
+.ax-nov h3.blu { color: #949cf7; }
+.ax-nov h3.rosa { color: #ff78b9; }
+.ax-nov ul { display: grid; gap: 8px; margin-top: 0; margin-bottom: 0; padding: 0 0 0 20px; color: var(--testo); font-size: 15px; }
+.ax-nov li::marker { color: #6d6f78; }
+.ax-nov .ax-b { width: calc(100% - 48px); margin-top: 22px; }
+
+/* il regalo di instagram */
+.ax-reg { text-align: center; }
+.ax-reg .ax-campo, .ax-reg .ax-err { text-align: left; }
+.ax-dono { display: inline-grid; place-items: center; min-width: 64px; height: 64px; margin: 0 auto 14px; padding: 0 16px; border-radius: 32px; background: linear-gradient(135deg, #f58529, #dd2a7b 55%, #8134af); color: #fff; font-size: 20px; font-weight: 800; box-shadow: 0 10px 24px -8px rgba(221, 42, 123, .7); }
+.ax-dono.dato { background: var(--verde); box-shadow: none; font-size: 30px; }
+.ax-dono.attesa { background: #4e5058; box-shadow: none; font-size: 30px; line-height: 0; padding-bottom: 14px; }
+.ax-profili { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 16px; }
+.ax-profili.uno { grid-template-columns: 1fr; }
+.ax-profili a { display: flex; align-items: center; gap: 8px; min-width: 0; min-height: 44px; padding: 0 10px; border-radius: 8px; background: #2b2d31; color: var(--forte); font-size: 14px; font-weight: 500; text-decoration: none; transition: background .15s; }
+.ax-profili a:hover { background: #35373c; }
+.ax-profili a svg { flex: 0 0 auto; color: #ff78b9; }
+.ax-profili a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ax-profili a i { margin-left: auto; font-style: normal; color: var(--muto); }
+.ax-profili a.visto i { color: var(--verde); }
+.ax-profili a.visto i::before { content: "✓ "; }
+
+@media (max-width: 480px) {
+  dialog.ax { padding: 8px; align-items: end; }
+  .ax-box { padding: 28px 18px 18px; border-radius: 14px; }
+  .ax-box.largo { padding: 0 0 16px; }
+  .ax-nov > * { margin-left: 16px; margin-right: 16px; }
+  .ax-nov header { padding: 18px 52px 12px 16px; }
+  .ax-foto, .ax-nov .ax-b { width: calc(100% - 32px); }
+  .ax-profili { grid-template-columns: 1fr; }
+  .ax-inv h2 { font-size: 26px; }
+}
+@media (prefers-reduced-motion: reduce) { .ax-box, .ax-passo, dialog.ax::backdrop, .ax-festa b { animation: none; } }

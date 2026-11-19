@@ -1,19 +1,19 @@
 // L'app «account» di pzk os (29.10, Alberto: «fai app account con stesse serietà» del profilo): il conto dei $pzk sul
 // cercapersone zero. La logica è quella dell'account del cercapersone vecchio (telefono/app/account.js: i nomi riservati,
 // le mosse in parole) e del wallet (games/pzk.js: entra, crea, esci, sincronizza, converti, invia, cambiaIndirizzo,
-// cambiaPin, chiE, il regalo di instagram): qui c'è solo la faccia a 8 bit.
-// - SENZA CONTO (e senza conto il cercapersone è chiuso: os.js, LIBERE): due righe, CREA e ENTRA. Crea: il nome dalla
-//   tastiera (per i nomi di Alberto, la chiave del progetto, nascosta), il PIN a cifre nascoste e di nuovo, per sicurezza (il
-//   PIN non si recupera). Entra: il nome e il PIN. Dopo, os.dopoAccesso: si apre l'app che si voleva.
+// chiE, il regalo di instagram): qui c'è solo la faccia a 8 bit.
+// - SENZA CONTO (e senza conto il cercapersone è chiuso: os.js, LIBERE): una riga, che apre il riquadro dell'accesso
+//   (19.11, accesso/accesso.js: l'email e il codice che arriva per posta, niente PIN). Dopo, os.dopoAccesso: si apre l'app
+//   che si voleva.
 // - COL CONTO, cinque pagine (← →, i pallini): IL CONTO (OK: sincronizza o esci, uscire si conferma), LE MOSSE (↑ ↓
 //   scorrono), IL CAMBIO (OK: il verso, la quota col cursore, la conferma), INVIA (l'indirizzo a cifre col nome di chi è, quanti
-//   $pzk, la conferma), ALTRO (l'indirizzo che si cambia una volta sola, il PIN, instagram).
+//   $pzk, la conferma), ALTRO (l'indirizzo che si cambia una volta sola, l'email, il regalo di instagram).
 // Mentre si aspetta il server, in fondo la rotellina e i tasti non fanno partire altro; l'esito resta lì qualche secondo.
 // Le regole: os/REGOLE.md.
 import { Lcd, W, H, C, esa } from './lcd.js'
 import * as icone from './icone.js'
 import * as pzk from '../../../games/pzk.js'
-import { RISERVATI, descriviMossa } from '../../app/account.js'
+import { descriviMossa } from '../../app/account.js'
 import { txt, corto, destra, centro, sposta, testata, striscia } from './pezzi.js'
 
 // ── i colori (11.11, Alberto: «fai colori a 8bit su tutto»): pochi e col loro senso. Il verde è quello che entra (le mosse
@@ -118,9 +118,8 @@ function quota(os, verso) {
 
 // ── la vista ──
 let pag = 0 // (si ricorda finché la pagina è aperta)
-let igLink = null, igFatto = null // il link di instagram, uno per tutta la pagina
 export function vista(os) {
-  let scorre = 0, esito = null, attesa = null, via = [], sel = 0, primaMossa = 0, scelta = 0
+  let scorre = 0, esito = null, attesa = null, via = [], sel = 0, primaMossa = 0
   const muto = { zona: () => {} }
   let oz = os // (le zone delle righe: a pagina ferma quelle vere, mentre scorre di lato nessuna)
   const invio = { ind: '', chi: null, quanti: '' } // la pagina invia: l'indirizzo (sei cifre), chi è (o 'cerco'), quanti
@@ -138,33 +137,12 @@ export function vista(os) {
     try { return await fai() } finally { attesa = null; os.ridisegna() }
   }
 
-  // ── senza conto: crea o entra ──
-  async function crea() {
-    const nome = await os.tastiera({ titolo: 'il tuo nome (20 lettere al massimo)' })
-    if (nome === null || !qui()) return
-    const n = nome.trim().slice(0, 20)
-    if (!n) return dì(false, 'serve un nome')
-    let chiave
-    if (RISERVATI.test(n)) {
-      chiave = await os.tastiera({ titolo: 'nome di Alberto: la chiave del progetto', nascosto: true })
-      if (chiave === null || !qui()) return
-    }
-    const pin = await os.cifre({ titolo: 'scegli il PIN: 4 cifre, non si recupera', n: 4, nascoste: true })
-    if (pin === null || !qui()) return
-    const pin2 = await os.cifre({ titolo: 'di nuovo il PIN, per sicurezza', n: 4, nascoste: true })
-    if (pin2 === null || !qui()) return
-    if (pin !== pin2) return dì(false, 'i due PIN non sono uguali: riprova')
-    const r = await aspetta('creo il conto', () => pzk.crea(n, pin, chiave || undefined))
-    if (r) dentro(r, true)
-  }
-  async function entra() {
-    const nome = await os.tastiera({ titolo: 'il nome del conto' })
-    if (nome === null || !qui()) return
-    if (!nome.trim()) return dì(false, 'serve il nome')
-    const pin = await os.cifre({ titolo: 'il PIN: 4 cifre', n: 4, nascoste: true })
-    if (pin === null || !qui()) return
-    const r = await aspetta('entro', () => pzk.entra(nome.trim(), pin))
-    if (r) dentro(r, false)
+  // ── senza conto: si entra (19.11: col riquadro dell'accesso, accesso/accesso.js: l'email e il codice che arriva per posta.
+  // Niente PIN, e niente tastiera a 8 bit per scrivere un'email: il riquadro si apre sopra il cercapersone) ──
+  async function accedi() {
+    if (attesa) return
+    const r = await aspetta('apro l’accesso', async () => (await import('../../../accesso/accesso.js')).accedi())
+    if (r?.ok && pzk.conto()) dentro({ ok: true, conto: pzk.conto() }, !!r.nuovo)
   }
   async function dentro(r, nuovo) {
     if (!r.ok) return dì(false, r.offline ? 'il conto è in pausa: per ora valgono i 1.000 della sessione' : r.errore ?? 'non è andata')
@@ -183,7 +161,7 @@ export function vista(os) {
       const r = await aspetta('sincronizzo', () => pzk.sincronizza())
       if (r) dì(r.ok, r.ok ? `sincronizzato: 1 $pzk = ${pzk.tasso().toFixed(4)} €` : r.errore ?? 'non è andata')
     } else if (d === 'esci') {
-      const s = await os.dialogo({ titolo: 'esci?', testo: 'per rientrare servono il nome e il PIN, e senza conto il cercapersone è chiuso.', icona: 'lucchetto', tasti: ['no', 'esci'] })
+      const s = await os.dialogo({ titolo: 'esci?', testo: 'per rientrare serve la tua email (ti arriva un codice), e senza conto il cercapersone è chiuso.', icona: 'lucchetto', tasti: ['no', 'esci'] })
       if (s !== 'esci' || !qui()) return
       const r = await aspetta('esco', () => pzk.esci().then(() => ({ ok: true })))
       if (r) { svuota(); dì(true, 'sei uscito dal conto') }
@@ -248,26 +226,14 @@ export function vista(os) {
     const r = await aspetta('cambio l’indirizzo', () => pzk.cambiaIndirizzo(s))
     if (r) dì(r.ok, r.ok ? `fatto: ora sei ${pzk.conto()?.ind}` : r.errore ?? 'non è andata')
   }
-  async function cambiaPin() {
-    const vecchio = await os.cifre({ titolo: 'il PIN di adesso', n: 4, nascoste: true })
-    if (vecchio === null || !qui()) return
-    const nuovo = await os.cifre({ titolo: 'il PIN nuovo: 4 cifre, non si recupera', n: 4, nascoste: true })
-    if (nuovo === null || !qui()) return
-    const di2 = await os.cifre({ titolo: 'di nuovo il PIN nuovo', n: 4, nascoste: true })
-    if (di2 === null || !qui()) return
-    if (nuovo !== di2) return dì(false, 'i due PIN nuovi non sono uguali')
-    const r = await aspetta('cambio il PIN', () => pzk.cambiaPin(vecchio, nuovo))
-    if (r) dì(r.ok, r.ok ? 'PIN cambiato' : r.errore ?? 'non è andata')
-  }
-  function instagram() {
+  function email() { dì(true, 'si entra con un codice che arriva a questa email: niente PIN') }
+  async function instagram() {
     if (pzk.premioPreso()) return dì(true, 'il regalo l’hai già avuto: grazie')
-    // il link del wallet (games/pzk.js): aperto da qui, dentro il tasto (il browser lo lascia aprire); tornando, i $pzk. Il
-    // link si fa una volta sola (30.10: ognuno lasciava un pzk.osserva e un ascolto di storage a ogni pressione)
-    igFatto = () => { dì(true, `grazie del follow: +${fmt(pzk.PREMIO_IG)} $pzk`); os.suoni.sigla('moneta') }
-    const a = (igLink ??= pzk.linkInstagram({ fatto: () => igFatto?.() }))
-    a.style.display = 'none'
-    document.body.appendChild(a); a.click(); a.remove()
-    dì(true, 'si apre instagram: tornando qui arrivano i $pzk')
+    // (19.11) il regalo passa da Alberto: il riquadro (accesso/accesso.js, premio) chiede il nome di instagram e la banca lo avvisa
+    const prima = pzk.seguo()?.stato
+    await (await import('../../../accesso/accesso.js')).premio()
+    const st = pzk.seguo()?.stato
+    if (st === 'attesa' && prima !== 'attesa') dì(true, 'richiesta mandata: Alberto controlla e arrivano')
   }
 
   // ── le pagine col conto (y da 34 a 116) ──
@@ -335,22 +301,22 @@ export function vista(os) {
     {
       nome: 'altro', icona: 'lucchetto',
       // (11.11: con l'indirizzo già scelto o il regalo già preso, «OK cambia l'indirizzo» e «OK apre instagram» non erano veri)
-      aiuto: () => ((sel === 0 && pzk.conto()?.indCambiato) || (sel === 2 && pzk.premioPreso()) ? '↑↓ sceglie · ←→ pagine' : ['OK cambia l’indirizzo', 'OK cambia il PIN', 'OK apre instagram'][sel] + ' · ↑↓'),
+      aiuto: () => ((sel === 0 && pzk.conto()?.indCambiato) || (sel === 2 && pzk.premioPreso()) ? '↑↓ sceglie · ←→ pagine' : ['OK cambia l’indirizzo', 'OK dice come si entra', 'OK apre il regalo'][sel] + ' · ↑↓'),
       disegna(l, c, t, T) {
         righe(l, oz, [
           { nome: 'indirizzo', valore: c.indCambiato ? `${c.ind} (tuo)` : `${c.ind} · cambialo` },
-          { nome: 'PIN', valore: 'cambia' },
-          { nome: 'instagram', valore: pzk.premioPreso() ? 'fatto, grazie' : `+${fmt(pzk.PREMIO_IG)} $pzk`, col: pzk.premioPreso() ? 1 : T.verde }, // (11.11: il regalo da prendere in verde, come quel che entra)
+          { nome: 'email', valore: c.email ?? '—' },
+          { nome: 'instagram', valore: pzk.premioPreso() ? 'fatto, grazie' : pzk.seguo()?.stato === 'attesa' ? 'Alberto controlla' : `+${fmt(pzk.PREMIO_IG)} $pzk`, col: pzk.premioPreso() || pzk.seguo()?.stato === 'attesa' ? 1 : T.verde }, // (11.11: il regalo da prendere in verde, come quel che entra)
         ], sel, 36, 12, (i) => { sel = i; PAGINE[4].fai() })
         const nota = [
           c.indCambiato ? 'l’indirizzo l’hai scelto tu: non si cambia più.' : 'è a caso: puoi cambiarlo una volta sola con sei cifre tue (studenti unimore: il numero dell’e-mail).',
-          'il PIN non si recupera: scegline uno che ricordi.',
-          'segui pzkko su instagram: tornando qui arrivano i $pzk, una volta sola.',
+          'niente PIN e niente password: per entrare ti arriva ogni volta un codice a questa email.',
+          'seguimi su tutti e due i profili e scrivi il tuo instagram: Alberto controlla e arrivano i $pzk, una volta sola.',
         ][sel]
         Lcd.acapo(nota, 39).slice(0, 4).forEach((r, i) => l.testo(10, 78 + i * 9, r))
       },
       righe: () => 3,
-      fai: () => [cambiaIndirizzo, cambiaPin, instagram][sel]?.(),
+      fai: () => [cambiaIndirizzo, email, instagram][sel]?.(),
     },
   ]
   const vai = (d) => {
@@ -400,22 +366,19 @@ export function vista(os) {
     },
   }
 
-  // ── senza conto: la testa, le due righe e cosa vuol dire quella scelta ──
+  // ── senza conto: la testa, la riga che apre l'accesso e cosa vuol dire ──
   function disegnaFuori(l, t) {
     l.bitmap(icone.bitmap('app-account', 16), 8, 13)
     l.testo(28, 17, 'account')
     destra(l, W - 8, 17, 'serve il conto')
     l.orizz(6, 31, W - 12)
-    righe(l, attesa ? muto : os, [{ nome: 'crea il conto', valore: '' }, { nome: 'entra', valore: '' }], scelta, 36, 13, (i) => { scelta = i; tastoFuori('ok') }) // (aspettando il server il clic non rifà partire «crea» o «entra»)
-    const nota = scelta === 0
-      ? 'col conto i $pzk restano tuoi, hanno un indirizzo e vivono nella borsa; si parte con 1.000 $pzk. Il PIN non si recupera: scegline uno che ricordi.'
-      : 'il nome e le quattro cifre del tuo conto. Senza conto il cercapersone resta chiuso.'
+    righe(l, attesa ? muto : os, [{ nome: 'entra o crea il conto', valore: '' }], 0, 36, 13, () => tastoFuori('ok')) // (aspettando il server il clic non rifà partire «crea» o «entra»)
+    const nota = 'col conto i $pzk restano tuoi, hanno un indirizzo e vivono nella borsa; si parte con 1.000 $pzk. Si entra con l’email: ti arriva un codice, niente password. Senza conto il cercapersone resta chiuso.'
     Lcd.acapo(nota, 39).slice(0, 5).forEach((r, i) => l.testo(10, 66 + i * 9, r))
-    if (!striscia(l, { esito, attesa }, t)) centro(l, H - 9, '↑↓ sceglie · OK va')
+    if (!striscia(l, { esito, attesa }, t)) centro(l, H - 9, 'OK apre l’accesso')
   }
   function tastoFuori(n) {
-    if (n === 'su' || n === 'giu') scelta = 1 - scelta
-    else if (n === 'ok') { if (scelta === 0) crea(); else entra() }
+    if (n === 'ok') accedi()
     else if (n === 'indietro') os.togli()
     else return false
     return true

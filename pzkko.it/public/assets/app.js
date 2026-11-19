@@ -862,6 +862,9 @@ function searchItems() {
     ...SOCIALS.map((s) => ({ group: u.tabs.social, label: s.name, sub: s.handle, ico: brand(s.icon, s), run: () => window.open(s.url, '_blank', 'noopener') })),
     { group: u.actions, label: theme === 'dark' ? u.theme.light : u.theme.dark, ico: theme === 'dark' ? I.sun : I.moon, run: toggleTheme },
     { group: u.actions, label: u.copyUser, sub: username(), ico: I.copy, run: () => copy(username()) },
+    ...(account() ? [] : [{ group: u.actions, label: acc().join, sub: acc().sub, ico: I_ACC, run: () => access('accedi') }]),
+    { group: u.actions, label: acc().news, ico: I_ACC, run: () => access('novita') },
+    { group: u.actions, label: acc().gift, sub: 'Instagram', ico: I_ACC, run: () => access('premio') },
     ...LANGS.filter((l) => l.code !== lang).map((l) => ({ group: u.language, label: l.name, sub: l.code.toUpperCase(), ico: `<img src="${flag(l.flag)}" alt="">`, run: () => setLang(l.code) })),
   ]
 }
@@ -934,6 +937,7 @@ addEventListener('keydown', (e) => {
 function applyLang() {
   const u = ui(), l = LANGS.find((x) => x.code === lang) || LANGS[0]
   document.documentElement.lang = lang
+  renderAcc()
   $('#lang-flag').src = flag(l.flag)
   $('#lang-code').textContent = l.code.toUpperCase()
   $('#lang-btn').setAttribute('aria-label', u.language); $('#lang-btn').title = u.language
@@ -1094,6 +1098,52 @@ function goatcounter(code) {
   fetch(`https://${code}.goatcounter.com/counter/TOTAL.json`).then((r) => r.json()).then((j) => { const n = parseInt(String(j.count ?? '').replace(/[^\d]/g, ''), 10); if (!Number.isNaN(n)) { views = n; renderViews() } }).catch(() => {})
 }
 
+// ─── il conto (19.11): si entra con l'email e un codice, niente password (accesso/accesso.js). Nella scheda c'è il tasto:
+// verde «Entra» per chi non ha un conto, il nome e i $pzk per chi è dentro (col menu: novità, regalo di instagram, esci).
+// All'arrivo, a pagina ferma: l'invito per chi non ha un conto, le novità per chi ce l'ha, e col tasto della lettera
+// (?premio=…) la decisione di Alberto sul regalo. Le scritte in italiano e in inglese (le altre lingue vedono l'inglese) ──
+const ACC = {
+  it: { join: 'Entra in pzkko.it', sub: '1.000 $pzk di benvenuto', news: 'Novità', gift: 'Regalo: +2.000 $pzk', giftWait: 'Regalo: Alberto controlla', out: 'Esci dal conto', bye: 'Uscito dal conto' },
+  en: { join: 'Join pzkko.it', sub: '1,000 $pzk to start', news: 'What’s new', gift: 'Gift: +2,000 $pzk', giftWait: 'Gift: Alberto is checking', out: 'Log out', bye: 'Logged out' },
+}
+const acc = () => ACC[lang] || ACC.en
+const I_ACC = svg('<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/>', { s: 16, w: 2.4 })
+let pzkMod = null
+const account = () => { if (pzkMod) return pzkMod.conto(); try { return JSON.parse(localStorage.getItem('pzkko-wallet') || 'null')?.conto ?? null } catch { return null } }
+const access = (what, ...a) => import('/accesso/accesso.js').then((m) => m[what](...a)).catch((e) => console.error(e))
+function renderAcc() {
+  const b = $('#acc-btn'), c = account()
+  if (!b) return
+  b.classList.toggle('btn--join', !c); b.classList.toggle('btn--ghost', !!c)
+  b.setAttribute('aria-haspopup', c ? 'menu' : 'dialog')
+  b.innerHTML = c
+    ? `<i class="acc__dot"></i><span class="acc__name">${esc(c.nome)}</span><span class="acc__pzk">$pzk ${Number(c.pzk || 0).toLocaleString(locale(), { maximumFractionDigits: 1 })}</span>`
+    : `${I_ACC}<span>${esc(acc().join)}</span><small>${esc(acc().sub)}</small>`
+}
+$('#acc-btn').addEventListener('click', (e) => {
+  const c = account()
+  if (!c) return access('accedi')
+  const st = c.seguo?.stato
+  showMenu(e.currentTarget, `
+    <button role="menuitem" tabindex="-1" data-v="novita">${I.search}${esc(acc().news)}</button>
+    ${st === 'dato' ? '' : `<button role="menuitem" tabindex="-1" data-v="premio">${I_ACC}${esc(st === 'attesa' ? acc().giftWait : acc().gift)}</button>`}<hr>
+    <button role="menuitem" tabindex="-1" data-v="esci">${I.copy}${esc(acc().out)}</button>`, async (v) => {
+    if (v !== 'esci') return access(v)
+    const p = pzkMod ?? await import('/games/pzk.js')
+    await p.esci(); renderAcc(); toast(acc().bye)
+  })
+})
+addEventListener('storage', (e) => { if (e.key === 'pzkko-wallet' || e.key === null) renderAcc() })
+document.addEventListener('pzkko-accesso', renderAcc)
+function mountAccess() {
+  const go = () => import('/games/pzk.js').then((p) => {
+    pzkMod = p; p.osserva(renderAcc); p.alCambioConto(renderAcc); renderAcc()
+    if (new URLSearchParams(location.search).has('premio') || (!modal && !qs && !first.proj)) access('arrivo')
+  }).catch(() => {})
+  const idle = () => (window.requestIdleCallback ? requestIdleCallback(go, { timeout: 2500 }) : setTimeout(go, 300))
+  if (document.readyState === 'complete') setTimeout(idle, 700); else addEventListener('load', () => setTimeout(idle, 700), { once: true })
+}
+
 // ─── avvio ───────────────────────────────────────────────────────────────────
 $('#msg').href = `https://discord.com/users/${ID}`
 $('#avatar').addEventListener('error', (e) => { if (!e.currentTarget.src.endsWith('/me.png')) { shown.avatar = '/me.png'; e.currentTarget.src = '/me.png' } })
@@ -1110,6 +1160,7 @@ loadProfile()
 setInterval(loadProfile, 10 * 60 * 1000)
 if (first.proj) openProject(first.proj, { push: false })
 if (CONFIG.goatcounter) goatcounter(CONFIG.goatcounter)
+mountAccess()
 
 // Per le prove: import('/assets/app.js').then((m) => m.onPresence({...}))
 export { onPresence }
