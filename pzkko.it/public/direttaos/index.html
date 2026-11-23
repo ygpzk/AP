@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diretta OS — installazione e comandi · pzkko.it</title>
+<meta name="description" content="Diretta OS: la regia delle sovrimpressioni per le dirette. Installer .exe per Windows, tutti i comandi, gli indirizzi per Camo Studio e OBS e la guida passo per passo.">
+<meta property="og:title" content="Diretta OS — installazione e comandi">
+<meta property="og:description" content="La regia delle sovrimpressioni sopra la webcam. Un installer .exe, un server solo sul tuo PC e tutti i comandi.">
+<meta property="og:image" content="https://pzkko.it/media/p/direttaos/cover.webp">
+<meta property="og:type" content="website">
+<link rel="icon" href="/direttaos/icona.png">
+<script>document.documentElement.classList.add('js')</script>
+<style>
+@font-face { font-family: "gg sans"; font-weight: 400; src: url(/fonts/ggsans-400.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "gg sans"; font-weight: 500; src: url(/fonts/ggsans-500.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "gg sans"; font-weight: 600; src: url(/fonts/ggsans-600.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "gg sans"; font-weight: 700; src: url(/fonts/ggsans-700.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "gg sans"; font-weight: 800; src: url(/fonts/ggsans-800.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "gg mono"; font-weight: 400; src: url(/fonts/ggmono-400.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "gg mono"; font-weight: 700; src: url(/fonts/ggmono-700.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Pricedown"; font-weight: 700; src: url(/fonts/dn-pricedown.woff2) format("woff2"); font-display: swap; }
+
+:root {
+  --bg: #0b090e;
+  --panel: #17151b;
+  --panel2: #1e1b24;
+  --line: rgba(255,255,255,.10);
+  --line2: rgba(255,255,255,.16);
+  --text: #f2f3f5;
+  --muted: #a9adb5;
+  --dim: #74777f;
+  --lime: #ccff00;
+  --purple: #9d00ff;
+  --green: #23a55a;
+  --red: #ff3d4a;
+  --font: "gg sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "gg mono", "Cascadia Code", Consolas, monospace;
+  --r: 16px;
+  --max: 1180px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 86px; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.6 var(--font); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(700px 420px at 78% -8%, rgba(157,0,255,.20), transparent 65%),
+    radial-gradient(620px 380px at 8% 4%, rgba(204,255,0,.10), transparent 62%),
+    linear-gradient(180deg, #0e0c12 0%, var(--bg) 38%, #09070c 100%);
+}
+a { color: var(--lime); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, pre { font-family: var(--mono); }
+::selection { background: var(--lime); color: #0b090e; }
+
+.wrap { width: min(var(--max), calc(100% - 40px)); margin: 0 auto; }
+.skip { position: absolute; left: -999px; top: 8px; background: var(--lime); color: #0b090e; padding: 10px 16px; border-radius: 8px; z-index: 100; font-weight: 700; }
+.skip:focus { left: 8px; }
+
+/* ----- barra ----- */
+.nav { position: sticky; top: 0; z-index: 50; background: rgba(11,9,14,.82); backdrop-filter: blur(16px); border-bottom: 1px solid var(--line); }
+.nav__in { width: min(var(--max), calc(100% - 32px)); margin: 0 auto; display: flex; align-items: center; gap: 18px; min-height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--text); font-weight: 700; letter-spacing: -.02em; white-space: nowrap; }
+.brand:hover { text-decoration: none; }
+.brand img { width: 34px; height: 34px; border-radius: 9px; }
+.brand b { font-family: "Pricedown", var(--font); font-size: 23px; letter-spacing: .01em; line-height: 1; background: linear-gradient(90deg, var(--lime), #f0b3ff 70%, var(--purple)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.brand > span:last-child { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.brand span span { font: 500 9px/1 var(--mono); color: var(--dim); text-transform: uppercase; letter-spacing: .14em; }
+.nav__links { display: flex; align-items: center; gap: 4px; margin-left: auto; overflow: auto; scrollbar-width: none; }
+.nav__links::-webkit-scrollbar { display: none; }
+.nav__links a { color: var(--muted); font-size: 13px; font-weight: 600; padding: 7px 10px; border-radius: 8px; white-space: nowrap; }
+.nav__links a:hover { color: var(--text); background: rgba(255,255,255,.06); text-decoration: none; }
+.nav__cta { margin-left: 6px; }
+
+/* ----- pulsanti ----- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; border: 1px solid transparent; border-radius: 10px; padding: 11px 18px; font: 700 14px/1 var(--font); color: #0b090e; background: var(--lime); cursor: pointer; transition: transform .15s, box-shadow .2s, background .2s; white-space: nowrap; }
+.btn:hover { text-decoration: none; transform: translateY(-1px); box-shadow: 0 10px 30px rgba(204,255,0,.18); }
+.btn:active { transform: translateY(0); }
+.btn--ghost { background: rgba(255,255,255,.04); border-color: var(--line2); color: var(--text); }
+.btn--ghost:hover { background: rgba(255,255,255,.09); box-shadow: none; }
+.btn--big { padding: 16px 24px; font-size: 16px; border-radius: 12px; }
+.btn svg { flex: 0 0 auto; }
+.nav .btn { padding: 9px 14px; font-size: 13px; }
+
+/* ----- hero ----- */
+.hero { padding: 64px 0 40px; display: grid; grid-template-columns: 1.02fr .98fr; gap: 52px; align-items: center; }
+.kicker { display: inline-flex; align-items: center; gap: 8px; font: 700 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--lime); margin-bottom: 18px; }
+.kicker i { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(35,165,90,.18); }
+h1 { margin: 0 0 18px; font: 700 clamp(48px, 7vw, 92px)/.9 "Pricedown", var(--font); letter-spacing: .01em; background: linear-gradient(100deg, #fff 0%, var(--lime) 38%, #f0b3ff 72%, var(--purple) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p.lead { margin: 0 0 26px; max-width: 34em; color: #d6d8dc; font-size: clamp(17px, 2vw, 20px); line-height: 1.5; }
+.hero p.lead b { color: var(--text); font-weight: 700; }
+.hero__actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.hero__meta { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 14px; color: var(--dim); font: 500 12px/1.4 var(--mono); }
+.hero__meta span { display: inline-flex; align-items: center; gap: 6px; }
+.hero__meta svg { color: var(--green); }
+.hero__art { position: relative; min-width: 0; }
+.hero__shot { position: relative; min-width: 0; border-radius: 20px; overflow: hidden; border: 1px solid rgba(204,255,0,.30); box-shadow: 0 30px 90px rgba(0,0,0,.55), 0 0 0 1px rgba(157,0,255,.18) inset; background: #050406; }
+.hero__shot img { display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover; }
+.hero__shot::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, transparent 55%, rgba(5,4,6,.55)); }
+.hero__term { position: absolute; left: 18px; right: 18px; bottom: 16px; border: 1px solid rgba(255,255,255,.16); border-radius: 12px; background: rgba(9,8,12,.86); backdrop-filter: blur(12px); padding: 12px 14px; font: 500 11px/1.7 var(--mono); color: #d7d9de; box-shadow: 0 14px 40px rgba(0,0,0,.45); }
+.hero__term .p { color: var(--lime); }
+.hero__term .ok { color: #5ef08a; }
+.hero__term .dim { color: var(--dim); }
+.hero__note { position: absolute; z-index: 2; right: -10px; top: -14px; transform: rotate(3deg); background: var(--lime); color: #0b090e; font: 700 11px/1.15 var(--mono); padding: 9px 11px; border-radius: 8px; box-shadow: 0 8px 22px rgba(0,0,0,.35); }
+.hero__note span { display: block; font-weight: 500; opacity: .8; }
+
+/* ----- striscia numeri ----- */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 8px 0 30px; }
+.stat { min-width: 0; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)); border-radius: 14px; padding: 18px; }
+.stat b { display: block; font: 700 26px/1 var(--font); color: var(--lime); letter-spacing: -.02em; }
+.stat span { display: block; margin-top: 6px; color: var(--muted); font-size: 12px; line-height: 1.35; }
+
+/* ----- sezioni ----- */
+section { padding: 58px 0; border-top: 1px solid var(--line); }
+.sec__head { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 26px; }
+.sec__head h2 { margin: 0; font-size: clamp(28px, 4vw, 42px); line-height: 1.05; letter-spacing: -.035em; }
+.sec__head p { margin: 0; max-width: 46ch; color: var(--muted); font-size: 15px; }
+.sec__num { font: 700 11px/1 var(--mono); color: var(--dim); letter-spacing: .16em; display: block; margin-bottom: 10px; }
+h3 { font-size: 18px; margin: 0 0 8px; letter-spacing: -.01em; }
+p { margin: 0 0 14px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+/* ----- schede ----- */
+.grid { display: grid; gap: 14px; }
+.grid > * { min-width: 0; }
+.g3 { grid-template-columns: repeat(3, 1fr); }
+.g2 { grid-template-columns: repeat(2, 1fr); }
+.card { border: 1px solid var(--line); border-radius: var(--r); background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)); padding: 22px; }
+.card:hover { border-color: var(--line2); }
+.card__ico { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: rgba(204,255,0,.10); color: var(--lime); margin-bottom: 14px; }
+.card p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+.card--wide { grid-column: span 2; }
+.card--purple .card__ico { background: rgba(157,0,255,.14); color: #d9a6ff; }
+
+/* ----- requisiti ----- */
+.req { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.req__row { display: grid; grid-template-columns: 180px 100px 1fr; gap: 12px; align-items: center; padding: 14px 18px; border-top: 1px solid var(--line); font-size: 14px; }
+.req__row:first-child { border-top: 0; background: rgba(255,255,255,.025); color: var(--muted); font: 700 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.req__row b { font-weight: 600; }
+.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 4px 9px; font: 700 11px/1 var(--mono); letter-spacing: .04em; width: max-content; }
+.pill--yes { background: rgba(35,165,90,.16); color: #6ee79b; }
+.pill--opt { background: rgba(255,193,7,.12); color: #ffd166; }
+.pill--no { background: rgba(255,61,74,.12); color: #ff8a93; }
+
+/* ----- passi ----- */
+.steps { min-width: 0; counter-reset: step; display: grid; gap: 14px; }
+.step { min-width: 0; counter-increment: step; display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 16px; border: 1px solid var(--line); border-radius: var(--r); padding: 20px; background: rgba(255,255,255,.018); }
+.step > div { min-width: 0; }
+.step::before { content: counter(step, decimal-leading-zero); font: 700 13px/1 var(--mono); color: #0b090e; background: var(--lime); width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; }
+.step p { margin: 0; color: var(--muted); font-size: 14px; }
+.step p + p { margin-top: 6px; }
+.step code { color: var(--lime); }
+
+/* ----- codice ----- */
+.code { position: relative; min-width: 0; max-width: 100%; border: 1px solid var(--line); border-radius: 12px; background: #0a080d; overflow: hidden; margin: 12px 0; }
+.code__bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px 8px 14px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.025); }
+.code__bar span { font: 500 10px/1 var(--mono); color: var(--dim); text-transform: uppercase; letter-spacing: .12em; }
+.copy { border: 1px solid var(--line2); background: rgba(255,255,255,.04); color: var(--muted); border-radius: 7px; padding: 5px 8px; font: 700 10px/1 var(--mono); cursor: pointer; }
+.copy:hover { color: var(--text); background: rgba(255,255,255,.10); }
+pre { margin: 0; max-width: 100%; padding: 14px 16px; overflow: auto; font-size: 12.5px; line-height: 1.75; color: #d7d9de; }
+pre .c { color: #6f737c; }
+pre .g { color: var(--lime); }
+pre .p { color: #d9a6ff; }
+
+/* ----- tabelle ----- */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.tbl th { text-align: left; font: 700 10px/1 var(--mono); letter-spacing: .13em; text-transform: uppercase; color: var(--dim); padding: 0 12px 10px; border-bottom: 1px solid var(--line); }
+.tbl td { padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl td:first-child { white-space: nowrap; }
+.tbl code { color: var(--lime); font-size: 12.5px; }
+.tbl td:nth-child(2) { color: var(--muted); }
+.tbl tr:hover td { background: rgba(255,255,255,.015); }
+.tbl .cmd { display: inline-flex; align-items: center; gap: 8px; }
+.tbl .copy { padding: 3px 6px; opacity: 0; }
+.tbl tr:hover .copy, .tbl .copy:focus { opacity: 1; }
+@media (hover: none) { .tbl .copy { opacity: 1; } }
+
+/* ----- indirizzi ----- */
+.urls { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.url { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: rgba(255,255,255,.018); }
+.url code { color: var(--lime); font-size: 12px; flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.url span { color: var(--dim); font-size: 11px; white-space: nowrap; }
+.url .copy { flex: 0 0 auto; }
+.urls__title { grid-column: 1 / -1; margin: 14px 0 2px; font: 700 10px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+.urls__title:first-child { margin-top: 0; }
+
+/* ----- callout ----- */
+.note { border-left: 3px solid var(--lime); background: rgba(204,255,0,.055); border-radius: 0 12px 12px 0; padding: 14px 18px; color: #d9dbe0; font-size: 14px; }
+.note b { color: var(--lime); }
+.note--purple { border-left-color: var(--purple); background: rgba(157,0,255,.07); }
+.note--purple b { color: #d9a6ff; }
+
+/* ----- problemi ----- */
+.faq { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.faq details { border-top: 1px solid var(--line); }
+.faq details:first-child { border-top: 0; }
+.faq summary { cursor: pointer; list-style: none; padding: 15px 18px; font-weight: 600; font-size: 14px; display: flex; gap: 10px; align-items: center; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::before { content: "+"; color: var(--lime); font: 700 18px/1 var(--mono); width: 18px; }
+.faq details[open] summary::before { content: "−"; }
+.faq details p { padding: 0 18px 16px 46px; margin: 0; color: var(--muted); font-size: 14px; }
+
+/* ----- footer ----- */
+.foot { padding: 42px 0 54px; border-top: 1px solid var(--line); color: var(--dim); font-size: 13px; }
+.foot__in { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; }
+.foot a { color: var(--muted); }
+.foot a:hover { color: var(--lime); }
+.foot__links { display: flex; gap: 16px; flex-wrap: wrap; }
+
+/* ----- reveal ----- */
+.rise { opacity: 1; transform: none; }
+.js .rise { opacity: 0; transform: translateY(14px); transition: opacity .5s ease, transform .5s cubic-bezier(.2,.8,.3,1); }
+.js .rise.on { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .rise, .js .rise { transition: none; opacity: 1; transform: none; } .btn { transition: none; } }
+
+/* ----- responsive ----- */
+@media (max-width: 980px) {
+  .hero { grid-template-columns: 1fr; gap: 34px; padding-top: 40px; }
+  .hero__art { order: -1; }
+  .g3 { grid-template-columns: repeat(2, 1fr); }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .sec__head { display: block; }
+  .sec__head p { margin-top: 10px; }
+}
+@media (max-width: 680px) {
+  .wrap { width: min(var(--max), calc(100% - 28px)); }
+  .nav__links { display: none; }
+  .nav__cta { margin-left: auto; }
+  .nav__in { gap: 10px; }
+  .stat { padding: 14px; }
+  .stat b { font-size: 21px; }
+  .tbl { table-layout: fixed; }
+  .tbl td { overflow-wrap: anywhere; }
+  .tbl td:first-child { width: 45%; }
+  .hero { padding-top: 28px; }
+  .hero__note { display: none; }
+  .g3, .g2, .urls { grid-template-columns: 1fr; }
+  .card--wide { grid-column: auto; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .req__row { grid-template-columns: 1fr; gap: 4px; padding: 12px 14px; }
+  .req__row:first-child { display: none; }
+  .tbl { font-size: 12.5px; }
+  .tbl td, .tbl th { padding: 9px 8px; }
+  .tbl td:first-child { white-space: normal; }
+  .hero__term { left: 10px; right: 10px; bottom: 10px; font-size: 9.5px; padding: 9px 10px; }
+  section { padding: 42px 0; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#installa">Vai all’installazione</a>
+
+<header class="nav">
+  <div class="nav__in">
+    <a class="brand" href="https://pzkko.it/#progetti" target="_top" title="Torna ai progetti di pzkko.it">
+      <img src="/direttaos/icona.png" alt="" width="34" height="34">
+      <span><b>Diretta OS</b><span>pzkko.it</span></span>
+    </a>
+    <nav class="nav__links" aria-label="Sezioni">
+      <a href="#cosa">Cosa fa</a>
+      <a href="#requisiti">Requisiti</a>
+      <a href="#installa">Installa</a>
+      <a href="#vista">Vista esterna</a>
+      <a href="#comandi">Comandi</a>
+      <a href="#indirizzi">Indirizzi</a>
+      <a href="#config">Configura</a>
+      <a href="#problemi">Problemi</a>
+    </nav>
+    <a class="btn nav__cta" href="/direttaos/DirettaOS-Setup.exe" download>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5"/><path d="M4 20h16"/></svg>
+      Scarica
+    </a>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap">
+    <section class="hero" style="border:0;padding-bottom:20px">
+      <div>
+        <div class="kicker"><i></i> Installer per Windows 10 / 11</div>
+        <h1>Diretta OS</h1>
+        <p class="lead">La regia delle sovrimpressioni per le dirette. Una tela trasparente <b>1920 × 1080</b> sopra la webcam, un pannello solo, <b>tutto sul tuo PC</b>. Un <b>.exe</b> installa, avvia e lascia tutti i comandi.</p>
+        <div class="hero__actions">
+          <a class="btn btn--big" href="/direttaos/DirettaOS-Setup.exe" download>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5"/><path d="M4 20h16"/></svg>
+            Scarica DirettaOS-Setup.exe
+          </a>
+          <a class="btn btn--ghost btn--big" href="#comandi">Tutti i comandi</a>
+        </div>
+        <div class="hero__meta">
+          <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg> 34,0 MB</span>
+          <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg> niente permessi di amministratore</span>
+          <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg> 100% locale</span>
+        </div>
+      </div>
+      <div class="hero__art">
+        <div class="hero__note">tutto dentro<span>un solo .exe</span></div>
+        <div class="hero__shot">
+          <img src="/media/p/direttaos/cover.webp" alt="Diretta OS: i pezzi in sovrimpressione, la cornice, il nome, il meteo, la bandiera e Giugnoh’s Cast" width="1280" height="720" fetchpriority="high">
+        </div>
+        <div class="hero__term" aria-hidden="true">
+          <div><span class="p">C:\&gt;</span> DirettaOS.exe start</div>
+          <div class="ok">OK &nbsp;server acceso: http://localhost:2350/</div>
+          <div><span class="p">C:\&gt;</span> DirettaOS.exe open</div>
+          <div class="dim">la regia si apre nel browser</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="stats">
+      <div class="stat"><b>30 fps</b><span>il giro delle sovrimpressioni, leggero</span></div>
+      <div class="stat"><b>1920 × 1080</b><span>la tela trasparente per Camo e OBS</span></div>
+      <div class="stat"><b>0 cloud</b><span>il server ascolta solo su 127.0.0.1</span></div>
+      <div class="stat"><b>40+</b><span>pezzi, scene, podcast e TV 4K</span></div>
+    </div>
+
+    <section id="cosa">
+      <div class="sec__head rise">
+        <div><span class="sec__num">01 / COSA FA</span><h2>Una regia, non un pannello in più</h2></div>
+        <p>Quello che finisce in onda sopra la webcam: si accende dalla regia, si trascina, si appende ai muri. I pezzi sono pagine vere, non immagini.</p>
+      </div>
+      <div class="grid g3">
+        <article class="card rise"><div class="card__ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></div><h3>La regia</h3><p>Anteprima grande, scheda a destra, i «torno subito» sotto. Clic, trascina, rotella, Alt per staccare dal muro, Ctrl+Z per tornare indietro.</p></article>
+        <article class="card rise"><div class="card__ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="4"/></svg></div><h3>L’occhio</h3><p>Legge la webcam «Camo» e trova la testa: il nome la segue, la puff ha il suo cartellino. Si spegne quando non serve.</p></article>
+        <article class="card rise"><div class="card__ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 17V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M8 17v4M16 17v4M8 7h8"/></svg></div><h3>Il PC e il meteo</h3><p>App aperte, CPU, GPU, RAM, SSD, HDD, temperatura e wi-fi. Il tempo di adesso, i follower e i tasti veri di tastiera, mouse e controller.</p></article>
+        <article class="card rise"><div class="card__ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 20h18M6 20V9l4-3 4 3v11M14 20V6l4-3 3 3v14"/></svg></div><h3>I muri</h3><p>Segni quattro angoli di una parete sulla foto della stanza e ci appendi i pezzi in prospettiva: più piccoli dove il muro scappa via, con la luce vera.</p></article>
+        <article class="card rise"><div class="card__ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 18 18 4M6 6l12 12M4 6l2 2M18 18l2 2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/></svg></div><h3>I «torno subito»</h3><p>Legna, pipì, bere, mangiare, Red Bull, telefono, spacco la legna, sistemo la postazione, riavvio il PC: scene in pixel art che coprono la webcam.</p></article>
+        <article class="card rise card--purple"><div class="card__ico"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12a8 8 0 0 1 16 0v5a3 3 0 0 1-3 3h-2"/><rect x="3" y="11" width="4" height="7" rx="2"/><rect x="17" y="11" width="4" height="7" rx="2"/></svg></div><h3>Giugnoh’s Cast</h3><p>Il podcast: inizia puntata, argomento a caso, fine puntata. La TV 4K in rete mostra la puntata, l’ora, il nome, chi parla, un testo o il meteo.</p></article>
+      </div>
+    </section>
+
+    <section id="requisiti">
+      <div class="sec__head rise">
+        <div><span class="sec__num">02 / REQUISITI</span><h2>Cosa serve</h2></div>
+        <p>L’installer non chiede permessi di amministratore e non installa servizi. Node.js è l’unica cosa davvero obbligatoria; ffmpeg serve per la webcam.</p>
+      </div>
+      <div class="req rise">
+        <div class="req__row"><span>Cosa</span><span>Serve?</span><span>Note</span></div>
+        <div class="req__row"><b>Windows 10 o 11</b><span class="pill pill--yes">sì</span><span class="muted">64 bit, Windows 10 1809 o più nuovo</span></div>
+        <div class="req__row"><b>Node.js 20+</b><span class="pill pill--yes">sì</span><span class="muted">l’installer lo propone con winget; altrimenti <a href="https://nodejs.org" target="_blank" rel="noopener noreferrer">nodejs.org</a> (LTS)</span></div>
+        <div class="req__row"><b>PowerShell 5</b><span class="pill pill--yes">sì</span><span class="muted">c’è già in Windows 10/11</span></div>
+        <div class="req__row"><b>ffmpeg</b><span class="pill pill--opt">consigliato</span><span class="muted">webcam «Camo», lente e volti; senza, il resto funziona</span></div>
+        <div class="req__row"><b>Camo Studio</b><span class="pill pill--opt">consigliato</span><span class="muted">per la webcam del telefono e il livello web</span></div>
+        <div class="req__row"><b>OBS Studio</b><span class="pill pill--opt">alternativo</span><span class="muted">va bene una sorgente browser 1920 × 1080</span></div>
+        <div class="req__row"><b>Webcam</b><span class="pill pill--opt">consigliata</span><span class="muted">la webcam virtuale «Camo» o una webcam normale</span></div>
+      </div>
+    </section>
+
+    <section id="installa">
+      <div class="sec__head rise">
+        <div><span class="sec__num">03 / INSTALLAZIONE</span><h2>Cinque minuti, passo per passo</h2></div>
+        <p>Il setup è autocontenuto: dentro c’è tutto il programma, le pagine, i caratteri e gli oggetti. Non scarica il progetto da GitHub.</p>
+      </div>
+      <div class="grid g2" style="align-items:start">
+        <div class="steps">
+          <div class="step rise"><div><h3>Scarica e apri</h3><p>Scarica <code>DirettaOS-Setup.exe</code> e fai doppio clic. Se SmartScreen chiede qualcosa: <b>Ulteriori informazioni → Esegui comunque</b> (non è firmato con un certificato a pagamento).</p></div></div>
+          <div class="step rise"><div><h3>Scegli la cartella</h3><p>Invio va bene: <code>%LOCALAPPDATA%\Programs\Diretta OS</code>. Non serve l’amministratore.</p></div></div>
+          <div class="step rise"><div><h3>Node.js e ffmpeg</h3><p>Se mancano, l’installer propone di metterli con <b>winget</b>. Puoi anche installarli a mano, o fare dopo con <code>DirettaOS.exe extra</code>.</p></div></div>
+          <div class="step rise"><div><h3>Avvia e apri</h3><p>Scegli <b>2 Avvia il server</b>, poi <b>3 Apri la regia</b>. In alternativa: <code>DirettaOS.exe start</code> e <code>DirettaOS.exe open</code>.</p></div></div>
+          <div class="step rise"><div><h3>Metti il livello in Camo o OBS</h3><p>Livello web / sorgente browser <b>1920 × 1080</b> su <code>http://localhost:2350/o/tutto</code>. Un livello solo.</p></div></div>
+        </div>
+        <div class="rise">
+          <div class="code">
+            <div class="code__bar"><span>Prompt dei comandi</span><button class="copy" data-copy="DirettaOS-Setup.exe install --silent">copia</button></div>
+            <pre><span class="c">:: installazione silenziosa, senza domande</span>
+DirettaOS-Setup.exe install --silent
+
+<span class="c">:: oppure in una cartella tua, senza scorciatoie</span>
+DirettaOS-Setup.exe install "D:\Diretta OS" --silent --portable</pre>
+          </div>
+          <div class="code">
+            <div class="code__bar"><span>Dopo l’installazione</span><button class="copy" data-copy="DirettaOS.exe start&#10;DirettaOS.exe open">copia</button></div>
+            <pre><span class="g">C:\&gt;</span> DirettaOS.exe start
+<span class="g">OK</span>  server acceso: http://localhost:2350/
+<span class="g">C:\&gt;</span> DirettaOS.exe open
+<span class="c">la regia si apre nel browser</span></pre>
+          </div>
+          <div class="note"><b>Aggiornare</b> è la stessa cosa: apri il nuovo setup e scegli «Installa / aggiorna». Config, stato, foto e modelli restano dove sono.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="primo">
+      <div class="sec__head rise">
+        <div><span class="sec__num">04 / PRIMO AVVIO</span><h2>Il terminale è il telecomando</h2></div>
+        <p>Doppio clic su <code>DirettaOS.exe</code>: menu numerato, stato del server e tutte le cose da fare. Ogni voce è anche un comando, per gli script.</p>
+      </div>
+      <div class="grid g2">
+        <div class="code rise">
+          <div class="code__bar"><span>DirettaOS.exe</span><span>menu</span></div>
+          <pre>  DIRETTA OS v1.0.0
+  la regia delle sovrimpressioni
+
+  Installazione      C:\Users\⬦\Programs\Diretta OS
+  Server             acceso · http://localhost:2350/
+  Avvio con Windows  sì
+
+  1  Installa / aggiorna
+  2  Avvia il server
+  3  Apri la regia
+  4  Ferma il server
+  5  Stato
+  6  Comandi e indirizzi
+  7  Diagnostica
+  8  Configurazione
+  9  Log
+  10 Backup
+  11 Extra
+  12 Avvio automatico on/off
+  13 Disinstalla
+  0  Esci</pre>
+        </div>
+        <div class="rise">
+          <h3>Cosa fa la regia</h3>
+          <p class="muted">Clic su un pezzo nell’anteprima (o sul suo nome nella lista) e la scheda a destra mostra solo le sue cose: acceso o spento, dove sta, la grandezza, il giro sul muro, le Red Bull, l’ora del letto, i follower, il gusto della puff, «segue la testa», la prova del meteo, le spie.</p>
+          <ul class="muted small" style="padding-left:18px;margin:0 0 14px">
+            <li><b>Trascina</b> per spostare; un pezzo appeso a un muro resta sul muro, in prospettiva.</li>
+            <li><b>Alt + trascina</b> per staccare o attaccare; <b>rotella</b> per la grandezza; <b>Shift + rotella</b> per girarlo sul muro.</li>
+            <li><b>Frecce</b> un pixel (Shift: dieci); <b>doppio clic</b> torna al suo posto; <b>Ctrl+Z</b> annulla.</li>
+          </ul>
+          <div class="note note--purple"><b>Libera la cam</b> in alto: Diretta OS smette di leggere la webcam (l’occhio, la lente, la foto della stanza) così in Camo puoi cambiare profilo. A ogni riavvio la webcam si legge di nuovo.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="camo">
+      <div class="sec__head rise">
+        <div><span class="sec__num">05 / CAMO E OBS</span><h2>Il livello web</h2></div>
+        <p>La tela è 1920 × 1080 e trasparente: sotto ci va la webcam, sopra i pezzi. La pagina va a 30 fotogrammi; con <code>?fps=60</code> va a 60.</p>
+      </div>
+      <div class="grid g2">
+        <article class="card rise"><h3>Camo Studio</h3><p>1. Apri Camo e collega il telefono.<br>2. Aggiungi un <b>livello web</b> a tutto schermo, 1920 × 1080.<br>3. Indirizzo: <code>http://localhost:2350/o/tutto</code>.<br>4. Mettilo sopra la webcam. Un livello solo: ogni livello è un browser che gira.</p></article>
+        <article class="card rise"><h3>OBS Studio</h3><p>1. Aggiungi una sorgente <b>Browser</b>.<br>2. Larghezza 1920, altezza 1080.<br>3. URL: <code>http://localhost:2350/o/tutto</code>.<br>4. Mettila sopra la webcam. Se ti serve un pezzo solo, usa il suo indirizzo.</p></article>
+      </div>
+      <div class="code rise" style="margin-top:14px">
+        <div class="code__bar"><span>Indirizzo del livello</span><button class="copy" data-copy="http://localhost:2350/o/tutto">copia</button></div>
+        <pre>http://localhost:2350/o/tutto      <span class="c"># tutti i pezzi (30 fps)</span>
+http://localhost:2350/o/tutto?fps=60 <span class="c"># a 60 fps</span></pre>
+      </div>
+    </section>
+
+    <section id="vista">
+      <div class="sec__head rise">
+        <div><span class="sec__num">05b / VISTA ESTERNA</span><h2>La webcam di un altro PC, in Wi-Fi</h2></div>
+        <p>Un portatile sulla stessa rete manda la sua webcam al PC: diventa il pezzo «esterna», come una webcam di questo PC. I fotogrammi restano in memoria, non vengono salvati.</p>
+      </div>
+      <div class="grid g2" style="align-items:start">
+        <div class="steps">
+          <div class="step rise"><div><h3>Stessa Wi-Fi</h3><p>In regia apri <b>In rete → collega un pc</b> (o il riquadro <b>Vista esterna</b>). Sul portatile apri l’indirizzo che vedi: <code>https://&lt;ip-del-pc&gt;:2371/</code>.</p></div></div>
+          <div class="step rise"><div><h3>Accetta il certificato</h3><p>La prima volta il browser dice che la connessione non è privata: è il certificato fatto in casa, serve perché la webcam si accende solo su HTTPS. <b>Avanzate → Procedi</b>.</p></div></div>
+          <div class="step rise"><div><h3>Scrivi il codice</h3><p>Il codice di sei cifre è in regia: vale dieci minuti e una volta sola. Poi consenti la webcam sul portatile.</p></div></div>
+          <div class="step rise"><div><h3>Accendi «esterna»</h3><p>Scegli nome, specchia e adatta l’immagine, poi accendi il pezzo <code>esterna</code>. Si sposta e si appende come gli altri.</p></div></div>
+        </div>
+        <div class="rise">
+          <div class="code"><div class="code__bar"><span>La pagina del portatile</span><button class="copy" data-copy="https://192.168.1.42:2371/">copia</button></div><pre>https://&lt;ip-del-pc&gt;:2371/   <span class="c"># HTTPS, solo rete locale</span></pre></div>
+          <div class="code"><div class="code__bar"><span>Dal terminale</span><button class="copy" data-copy="DirettaOS.exe piece esterna on">copia</button></div><pre><span class="g">C:\&gt;</span> DirettaOS.exe piece esterna on
+<span class="g">C:\&gt;</span> DirettaOS.exe piece esterna off</pre></div>
+          <div class="note note--purple"><b>Solo la webcam.</b> La pagina del portatile non può aprire la regia, non può comandare niente e non vede la webcam del PC. Un portatile alla volta, cookie <code>HttpOnly</code> e <code>Secure</code>, codice mono-uso; se cambi rete il certificato si rifà e l’avviso torna.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="comandi">
+      <div class="sec__head rise">
+        <div><span class="sec__num">06 / COMANDI</span><h2>Tutti i comandi</h2></div>
+        <p>Si scrivono nel terminale. Se <code>DirettaOS.exe</code> non è nel <code>PATH</code>, usa il percorso completo o apri il terminale nella cartella di installazione.</p>
+      </div>
+
+      <h3 class="rise" style="margin-top:8px">Server e installazione</h3>
+      <div class="card rise" style="padding:6px 14px;margin-bottom:18px">
+        <table class="tbl">
+          <thead><tr><th>Comando</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr><td><span class="cmd"><code>DirettaOS.exe</code><button class="copy" data-copy="DirettaOS.exe">copia</button></span></td><td>apre il menu</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe install [cartella]</code><button class="copy" data-copy="DirettaOS.exe install">copia</button></span></td><td>installa o aggiorna (solo <code>DirettaOS-Setup.exe</code>)</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe start</code><button class="copy" data-copy="DirettaOS.exe start">copia</button></span></td><td>avvia il server in background</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe start --foreground</code><button class="copy" data-copy="DirettaOS.exe start --foreground">copia</button></span></td><td>avvia e mostra i log nel terminale</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe stop</code><button class="copy" data-copy="DirettaOS.exe stop">copia</button></span></td><td>ferma il server, chiudendo la webcam con le buone</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe restart</code><button class="copy" data-copy="DirettaOS.exe restart">copia</button></span></td><td>ferma e riavvia (dopo un aggiornamento)</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe open</code><button class="copy" data-copy="DirettaOS.exe open">copia</button></span></td><td>apre la regia nel browser</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe status</code><button class="copy" data-copy="DirettaOS.exe status">copia</button></span></td><td>stato, porta, processo e pezzi accesi</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe logs --follow</code><button class="copy" data-copy="DirettaOS.exe logs --follow">copia</button></span></td><td>il log dal vivo (Ctrl+C per uscire)</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe doctor</code><button class="copy" data-copy="DirettaOS.exe doctor">copia</button></span></td><td>diagnostica completa</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe config</code><button class="copy" data-copy="DirettaOS.exe config">copia</button></span></td><td>apre <code>config.json</code> nel Blocco note</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe configura</code><button class="copy" data-copy="DirettaOS.exe configura">copia</button></span></td><td>porte, città, microfono, cuffie, webcam Camo</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe backup</code><button class="copy" data-copy="DirettaOS.exe backup">copia</button></span></td><td>salva config, stato, foto e modelli in Documenti</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe extra</code><button class="copy" data-copy="DirettaOS.exe extra">copia</button></span></td><td>scarica modello volti e foto di tastiera, mouse e pad</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe photo</code><button class="copy" data-copy="DirettaOS.exe photo">copia</button></span></td><td>scatta la foto della stanza dalla webcam Camo</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe autostart on</code> / <code>off</code><button class="copy" data-copy="DirettaOS.exe autostart on">copia</button></span></td><td>accende o spegne l’avvio con Windows</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe uninstall</code><button class="copy" data-copy="DirettaOS.exe uninstall">copia</button></span></td><td>disinstalla, tenendo i dati in Documenti</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe uninstall --purge</code><button class="copy" data-copy="DirettaOS.exe uninstall --purge">copia</button></span></td><td>disinstalla e cancella tutto</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe folder</code> / <code>guide</code> / <code>web</code><button class="copy" data-copy="DirettaOS.exe folder">copia</button></span></td><td>cartella, guida locale, guida sul sito</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="rise" style="margin-top:8px">La regia, dal terminale</h3>
+      <div class="card rise" style="padding:6px 14px;margin-bottom:18px">
+        <table class="tbl">
+          <thead><tr><th>Comando</th><th>Cosa fa</th></tr></thead>
+          <tbody>
+            <tr><td><span class="cmd"><code>DirettaOS.exe pieces</code><button class="copy" data-copy="DirettaOS.exe pieces">copia</button></span></td><td>elenca i pezzi e quali sono accesi</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe piece &lt;nome&gt; on|off</code><button class="copy" data-copy="DirettaOS.exe piece nome on">copia</button></span></td><td>accende o spegne un pezzo</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe piece esterna on|off</code><button class="copy" data-copy="DirettaOS.exe piece esterna on">copia</button></span></td><td>la webcam del portatile in Wi-Fi</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe all on|off</code><button class="copy" data-copy="DirettaOS.exe all on">copia</button></span></td><td>tutti i pezzi (tranne PC e podcast)</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe via &lt;scena&gt;</code><button class="copy" data-copy="DirettaOS.exe via bosco">copia</button></span></td><td>accende un «torno subito»</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe lens auto|05|10</code><button class="copy" data-copy="DirettaOS.exe lens auto">copia</button></span></td><td>lente automatica, 0,5× o 1,0×</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe letto HH:MM</code><button class="copy" data-copy="DirettaOS.exe letto 02:35">copia</button></span></td><td>cambia l’ora del letto</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe redbull +1|-1|0</code><button class="copy" data-copy="DirettaOS.exe redbull +1">copia</button></span></td><td>cambia il contatore di oggi</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe social &lt;rete&gt; &lt;numero|-&gt;</code><button class="copy" data-copy="DirettaOS.exe social twitch 1234">copia</button></span></td><td>scrive un numero, o toglie quello a mano</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe podcast inizia|argomento|fine|chiudi|riprendi</code><button class="copy" data-copy="DirettaOS.exe podcast inizia">copia</button></span></td><td>Giugnoh’s Cast</td></tr>
+            <tr><td><span class="cmd"><code>DirettaOS.exe tv podcast|logo|ora|nome|parla|testo|meteo</code><button class="copy" data-copy="DirettaOS.exe tv podcast">copia</button></span></td><td>cambia la schermata della TV</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid g2">
+        <div class="code rise">
+          <div class="code__bar"><span>Le scene dei «torno subito»</span><button class="copy" data-copy="legna pipi bere mangiare lattina telefono spacco sistemo riavvio">copia</button></div>
+          <pre>legna  pipi  bere  mangiare  lattina
+telefono  spacco  sistemo  riavvio</pre>
+        </div>
+        <div class="code rise">
+          <div class="code__bar"><span>Esempi</span></div>
+          <pre><span class="g">C:\&gt;</span> DirettaOS.exe piece nome off
+<span class="g">C:\&gt;</span> DirettaOS.exe via bosco
+<span class="g">C:\&gt;</span> DirettaOS.exe letto 03:10
+<span class="g">C:\&gt;</span> DirettaOS.exe tv meteo</pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="indirizzi">
+      <div class="sec__head rise">
+        <div><span class="sec__num">07 / INDIRIZZI</span><h2>Tutti gli indirizzi</h2></div>
+        <p>Se cambi la porta, cambia <code>2350</code>. Le pagine disegnano solo il loro pezzo, sempre allo stesso posto: puoi mettere un livello per pezzo o uno solo con tutto.</p>
+      </div>
+      <div class="urls rise">
+        <div class="urls__title">La regia e il tutto</div>
+        <div class="url"><code>/</code><span>regia</span><button class="copy" data-copy="http://localhost:2350/">copia</button></div>
+        <div class="url"><code>/o/tutto</code><span>tutti i pezzi</span><button class="copy" data-copy="http://localhost:2350/o/tutto">copia</button></div>
+        <div class="urls__title">I pezzi</div>
+        <div class="url"><code>/o/cornice</code><span>bordo</span><button class="copy" data-copy="http://localhost:2350/o/cornice">copia</button></div>
+        <div class="url"><code>/o/nome</code><span>nome</span><button class="copy" data-copy="http://localhost:2350/o/nome">copia</button></div>
+        <div class="url"><code>/o/spie</code><span>spie</span><button class="copy" data-copy="http://localhost:2350/o/spie">copia</button></div>
+        <div class="url"><code>/o/conto</code><span>letto</span><button class="copy" data-copy="http://localhost:2350/o/conto">copia</button></div>
+        <div class="url"><code>/o/meteo</code><span>meteo</span><button class="copy" data-copy="http://localhost:2350/o/meteo">copia</button></div>
+        <div class="url"><code>/o/tasti</code><span>tasti</span><button class="copy" data-copy="http://localhost:2350/o/tasti">copia</button></div>
+        <div class="url"><code>/o/meme</code><span>meme</span><button class="copy" data-copy="http://localhost:2350/o/meme">copia</button></div>
+        <div class="url"><code>/o/adv</code><span>progetti</span><button class="copy" data-copy="http://localhost:2350/o/adv">copia</button></div>
+        <div class="url"><code>/o/adigeo</code><span>Adigeo</span><button class="copy" data-copy="http://localhost:2350/o/adigeo">copia</button></div>
+        <div class="url"><code>/o/redbull</code><span>Red Bull</span><button class="copy" data-copy="http://localhost:2350/o/redbull">copia</button></div>
+        <div class="url"><code>/o/social</code><span>follower</span><button class="copy" data-copy="http://localhost:2350/o/social">copia</button></div>
+        <div class="url"><code>/o/puff</code><span>puff</span><button class="copy" data-copy="http://localhost:2350/o/puff">copia</button></div>
+        <div class="url"><code>/o/bandiera</code><span>bandiera</span><button class="copy" data-copy="http://localhost:2350/o/bandiera">copia</button></div>
+        <div class="urls__title">I «torno subito»</div>
+        <div class="url"><code>/o/legna</code><span>stufa</span><button class="copy" data-copy="http://localhost:2350/o/legna">copia</button></div>
+        <div class="url"><code>/o/pipi</code><span>bosco</span><button class="copy" data-copy="http://localhost:2350/o/pipi">copia</button></div>
+        <div class="url"><code>/o/bere</code><span>bere</span><button class="copy" data-copy="http://localhost:2350/o/bere">copia</button></div>
+        <div class="url"><code>/o/mangiare</code><span>mangiare</span><button class="copy" data-copy="http://localhost:2350/o/mangiare">copia</button></div>
+        <div class="url"><code>/o/lattina</code><span>Red Bull</span><button class="copy" data-copy="http://localhost:2350/o/lattina">copia</button></div>
+        <div class="url"><code>/o/telefono</code><span>telefono</span><button class="copy" data-copy="http://localhost:2350/o/telefono">copia</button></div>
+        <div class="url"><code>/o/spacco</code><span>legna</span><button class="copy" data-copy="http://localhost:2350/o/spacco">copia</button></div>
+        <div class="url"><code>/o/sistemo</code><span>postazione</span><button class="copy" data-copy="http://localhost:2350/o/sistemo">copia</button></div>
+        <div class="url"><code>/o/riavvio</code><span>riavvio</span><button class="copy" data-copy="http://localhost:2350/o/riavvio">copia</button></div>
+        <div class="urls__title">Il PC</div>
+        <div class="url"><code>/o/app</code><span>app</span><button class="copy" data-copy="http://localhost:2350/o/app">copia</button></div>
+        <div class="url"><code>/o/cpu</code><span>CPU</span><button class="copy" data-copy="http://localhost:2350/o/cpu">copia</button></div>
+        <div class="url"><code>/o/gpu</code><span>GPU</span><button class="copy" data-copy="http://localhost:2350/o/gpu">copia</button></div>
+        <div class="url"><code>/o/ram</code><span>RAM</span><button class="copy" data-copy="http://localhost:2350/o/ram">copia</button></div>
+        <div class="url"><code>/o/ssd</code><span>SSD</span><button class="copy" data-copy="http://localhost:2350/o/ssd">copia</button></div>
+        <div class="url"><code>/o/hdd</code><span>HDD</span><button class="copy" data-copy="http://localhost:2350/o/hdd">copia</button></div>
+        <div class="url"><code>/o/temp</code><span>temp</span><button class="copy" data-copy="http://localhost:2350/o/temp">copia</button></div>
+        <div class="url"><code>/o/wifi</code><span>wi-fi</span><button class="copy" data-copy="http://localhost:2350/o/wifi">copia</button></div>
+        <div class="urls__title">Podcast, TV e pagine</div>
+        <div class="url"><code>/o/argomento</code><span>argomento</span><button class="copy" data-copy="http://localhost:2350/o/argomento">copia</button></div>
+        <div class="url"><code>/o/fine</code><span>fine</span><button class="copy" data-copy="http://localhost:2350/o/fine">copia</button></div>
+        <div class="url"><code>/tv</code><span>TV 4K</span><button class="copy" data-copy="http://localhost:2350/tv">copia</button></div>
+        <div class="url"><code>/muri.html</code><span>muri</span><button class="copy" data-copy="http://localhost:2350/muri.html">copia</button></div>
+        <div class="url"><code>/dualsense.html</code><span>DualSense</span><button class="copy" data-copy="http://localhost:2350/dualsense.html">copia</button></div>
+      </div>
+      <div class="note rise" style="margin-top:16px"><b>La TV</b> è un altro apparecchio in rete: apri sul suo browser <code>http://&lt;ip-del-pc&gt;:2360/</code>. La prima volta premi OK sul telecomando per lo schermo intero. La porta si cambia in <code>config.json</code> → <code>podcast.tvPorta</code>.</div>
+      <div class="note note--purple rise" style="margin-top:12px"><b>La vista esterna</b> non è un indirizzo locale: è <code>https://&lt;ip-del-pc&gt;:2371/</code>, da aprire sul portatile sulla stessa Wi-Fi. La porta si cambia in <code>config.json</code> → <code>esterna.porta</code>.</div>
+    </section>
+
+    <section id="config">
+      <div class="sec__head rise">
+        <div><span class="sec__num">08 / CONFIGURAZIONE</span><h2>Porta, città, dispositivi</h2></div>
+        <p>Le cose che cambi tu vanno in <code>config.locale.json</code>: un aggiornamento non le cancella. Il comando <code>configura</code> le chiede e le scrive per te.</p>
+      </div>
+      <div class="grid g2" style="align-items:start">
+        <div class="code rise">
+          <div class="code__bar"><span>config.locale.json</span><button class="copy" data-copy='{"porta":2350,"podcast":{"tvPorta":2360},"esterna":{"porta":2371},"meteo":{"nome":"Mantova","lat":45.1564,"lon":10.7914},"mic":"Yeti","cuffie":"Turtle Beach|Stealth|Cuffie|Headset","camo":"Camo"}'>copia</button></div>
+          <pre>{
+  <span class="p">"porta"</span>: 2350,
+  <span class="p">"podcast"</span>: { "tvPorta": 2360 },
+  <span class="p">"esterna"</span>: { "porta": 2371 },
+  <span class="p">"meteo"</span>: { "nome": "Mantova", "lat": 45.1564, "lon": 10.7914 },
+  <span class="p">"mic"</span>: "Yeti",
+  <span class="p">"cuffie"</span>: "Turtle Beach|Stealth|Cuffie|Headset",
+  <span class="p">"camo"</span>: "Camo"
+}</pre>
+        </div>
+        <div class="rise">
+          <h3>Le voci principali</h3>
+          <table class="tbl">
+            <tbody>
+              <tr><td><code>porta</code></td><td>la porta del server (2350). Se la cambi, cambia gli indirizzi in Camo/OBS.</td></tr>
+              <tr><td><code>letto</code></td><td>l’ora del conto alla rovescia.</td></tr>
+              <tr><td><code>meteo</code></td><td>città, latitudine e longitudine; il punto vero lo prende da Open-Meteo.</td></tr>
+              <tr><td><code>mic</code> / <code>cuffie</code></td><td>parte del nome del dispositivo, per le spie.</td></tr>
+              <tr><td><code>camo</code></td><td>il nome della webcam virtuale di Camo.</td></tr>
+              <tr><td><code>pc</code></td><td><code>ssd</code>/<code>hdd</code>, <code>nomi</code>, <code>nascoste</code>, <code>giochi</code>: quali dischi, come si chiamano i componenti, quali app non mostrare.</td></tr>
+              <tr><td><code>podcast.tvPorta</code></td><td>la porta della TV (2360).</td></tr>
+              <tr><td><code>esterna.porta</code></td><td>la porta HTTPS della vista esterna (2371).</td></tr>
+              <tr><td><code>adv</code></td><td>i progetti che girano nel pezzo «Pubblicità».</td></tr>
+            </tbody>
+          </table>
+          <div class="note note--purple" style="margin-top:14px">Dopo una modifica: <code>DirettaOS.exe restart</code>. Se hai cambiato la porta, ricordati di aggiornare il livello web in Camo.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="extra">
+      <div class="sec__head rise">
+        <div><span class="sec__num">09 / EXTRA</span><h2>Le cose facoltative</h2></div>
+        <p>Non stanno nel pacchetto perché non posso ridistribuirle. Le scarica il comando <code>extra</code>, dai loro indirizzi ufficiali.</p>
+      </div>
+      <div class="grid g3">
+        <article class="card rise"><h3>Il modello dei volti</h3><p><code>modelli\volti-rfb-320.onnx</code> (Ultra-Light Face Detector, MIT, 1,2 MB). Serve a Giugnoh che segue la testa e alla puff. Senza, il nome resta al suo posto.</p></article>
+        <article class="card rise"><h3>Le foto di tastiera, mouse e pad</h3><p><code>foto\tastiera.png</code>, <code>mouse.png</code>, <code>pad.png</code>: le foto ufficiali di Logitech e Sony, ritagliate come servono a <code>/o/tasti</code>.</p></article>
+        <article class="card rise"><h3>La foto della stanza</h3><p><code>riferimenti\05.jpg</code> e <code>10.jpg</code>: sono tue, l’inquadratura della stanza per le due lenti. Le fai con <code>DirettaOS.exe photo</code> da Camo.</p></article>
+      </div>
+      <div class="code rise" style="margin-top:14px">
+        <div class="code__bar"><span>Extra e foto</span><button class="copy" data-copy="DirettaOS.exe extra&#10;DirettaOS.exe photo">copia</button></div>
+        <pre><span class="g">C:\&gt;</span> DirettaOS.exe extra
+<span class="g">C:\&gt;</span> DirettaOS.exe photo</pre>
+      </div>
+    </section>
+
+    <section id="aggiorna">
+      <div class="sec__head rise">
+        <div><span class="sec__num">10 / MANUTENZIONE</span><h2>Aggiornare, backup, disinstallare</h2></div>
+        <p>L’aggiornamento sostituisce i file del programma e lascia stare i tuoi: config, stato, foto, modelli e lezioni.</p>
+      </div>
+      <div class="grid g3">
+        <article class="card rise"><h3>Aggiornare</h3><p>Scarica il nuovo <code>DirettaOS-Setup.exe</code>, aprilo e scegli <b>Installa / aggiorna</b>. Se <code>config.json</code> è diverso, il nuovo lo trovi come <code>config.json.nuovo</code>. Poi <code>restart</code> e ricarica i livelli in Camo.</p></article>
+        <article class="card rise"><h3>Backup</h3><p><code>DirettaOS.exe backup</code> crea <code>Documenti\Diretta OS\backup-AAAA-MM-GG-HHMM.zip</code> con config, stato, foto della stanza, modelli, lezioni e copie.</p></article>
+        <article class="card rise"><h3>Disinstallare</h3><p><code>DirettaOS.exe uninstall</code> ferma il server, toglie scorciatoie e avvio automatico e mette i dati in <code>Documenti\Diretta OS\backup-uninstall-⬦</code>. Con <code>--purge</code> cancella tutto.</p></article>
+      </div>
+      <div class="grid g2" style="margin-top:14px">
+        <div class="code rise"><div class="code__bar"><span>Backup</span><button class="copy" data-copy="DirettaOS.exe backup">copia</button></div><pre><span class="g">C:\&gt;</span> DirettaOS.exe backup
+<span class="g">OK</span>  salvato C:\Users\⬦\Documents\Diretta OS\backup-⬦.zip</pre></div>
+        <div class="code rise"><div class="code__bar"><span>Disinstallazione</span><button class="copy" data-copy="DirettaOS.exe uninstall">copia</button></div><pre><span class="g">C:\&gt;</span> DirettaOS.exe uninstall
+<span class="g">C:\&gt;</span> DirettaOS.exe uninstall --purge</pre></div>
+      </div>
+    </section>
+
+    <section id="problemi">
+      <div class="sec__head rise">
+        <div><span class="sec__num">11 / PROBLEMI</span><h2>Se qualcosa non va</h2></div>
+        <p>Prima di tutto <code>DirettaOS.exe doctor</code>: guarda Node, ffmpeg, porta, server, guardiano, foto, modello, Camo e permessi.</p>
+      </div>
+      <div class="faq rise">
+        <details><summary>«Node.js non c’è» o è troppo vecchio</summary><p>Installa la versione LTS da <a href="https://nodejs.org" target="_blank" rel="noopener noreferrer">nodejs.org</a>, poi chiudi e riapri il terminale. Serve Node 20 o più nuovo.</p></details>
+        <details><summary>La porta 2350 è occupata</summary><p>Chiudi l’altro programma, oppure cambia porta con <code>DirettaOS.exe configura</code>. Se cambi porta, aggiorna anche l’indirizzo del livello in Camo/OBS.</p></details>
+        <details><summary>Il server non parte</summary><p>Guarda <code>DirettaOS.exe logs --follow</code> e lancia <code>DirettaOS.exe doctor</code>. Il log è in <code>app\diretta.log</code>.</p></details>
+        <details><summary>La regia si apre ma i pezzi sono vuoti</summary><p>Mancano i caratteri o gli oggetti in <code>pzkko.it\public</code>: reinstalla con il setup, che li porta con sé.</p></details>
+        <details><summary>La webcam non si vede</summary><p>ffmpeg è installato? Camo è aperto? La webcam non è usata da Discord o da un altro programma? Prova <code>DirettaOS.exe doctor</code>.</p></details>
+        <details><summary>La lente sbaglia o l’inquadratura è cambiata</summary><p>Forza <code>lens 05</code> o <code>lens 10</code>, poi dalla regia «impara» la lente. Se hai cambiato stanza, rifai la foto con <code>DirettaOS.exe photo</code>.</p></details>
+        <details><summary>Il nome non segue la testa</summary><p>Manca <code>modelli\volti-rfb-320.onnx</code>: lancia <code>DirettaOS.exe extra</code>. Senza modello il nome resta al suo posto.</p></details>
+        <details><summary>La TV non si collega</summary><p>Stessa rete del PC, porta 2360, e il firewall di Windows deve lasciar passare la porta. L’indirizzo è <code>http://&lt;ip-del-pc&gt;:2360/</code>.</p></details>
+        <details><summary>La vista esterna non si collega</summary><p>Portatile e PC sulla stessa Wi-Fi, niente VPN che cambia la rete. Apri <code>https://&lt;ip-del-pc&gt;:2371/</code>, accetta il certificato e scrivi il codice che vedi in regia (vale dieci minuti). Se Windows chiede il firewall, consenti solo le reti private.</p></details>
+        <details><summary>Voglio ripartire da zero</summary><p>Fai <code>DirettaOS.exe backup</code>, poi cancella <code>app\stato.json</code> e riavvia. Config, foto e modelli restano.</p></details>
+      </div>
+    </section>
+
+    <section id="privacy">
+      <div class="sec__head rise">
+        <div><span class="sec__num">12 / PRIVACY</span><h2>Tutto sul tuo PC</h2></div>
+        <p>Niente account, niente cloud, niente telemetria. Il server ascolta solo su <code>127.0.0.1</code> e rifiuta le richieste degli altri siti.</p>
+      </div>
+      <div class="grid g3">
+        <article class="card rise"><h3>Solo locale</h3><p>Il server delle sovrimpressioni non è raggiungibile dagli altri PC. Controlla <code>Host</code> e <code>Origin</code>: un sito aperto nel browser non può comandarlo.</p></article>
+        <article class="card rise"><h3>La TV in sola lettura</h3><p>La porta 2360 serve solo la pagina della TV e il flusso del podcast: niente regia, niente azioni, niente webcam.</p></article>
+        <article class="card rise"><h3>I tuoi file</h3><p>Foto della stanza, stato e modelli restano nella cartella di installazione. L’unica uscita è il meteo, i follower di Twitch e gli extra che chiedi tu.</p></article>
+      </div>
+    </section>
+
+    <section id="english" lang="en">
+      <div class="sec__head rise">
+        <div><span class="sec__num">13 / ENGLISH</span><h2>Quick start</h2></div>
+        <p>The full guide is in Italian; this is the short version.</p>
+      </div>
+      <div class="grid g2">
+        <div class="steps rise" style="counter-reset:step">
+          <div class="step"><div><h3>Install</h3><p>Run <code>DirettaOS-Setup.exe</code>. It needs Windows 10/11 and Node.js 20+ (the installer offers winget). ffmpeg is recommended for the webcam. No admin rights.</p></div></div>
+          <div class="step"><div><h3>Start</h3><p><code>DirettaOS.exe start</code>, then <code>DirettaOS.exe open</code>. The control room is <code>http://localhost:2350/</code>.</p></div></div>
+          <div class="step"><div><h3>Camo / OBS</h3><p>Add a browser/web layer, 1920 × 1080, at <code>http://localhost:2350/o/tutto</code>. One layer only.</p></div></div>
+        </div>
+        <div class="rise">
+          <div class="code"><div class="code__bar"><span>All commands</span><button class="copy" data-copy="DirettaOS.exe commands">copy</button></div><pre><span class="g">C:\&gt;</span> DirettaOS.exe commands
+<span class="g">C:\&gt;</span> DirettaOS.exe doctor
+<span class="g">C:\&gt;</span> DirettaOS.exe piece nome off
+<span class="g">C:\&gt;</span> DirettaOS.exe tv meteo</pre></div>
+          <div class="note">The server only listens on <code>127.0.0.1</code>. The 4K TV server on port 2360 is read-only. Everything else stays on your PC.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="scarica" style="border-bottom:0">
+      <div class="card rise" style="display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;background:linear-gradient(110deg,rgba(204,255,0,.10),rgba(157,0,255,.10));border-color:rgba(204,255,0,.25)">
+        <div>
+          <h2 style="margin:0 0 6px;font-size:clamp(24px,3vw,34px);letter-spacing:-.03em">Pronto per la diretta?</h2>
+          <p class="muted" style="margin:0">34,0 MB · Windows 10/11 · niente permessi di amministratore. Il codice è su GitHub.</p>
+          <p class="small" style="margin:8px 0 0;color:var(--dim)">SHA-256 <code style="color:var(--muted);font-size:10.5px">0ACD4FF3C658A80E4D61BA5BF76348F47395DF382D9283285FDF3E976FD59E8E</code></p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn btn--big" href="/direttaos/DirettaOS-Setup.exe" download>Scarica il setup</a>
+          <a class="btn btn--ghost btn--big" href="https://github.com/ygpzk/AP" target="_blank" rel="noopener noreferrer">Codice su GitHub</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>
+      <b style="color:var(--text)">Diretta OS</b> — un progetto di <a href="https://pzkko.it" target="_blank" rel="noopener noreferrer">pzkko</a>. La regia delle sovrimpressioni per le dirette.
+    </div>
+    <div class="foot__links">
+      <a href="https://pzkko.it/#progetti" target="_top">Torna ai progetti</a>
+      <a href="https://github.com/ygpzk/AP" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="#top">Torna su</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)]
+  const $$copy = $$('.copy')
+  for (const b of $$copy) {
+    b.addEventListener('click', async () => {
+      const t = b.dataset.copy || ''
+      try {
+        await navigator.clipboard.writeText(t)
+        const old = b.textContent
+        b.textContent = 'copiato'
+        b.disabled = true
+        setTimeout(() => { b.textContent = old; b.disabled = false }, 1400)
+      } catch {
+        const a = document.createElement('textarea')
+        a.value = t; a.style.position = 'fixed'; a.style.opacity = '0'
+        document.body.appendChild(a); a.select()
+        try { document.execCommand('copy'); b.textContent = 'copiato'; setTimeout(() => { b.textContent = 'copia' }, 1400) } catch {}
+        a.remove()
+      }
+    })
+  }
+  const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => {
+    for (const e of es) if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target) }
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 }) : null
+  for (const el of $$('.rise')) io ? io.observe(el) : el.classList.add('on')
+  // la voce del menu accanto alla sezione che si sta guardando
+  const links = $$('.nav__links a')
+  const sez = links.map((a) => document.querySelector(a.getAttribute('href'))).filter(Boolean)
+  if ('IntersectionObserver' in window && sez.length) {
+    const map = new Map(sez.map((s, i) => [s, links[i]]))
+    const navIO = new IntersectionObserver((es) => {
+      for (const e of es) if (e.isIntersecting) {
+        for (const a of links) a.style.color = ''
+        const a = map.get(e.target); if (a) a.style.color = 'var(--lime)'
+      }
+    }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 })
+    for (const s of sez) navIO.observe(s)
+  }
+})()
+</script>
+</body>
+</html>
+
