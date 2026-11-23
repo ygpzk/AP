@@ -6,8 +6,8 @@ Pricedown per il nome), la cornice «Crystals (Peridot)», l’effetto «Dreamy 
 il tema `#ccff00 → #9d00ff` calcolato come lo calcola il client (velo bianco
 all’80 % col tema chiaro, nero al 60 % con quello scuro, tinta del testo, sfondo
 del pannello), banner, avatar con la decorazione, stato, stato personalizzato,
-tag NODE, badge, bio e collegamenti, tutto dal vivo. Il sito principale resta
-[albertopecchini.it](https://www.albertopecchini.it).
+tag NODE, badge, bio e collegamenti, tutto dal vivo. pzkko.it è autosufficiente:
+non rimanda e non si collega a nessun altro sito personale.
 
 ## Da dove arrivano i dati
 
@@ -43,6 +43,12 @@ nel sito.
   `cover.webp` (1280 × 720), `01.webp`… (la galleria), `loop.mp4` (il filmato
   che parte al passaggio del mouse) e `meta.json` (misure e didascalie). Niente
   disegni né simulazioni: se un progetto non gira, resta senza immagine.
+- **Diretta OS** (22.11): la scheda del progetto, la guida `/direttaos/` e il setup
+  `public/direttaos/DirettaOS-Setup.exe`. Il sorgente e l'installer sono nella
+  cartella `DirettaOS/` del repository; le catture in `public/media/p/direttaos/`
+  sono vere (la regia ha l'anteprima su fondo neutro al posto della webcam). Il
+  setup è autocontenuto: dentro ha il programma, le pagine, i caratteri e gli
+  oggetti del sito, e non scarica il progetto da GitHub.
 - `public/fonts/`: i caratteri del client di Discord (vedi sotto).
 - `public/.well-known/discord`: la verifica del dominio per Discord.
 - `src/site.css`: Tailwind v4 e i componenti.
@@ -84,6 +90,25 @@ prima che pzkko uscisse dal repository (`a5e42f1`), rimessi agli stessi indirizz
   (la stessa partita del foglio) e `/quiz`. I caratteri del muro (Anton, Special Elite,
   Permanent Marker) sono dichiarati in `site.css`, così i tavoli aperti sopra il profilo
   li hanno.
+- **Le app singole (19.11).** Virtual, Miniera, Borsa $pzk, Convertitori, Calcolatrice, Codice C, Cucina del Mincio e
+  Rapina hanno ognuna la sua scheda fra i progetti. Virtual apre il suo tavolo (`qui:virtual`); le altre sono le app vere
+  del cercapersone, da sole: `public/telefono/schermo.js` (+ `schermo.css`) stende piatto lo schermo di pzk os in una
+  finestra sopra il profilo, fermo su quell’app, coi sei tasti dello zero sotto, la tastiera e il clic sullo schermo
+  (`qui:app:<app>` in `config.js`, che `openHere` passa a `schermo.apri`; `borsa` è la banca aperta sulla pagina della
+  borsa). INDIETRO dalla prima pagina chiude la finestra. Da ospite si aprono tutte tranne la rapina, che vuole il conto
+  (prima esce l’accesso): per questo `os.apri` accetta `libera`, e dal cercapersone la regola «senza conto non si entra»
+  resta. Le catture ci sono per miniera, borsa e convertitori; le altre restano senza immagine finché non si catturano.
+- **La calcolatrice in stile Discord (20.11).** `public/games/calcolatrice/` (`calcolatrice.js` + `.css`): il riquadro
+  vestito come il profilo di Discord col tema Nitro (il velo sopra la sfumatura `#ccff00 → #9d00ff`, con le variabili del
+  tema che scrive `app.js`, e i colori pzk di riserva), gg sans, i tasti di Discord coi colori pzk: viola le operazioni,
+  lime l’uguale, rosso AC. Tre schede: Base, Scientifica (sin cos tan e inverse, log ln √ ^ ! π e, gon/deg/rad; sul
+  computer il riquadro si allarga) e Cronologia. I conti sono quelli della calcolatrice del cercapersone
+  (`telefono/app/calcolatrice.js`): ANS, gli ultimi risultati e l’unità degli angoli sono in comune, e le parentesi
+  lasciate aperte si chiudono da sole (`chiusa`). Si apre col primo tasto del progetto «Calcolatrice» (`qui:calcolatrice`;
+  il secondo, «Su pzk os», è l’app del cercapersone) e in chat con `/calcola` (senza conto apre il riquadro, con un conto
+  risponde lì). Le catture in `media/p/calcolatrice/` sono di questa.
+- Nella chat i suggerimenti dei comandi (`suggerisci` in `dchat.js`) mostrano l’icona vera, `/nome` con gli argomenti e
+  sotto la descrizione, come il selettore di Discord.
 - `/serranda/?apri=zero` (`?apri=chat`, `?apri=roulette`…) funziona ancora come
   indirizzo diretto, ma il profilo non lo usa più.
 - `api/`: le funzioni di Vercel, ponti firmati verso la banca che gira sul pc
@@ -133,13 +158,45 @@ il nome e i $pzk per chi è dentro (col menu: novità, regalo, esci). In chat:
 
 ```sh
 npm install
-npm run build   # genera public/assets/site.css
-npm run dev     # lo rigenera a ogni modifica
+npm run build   # controllo di sicurezza + public/assets/site.css
+npm run check   # controllo di sicurezza (CSP, segreti, rimandi vietati)
+npm run csp     # rigenera le impronte CSP dopo aver toccato uno script in linea
+npm run dev     # rigenera site.css a ogni modifica
 npm run media   # riscrive public/assets/media.js dopo aver cambiato le catture
 npm run serve   # il sito in locale con le funzioni di api/ (porta 5080) e la banca del pc
+npm run preview # le intestazioni vere di vercel.json, in locale (porta 5081)
 ```
 
 Vercel esegue `npm run build` e pubblica `public/` (vedi `vercel.json`).
+
+## Sicurezza e prestazioni
+
+- **Content-Security-Policy con impronte.** Gli script in linea delle pagine
+  vecchie sono ammessi solo con la loro impronta SHA-256: niente
+  `'unsafe-inline'`, niente script di terzi. Dopo aver modificato uno script in
+  linea in un `.html` si lancia `npm run csp`; `npm run check` (e quindi la
+  build) fallisce se le impronte non sono più allineate.
+- **Intestazioni forti.** HSTS con preload, `frame-ancestors 'self'` (il sito non
+  si fa incorniciare da altri), COOP/CORP, `Permissions-Policy` minima,
+  `X-Content-Type-Options`, `Referrer-Policy`. `www.pzkko.it` rimanda a
+  `pzkko.it`, così c'è una sola origine.
+- **API chiuse.** I ponti verso la banca accettano solo lo stesso sito,
+  `application/json` nei POST, con tetto di richieste per IP (in memoria, l'IP
+  non si salva); il tasto di moderazione si confronta in tempo costante; gli
+  errori del server di casa non tornano al browser. Il segreto resta nelle
+  variabili di Vercel.
+- **Niente collegamenti al vecchio sito personale.** Non è un accordo fra siti:
+  la build cerca il dominio in `public/`, `api/`, `vercel.json` e `README.md` e
+  si ferma se ricompare. `npm run check` cerca anche percorsi del computer,
+  chiavi private e token.
+- **Prestazioni.** Italiano e inglese arrivano subito; le altre sette lingue
+  stanno in `public/assets/i18n/` e si scaricano solo quando si sceglie quella.
+  Cache lunga su CDN per asset, font, immagini e video; HTML sempre rivalidato.
+  Font critici e avatar in preload, immagini dei progetti lazy.
+- **Quello che non si può promettere.** Nessun sito è al 100 %: qui si chiudono
+  le porte applicative, ma DDoS, WAF e patch dell'infrastruttura sono di Vercel
+  (e vanno tenuti attivi nel pannello). `npm audit` va rifatto quando si
+  aggiornano le dipendenze.
 
 ## I caratteri
 
