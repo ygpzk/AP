@@ -1,0 +1,15 @@
+{
+  "name": "pzkko",
+  "short_name": "pzkko",
+  "description": "Il profilo per svago di pzkko: Discord dal vivo, giochi, programmi e social.",
+  "lang": "it",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#665d56",
+  "theme_color": "#0e0d0c",
+  "icons": [
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
+  ]
+}

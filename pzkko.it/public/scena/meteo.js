@@ -1,5 +1,5 @@
 // Il meteo di Mantova, quello vero, nella scena. Lo chiede a /api/meteo (la funzione
-// di albertopecchini.it/api/meteo.js, che lo prende da Open-Meteo e lo tiene in cache)
+// di /api/meteo/ (api/meteo.mjs), che lo prende da Open-Meteo e lo tiene in cache)
 // all'arrivo e ogni dieci minuti, e lo fa vedere:
 // - sole e nuvole: con le nuvole il sole non fa più ombre nette, la luce del cielo
 //   cresce e si fa grigia, il cielo si copre (una cupola grigia davanti al cielo,

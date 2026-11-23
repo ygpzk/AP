@@ -292,7 +292,7 @@ function passoRegalo(messaggio = '', forza = false) {
   const b = passo(`<form novalidate class="ax-reg">
       <div class="ax-dono" aria-hidden="true">+${esc(P)}</div>
       <h2>${esc(t.t(P))}</h2><p class="ax-s">${esc(t.s)}</p>
-      <p class="ax-profili">${PROFILI.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener">${IG}<span>@${n}</span><i aria-hidden="true">↗</i></a>`).join('')}</p>
+      <p class="ax-profili">${PROFILI.map(([n, u]) => `<a href="${u}" target="_blank" rel="noopener noreferrer">${IG}<span>@${n}</span><i aria-hidden="true">↗</i></a>`).join('')}</p>
       <label class="ax-campo"><span>${esc(t.campo)}</span><span class="ax-chiocciola"><i>@</i><input name="ig" type="text" maxlength="60" autocomplete="off" autocapitalize="off" spellcheck="false" value="${esc(s?.stato === 'no' || forza ? s?.ig ?? '' : '')}" required></span></label>
       <p class="ax-err" role="alert" hidden></p>
       <button type="submit" class="ax-b">${esc(t.vai)}</button>
@@ -338,7 +338,7 @@ export async function decidi(biglietto) {
   const quando = new Date(d.creato).toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })
   const b = passo(`<div class="ax-reg">
       <h2>${esc(t.t(d.ig, P))}</h2><p class="ax-s">${t.s(esc(d.nome), esc(quando))}</p>
-      <p class="ax-profili uno"><a href="https://www.instagram.com/${esc(d.ig)}/" target="_blank" rel="noopener">${IG}<span>${esc(t.apri(d.ig))}</span><i aria-hidden="true">↗</i></a></p>
+      <p class="ax-profili uno"><a href="https://www.instagram.com/${esc(d.ig)}/" target="_blank" rel="noopener noreferrer">${IG}<span>${esc(t.apri(d.ig))}</span><i aria-hidden="true">↗</i></a></p>
       <p class="ax-err" role="alert" hidden></p>
       <button type="button" class="ax-b verde" data-si>${esc(t.si(P))}</button>
       <button type="button" class="ax-b rosso" data-no>${esc(t.no)}</button>

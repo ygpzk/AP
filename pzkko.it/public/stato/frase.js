@@ -1,7 +1,6 @@
 // La frase dell'informatore (11.11.2026, Alberto: «un informatore che dice che i sistemi vanno sempre connessi dal mio
-// pc»): da quello che risponde /api/stato/ (pzkko/api/stato.mjs) a «● sistemi operativi · connessi dal pc di Alberto ·
-// controllato 2 min fa». Un modulo solo per i due siti: lo usano pzkko/stato/informatore.js (pzkko.it, così com'è) e
-// src/client/stato.js (albertopecchini.it, dentro la build di vite).
+// pc»): da quello che risponde /api/stato/ (api/stato.mjs) a «● sistemi operativi · connessi dal pc di Alberto ·
+// controllato 2 min fa». Lo usa stato/informatore.js.
 
 export const API = '/api/stato/'
 
