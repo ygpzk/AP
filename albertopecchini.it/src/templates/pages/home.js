@@ -274,7 +274,6 @@ function strip() {
 // Quattro foto prese lungo la strada (la prima, due in mezzo, l'ultima) e il link.
 
 function tempo() {
-  return '' // 12.11.2026: la macchina del tempo non è più online (dentro ci sono numero e luoghi)
   const conFoto = versioni.filter((v) => v.d)
   if (!conFoto.length) return ''
   const prime = conFoto[0]

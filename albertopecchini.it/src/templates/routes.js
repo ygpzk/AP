@@ -266,7 +266,7 @@ const tutteLeRotte = [
 
 // 12.11.2026 (Alberto: «togli social, numeri, indirizzi e luoghi»): fuori dal sito la macchina del
 // tempo (le copie dei siti vecchi hanno numero, WhatsApp, Instagram e il paese). I file restano nel repository.
-export const FUORI = (p) => p === '/tempo/' || p.startsWith('/tempo/')
+export const FUORI = () => false // la macchina del tempo è di nuovo online (riabilitata il 14.11.2026)
 export const routes = tutteLeRotte.filter((r) => !FUORI(r.path))
 
 /** Le rotte del sito. */
