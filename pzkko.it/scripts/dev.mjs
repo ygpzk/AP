@@ -3,7 +3,7 @@
 import { createServer } from 'node:http'
 import { readFile, stat } from 'node:fs/promises'
 import { readFileSync, existsSync } from 'node:fs'
-import { join, extname, normalize, dirname } from 'node:path'
+import { join, extname, normalize, dirname, sep } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const radice = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -18,32 +18,48 @@ if (!process.env.PZKKO_SERVER_SECRET && existsSync(conf)) {
 }
 const TIPI = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.mp4': 'video/mp4', '.woff2': 'font/woff2', '.wasm': 'application/wasm', '.zip': 'application/zip', '.webmanifest': 'application/manifest+json', '.txt': 'text/plain; charset=utf-8', '.xml': 'application/xml', '.ico': 'image/x-icon' }
 const funzioni = new Map()
+const SICUREZZA = {
+  'X-Content-Type-Options': 'nosniff',
+  'X-Frame-Options': 'SAMEORIGIN',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+  'Cross-Origin-Resource-Policy': 'same-origin',
+}
 
 createServer(async (req, res) => {
-  const u = new URL(req.url, 'http://x')
-  let p = decodeURIComponent(u.pathname)
+  let u
+  try { u = new URL(req.url, 'http://x') } catch { res.writeHead(400, SICUREZZA); return res.end() }
+  let p
+  try { p = decodeURIComponent(u.pathname) } catch { res.writeHead(400, SICUREZZA); return res.end() }
+  if (p.includes('\0')) { res.writeHead(400, SICUREZZA); return res.end() }
   const api = /^\/api\/([a-z]+)\/?$/.exec(p)
   if (api) {
     const f = join(radice, 'api', `${api[1]}.mjs`)
-    if (!existsSync(f)) { res.writeHead(404); return res.end('{}') }
+    if (!existsSync(f)) { res.writeHead(404, SICUREZZA); return res.end('{}') }
     try {
       if (!funzioni.has(f)) funzioni.set(f, (await import(pathToFileURL(f))).default)
       req.query = Object.fromEntries(u.searchParams)
       return await funzioni.get(f)(req, res)
-    } catch (e) { console.error(e); res.writeHead(500); return res.end('{"ok":false}') }
+    } catch (e) { console.error(e); res.writeHead(500, SICUREZZA); return res.end('{"ok":false}') }
   }
-  let file = normalize(join(pub, p))
-  if (!file.startsWith(normalize(pub))) { res.writeHead(403); return res.end() }
+  const radicePub = normalize(pub)
+  let file = normalize(join(radicePub, p))
+  if (file !== radicePub && !file.startsWith(radicePub + sep)) { res.writeHead(403, SICUREZZA); return res.end() }
+  if (/(^|[\\/])(\.env|\.git|\.vercel)([\\/]|$)/i.test(file)) { res.writeHead(404, SICUREZZA); return res.end() }
   try {
     let s = await stat(file).catch(() => null)
     if (s?.isDirectory()) { file = join(file, 'index.html'); s = await stat(file).catch(() => null) }
     if (!s && !extname(file)) { file += '.html'; s = await stat(file).catch(() => null) }
     if (!s) throw 0
     const corpo = await readFile(file)
-    res.writeHead(200, { 'Content-Type': TIPI[extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store' })
-    res.end(corpo)
+    res.writeHead(200, {
+      ...SICUREZZA,
+      'Content-Type': TIPI[extname(file)] || 'application/octet-stream',
+      'Cache-Control': 'no-store',
+    })
+    res.end(req.method === 'HEAD' ? undefined : corpo)
   } catch {
-    res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' })
-    res.end(await readFile(join(pub, '404.html')).catch(() => 'non trovato'))
+    res.writeHead(404, { ...SICUREZZA, 'Content-Type': 'text/html; charset=utf-8' })
+    res.end(req.method === 'HEAD' ? undefined : await readFile(join(pub, '404.html')).catch(() => 'non trovato'))
   }
 }).listen(porta, () => console.log(`pzkko.it su http://localhost:${porta} · banca: ${process.env.PZKKO_SERVER_URL || 'spenta'}`))

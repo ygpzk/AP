@@ -8,20 +8,18 @@
 // minuti, non una per visita). Se Open-Meteo non risponde: 502, e la scena resta col
 // dopo pioggia di sempre.
 //
-// Sta qui (.mjs: senza package.json intorno è comunque un modulo) perché vada online
-// quando il progetto pzkko avrà la Root Directory in albertopecchini.it/pzkko; finché
-// la radice è albertopecchini.it, la pubblica albertopecchini.it/api/meteo.js, che la
-// riesporta. In locale la serve tools/dev.mjs (npm run dev:pzkko).
+// In locale la serve scripts/dev.mjs (npm run serve).
 
 // Mantova, la stessa delle luci (pzkko/scena/luci.js): 45,1564 N, 10,7914 E
 const OPEN_METEO = 'https://api.open-meteo.com/v1/forecast?latitude=45.1564&longitude=10.7914' +
   '&current=temperature_2m,is_day,precipitation,rain,showers,snowfall,weather_code,cloud_cover,visibility,wind_speed_10m,wind_direction_10m,snow_depth' +
   '&hourly=precipitation&past_hours=12&forecast_hours=1&timezone=Europe%2FRome'
 
+import { intestazioniJson } from './_server.mjs'
+
 const json = (res, status, body, cache) => {
   res.statusCode = status
-  res.setHeader('Content-Type', 'application/json; charset=utf-8')
-  res.setHeader('Cache-Control', cache)
+  intestazioniJson(res, cache)
   res.end(JSON.stringify(body))
 }
 
@@ -47,7 +45,7 @@ export default async function handler(req, res) {
       pioggia12: Math.round(ore.reduce((a, b) => a + (b || 0), 0) * 10) / 10,
       ora: c.time,
     }, 'public, s-maxage=600, stale-while-revalidate=1800')
-  } catch (e) {
-    json(res, 502, { errore: String(e?.message || e) }, 'public, s-maxage=60')
+  } catch {
+    json(res, 502, { errore: 'il meteo non risponde: riprova fra poco' }, 'public, s-maxage=60')
   }
 }

@@ -10,14 +10,10 @@
 //
 // La risposta resta in cache sul CDN 60 secondi (e fino a 5 minuti mentre se ne prepara una nuova): al server di casa
 // arriva al più una richiesta al minuto per regione. «agg» è l'ora vera del controllo: la pagina dice «controllato N min fa».
-//
-// Nei progetti senza le variabili del server (albertopecchini.it) la funzione non sa chiedere al pc: gira la domanda a
-// pzkko.it, una volta sola (x-pzk-stato-inoltro), così le pagine di tutti e due i siti chiedono a /api/stato/ e basta.
-// Albertopecchini.it/api/stato.js la riesporta. Lo stesso controllo, visto dal pc, è tools/cruscotto/hosting.mjs.
-import { chiedi, serverOpzioni } from './_server.mjs'
+// Lo stesso controllo, visto dal pc, è tools/cruscotto/hosting.mjs.
+import { chiedi, intestazioniJson, serverOpzioni } from './_server.mjs'
 
 const SITI = [
-  'https://www.albertopecchini.it/',
   'https://www.pzkko.it/',
   'https://www.rivaltasulmincio.it/',
   'https://www.cascinafontana.xyz/',
@@ -25,7 +21,6 @@ const SITI = [
   'https://dariodonelli.vercel.app/',
 ]
 const ATTESA = 6_000
-const PZKKO = 'https://www.pzkko.it/api/stato/'
 const UA = 'pzkko-stato (controllo dei sistemi)'
 
 async function misura(url) {
@@ -78,24 +73,14 @@ export async function controlla() {
 export default async function handler(req, res) {
   const manda = (status, corpo, cache) => {
     res.statusCode = status
-    res.setHeader('Content-Type', 'application/json; charset=utf-8')
-    res.setHeader('Cache-Control', cache)
+    intestazioniJson(res, cache)
     res.end(req.method === 'HEAD' ? undefined : JSON.stringify(corpo))
   }
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.setHeader('Allow', 'GET, HEAD'); return manda(405, { ok: false, errore: 'solo GET' }, 'no-store') }
   const CACHE = 'public, max-age=0, s-maxage=60, stale-while-revalidate=300'
 
-  // senza le variabili del server: si chiede a pzkko.it (mai due volte di fila: niente giri infiniti)
-  if (!serverOpzioni()) {
-    if (!req.headers['x-pzk-stato-inoltro']) {
-      try {
-        const r = await fetch(PZKKO, { headers: { 'x-pzk-stato-inoltro': '1', 'user-agent': UA }, signal: AbortSignal.timeout(9_000) })
-        const d = await r.json()
-        if (r.ok && d?.ok) return manda(200, d, CACHE)
-      } catch {}
-    }
-    return manda(200, { ok: true, agg: Date.now(), stato: 'sconosciuto', giu: [] }, 'public, max-age=0, s-maxage=30')
-  }
+  // senza le variabili del server non si può chiedere al pc: si dice «sconosciuto», mai un giro su sé stessi
+  if (!serverOpzioni()) return manda(200, { ok: true, agg: Date.now(), stato: 'sconosciuto', giu: [] }, 'public, max-age=0, s-maxage=30')
   try {
     return manda(200, await controlla(), CACHE)
   } catch (e) {

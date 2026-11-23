@@ -6,17 +6,15 @@
 // 28.10 su Vercel Blob, tolto dal codice il 29.10), come il database di Better Call Pekko (api/bcp.js): riscritto solo
 // se l'ETag è ancora quello, così due firme nello stesso istante non si cancellano (chi perde riprova). Senza il server,
 // online, la funzione risponde «offline» (il foglio si vede, ma non si firma); in locale (il server di npm run
-// dev:pzkko, o FIRME_STORE=memory) le firme stanno in memoria finché il server non si ferma.
+// serve, o FIRME_STORE=memory) le firme stanno in memoria finché il server non si ferma.
 //
 // Protezioni: campo trappola e tempo minimo da quando il foglio si è avvicinato, limite di frequenza per IP (in memoria,
 // l'IP non si salva), lo stesso nome una volta al giorno, niente link, numeri di telefono o parolacce nei nomi.
 // Moderazione: con FIRME_ADMIN_KEY impostata nel progetto, `{ a: 'via', key, id }` cancella una firma
 // (node tools/pzkko/firme.mjs via <id>).
-//
-// Sta qui (.mjs) perché vada online anche quando il progetto pzkko avrà la Root Directory in albertopecchini.it/pzkko;
-// finché la radice è albertopecchini.it, la pubblica albertopecchini.it/api/firme.js, che la riesporta.
 
-import { archivioServer, serverGiu, serverOpzioni } from './_server.mjs'
+import { createHash, timingSafeEqual } from 'node:crypto'
+import { archivioServer, intestazioniJson, ipDi, origineAmmessa, serverGiu, serverOpzioni, troppeRichieste } from './_server.mjs'
 
 const PATH = process.env.FIRME_BLOB_PATH || 'pzkko/firme.json'
 const MAX_BODY = 2 * 1024
@@ -24,11 +22,15 @@ const CAP = 5000 // firme in tutto: oltre, il foglio è pieno
 const MOSTRA = 300 // quante se ne mandano a chi guarda (le ultime)
 const PENNE = ['blu', 'nera', 'rossa']
 const MINUTO = 60 * 1000, GIORNO = 24 * 60 * MINUTO
+const chiaveIp = (ip) => createHash('sha256').update(String(ip)).digest('base64url').slice(0, 22)
+const stessaChiave = (a, b) => {
+  const x = Buffer.from(String(a ?? '')), y = Buffer.from(String(b ?? ''))
+  return x.length === y.length && timingSafeEqual(x, y)
+}
 
 const json = (res, status, body, cache = 'no-store') => {
   res.statusCode = status
-  res.setHeader('Content-Type', 'application/json; charset=utf-8')
-  res.setHeader('Cache-Control', cache)
+  intestazioniJson(res, cache)
   res.end(JSON.stringify(body))
 }
 
@@ -97,14 +99,22 @@ function valida(nome) {
 // ── il limite di frequenza (in memoria, per istanza; l'IP non si salva da nessuna parte) ──
 const visti = (globalThis.__pzkkoFirmeIp ??= new Map())
 function troppe(ip, now) {
-  const v = (visti.get(ip) ?? []).filter((t) => now - t < GIORNO)
-  visti.set(ip, v)
-  if (visti.size > 5000) for (const k of [...visti.keys()].slice(0, 1000)) visti.delete(k)
+  const k = chiaveIp(ip)
+  const v = (visti.get(k) ?? []).filter((t) => now - t < GIORNO)
+  visti.set(k, v)
+  if (visti.size > 5000) for (const x of [...visti.keys()].slice(0, 1000)) visti.delete(x)
   return v.filter((t) => now - t < 10 * MINUTO).length >= 2 || v.length >= 6
 }
 
 async function leggi(req) {
-  if (req.body !== undefined && req.body !== null) return typeof req.body === 'string' ? JSON.parse(req.body) : req.body
+  if (req.body !== undefined && req.body !== null) {
+    if (typeof req.body === 'string') {
+      if (req.body.length > MAX_BODY) throw new Error('corpo troppo grande')
+      return JSON.parse(req.body)
+    }
+    if (JSON.stringify(req.body).length > MAX_BODY) throw new Error('corpo troppo grande')
+    return req.body
+  }
   const parti = []
   let n = 0
   for await (const p of req) { n += p.length; if (n > MAX_BODY) throw new Error('corpo troppo grande'); parti.push(p) }
@@ -112,16 +122,27 @@ async function leggi(req) {
 }
 
 export default async function handler(req, res) {
-  const store = await backend()
-  if (!store) return json(res, 503, { ok: false, offline: true, errore: 'la petizione è in pausa: riprova più tardi' }, 'public, s-maxage=30')
+  if (req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'POST') {
+    res.setHeader('Allow', 'GET, HEAD, POST')
+    return json(res, 405, { ok: false, errore: 'solo GET e POST' })
+  }
+  if (req.method === 'POST' && !origineAmmessa(req)) return json(res, 403, { ok: false, errore: 'origine non ammessa' })
+  const ip = ipDi(req)
+  if (req.method === 'POST' && troppeRichieste(`firme:${ip}`, 30)) {
+    return json(res, 429, { ok: false, errore: 'troppe richieste: aspetta un momento' })
+  }
+  if (req.method === 'POST' && !/^application\/json\b/i.test(String(req.headers['content-type'] || ''))) {
+    return json(res, 415, { ok: false, errore: 'serve application/json' })
+  }
   try {
+    const store = await backend()
+    if (!store) return json(res, 503, { ok: false, offline: true, errore: 'la petizione è in pausa: riprova più tardi' }, 'public, s-maxage=30')
     if (req.method === 'GET' || req.method === 'HEAD') {
       const { db } = await store.read()
       // venti secondi di cache sulla rete di Vercel (e cinque minuti di riuso mentre si rinfresca): tante visite, poche
       // letture del Blob, che sul piano gratuito sono contate. Chi firma vede subito la sua firma (gliela dà la POST)
       return json(res, 200, { ok: true, ...pubblico(db) }, 'public, max-age=0, s-maxage=20, stale-while-revalidate=300')
     }
-    if (req.method !== 'POST') { res.setHeader('Allow', 'GET, POST'); return json(res, 405, { ok: false, errore: 'solo GET e POST' }) }
 
     let body
     try { body = await leggi(req) } catch { return json(res, 400, { ok: false, errore: 'richiesta sbagliata' }) }
@@ -130,7 +151,8 @@ export default async function handler(req, res) {
 
     if (body.a === 'via') {
       const k = process.env.FIRME_ADMIN_KEY
-      if (!k || body.key !== k) return json(res, 403, { ok: false, errore: 'no' })
+      if (!k || !stessaChiave(body.key, k)) return json(res, 403, { ok: false, errore: 'no' })
+      if (typeof body.id !== 'string' || !/^[a-z0-9]{1,40}$/.test(body.id)) return json(res, 400, { ok: false, errore: 'richiesta sbagliata' })
       const r = await aggiorna(store, (db) => {
         const i = db.firme.findIndex((f) => f.id === body.id)
         if (i < 0) return { errore: 'non c’è' }
@@ -142,12 +164,13 @@ export default async function handler(req, res) {
 
     // le trappole per i bot: il campo che una persona non vede (si finge di aver firmato) e la fretta
     if (body.sito) return json(res, 200, { ok: true, ...pubblico((await store.read()).db) })
-    if (typeof body.aperto !== 'number' || now - body.aperto < 2500) return json(res, 429, { ok: false, errore: 'con calma: leggi il foglio, prima' })
+    if (typeof body.aperto !== 'number' || !Number.isFinite(body.aperto) || now - body.aperto < 2500 || body.aperto > now + 60_000) {
+      return json(res, 429, { ok: false, errore: 'con calma: leggi il foglio, prima' })
+    }
 
     const nome = pulisci(body.nome), errore = valida(nome)
     if (errore) return json(res, 400, { ok: false, errore })
     const c = Math.max(0, PENNE.indexOf(body.penna))
-    const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'ip'
     if (troppe(ip, now)) return json(res, 429, { ok: false, errore: 'hai già firmato: una firma basta' })
 
     const r = await aggiorna(store, (db) => {
@@ -161,7 +184,7 @@ export default async function handler(req, res) {
       return { firma }
     })
     if (r.errore) return json(res, 409, { ok: false, errore: r.errore, ...pubblico(r.db) })
-    visti.get(ip)?.push(now) ?? visti.set(ip, [now])
+    visti.get(chiaveIp(ip))?.push(now) ?? visti.set(chiaveIp(ip), [now])
     return json(res, 200, { ok: true, firma: r.firma, ...pubblico(r.db) })
   } catch (e) {
     if (e.occupato) return json(res, 503, { ok: false, errore: 'troppe firme insieme: riprova' })

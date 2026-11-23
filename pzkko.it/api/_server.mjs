@@ -14,8 +14,47 @@
 // (Comincia per _ : Vercel non ne fa una funzione.)
 import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 
-const stato = (globalThis.__pzkkoServer ??= { copie: new Map(), giuFino: 0 })
+const stato = (globalThis.__pzkkoServer ??= { copie: new Map(), giuFino: 0, limiti: new Map() })
 const PAUSA = 15_000
+
+// ── le guardie delle funzioni (uguali per tutti i ponti) ─────────────────────
+const sha = (b) => createHash('sha256').update(b).digest('hex')
+const impronta = (s) => createHash('sha256').update(String(s)).digest('base64url').slice(0, 22)
+/** L'IP vero, corto e senza sorprese: x-real-ip, poi il primo di x-forwarded-for. */
+export function ipDi(req) {
+  const grezzo = String(req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || '').split(',')[0].trim().slice(0, 64)
+  return /^[0-9a-fA-F:.]{2,64}$/.test(grezzo) ? grezzo : 'ip'
+}
+/** Solo richieste dello stesso sito: un'altra origine (o un modulo cross-site) non entra. */
+export function origineAmmessa(req) {
+  const sec = String(req.headers['sec-fetch-site'] || '').toLowerCase()
+  if (sec === 'cross-site') return false
+  const origin = String(req.headers.origin || '')
+  if (!origin) return true // curl, server-to-server, vecchi browser
+  const host = String(req.headers.host || req.headers['x-forwarded-host'] || '').toLowerCase()
+  try { return new URL(origin).host.toLowerCase() === host } catch { return false }
+}
+/** Un tetto per IP, in memoria (per istanza): non è un database, è una diga contro le valanghe. */
+export function troppeRichieste(chiave, max = 120, finestra = 60_000) {
+  const now = Date.now(), k = impronta(chiave)
+  const v = (stato.limiti.get(k) ?? []).filter((t) => now - t < finestra)
+  v.push(now)
+  stato.limiti.set(k, v)
+  if (stato.limiti.size > 10_000) for (const x of [...stato.limiti.keys()].slice(0, 2000)) stato.limiti.delete(x)
+  return v.length > max
+}
+/** Le intestazioni di una risposta JSON delle funzioni. */
+export function intestazioniJson(res, cache = 'no-store') {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8')
+  res.setHeader('Cache-Control', cache)
+  res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
+  res.setHeader('X-Content-Type-Options', 'nosniff')
+  res.setHeader('X-Frame-Options', 'DENY')
+  res.setHeader('X-Robots-Tag', 'noindex')
+  res.setHeader('Referrer-Policy', 'no-referrer')
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin')
+  res.setHeader('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'; sandbox")
+}
 
 // le variabili come vengono incollate nel pannello di Vercel (29.10: il segreto giusto con un carattere in più, e nessuna
 // firma tornava): il segreto è sempre 43 caratteri base64url (32 byte, installa.ps1), e si pesca anche fra virgolette,
@@ -34,7 +73,6 @@ export function serverOpzioni() {
 /** Il server non ha risposto da poco: meglio dire subito «in pausa». */
 export const serverGiu = () => Date.now() < stato.giuFino
 
-const sha = (b) => createHash('sha256').update(b).digest('hex')
 const errore = (msg, extra = {}) => Object.assign(new Error(`server dei dati: ${msg}`), extra)
 
 async function chiama({ url, segreto }, metodo, nome, { corpo = null, ifMatch = '', ifNoneMatch = '', indirizzo = `/v1/f/${nome}`, scadenza = metodo === 'PUT' ? 20_000 : 10_000 } = {}) {
@@ -82,25 +120,44 @@ async function chiama({ url, segreto }, metodo, nome, { corpo = null, ifMatch = 
  * server può usare per i limiti) e ne riportano la risposta, la cui firma si controlla prima di consegnarla.
  */
 export async function ponte(nome, req, res, { max = 16 * 1024 } = {}) {
+  const manda = (status, body, cache = 'no-store') => {
+    res.statusCode = status
+    intestazioniJson(res, cache)
+    res.end(typeof body === 'string' ? body : JSON.stringify(body))
+  }
+  if (req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'POST') {
+    res.setHeader('Allow', 'GET, HEAD, POST')
+    return manda(405, { ok: false, errore: 'solo GET, HEAD e POST' })
+  }
+  if (!origineAmmessa(req)) return manda(403, { ok: false, errore: 'origine non ammessa' })
+  const ip = ipDi(req)
+  if (troppeRichieste(`ponte:${nome}:${ip}`, req.method === 'POST' ? 60 : 180)) {
+    return manda(429, { ok: false, errore: 'troppe richieste: aspetta un momento' })
+  }
   const opz = serverOpzioni()
-  const manda = (status, body, cache = 'no-store') => { res.statusCode = status; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', cache); res.end(typeof body === 'string' ? body : JSON.stringify(body)) }
   const pausa = { ok: false, offline: true, errore: 'la banca è in pausa (il server di pzkko è spento): riprova fra poco' }
   if (!opz || serverGiu()) return manda(503, pausa, 'public, s-maxage=5')
   let testo = ''
   if (req.method === 'POST') {
+    if (!/^application\/json\b/i.test(String(req.headers['content-type'] || ''))) {
+      return manda(415, { ok: false, errore: 'serve application/json' })
+    }
     try {
       if (req.body !== undefined && req.body !== null) testo = typeof req.body === 'string' ? req.body : JSON.stringify(req.body)
       else { const parti = []; let n = 0; for await (const p of req) { n += p.length; if (n > max) throw new Error('troppo'); parti.push(p) } testo = Buffer.concat(parti).toString('utf8') }
     } catch { return manda(400, { ok: false, errore: 'richiesta sbagliata' }) }
     if (testo.length > max) return manda(413, { ok: false, errore: 'richiesta troppo grande' })
-  } else if (req.method !== 'GET' && req.method !== 'HEAD') { res.setHeader('Allow', 'GET, POST'); return manda(405, { ok: false, errore: 'solo GET e POST' }) }
-  const q = new URL(req.url, 'http://x').search
-  const busta = JSON.stringify({ m: req.method === 'HEAD' ? 'GET' : req.method, q, ip: String(req.headers['x-forwarded-for'] || '').split(',')[0].trim().slice(0, 64), ua: String(req.headers['user-agent'] ?? '').slice(0, 200), corpo: testo })
+  }
+  let q = ''
+  try { q = new URL(req.url || '/', 'http://x').search } catch { return manda(400, { ok: false, errore: 'richiesta sbagliata' }) }
+  const busta = JSON.stringify({ m: req.method === 'HEAD' ? 'GET' : req.method, q, ip, ua: String(req.headers['user-agent'] ?? '').slice(0, 200), corpo: testo })
   let r
   try { r = await chiama(opz, 'PUT', null, { corpo: busta, indirizzo: `/v1/api/${nome}` }) } catch (e) { console.warn(`ponte ${nome}:`, e.message); return manda(503, pausa) }
   let d
   try { d = JSON.parse(r.testo.toString('utf8')) } catch { return manda(502, { ok: false, errore: 'la banca ha risposto male' }) }
-  return manda(d.status ?? 200, d.corpo ?? '{}', d.cache ?? 'no-store')
+  const status = Number.isInteger(d.status) && d.status >= 200 && d.status <= 599 ? d.status : 200
+  const cache = typeof d.cache === 'string' && /^[a-z0-9 ,=-]{0,120}$/i.test(d.cache) ? d.cache : 'no-store'
+  return manda(status, d.corpo ?? '{}', cache)
 }
 
 /**

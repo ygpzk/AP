@@ -5,6 +5,27 @@
   "buildCommand": "npm run build",
   "outputDirectory": "public",
   "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.pzkko.it"
+        }
+      ],
+      "destination": "https://pzkko.it/$1",
+      "permanent": true
+    }
+  ],
+  "functions": {
+    "api/wallet.mjs": { "maxDuration": 30 },
+    "api/borsa.mjs": { "maxDuration": 30 },
+    "api/giocatori.mjs": { "maxDuration": 30 },
+    "api/firme.mjs": { "maxDuration": 30 },
+    "api/stato.mjs": { "maxDuration": 30 },
+    "api/meteo.mjs": { "maxDuration": 15 }
+  },
   "headers": [
     {
       "source": "/.well-known/discord",
@@ -20,11 +41,15 @@
       ]
     },
     {
-      "source": "/art/(.*)",
+      "source": "/.well-known/security.txt",
       "headers": [
         {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        },
+        {
           "key": "Cache-Control",
-          "value": "public, max-age=2592000"
+          "value": "public, max-age=3600"
         }
       ]
     },
@@ -38,11 +63,11 @@
       ]
     },
     {
-      "source": "/assets/flags/(.*)",
+      "source": "/art/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=2592000"
+          "value": "public, max-age=2592000, stale-while-revalidate=604800"
         }
       ]
     },
@@ -51,7 +76,65 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=2592000"
+          "value": "public, max-age=2592000, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=300, s-maxage=31536000, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
+      "source": "/me.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/favicon.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/apple-touch-icon.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/og.png",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/direttaos/DirettaOS-Setup.exe",
+      "headers": [
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=DirettaOS-Setup.exe"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
         }
       ]
     },
@@ -60,7 +143,7 @@
       "headers": [
         {
           "key": "Strict-Transport-Security",
-          "value": "max-age=31536000"
+          "value": "max-age=63072000; includeSubDomains; preload"
         },
         {
           "key": "X-Content-Type-Options",
@@ -71,16 +154,36 @@
           "value": "SAMEORIGIN"
         },
         {
+          "key": "X-XSS-Protection",
+          "value": "0"
+        },
+        {
+          "key": "X-Permitted-Cross-Domain-Policies",
+          "value": "none"
+        },
+        {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
         },
         {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Cross-Origin-Resource-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Origin-Agent-Cluster",
+          "value": "?1"
+        },
+        {
           "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+          "value": "accelerometer=(), autoplay=(self), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(self), display-capture=(), encrypted-media=(), fullscreen=(self), gamepad=(self), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), usb=(), web-share=(), xr-spatial-tracking=()"
         },
         {
           "key": "Content-Security-Policy",
-          "value": "frame-ancestors 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-0r1y39vuI+p/Uq/EB6dMiDlVbFrR5wHqMuhV37yPB0k=' 'sha256-Aoc4MmsVaIszKBo1vTKadu3wwIKrInkYyG/VfAxRZtc=' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo=' 'sha256-NYWQ8pu7WmEwIfN9TH64qRUtd4ktc6kNpNODvjDyO4w=' 'sha256-OXmLHwvbvD5IW3xzaf0YHkgbBKRsa9KSMFNraF1fCpI=' 'sha256-P80Sgt+KtpHzg+JCTuwZ/CY0na2tthXrn5MkI+Akpqc=' 'sha256-UBO1ffjKEKsDeZtVJymRLvFnG7d0KSMacxzWIVr1D54=' 'sha256-XQxYiw5oLAr7fW3Yv3itz4T9ONiRMHhPl87lNwJFQp4=' 'sha256-aSHlEHUXp/3pQXB3jJhyYbF7+sx3HqeLI1GdYXmv0Bg=' 'sha256-dK8ZJSczlPmvwGBE1uUFduk3CKz/GXT4BhuPqABmV0Y=' 'sha256-m75/m7enboELz+m0/I07DgWwjCQ2Gqq4TXsOHC7U3JI=' 'sha256-wHWjdfu7Z9KBM23x5nC7y4k3mEWpvXC+Zjt7TJrJz68='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://dcdn.dstn.to https://tile.openstreetmap.org https://thumb.wikimedia.org https://upload.wikimedia.org https://i.imgur.com; font-src 'self'; connect-src 'self' https://api.lanyard.rest wss://api.lanyard.rest https://dcdn.dstn.to https://discord.com https://cdn.discordapp.com https://media.discordapp.net https://tiles.openfreemap.org https://api.bigdatacloud.net; media-src 'self' blob:; worker-src 'self' blob:; frame-src 'self' https://www.google.com https://maps.google.com https://consent.google.com; manifest-src 'self'; upgrade-insecure-requests"
         }
       ]
     }
