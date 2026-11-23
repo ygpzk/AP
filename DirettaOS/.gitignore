@@ -1,0 +1,35 @@
+# le foto della webcam (c'è la mia faccia), il punto vero del meteo e lo stato dell'ultima diretta restano sul pc
+riferimenti/
+config.locale.json
+stato.json
+stato-prova.json
+# le foto ufficiali di tastiera, mouse e controller sono di Logitech e Sony: restano sul pc (il README dice da dove vengono)
+foto/
+# il modello dei volti è di Ultra-Light Face Detector (MIT): resta sul pc, il README dice da dove viene
+modelli/
+# (ma il modello delle persone, Apache 2.0, sta nel repository: serve al corpo davanti ai muri)
+!modelli/
+modelli/*
+!modelli/persone/
+!modelli/persone/**
+diretta.log
+# le icone dei programmi aperti (le salva macchina.ps1, sono di chi ha fatto i programmi)
+cache/
+# le lezioni «impara come bevo» (video e impronte della mia faccia) e il giudice allenato su di me: restano sul pc
+impara/
+bevo.log
+bevo-prima.log
+# le copie di sicurezza prima di un aggiornamento grosso
+copie/
+
+# gli stati scritti a metà (stato.json si scrive accanto e poi si scambia)
+*.json.nuovo
+*.json.uscita
+
+# il build dell'installer e le catture per il sito (si rifanno con installer\build.ps1)
+installer/build/
+installer/icona-256.png
+installer/icona.png
+catture-sito/
+sito.log
+sito.err.log

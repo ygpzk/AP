@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DualSense dal vivo</title>
+<style>
+  html, body { margin: 0; height: 100%; background: transparent; }
+  body { display: grid; place-items: center; }
+  #pad { width: min(92vw, 150vh); }
+</style>
+</head>
+<body>
+<!-- Il DualSense da solo, grande, su sfondo trasparente. Con Diretta OS acceso lo muove il sensore del pc (anche a
+     finestra non in primo piano); con «?browser» lo muove il browser (Gamepad API). -->
+<div id="pad"></div>
+<script type="module">
+import { creaDualSense, daBrowser } from './dualsense.js'
+const pad = creaDualSense()
+document.getElementById('pad').append(pad.el)
+if (new URLSearchParams(location.search).has('browser')) daBrowser(pad.aggiorna)
+else { const filo = new EventSource('/api/flusso?pad'); filo.addEventListener('pad', (e) => pad.aggiorna(JSON.parse(e.data))) }
+if (new URLSearchParams(location.search).has('prova')) window.__prova = pad
+</script>
+</body>
+</html>

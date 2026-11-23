@@ -1,0 +1,2014 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diretta OS · Regia</title>
+<link rel="icon" href="/logo.svg">
+<!--
+  Diretta OS · la regia. Quattro zone fisse, ognuna fa una cosa sola:
+  · SORGENTI (a sinistra): l'elenco di tutte le sorgenti, per gruppo, con l'interruttore on air. Resta sempre lì.
+  · MONITOR (al centro): l'uscita di Camo (live) o il fotogramma di riferimento; le sorgenti si selezionano, si
+    spostano, si scalano e si ruotano qui. Sopra, la barra con l'ottica; sotto, la riga di stato con «Annulla».
+  · CONTROLLI (sotto il monitor, a schede): Pausa · Podcast · TV. Una scheda alla volta.
+  · PROPRIETÀ (a destra): la sorgente selezionata. Trasformazione (ancoraggio, X/Y, scala, rotazione, specchio),
+    Regolazioni (come il pannello di Camo: opacità, luminosità, contrasto… con la leva e il cursore), Parametri
+    (quello che è solo suo), Sorgente browser (il suo indirizzo per Camo).
+  In basso a sinistra lo stato del server e del tracking; l'ingranaggio apre la Configurazione, a pagine (ottica,
+  fotogramma di riferimento, piani prospettici, URL, TV, aspetto).
+  I colori sono tutti variabili: il tema «Discord» (verde chiaro) e quello scuro si scambiano da Configurazione → Aspetto.
+-->
+<script>try { document.documentElement.dataset.tema = localStorage.getItem('regia-tema') || 'discord' } catch {}</script>
+<style>
+@font-face { font-family: "gg sans"; font-weight: 400; src: url(/fonts/ggsans-400.woff2) format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 500; src: url(/fonts/ggsans-500.woff2) format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 600; src: url(/fonts/ggsans-600.woff2) format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 700; src: url(/fonts/ggsans-700.woff2) format("woff2"); }
+@font-face { font-family: "gg mono"; font-weight: 400; src: url(/fonts/ggmono-400.woff2) format("woff2"); }
+@font-face { font-family: "gg mono"; font-weight: 700; src: url(/fonts/ggmono-700.woff2) format("woff2"); }
+/* Il tema Discord (verde chiaro): la striscia e la colonna delle icone (--rail), le sorgenti (--lato), il banco
+   (--fondo), i riquadri (--carta). --p (lime) è solo per quello che si disegna sopra il video. */
+:root {
+  --rail: #6bfe6b; --lato: #80ff80; --fondo: #aeffae; --carta: #dbffdb; --chiaro: #f1fff1;
+  --testo: #0c1a0e; --tenue: #2f5235; --riga: rgba(0, 70, 10, .18); --vetro: rgba(0, 80, 14, .08); --vetro-2: rgba(0, 80, 14, .16);
+  --blu: #5865f2; --blu-2: #4752c4; --su-blu: #fff;
+  --verde: #0b7a33; --rosso: #d22b38; --giallo: #8a5200; --arancio: #b0480a; --rosa: #eb459e; --ambra: #f0b232; --a: #7a2be0;
+  --avv-t: #4d3000; --avv-f: rgba(240, 178, 50, .26); --err-t: #8a121c; --err-f: rgba(210, 43, 56, .12);
+  --ombra: 0 8px 24px rgba(0, 60, 10, .2); --p: #ccff00;
+  --barra: 28px; --testa: 46px; --rail-w: 60px; --lato-w: 292px; --prop-w: 336px; color-scheme: light;
+}
+html[data-tema=scuro] {
+  --rail: #0b090e; --lato: #121016; --fondo: #0e0c12; --carta: #1a161f; --chiaro: #0b090e;
+  --testo: #f2eef6; --tenue: #a69fb0; --riga: rgba(255, 255, 255, .1); --vetro: rgba(255, 255, 255, .05); --vetro-2: rgba(255, 255, 255, .11);
+  --blu: #ccff00; --blu-2: #a8d400; --su-blu: #0b090e;
+  --verde: #2dff7a; --rosso: #ff5560; --giallo: #f0b232; --arancio: #ff8a3d; --a: #9d00ff;
+  --avv-t: #ffdca8; --avv-f: rgba(240, 178, 50, .13); --err-t: #ff9aa2; --err-f: rgba(255, 61, 74, .1);
+  --ombra: 0 12px 34px rgba(0, 0, 0, .55); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--fondo); color: var(--testo); font: 500 14px/1.35 "gg sans", "Noto Sans", "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden;
+  display: grid; grid-template-columns: var(--rail-w) var(--lato-w) minmax(0, 1fr) var(--prop-w); grid-template-rows: var(--barra) minmax(0, 1fr); grid-template-areas: "barra barra barra barra" "rail lato palco prop"; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--vetro-2); border-radius: 5px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-track { background: transparent; }
+::selection { background: color-mix(in srgb, var(--blu) 35%, transparent); }
+button { font: inherit; font-weight: 600; color: var(--testo); background: var(--vetro); border: 1px solid var(--riga); border-radius: 6px; padding: 6px 11px; cursor: pointer; transition: background .12s, border-color .12s, color .12s; }
+button:hover { background: var(--vetro-2); }
+button:active { transform: translateY(1px); }
+button:disabled { opacity: .45; cursor: default; transform: none; }
+button:focus-visible, [role=switch]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible, summary:focus-visible { outline: 2px solid var(--blu); outline-offset: 2px; }
+button.forte { background: var(--blu); color: var(--su-blu); border-color: transparent; font-weight: 700; }
+button.forte:hover { background: var(--blu-2); }
+button.fatto { color: var(--verde); border-color: var(--verde); }
+button.piccolo { padding: 3px 9px; font-size: 12px; }
+button[aria-pressed=true]:not(.cam) { background: var(--testo); color: var(--carta); border-color: transparent; }
+input[type=text], input[type=number], input[type=time], input[type=search], select, textarea { font: 600 14px/1.2 "gg sans"; color: var(--testo); background: var(--chiaro); border: 1px solid var(--riga); border-radius: 6px; padding: 6px 8px; width: 100%; min-width: 0; }
+input::placeholder { color: var(--tenue); opacity: .75; font-weight: 500; }
+input[type=range] { width: 100%; margin: 0; accent-color: var(--blu); }
+code { font: 400 12px "gg mono", Consolas, monospace; background: var(--vetro); padding: 2px 6px; border-radius: 4px; color: var(--testo); }
+kbd { font: 700 11px "gg mono", monospace; padding: 1px 5px; border-radius: 4px; background: var(--chiaro); border: 1px solid var(--riga); border-bottom-width: 2px; color: var(--testo); white-space: nowrap; }
+a { color: var(--blu-2); font-weight: 700; }
+html[data-tema=scuro] a { color: var(--blu); }
+.nota { color: var(--tenue); font-size: 12.5px; margin: 8px 0 0; }
+.nota b { color: var(--testo); font-weight: 700; }
+.riga { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.box { background: var(--vetro); border: 1px solid var(--riga); border-radius: 8px; overflow: hidden; }
+.scelta { display: inline-flex; flex-wrap: wrap; background: var(--vetro); border: 1px solid var(--riga); border-radius: 7px; padding: 2px; gap: 2px; }
+.scelta button { border: 0; background: none; padding: 4px 10px; border-radius: 5px; }
+.scelta button:hover { background: var(--vetro-2); }
+.scelta button[aria-pressed=true] { background: var(--testo); color: var(--carta); }
+/* le leve */
+.leva { position: relative; width: 34px; height: 20px; border-radius: 10px; background: var(--vetro-2); box-shadow: inset 0 0 0 1px var(--riga); flex: none; transition: background .15s; }
+.leva::after { content: ""; position: absolute; left: 3px; top: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .35); transition: transform .15s; }
+[aria-checked=true] > .leva, [aria-checked=true] .leva { background: var(--verde); }
+[aria-checked=true] > .leva::after, [aria-checked=true] .leva::after { transform: translateX(14px); }
+[role=switch] { cursor: pointer; }
+.pezzo-r { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-top: 1px solid var(--riga); cursor: pointer; }
+.pezzo-r:first-child { border-top: 0; }
+.pezzo-r:hover { background: var(--vetro); }
+.pezzo-r .testo { flex: 1; min-width: 0; }
+.pezzo-r b { font-weight: 600; display: block; }
+.pezzo-r small { display: block; color: var(--tenue); font-size: 12px; }
+.tinta { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-right: 6px; box-shadow: 0 0 0 2px var(--riga); }
+.avviso { border-left: 3px solid var(--ambra); background: var(--avv-f); color: var(--avv-t); padding: 7px 10px; border-radius: 4px; font-size: 12.5px; margin-top: 10px; }
+.campo { display: grid; grid-template-columns: 82px minmax(0, 1fr) auto; align-items: center; gap: 8px; margin-top: 8px; }
+.campo > span:first-child { color: var(--tenue); font-size: 12.5px; font-weight: 600; }
+.campo > b { font: 700 12px/1 "gg mono", monospace; min-width: 50px; text-align: right; }
+.pallino { display: inline-flex; align-items: center; gap: 7px; color: var(--tenue); font-size: 12.5px; white-space: nowrap; min-width: 0; }
+.pallino i { width: 8px; height: 8px; border-radius: 50%; background: var(--rosso); flex: none; }
+.pallino.su i { background: var(--verde); }
+.pallino.forse i { background: var(--ambra); }
+.pallino.spento i { background: none; box-shadow: inset 0 0 0 2px var(--tenue); }
+/* il led di una sorgente: pieno = on air */
+.led { width: 8px; height: 8px; flex: none; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--tenue); }
+.su > .vai .led, .led.su { background: var(--verde); box-shadow: 0 0 0 3px color-mix(in srgb, var(--verde) 22%, transparent); }
+/* l'intestazione di una zona */
+.zt { display: flex; align-items: center; gap: 8px; height: var(--testa); flex: none; padding: 0 12px 0 14px; border-bottom: 1px solid var(--riga); }
+.zt h1, .zt h2 { margin: 0; font: 700 12px/1 "gg sans"; letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
+.zt .conta-z { margin-left: auto; font: 700 11px/1 "gg mono", monospace; color: var(--tenue); white-space: nowrap; }
+
+/* ── la striscia del titolo ── */
+.barra { grid-area: barra; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--rail); border-bottom: 1px solid var(--riga); font: 700 12.5px/1 "gg sans"; white-space: nowrap; min-width: 0; }
+.barra img { width: 16px; height: 16px; }
+.barra small { color: var(--tenue); font: 700 10.5px/1 "gg sans"; letter-spacing: .08em; text-transform: uppercase; }
+
+/* ── la colonna delle icone: i gruppi di sorgenti (il numero: quante on air), poi i piani e la tv ── */
+.rail { grid-area: rail; background: var(--rail); display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 0 128px; overflow: hidden auto; scrollbar-width: none; }
+.rail::-webkit-scrollbar { display: none; }
+.rail button, .rail a { position: relative; width: 40px; height: 40px; flex: none; padding: 0; display: grid; place-items: center; border: 0; border-radius: 12px; background: var(--vetro); color: var(--testo); }
+.rail button:hover, .rail a:hover { background: var(--blu); color: var(--su-blu); }
+.rail svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.rail .casa { background: var(--testo); color: var(--rail); }
+.rail .tondo { border-radius: 50%; }
+.rail hr { width: 28px; flex: none; border: 0; border-top: 1px solid var(--riga); margin: 2px 0; }
+.rail .conta { position: absolute; right: -4px; bottom: -4px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--testo); color: var(--carta); font: 700 10px/16px "gg mono", monospace; box-shadow: 0 0 0 2px var(--rail); pointer-events: none; }
+.rail .conta:empty { display: none; }
+
+/* ── zona 1 · sorgenti ── */
+.lato { grid-area: lato; background: var(--lato); border-left: 1px solid var(--riga); min-height: 0; display: flex; flex-direction: column; }
+.lista { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 8px 128px; }
+.cerca { height: 30px; padding: 0 9px !important; font-weight: 500 !important; font-size: 13px !important; }
+.lista h2 { margin: 14px 0 3px; padding: 0 2px 0 8px; min-height: 24px; font: 700 11px/1.2 "gg sans"; letter-spacing: .07em; text-transform: uppercase; color: var(--tenue); display: flex; align-items: center; gap: 8px; }
+.lista h2 .poi { margin-left: auto; display: flex; gap: 4px; font-weight: 600; letter-spacing: 0; text-transform: none; font-size: 11.5px; }
+.lista h2 .piccolo { padding: 2px 7px; font-size: 11px; }
+.lista .box { background: none; border: 0; border-radius: 0; overflow: visible; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1px; }
+.lista .pezzo-r { border-top: 0; border-radius: 6px; padding: 0 6px 0 0; min-height: 34px; gap: 6px; }
+.lista .pezzo-r .vai { flex: 1; min-width: 0; align-self: stretch; display: flex; align-items: center; gap: 10px; padding: 0 0 0 10px; }
+.lista .pezzo-r .vai b { font-weight: 500; font-size: 13.5px; color: var(--tenue); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lista .pezzo-r.su .vai b { color: var(--testo); font-weight: 600; }
+.lista .pezzo-r .dove { font: 700 9.5px/1.7 "gg mono", monospace; letter-spacing: .03em; text-transform: uppercase; white-space: nowrap; }
+.lista .pezzo-r .dove.muro, .lista .pezzo-r .reg-tag { padding: 0 5px; border-radius: 3px; background: var(--vetro-2); }
+.lista .pezzo-r .reg-tag { font: 700 9.5px/1.7 "gg mono", monospace; letter-spacing: .03em; }
+.lista .pezzo-r .rete-stato { font-size: 11.5px; font-weight: 600; color: var(--tenue); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.lista .pezzo-r .rete-stato.su { color: var(--verde); }
+.lista .pezzo-r .rete-stato.attesa { color: var(--giallo); }
+.lista .pezzo-r .rete-stato.persa { color: var(--arancio); }
+.lista .pezzo-r .torna { font: 700 9.5px/1.7 "gg mono", monospace; text-transform: uppercase; color: #3d2600; background: var(--ambra); padding: 0 5px; border-radius: 3px; white-space: nowrap; }
+.lista .pezzo-r.scelto { background: var(--vetro-2); box-shadow: inset 2px 0 0 var(--blu); }
+.lista .pezzo-r.scelto .vai b { color: var(--testo); }
+.lista .vuoto { padding: 10px; color: var(--tenue); font-size: 12.5px; }
+
+/* ── in basso a sinistra: server, tracking, camera, GPU, configurazione ── */
+.pannello { position: fixed; left: 6px; bottom: 6px; width: calc(var(--rail-w) + var(--lato-w) - 12px); z-index: 4; display: grid; gap: 8px; padding: 9px; border-radius: 8px; background: var(--carta); border: 1px solid var(--riga); box-shadow: var(--ombra); }
+.pn-filo { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.pn-filo > img { width: 30px; height: 30px; flex: none; padding: 5px; border-radius: 50%; background: var(--testo); }
+.pn-filo > div { flex: 1; min-width: 0; display: grid; gap: 2px; }
+#filo { font-weight: 700; color: var(--rosso); }
+#filo.su { color: var(--verde); }
+#filo span, #occhio-chip span { overflow: hidden; text-overflow: ellipsis; }
+.pn-tasti { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.cam { padding: 6px 8px; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cam.libera, .cam.gpu[aria-pressed=true] { background: var(--ambra); color: #2e1c00; border-color: transparent; font-weight: 700; }
+.icona { width: 30px; height: 30px; flex: none; padding: 0; display: grid; place-items: center; border: 0; background: none; border-radius: 6px; color: var(--tenue); }
+.icona:hover { background: var(--vetro-2); color: var(--testo); }
+.icona svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── zona 2 · monitor ── */
+.palco { grid-area: palco; display: flex; flex-direction: column; min-width: 0; min-height: 0; border-left: 1px solid var(--riga); }
+.testa { height: var(--testa); flex: none; display: flex; align-items: center; gap: 10px; padding: 0 12px 0 14px; border-bottom: 1px solid var(--riga); min-width: 0; }
+.testa h1 { margin: 0; font: 700 12px/1 "gg sans"; letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
+.testa .sep { width: 1px; height: 22px; flex: none; background: var(--riga); }
+.testa .et { color: var(--tenue); font: 700 11px/1 "gg sans"; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; margin-right: -4px; }
+.veloci { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.veloce { display: flex; align-items: center; gap: 2px; background: var(--vetro); border: 1px solid var(--riga); border-radius: 7px; padding: 2px; }
+.veloce > button { border: 0; background: none; padding: 4px 8px; border-radius: 5px; white-space: nowrap; font-size: 12.5px; }
+.veloce > button:hover { background: var(--vetro-2); }
+.veloce > button b { font: 700 12.5px/1 "gg mono", monospace; margin-left: 4px; font-variant-numeric: tabular-nums; }
+.veloce > button.forte { background: var(--blu); color: var(--su-blu); }
+.veloce > button.forte:hover { background: var(--blu-2); }
+.veloce .tardi { color: var(--rosso) !important; }
+.palco-dentro { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; padding: 10px 12px 12px; }
+/* l'anteprima: grande quanto ci sta nel suo spazio (in larghezza e in altezza), sempre 16:9 */
+.monitor { flex: 1; min-height: 0; container-type: size; display: grid; place-items: center; }
+.anteprima { position: relative; width: min(100cqw, calc(100cqh * 16 / 9)); aspect-ratio: 16 / 9; border-radius: 6px; overflow: hidden; border: 1px solid var(--riga); background: #000; touch-action: none; user-select: none; }
+.anteprima iframe { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border: 0; transform-origin: 0 0; pointer-events: none; }
+.anteprima .sagome { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; overflow: visible; }
+.sagome polygon { fill: none; stroke: rgba(255, 255, 255, .3); stroke-width: 1; stroke-dasharray: 5 5; }
+.sagome polygon.sopra { stroke: var(--p); stroke-width: 2; stroke-dasharray: 7 5; fill: rgba(204, 255, 0, .05); }
+.sagome polygon.scelto { stroke: var(--p); stroke-width: 2; stroke-dasharray: none; fill: rgba(204, 255, 0, .06); }
+.sagome polygon.tiene { fill: rgba(204, 255, 0, .1); }
+.sagome .mani rect { fill: #0b090e; stroke: var(--p); stroke-width: 2; }
+.sagome text { font-family: "gg sans"; font-weight: 700; fill: #0b090e; paint-order: stroke; stroke: var(--p); stroke-linejoin: round; }
+.sagome text.tenue { fill: #fff; stroke: rgba(11, 9, 14, .85); font-weight: 600; }
+.anteprima .mano { position: absolute; inset: 0; z-index: 3; cursor: default; }
+.anteprima .mano.sopra { cursor: grab; }
+.anteprima .mano.tiene { cursor: grabbing; }
+.anteprima .mano.angolo { cursor: nwse-resize; }
+.anteprima .mano.angolo2 { cursor: nesw-resize; }
+.anteprima.insegna .mano, .anteprima.disegna .mano { cursor: crosshair; }
+.anteprima.disegna::after, .anteprima.insegna::after { position: absolute; left: 50%; top: 10px; translate: -50% 0; z-index: 5; padding: 5px 12px; border-radius: 6px; background: var(--rosa); color: #fff; font: 700 13px/1.3 "gg sans"; pointer-events: none; }
+.anteprima.disegna::after { content: "Trascina un rettangolo sulla ROI di tracking"; }
+.anteprima.insegna::after { content: "Clic sull’oggetto da tracciare"; }
+.anteprima .zona { position: absolute; border: 2px dashed var(--rosa); border-radius: 4px; pointer-events: none; display: none; background: rgba(235, 69, 158, .08); z-index: 2; }
+.anteprima .zona span { position: absolute; left: -2px; top: 100%; margin-top: 3px; padding: 1px 6px; border-radius: 4px; background: var(--rosa); color: #fff; font: 700 10.5px/1.5 "gg mono", monospace; white-space: nowrap; }
+.anteprima .libera { position: absolute; left: 50%; top: 12px; translate: -50% 0; z-index: 6; display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 12px; border-radius: 8px; background: var(--carta); border: 1px solid var(--ambra); box-shadow: 0 10px 30px rgba(0, 0, 0, .5); font-weight: 700; font-size: 13px; white-space: nowrap; }
+.anteprima .libera i { width: 8px; height: 8px; border-radius: 50%; background: var(--ambra); animation: pulsa 1.2s ease-in-out infinite; }
+@keyframes pulsa { 50% { opacity: .3; } }
+/* la riga di stato: cosa puoi fare adesso, e «annulla» */
+.dice-r { flex: none; display: flex; align-items: center; gap: 10px; min-height: 34px; padding: 3px 4px 3px 12px; border-radius: 6px; background: var(--carta); border: 1px solid var(--riga); }
+.dice-r .aiuto { flex: 1; min-width: 0; color: var(--tenue); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dice-r .aiuto b { color: var(--testo); font-weight: 700; }
+.dice-r #annulla { flex: none; }
+
+/* ── zona 3 · controlli: una scheda alla volta (pausa, podcast, tv) ── */
+.dock { flex: none; border-radius: 6px; background: var(--carta); border: 1px solid var(--riga); }
+.dock-t { display: flex; align-items: center; gap: 2px; padding: 4px 4px 0; border-bottom: 1px solid var(--riga); }
+.dock-t > button { border: 0; background: none; border-radius: 5px 5px 0 0; padding: 6px 12px 7px; font: 700 11px/1 "gg sans"; letter-spacing: .07em; text-transform: uppercase; color: var(--tenue); display: flex; align-items: center; gap: 7px; margin-bottom: -1px; border-bottom: 2px solid transparent; }
+.dock-t > button:hover { background: var(--vetro); color: var(--testo); }
+.dock-t > button[aria-selected=true] { color: var(--testo); border-bottom-color: var(--blu); background: none; }
+.dock-t > button i { width: 7px; height: 7px; border-radius: 50%; background: var(--rosso); display: none; }
+.dock-t > button.viva i { display: block; }
+.dock-t .dock-nota { margin-left: auto; padding: 0 8px; color: var(--tenue); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.dock-p { padding: 8px; min-height: 52px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.via-r { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; }
+.via-r button { flex: 1 1 96px; min-width: 0; padding: 8px 6px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.via-r button[aria-pressed=true] { background: var(--a); border-color: transparent; color: #fff; }
+.cast-r, .tv-r { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; }
+.cast-r button { padding: 7px 12px; white-space: nowrap; }
+.cast-r .cast-dice { flex: 1 1 200px; min-width: 0; color: var(--tenue); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cast-r .cast-dice b { color: var(--testo); font-weight: 700; }
+.cast-r .cast-dice .onda { color: var(--rosso); font-weight: 700; letter-spacing: .04em; }
+.cast-r .cast-tv { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: var(--tenue); white-space: nowrap; cursor: pointer; }
+.cast-r .cast-tv i { width: 8px; height: 8px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--tenue); }
+.cast-r .cast-tv.su { color: var(--verde); }
+.cast-r .cast-tv.su i { background: var(--verde); box-shadow: none; }
+.tv-r .scelta button { padding: 6px 11px; white-space: nowrap; }
+.tv-r .tv-piu { flex: 1 1 260px; min-width: 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.tv-r .tv-piu input { flex: 1 1 160px; min-width: 120px; }
+.tv-r .tv-nomi:empty { display: none; }
+
+/* ── zona 4 · proprietà della sorgente selezionata ── */
+.prop { grid-area: prop; background: var(--lato); border-left: 1px solid var(--riga); min-height: 0; display: flex; flex-direction: column; }
+.prop-c { flex: 1; min-height: 0; overflow-y: auto; }
+.sc-testa { padding: 12px 14px; border-bottom: 1px solid var(--riga); }
+.sc-titolo { display: flex; align-items: center; gap: 10px; }
+.sc-titolo h3 { flex: 1; min-width: 0; margin: 0; font: 700 15px/1.2 "gg sans"; overflow-wrap: anywhere; }
+.sc-titolo [role=switch] { display: flex; align-items: center; gap: 7px; color: var(--tenue); font: 700 10.5px/1 "gg sans"; letter-spacing: .07em; text-transform: uppercase; }
+.sc-id { margin-top: 5px; display: flex; align-items: center; gap: 6px; font: 400 11.5px/1 "gg mono", monospace; color: var(--tenue); }
+.sc-dice { margin-top: 8px; }
+.sc-torna { margin: 8px 0 0; font-size: 12.5px; font-weight: 600; color: var(--giallo); }
+/* le sezioni che si aprono e si chiudono (come «Regolazioni» in Camo) */
+.sez { border-bottom: 1px solid var(--riga); }
+.sez > summary { list-style: none; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 10px 0 14px; cursor: pointer; font: 700 11px/1 "gg sans"; letter-spacing: .07em; text-transform: uppercase; user-select: none; }
+.sez > summary::-webkit-details-marker { display: none; }
+.sez > summary::after { content: ""; width: 7px; height: 7px; margin: 0 5px 3px auto; border: solid var(--tenue); border-width: 0 2px 2px 0; transform: rotate(45deg); transition: transform .15s; }
+.sez:not([open]) > summary::after { transform: rotate(-45deg); margin-bottom: 0; }
+.sez > summary:hover { background: var(--vetro); }
+.sez > summary .sez-az { margin-left: auto; display: flex; gap: 2px; }
+.sez > summary .sez-az + i { display: none; }
+.sez > summary:has(.sez-az)::after { margin-left: 4px; }
+.sez > summary .icona { width: 26px; height: 26px; }
+.sez > summary .icona svg { width: 15px; height: 15px; }
+.sez-c { padding: 2px 14px 14px; }
+.sc-dove { font-size: 12.5px; color: var(--tenue); }
+.sc-dove b { color: var(--testo); font-weight: 700; }
+.campo2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.campo2 label { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; }
+.campo2 span { color: var(--tenue); font: 700 11px/1 "gg mono", monospace; }
+.campo2 input { font: 700 12.5px/1.2 "gg mono", monospace; padding: 5px 7px; }
+.tasti4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+.tasti4 button { padding: 6px 2px; font-size: 12px; display: grid; justify-items: center; gap: 3px; }
+.tasti4 svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.sc-bottoni { margin-top: 10px; }
+.sc-bottoni button { flex: 1 1 0; white-space: nowrap; font-size: 12.5px; padding: 6px 8px; }
+/* una regolazione: il nome, il valore e la leva; sotto, il cursore (doppio clic: torna al neutro) */
+.reg { padding: 7px 0 3px; }
+.reg + .reg { border-top: 1px solid var(--riga); }
+.reg-t { display: flex; align-items: center; gap: 8px; }
+.reg-t span { flex: 1; font-weight: 600; font-size: 13px; }
+.reg-t b { font: 700 12px/1 "gg mono", monospace; color: var(--tenue); font-variant-numeric: tabular-nums; }
+.reg.su .reg-t b { color: var(--testo); }
+.reg input[type=range] { display: block; margin-top: 5px; opacity: .55; }
+.reg.su input[type=range] { opacity: 1; }
+.reg-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: 10px; margin-top: 4px; border-top: 1px solid var(--riga); }
+.reg-2 label { display: grid; gap: 4px; }
+.reg-2 span { color: var(--tenue); font-size: 12.5px; font-weight: 600; }
+.sc-suo:empty { display: none; }
+.sc-url { display: flex; align-items: center; gap: 6px; }
+.sc-url code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 6px 8px; }
+.vuota-p > .nota { padding: 12px 14px; margin: 0; border-bottom: 1px solid var(--riga); }
+.pila { display: grid; gap: 6px; }
+.pila button { text-align: left; }
+dl.tasti { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 10px; font-size: 12.5px; align-items: baseline; }
+dl.tasti dt { white-space: nowrap; }
+dl.tasti dd { margin: 0; color: var(--tenue); }
+/* i parametri delle singole sorgenti */
+.grosso { font: 700 30px/1 "gg mono", monospace; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.grosso.tardi { color: var(--rosso); }
+.rb-n { font: 700 38px/1 "gg mono", monospace; min-width: 52px; text-align: center; }
+.spie-r { display: grid; gap: 6px; }
+.spie-r div { background: var(--vetro); border: 1px solid var(--riga); border-radius: 6px; padding: 8px 10px; }
+.spie-r i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--rosso); margin-right: 8px; }
+.spie-r .ok i { background: var(--verde); }
+.spie-r small { display: block; color: var(--tenue); font-size: 12px; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mic-barra { height: 5px; border-radius: 3px; background: var(--vetro-2); margin-top: 7px; overflow: hidden; padding: 0 !important; border: 0 !important; }
+.mic-barra b { display: block; height: 100%; width: 0; background: var(--verde); transition: width .06s linear; }
+.so-r { display: grid; grid-template-columns: minmax(0, 1fr) 88px; align-items: center; gap: 8px; padding: 6px 8px; border-top: 1px solid var(--riga); }
+.so-r:first-child { border-top: 0; }
+.so-si { display: flex; align-items: center; gap: 8px; min-width: 0; cursor: pointer; }
+.so-si svg { width: 22px; height: 22px; flex: none; padding: 3px; border-radius: 5px; background: #111214; } /* (le icone dei marchi sono fatte per lo scuro) */
+.so-si .testo { min-width: 0; line-height: 1.2; }
+.so-si b { font-weight: 600; display: block; font-size: 13px; }
+.so-si small { color: var(--tenue); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.so-r input { padding: 5px 7px; }
+.so-r:has(.so-si[aria-checked=false]) input, .so-r:has(.so-si[aria-checked=false]) .testo { opacity: .5; }
+#parcheggio { display: none; }
+.bandiere { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 5px; }
+.bandiere button { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 8px 3px 6px; font-size: 11px; line-height: 1.15; text-align: center; min-width: 0; }
+.bandiere img { width: 54px; height: 36px; object-fit: contain; border-radius: 2px; box-shadow: 0 1px 4px rgba(0, 0, 0, .35); }
+.bandiere button[aria-pressed=true] { background: var(--chiaro); color: var(--testo); border-color: var(--blu); box-shadow: 0 0 0 1px var(--blu); }
+textarea.cast-lista { min-height: 200px; resize: vertical; font: 500 13px/1.45 "gg sans"; padding: 7px 9px; }
+
+/* ── la sorgente remota: il portatile si collega da solo ── */
+dialog { color: var(--testo); }
+dialog.dx-sheet { width: min(960px, 95vw); max-height: 92vh; padding: 0; border: 1px solid var(--riga); border-radius: 10px; background: var(--carta); box-shadow: 0 30px 90px rgba(0, 0, 0, .45); overflow: hidden; }
+dialog::backdrop { background: rgba(0, 0, 0, .5); }
+.dx-testa { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-bottom: 1px solid var(--riga); background: var(--fondo); }
+.dx-ico { width: 38px; height: 38px; flex: none; display: grid; place-items: center; border-radius: 10px; background: var(--testo); }
+.dx-ico svg { width: 21px; height: 21px; fill: none; stroke: var(--carta); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.dx-titolo { flex: 1; min-width: 0; }
+.dx-titolo h2 { margin: 0; font: 700 16px/1.1 "gg sans"; }
+.dx-titolo p { margin: 4px 0 0; color: var(--tenue); font-size: 12.5px; }
+.dx-chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px; border-radius: 999px; background: var(--vetro); border: 1px solid var(--riga); color: var(--tenue); font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.dx-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--tenue); }
+.dx-chip.attesa, .dx-chip.persa { color: var(--avv-t); border-color: var(--ambra); background: var(--avv-f); }
+.dx-chip.attesa i { background: var(--ambra); animation: dx-pulsa 1.6s ease-in-out infinite; }
+.dx-chip.persa i { background: none; box-shadow: inset 0 0 0 2px var(--ambra); }
+.dx-chip.collegata { color: var(--verde); border-color: var(--verde); }
+.dx-chip.collegata i { background: var(--verde); }
+.dx-chip.onda { color: var(--carta); border-color: transparent; background: var(--verde); }
+.dx-chip.onda i { background: var(--carta); }
+.dx-chip.rotto { color: var(--err-t); border-color: var(--rosso); background: var(--err-f); }
+.dx-chip.rotto i { background: var(--rosso); }
+@keyframes dx-pulsa { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+.dx-corpo { padding: 18px 20px 20px; max-height: calc(92vh - 62px); overflow: auto; }
+.dx-vista { display: grid; grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr); gap: 26px; align-items: start; }
+.dx-colonna { min-width: 0; }
+.dx-passo { display: flex; gap: 11px; margin-top: 2px; }
+.dx-passo + .dx-passo, .dx-altri + .dx-passo, .dx-indirizzo + .dx-passo { margin-top: 16px; }
+.dx-passo > span { width: 22px; height: 22px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--testo); color: var(--carta); font: 700 11px/1 "gg mono", monospace; }
+.dx-passo b { display: block; font-size: 14px; font-weight: 700; }
+.dx-passo p { margin: 3px 0 0; color: var(--tenue); font-size: 12.5px; line-height: 1.4; }
+.dx-indirizzo { display: flex; align-items: center; gap: 8px; margin: 10px 0 0 33px; padding: 7px 7px 7px 12px; border-radius: 6px; background: var(--chiaro); border: 1px solid var(--riga); }
+.dx-indirizzo code { flex: 1; min-width: 0; overflow-wrap: anywhere; white-space: normal; padding: 0; background: none; font: 700 13.5px/1.3 "gg mono", Consolas, monospace; }
+.dx-indirizzo .piccolo { flex: none; }
+.dx-altri { margin: 8px 0 0 33px; word-break: break-all; }
+.dx-nota-cert { margin: 14px 0 0 33px; padding: 8px 11px; border-left: 3px solid var(--ambra); border-radius: 4px; background: var(--avv-f); color: var(--avv-t); font-size: 12.5px; line-height: 1.45; }
+.dx-radar-col { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 6px 12px 0; }
+.dx-radar { position: relative; width: min(220px, 100%); aspect-ratio: 1; display: grid; place-items: center; border-radius: 50%; background: repeating-conic-gradient(from -.6deg, var(--riga) 0 1.2deg, transparent 1.2deg 15deg), var(--fondo); border: 2px solid var(--testo); overflow: hidden; }
+.dx-radar::before { content: ""; position: absolute; inset: 10px; border-radius: 50%; background: var(--fondo); }
+.dx-giro { position: absolute; inset: 10px; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0 68%, color-mix(in srgb, var(--verde) 45%, transparent) 97%, var(--verde) 100%); animation: dx-gira 3.6s linear infinite; }
+@keyframes dx-gira { to { transform: rotate(360deg); } }
+.dx-anello { position: absolute; border-radius: 50%; border: 1px solid var(--riga); }
+.dx-anello.a1 { inset: 20%; }
+.dx-anello.a2 { inset: 33%; }
+.dx-anello.a3 { inset: 41%; background: var(--chiaro); border: 2px solid var(--testo); }
+.dx-radar > svg { position: relative; width: 26px; height: 26px; fill: none; stroke: var(--testo); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.dx-radar-titolo { margin-top: 14px; font: 700 14.5px/1.2 "gg sans"; }
+.dx-radar-testo { margin: 6px 0 0; max-width: 34ch; color: var(--tenue); font-size: 12.5px; line-height: 1.45; }
+.dx-rete { display: flex; flex-direction: column; gap: 3px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--riga); width: 100%; color: var(--tenue); }
+.dx-rete span { display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--testo); }
+.dx-rete span i { width: 7px; height: 7px; border-radius: 50%; background: var(--verde); }
+.dx-rete small { font-size: 11.5px; }
+.dx-vista[data-dx-vista=rotto] { grid-template-columns: 1fr; gap: 0; }
+.dx-avviso { padding: 12px 14px; border-radius: 6px; border: 1px solid var(--rosso); border-left-width: 3px; background: var(--err-f); }
+.dx-avviso b { display: block; color: var(--err-t); font-size: 14px; }
+.dx-avviso span { display: block; margin-top: 5px; font-size: 13px; line-height: 1.5; }
+.dx-collegata { grid-template-columns: minmax(0, 1.12fr) minmax(0, .88fr); }
+.dx-anta { position: relative; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 6px; background: #08070a; border: 1px solid var(--riga); }
+.dx-anta img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .18s ease, transform .3s ease; }
+.dx-anta img.su { opacity: 1; }
+.dx-anta.adatta img { object-fit: contain; }
+.dx-anta.specchia img { transform: scaleX(-1); }
+.dx-anta-vuoto { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #b9c2bb; font-size: 12.5px; background: #0b0f0c; }
+.dx-anta-vuoto svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.dx-anta-etichetta { position: absolute; left: 8px; bottom: 8px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: rgba(8, 10, 9, .8); color: #eef2ef; font: 700 10px/1 "gg sans"; letter-spacing: .07em; text-transform: uppercase; }
+.dx-anta-etichetta i { width: 7px; height: 7px; border-radius: 50%; background: var(--p); }
+.dx-sotto-anta { display: flex; align-items: flex-end; gap: 12px; margin-top: 12px; }
+.dx-nome-r { flex: 1; min-width: 0; }
+.dx-nome-r span { display: block; margin-bottom: 4px; color: var(--tenue); font-size: 12px; font-weight: 700; }
+.dx-misure { color: var(--tenue); font: 700 11.5px/1 "gg mono", monospace; padding-bottom: 10px; white-space: nowrap; }
+.dx-comandi .dx-toggle { margin-bottom: 6px; }
+.dx-comandi .dx-toggle .pezzo-r { border-top: 0; }
+.dx-comandi .dx-toggle .testo b { font-size: 13.5px; }
+.dx-comandi .dx-toggle .testo small { line-height: 1.3; }
+.dx-dettagli { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 12px; }
+.dx-dettagli div { padding: 7px 9px; border-radius: 6px; background: var(--vetro); border: 1px solid var(--riga); min-width: 0; }
+.dx-dettagli span { display: block; color: var(--tenue); font-size: 11px; font-weight: 700; }
+.dx-dettagli b { display: block; margin-top: 3px; font: 700 12px/1.3 "gg mono", Consolas, monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dx-stacca { color: var(--err-t); border-color: var(--rosso); background: var(--err-f); }
+.dx-stacca:hover { background: var(--rosso); color: #fff; }
+.dx-banner { margin-bottom: 10px; padding: 8px 10px; border-radius: 4px; border-left: 3px solid var(--ambra); background: var(--avv-f); color: var(--avv-t); font-size: 12.5px; font-weight: 600; line-height: 1.45; }
+.dx-collegata.persa .dx-anta { border-color: var(--ambra); }
+.dx-collegata.persa .dx-anta img { filter: saturate(.55) brightness(.72); }
+.dx-collegata.persa .dx-anta-etichetta i { background: var(--ambra); }
+.dx-sheet .scelta button { padding: 5px 9px; font-size: 12px; }
+@media (max-width: 820px) {
+  .dx-vista, .dx-collegata { grid-template-columns: 1fr; gap: 20px; }
+  .dx-radar { width: 180px; }
+  .dx-corpo { padding: 16px; }
+  .dx-indirizzo, .dx-nota-cert, .dx-altri { margin-left: 0; }
+}
+@media (max-height: 760px) {
+  .dx-corpo { padding: 12px 18px 14px; }
+  .dx-passo p { display: none; }
+  .dx-passo + .dx-passo, .dx-altri + .dx-passo, .dx-indirizzo + .dx-passo { margin-top: 12px; }
+  .dx-nota-cert { margin-top: 10px; }
+  .dx-radar { width: 168px; }
+}
+
+/* ── la configurazione: a sinistra le pagine, a destra una pagina alla volta ── */
+dialog.imp { width: min(880px, 95vw); height: min(620px, 90vh); padding: 0; border: 1px solid var(--riga); border-radius: 10px; background: var(--carta); box-shadow: 0 30px 90px rgba(0, 0, 0, .45); overflow: hidden; }
+dialog.imp[open] { display: grid; grid-template-columns: 214px minmax(0, 1fr); }
+.imp-nav { background: var(--lato); border-right: 1px solid var(--riga); padding: 14px 8px; display: flex; flex-direction: column; gap: 2px; min-height: 0; overflow-y: auto; }
+.imp-nav h2 { margin: 0 0 8px; padding: 0 8px; font: 700 11px/1 "gg sans"; letter-spacing: .07em; text-transform: uppercase; color: var(--tenue); }
+.imp-nav button { border: 0; background: none; text-align: left; padding: 7px 9px; border-radius: 5px; font-weight: 500; color: var(--tenue); }
+.imp-nav button:hover { background: var(--vetro); color: var(--testo); }
+.imp-nav button[aria-pressed=true] { background: var(--vetro-2); color: var(--testo); font-weight: 700; }
+.imp-nav .imp-ver { margin-top: auto; padding: 8px; font: 400 11px/1.4 "gg mono", monospace; color: var(--tenue); }
+.imp-corpo { position: relative; min-height: 0; overflow-y: auto; padding: 16px 20px 20px; }
+.imp-corpo .imp-x { position: absolute; right: 10px; top: 10px; font-size: 20px; line-height: 1; }
+.imp-corpo h3 { margin: 0 44px 12px 0; font: 700 16px/1.2 "gg sans"; }
+.imp-corpo h4 { margin: 16px 0 6px; font: 700 11px/1 "gg sans"; letter-spacing: .07em; text-transform: uppercase; color: var(--tenue); }
+.link-r { display: flex; align-items: center; gap: 10px; padding: 5px 10px; border-top: 1px solid var(--riga); }
+.link-r:first-child { border-top: 0; }
+.link-r span { width: 200px; flex: none; font-weight: 600; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.link-r code { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* più stretta: le colonne si restringono; sotto i 1180 px le zone vanno una sotto l'altra e la pagina scorre */
+@media (max-width: 1560px) { :root { --lato-w: 256px; --prop-w: 304px; } }
+@media (max-width: 1180px) {
+  html, body { height: auto; }
+  body { display: block; overflow: auto; }
+  .barra { height: var(--barra); }
+  .rail { display: none; }
+  .palco, .lato, .prop { border-left: 0; }
+  .testa { height: auto; flex-wrap: wrap; padding: 8px 12px; }
+  .monitor { display: block; container-type: normal; }
+  .anteprima { width: 100%; }
+  .lista { overflow: visible; padding-bottom: 12px; }
+  .prop-c { overflow: visible; }
+  .pannello { position: static; width: auto; margin: 8px; }
+  dialog.imp[open] { grid-template-columns: 1fr; height: auto; max-height: 92vh; overflow: auto; }
+}
+@media (max-height: 700px) and (min-width: 1181px) {
+  :root { --barra: 0px; }
+  .barra { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dx-giro, .dx-chip i, .anteprima .libera i { animation: none !important; }
+  .dx-anta img, .leva, .leva::after, button, .sez > summary::after { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<!-- la striscia del titolo -->
+<div class="barra"><img src="/logo.svg" alt=""><span>Diretta OS</span><small>Regia</small></div>
+
+<!-- la colonna delle icone: in cima all'elenco, i gruppi di sorgenti (il numero: quante on air), i piani e la tv -->
+<nav class="rail" aria-label="Gruppi di sorgenti">
+  <button class="casa" data-sez="" title="Tutte le sorgenti" aria-label="Tutte le sorgenti"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  <hr>
+  <button data-sez="sez-onda" title="Overlay" aria-label="Overlay"><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="M3 13l9 5 9-5"/></svg><b class="conta" data-conta="pz-onda"></b></button>
+  <button data-sez="sez-scene" title="Scene" aria-label="Scene"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 15l5-4 4 3 3-2 6 4"/></svg><b class="conta" data-conta="pz-scene"></b></button>
+  <button data-sez="sez-rete" title="Sorgenti remote" aria-label="Sorgenti remote"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/><circle cx="12" cy="10" r="2.4"/></svg><b class="conta" data-conta="pz-rete"></b></button>
+  <button data-sez="sez-pc" title="Telemetria hardware" aria-label="Telemetria hardware"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg><b class="conta" data-conta="pz-pc"></b></button>
+  <button data-sez="sez-cast" title="Podcast" aria-label="Podcast"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.500a6.5 6.5 0 0 0 13 0M12 18v3M8.5 21h7"/></svg><b class="conta" data-conta="pz-cast"></b></button>
+  <hr>
+  <a class="tondo" href="/muri.html" target="diretta-muri" title="Piani prospettici: mappa le pareti dell’inquadratura" aria-label="Apri i piani prospettici"><svg viewBox="0 0 24 24"><path d="M3 6l9-2 9 2v12l-9 2-9-2z"/><path d="M12 4v16M3 12h18"/></svg></a>
+  <a class="tondo" href="/tv" target="diretta-tv" title="Uscita TV del podcast, su questo PC" aria-label="Apri l’uscita TV"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></svg></a>
+</nav>
+
+<!-- ZONA 1 · SORGENTI: l'elenco resta sempre qui; clic su una riga: la seleziona (le sue proprietà vanno a destra) -->
+<aside class="lato" id="lato" aria-label="Sorgenti">
+  <div class="zt"><h2>Sorgenti</h2><span class="conta-z" id="conta-onair"></span></div>
+  <div class="lista" id="lista">
+    <input class="cerca" id="cerca" type="search" placeholder="Cerca sorgente" aria-label="Cerca sorgente" autocomplete="off">
+    <h2 id="sez-onda">Overlay <span class="poi"><button class="piccolo" data-tutti="1" title="Attiva tutti gli overlay">Tutti on</button><button class="piccolo" data-tutti="0" title="Disattiva tutti gli overlay">Tutti off</button></span></h2>
+    <div class="box" id="pz-onda"></div>
+    <h2 id="sez-scene">Scene <span class="poi">esclusive</span></h2>
+    <div class="box" id="pz-scene"></div>
+    <h2 id="sez-rete">Sorgenti remote <span class="poi"><button class="piccolo" id="apri-vista" title="Collega la webcam di un PC sulla stessa rete">Collega</button></span></h2>
+    <div class="box" id="pz-rete"></div>
+    <h2 id="sez-pc">Telemetria hardware</h2>
+    <div class="box" id="pz-pc"></div>
+    <h2 id="sez-cast">Podcast <span class="poi">comandi nel dock</span></h2>
+    <div class="box" id="pz-cast"></div>
+    <p class="vuoto" id="cerca-vuoto" hidden>Nessuna sorgente con questo nome.</p>
+  </div>
+</aside>
+
+<!-- ZONA 2 · MONITOR: la barra (segnale, ottica, azioni rapide), l'anteprima, la riga di stato; sotto, ZONA 3 · CONTROLLI -->
+<main class="palco">
+  <header class="testa">
+    <h1>Monitor</h1>
+    <div class="scelta" id="ant-fondo" title="Segnale di sfondo dell’anteprima"><button data-fondo="vivo" aria-pressed="true" title="Uscita reale di Camo (le sorgenti sono già nell’immagine)">Live</button><button data-fondo="foto" aria-pressed="false" title="Fotogramma di riferimento: le sorgenti si vedono nitide">Riferimento</button></div>
+    <i class="sep"></i>
+    <span class="et">Ottica</span>
+    <div class="scelta" id="lente" title="Ottica attiva: in Auto la decide il sensore"><button data-modo="auto">Auto</button><button data-modo="05">0,5×</button><button data-modo="10">1,0×</button></div>
+    <div class="veloci">
+      <div class="veloce"><button data-vai="conto" title="Countdown: apre le sue proprietà">Countdown <b id="v-letto">–</b></button></div>
+      <div class="veloce"><button data-vai="redbull" title="Contatore Red Bull: apre le sue proprietà">Red Bull <b id="v-rb">0</b></button><button class="forte" data-rb="1" title="Incrementa il contatore">+1</button></div>
+    </div>
+  </header>
+  <div class="palco-dentro">
+    <div class="monitor">
+      <div class="anteprima" id="anteprima">
+        <iframe title="Anteprima"></iframe>
+        <svg class="sagome" id="sagome" viewBox="0 0 1920 1080" preserveAspectRatio="none"></svg>
+        <div class="zona" id="zona"><span>ROI tracking</span></div>
+        <div class="mano" id="mano"></div>
+        <div class="libera" id="libera" hidden><i></i><span>Camera rilasciata: in Camo puoi cambiare profilo</span><button class="forte piccolo" data-cam="0">Riacquisisci</button></div>
+      </div>
+    </div>
+    <div class="dice-r">
+      <span class="aiuto" id="aiuto"></span>
+      <button class="piccolo" id="annulla" disabled title="Ctrl+Z">Annulla</button>
+    </div>
+    <section class="dock" aria-label="Controlli">
+      <div class="dock-t" role="tablist">
+        <button role="tab" data-dock="pausa" aria-selected="true"><i></i>Pausa</button>
+        <button role="tab" data-dock="podcast" aria-selected="false"><i></i>Podcast</button>
+        <button role="tab" data-dock="tv" aria-selected="false">Uscita TV</button>
+        <span class="dock-nota" id="dock-nota"></span>
+      </div>
+      <!-- pausa (BRB): una scena a tutto frame; attivarne una mette in mute tutte le altre sorgenti, al rientro tornano -->
+      <div class="dock-p" data-dock-p="pausa"><div class="via-r" id="via"></div></div>
+      <!-- podcast: la puntata -->
+      <div class="dock-p" data-dock-p="podcast" hidden>
+        <div class="cast-r" id="cast">
+          <button data-cast="inizia" id="cast-inizia" title="Avvia la puntata (anche sulla TV); la prima estrazione la avvia da sola">Avvia puntata</button>
+          <button class="forte" data-cast="argomento" title="Estrae un argomento non ancora trattato in questa puntata (/o/argomento)">Estrai argomento</button>
+          <button data-cast="fine" id="cast-fine" title="Saluti e titoli di coda a centro frame (/o/fine)">Chiudi puntata</button>
+          <button data-cast="chiudi" id="cast-chiudi" hidden title="Toglie i titoli di coda; la TV torna in attesa">Fine titoli</button>
+          <span class="cast-dice" id="cast-dice"></span>
+          <span class="cast-tv" id="cast-tv" title="Uscita TV 4K: indirizzo in Configurazione → TV"><i></i><span>TV</span></span>
+        </div>
+      </div>
+      <!-- uscita tv: quale schermata mostra (sulla tv non si tocca niente) -->
+      <div class="dock-p" data-dock-p="tv" hidden>
+        <div class="tv-r" id="tv-r">
+          <div class="scelta" id="tv-schermi"></div>
+          <div class="tv-piu" id="tv-piu-testo" hidden><input type="text" id="tv-testo" maxlength="240" placeholder="Testo a tutto schermo (auto-fit)" autocomplete="off"></div>
+          <div class="tv-piu" id="tv-piu-parla" hidden><div class="scelta tv-nomi" id="tv-nomi"></div><input type="text" id="tv-nuovo" maxlength="40" placeholder="Nuovo nome + Invio" autocomplete="off"><button class="piccolo" id="tv-togli" title="Rimuove dall’elenco lo speaker attivo">Rimuovi</button></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ZONA 4 · PROPRIETÀ: la sorgente selezionata (o, senza selezione, gli strumenti di layout e i comandi) -->
+<aside class="prop" id="prop" aria-label="Proprietà">
+  <div class="zt"><h2>Proprietà</h2><button class="piccolo" id="sc-indietro" hidden style="margin-left:auto" title="Esc">Deseleziona</button></div>
+  <div class="prop-c vuota-p" id="scheda-vuota">
+    <p class="nota">Nessuna sorgente selezionata. Selezionane una dall’elenco o con un clic sul monitor.</p>
+    <details class="sez" data-sez="layout" open>
+      <summary>Layout</summary>
+      <div class="sez-c pila">
+        <button id="grandezze" title="Porta ogni sorgente on air a una scala leggibile in una webcam di Discord, senza spostarla">Scala consigliata · tutte</button>
+        <button id="tutti-posto" title="Le sorgenti libere tornano alla posizione predefinita (quelle ancorate a un piano restano)">Ripristina posizioni predefinite</button>
+        <p class="nota">Valgono per l’ottica attiva e si annullano con <b>Annulla</b>.</p>
+      </div>
+    </details>
+    <details class="sez" data-sez="comandi" open>
+      <summary>Comandi sul monitor</summary>
+      <div class="sez-c">
+        <dl class="tasti">
+          <dt><kbd>Clic</kbd></dt><dd>seleziona la sorgente</dd>
+          <dt><kbd>Trascina</kbd></dt><dd>sposta (su un piano resta sul piano)</dd>
+          <dt><kbd>Alt</kbd> + trascina</dt><dd>ancora a un piano / sgancia</dd>
+          <dt><kbd>Rotella</kbd></dt><dd>scala</dd>
+          <dt><kbd>Shift</kbd> + rotella</dt><dd>rotazione</dd>
+          <dt><kbd>Angoli</kbd></dt><dd>scala dal centro</dd>
+          <dt><kbd>Frecce</kbd></dt><dd>1 px (con <kbd>Shift</kbd> 10 px)</dd>
+          <dt><kbd>Doppio clic</kbd></dt><dd>posizione predefinita</dd>
+          <dt><kbd>Ctrl</kbd> + <kbd>Z</kbd></dt><dd>annulla</dd>
+          <dt><kbd>Esc</kbd></dt><dd>deseleziona</dd>
+        </dl>
+      </div>
+    </details>
+  </div>
+  <div class="prop-c scheda" id="scheda" hidden>
+    <div class="sc-testa">
+      <div class="sc-titolo"><i class="led" id="sc-led" aria-hidden="true"></i><h3 id="sc-nome"></h3><div role="switch" tabindex="0" aria-checked="false" id="sc-acceso" title="On air / off"><span>On air</span><div class="leva"></div></div></div>
+      <div class="sc-id"><span id="sc-id"></span></div>
+      <p class="nota sc-dice" id="sc-dice"></p>
+      <p class="sc-torna" id="sc-torna" hidden>In mute per la pausa: torna on air al rientro.</p>
+    </div>
+    <!-- trasformazione: dove sta, quanto è grande, com'è girata -->
+    <details class="sez" id="sc-pos" data-sez="tras" open>
+      <summary>Trasformazione<span class="sez-az"><button class="icona" id="tr-azzera" title="Azzera rotazione e specchio" aria-label="Azzera rotazione e specchio"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg></button></span></summary>
+      <div class="sez-c">
+        <div class="sc-dove" id="sc-dove"></div>
+        <div class="campo" id="sc-muro-r"><span>Ancoraggio</span><select id="sc-muro" aria-label="Ancoraggio"></select></div>
+        <div class="campo" id="sc-corpo-r" hidden><span>Passaggio davanti</span><label style="display:flex;align-items:center;gap:6px;font-size:12.5px"><input type="checkbox" id="sc-corpo"> si toglie</label><b></b></div>
+        <div class="campo2" id="sc-xy-r"><label><span>X</span><input type="number" id="sc-x" step="1" aria-label="Posizione X in pixel"></label><label><span>Y</span><input type="number" id="sc-y" step="1" aria-label="Posizione Y in pixel"></label></div>
+        <label class="campo"><span>Scala</span><input type="range" id="sc-gr" min="0" max="1000" step="1"><b id="sc-gr-n"></b></label>
+        <label class="campo" id="sc-gira-r"><span>Rotazione</span><input type="range" id="sc-gira" min="-180" max="180" step="0.5" title="Doppio clic: 0°"><b id="sc-gira-n"></b></label>
+        <div class="tasti4">
+          <button id="tr-fx" aria-pressed="false" title="Specchia in orizzontale"><svg viewBox="0 0 24 24"><path d="M12 3v18M8 7l-5 5 5 5zM16 7l5 5-5 5z"/></svg>Flip H</button>
+          <button id="tr-fy" aria-pressed="false" title="Specchia in verticale"><svg viewBox="0 0 24 24"><path d="M3 12h18M7 8l5-5 5 5zM7 16l5 5 5-5z"/></svg>Flip V</button>
+          <button id="tr-meno" title="Ruota di 90° in senso antiorario"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg>−90°</button>
+          <button id="tr-piu" title="Ruota di 90° in senso orario"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>+90°</button>
+        </div>
+        <div class="riga sc-bottoni"><button id="sc-posto" title="Sgancia dal piano e torna alla posizione predefinita">Ripristina posizione</button><button id="sc-giusta" title="Scala leggibile in una webcam di Discord">Scala consigliata</button></div>
+      </div>
+    </details>
+    <!-- regolazioni: come il pannello di Camo (la leva accende il parametro, il cursore lo regola) -->
+    <details class="sez" id="sc-reg" data-sez="reg" open>
+      <summary>Regolazioni<span class="sez-az"><button class="icona" id="reg-azzera" title="Ripristina tutte le regolazioni" aria-label="Ripristina tutte le regolazioni"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4v5h5"/></svg></button></span></summary>
+      <div class="sez-c">
+        <div id="reg-righe"></div>
+        <div class="reg-2">
+          <label><span>Filtro</span><select id="reg-filtro" aria-label="Filtro"></select></label>
+          <label><span>Effetto</span><select id="reg-effetto" aria-label="Effetto"></select></label>
+        </div>
+        <p class="nota" id="reg-nota"></p>
+      </div>
+    </details>
+    <!-- parametri: quello che è solo di questa sorgente -->
+    <details class="sez" id="sc-par" data-sez="par" open>
+      <summary>Parametri</summary>
+      <div class="sez-c sc-suo" id="sc-suo"></div>
+    </details>
+    <!-- sorgente browser: il suo indirizzo, per un livello web di Camo -->
+    <details class="sez" data-sez="url">
+      <summary>Sorgente browser</summary>
+      <div class="sez-c">
+        <div class="sc-url"><code id="sc-url"></code><button class="piccolo" id="sc-url-copia" data-copia="">copia</button></div>
+        <p class="nota">Livello web 1920 × 1080 a sfondo trasparente. In Camo conviene un livello solo, <code>/o/tutto</code>.</p>
+      </div>
+    </details>
+  </div>
+</aside>
+
+<!-- in basso a sinistra: lo stato del server e del tracking, la camera da rilasciare a Camo, il profilo GPU, la configurazione -->
+<div class="pannello">
+  <div class="pn-filo">
+    <img src="/logo.svg" alt="">
+    <div>
+      <span class="pallino" id="filo"><i></i><span>Server · offline</span></span>
+      <span class="pallino spento" id="occhio-chip" title="Tracking sulla camera"><i></i><span>Tracking</span></span>
+    </div>
+    <button class="icona" id="apri-imp" title="Configurazione: ottica, fotogramma di riferimento, piani, URL, TV, aspetto" aria-label="Configurazione"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.500v3M12 18.500v3M2.5 12h3M18.5 12h3M5.3 5.300l2.1 2.100M16.6 16.600l2.1 2.100M5.3 18.700l2.1-2.100M16.600 7.400l2.100-2.100"/></svg></button>
+  </div>
+  <div class="pn-tasti">
+    <button class="cam" id="cam" title="Diretta OS smette di leggere la camera virtuale «Camo» (tracking, sensore dell’ottica, fotogramma di riferimento): così in Camo puoi cambiare profilo. Poi riacquisiscila.">Rilascia camera</button>
+    <button class="cam gpu" id="gpu" aria-pressed="false" title="Profilo GPU ridotto: niente ombre, filtri e animazioni CSS, rendering a 30 fps. Disattiva anche le Regolazioni delle sorgenti. Per applicarlo in Camo ricarica il livello web.">GPU ridotta</button>
+  </div>
+</div>
+
+<!-- i parametri di ogni sorgente: si costruiscono una volta, e vanno in «Parametri» quando la selezioni -->
+<div id="parcheggio">
+  <div data-suo="conto">
+    <div class="riga" style="justify-content:space-between"><div><div class="nota" style="margin:0" id="letto-dice">T−</div><div class="grosso" id="letto-conta">–:––</div></div><input type="time" id="letto" aria-label="Orario di scadenza" style="width:auto;font-size:17px"></div>
+    <div class="riga" style="margin-top:10px"><button data-letto="-30">−30′</button><button data-letto="-15">−15′</button><button data-letto="15">+15′</button><button data-letto="30">+30′</button><button data-letto="60">+1 h</button></div>
+  </div>
+  <div data-suo="redbull" class="rb">
+    <div class="riga"><span class="rb-n" id="rb-n">0</span><button class="forte" data-rb="1">+1</button><button data-rb="-1">−1</button><button data-rb="0">Azzera</button></div>
+    <p class="nota">Reset automatico alle 06:00.</p>
+  </div>
+  <div data-suo="nome">
+    <div class="box"><div class="pezzo-r" role="switch" tabindex="0" aria-checked="false" id="segue"><div class="testo"><b>Head tracking</b><small>aggancia il titolo al volto rilevato (10 Hz); off: posizione fissa</small></div><div class="leva"></div></div></div>
+    <p class="nota"><span class="pallino spento" id="occhio-dice"><i></i><span>tracking off</span></span></p>
+    <p class="nota">Con il tracking attivo, trascinarlo (o la rotella) imposta l’offset rispetto al volto. <b>Doppio clic</b>: offset predefinito.</p>
+  </div>
+  <div data-suo="puff">
+    <label class="campo"><span>Etichetta</span><input type="text" id="pf-gusto" maxlength="40" placeholder="es. menta ghiaccio" autocomplete="off"><span></span></label>
+    <label class="campo"><span>Batteria</span><input type="range" id="pf-batt" min="0" max="100" step="5"><b id="pf-batt-n">–</b></label>
+    <div class="campo"><span>Pod</span><div class="scelta" id="pf-pod"></div><span></span></div>
+    <div class="riga" style="margin-top:10px"><button class="forte" id="pf-zona">Disegna ROI</button><button id="pf-insegna">Campiona colore</button><button id="pf-zona-via" hidden>Rimuovi ROI</button></div>
+    <p class="nota" id="pf-dice"></p>
+    <p class="nota">La ROI si disegna sul monitor in Live (una per ottica), solo sull’area dove appoggi l’oggetto: il tracking cerca lì e campiona il colore da solo.</p>
+  </div>
+  <div data-suo="social"><div class="box" id="social"></div>
+    <p class="nota">Attiva le piattaforme da mostrare e inserisci il conteggio (Invio). Twitch si aggiorna da solo ogni 10 min; campo vuoto = valore automatico.</p></div>
+  <div data-suo="tasti">
+    <div class="box"><div class="pezzo-r" role="switch" tabindex="0" aria-checked="false" id="tutti-tasti"><div class="testo"><b>Layout completo</b><small>off: solo input di gioco (WASD, QERF, Tab, Shift, Ctrl, spazio, frecce, mouse)</small></div><div class="leva"></div></div></div>
+    <div class="avviso">Con il layout completo va on air ogni tasto premuto, password comprese: disattivalo prima di digitarne una.</div>
+  </div>
+  <div data-suo="meteo">
+    <div class="scelta" id="meteo-prova"></div>
+    <p class="nota">Override di test delle condizioni: «Reale» torna al dato di Open-Meteo.</p>
+  </div>
+  <div data-suo="spie"><div class="spie-r" id="spie"></div></div>
+  <div data-suo="esterna">
+    <div class="riga"><button class="forte" id="dx-apri">Collega un dispositivo</button><button id="dx-gestisci" hidden>Gestisci dispositivo</button></div>
+    <p class="nota" id="dx-dice-scheda"></p>
+  </div>
+  <div data-suo="bandiera">
+    <div class="bandiere" id="bandiere"></div>
+    <p class="nota" id="bandiera-luce"></p>
+    <p class="nota">La luce (intensità, colore, direzione) è stimata dal fotogramma di riferimento nel punto in cui è ancorata: se cambi le luci, rifai il fotogramma (Configurazione → Fotogramma di riferimento).</p>
+  </div>
+  <div data-suo="argomento">
+    <div class="riga"><button class="forte" data-cast="argomento">Estrai argomento</button><button data-cast="chiudi">Fine titoli</button></div>
+    <p class="nota" id="cast-ora"></p>
+    <label class="campo"><span>Puntata n.</span><input type="number" id="cast-n" min="0" max="9999" step="1"><span></span></label>
+    <div class="riga" style="justify-content:space-between;margin-top:12px"><b>Argomenti, uno per riga</b><span class="nota" style="margin:0" id="cast-quanti"></span></div>
+    <textarea class="cast-lista" id="cast-lista" spellcheck="false" style="margin-top:6px"></textarea>
+    <div class="riga" style="margin-top:8px"><button id="cast-salva" disabled>Salva elenco</button><button id="cast-primi">Ripristina predefiniti</button></div>
+    <p class="nota">L’estrazione esclude gli argomenti già trattati nella puntata; una nuova estrazione entro 15 s rimette in elenco il precedente.</p>
+  </div>
+  <div data-suo="fine">
+    <p class="nota" id="fine-dice" style="margin-top:0"></p>
+    <div class="riga" style="margin-top:8px"><button data-cast="riprendi">Annulla chiusura</button><button data-cast="chiudi">Fine titoli</button></div>
+  </div>
+</div>
+
+<!-- la sorgente remota: il PC si associa con un codice, poi la finestra si attiva come le altre sorgenti -->
+<dialog class="dx-sheet" id="dx" aria-labelledby="dx-titolo">
+  <div class="dx-testa">
+    <div class="dx-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/><circle cx="12" cy="10" r="2.4"/></svg></div>
+    <div class="dx-titolo"><h2 id="dx-titolo">Vista esterna</h2><p id="dx-sottotitolo">la webcam di un altro pc, in wifi</p></div>
+    <span class="dx-chip" id="dx-chip" role="status" aria-live="polite"><i></i><span>pronta</span></span>
+    <button class="piccolo" id="dx-chiudi">chiudi</button>
+  </div>
+
+  <div class="dx-corpo">
+    <!-- senza rete / senza https -->
+    <section class="dx-vista" data-dx-vista="rotto" hidden>
+      <div class="dx-avviso"><b>La pagina del portatile non si apre.</b><span id="dx-rotto-dice"></span></div>
+      <p class="nota">La regia funziona lo stesso: la vista esterna si può collegare quando il pc è su una rete wifi e la porta è libera. Guarda <code>diretta.log</code> per il motivo.</p>
+    </section>
+
+    <!-- in attesa del portatile -->
+    <section class="dx-vista dx-attesa" data-dx-vista="attesa">
+      <div class="dx-colonna">
+        <div class="dx-passo"><span>1</span><div><b>Apri questo indirizzo sul portatile</b><p>Stessa rete del pc: il portatile in wifi, niente cavi. Appena apre il link si collega da solo, senza codice.</p></div></div>
+        <div class="dx-indirizzo">
+          <code id="dx-principale">—</code>
+          <button class="piccolo" id="dx-copia-principale" data-copia="" disabled>copia</button>
+        </div>
+        <p class="nota dx-altri" id="dx-altri" hidden></p>
+        <p class="dx-nota-cert">La prima volta il browser del portatile dice che la connessione non è privata: <b>è normale</b>, il certificato è del tuo pc, non di un sito. Premi <b>Avanzate</b> → <b>Procedi</b> (in Firefox: <b>Accetta il rischio e continua</b>).</p>
+      </div>
+      <div class="dx-colonna dx-radar-col">
+        <div class="dx-radar" aria-hidden="true"><i class="dx-giro"></i><i class="dx-anello a1"></i><i class="dx-anello a2"></i><i class="dx-anello a3"></i>
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/><circle cx="12" cy="10" r="2.4"/></svg>
+        </div>
+        <b class="dx-radar-titolo">In attesa del portatile…</b>
+        <p class="dx-radar-testo">Appena apre il link, qui compare la sua webcam. Non serve nessun codice: la pagina si collega da sola.</p>
+        <div class="dx-rete">
+          <span><i></i><b id="dx-rete-nome">rete</b></span>
+          <small id="dx-rete-dice">—</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- collegata -->
+    <section class="dx-vista dx-collegata" data-dx-vista="collegata" hidden>
+      <div class="dx-colonna">
+        <div class="dx-anta">
+          <img id="dx-anta-img" alt="Anteprima della vista esterna">
+          <img id="dx-anta-img2" alt="" aria-hidden="true">
+          <div class="dx-anta-vuoto" id="dx-anta-vuoto"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/><circle cx="12" cy="10" r="2.4"/></svg><span>arrivo della webcam…</span></div>
+          <span class="dx-anta-etichetta"><i></i> anteprima dal portatile</span>
+        </div>
+        <div class="dx-sotto-anta">
+          <label class="dx-nome-r"><span>Questo portatile</span><input type="text" id="dx-nome" maxlength="40" autocomplete="off"></label>
+          <div class="dx-misure" id="dx-misure">—</div>
+        </div>
+        <p class="nota" id="dx-dice">La webcam del portatile arriva qui appena accesa. La finestra si accende e si spegne come gli altri pezzi.</p>
+        <p class="nota" id="dx-luce-dice"></p>
+      </div>
+      <div class="dx-colonna dx-comandi">
+        <div class="dx-banner" id="dx-banner" hidden></div>
+        <div class="box dx-toggle"><div class="pezzo-r" role="switch" tabindex="0" aria-checked="false" id="dx-onda"><div class="testo"><b>In onda</b><small>la finestra compare in Camo e in /o/tutto</small></div><div class="leva"></div></div></div>
+        <div class="box dx-toggle"><div class="pezzo-r" role="switch" tabindex="0" aria-checked="false" id="dx-specchia"><div class="testo"><b>Specchia</b><small>come uno specchio: utile se il portatile guarda te</small></div><div class="leva"></div></div></div>
+        <div class="box dx-toggle"><div class="pezzo-r" role="switch" tabindex="0" aria-checked="false" id="dx-adatta"><div class="testo"><b>Adatta tutta</b><small>spento riempie la finestra e taglia i bordi</small></div><div class="leva"></div></div></div>
+        <div class="dx-dettagli">
+          <div><span>Rete</span><b id="dx-ip">—</b></div>
+          <div><span>Formato</span><b id="dx-formato">—</b></div>
+          <div><span>Ultimo fotogramma</span><b id="dx-ultimo">—</b></div>
+          <div><span>Collegato da</span><b id="dx-da">—</b></div>
+        </div>
+        <div class="riga" style="margin-top:14px"><button id="dx-cambia">collega un altro pc</button><button id="dx-stacca" class="dx-stacca">stacca</button></div>
+        <p class="nota">«Stacca» spegne la webcam del portatile e chiude il collegamento. Se il portatile chiude la scheda o perde la wifi, la finestra tiene l’ultimo fotogramma e poi esce da sola.</p>
+      </div>
+    </section>
+  </div>
+</dialog>
+
+<!-- la configurazione: una pagina per cosa -->
+<dialog class="imp" id="imp" aria-label="Configurazione">
+  <nav class="imp-nav">
+    <h2>Configurazione</h2>
+    <button data-imp="ottica" aria-pressed="true">Ottica</button>
+    <button data-imp="rif" aria-pressed="false">Fotogramma di riferimento</button>
+    <button data-imp="piani" aria-pressed="false">Piani prospettici</button>
+    <button data-imp="url" aria-pressed="false">URL sorgenti</button>
+    <button data-imp="tv" aria-pressed="false">Uscita TV</button>
+    <button data-imp="aspetto" aria-pressed="false">Aspetto</button>
+    <span class="imp-ver" id="imp-ver"></span>
+  </nav>
+  <div class="imp-corpo">
+    <button class="icona imp-x" id="chiudi-imp" title="Chiudi (Esc)" aria-label="Chiudi">×</button>
+    <section data-imp-p="ottica">
+      <h3>Ottica</h3>
+      <div class="riga"><div class="scelta" id="lente2"><button data-modo="auto">Auto</button><button data-modo="05">0,5×</button><button data-modo="10">1,0×</button></div><span class="nota" style="margin:0" id="lente-dice"></span></div>
+      <h4>Sensori</h4>
+      <p class="nota" id="lente-sensori" style="margin-top:0"></p>
+      <h4>Calibrazione</h4>
+      <div class="riga"><button data-impara="05">L’ottica attuale è 0,5×</button><button data-impara="10">L’ottica attuale è 1,0×</button></div>
+      <p class="nota">Da usare se il rilevamento automatico sbaglia: associa la camera attiva in Camo all’ottica indicata.</p>
+    </section>
+    <section data-imp-p="rif" hidden>
+      <h3>Fotogramma di riferimento</h3>
+      <div class="riga"><span class="nota" style="margin:0" id="foto-dice"></span><button class="forte" id="foto-scatta">Acquisisci ora</button></div>
+      <p class="nota">Acquisisce un frame pulito per l’ottica attiva e sostituisce il precedente: per circa un secondo le sorgenti spariscono (anche on air). In automatico si rinnova ogni 30 minuti, solo se l’inquadratura non è cambiata.</p>
+      <p class="nota">Serve allo sfondo «Riferimento» del monitor, al sensore dell’ottica, alla luce delle sorgenti ancorate ai piani e alla copertura: con «Acquisisci ora» è anche la <b>foto di inizio</b> con cui si confronta il colore attorno alle sorgenti appese. Il rinnovo automatico non la cambia: la base resta quella finché non ne fai un’altra. Se l’hai fatta con qualcosa davanti a una sorgente, rifalla con la stanza vuota.</p>
+    </section>
+    <section data-imp-p="piani" hidden>
+      <h3>Piani prospettici</h3>
+      <p class="nota" style="margin-top:0">Le sorgenti ancorate a un piano si spostano direttamente dal monitor. Per mappare le pareti (dopo un cambio di inquadratura) usa l’editor dedicato.</p>
+      <div class="riga" style="margin-top:12px"><a href="/muri.html" target="diretta-muri">Apri l’editor dei piani</a></div>
+    </section>
+    <section data-imp-p="url" hidden>
+      <h3>URL sorgenti</h3>
+      <p class="nota" style="margin-top:0">Livello web in Camo Studio: 1920 × 1080, sfondo trasparente. La configurazione più leggera è un solo livello con il composito.</p>
+      <div class="box" id="link" style="margin-top:10px"></div>
+      <p class="nota">Come immagini statiche: <code id="gif"></code></p>
+    </section>
+    <section data-imp-p="tv" hidden>
+      <h3>Uscita TV</h3>
+      <p class="nota" style="margin-top:0">Pagina 4K in sola lettura per la smart TV del podcast: la TV deve essere sulla stessa rete di questo PC.</p>
+      <div class="box" id="tv-link" style="margin-top:10px"></div>
+      <p class="nota" id="tv-dice"></p>
+      <div class="riga" style="margin-top:10px"><button class="forte" id="tv-cerca">Rileva TV</button><button class="forte" id="tv-apri" disabled>Apri il canale sulla TV</button><a href="/tv" target="diretta-tv">Anteprima su questo PC</a></div>
+      <p class="nota" id="tv-trova-dice"></p>
+      <div class="box" style="margin-top:12px"><div class="pezzo-r" role="switch" tabindex="0" aria-checked="false" id="tv-specchio"><div class="testo"><b>Compensa lo specchio di Camo</b><small>Camo specchia la webcam: attivo, la pagina della TV è ribaltata e on air si legge dritta (nella stanza al contrario)</small></div><div class="leva"></div></div></div>
+      <p class="nota">Standby automatico della TV: <b>Impostazioni → Generale → Sistema → Data e ora → Timer</b>, disattiva <b>Timer di spegnimento</b>, <b>Sleep Timer</b> e <b>Spegnimento automatico dopo 4 ore</b>.</p>
+    </section>
+    <section data-imp-p="aspetto" hidden>
+      <h3>Aspetto</h3>
+      <h4>Tema</h4>
+      <div class="scelta" id="tema"><button data-tema="discord">Discord · verde chiaro</button><button data-tema="scuro">Scuro</button></div>
+      <p class="nota">Vale per la regia su questo browser. Le sorgenti on air non cambiano.</p>
+    </section>
+  </div>
+</dialog>
+
+<script type="module">
+import { PEZZI, NOMI, POSTI, VIA } from '/pezzi.js'
+import { ICONS } from '/assets/icons.js'
+import { PC, PC_DICE } from '/pc.js'
+import { SCENE, SCENE_DICE } from '/scene-nomi.js' // le tre scene nuove (i nomi sono gli stessi dei pezzi in onda)
+import { fDi, piano, sulPiano, matrice, scalaIn, angoli, dentro, distanza, porta, MAI_SUL_MURO } from '/muri.js'
+import { CAST, CAST_DICE } from '/cast-pezzi.js' // Giugnoh's Cast (e window.Cast, da cast.js)
+import { BANDIERE, svgUrl } from '/bandiere.js' // il catalogo della bandiera appesa
+import { TECNICI, DESCR } from '/nomi-tecnici.js' // i nomi tecnici delle sorgenti (on air restano quelli di sempre)
+import { REGOLE, FILTRI, EFFETTI, pulisci as regPulisci, acceso as regAcceso, vale as regVale } from '/regola.js' // le regolazioni di ogni sorgente
+Object.assign(NOMI, TECNICI)
+
+const DICE = DESCR
+const ONDA = ['cornice', 'nome', 'spie', 'conto', 'meteo', 'tasti', 'social', 'meme', 'adv', 'adigeo', 'redbull', 'puff', 'bandiera', 'cavi']
+// la grandezza «giusta» di ogni pezzo in onda (1 = un pixel del pezzo per pixel della webcam): nella webcam di Discord
+// l'immagine si vede a un terzo, e così le scritte restano leggibili senza coprire mezza stanza
+const GIUSTA = { meteo: .82, redbull: .85, conto: .9, social: 1.05, spie: .8, tasti: .8, meme: .95, adv: .95, app: .8, adigeo: 1, esterna: .85, quadro: .72, dovevivo: .78, azienda: .72, surf: .68, cpu: .72, gpu: .72, ram: .72, ssd: .72, hdd: .72, temp: .72, wifi: .72, legna: 1, pipi: 1, bere: 1, mangiare: 1, sistemo: 1 }
+const L_ = { '05': '0,5×', 10: '1,0×' }
+const $ = (s) => document.querySelector(s)
+const fai = (a) => fetch('/api/azione', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(a) })
+const faiJ = (a) => fai(a).then((r) => r.json()).catch(() => ({ ok: false }))
+const copia = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)))
+const pulito = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+const virgola = (x, n = 1) => x.toFixed(n).replace('.', ',')
+const qui = location.origin
+let stato = null, conti = { acceso: false }
+// (tutto quello che ricordano l'anteprima e la scheda, qui in cima: le funzioni qui sotto le usano da subito)
+let scelto = null, sucoDi = null, tutte = [], presa = null, sopra = null, dentroAnt = false, Mloc = null, attesaMuri = null, barra = null, disegnoDa = null, scala = 1, fondo = 'vivo'
+const L = () => stato?.lente ?? '10'
+// le regolazioni (regola.js): regLoc è quello che sto provando adesso (un cursore in mano), prima che il server lo rimandi
+const regLoc = {}
+let regGesto = null, regFra = null, regUltimo = 0
+const regDi = (p) => (p in regLoc ? regLoc[p] : stato?.regola?.[p]) ?? null
+
+// ── la lista dei pezzi ──
+// la faccina di un pezzo, come l'avatar di un messaggio diretto: l'iniziale su un colore suo (sempre quello)
+const TINTE = ['#5865f2', '#eb459e', '#313338', '#8b2fff', '#d22b38', '#0b6e75', '#c2570c', '#1f3a8a']
+const tintaDi = (p) => TINTE[[...p].reduce((n, c) => n + c.charCodeAt(0), 0) % TINTE.length]
+const iniziale = (p) => (NOMI[p] ?? p).replace(/[^\p{L}\p{N}]/gu, '').slice(0, 1) || '?'
+const riga = (p) => `<div class="pezzo-r" data-riga="${p}"><div class="vai" data-scegli="${p}" title="Seleziona"><i class="led" aria-hidden="true"></i><b>${NOMI[p]}</b><span class="reg-tag" hidden title="Trasformazione o regolazioni attive">FX</span><span class="dove"></span>${p === 'esterna' ? '<span class="rete-stato"></span>' : ''}<span class="torna" hidden title="In mute per la pausa: torna on air al rientro">mute</span></div><div role="switch" tabindex="0" aria-checked="false" data-pezzo="${p}" title="On air / off"><div class="leva"></div></div></div>`
+$('#pz-onda').innerHTML = ONDA.map(riga).join('')
+$('#pz-scene').innerHTML = SCENE.map(riga).join('')
+$('#pz-rete').innerHTML = riga('esterna')
+$('#pz-pc').innerHTML = PC.map(riga).join('')
+$('#pz-cast').innerHTML = CAST.map(riga).join('')
+// (i «torno subito» sono quelli di pezzi.js, nell'ordine suo: se ne arrivano di nuovi, compaiono da soli)
+const CORTI = { legna: 'Legna', pipi: 'Pipì', bere: 'Da bere', mangiare: 'Da mangiare', lattina: 'Una Red Bull', telefono: 'Al telefono', spacco: 'Spacco la legna', sistemo: 'Sistemo', riavvio: 'Riavvio il pc' }
+$('#via').insertAdjacentHTML('beforeend', VIA.map((p) => `<button data-pezzo="${p}" aria-pressed="false" title="${pulito(NOMI[p] ?? p)}">${pulito(CORTI[p] ?? NOMI[p] ?? p)}</button>`).join(''))
+$('#meteo-prova').innerHTML = [['', 'Reale'], ['sole', 'Sole'], ['luna', 'Notte'], ['nuvole', 'Nuvole'], ['pioggia', 'Pioggia'], ['temporale', 'Temporale'], ['neve', 'Neve'], ['nebbia', 'Nebbia'], ['vento', 'Vento']].map(([k, n]) => `<button data-meteo="${k}">${n}</button>`).join('')
+$('#link').innerHTML = [['tutto', 'Composito · tutte le sorgenti'], ...PEZZI.map((p) => [p, NOMI[p]])].map(([p, n]) => `<div class="link-r"><span>${n}</span><code>${qui}/o/${p}</code><button class="piccolo" data-copia="${qui}/o/${p}">copia</button></div>`).join('')
+$('#gif').textContent = `${qui}/giugnoh.gif · ${qui}/cornice.gif`
+$('#pf-pod').innerHTML = [1, 2, 3, 4].map((n) => `<button data-pod="${n}">${n}</button>`).join('')
+
+// ── la bandiera: il catalogo (la prima è la Cina), e da dove le arriva la luce ──
+$('#bandiere').innerHTML = BANDIERE.map((b) => `<button data-bandiera="${b.id}" aria-pressed="false" title="${pulito(b.nome)}"><img src="${svgUrl(b)}" alt=""><span>${pulito(b.nome)}</span></button>`).join('')
+$('#bandiere').addEventListener('click', (e) => { const b = e.target.closest('[data-bandiera]'); if (b) fai({ tipo: 'bandiera', id: b.dataset.bandiera }) })
+function bandieraMostra() {
+  for (const b of document.querySelectorAll('#bandiere [data-bandiera]')) b.setAttribute('aria-pressed', b.dataset.bandiera === stato?.bandiera)
+  // lo studio della luce lo fa la pagina dell'anteprima (bandiera.js), sulla foto della stanza
+  let S = null
+  try { S = win()?.__bandieraLuce?.() } catch {}
+  const muro = stato?.muri?.[L()]?.pezzi?.bandiera
+  $('#bandiera-luce').innerHTML = !muro ? 'Libera: ancorala a un piano (<kbd>Alt</kbd> + trascina, o «Ancoraggio») per rilluminarla dal fotogramma di riferimento.'
+    : !S ? 'Stima della luce in corso…'
+    : `La luce qui: arriva <b>${S.verso[0] > 0.2 ? 'da destra' : S.verso[0] < -0.2 ? 'da sinistra' : 'di fronte'}${S.verso[1] < -0.2 ? ', dall’alto' : S.verso[1] > 0.2 ? ', dal basso' : ''}</b>, ${S.kd > 0.6 ? 'diretta' : 'morbida'}, ${S.colore[0] / S.colore[2] > 1.35 ? 'calda' : S.colore[0] / S.colore[2] < 0.9 ? 'fredda' : 'neutra'}${S.luce ? ` · la lampada a ${virgola(S.luce.h)} m dal muro` : ''} · ${S.punti} punti di muro guardati.`
+}
+setInterval(() => { if (scelto === 'bandiera') bandieraMostra() }, 1500) // (lo studio arriva un attimo dopo)
+
+// ── la vista esterna: il portatile si collega da solo appena apre il link, poi è un pezzo come gli altri ──
+const dxDialog = $('#dx')
+// due strati: la foto nuova si carica dietro e si mostra solo quando è pronta (prima la finestra
+// si svuotava a ogni aggiornamento, ed era il farfallio che si vedeva nella scheda)
+const dxAnta = [$('#dx-anta-img'), $('#dx-anta-img2')]
+let dxAntaFoto = 0
+function antaFoto() {
+  if (!stato?.esterna?.ultimo || !dxDialog.open) return
+  const i = dxAntaFoto ^ 1
+  const img = dxAnta[i]
+  const url = `/api/esterna/anteprima.jpg?t=${Date.now()}`
+  img.dataset.url = url
+  img.onload = () => {
+    if (img.dataset.url !== url) return
+    img.classList.add('su')
+    img.removeAttribute('aria-hidden')
+    dxAnta[i ^ 1].classList.remove('su')
+    dxAnta[i ^ 1].setAttribute('aria-hidden', 'true')
+    dxAntaFoto = i
+    $('#dx-anta-vuoto').hidden = true
+  }
+  img.onerror = () => { if (!dxAnta.some((x) => x.classList.contains('su'))) $('#dx-anta-vuoto').hidden = false }
+  img.src = url
+}
+function antaPulisci() {
+  for (const img of dxAnta) { img.removeAttribute('src'); img.removeAttribute('data-url'); img.classList.remove('su') }
+  dxAntaFoto = 0
+  $('#dx-anta-vuoto').hidden = false
+}
+function apriVista() {
+  if (!dxDialog.open) dxDialog.showModal()
+  vistaMostra()
+}
+$('#apri-vista').addEventListener('click', () => apriVista())
+$('#dx-apri').addEventListener('click', () => apriVista())
+$('#dx-gestisci').addEventListener('click', () => apriVista(true))
+$('#dx-chiudi').addEventListener('click', () => dxDialog.close())
+dxDialog.addEventListener('click', (e) => { if (e.target === dxDialog) dxDialog.close() })
+dxDialog.addEventListener('close', antaPulisci)
+$('#dx-stacca').addEventListener('click', () => fai({ tipo: 'esterna', cosa: 'stacca' }))
+$('#dx-cambia').addEventListener('click', async () => {
+  if (!confirm('Staccare il portatile collegato? Per collegarne un altro, apri l’indirizzo sul nuovo pc.')) return
+  await fai({ tipo: 'esterna', cosa: 'stacca' })
+})
+$('#dx-onda').addEventListener('click', () => stato && fai({ tipo: 'pezzo', nome: 'esterna' }))
+$('#dx-specchia').addEventListener('click', () => stato && fai({ tipo: 'esterna', specchia: !stato.esterna?.specchia }))
+$('#dx-adatta').addEventListener('click', () => stato && fai({ tipo: 'esterna', adatta: !stato.esterna?.adatta }))
+let dxNomeFra = null
+$('#dx-nome').addEventListener('input', (e) => { clearTimeout(dxNomeFra); dxNomeFra = setTimeout(() => fai({ tipo: 'esterna', nome: e.target.value }), 450) })
+$('#dx-nome').addEventListener('change', (e) => { clearTimeout(dxNomeFra); fai({ tipo: 'esterna', nome: e.target.value }) })
+$('#dx-nome').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur() } })
+const dueMin = (ms) => `${Math.floor(ms / 60000)}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}`
+function vistaMostra() {
+  if (!stato) return
+  const v = stato.esterna ?? {}
+  const collegata = !!v.collegata
+  const persa = v.segnale === 'persa'
+  const vista = v.https === false ? 'rotto' : collegata ? 'collegata' : 'attesa'
+  for (const s of document.querySelectorAll('[data-dx-vista]')) s.hidden = s.dataset.dxVista !== vista
+  const chip = $('#dx-chip')
+  const inOnda = !!stato.attivi.esterna
+  chip.className = `dx-chip ${vista === 'rotto' ? 'rotto' : vista === 'attesa' ? 'attesa' : vista === 'collegata' && persa ? 'persa' : vista === 'collegata' && inOnda ? 'onda' : vista === 'collegata' ? 'collegata' : 'attesa'}`
+  const chipTesto = vista === 'rotto' ? 'non disponibile' : vista === 'attesa' ? 'in attesa' : persa ? 'segnale perso' : inOnda ? 'in onda' : 'collegata'
+  if (chip.querySelector('span').textContent !== chipTesto) chip.querySelector('span').textContent = chipTesto
+  $('#dx-sottotitolo').textContent = vista === 'collegata' ? `${v.nome ?? 'Portatile'} · ${v.ip ?? 'rete locale'}` : vista === 'rotto' ? 'la pagina del portatile non si apre' : 'la webcam di un altro pc, in wifi'
+  const r = document.querySelector('[data-riga=esterna] .rete-stato')
+  if (r) {
+    r.className = `rete-stato ${collegata ? (persa ? 'persa' : inOnda ? 'su' : '') : v.https !== false ? 'attesa' : ''}`
+    r.textContent = collegata ? (persa ? 'segnale perso' : inOnda ? 'in onda' : 'collegata') : v.https !== false ? 'in attesa' : ''
+    const sw = r.closest('.pezzo-r')?.querySelector('[role=switch]')
+    if (sw) sw.title = collegata ? 'accendi / spegni' : 'apri il link sul portatile'
+  }
+  $('#apri-vista').textContent = collegata ? 'Gestisci' : 'Collega'
+  $('#dx-apri').hidden = collegata
+  $('#dx-gestisci').hidden = !collegata
+  $('#dx-dice-scheda').innerHTML = !collegata
+    ? 'La webcam di un portatile sulla stessa wifi, dentro una finestra. Apri l’indirizzo sul portatile: si collega da solo, poi si accende e si spegne come gli altri pezzi.'
+    : persa ? `<b style="color:var(--arancio)">Segnale perso</b> da <b>${pulito(v.nome || 'portatile')}</b>. La finestra tiene l’ultimo fotogramma e aspetta che torni.` : `Collegata <b>${pulito(v.nome || 'portatile')}</b>: ${stato.attivi.esterna ? 'in onda' : 'pronta, ma spenta'}.`
+
+  if (vista === 'attesa') {
+    const p = v.principale ?? '—'
+    $('#dx-principale').textContent = p
+    $('#dx-copia-principale').dataset.copia = v.principale ?? ''
+    $('#dx-copia-principale').disabled = !v.principale
+    const alt = (v.indirizzi ?? [])[0]
+    $('#dx-altri').hidden = !alt
+    if (alt) {
+      const html = `Se il nome non si apre: <code>${pulito(alt.url)}</code> <button class="piccolo" data-copia="${pulito(alt.url)}">copia</button>`
+      if ($('#dx-altri').dataset.c !== html) { $('#dx-altri').innerHTML = html; $('#dx-altri').dataset.c = html }
+    }
+    $('#dx-rete-nome').textContent = v.rete || 'nessuna rete'
+    $('#dx-rete-dice').textContent = (v.indirizzi ?? []).length ? `${v.indirizzi.length} indirizzi · porta ${v.porta}` : 'collega il pc a una rete wifi'
+    $('#dx-rotto-dice').textContent = v.motivo === 'spenta'
+      ? 'La vista esterna è spenta all’avvio (--senza-vista). La regia continua a funzionare.'
+      : v.motivo === 'rete' || !(v.indirizzi ?? []).length
+        ? 'Il pc non è collegato a una rete: senza wifi il portatile non può raggiungerlo. Riprova appena la rete c’è.'
+        : v.motivo === 'cert'
+          ? 'Non sono riuscito a fare il certificato HTTPS (serve per la webcam): guarda diretta.log. Il resto della regia funziona.'
+          : `La porta ${v.porta} non è aperta: forse è già in uso da un altro programma. La regia continua a funzionare.`
+  }
+  if (vista === 'collegata') {
+    $('#dx-anta-img').closest('.dx-collegata')?.classList.toggle('persa', persa)
+    $('#dx-nome').value = document.activeElement === $('#dx-nome') ? $('#dx-nome').value : (v.nome ?? 'Portatile')
+    $('#dx-ip').textContent = v.ip ?? '—'
+    $('#dx-formato').textContent = v.w && v.h ? `${v.w}×${v.h} · ${v.fps ?? 0} fps` : '—'
+    const eta = v.ultimo ? Date.now() - v.ultimo : null
+    $('#dx-ultimo').textContent = eta == null ? '—' : eta < 2500 ? 'adesso' : `${Math.round(eta / 1000)} s fa`
+    $('#dx-da').textContent = v.da ? `da ${dueMin(Math.max(0, Date.now() - v.da))}` : '—'
+    $('#dx-onda').setAttribute('aria-checked', String(!!stato.attivi.esterna))
+    $('#dx-specchia').setAttribute('aria-checked', String(!!v.specchia))
+    $('#dx-adatta').setAttribute('aria-checked', String(!!v.adatta))
+    const anta = $('#dx-anta-img').parentElement
+    anta.classList.toggle('specchia', !!v.specchia)
+    anta.classList.toggle('adatta', !!v.adatta)
+    $('#dx-dice').textContent = persa
+      ? 'La finestra tiene l’ultimo fotogramma e aspetta che il portatile torni: il collegamento non si chiude da solo.'
+      : !v.ultimo
+        ? 'Il portatile è collegato, ma la webcam non manda ancora fotogrammi: controlla il permesso della fotocamera sul portatile.'
+        : stato.attivi.esterna
+          ? 'La finestra è in onda: la vedi in Camo (dentro /o/tutto) e nel suo indirizzo /o/esterna.'
+          : 'La finestra è pronta ma spenta: accendila con «In onda» qui accanto.'
+    // la luce che la finestra ha trovato sulla webcam (la studia esterna.js, come bandiera.js fa col muro)
+    let SL = null
+    try { SL = win()?.__esternaLuce?.() } catch {}
+    $('#dx-luce-dice').textContent = !v.ultimo || persa || !SL ? '' : `Luce della scena: ${SL.tinta}, arriva ${SL.verso}, ${SL.esposizione}.`
+    const banner = $('#dx-banner')
+    if (persa) { banner.hidden = false; banner.textContent = 'La finestra tiene l’ultimo fotogramma e aspetta che torni. Il portatile può dormire o cambiare rete: quando riprende, la vista torna da sola.' }
+    else if (!v.ultimo) { banner.hidden = false; banner.textContent = 'Il portatile è collegato. La webcam parte da sola appena il browser dà il permesso: controlla sul portatile.' }
+    else banner.hidden = true
+    if (v.ultimo && !dxAnta.some((x) => x.classList.contains('su')) && dxDialog.open) antaFoto()
+    if (!v.ultimo) antaPulisci()
+  }
+}
+setInterval(() => { if (!document.hidden && stato && dxDialog.open) vistaMostra() }, 1000)
+setInterval(() => {
+  if (!stato || !dxDialog.open) return
+  const v = stato.esterna
+  if (!v?.collegata || !v.ultimo) return
+  if (document.hidden) return
+  antaFoto()
+}, 1300)
+
+// ── le impostazioni ──
+$('#apri-imp').addEventListener('click', () => impApri())
+$('#chiudi-imp').addEventListener('click', () => $('#imp').close())
+$('#imp').addEventListener('click', (e) => { if (e.target === $('#imp')) $('#imp').close() })
+
+// ── la puff ──
+let gustoFra = null
+$('#pf-gusto').addEventListener('input', (e) => { clearTimeout(gustoFra); gustoFra = setTimeout(() => fai({ tipo: 'puff', gusto: e.target.value }), 400) })
+$('#pf-batt').addEventListener('input', (e) => { $('#pf-batt-n').textContent = `${e.target.value}%` })
+$('#pf-batt').addEventListener('change', (e) => fai({ tipo: 'puff', batteria: +e.target.value }))
+let insegna = false, disegna = false
+$('#pf-insegna').addEventListener('click', () => { insegna = !insegna; disegna = false; ant.classList.remove('disegna'); ant.classList.toggle('insegna', insegna); if (insegna && fondo !== 'vivo') sceglFondo('vivo') })
+$('#pf-zona').addEventListener('click', () => { disegna = !disegna; insegna = false; ant.classList.remove('insegna'); ant.classList.toggle('disegna', disegna); if (disegna && fondo !== 'vivo') sceglFondo('vivo') })
+$('#pf-zona-via').addEventListener('click', () => stato && fai({ tipo: 'puffZona', lente: L(), via: true }))
+function zonaMostra(z) {
+  const d = $('#zona')
+  if (!z || (scelto !== 'puff' && !disegnoDa)) { d.style.display = 'none'; return }
+  Object.assign(d.style, { display: 'block', left: `${z[0] * scala}px`, top: `${z[1] * scala}px`, width: `${z[2] * scala}px`, height: `${z[3] * scala}px` })
+}
+
+// ── Giugnoh's Cast: la puntata, gli argomenti, la tv ──
+const Cast = window.Cast
+$('#cast-lista').addEventListener('input', () => { $('#cast-salva').disabled = false })
+$('#cast-salva').addEventListener('click', async () => {
+  const l = $('#cast-lista').value.split('\n').map((x) => x.trim()).filter(Boolean)
+  const r = await faiJ({ tipo: 'podcast', argomenti: l })
+  if (r.ok) { $('#cast-salva').disabled = true; $('#cast-lista').dataset.c = '' }
+})
+$('#cast-primi').addEventListener('click', () => { if (confirm('Rimettere gli argomenti di partenza al posto di questi?')) { $('#cast-lista').dataset.c = ''; fai({ tipo: 'podcast', argomenti: 'primi' }).then(() => { $('#cast-salva').disabled = true }) } })
+$('#cast-n').addEventListener('change', (e) => e.target.value !== '' && fai({ tipo: 'podcast', puntata: +e.target.value }))
+$('#cast-tv').addEventListener('click', () => impApri('tv'))
+$('#tv-specchio').addEventListener('click', () => stato && fai({ tipo: 'podcast', specchio: !stato.podcast?.specchio }))
+$('#tv-cerca').addEventListener('click', () => fai({ tipo: 'tvCerca' }))
+$('#tv-apri').addEventListener('click', () => fai({ tipo: 'tvApri', canale: 'tv' }))
+// ── la tv: le schermate (podcast, logo, ora, il tuo nome, chi parla, un testo, il meteo) ──
+const SCHERMI_TV = [['podcast', 'Podcast'], ['logo', 'Logo'], ['ora', 'Ora'], ['nome', 'Giugnoh'], ['parla', 'Speaker'], ['testo', 'Testo'], ['meteo', 'Meteo']]
+$('#tv-schermi').innerHTML = SCHERMI_TV.map(([k, n]) => `<button data-tv="${k}" aria-pressed="false">${n}</button>`).join('')
+const tvFai = (x) => fai({ tipo: 'podcast', ...x })
+$('#tv-schermi').addEventListener('click', (e) => { const b = e.target.closest('[data-tv]'); if (b) tvFai({ schermo: b.dataset.tv }) })
+// il testo: mentre scrivi va sulla tv (un attimo dopo che hai smesso)
+let tvTestoFra = null
+$('#tv-testo').addEventListener('input', (e) => { clearTimeout(tvTestoFra); tvTestoFra = setTimeout(() => tvFai({ schermo: 'testo', testo: e.target.value }), 350) })
+$('#tv-testo').addEventListener('keydown', (e) => { if (e.key === 'Enter') { clearTimeout(tvTestoFra); tvFai({ schermo: 'testo', testo: e.target.value }) } })
+// chi parla: un clic su un nome; uno nuovo si scrive e Invio (resta nella lista)
+$('#tv-nomi').addEventListener('click', (e) => { const b = e.target.closest('[data-nome]'); if (b) tvFai({ schermo: 'parla', parla: b.dataset.nome }) })
+$('#tv-nuovo').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.value.trim()) { tvFai({ schermo: 'parla', parla: e.target.value.trim() }); e.target.value = '' } })
+$('#tv-togli').addEventListener('click', () => { const S = stato?.podcast?.schermo; if (S) tvFai({ nomi: S.nomi.filter((n) => n !== S.parla) }) })
+function tvMostra() {
+  const S = stato?.podcast?.schermo
+  if (!S) return
+  for (const b of document.querySelectorAll('#tv-schermi [data-tv]')) b.setAttribute('aria-pressed', b.dataset.tv === S.s)
+  $('#tv-piu-testo').hidden = S.s !== 'testo'
+  $('#tv-piu-parla').hidden = S.s !== 'parla'
+  if (document.activeElement !== $('#tv-testo')) $('#tv-testo').value = S.testo ?? ''
+  const nomi = S.nomi.map((n) => `<button data-nome="${pulito(n)}" aria-pressed="${n === S.parla}">${pulito(n)}</button>`).join('')
+  if ($('#tv-nomi').dataset.c !== nomi) { $('#tv-nomi').innerHTML = nomi; $('#tv-nomi').dataset.c = nomi }
+  $('#tv-togli').hidden = !S.parla
+}
+function castMostra() {
+  const p = stato?.podcast
+  if (!p) return
+  const fase = Cast.fase(p), ora = Date.now()
+  $('#cast-inizia').hidden = fase === 'onda'
+  $('#cast-inizia').textContent = fase === 'finita' ? 'nuova puntata' : 'inizia puntata'
+  $('#cast-fine').hidden = fase === 'finita'
+  $('#cast-fine').disabled = fase !== 'onda'
+  $('#cast-chiudi').hidden = fase !== 'finita'
+  const a = p.argomento
+  const dice = fase === 'onda' ? `<span class="onda">● IN ONDA</span> · puntata <b>${p.puntata}</b> da <b>${Cast.tempo((ora - p.inizio) / 1000)}</b>${a ? ` · argomento ${a.n}: <b>${pulito(a.testo)}</b>` : ' · nessun argomento ancora'}`
+    : fase === 'finita' ? `puntata <b>${p.puntata}</b> finita: <b>${Cast.tempo((p.fine - p.inizio) / 1000)}</b>, ${p.scaletta.length} argomenti · i saluti sono in onda`
+      : `spento · la prossima è la <b>${p.puntata + 1}</b>`
+  if ($('#cast-dice').innerHTML !== dice) $('#cast-dice').innerHTML = dice
+  const tv = stato.tv ?? {}
+  $('#cast-tv').classList.toggle('su', tv.guarda > 0)
+  $('#cast-tv span').textContent = tv.guarda > 0 ? 'tv collegata' : 'tv'
+  // la scheda dell'argomento e quella della fine
+  $('#cast-ora').innerHTML = dice
+  if (document.activeElement !== $('#cast-n')) $('#cast-n').value = p.puntata
+  const chiave = JSON.stringify(p.argomenti)
+  if ($('#cast-lista').dataset.c !== chiave && $('#cast-salva').disabled) { $('#cast-lista').value = p.argomenti.join('\n'); $('#cast-lista').dataset.c = chiave }
+  const fatti = new Set(p.scaletta.map((x) => x.testo))
+  $('#cast-quanti').textContent = `${p.argomenti.length} · ${p.argomenti.filter((x) => !fatti.has(x)).length} ancora da fare`
+  $('#fine-dice').innerHTML = fase === 'finita' ? `Puntata <b>${p.puntata}</b>: ${Cast.tempo((p.fine - p.inizio) / 1000)} in onda, ${p.scaletta.length} argomenti.` : fase === 'onda' ? 'Accendila per chiudere la puntata: le strisce passano davanti a tutto, poi i saluti e i titoli di coda (anche sulla tv).' : 'Nessuna puntata in onda: inizia una puntata, poi a fine puntata accendi questo.'
+  // la tv: gli indirizzi da aprire sul browser della tv
+  const righe = (tv.indirizzi ?? []).map(({ rete, url }) => `<div class="link-r"><span>${pulito(rete)}</span><code>${pulito(url)}</code><button class="piccolo" data-copia="${pulito(url)}">copia</button></div>`).join('') || '<div class="link-r"><span>nessuna rete</span><code>il pc non è collegato a una rete</code></div>'
+  if ($('#tv-link').dataset.c !== righe) { $('#tv-link').innerHTML = righe; $('#tv-link').dataset.c = righe }
+  $('#tv-dice').innerHTML = !tv.acceso ? `<b style="color:var(--giallo)">La porta ${tv.porta} per la tv non è aperta</b> (vedi diretta.log): la pagina c’è solo su questo pc.` : tv.guarda > 0 ? `<b style="color:var(--verde)">La tv è collegata</b> (${tv.guarda}).` : 'Nessuna tv collegata adesso.'
+  $('#tv-trova-dice').innerHTML = tv.cercando ? 'cerco la tv sulla rete…'
+    : tv.errore ? `<b style="color:var(--giallo)">${pulito(tv.errore)}</b>`
+      : tv.nome ? `TV trovata: <b>${pulito(tv.nome)}</b>${tv.ip ? ` · ${pulito(tv.ip)}` : ''}${tv.aperta ? ' · canale aperto' : ''}`
+        : 'premi «trova la tv»: la cerco sulla Wi-Fi e le apro il canale nel browser.'
+  $('#tv-cerca').disabled = !!tv.cercando
+  $('#tv-apri').disabled = !!tv.cercando
+  $('#tv-specchio').setAttribute('aria-checked', !!p.specchio)
+}
+setInterval(castMostra, 1000)
+
+// ── i follower ──
+const marchio =(ic) => { const [col, d] = ICONS[ic] ?? []; return d ? `<svg viewBox="0 0 24 24"><path fill="#${['000000', '181717'].includes(col) ? 'fff' : col}" d="${d}"/></svg>` : '' }
+function socialRighe(s) {
+  if ($('#social').dataset.fatto || !s.reti?.length) return
+  $('#social').dataset.fatto = '1'
+  $('#social').innerHTML = s.reti.map(({ rete, nome, etichetta, icona }) => `<div class="so-r"><div class="so-si" role="switch" tabindex="0" aria-checked="false" data-rete="${rete}"><div class="leva"></div>${marchio(icona)}<div class="testo"><b>${pulito(etichetta)}</b><small>@${pulito(nome)} · <span id="so-alle-${rete}"></span></small></div></div><input type="number" min="0" step="1" data-rete="${rete}" placeholder="follower"></div>`).join('')
+  for (const i of document.querySelectorAll('#social input')) i.addEventListener('change', () => fai({ tipo: 'social', rete: i.dataset.rete, n: i.value === '' ? null : +i.value }))
+  for (const l of document.querySelectorAll('#social .so-si')) l.addEventListener('click', () => fai({ tipo: 'socialSi', rete: l.dataset.rete, si: l.getAttribute('aria-checked') !== 'true' }))
+}
+const quando = (t) => { if (!t) return ''; const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'adesso' : m < 60 ? `${m}′ fa` : m < 1440 ? `${Math.floor(m / 60)} h fa` : new Date(t).toLocaleDateString('it-IT') }
+
+// ── i clic ──
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('[data-pezzo], [data-tutti], [data-modo], [data-impara], [data-copia], [data-letto], [data-rb], [data-meteo], [data-pod], [data-scegli], [data-vai], [data-cast], #tutti-tasti, #tutti-posto, #segue, #grandezze')
+  if (!t) return
+  if (t.dataset.copia) { navigator.clipboard.writeText(t.dataset.copia).then(() => { t.textContent = 'copiato'; t.classList.add('fatto'); setTimeout(() => { t.textContent = 'copia'; t.classList.remove('fatto') }, 1400) }); return }
+  if (t.dataset.cast) fai({ tipo: 'podcast', cosa: t.dataset.cast })
+  else if (t.dataset.scegli) scegli(t.dataset.scegli)
+  else if (t.dataset.vai) scegli(t.dataset.vai)
+  else if (t.dataset.pezzo === 'esterna' && !stato?.esterna?.collegata) apriVista() // (senza portatile non c'è niente da accendere: si collega)
+  else if (t.dataset.pezzo) fai({ tipo: 'pezzo', nome: t.dataset.pezzo })
+  else if (t.dataset.tutti) fai({ tipo: 'tutti', su: t.dataset.tutti === '1' })
+  else if (t.dataset.modo) fai({ tipo: 'lente', modo: t.dataset.modo })
+  else if (t.dataset.impara) fai({ tipo: 'impara', lente: t.dataset.impara })
+  else if (t.dataset.letto) fai({ tipo: 'lettoSposta', min: +t.dataset.letto })
+  else if (t.dataset.rb) fai({ tipo: 'redbull', d: +t.dataset.rb })
+  else if (t.dataset.meteo !== undefined) fai({ tipo: 'meteoProva', cosa: t.dataset.meteo || null })
+  else if (t.dataset.pod) fai({ tipo: 'puff', pod: +t.dataset.pod })
+  else if (t.id === 'segue') fai({ tipo: 'segue', su: !stato?.segue })
+  else if (t.id === 'tutti-tasti') fai({ tipo: 'tastiTutti', su: !stato?.tastiTutti })
+  else if (t.id === 'tutti-posto') tuttiAPosto()
+  else if (t.id === 'grandezze') grandezzeGiuste()
+})
+document.addEventListener('keydown', (e) => { if ((e.key === ' ' || e.key === 'Enter') && e.target.matches?.('[role=switch]')) { e.preventDefault(); e.target.click() } })
+$('#letto').addEventListener('change', (e) => fai({ tipo: 'letto', ora: e.target.value }))
+// la webcam per Camo: libera (nessuno di qui la legge) o ripresa
+$('#cam').addEventListener('click', () => stato && fai({ tipo: 'cam', libera: !stato.camLibera }))
+$('#gpu').addEventListener('click', () => stato && fai({ tipo: 'gpuLeggero', su: !stato.gpuLeggero }))
+$('#libera').addEventListener('click', (e) => { if (e.target.closest('[data-cam]')) fai({ tipo: 'cam', libera: false }) })
+
+// ── il conto alla rovescia, in alto e nella sua scheda ──
+const due = (n) => String(n).padStart(2, '0')
+function lettoConta() {
+  if (!stato) return
+  const [h, m] = stato.letto.split(':').map(Number), ora = new Date(), meta = new Date(ora)
+  meta.setHours(h, m, 0, 0)
+  let s = (meta - ora) / 1000
+  if (s < -6 * 3600) s += 86400
+  if (s > 18 * 3600) s -= 86400
+  const tardi = s <= 0, a = Math.floor(Math.abs(s)), t = `${Math.floor(a / 3600)}:${due(Math.floor(a / 60) % 60)}:${due(a % 60)}`
+  $('#letto-dice').textContent = tardi ? 'T+ · scaduto da' : 'T− · mancano'
+  $('#letto-conta').textContent = t; $('#letto-conta').classList.toggle('tardi', tardi)
+  $('#v-letto').textContent = tardi ? `−${t}` : t; $('#v-letto').classList.toggle('tardi', tardi)
+}
+setInterval(lettoConta, 500)
+
+// ── lo stato dal server ──
+function applica(s) {
+  stato = s
+  const L0 = L()
+  for (const r of document.querySelectorAll('[data-riga]')) {
+    const p = r.dataset.riga, su = !!s.attivi[p], torna = !!s.viaPrima?.includes(p)
+    r.querySelector('[role=switch]').setAttribute('aria-checked', su)
+    r.classList.toggle('su', su) // (il pallino della faccina, e il nome più scuro)
+    r.querySelector('.torna').hidden = !torna
+    const d = r.querySelector('.dove'), muro = s.muri?.[L0]?.pezzi?.[p], m = muro && s.muri[L0].pareti.find((x) => x.id === muro.muro)
+    d.textContent = m ? (m.nome || 'piano') : ''
+    d.classList.toggle('muro', !!m)
+    r.classList.toggle('scelto', p === scelto)
+    r.querySelector('.reg-tag').hidden = !s.regola?.[p]
+  }
+  for (const b of document.querySelectorAll('#via button')) b.setAttribute('aria-pressed', !!s.attivi[b.dataset.pezzo])
+  for (const b of document.querySelectorAll('[data-modo]')) b.setAttribute('aria-pressed', b.dataset.modo === s.lenteModo)
+  for (const b of document.querySelectorAll('#meteo-prova button')) b.setAttribute('aria-pressed', (b.dataset.meteo || null) === s.meteoProva)
+  $('#tutti-tasti').setAttribute('aria-checked', !!s.tastiTutti)
+  $('#cam').textContent = s.camLibera ? 'Riacquisisci camera' : 'Rilascia camera'
+  $('#cam').classList.toggle('libera', !!s.camLibera)
+  $('#gpu').textContent = s.gpuLeggero ? 'GPU ridotta · on' : 'GPU ridotta'
+  $('#gpu').setAttribute('aria-pressed', !!s.gpuLeggero)
+  $('#libera').hidden = !s.camLibera
+  $('#segue').setAttribute('aria-checked', !!s.segue)
+  const pf = s.puff ?? {}
+  if (document.activeElement !== $('#pf-gusto')) $('#pf-gusto').value = pf.gusto ?? ''
+  if (document.activeElement !== $('#pf-batt')) { $('#pf-batt').value = pf.batteria ?? 100; $('#pf-batt-n').textContent = `${pf.batteria ?? 100}%` }
+  for (const b of document.querySelectorAll('#pf-pod button')) b.setAttribute('aria-pressed', +b.dataset.pod === pf.pod)
+  $('#pf-zona-via').hidden = !pf.zona?.[L0]
+  if (!disegnoDa) zonaMostra(pf.zona?.[L0])
+  occhioDice(); fotoDice(); socialRighe(s)
+  for (const { rete } of s.reti ?? []) {
+    const v = s.social?.[rete], i = document.querySelector(`#social input[data-rete=${rete}]`)
+    if (i && document.activeElement !== i) i.value = v?.n ?? ''
+    document.querySelector(`#social .so-si[data-rete="${rete}"]`)?.setAttribute('aria-checked', !!s.socialSi?.[rete])
+    const a = document.getElementById(`so-alle-${rete}`); if (a) a.textContent = v?.alle ? (v.auto ? `da solo, ${quando(v.alle)}` : quando(v.alle)) : 'senza numero'
+  }
+  if (document.activeElement !== $('#letto')) $('#letto').value = s.letto
+  $('#rb-n').textContent = $('#v-rb').textContent = s.redbull?.n ?? 0
+  const sl = s.sensori.lente
+  $('#lente-dice').innerHTML = `attiva: <b>${L_[s.lente]}</b>`
+  $('#lente-sensori').innerHTML = `Preset di Camo <b>${L_[sl.file] ?? 'non letto'}</b> · analisi immagine <b>${L_[sl.immagine] ?? 'incerta'}</b>${sl.somiglia ? ` (similarità 0,5× ${sl.somiglia['05']} · 1,0× ${sl.somiglia['10']})` : ''} · sensori PC <b>${s.sensori.pc ? 'attivi' : 'fermi'}</b> · controller <b>${s.sensori.pad ?? 'nessuno'}</b>`
+  $('#spie').innerHTML = [['mic', 'Microfono'], ['cuffie', 'Cuffie'], ['iphone', 'Webcam iPhone']].map(([k, n]) => `<div class="${s.spie[k].ok ? 'ok' : ''}"><i></i><b>${n}</b><small>${pulito(s.spie[k].nome) || (k === 'iphone' ? (s.spie[k].ok ? 'collegato, Camo aperto' : 'scollegato, Camo chiuso o immagine nera') : 'non trovato')}</small>${k === 'mic' ? '<div class="mic-barra"><b id="mic-barra"></b></div>' : ''}</div>`).join('')
+  lettoConta(); castMostra(); tvMostra(); bandieraMostra(); railMostra(); ondaMostra()
+  // i muri che ho appena mandato sono arrivati: l'anteprima torna a seguire il server
+  if (attesaMuri && Date.now() > attesaMuri.dopo) { const { p, L: Lm } = attesaMuri; if (JSON.stringify(s.muri?.[Lm]?.pezzi?.[p] ?? null) === JSON.stringify(attesaMuri.q)) { attesaMuri = null; setTimeout(() => { if (!presa) try { win()?.__muri?.(Lm, null) } catch {} }, 350) } }
+  schedaAggiorna()
+  forme(); sagome()
+  vistaMostra()
+}
+function occhioDice() {
+  const o = conti, chip = $('#occhio-chip'), od = $('#occhio-dice')
+  const cl = `pallino ${o.acceso ? (o.testa === 'volto' || o.testa === 'segue' ? 'su' : 'forse') : 'spento'}`
+  chip.className = cl; od.className = cl
+  chip.querySelector('span').textContent = stato?.camLibera ? 'Tracking · camera rilasciata' : o.acceso ? (o.cerca === false ? 'Tracking · solo anteprima' : `Tracking · ${o.fps ?? 0} fps`) : 'Tracking · off'
+  chip.title = o.acceso ? (o.cerca === false ? 'Lettura della camera attiva solo per l’anteprima live: nessun target da cercare' : `Analisi della camera: ${o.fps ?? 0} fps, ${o.ms ?? 0} ms per frame`) : 'Si attiva da solo quando serve (head tracking, tracking oggetto, anteprima live)'
+  od.querySelector('span').innerHTML = !o.acceso ? 'tracking off: si attiva da solo quando serve'
+    : o.cerca === false ? 'attivo solo per l’anteprima live (nessun target da cercare)'
+    : `attivo · <b>${o.fps ?? 0}</b> fps · volto: <b>${{ volto: 'rilevato', segue: 'agganciato', persa: 'perso (posizione mantenuta)' }[o.testa] ?? 'non ancora rilevato'}</b>${o.volti === false ? ' · <b>modello volti non caricato</b>' : ''}`
+  if (!stato) return
+  const pf = stato.puff ?? {}, zona = pf.zona?.[L()]
+  $('#pf-dice').innerHTML = `${pf.colore ? `<span class="tinta" style="background:hsl(${pf.colore.h} 85% 50%)"></span>` : ''}${!pf.colore ? 'colore non campionato' : o.puff ? 'agganciato' : o.acceso ? (zona ? 'fuori ROI' : 'non rilevato') : 'pronto (tracking off)'}${zona ? ` · ROI ${L_[L()]}` : ` · nessuna ROI per ${L_[L()]}: ricerca su tutto il frame`}`
+}
+// la foto della stanza della lente in onda: di quando è
+let fotoFa = ''
+function fotoDice() {
+  if (!stato || fotoFa) return
+  const t = stato.foto?.[L()]
+  $('#foto-dice').innerHTML = `Ottica ${L_[L()]}: <b>${t ? quando(t) : 'assente'}</b>${stato.fotoCambiata?.[L()] ? ' · <b style="color:var(--giallo)">inquadratura cambiata: acquisiscilo di nuovo</b>' : ''}`
+}
+setInterval(fotoDice, 30000)
+$('#foto-scatta').addEventListener('click', async () => {
+  const b = $('#foto-scatta')
+  b.disabled = true; fotoFa = 'scatta'; $('#foto-dice').textContent = 'Acquisizione…'
+  let r = null
+  try { r = await (await fetch('/api/foto', { method: 'POST' })).json() } catch {}
+  b.disabled = false; fotoFa = ''
+  if (r?.ok) fotoDice()
+  else $('#foto-dice').innerHTML = `Acquisizione fallita: <b>${pulito(r?.dice ?? 'il server non risponde')}</b>`
+})
+// Il filo col server resta aperto solo con la scheda in vista (il browser tiene al massimo 6 collegamenti per sito, e
+// ogni regia ne usa due: lei e l'anteprima). Quando torni sulla scheda si ricollega e il server rimanda tutto.
+let filo = null
+function collega() {
+  if (filo || document.hidden) return
+  filo = new EventSource('/api/flusso')
+  filo.addEventListener('stato', (e) => applica(JSON.parse(e.data)))
+  filo.addEventListener('conti', (e) => { conti = JSON.parse(e.data); occhioDice() })
+  filo.addEventListener('regola', (e) => regolaArriva(JSON.parse(e.data)))
+  filo.addEventListener('picco', (e) => { const b = document.getElementById('mic-barra'); if (b) b.style.width = `${Math.min(100, JSON.parse(e.data).mic * 300)}%` })
+  filo.onopen = () => { $('#filo').classList.add('su'); $('#filo span').textContent = 'Server · online' }
+  filo.onerror = () => { $('#filo').classList.remove('su'); $('#filo span').textContent = 'Server · offline' }
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) return collega(); filo?.close(); filo = null })
+collega()
+
+// ══ l'anteprima: i pezzi si toccano qui ══
+// (la pagina dei pezzi dentro, ma a 15 fotogrammi: è piccola e serve solo a prendere i pezzi; in onda il livello di Camo va a 60)
+const ant = $('#anteprima'), cornice = ant.querySelector('iframe'), mano = $('#mano'), svg = $('#sagome')
+function sceglFondo(f) {
+  fondo = f
+  for (const b of document.querySelectorAll('#ant-fondo button')) b.setAttribute('aria-pressed', b.dataset.fondo === f)
+  cornice.src = f === 'vivo' ? '/o/tutto?sfondo=vivo&fps=15' : '/o/tutto?sfondo&fps=15'
+}
+sceglFondo('vivo')
+$('#ant-fondo').addEventListener('click', (e) => { const b = e.target.closest('[data-fondo]'); if (b) sceglFondo(b.dataset.fondo) })
+const adatta = () => { scala = ant.clientWidth / 1920; cornice.style.transform = `scale(${scala})`; if (stato) zonaMostra(stato.puff?.zona?.[L()]); sagome() }
+new ResizeObserver(adatta).observe(ant); adatta()
+const win = () => cornice.contentWindow
+const punto = (e) => { const r = ant.getBoundingClientRect(); return [(e.clientX - r.left) / scala, (e.clientY - r.top) / scala] }
+const lontano = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1])
+const leggiPosto = (t) => { const m = /translate\(([-\d.]+)px,\s*([-\d.]+)px\)\s*scale\(([\d.]+)\)/.exec(t ?? ''); return m ? m.slice(1).map(Number) : null }
+
+// i muri della lente in onda: durante un gesto valgono quelli che sto toccando (Mloc)
+const muriOra = () => Mloc ?? stato?.muri?.[L()] ?? { pareti: [], pezzi: {} }
+const pianoDi = (M, m) => piano(m, fDi(M, L()))
+// com'è ogni pezzo acceso nell'immagine: i 4 angoli, il centro, quanto è ingrandito, e se sta in aria o su un muro
+function forme() {
+  let P = {}
+  try { P = win()?.__pezzi?.() ?? {} } catch {}
+  const M = muriOra()
+  tutte = []
+  for (const [nome, v] of Object.entries(P)) {
+    if (!v.su || v.nascosto) continue
+    const q = M.pezzi?.[nome], m = q && M.pareti.find((x) => x.id === q.muro), pi = m && pianoDi(M, m)
+    if (pi) {
+      const G = matrice(pi, q, v.w, v.h), c = porta(G, v.w / 2, v.h / 2)
+      tutte.push({ nome, w: v.w, h: v.h, muro: m, pi, q, G, angoli: angoli(G, v.w, v.h), centro: [c[0], c[1]], scala: scalaIn(G, v.w / 2, v.h / 2) })
+      continue
+    }
+    const b = v.box, a = leggiPosto(v.posto)
+    if (!b.width) continue
+    const c = [(b.left + b.right) / 2, (b.top + b.bottom) / 2], s = a?.[2] ?? b.width / (v.w || 1)
+    // (ruotata dalla regia: il contorno vero attorno al centro, non il rettangolo dritto che la contiene)
+    let ang = [[b.left, b.top], [b.right, b.top], [b.right, b.bottom], [b.left, b.bottom]]
+    if (v.giro && a) { const g = v.giro * Math.PI / 180, co = Math.cos(g), si = Math.sin(g), hw = v.w * s / 2, hh = v.h * s / 2; ang = [[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]].map(([x, y]) => [c[0] + x * co - y * si, c[1] + x * si + y * co]) }
+    tutte.push({ nome, w: v.w, h: v.h, aria: a, segue: v.segue, giro: v.giro || 0, angoli: ang, centro: c, scala: s })
+  }
+  return tutte
+}
+const area = (a) => Math.abs((a[2][0] - a[0][0]) * (a[3][1] - a[1][1]) - (a[3][0] - a[1][0]) * (a[2][1] - a[0][1])) / 2
+function sotto(pt) {
+  let meglio = null
+  for (const f of tutte) if (dentro(f.angoli, pt[0], pt[1]) && (!meglio || area(f.angoli) < area(meglio.angoli))) meglio = f
+  return meglio
+}
+// l'angolo del pezzo scelto sotto il mouse (per tirarlo)
+function angoloSotto(pt) {
+  const f = tutte.find((x) => x.nome === scelto)
+  if (!f || f.nome === 'cornice') return null
+  const i = f.angoli.findIndex((a) => lontano(a, pt) < 11 / scala)
+  return i < 0 ? null : { f, i }
+}
+// il disegno sopra l'anteprima: i contorni veri dei pezzi (anche quelli sui muri, in prospettiva), il nome, le maniglie
+function sagome() {
+  const k = 1 / scala, out = []
+  for (const f of tutte) {
+    const cl = presa?.nome === f.nome ? 'scelto tiene' : f.nome === scelto ? 'scelto' : f.nome === sopra?.nome ? 'sopra' : dentroAnt ? '' : null
+    if (cl === null) continue
+    out.push(`<polygon class="${cl}" points="${f.angoli.map((p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ')}" vector-effect="non-scaling-stroke"/>`)
+    const top = f.angoli.reduce((a, b) => (b[1] < a[1] ? b : a)), forte = cl !== ''
+    const etichetta = `${NOMI[f.nome]}${forte && f.muro ? ` · sul ${f.muro.nome || 'piano'}` : ''}`
+    out.push(`<text class="${forte ? '' : 'tenue'}" x="${Math.max(4 * k, top[0]).toFixed(1)}" y="${Math.max(16 * k, top[1] - 7 * k).toFixed(1)}" font-size="${((forte ? 13 : 11) * k).toFixed(1)}" stroke-width="${(4 * k).toFixed(1)}">${pulito(etichetta)}</text>`)
+  }
+  const f = tutte.find((x) => x.nome === scelto)
+  if (f && !presa) out.push(`<g class="mani">${f.angoli.map(([x, y]) => `<rect x="${(x - 5 * k).toFixed(1)}" y="${(y - 5 * k).toFixed(1)}" width="${(10 * k).toFixed(1)}" height="${(10 * k).toFixed(1)}" rx="${(2 * k).toFixed(1)}" vector-effect="non-scaling-stroke"/>`).join('')}</g>`)
+  svg.innerHTML = out.join('')
+}
+// (Giugnoh e la puff si muovono da soli, le bestioline del meteo anche: i contorni si rifanno ogni tanto)
+setInterval(() => { if (!presa && !document.hidden && (dentroAnt || scelto)) { forme(); sagome() } }, 300)
+cornice.addEventListener('load', () => setTimeout(() => { forme(); sagome() }, 600))
+
+const AIUTO = '<b>Clic</b>: seleziona · <b>trascina</b>: sposta · <b>rotella</b>: scala · <b>Shift + rotella</b>: rotazione · <b>doppio clic</b>: posizione predefinita'
+function aiuto(h) { $('#aiuto').innerHTML = h ?? AIUTO }
+aiuto()
+
+// ── il muro sotto un punto: prima quello dove sta già, poi il più vicino al telefono ──
+function muroSotto(M, [x, y], ora) {
+  const qui = M.pareti.filter((m) => dentro(m.punti, x, y) && pianoDi(M, m))
+  if (!qui.length) return null
+  return qui.find((m) => m.id === ora) ?? qui.map((m) => { const pi = pianoDi(M, m), [u, v] = sulPiano(pi, x, y); return [m, distanza(pi, { u, v })] }).sort((a, b) => a[1] - b[1])[0][0]
+}
+// un pezzo appeso a un muro col centro in c, grande sullo schermo quanto «scr» (pixel della webcam per pixel del pezzo)
+function appendi(M, m, c, scr, w, h, r = 0) {
+  const pi = pianoDi(M, m)
+  if (!pi) return null
+  let [u, v] = sulPiano(pi, c[0], c[1])
+  if (![u, v].every(Number.isFinite)) [u, v] = [0.5, 0.5]
+  u = Math.min(3.9, Math.max(-2.9, u)); v = Math.min(3.9, Math.max(-2.9, v))
+  const q = { muro: m.id, u, v, s: 1, r }
+  q.s = Math.min(50, Math.max(0.05, scr / (scalaIn(matrice(pi, q, w, h), w / 2, h / 2) || 1)))
+  return q
+}
+
+// ── i gesti ──
+const storia = [] // per «annulla»: [{ L, voci: [{ p, aria, q }] }]
+const fotoDi = (p, Lx = L()) => ({ p, aria: copia(stato.posti?.[Lx]?.[p] ?? null), q: copia(stato.muri?.[Lx]?.pezzi?.[p] ?? null), reg: copia(stato.regola?.[p] ?? null) })
+function ricorda(voci, Lx = L()) { storia.push({ L: Lx, voci }); if (storia.length > 60) storia.shift(); $('#annulla').disabled = false }
+async function mandaMuro(p, q, Lx = L()) {
+  attesaMuri = { p, q: q ?? null, L: Lx, dopo: Date.now() }
+  const r = await faiJ({ tipo: 'muroPezzo', lente: Lx, pezzo: p, q: q ?? null })
+  if (r.ok) return
+  // (un server di prima non conosce «muroPezzo»: gli mando tutti i muri della lente, come fa la pagina dei muri)
+  const M = copia(stato.muri[Lx]); if (q) M.pezzi[p] = q; else delete M.pezzi[p]
+  await faiJ({ tipo: 'muri', lente: Lx, dati: M })
+}
+const mandaAria = (p, a, Lx = L()) => fai(a ? { tipo: 'posto', pezzo: p, lente: Lx, x: a[0], y: a[1], s: a[2] } : { tipo: 'posto', pezzo: p, lente: Lx, via: true })
+// l'anteprima prende subito i muri che sto toccando (senza aspettare il server)
+const spingi = (tiene) => { try { win()?.__muri?.(L(), Mloc, tiene) } catch {} }
+
+mano.addEventListener('pointerenter', () => { dentroAnt = true; forme(); sagome() })
+mano.addEventListener('pointerleave', () => { dentroAnt = false; if (!presa) { sopra = null; mano.className = 'mano'; aiuto(); sagome() } })
+mano.addEventListener('pointermove', (e) => {
+  const pt = punto(e)
+  if (disegnoDa) { zonaMostra(rett(disegnoDa, pt)); return }
+  if (disegna || insegna) return
+  if (!presa) {
+    const a = angoloSotto(pt), h = a ? a.f : sotto(pt)
+    if (h?.nome !== sopra?.nome) { sopra = h; sagome() }
+    mano.className = `mano${a ? (a.i % 2 ? ' angolo2' : ' angolo') : h ? ' sopra' : ''}`
+    aiuto(a ? 'Trascina l’angolo: scala dal centro' : !h ? null : h.muro ? `<b>${NOMI[h.nome]}</b> · ancorata a ${pulito(h.muro.nome || 'piano')}: trascina (resta sul piano) · <kbd>Alt</kbd> + trascina: sgancia · <kbd>Shift</kbd> + rotella: rotazione` : h.nome === 'cornice' ? `<b>${NOMI.cornice}</b>: a tutto frame, non si sposta` : `<b>${NOMI[h.nome]}</b>: trascina · rotella: scala · <kbd>Shift</kbd> + rotella: rotazione · <kbd>Alt</kbd> + trascina: ancora a un piano`)
+    return
+  }
+  const P = presa
+  P.mosso = P.mosso || lontano(pt, P.da) > 3 / scala
+  if (!P.mosso) return
+  if (P.tipo === 'angolo') tiraAngolo(pt)
+  else trascina(pt, e.altKey)
+  forme(); sagome()
+})
+mano.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0) return
+  const pt = punto(e)
+  if (disegna) { disegnoDa = pt; try { mano.setPointerCapture(e.pointerId) } catch {} zonaMostra([...pt, 0, 0]); return }
+  if (insegna) {
+    insegna = false; ant.classList.remove('insegna')
+    fai({ tipo: 'puffQui', x: pt[0], y: pt[1] }).then((r) => r.json()).then((r) => { if (!r.ok) $('#pf-dice').textContent = 'lì non vedo niente di colorato: riprova, clicca proprio sulla parte azzurra' })
+    return
+  }
+  forme()
+  const a = angoloSotto(pt), f = a ? a.f : sotto(pt)
+  if (!f || f.nome === 'cornice') { scegli(f?.nome ?? null); return }
+  scegli(f.nome)
+  Mloc = copia(stato.muri?.[L()] ?? { pareti: [], pezzi: {} })
+  presa = { tipo: a ? 'angolo' : 'sposta', nome: f.nome, da: pt, off: [f.centro[0] - pt[0], f.centro[1] - pt[1]], f0: f, w: f.w, h: f.h, scala: f.scala, eraSulMuro: !!f.muro, aria: f.aria, prima: fotoDi(f.nome), mosso: false }
+  try { mano.setPointerCapture(e.pointerId) } catch {}
+  mano.classList.add('tiene')
+})
+// trascinare: chi è sul muro resta sul muro (anche passando su un altro), chi è in aria resta in aria; con Alt cambia
+function trascina(pt, alt) {
+  const P = presa, nome = P.nome, c = [pt[0] + P.off[0], pt[1] + P.off[1]], M = Mloc
+  const vuoleMuro = MAI_SUL_MURO.includes(nome) ? false : P.eraSulMuro !== alt
+  const q0 = M.pezzi[nome]
+  let m = vuoleMuro ? (muroSotto(M, c, q0?.muro) ?? (q0 && !alt ? M.pareti.find((x) => x.id === q0.muro) : null)) : null
+  if (m) {
+    const pi = pianoDi(M, m)
+    let q
+    if (q0) { const [u, v] = sulPiano(pi, c[0], c[1]); q = { ...q0, muro: m.id, u: Math.min(3.9, Math.max(-2.9, u)), v: Math.min(3.9, Math.max(-2.9, v)) } } // (da un muro all'altro tiene la grandezza vera)
+    else q = appendi(M, m, c, P.scala, P.w, P.h) // (dall'aria: tiene la grandezza che aveva sullo schermo)
+    if (q) { M.pezzi[nome] = q; P.esito = { q }; P.scala = scalaIn(matrice(pi, q, P.w, P.h), P.w / 2, P.h / 2); spingi(nome); return }
+  }
+  // in aria
+  if (M.pezzi[nome]) { delete M.pezzi[nome]; spingi(nome) }
+  const s = Math.min(3, Math.max(0.2, P.aria && !P.eraSulMuro ? P.aria[2] : P.scala))
+  P.scala = s
+  const a = P.aria && !P.eraSulMuro && !alt ? [P.aria[0] + pt[0] - P.da[0], P.aria[1] + pt[1] - P.da[1], s] : [c[0] - P.w * s / 2, c[1] - P.h * s / 2, s]
+  P.esito = { aria: a.map((x, i) => (i < 2 ? Math.round(x) : x)) }
+  try { win().__posto(nome, ...a, false) } catch {}
+}
+// tirare un angolo: la grandezza cambia di quanto si allontana dal centro
+function tiraAngolo(pt) {
+  const P = presa, f = P.f0, k = lontano(pt, f.centro) / Math.max(1, lontano(P.da, f.centro))
+  if (f.muro) {
+    const q = { ...Mloc.pezzi[P.nome], s: Math.min(50, Math.max(0.05, f.q.s * k)) }
+    Mloc.pezzi[P.nome] = q; P.esito = { q }; spingi(P.nome)
+  } else if (f.aria) {
+    const s = Math.min(3, Math.max(0.2, f.aria[2] * k)), a = [Math.round(f.centro[0] - f.w * s / 2), Math.round(f.centro[1] - f.h * s / 2), +s.toFixed(3)]
+    P.esito = { aria: a }
+    try { win().__posto(P.nome, ...a, false) } catch {}
+  }
+}
+const lascia = async () => {
+  if (disegnoDa) {
+    const [x, y, w, h] = rett(disegnoDa, ultimoPunto ?? disegnoDa)
+    disegnoDa = null; disegna = false; ant.classList.remove('disegna')
+    if (w >= 20 && h >= 20) fai({ tipo: 'puffZona', lente: L(), x, y, w, h }); else zonaMostra(stato.puff?.zona?.[L()])
+    return
+  }
+  const P = presa
+  presa = null; mano.classList.remove('tiene')
+  if (!P) return
+  if (!P.mosso || !P.esito) { Mloc = null; forme(); sagome(); return }
+  ricorda([P.prima])
+  if (P.esito.q) {
+    await mandaMuro(P.nome, P.esito.q)
+  } else {
+    try { win().__posto(P.nome, ...P.esito.aria, true) } catch {}
+    if (P.eraSulMuro) await mandaMuro(P.nome, null)
+    mandaAria(P.nome, P.esito.aria)
+  }
+  Mloc = null
+  forme(); sagome()
+}
+let ultimoPunto = null
+mano.addEventListener('pointermove', (e) => { ultimoPunto = punto(e) }, true)
+mano.addEventListener('pointerup', lascia); mano.addEventListener('pointercancel', lascia)
+const rett = (a, b) => [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.abs(a[0] - b[0]), Math.abs(a[1] - b[1])]
+
+// la rotella: grandezza (con Shift, sul muro: lo gira)
+let rotFra = null, rot = null
+mano.addEventListener('wheel', (e) => {
+  if (presa) return
+  const pt = punto(e), f = rot?.f ?? sotto(pt), d = e.deltaY || e.deltaX
+  if (!f || !d || f.nome === 'cornice') return
+  e.preventDefault()
+  if (!rot || rot.nome !== f.nome) rot = { nome: f.nome, f, prima: fotoDi(f.nome), Lx: L() }
+  scegli(f.nome)
+  if (f.muro) {
+    Mloc ??= copia(stato.muri[L()])
+    const q = Mloc.pezzi[f.nome]
+    if (e.shiftKey) q.r = Math.max(-180, Math.min(180, (q.r || 0) + (d < 0 ? 2.5 : -2.5)))
+    else q.s = Math.min(50, Math.max(0.05, q.s * (d < 0 ? 1.05 : 1 / 1.05)))
+    rot.esito = { q: { ...q } }; spingi()
+  } else if (e.shiftKey) {
+    // libera: Shift + rotella la ruota attorno al suo centro (la regolazione «r»)
+    const R = { ...(regDi(f.nome) ?? {}) }
+    R.r = giro180(Math.round((R.r || 0) + (d < 0 ? 2 : -2)))
+    rot.reg = true
+    regolaProva(f.nome, R)
+  } else if (f.aria) {
+    const s0 = rot.esito?.aria?.[2] ?? f.aria[2], s = Math.min(3, Math.max(0.2, s0 * (d < 0 ? 1.05 : 1 / 1.05)))
+    const a = [Math.round(f.centro[0] - f.w * s / 2), Math.round(f.centro[1] - f.h * s / 2), +s.toFixed(3)]
+    rot.esito = { aria: a }
+    try { win().__posto(f.nome, ...a, false) } catch {}
+  }
+  forme(); sagome(); schedaAggiorna()
+  clearTimeout(rotFra)
+  rotFra = setTimeout(async () => {
+    const r = rot; rot = null
+    if (r?.reg) { ricorda([r.prima], r.Lx); regolaManda(r.nome, regDi(r.nome)) }
+    if (!r?.esito) { Mloc = null; return }
+    if (!r.reg) ricorda([r.prima], r.Lx)
+    if (r.esito.q) await mandaMuro(r.nome, r.esito.q, r.Lx)
+    else { try { win().__posto(r.nome, ...r.esito.aria, true) } catch {} mandaAria(r.nome, r.esito.aria, r.Lx) }
+    Mloc = null
+  }, 350)
+}, { passive: false })
+// doppio clic: al suo posto (in aria, dove sta per quella lente; un pezzo appeso resta appeso: si stacca dalla scheda)
+mano.addEventListener('dblclick', (e) => {
+  const f = sotto(punto(e))
+  if (!f || f.nome === 'cornice') return
+  if (f.muro) { aiuto(`<b>${NOMI[f.nome]}</b> è ancorata a un piano: per sganciarla imposta Ancoraggio → «Libero» (o <kbd>Alt</kbd> + trascina)`); return }
+  ricorda([fotoDi(f.nome)]); mandaAria(f.nome, null)
+})
+// la tastiera: le frecce spostano il pezzo scelto, Esc lo lascia, Ctrl+Z annulla
+let frecceFra = null, frecce = null
+document.addEventListener('keydown', (e) => {
+  if (e.target?.matches?.('input, select, textarea') || $('#imp').open) return
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); annulla(); return }
+  if (e.key === 'Escape') { scegli(null); return }
+  const dir = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key]
+  if (!dir || !scelto) return
+  const f = tutte.find((x) => x.nome === scelto)
+  if (!f || f.nome === 'cornice') return
+  e.preventDefault()
+  const n = e.shiftKey ? 10 : 1
+  if (!frecce || frecce.nome !== f.nome) frecce = { nome: f.nome, prima: fotoDi(f.nome), Lx: L() }
+  if (f.muro) {
+    Mloc ??= copia(stato.muri[L()])
+    const q = Mloc.pezzi[f.nome], pi = pianoDi(Mloc, Mloc.pareti.find((x) => x.id === q.muro)), c = porta(pi.H, q.u, q.v)
+    const [u, v] = sulPiano(pi, c[0] + dir[0] * n, c[1] + dir[1] * n)
+    Object.assign(q, { u, v }); frecce.esito = { q: { ...q } }; spingi()
+  } else if (f.aria) {
+    const a0 = frecce.esito?.aria ?? f.aria, a = [a0[0] + dir[0] * n, a0[1] + dir[1] * n, a0[2]]
+    frecce.esito = { aria: a }
+    try { win().__posto(f.nome, ...a, false) } catch {}
+  }
+  forme(); sagome()
+  clearTimeout(frecceFra)
+  frecceFra = setTimeout(async () => {
+    const r = frecce; frecce = null
+    if (!r?.esito) return
+    ricorda([r.prima], r.Lx)
+    if (r.esito.q) await mandaMuro(r.nome, r.esito.q, r.Lx)
+    else { try { win().__posto(r.nome, ...r.esito.aria, true) } catch {} mandaAria(r.nome, r.esito.aria, r.Lx) }
+    Mloc = null
+  }, 500)
+})
+// annulla: rimette com'erano i pezzi dell'ultimo gesto (anche «grandezze giuste» e «rimetti tutto a posto», tutti insieme)
+async function annulla() {
+  const u = storia.pop()
+  $('#annulla').disabled = !storia.length
+  if (!u) return
+  for (const { p, aria, q, reg } of u.voci) {
+    if (reg !== undefined && JSON.stringify(stato.regola?.[p] ?? null) !== JSON.stringify(reg)) regolaManda(p, reg)
+    if (JSON.stringify(stato.muri?.[u.L]?.pezzi?.[p] ?? null) !== JSON.stringify(q)) await mandaMuro(p, q, u.L)
+    if (JSON.stringify(stato.posti?.[u.L]?.[p] ?? null) !== JSON.stringify(aria)) await mandaAria(p, aria, u.L)
+  }
+  try { win()?.__muri?.(u.L, null) } catch {}
+  aiuto('Annullato')
+}
+$('#annulla').addEventListener('click', annulla)
+// tutti al loro posto, per la lente in onda (in aria; quelli appesi restano appesi)
+function tuttiAPosto() {
+  if (!stato) return
+  const ps = Object.keys(stato.posti?.[L()] ?? {})
+  if (!ps.length) return aiuto('Tutte le sorgenti sono già alla posizione predefinita')
+  ricorda(ps.map((p) => fotoDi(p)))
+  for (const p of ps) mandaAria(p, null)
+}
+// la grandezza giusta (GIUSTA). Si tocca solo chi è fuori misura di più di un quarto. Chi rimpicciolisce resta col
+// centro dov'è; chi cresce cresce solo finché non esce dallo schermo e non finisce sopra un vicino (se serve si sposta un
+// po' verso l'interno). Sul muro cambia la grandezza vera (e il punto sul muro, se si è spostato), in aria la scala.
+const scatola = (a) => { const xs = a.map((p) => p[0]), ys = a.map((p) => p[1]); return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] }
+const sopraPosto = (A, B) => Math.max(0, Math.min(A[2], B[2]) - Math.max(A[0], B[0])) * Math.max(0, Math.min(A[3], B[3]) - Math.max(A[1], B[1]))
+function grandezzaGiusta(f, altre) {
+  const g = GIUSTA[f.nome]
+  if (!g || f.segue || f.nome === 'puff' || f.nome === 'nome' || !(f.muro || f.aria)) return null
+  const voluto = g / (f.scala || 1)
+  if (voluto > 0.8 && voluto < 1.25) return null // (già giusto, più o meno)
+  const B0 = scatola(f.angoli), cx = (B0[0] + B0[2]) / 2, cy = (B0[1] + B0[3]) / 2, M = 14
+  const prova = (k) => {
+    let B = [cx + (B0[0] - cx) * k, cy + (B0[1] - cy) * k, cx + (B0[2] - cx) * k, cy + (B0[3] - cy) * k]
+    // dentro lo schermo: se esce da un lato si sposta verso l'interno (se è più grande dello schermo, non va)
+    if (B[2] - B[0] > 1920 - 2 * M || B[3] - B[1] > 1080 - 2 * M) return null
+    const dx = Math.max(0, M - B[0]) - Math.max(0, B[2] - (1920 - M)), dy = Math.max(0, M - B[1]) - Math.max(0, B[3] - (1080 - M))
+    B = [B[0] + dx, B[1] + dy, B[2] + dx, B[3] + dy]
+    // e non sopra i vicini più di quanto già non fosse
+    for (const [n, A] of altre) if (n !== f.nome && sopraPosto(A, B) > sopraPosto(A, B0) + 400) return null
+    return { k, dx, dy, B }
+  }
+  let r = voluto < 1 ? prova(voluto) ?? { k: voluto, dx: 0, dy: 0, B: null } : null
+  if (!r) { let lo = 1, hi = voluto, meglio = null; for (let i = 0; i < 14; i++) { const m = (lo + hi) / 2, x = prova(m); if (x) { meglio = x; lo = m } else hi = m } r = prova(voluto) ?? meglio }
+  if (!r || Math.abs(r.k - 1) < 0.06) return null
+  altre.set(f.nome, r.B ?? B0)
+  if (f.muro) {
+    const q = { ...f.q, s: +Math.min(50, Math.max(0.05, f.q.s * r.k)).toFixed(3) }
+    if (r.dx || r.dy) { const [u, v] = sulPiano(f.pi, f.centro[0] + r.dx, f.centro[1] + r.dy); if ([u, v].every(Number.isFinite)) Object.assign(q, { u: +u.toFixed(4), v: +v.toFixed(4) }) }
+    return { q }
+  }
+  const s = Math.min(3, Math.max(0.2, f.aria[2] * r.k))
+  return { aria: [Math.round(f.centro[0] + r.dx - f.w * s / 2), Math.round(f.centro[1] + r.dy - f.h * s / 2), +s.toFixed(3)] }
+}
+async function grandezzeGiuste(soloUno) {
+  forme()
+  const altre = new Map(tutte.map((f) => [f.nome, scatola(f.angoli)]))
+  // (prima chi rimpicciolisce: fa posto a chi cresce)
+  const ordine = [...tutte].filter((f) => !soloUno || f.nome === soloUno).sort((a, b) => (GIUSTA[a.nome] ?? 1) / (a.scala || 1) - (GIUSTA[b.nome] ?? 1) / (b.scala || 1))
+  const fatte = []
+  for (const f of ordine) { const x = grandezzaGiusta(f, altre); if (x) fatte.push([f, x]) }
+  if (!fatte.length) return aiuto(soloUno ? `<b>${NOMI[soloUno]}</b>: scala già nel range consigliato (o manca lo spazio per aumentarla)` : 'Tutte le sorgenti sono già nel range consigliato')
+  ricorda(fatte.map(([f]) => fotoDi(f.nome)))
+  for (const [f, x] of fatte) { if (x.q) await mandaMuro(f.nome, x.q); else await mandaAria(f.nome, x.aria) }
+  aiuto(`Scala consigliata applicata a <b>${fatte.map(([f]) => NOMI[f.nome]).join(', ')}</b> · <b>Annulla</b> per tornare indietro`)
+}
+
+// ══ la scheda del pezzo scelto ══
+function scegli(p) {
+  if (p === 'cornice' && scelto === p) p = null
+  scelto = p
+  // le cose del pezzo di prima tornano al parcheggio, quelle del nuovo vengono qui
+  if (sucoDi) { $('#parcheggio').append(sucoDi); sucoDi = null }
+  $('#scheda-vuota').hidden = !!p; $('#scheda').hidden = !p; $('#sc-indietro').hidden = !p
+  for (const r of document.querySelectorAll('[data-riga]')) r.classList.toggle('scelto', r.dataset.riga === p)
+  if (p) {
+    $('#sc-nome').textContent = NOMI[p]
+    $('#sc-id').textContent = `id ${p} · /o/${p}`
+    $('#sc-url').textContent = `${qui}/o/${p}`; $('#sc-url-copia').dataset.copia = `${qui}/o/${p}`
+    $('#sc-dice').textContent = DICE[p] ?? (VIA.includes(p) ? 'Scena di pausa a tutto frame, con il titolo a centro schermo: mette in mute le altre sorgenti fino al rientro.' : '')
+    const suo = document.querySelector(`#parcheggio [data-suo="${p}"]`)
+    if (suo) { $('#sc-suo').append(suo); sucoDi = suo }
+    $('#sc-par').hidden = !suo
+    $('#scheda').scrollTop = 0
+    document.querySelector(`#lista [data-riga="${p}"]`)?.scrollIntoView({ block: 'nearest' })
+  }
+  if (stato) zonaMostra(stato.puff?.zona?.[L()])
+  schedaAggiorna(); sagome()
+}
+$('#sc-indietro').addEventListener('click', () => scegli(null))
+
+// ── la colonna delle icone: porta alla sua sezione della lista (la «G»: tutti i pezzi, in cima); il numero è quanti
+// pezzi di quella sezione sono accesi. E «trova un pezzo»: restano le righe col nome che scrivi ──
+document.querySelector('.rail').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-sez]')
+  if (!b) return
+  const dove = b.dataset.sez && document.getElementById(b.dataset.sez)
+  if (dove) dove.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' })
+  else $('#lato').scrollTo({ top: 0, behavior: 'smooth' })
+})
+function railMostra() {
+  for (const c of document.querySelectorAll('.rail [data-conta]')) {
+    const n = document.querySelectorAll(`#${c.dataset.conta} .pezzo-r.su`).length
+    c.textContent = n || ''
+  }
+}
+$('#cerca').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase()
+  let visti = 0
+  for (const r of document.querySelectorAll('#lista [data-riga]')) { r.hidden = !!q && !(NOMI[r.dataset.riga] ?? '').toLowerCase().includes(q); if (!r.hidden) visti++ }
+  for (const b of document.querySelectorAll('#lista .box')) { const vuota = !!q && !b.querySelector('.pezzo-r:not([hidden])'); b.hidden = vuota; b.previousElementSibling.hidden = vuota }
+  $('#cerca-vuoto').hidden = visti > 0
+})
+$('#cerca').addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.target.value = ''; e.target.dispatchEvent(new Event('input')) } })
+$('#sc-acceso').addEventListener('click', () => scelto && fai({ tipo: 'pezzo', nome: scelto }))
+// la grandezza sulla barra: in aria la scala (0,2 … 3), sul muro i millimetri di muro per pixel (0,05 … 50), a logaritmo
+const daBarra = (v, a, b) => a * (b / a) ** (v / 1000), aBarra = (s, a, b) => Math.round(1000 * Math.log(s / a) / Math.log(b / a))
+// (barra: il gesto con la barra in corso: { nome, prima, esito })
+function schedaAggiorna() {
+  if (!scelto || !stato) return
+  const p = scelto, su = !!stato.attivi[p], f = tutte.find((x) => x.nome === p)
+  $('#sc-acceso').setAttribute('aria-checked', su)
+  $('#sc-led').classList.toggle('su', !!su)
+  regolaMostra()
+  $('#sc-torna').hidden = !stato.viaPrima?.includes(p)
+  $('#sc-pos').hidden = p === 'cornice'
+  if (p === 'cornice') return
+  const M = muriOra(), q = M.pezzi?.[p], m = q && M.pareti.find((x) => x.id === q.muro)
+  // dove sta
+  const inOnda = f ? `${Math.round(Math.hypot(f.angoli[1][0] - f.angoli[0][0], f.angoli[1][1] - f.angoli[0][1]))} × ${Math.round(Math.hypot(f.angoli[3][0] - f.angoli[0][0], f.angoli[3][1] - f.angoli[0][1]))} px a schermo` : su ? '' : 'off: attivala per misurarla'
+  $('#sc-dove').innerHTML = m ? `Piano <b>${pulito(m.nome || 'piano')}</b>${f ? ` · ${Math.round(f.w * q.s / 10)} × ${Math.round(f.h * q.s / 10)} cm · a ${virgola(distanza(pianoDi(M, m) ?? { X: () => [0, 0, 0] }, q))} m` : ''} · ${inOnda}`
+    : f?.segue ? `<b>Tracking ${p === 'puff' ? 'oggetto' : 'volto'}</b> · ${inOnda}` : `<b>Libera (2D)</b> · ${inOnda}`
+  // il muro
+  const sel = $('#sc-muro'), voci = `<option value="">Libero (2D)</option>${(M.pareti ?? []).map((x) => `<option value="${x.id}">${pulito(x.nome || 'piano')}</option>`).join('')}`
+  if (sel.dataset.voci !== voci) { sel.innerHTML = voci; sel.dataset.voci = voci }
+  if (document.activeElement !== sel) sel.value = m ? m.id : ''
+  $('#sc-muro-r').hidden = MAI_SUL_MURO.includes(p) || !(M.pareti ?? []).length
+  // il pezzo può restare davanti anche se qualcosa gli passa davanti: casella per pezzo (il muro ha il suo master)
+  const puoCorpo = !!m && !MAI_SUL_MURO.includes(p) && m.corpo !== false
+  $('#sc-corpo-r').hidden = !puoCorpo
+  if (puoCorpo && document.activeElement !== $('#sc-corpo')) $('#sc-corpo').checked = q.corpo !== false
+  // la grandezza
+  if (!barra || barra.nome !== p) {
+    if (m) { $('#sc-gr').value = aBarra(q.s, 0.05, 50) } else { const s = stato.posti?.[L()]?.[p]?.[2] ?? f?.aria?.[2] ?? (POSTI[L()]?.[p]?.[2] ?? 1); $('#sc-gr').value = aBarra(s, 0.2, 3) }
+  }
+  $('#sc-gr-n').textContent = f ? `${Math.round(f.scala * 100)}%` : ''
+  // la rotazione: su un piano è quella sul piano (q.r), libera è la regolazione «r» (attorno al centro)
+  const giro = m ? q.r || 0 : regDi(p)?.r || 0
+  if (!barra) { $('#sc-gira').value = giro; $('#sc-gira-n').textContent = `${virgola(giro, 1)}°` }
+  // X e Y: solo per una sorgente libera e ferma (su un piano conta il punto sul piano; col tracking decide il tracking)
+  const xy = !m && !f?.segue && (stato.posti?.[L()]?.[p] ?? f?.aria ?? POSTI[L()]?.[p])
+  $('#sc-xy-r').hidden = !xy
+  if (xy) { if (document.activeElement !== $('#sc-x')) $('#sc-x').value = Math.round(xy[0]); if (document.activeElement !== $('#sc-y')) $('#sc-y').value = Math.round(xy[1]) }
+  $('#sc-giusta').hidden = !GIUSTA[p]
+}
+// le barre: mentre la muovi l'anteprima segue, quando la lasci va al server
+function barraMuovi(tipo) {
+  const p = scelto; if (!p) return
+  forme()
+  const f = tutte.find((x) => x.nome === p)
+  if (!barra || barra.nome !== p) barra = { nome: p, prima: fotoDi(p), f0: f }
+  const M = Mloc ??= copia(stato.muri?.[L()] ?? { pareti: [], pezzi: {} }), q = M.pezzi[p]
+  if (q) {
+    if (tipo === 'gr') q.s = +daBarra(+$('#sc-gr').value, 0.05, 50).toFixed(3)
+    else { q.r = +$('#sc-gira').value; $('#sc-gira-n').textContent = `${virgola(q.r, 1)}°` }
+    barra.esito = { q: { ...q } }; spingi()
+  } else if (tipo === 'gira') {
+    const R = { ...(regDi(p) ?? {}), r: +$('#sc-gira').value }
+    barra.reg = true; regolaProva(p, R); $('#sc-gira-n').textContent = `${virgola(R.r, 1)}°`
+  } else if (f?.aria && tipo === 'gr') {
+    const g = barra.f0 ?? f, s = +daBarra(+$('#sc-gr').value, 0.2, 3).toFixed(3)
+    const a = [Math.round(g.centro[0] - g.w * s / 2), Math.round(g.centro[1] - g.h * s / 2), s]
+    barra.esito = { aria: a }
+    try { win().__posto(p, ...a, false) } catch {}
+  }
+  forme(); sagome(); $('#sc-gr-n').textContent = `${Math.round((tutte.find((x) => x.nome === p)?.scala ?? 0) * 100)}%`
+}
+async function barraLascia() {
+  const b = barra; barra = null
+  if (b?.reg) { ricorda([b.prima]); regolaManda(b.nome, regDi(b.nome)) }
+  if (!b?.esito) { Mloc = null; return }
+  if (!b.reg) ricorda([b.prima])
+  if (b.esito.q) await mandaMuro(b.nome, b.esito.q)
+  else { try { win().__posto(b.nome, ...b.esito.aria, true) } catch {} mandaAria(b.nome, b.esito.aria) }
+  Mloc = null
+}
+$('#sc-gr').addEventListener('input', () => barraMuovi('gr')); $('#sc-gr').addEventListener('change', barraLascia)
+$('#sc-gira').addEventListener('input', () => barraMuovi('gira')); $('#sc-gira').addEventListener('change', barraLascia)
+// appeso a un muro, o in aria: dove sta adesso sullo schermo, grande uguale
+$('#sc-muro').addEventListener('change', async () => {
+  const p = scelto; forme()
+  const f = tutte.find((x) => x.nome === p), id = $('#sc-muro').value, M = copia(stato.muri?.[L()] ?? { pareti: [], pezzi: {} })
+  if (!f) return
+  ricorda([fotoDi(p)])
+  if (!id) {
+    const s = Math.min(3, Math.max(0.2, f.scala)), a = [Math.round(f.centro[0] - f.w * s / 2), Math.round(f.centro[1] - f.h * s / 2), +s.toFixed(3)]
+    await mandaMuro(p, null); mandaAria(p, a)
+    return
+  }
+  const m = M.pareti.find((x) => x.id === id)
+  // (sul muro scelto: nel punto dove sta, se ci cade dentro; se no, in mezzo al muro)
+  const c = dentro(m.punti, ...f.centro) ? f.centro : porta(pianoDi(M, m)?.H ?? [1, 0, 0, 0, 1, 0, 0, 0, 1], 0.5, 0.5)
+  const q = appendi(M, m, c, f.scala, f.w, f.h, f.q?.r ?? 0)
+  if (q) { q.corpo = f.q?.corpo !== false; await mandaMuro(p, q) }
+})
+$('#sc-corpo').addEventListener('change', async () => {
+  const p = scelto
+  if (!p) return
+  const q = stato?.muri?.[L()]?.pezzi?.[p]
+  if (!q) return
+  ricorda([fotoDi(p)])
+  await mandaMuro(p, { ...q, corpo: $('#sc-corpo').checked })
+})
+$('#sc-posto').addEventListener('click', async () => {
+  const p = scelto; if (!p) return
+  ricorda([fotoDi(p)])
+  if (stato.muri?.[L()]?.pezzi?.[p]) await mandaMuro(p, null)
+  mandaAria(p, null)
+})
+$('#sc-giusta').addEventListener('click', () => scelto && grandezzeGiuste(scelto))
+$('#sc-gira').addEventListener('dblclick', () => { $('#sc-gira').value = 0; barraMuovi('gira'); barraLascia() })
+// X e Y a mano (in pixel del frame 1920 × 1080: l'angolo in alto a sinistra della sorgente)
+for (const id of ['sc-x', 'sc-y']) $(`#${id}`).addEventListener('change', () => {
+  const p = scelto
+  if (!p || !stato) return
+  forme()
+  const f = tutte.find((x) => x.nome === p), a0 = stato.posti?.[L()]?.[p] ?? f?.aria ?? POSTI[L()]?.[p], x = +$('#sc-x').value, y = +$('#sc-y').value
+  if (!a0 || ![x, y].every(Number.isFinite)) return
+  ricorda([fotoDi(p)])
+  const a = [Math.round(x), Math.round(y), a0[2]]
+  try { win().__posto(p, ...a, true) } catch {}
+  mandaAria(p, a)
+})
+
+// ══ le regolazioni della sorgente selezionata (regola.js): come il pannello di Camo ══
+const giro180 = (g) => { g = ((g + 180) % 360 + 360) % 360 - 180; return g === -180 ? 180 : g }
+const fmtReg = (g, v) => (g.k === 'gamma' ? virgola(v, 2) : `${g.zero === 0 && g.min < 0 && v > 0 ? '+' : ''}${g.passo < 1 ? virgola(v, 1) : v}${g.u === '°' ? '°' : g.u ? ` ${g.u}` : ''}`).replace('-', '−')
+$('#reg-righe').innerHTML = REGOLE.map((g) => `<div class="reg" data-reg="${g.k}"><div class="reg-t"><span>${g.nome}</span><b></b><div role="switch" tabindex="0" aria-checked="false" aria-label="${g.nome}" title="Attiva / disattiva"><div class="leva"></div></div></div><input type="range" min="${g.min}" max="${g.max}" step="${g.passo}" value="${g.zero}" aria-label="${g.nome}" title="Doppio clic: valore neutro"></div>`).join('')
+$('#reg-filtro').innerHTML = FILTRI.map(([k, n]) => `<option value="${k}">${n}</option>`).join('')
+$('#reg-effetto').innerHTML = EFFETTI.map(([k, n]) => `<option value="${k}">${n}</option>`).join('')
+// prova subito nell'anteprima; al server al massimo sei volte al secondo mentre il cursore si muove (così segue anche il live)
+function regolaProva(p, R) {
+  regLoc[p] = regPulisci(R)
+  try { win()?.__regola?.(p, regLoc[p]) } catch {}
+  clearTimeout(regFra)
+  regFra = setTimeout(() => { regUltimo = Date.now(); if (p in regLoc) fai({ tipo: 'regola', pezzo: p, v: regLoc[p] }) }, Math.max(0, 160 - (Date.now() - regUltimo)))
+  regolaMostra()
+}
+// il valore definitivo: vale da subito qui, e va al server (che lo rimanda a tutte le pagine)
+function regolaManda(p, R) {
+  clearTimeout(regFra); regFra = null
+  R = regPulisci(R)
+  delete regLoc[p]
+  if (stato) { stato.regola ??= {}; if (R) stato.regola[p] = R; else delete stato.regola[p] }
+  try { win()?.__regola?.(p, R) } catch {}
+  faiJ({ tipo: 'regola', pezzo: p, v: R }).then((r) => {
+    if (r.ok) return
+    // (un server avviato prima dell'aggiornamento non conosce «regola»: non la salva e non la manda on air)
+    if (stato?.regola) delete stato.regola[p]
+    try { win()?.__regola?.(p, undefined) } catch {}
+    regolaTag(); regolaMostra(); forme(); sagome(); schedaAggiorna()
+    aiuto('<b>Non salvato</b>: il server in esecuzione è precedente all’aggiornamento. Riavvialo con <b>riavvia.cmd</b>, poi ricarica il livello web in Camo.')
+  })
+  regolaTag(); regolaMostra()
+  setTimeout(() => { forme(); sagome(); schedaAggiorna() }, 60)
+}
+const regolaSubito = (p, R) => { ricorda([fotoDi(p)]); regolaManda(p, R) }
+function regolaArriva({ p, v }) {
+  if (!stato) return
+  stato.regola ??= {}
+  if (v) stato.regola[p] = v; else delete stato.regola[p]
+  regolaTag()
+  if (p === scelto && !(p in regLoc)) { regolaMostra(); forme(); sagome(); schedaAggiorna() }
+}
+function regolaTag() { for (const r of document.querySelectorAll('#lista [data-riga]')) r.querySelector('.reg-tag').hidden = !stato?.regola?.[r.dataset.riga] }
+function regolaMostra() {
+  const p = scelto
+  if (!p) return
+  const R = regDi(p)
+  for (const g of REGOLE) {
+    const r = document.querySelector(`#reg-righe [data-reg="${g.k}"]`), su = regAcceso(R, g.k), v = Number.isFinite(R?.[g.k]) ? R[g.k] : g.zero, i = r.querySelector('input')
+    r.classList.toggle('su', su)
+    r.querySelector('[role=switch]').setAttribute('aria-checked', su)
+    r.querySelector('b').textContent = fmtReg(g, v)
+    if (!regGesto) i.value = v
+  }
+  if (document.activeElement !== $('#reg-filtro')) $('#reg-filtro').value = R?.filtro ?? ''
+  if (document.activeElement !== $('#reg-effetto')) $('#reg-effetto').value = R?.effetto ?? ''
+  $('#tr-fx').setAttribute('aria-pressed', !!R?.fx); $('#tr-fy').setAttribute('aria-pressed', !!R?.fy)
+  $('#reg-nota').textContent = stato?.gpuLeggero ? 'Profilo GPU ridotto attivo: on air i filtri non vengono applicati (restano opacità, rotazione e specchio).'
+    : ['viv', 'temp', 'gamma', 'nit'].some((k) => regVale(R, k)) ? 'Vividezza, temperatura, gamma e nitidezza usano un filtro SVG: un po’ più di GPU degli altri.' : ''
+}
+// il cursore: muoverlo accende il parametro; quando lo lasci, il gesto finisce (e si può annullare)
+$('#reg-righe').addEventListener('input', (e) => {
+  const r = e.target.closest('[data-reg]'), p = scelto
+  if (!r || !p) return
+  if (!regGesto || regGesto.p !== p) regGesto = { p, prima: fotoDi(p) }
+  const k = r.dataset.reg, R = { ...(regDi(p) ?? {}) }
+  R[k] = +e.target.value; R.si = [...new Set([...(R.si ?? []), k])]
+  regolaProva(p, R)
+})
+$('#reg-righe').addEventListener('change', (e) => {
+  if (!e.target.matches('input[type=range]') || !regGesto) return
+  const g = regGesto; regGesto = null
+  ricorda([g.prima]); regolaManda(g.p, regDi(g.p))
+})
+// la leva: acceso / spento (spento, il cursore resta dov'è); doppio clic sul cursore: torna al neutro
+$('#reg-righe').addEventListener('click', (e) => {
+  const sw = e.target.closest('[role=switch]'), r = sw?.closest('[data-reg]'), p = scelto
+  if (!r || !p) return
+  const k = r.dataset.reg, R = { ...(regDi(p) ?? {}) }, su = regAcceso(R, k)
+  if (!Number.isFinite(R[k])) R[k] = REGOLE.find((g) => g.k === k).zero
+  R.si = su ? (R.si ?? []).filter((x) => x !== k) : [...(R.si ?? []), k]
+  regolaSubito(p, R)
+})
+$('#reg-righe').addEventListener('dblclick', (e) => {
+  const r = e.target.matches('input[type=range]') && e.target.closest('[data-reg]'), p = scelto
+  if (!r || !p) return
+  const k = r.dataset.reg, R = { ...(regDi(p) ?? {}) }
+  R[k] = REGOLE.find((g) => g.k === k).zero
+  regGesto = null
+  regolaSubito(p, R)
+})
+for (const [id, k] of [['reg-filtro', 'filtro'], ['reg-effetto', 'effetto']]) $(`#${id}`).addEventListener('change', (e) => { if (scelto) regolaSubito(scelto, { ...(regDi(scelto) ?? {}), [k]: e.target.value }) })
+$('#reg-azzera').addEventListener('click', (e) => {
+  e.preventDefault() // (è dentro il titolo della sezione: non deve chiuderla)
+  const p = scelto, R = regDi(p)
+  if (p && R) regolaSubito(p, { r: R.r, fx: R.fx, fy: R.fy }) // (la trasformazione resta: ha il suo tasto)
+})
+// ── la trasformazione: specchio, ±90°, azzera. Su un piano la rotazione è quella sul piano ──
+const sulPianoOra = (p) => stato?.muri?.[L()]?.pezzi?.[p]
+async function ruota(p, fn) {
+  const q = sulPianoOra(p)
+  if (q) { ricorda([fotoDi(p)]); await mandaMuro(p, { ...q, r: giro180(fn(q.r || 0)) }); return }
+  const R = { ...(regDi(p) ?? {}) }
+  R.r = giro180(fn(R.r || 0))
+  regolaSubito(p, R)
+}
+$('#tr-fx').addEventListener('click', () => { if (scelto) { const R = { ...(regDi(scelto) ?? {}) }; R.fx = !R.fx; regolaSubito(scelto, R) } })
+$('#tr-fy').addEventListener('click', () => { if (scelto) { const R = { ...(regDi(scelto) ?? {}) }; R.fy = !R.fy; regolaSubito(scelto, R) } })
+$('#tr-meno').addEventListener('click', () => scelto && ruota(scelto, (g) => g - 90))
+$('#tr-piu').addEventListener('click', () => scelto && ruota(scelto, (g) => g + 90))
+$('#tr-azzera').addEventListener('click', async (e) => {
+  e.preventDefault()
+  const p = scelto
+  if (!p) return
+  const q = sulPianoOra(p), R = { ...(regDi(p) ?? {}) }
+  ricorda([fotoDi(p)])
+  if (q?.r) await mandaMuro(p, { ...q, r: 0 })
+  delete R.fx; delete R.fy; if (!q) delete R.r
+  regolaManda(p, R)
+})
+
+// ══ zona 3 · controlli: una scheda alla volta (pausa, podcast, uscita tv); resta quella dell'ultima volta ══
+const DOCK = { pausa: 'Attiva una scena di pausa: le altre sorgenti vanno in mute e tornano on air al rientro', podcast: '', tv: 'Schermata mostrata dalla TV (sulla TV non si tocca niente)' }
+function dockScegli(k) {
+  if (!(k in DOCK)) k = 'pausa'
+  for (const b of document.querySelectorAll('[data-dock]')) b.setAttribute('aria-selected', b.dataset.dock === k)
+  for (const d of document.querySelectorAll('[data-dock-p]')) d.hidden = d.dataset.dockP !== k
+  $('#dock-nota').textContent = DOCK[k]
+  try { localStorage.setItem('regia-dock', k) } catch {}
+}
+document.querySelector('.dock-t').addEventListener('click', (e) => { const b = e.target.closest('[data-dock]'); if (b) dockScegli(b.dataset.dock) })
+let dock0 = 'pausa'
+try { dock0 = localStorage.getItem('regia-dock') || 'pausa' } catch {}
+dockScegli(dock0)
+// quante sorgenti sono on air, e il pallino rosso sulle schede del dock che hanno qualcosa in corso
+function ondaMostra() {
+  if (!stato) return
+  const n = Object.entries(stato.attivi).filter(([p, su]) => su && !VIA.includes(p)).length
+  $('#conta-onair').textContent = `${n} on air`
+  document.querySelector('[data-dock=pausa]').classList.toggle('viva', VIA.some((p) => stato.attivi[p]))
+  document.querySelector('[data-dock=podcast]').classList.toggle('viva', !!stato.podcast && Cast.fase(stato.podcast) === 'onda')
+}
+
+// ── le sezioni delle proprietà: aperte o chiuse come le hai lasciate ──
+for (const d of document.querySelectorAll('details[data-sez]')) {
+  const k = `regia-sez-${d.dataset.sez}`
+  try { const v = localStorage.getItem(k); if (v != null) d.open = v === '1' } catch {}
+  d.addEventListener('toggle', () => { try { localStorage.setItem(k, d.open ? '1' : '0') } catch {} })
+}
+
+// ══ la configurazione: una pagina per cosa ══
+function impPagina(k) {
+  for (const b of document.querySelectorAll('[data-imp]')) b.setAttribute('aria-pressed', b.dataset.imp === k)
+  for (const s of document.querySelectorAll('[data-imp-p]')) s.hidden = s.dataset.impP !== k
+  document.querySelector('.imp-corpo').scrollTop = 0
+}
+function impApri(pag) {
+  fotoDice()
+  if (pag) impPagina(pag)
+  if (!$('#imp').open) $('#imp').showModal()
+}
+document.querySelector('.imp-nav').addEventListener('click', (e) => { const b = e.target.closest('[data-imp]'); if (b) impPagina(b.dataset.imp) })
+$('#imp-ver').textContent = `Diretta OS · ${location.host}`
+// il tema: Discord (verde chiaro) o scuro; resta su questo browser
+const temaMostra = () => { for (const b of document.querySelectorAll('#tema [data-tema]')) b.setAttribute('aria-pressed', b.dataset.tema === document.documentElement.dataset.tema) }
+$('#tema').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-tema]')
+  if (!b) return
+  document.documentElement.dataset.tema = b.dataset.tema
+  try { localStorage.setItem('regia-tema', b.dataset.tema) } catch {}
+  temaMostra()
+})
+temaMostra()
+</script>
+</body>
+</html>

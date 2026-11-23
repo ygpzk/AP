@@ -1,0 +1,95 @@
+/* Diretta OS · Vista esterna: la finestra sulla webcam di un altro pc.
+   Sta sospesa come gli altri pezzi (l'animazione la dà .aria), ma la finestra ha un bordo scuro e un filo
+   verde fosforo: deve leggersi come un vetro, non come un riquadro. La riga sotto è il cartellino, senza
+   scatola. Il video è al fosforo (verde radar) e i widget prendono colore e direzione della luce dal fotogramma
+   (esterna.js: --luce, --lume-*, --ombra-*). */
+
+.pezzo[data-pezzo=esterna] { width: 560px; }
+.dx {
+  --luce: #d9d3c8;
+  --luce-forza: .35;
+  --ombra-x: 0px; --ombra-y: 12px;
+  --lume-x: 0px; --lume-y: -4px;
+  --lume-xp: 0%; --lume-yp: -8%;
+  --radar-ruota: 86deg; --radar-lux: .92;
+  width: 560px; color: var(--testo); font: 600 14px/1.2 "gg sans", "Segoe UI", sans-serif;
+}
+.dx-finestra { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 16px; background: #04120a; box-shadow: calc(var(--ombra-x) * 1.1) calc(var(--ombra-y) * 1.1) 54px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .13), 0 0 0 5px rgba(11, 9, 14, .5); }
+.dx-finestra::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px rgba(92, 255, 157, .3), inset 0 1px 0 rgba(255, 255, 255, .18), inset calc(var(--lume-x) * .32) calc(var(--lume-y) * .32) 24px color-mix(in srgb, var(--luce) 26%, transparent); pointer-events: none; }
+/* la webcam al fosforo: verde da radar. La tinta gira con la luce della stanza (calda → verde-giallo, fredda →
+   verde-acqua) e la luminosità segue quella del fotogramma; è un filtro solo, la scheda video lo fa senza ridisegnare. */
+.dx-foto { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; background: #04120a; opacity: 0; transition: opacity .18s ease, transform .3s ease; filter: grayscale(1) sepia(1) saturate(2.7) hue-rotate(var(--radar-ruota)) brightness(var(--radar-lux)) contrast(1.06); }
+.dx-foto.su { opacity: 1; }
+.dx.adatta .dx-foto { object-fit: contain; }
+.dx.specchia .dx-foto { transform: scaleX(-1); }
+.dx.persa .dx-foto { filter: grayscale(1) sepia(.8) saturate(1.5) hue-rotate(var(--radar-ruota)) brightness(.55) contrast(1.12); }
+.dx:not(.ha-foto) .dx-foto { opacity: 0; }
+
+/* ── il radar: trama, righe di scansione, il fascio che gira piano, il mirino e il riflesso della stanza ── */
+.dx-trama, .dx-scans, .dx-pass, .dx-onda, .dx-riflesso, .dx-vignetta { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .5s ease; }
+.dx-trama { background-image: linear-gradient(rgba(92, 255, 157, .1) 1px, transparent 1px), linear-gradient(90deg, rgba(92, 255, 157, .1) 1px, transparent 1px); background-size: 46px 46px; mix-blend-mode: screen; mask-image: radial-gradient(ellipse at center, #000 5%, transparent 78%); }
+.dx-scans { background: repeating-linear-gradient(180deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px); mix-blend-mode: multiply; }
+.dx-pass { height: 26%; bottom: auto; background: linear-gradient(180deg, transparent, rgba(92, 255, 157, .15) 50%, transparent); mix-blend-mode: screen; animation: dx-pass 7.5s linear infinite; will-change: transform; }
+.dx-onda { left: 50%; top: 50%; right: auto; bottom: auto; width: 150%; aspect-ratio: 1; border-radius: 50%; background: conic-gradient(from 0deg, transparent 0deg 312deg, rgba(92, 255, 157, .05) 320deg, rgba(92, 255, 157, .26) 352deg, rgba(92, 255, 157, .55) 359deg, transparent 360deg); mix-blend-mode: screen; mask-image: radial-gradient(circle, #000 0 58%, transparent 70%); transform: translate(-50%, -50%); animation: dx-gira 10s linear infinite; will-change: transform; }
+.dx-vignetta { background: radial-gradient(120% 100% at 50% 50%, transparent 38%, rgba(1, 22, 10, .36) 100%), linear-gradient(180deg, rgba(1, 16, 8, .3), transparent 18%, transparent 72%, rgba(1, 16, 8, .45)); mix-blend-mode: multiply; }
+.dx-riflesso { background: radial-gradient(70% 90% at calc(50% + var(--lume-xp)) calc(50% + var(--lume-yp)), color-mix(in srgb, var(--luce) 55%, transparent), transparent 62%); mix-blend-mode: screen; }
+.dx-mirino { position: absolute; left: 50%; top: 50%; width: 72px; height: auto; color: #5cff9d; opacity: 0; transform: translate(-50%, -50%); filter: drop-shadow(0 0 8px rgba(92, 255, 157, .35)); pointer-events: none; transition: opacity .5s ease; }
+.dx.ha-foto .dx-trama { opacity: .55; }
+.dx.ha-foto .dx-scans { opacity: .62; }
+.dx.ha-foto .dx-pass { opacity: .55; }
+.dx.ha-foto .dx-onda { opacity: .5; }
+.dx.ha-foto .dx-vignetta { opacity: 1; }
+.dx.ha-foto .dx-mirino { opacity: .32; }
+.dx.ha-foto .dx-riflesso { opacity: calc(.1 + var(--luce-forza) * .16); }
+@keyframes dx-pass { from { transform: translateY(-110%); } to { transform: translateY(490%); } }
+@keyframes dx-gira { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+.dx.persa .dx-onda { animation-play-state: paused; opacity: .18; }
+.dx.persa .dx-pass { animation-play-state: paused; opacity: .22; }
+.dx.persa .dx-scans { opacity: .35; }
+
+/* l'attesa: una finestra spenta, col profilo del portatile e il riflesso del cielo */
+.dx-vuoto { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; background: radial-gradient(120% 100% at 50% 15%, rgba(157, 0, 255, .2), transparent 55%), linear-gradient(160deg, #19131f, #0b090e 70%); transition: opacity .5s ease; }
+.dx.ha-foto .dx-vuoto { opacity: 0; visibility: hidden; }
+.dx-vuoto svg { width: 78px; height: auto; fill: #0b090e; stroke: rgba(204, 255, 0, .7); stroke-width: 1.4; stroke-linejoin: round; filter: drop-shadow(0 0 18px rgba(204, 255, 0, .18)); }
+.dx-vuoto .dx-cielo { fill: rgba(157, 0, 255, .13); stroke: none; }
+.dx-vuoto .dx-sole { fill: #ccff00; stroke: none; opacity: .8; }
+.dx-vuoto .dx-monte { fill: rgba(204, 255, 0, .09); stroke: none; }
+.dx-vuoto b { color: var(--testo); font: 700 15px/1 "gg sans", "Segoe UI", sans-serif; letter-spacing: .01em; }
+.dx-vuoto span { color: var(--tenue); font: 500 12px/1 "gg sans", "Segoe UI", sans-serif; }
+.dx.attesa .dx-vuoto svg { animation: dx-respira 2.6s ease-in-out infinite; }
+@keyframes dx-respira { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+
+.dx-velo { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(0, 0, 0, .28), transparent 24%, transparent 66%, rgba(0, 0, 0, .48)); }
+/* i cartellini sono vetro: il colore e il lato della luce vengono dalla webcam (--luce, --lume-*, --ombra-*) */
+.dx-vetro { isolation: isolate; }
+.dx-vetro::after { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: radial-gradient(120% 170% at calc(50% + var(--lume-xp)) calc(50% + var(--lume-yp)), var(--luce), transparent 64%); opacity: calc(.1 + var(--luce-forza) * .18); mix-blend-mode: screen; pointer-events: none; }
+.dx-pillola { position: absolute; left: 13px; bottom: 12px; display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px 5px 8px; border-radius: 999px; color: #f1eef4; background: linear-gradient(135deg, color-mix(in srgb, var(--luce) 16%, rgba(11, 9, 14, .88)), rgba(11, 9, 14, .82)); box-shadow: calc(var(--ombra-x) * .5) calc(var(--ombra-y) * .5) 16px rgba(0, 0, 0, .38), 0 0 18px color-mix(in srgb, var(--luce) 14%, transparent), 0 0 0 1px color-mix(in srgb, var(--luce) 24%, rgba(255, 255, 255, .12)); font: 700 11px/1 "gg sans", "Segoe UI", sans-serif; letter-spacing: .055em; text-transform: uppercase; }
+.dx-pillola i, .dx-live i { width: 7px; height: 7px; border-radius: 50%; background: #aaa2b4; flex: none; }
+.dx-pillola[data-stato=live] i { background: var(--verde, #2dff7a); box-shadow: 0 0 9px rgba(45, 255, 122, .85); animation: dx-batte 1.7s ease-in-out infinite; }
+.dx-pillola[data-stato=persa] { color: #ffd7a8; }
+.dx-pillola[data-stato=persa] i { background: #f0b232; box-shadow: 0 0 9px rgba(240, 178, 50, .7); }
+@keyframes dx-batte { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+
+.dx-live { position: absolute; right: 13px; top: 12px; display: none; align-items: center; gap: 6px; color: #0b090e; background: color-mix(in srgb, #ccff00 88%, var(--luce)); border-radius: 999px; padding: 5px 9px 5px 8px; font: 800 10px/1 "gg sans", "Segoe UI", sans-serif; letter-spacing: .1em; box-shadow: calc(var(--ombra-x) * .5) calc(var(--ombra-y) * .5) 16px rgba(0, 0, 0, .35), 0 0 20px color-mix(in srgb, var(--luce) 20%, transparent); }
+.dx[data-stato=live] .dx-live { display: inline-flex; }
+.dx-live i { background: #0b090e; }
+.dx.persa .dx-live { background: #f0b232; display: inline-flex; }
+.dx.persa .dx-live::before { content: "SEGNALE"; }
+.dx.persa .dx-live { font-size: 0; }
+.dx.persa .dx-live::before { font-size: 10px; }
+.dx.persa .dx-live i { display: none; }
+
+.dx-sotto { position: relative; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; width: fit-content; max-width: 100%; margin-top: 9px; padding: 5px 9px; border-radius: 8px; color: color-mix(in srgb, var(--luce) 12%, #f1eef4); background: linear-gradient(135deg, color-mix(in srgb, var(--luce) 14%, rgba(11, 9, 14, .86)), rgba(11, 9, 14, .78)); box-shadow: calc(var(--ombra-x) * .4) calc(var(--ombra-y) * .4) 14px rgba(0, 0, 0, .35), 0 0 16px color-mix(in srgb, var(--luce) 12%, transparent), 0 0 0 1px color-mix(in srgb, var(--luce) 20%, rgba(255, 255, 255, .1)); }
+.dx-nome { color: color-mix(in srgb, var(--luce) 18%, #f1eef4); font: 700 14px/1.2 "gg sans", "Segoe UI", sans-serif; letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dx-fps { color: color-mix(in srgb, var(--luce) 12%, #cfc8d8); font: 700 11px/1 "gg mono", Consolas, monospace; letter-spacing: .03em; white-space: nowrap; }
+
+/* la luce trovata: la stessa lettura della bandiera, qui in un cartellino sulla finestra */
+.dx-luce { position: absolute; left: 13px; top: 12px; display: inline-flex; align-items: center; gap: 6px; max-width: calc(100% - 98px); padding: 5px 9px 5px 8px; border-radius: 999px; color: #eef7f0; background: linear-gradient(135deg, color-mix(in srgb, var(--luce) 18%, rgba(11, 9, 14, .88)), rgba(11, 9, 14, .8)); font: 700 9.5px/1 "gg sans", "Segoe UI", sans-serif; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; opacity: 0; visibility: hidden; transition: opacity .4s ease; box-shadow: calc(var(--ombra-x) * .5) calc(var(--ombra-y) * .5) 16px rgba(0, 0, 0, .38), 0 0 18px color-mix(in srgb, var(--luce) 16%, transparent), 0 0 0 1px color-mix(in srgb, var(--luce) 24%, rgba(255, 255, 255, .12)); }
+.dx.ha-foto[data-luce] .dx-luce { opacity: 1; visibility: visible; }
+.dx-luce i { width: 7px; height: 7px; border-radius: 50%; background: var(--luce); box-shadow: 0 0 9px color-mix(in srgb, var(--luce) 70%, transparent); flex: none; }
+.dx-luce span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dx-vuoto svg, .dx-pillola i, .dx-onda, .dx-pass { animation: none !important; }
+  .dx-pass { opacity: 0 !important; }
+}

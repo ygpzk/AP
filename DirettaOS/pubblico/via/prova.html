@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Diretta OS · prova delle scene</title>
+<style>
+  html, body { margin: 0; background: #1b1820; color: #eee; font: 14px "Segoe UI", sans-serif; }
+  canvas { image-rendering: pixelated; display: block; }
+  .foglio { display: grid; grid-template-columns: repeat(var(--col), auto); gap: 4px; padding: 4px; width: max-content; }
+  .foglio div { position: relative; }
+  .foglio span { position: absolute; left: 4px; top: 2px; font: 700 12px monospace; color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000; }
+</style>
+</head>
+<body>
+<script type="module">
+// La prova delle scene dei «torno subito», senza essere via: /via/prova.html?scena=bosco&ora=22:30&meteo=nebbia&t=12
+//   scena   fuoco | bosco | casa-mangiare | casa-bere | casa-redbull | telefono | spacco | postazione | riavvio | omino (le pose dell'omino)
+//   ora     l'ora finta (HH:MM), data (AAAA-MM-GG), meteo (sole, luna, nuvolo, nuvole, nebbia, pioggia, neve, temporale), gradi
+//   t       il secondo della scena; fermo (non si muove); foglio=n (n fotogrammi da t, ogni «passo» secondi, in griglia)
+import { omino } from '/via/omino.js'
+import { tela } from '/via/pixel.js'
+const Q = new URLSearchParams(location.search)
+const scena = Q.get('scena') ?? 'bosco'
+const ora = () => {
+  const d = Q.get('data') ? new Date(`${Q.get('data')}T12:00:00`) : new Date()
+  if (Q.get('ora')) { const [h, m] = Q.get('ora').split(':').map(Number); d.setHours(h, m, 0, 0) }
+  return d
+}
+const meteo = { icona: Q.get('meteo') ?? 'sole', gradi: +(Q.get('gradi') ?? 12), vento: +(Q.get('vento') ?? 5) }
+const t0 = +(Q.get('t') ?? 0)
+
+if (scena === 'omino') {
+  const [c, g] = tela(480, 270)
+  g.fillStyle = '#7fa0c8'; g.fillRect(0, 0, 480, 270); g.fillStyle = '#5a7a3a'; g.fillRect(0, 200, 480, 70)
+  const pose = [
+    { vista: 'lato' }, { vista: 'lato', dir: -1 }, ...[0, 1, 2, 3, 4, 5].map((k) => ({ vista: 'lato', passo: k * Math.PI / 3 })),
+    { vista: 'fronte' }, { vista: 'retro' }, { vista: 'retro', testa: 1 }, { vista: 'retro', testa: -1 },
+    { vista: 'lato', giu: 7, busto: 0.5, mani: [[10, -14], [8, -12]] }, { vista: 'lato', mani: [[9, -30], null] }, { vista: 'fronte', mani: [[1, -34], null], bocca: 1 },
+    { vista: 'fronte', passo: 1 }, { vista: 'retro', passo: 2 }, { vista: 'lato', busto: 0.35, mani: [[12, -26], [11, -24]] },
+  ]
+  pose.forEach((p, i) => omino(g, 30 + (i % 10) * 45, i < 10 ? 120 : 220, p))
+  c.style.width = '1920px'; c.style.height = '1080px'
+  document.body.append(c)
+} else {
+  const quale = scena.split('-')
+  const m = await import(`/via/${quale[0]}.js`)
+  const s = m.crea({ cosa: quale[1] ?? quale[0], seme: +(Q.get('seme') ?? 7), meteo })
+  const n = +(Q.get('foglio') ?? 0)
+  // l'oggetto trovato (casa): l'immagine di pzkko sopra la tela; x, y in pixel della scena (480 × 270), s in pixel veri
+  const immagini = new Map()
+  const img = (src) => { if (!immagini.has(src)) { const i = new Image(); i.src = src; immagini.set(src, i) } return immagini.get(src) }
+  if (Q.get('scena')?.startsWith('casa')) for (const p of ['chat-cibo/tortelli', 'chat-cibo/ramen', 'chat-cucina/risotto', 'chat-cibo/pzk-kola', 'chat-cibo/estathe', 'chat-attrezzi/lattina', 'chat-cibo/sbrisolona', 'chat-attrezzi/cornetto', 'chat-attrezzi/mortadella', 'chat-cucina/parmigiano', 'chat-cucina/salamella', 'chat-cibo/grissini', 'chat-cucina/amaretti', 'chat-cibo/frutti-bosco']) img(`/art/${p}.webp`)
+  await new Promise((ok) => setTimeout(ok, 400))
+  const incolla = (cx, a, k) => { if (!a) return; const i = img(a.src), s = a.s * k; cx.imageSmoothingEnabled = false; if (i.complete) cx.drawImage(i, a.x * 4 * k - s / 2, a.y * 4 * k - s, s, s * i.naturalHeight / i.naturalWidth); if (a.nome) { cx.font = `800 ${Math.round(30 * k)}px sans-serif`; cx.fillStyle = '#ccff00'; cx.strokeStyle = '#000'; cx.lineWidth = 4 * k; cx.textAlign = 'center'; cx.strokeText(a.nome, a.x * 4 * k, a.y * 4 * k + 30 * k); cx.fillText(a.nome, a.x * 4 * k, a.y * 4 * k + 30 * k) } }
+  if (n) {
+    const passo = +(Q.get('passo') ?? 1), f = document.createElement('div'), col = +(Q.get('col') ?? 4)
+    f.className = 'foglio'; f.style.setProperty('--col', col); document.body.append(f)
+    for (let i = 0; i < n; i++) {
+      const t = t0 + i * passo
+      const fatto = s.disegna(t, ora(), i ? passo : 1 / 30)
+      const c = document.createElement('canvas'); c.width = s.tela.width; c.height = s.tela.height
+      c.getContext('2d').drawImage(s.tela, 0, 0)
+      incolla(c.getContext('2d'), fatto?.adesivo, s.tela.width / 1920)
+      const k = +(Q.get('scala') ?? (s.tela.width > 600 ? 0.5 : 1)); c.style.width = `${s.tela.width * k}px`; c.style.height = `${s.tela.height * k}px`
+      const d = document.createElement('div'); d.append(c); const e = document.createElement('span'); e.textContent = `${t.toFixed(1)} s`; d.append(e); f.append(d)
+    }
+  } else {
+    const sopra = document.createElement('canvas'); sopra.width = 1920; sopra.height = 1080; sopra.style.cssText = 'position:absolute;left:0;top:0'
+    s.tela.style.width = '1920px'; s.tela.style.height = '1080px'
+    document.body.append(s.tela, sopra)
+    const inizio = performance.now()
+    let prima = inizio
+    const giro = (adesso) => {
+      const t = Q.has('fermo') ? t0 : t0 + (adesso - inizio) / 1000
+      const fatto = s.disegna(t, ora(), Math.min(0.1, (adesso - prima) / 1000)); prima = adesso
+      const sc = sopra.getContext('2d'); sc.clearRect(0, 0, 1920, 1080); incolla(sc, fatto?.adesivo, 1)
+      if (!Q.has('fermo')) requestAnimationFrame(giro)
+    }
+    requestAnimationFrame(giro)
+  }
+}
+window.__pronto = true
+</script>
+</body>
+</html>

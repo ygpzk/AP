@@ -1,0 +1,219 @@
+/* Giugnoh's Cast sulla tv. Misure in rem: 1rem = 10 pixel di uno schermo 4K (3840 × 2160); tv.js mette la grandezza
+   del carattere della pagina in base allo schermo vero. Scuro di fondo (la tv si vede in webcam: una tv troppo chiara
+   cambia la foto della stanza), neon lime e viola di pzkko, Pricedown come il nome su Discord.
+   Per il browser della tv: niente color-mix, niente :has, si muove solo con transform e opacity. */
+@font-face { font-family: "gg sans"; font-weight: 600; src: url(/fonts/ggsans-600.woff2) format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 700; src: url(/fonts/ggsans-700.woff2) format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 800; src: url(/fonts/ggsans-800.woff2) format("woff2"); }
+@font-face { font-family: "gg mono"; font-weight: 700; src: url(/fonts/ggmono-700.woff2) format("woff2"); }
+@font-face { font-family: "Ginto Nord"; font-weight: 800; src: url(/fonts/gintonord-800.woff2) format("woff2"); }
+@font-face { font-family: "Pricedown"; font-weight: 700; src: url(/fonts/dn-pricedown.woff2) format("woff2"); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #050407; }
+html { font-size: 5px; }
+body { font-family: "gg sans", "Segoe UI", Roboto, sans-serif; color: #f6f4f8; -webkit-font-smoothing: antialiased; cursor: none; }
+#palco { position: absolute; left: 0; top: 0; width: 384rem; height: 216rem; overflow: hidden; background: radial-gradient(ellipse 140% 90% at 50% 115%, #1d0c2e 0%, #0e0914 52%, #0b090e 100%); }
+#palco.specchio { transform: scaleX(-1); }
+
+/* ── lo sfondo: tre luci che girano piano, il pavimento a griglia, una luce che passa ── */
+.sfondo { position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; }
+.lu { position: absolute; border-radius: 50%; will-change: transform, opacity; }
+.lu1 { width: 230rem; height: 230rem; left: -70rem; top: -110rem; background: radial-gradient(closest-side, rgba(204, 255, 0, .2), rgba(204, 255, 0, 0)); animation: lu1 38s ease-in-out infinite; }
+.lu2 { width: 280rem; height: 280rem; right: -90rem; bottom: -120rem; background: radial-gradient(closest-side, rgba(157, 0, 255, .5), rgba(157, 0, 255, 0)); animation: lu2 46s ease-in-out infinite; }
+.lu3 { width: 150rem; height: 150rem; left: 120rem; top: 40rem; background: radial-gradient(closest-side, rgba(235, 69, 158, .16), rgba(235, 69, 158, 0)); animation: lu3 31s ease-in-out infinite; }
+@keyframes lu1 { 50% { transform: translate(60rem, 30rem) scale(1.15); } }
+@keyframes lu2 { 50% { transform: translate(-70rem, -20rem) scale(.9); } }
+@keyframes lu3 { 50% { transform: translate(90rem, 40rem) scale(1.3); } }
+.pavimento { position: absolute; left: -40rem; right: -40rem; bottom: 0; height: 78rem; perspective: 60rem; perspective-origin: 50% 0; overflow: hidden; -webkit-mask-image: linear-gradient(transparent, #000 60%); mask-image: linear-gradient(transparent, #000 60%); }
+.pavimento i { position: absolute; left: 0; right: 0; top: 0; height: 240rem; transform-origin: 50% 0; transform: rotateX(72deg); background-image: linear-gradient(rgba(204, 255, 0, .16) .3rem, transparent .3rem), linear-gradient(90deg, rgba(157, 0, 255, .3) .3rem, transparent .3rem); background-size: 100% 16rem, 16rem 100%; animation: pavimento 4s linear infinite; }
+@keyframes pavimento { from { transform: rotateX(72deg) translateY(-16rem); } to { transform: rotateX(72deg) translateY(0); } }
+.scansione { position: absolute; left: 0; right: 0; top: 0; height: 30rem; background: linear-gradient(transparent, rgba(204, 255, 0, .045), transparent); animation: scansione 9s linear infinite; will-change: transform; }
+@keyframes scansione { from { transform: translateY(-30rem); } to { transform: translateY(216rem); } }
+
+/* ── in alto: ON AIR a sinistra, l'ora e la puntata a destra ── */
+.testa { position: absolute; left: 5rem; right: 5rem; top: 4rem; display: flex; align-items: flex-start; justify-content: space-between; z-index: 3; }
+.onair { position: relative; display: flex; align-items: center; gap: 4rem; padding: 2.6rem 5rem 2.6rem 4rem; border: .9rem solid #3a3340; border-radius: 3rem; font: 800 12.5rem/1 "Ginto Nord", "gg sans", sans-serif; letter-spacing: .04em; color: #4a4253; background: rgba(10, 8, 14, .6); }
+.onair .pallino { width: 6rem; height: 6rem; border-radius: 50%; background: #3a3340; }
+.onair .on { display: none; }
+body[data-fase=onda] .onair { border-color: #ff3d4a; color: #fff; background: rgba(60, 6, 14, .55); box-shadow: 0 0 6rem rgba(255, 61, 74, .7), inset 0 0 4rem rgba(255, 61, 74, .45); text-shadow: 0 0 3rem #ff3d4a, 0 0 1rem #ff3d4a; animation: accende 1.3s steps(1) both; }
+body[data-fase=onda] .onair .on { display: inline; }
+body[data-fase=onda] .onair .off { display: none; }
+body[data-fase=onda] .onair .pallino { background: #ff3d4a; box-shadow: 0 0 3rem #ff3d4a; animation: pallino 1.6s ease-in-out infinite; }
+body.si-spegne .onair { animation: spegne 1.4s steps(1) both; }
+@keyframes accende { 0% { opacity: .2; } 10% { opacity: 1; } 18% { opacity: .3; } 30% { opacity: 1; } 36% { opacity: .5; } 44%, 100% { opacity: 1; } }
+@keyframes spegne { 0% { opacity: 1; } 12% { opacity: .3; } 22% { opacity: 1; } 40% { opacity: .2; } 50% { opacity: .9; } 70%, 100% { opacity: 1; } }
+@keyframes pallino { 50% { transform: scale(.7); opacity: .55; } }
+.testa .dx { text-align: right; }
+.orologio { font: 700 17rem/1 "gg mono", Consolas, monospace; color: #fff; letter-spacing: -.02em; text-shadow: 0 0 4rem rgba(157, 0, 255, .8); }
+.ep { margin-top: 2.4rem; font: 800 7rem/1 "Ginto Nord", "gg sans", sans-serif; color: #ccff00; letter-spacing: .06em; text-transform: uppercase; }
+.ep .da { margin-left: 3rem; font: 700 7rem/1 "gg mono", monospace; color: #e2b3ff; text-transform: none; letter-spacing: 0; }
+
+/* ── il marchio: le cuffie di pzkko sopra «Giugnoh's Cast» ── */
+.marchio { position: absolute; left: 0; right: 0; top: 30rem; text-align: center; z-index: 2; transform-origin: 50% 0; transition: transform 1.1s cubic-bezier(.2, .9, .25, 1), opacity .8s ease; will-change: transform; }
+.cuffie { display: block; width: 46rem; height: auto; margin: 0 auto -6rem; image-rendering: pixelated; image-rendering: crisp-edges; transform-origin: 50% 100%; will-change: transform; filter: drop-shadow(0 0 4rem rgba(204, 255, 0, .35)); }
+.logo { display: inline-flex; align-items: flex-end; font: 700 51rem/1 "Pricedown", "Ginto Nord", sans-serif; letter-spacing: .01em; white-space: nowrap; }
+.logo span { display: inline-block; color: #ccff00; text-shadow: 0 .8rem 0 #6a00ad, 0 1.6rem 0 #3d0066, 0 0 7rem rgba(157, 0, 255, .75); animation: lettera 3s ease-in-out infinite; animation-delay: calc(var(--i) * -.19s); will-change: transform; }
+.logo span.b { color: #fff; }
+.logo .sp { width: .26em; }
+@keyframes lettera { 50% { transform: translateY(-2.2rem) rotate(-1.5deg); } }
+.motto { margin-top: 3rem; font: 800 10.5rem/1 "gg sans", sans-serif; letter-spacing: .32em; text-transform: uppercase; color: #e2b3ff; text-shadow: 0 0 3rem rgba(157, 0, 255, .9); }
+/* con l'argomento in onda il marchio sale e si fa piccolo; alla fine sparisce */
+body[data-argo=si] .marchio { transform: translateY(-26rem) scale(.48); }
+body[data-argo=si] .motto { opacity: 0; }
+body[data-fase=finita] .marchio { transform: translateY(-26rem) scale(.46); }
+body[data-fase=finita] .motto, body[data-fase=finita] .cuffie { opacity: 0; }
+
+/* ── l'argomento ── */
+.argo { position: absolute; left: 3rem; right: 3rem; top: 54rem; height: 120rem; text-align: center; z-index: 2; opacity: 0; transform: translateY(8rem); transition: opacity .6s ease, transform .9s cubic-bezier(.2, .9, .25, 1); }
+body[data-argo=si] .argo { opacity: 1; transform: none; }
+.ar-testa { height: 14rem; }
+.chip { display: inline-block; padding: 2rem 5.4rem 2.4rem; border-radius: 3.6rem; background: #9d00ff; color: #fff; font: 800 8rem/1 "Ginto Nord", "gg sans", sans-serif; letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 0 5rem rgba(157, 0, 255, .8); }
+.ar-corpo { position: relative; height: 88rem; margin-top: 2rem; }
+.rullo { position: absolute; left: 15rem; right: 15rem; top: 0; bottom: 0; overflow: hidden; -webkit-mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent); mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent); transition: opacity .35s ease; }
+.nastro { position: absolute; left: 0; right: 0; top: 50%; will-change: transform; }
+.voce { position: absolute; left: 0; right: 0; height: 30rem; display: flex; align-items: center; justify-content: center; }
+.voce span { font: 800 21rem/1 "Ginto Nord", "gg sans", sans-serif; color: #fff; white-space: nowrap; }
+.vero .voce span { text-shadow: 0 0 4rem rgba(157, 0, 255, .9); }
+.voce.scelta span { color: #ccff00; }
+.scia1, .scia2 { opacity: 0; }
+.banda { position: absolute; left: 11rem; right: 11rem; top: 50%; height: 32rem; margin-top: -16rem; border-top: .9rem solid #ccff00; border-bottom: .9rem solid #ccff00; background: linear-gradient(90deg, rgba(204, 255, 0, 0), rgba(204, 255, 0, .12) 30%, rgba(204, 255, 0, .12) 70%, rgba(204, 255, 0, 0)); box-shadow: 0 0 5rem rgba(204, 255, 0, .45); transition: opacity .35s ease; }
+.freccia { position: absolute; top: 50%; width: 15rem; height: 18rem; margin-top: -9rem; transform-origin: 25% 50%; will-change: transform; transition: opacity .35s ease;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 44'%3E%3Cpath d='M6 5 L35 22 L6 39 Z' fill='%23ccff00' stroke='%230b090e' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+.freccia.sx { left: 0; }
+.freccia.dx { right: 0; }
+.titolo { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; opacity: 0; transform: scale(1.5); }
+.titolo span { display: inline-block; max-width: 372rem; font: 800 27rem/1.1 "Ginto Nord", "gg sans", sans-serif; color: #fff; text-shadow: 0 0 5rem rgba(157, 0, 255, .95), 0 1rem 0 #3d0066; }
+.lampo { position: absolute; left: 50%; top: 50%; width: 380rem; height: 130rem; margin: -65rem 0 0 -190rem; background: radial-gradient(closest-side, rgba(204, 255, 0, .55), rgba(157, 0, 255, .25) 55%, rgba(157, 0, 255, 0)); opacity: 0; }
+.argo[data-rullo=entra] .rullo, .argo[data-rullo=entra] .banda, .argo[data-rullo=entra] .freccia { opacity: 0; }
+.argo[data-rullo=preso] .rullo, .argo[data-rullo=fermo] .rullo, .argo[data-rullo=preso] .banda, .argo[data-rullo=fermo] .banda, .argo[data-rullo=preso] .freccia, .argo[data-rullo=fermo] .freccia { opacity: 0; }
+.argo[data-rullo=preso] .titolo, .argo[data-rullo=fermo] .titolo { opacity: 1; transform: none; transition: opacity .2s ease, transform .7s cubic-bezier(.3, 1.9, .5, 1); }
+.argo.botto .lampo { animation: lampo 1s ease-out; }
+.argo.botto .ar-corpo { animation: scossa .55s ease-out; }
+@keyframes lampo { 0% { opacity: 0; transform: scale(.3); } 14% { opacity: 1; } 100% { opacity: 0; transform: scale(1.6); } }
+@keyframes scossa { 12% { transform: translate(-2.4rem, 1.2rem) rotate(-.6deg); } 30% { transform: translate(2rem, -1rem) rotate(.4deg); } 50% { transform: translate(-1.2rem, .6rem); } 72% { transform: translate(.6rem, -.3rem); } 100% { transform: none; } }
+.ar-sotto { margin-top: 2rem; display: flex; justify-content: center; align-items: center; gap: 3.6rem; font: 700 10rem/1 "gg mono", monospace; color: #fff; transition: opacity .35s ease; }
+.ar-sotto .dopo { color: #aaa2b4; font: 700 7.2rem/1 "gg sans", sans-serif; letter-spacing: .04em; }
+.argo[data-rullo=entra] .ar-sotto, .argo[data-rullo=gira] .ar-sotto { opacity: 0; }
+.rec { width: 6rem; height: 6rem; border-radius: 50%; background: #ff3d4a; box-shadow: 0 0 3rem #ff3d4a; animation: rec 1.6s steps(1) infinite; }
+@keyframes rec { 50% { opacity: .25; } }
+
+/* ── la fine puntata ── */
+.fine { position: absolute; left: 3rem; right: 3rem; top: 44rem; text-align: center; z-index: 2; opacity: 0; transform: translateY(10rem); transition: opacity .7s ease, transform 1s cubic-bezier(.2, .9, .25, 1); }
+body[data-fase=finita] .fine { opacity: 1; transform: none; }
+.fi-grazie { display: inline-flex; font: 700 38rem/1 "Pricedown", "Ginto Nord", sans-serif; white-space: nowrap; }
+.fi-grazie span { display: inline-block; color: #ccff00; text-shadow: 0 .8rem 0 #6a00ad, 0 1.6rem 0 #3d0066, 0 0 7rem rgba(157, 0, 255, .75); animation: lettera 2.8s ease-in-out infinite; animation-delay: calc(var(--i) * -.19s); }
+.fi-grazie .sp { width: .26em; }
+.fine.entra .fi-grazie span { animation: cade .8s cubic-bezier(.3, 1.7, .5, 1) both; animation-delay: calc(.55s + var(--i) * 60ms); }
+@keyframes cade { from { transform: translateY(-60rem) rotate(-26deg) scale(.5); opacity: 0; } to { transform: none; opacity: 1; } }
+.fi-dice { margin-top: 3rem; font: 800 10rem/1.15 "gg sans", sans-serif; color: #fff; }
+.fi-dice b { color: #ccff00; }
+.fi-numeri { display: flex; justify-content: center; gap: 30rem; margin-top: 5rem; }
+.fi-numeri b { display: block; font: 800 21rem/1 "Ginto Nord", "gg sans", sans-serif; color: #ccff00; text-shadow: 0 0 5rem rgba(204, 255, 0, .45); }
+.fi-numeri small { display: block; margin-top: 2.4rem; font: 800 6.2rem/1 "gg sans", sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #e2b3ff; }
+.fi-titoli { width: 372rem; height: 44rem; margin: 4rem auto 0; overflow: hidden; -webkit-mask-image: linear-gradient(transparent, #000 22%, #000 78%, transparent); mask-image: linear-gradient(transparent, #000 22%, #000 78%, transparent); }
+.fi-scorre { will-change: transform; animation: titoli 14s linear infinite; }
+.fi-scorre.ferma { animation: none; padding-top: 10rem; }
+.fi-scorre.ferma .fi-lista + .fi-lista { display: none; }
+@keyframes titoli { to { transform: translateY(-50%); } }
+.fi-lista div { font: 700 10.5rem/15rem "gg sans", sans-serif; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fi-lista b { margin-right: 4rem; font: 800 9rem/1 "Ginto Nord", sans-serif; color: #ccff00; }
+.fine.entra .fi-dice { animation: su .7s cubic-bezier(.2, .9, .25, 1) .9s both; }
+.fine.entra .fi-numeri { animation: su .7s cubic-bezier(.2, .9, .25, 1) 1.3s both; }
+.fine.entra .fi-titoli { animation: su .7s cubic-bezier(.2, .9, .25, 1) 1.8s both; }
+@keyframes su { from { transform: translateY(10rem); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ── in basso: le barre che ballano con la voce, la lumaca al neon, il nastro che scorre ── */
+.eq { position: absolute; left: 0; right: 0; bottom: 21rem; height: 22rem; display: flex; justify-content: center; align-items: flex-end; gap: 1.6rem; z-index: 1; -webkit-box-reflect: below .8rem linear-gradient(transparent 40%, rgba(255, 255, 255, .22)); }
+.eq i { width: 3.8rem; height: 22rem; border-radius: 1.9rem; background: linear-gradient(#ccff00, #9d00ff); transform-origin: 50% 100%; transform: scaleY(.05); will-change: transform; }
+body[data-fase=spento] .eq i { background: linear-gradient(#6a5a7a, #3a2d48); }
+.lumaca { position: absolute; left: 0; bottom: 18.6rem; width: 22rem; height: auto; image-rendering: pixelated; image-rendering: crisp-edges; z-index: 3; animation: lumaca 120s linear infinite; will-change: transform; filter: drop-shadow(0 0 3rem rgba(5, 217, 232, .6)); }
+@keyframes lumaca { from { transform: translateX(-24rem); } to { transform: translateX(390rem); } }
+.nastrino { position: absolute; left: 0; right: 0; bottom: 0; height: 20rem; background: linear-gradient(#150e1d, #0b090e); border-top: .5rem solid #ccff00; box-shadow: 0 -2rem 6rem rgba(204, 255, 0, .12); overflow: hidden; z-index: 2; }
+.scorre { position: absolute; left: 0; top: 0; height: 100%; display: flex; align-items: center; white-space: nowrap; will-change: transform; }
+.scorre span { font: 800 8.4rem/1 "Ginto Nord", "gg sans", sans-serif; color: #fff; padding: 0 3rem; }
+.scorre span.m { color: #ccff00; font-family: "Pricedown", sans-serif; font-weight: 700; font-size: 10.5rem; }
+.scorre i { display: inline-block; width: 2.4rem; height: 2.4rem; border-radius: 50%; background: #9d00ff; box-shadow: 0 0 2rem #9d00ff; }
+@keyframes scorre { to { transform: translateX(-50%); } }
+
+/* ── i colpi di scena: le strisce della fine, il lampo dell'argomento, i coriandoli ── */
+.tenda { position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; z-index: 8; pointer-events: none; display: none; }
+.tenda.va { display: block; }
+.tenda i { position: absolute; top: -20%; left: 0; width: 62%; height: 140%; transform: translateX(-140%) skewX(-18deg); }
+.tenda.va i { animation: tenda 1.25s cubic-bezier(.75, 0, .25, 1) forwards; }
+.tenda i:nth-child(1) { background: #ccff00; }
+.tenda i:nth-child(2) { background: #9d00ff; animation-delay: .09s; }
+.tenda i:nth-child(3) { background: #0b090e; animation-delay: .18s; }
+@keyframes tenda { from { transform: translateX(-140%) skewX(-18deg); } to { transform: translateX(270%) skewX(-18deg); } }
+.flash { position: absolute; left: 0; top: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at 50% 55%, rgba(204, 255, 0, .5), rgba(157, 0, 255, .25) 60%, rgba(0, 0, 0, 0)); opacity: 0; pointer-events: none; z-index: 7; }
+.flash.va { animation: flash .9s ease-out; }
+@keyframes flash { 0% { opacity: 0; } 12% { opacity: 1; } 100% { opacity: 0; } }
+.cor { position: absolute; left: 50%; top: 55%; width: 0; height: 0; z-index: 9; pointer-events: none; }
+.cor i { position: absolute; left: 0; top: 0; width: 3rem; height: 1.7rem; border-radius: .5rem; opacity: 0; animation: cor 2.2s cubic-bezier(.2, .65, .45, 1) forwards; }
+@keyframes cor {
+  0% { transform: translate(0, 0) rotate(0) scale(.3); opacity: 1; }
+  40% { transform: translate(var(--mx), var(--my)) rotate(var(--mr)) scale(1.1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(1); opacity: 0; }
+}
+
+/* ── i messaggi piccoli: il collegamento col pc, lo schermo intero ── */
+.filo { position: absolute; left: 50%; top: 4rem; transform: translateX(-50%); padding: 1.6rem 4rem; border-radius: 3rem; background: rgba(255, 61, 74, .2); border: .4rem solid #ff3d4a; font: 700 4.6rem/1 "gg sans", sans-serif; color: #fff; z-index: 10; opacity: 0; transition: opacity .5s ease; }
+.filo.su { opacity: 1; }
+.schermo { position: absolute; left: 50%; bottom: 24rem; transform: translateX(-50%); padding: 2rem 5rem; border-radius: 3rem; background: rgba(11, 9, 14, .85); border: .4rem solid #ccff00; font: 700 5rem/1 "gg sans", sans-serif; color: #ccff00; z-index: 10; opacity: 0; transition: opacity .6s ease; }
+.schermo.su { opacity: 1; }
+
+/* ── le schermate scelte dalla regia (body[data-schermo]): una alla volta, a tutto schermo, quasi senza bordi ── */
+.podcast { position: absolute; left: 0; top: 0; right: 0; bottom: 0; transition: opacity .6s ease; }
+body:not([data-schermo=podcast]) .podcast { opacity: 0; pointer-events: none; }
+.eq { transition: opacity .6s ease; }
+body:not([data-schermo=podcast]):not([data-schermo=parla]) .eq { opacity: 0; }
+.sch { position: absolute; left: 0; top: 0; right: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; z-index: 4; opacity: 0; transform: scale(.92); transition: opacity .6s ease, transform .9s cubic-bezier(.2, .9, .25, 1); pointer-events: none; }
+body[data-schermo=logo] #s-logo, body[data-schermo=ora] #s-ora, body[data-schermo=nome] #s-nome, body[data-schermo=parla] #s-parla, body[data-schermo=testo] #s-testo, body[data-schermo=meteo] #s-meteo { opacity: 1; transform: none; }
+
+/* solo il logo: le cuffie grandi sopra «Giugnoh's Cast», da bordo a bordo */
+.sc-cuffie { display: block; width: 64rem; height: auto; margin: 0 auto -8rem; image-rendering: pixelated; image-rendering: crisp-edges; filter: drop-shadow(0 0 5rem rgba(204, 255, 0, .4)); animation: sc-cuffie 3.2s ease-in-out infinite; }
+@keyframes sc-cuffie { 50% { transform: translateY(-2.6rem) rotate(-2deg); } }
+.sc-motto { margin-top: 4rem; font: 800 12rem/1 "gg sans", sans-serif; letter-spacing: .3em; text-transform: uppercase; color: #e2b3ff; text-shadow: 0 0 3rem rgba(157, 0, 255, .9); }
+
+/* solo l'ora: le cifre giganti, i due punti che battono, il giorno sotto */
+.sc-ora { font: 700 130rem/1 "gg mono", Consolas, monospace; color: #fff; letter-spacing: -.04em; white-space: nowrap; text-shadow: 0 0 7rem rgba(157, 0, 255, .9), 0 1.6rem 0 #3d0066; }
+.sc-ora .due { color: #ccff00; animation: sc-batte 2s steps(1) infinite; }
+@keyframes sc-batte { 50% { opacity: .25; } }
+.sc-data { margin-top: 3rem; font: 800 16rem/1 "Ginto Nord", "gg sans", sans-serif; color: #ccff00; text-shadow: 0 0 4rem rgba(204, 255, 0, .4); white-space: nowrap; }
+
+/* il nome: «Giugnoh» in Pricedown, le lettere che ondeggiano e cambiano colore */
+.sc-nome { display: inline-flex; align-items: flex-end; font: 700 100rem/1 "Pricedown", "Ginto Nord", sans-serif; white-space: nowrap; }
+.sc-nome span { display: inline-block; color: #ccff00; text-shadow: 0 1.4rem 0 #6a00ad, 0 2.8rem 0 #3d0066, 0 0 10rem rgba(157, 0, 255, .8); animation: sc-onda 2.6s ease-in-out infinite, sc-colore 7s linear infinite; animation-delay: calc(var(--i) * -.22s), calc(var(--i) * -.5s); }
+@keyframes sc-onda { 50% { transform: translateY(-6rem) rotate(-2deg); } }
+@keyframes sc-colore { 0%, 100% { color: #ccff00; } 33% { color: #ffffff; } 66% { color: #e2b3ff; } }
+
+/* chi sta parlando: l'etichetta sopra e il nome gigante, che batte con la voce (tv.js) */
+.sc-chip { display: inline-flex; align-items: center; gap: 3.4rem; padding: 2.8rem 6.4rem 3.2rem; margin-bottom: 7rem; border-radius: 4rem; background: #9d00ff; color: #fff; font: 800 10rem/1 "Ginto Nord", "gg sans", sans-serif; letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 0 7rem rgba(157, 0, 255, .85); }
+.sc-chip .rec { width: 6.4rem; height: 6.4rem; }
+.sc-parla { display: inline-block; font: 800 90rem/1.05 "Ginto Nord", "gg sans", sans-serif; color: #ccff00; white-space: nowrap; text-shadow: 0 0 7rem rgba(204, 255, 0, .45), 0 1.4rem 0 #3d0066; will-change: transform; }
+
+/* un testo qualsiasi: grande quanto ci sta (tv.js lo misura) */
+.sc-testo { width: 372rem; font: 800 40rem/1.08 "Ginto Nord", "gg sans", sans-serif; color: #fff; white-space: pre-wrap; overflow-wrap: normal; word-break: normal; hyphens: none; text-wrap: balance; /* (le parole non si spezzano mai: se una non ci sta, grandeQuanto rimpicciolisce finché sta intera su una riga) */ text-shadow: 0 0 6rem rgba(157, 0, 255, .95), 0 1.2rem 0 #3d0066; }
+
+/* il meteo di Mantova, gigante: l'icona, i gradi, il tempo, minima, massima, percepiti e vento; e il cielo che cade */
+.sc-m-cielo { position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; z-index: -1; }
+.sc-m-su { display: flex; align-items: center; justify-content: center; gap: 12rem; }
+.sc-m-ico { position: relative; width: 94rem; height: 94rem; flex: none; }
+.sc-m-ico svg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 0 4rem rgba(204, 255, 0, .35)); }
+.sc-m-ico .raggi { animation: sc-gira 20s linear infinite; }
+.sc-m-ico .nuvola-su { animation: sc-nuvola 6s ease-in-out infinite; }
+@keyframes sc-gira { to { transform: rotate(360deg); } }
+@keyframes sc-nuvola { 50% { transform: translateX(2.6rem); } }
+.sc-m-gradi { font: 800 104rem/1 "Ginto Nord", "gg sans", sans-serif; color: #fff; letter-spacing: -.03em; white-space: nowrap; text-shadow: 0 0 7rem rgba(157, 0, 255, .9), 0 1.6rem 0 #3d0066; }
+.sc-m-dove { margin-top: 3rem; display: flex; align-items: baseline; justify-content: center; gap: 6rem; white-space: nowrap; }
+.sc-m-dove b { font: 800 22rem/1 "Ginto Nord", "gg sans", sans-serif; color: #ccff00; text-shadow: 0 0 4rem rgba(204, 255, 0, .4); }
+.sc-m-dove span { font: 800 17rem/1 "gg sans", sans-serif; color: #fff; }
+.sc-m-numeri { display: flex; justify-content: center; gap: 20rem; margin-top: 7rem; }
+.sc-m-numeri b { display: block; font: 800 20rem/1 "Ginto Nord", "gg sans", sans-serif; color: #ccff00; }
+.sc-m-numeri small { display: block; margin-top: 2.2rem; font: 800 6rem/1 "gg sans", sans-serif; letter-spacing: .2em; text-transform: uppercase; color: #e2b3ff; }
+.sc-m-cielo .goccia { position: absolute; top: -14rem; width: .7rem; height: 12rem; border-radius: .4rem; background: linear-gradient(rgba(179, 192, 255, 0), #b3c0ff); animation: sc-cade .9s linear infinite; }
+@keyframes sc-cade { to { transform: translateY(240rem); } }
+.sc-m-cielo .fiocco { position: absolute; top: -4rem; width: 2.4rem; height: 2.4rem; border-radius: 50%; background: #fff; box-shadow: 0 0 1.6rem rgba(255, 255, 255, .8); animation: sc-nevica 9s linear infinite; }
+@keyframes sc-nevica { 25% { transform: translate(3rem, 55rem); } 50% { transform: translate(-3rem, 110rem); } 75% { transform: translate(3rem, 165rem); } to { transform: translate(0, 225rem); } }
+.sc-m-cielo .stella { position: absolute; width: 1.2rem; height: 1.2rem; border-radius: 50%; background: #fff; box-shadow: 0 0 2rem #e2b3ff; animation: sc-brilla 3s ease-in-out infinite; }
+@keyframes sc-brilla { 50% { opacity: .15; transform: scale(.5); } }

@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diretta OS · muri</title>
+<link rel="icon" href="/logo.svg">
+<style>
+@font-face { font-family: "gg sans"; font-weight: 500; src: url(/fonts/ggsans-500.woff2) format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 600; src: url(/fonts/ggsans-600.woff2) format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 700; src: url(/fonts/ggsans-700.woff2) format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 800; src: url(/fonts/ggsans-800.woff2) format("woff2"); }
+@font-face { font-family: "gg mono"; font-weight: 400; src: url(/fonts/ggmono-400.woff2) format("woff2"); }
+@font-face { font-family: "gg mono"; font-weight: 700; src: url(/fonts/ggmono-700.woff2) format("woff2"); }
+@font-face { font-family: "Ginto Nord"; font-weight: 800; src: url(/fonts/gintonord-800.woff2) format("woff2"); }
+@font-face { font-family: "Pricedown"; font-weight: 700; src: url(/fonts/dn-pricedown.woff2) format("woff2"); }
+/* Lo stesso aspetto della regia (Discord col tema verde chiaro): gli stessi colori e gli stessi pezzi (la striscia, la
+   colonna delle icone, la colonna a sinistra, il riquadro in basso, la barra del banco). Qui il banco è la tela dei muri.
+   --p (lime) resta solo per quello che si disegna sopra la foto. */
+:root {
+  --rail: #6bfe6b; --lato: #80ff80; --fondo: #aeffae; --carta: #dbffdb; --chiaro: #f1fff1;
+  --testo: #0c1a0e; --tenue: #2f5235; --riga: rgba(0, 70, 10, .16); --vetro: rgba(0, 80, 14, .08); --vetro-2: rgba(0, 80, 14, .15);
+  --box: rgba(255, 255, 255, .36); --p: #ccff00; --a: #8b2fff; --blu: #5865f2; --blu-2: #4752c4;
+  --verde: #0b7a33; --rosso: #d22b38; --giallo: #8a5200; --rosa: #eb459e; --ambra: #f0b232;
+  --barra: 30px; --testa: 48px; --rail-w: 72px; --lato-w: 372px; color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--fondo); color: var(--testo); font: 500 15px/1.4 "gg sans", "Noto Sans", "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden;
+  display: grid; grid-template-columns: var(--rail-w) var(--lato-w) minmax(0, 1fr); grid-template-rows: var(--barra) minmax(0, 1fr); grid-template-areas: "barra barra barra" "rail lato palco"; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgba(0, 80, 14, .28); border-radius: 5px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 80, 14, .45); background-clip: padding-box; }
+button, .tasto { font: inherit; font-weight: 600; color: var(--testo); background: var(--vetro); border: 1px solid var(--riga); border-radius: 8px; padding: 7px 12px; cursor: pointer; text-decoration: none; transition: background .15s, border-color .15s, color .15s, transform .08s; }
+button:hover, .tasto:hover { background: var(--vetro-2); }
+button:active { transform: scale(.97); }
+button:disabled { opacity: .45; cursor: default; transform: none; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--blu); outline-offset: 2px; }
+button.forte { background: var(--blu); color: #fff; border-color: transparent; font-weight: 700; }
+button.forte:hover { background: var(--blu-2); }
+button.forte[aria-pressed=true] { background: var(--rosa); color: #fff; box-shadow: 0 0 0 3px rgba(235, 69, 158, .3); }
+.scelta { display: inline-flex; flex-wrap: wrap; background: var(--vetro); border: 1px solid var(--riga); border-radius: 8px; padding: 2px; gap: 2px; }
+.scelta button { border: 0; background: none; padding: 5px 11px; border-radius: 6px; white-space: nowrap; }
+.scelta button:hover { background: var(--vetro-2); }
+.scelta button[aria-pressed=true] { background: var(--testo); color: var(--carta); }
+.riga { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.nota { color: var(--tenue); font-size: 13px; margin: 8px 0 0; }
+.nota b { color: var(--testo); font-weight: 700; }
+kbd { font: 700 11px "gg mono", monospace; padding: 1px 5px; border-radius: 4px; background: var(--chiaro); border: 1px solid var(--riga); border-bottom-width: 2px; color: var(--testo); }
+.avviso { border-left: 4px solid var(--ambra); background: rgba(240, 178, 50, .22); color: #4d3000; padding: 8px 12px; border-radius: 3px 8px 8px 3px; font-size: 13px; font-weight: 600; margin-top: 10px; }
+input[type=text], input[type=number], select { font: 600 14px/1.2 "gg sans"; color: var(--testo); background: var(--chiaro); border: 1px solid var(--riga); border-radius: 8px; padding: 6px 8px; min-width: 0; }
+input[type=number] { width: 72px; }
+input[type=range] { width: 100%; accent-color: var(--blu); }
+input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--verde); margin: 0; }
+.carta { background: var(--box); border: 1px solid var(--riga); border-radius: 8px; padding: 12px; }
+.campo { display: grid; grid-template-columns: 118px 1fr 48px; align-items: center; gap: 10px; margin-top: 8px; }
+.campo:first-child { margin-top: 0; }
+.campo > span { color: var(--tenue); font-size: 13px; font-weight: 600; }
+.campo > b { font: 700 13px "gg mono", monospace; text-align: right; }
+
+/* la striscia del titolo e la colonna delle icone */
+.barra { grid-area: barra; display: flex; align-items: center; justify-content: center; gap: 8px; background: var(--rail); font: 600 14px/1 "gg sans"; white-space: nowrap; }
+.barra img { width: 18px; height: 18px; }
+.rail { grid-area: rail; background: var(--rail); display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 4px 0 130px; overflow: hidden auto; scrollbar-width: none; }
+.rail::-webkit-scrollbar { display: none; }
+.rail a { position: relative; width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 14px; background: rgba(0, 80, 14, .13); color: var(--testo); text-decoration: none; transition: background .15s, color .15s; }
+.rail a:hover { background: var(--blu); color: #fff; }
+.rail svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.rail .casa { background: var(--testo); color: var(--rail); font: 700 30px/1 "Pricedown"; padding-bottom: 2px; }
+.rail .tondo { border-radius: 50%; }
+.rail hr { width: 32px; flex: none; border: 0; border-top: 2px solid var(--riga); border-radius: 1px; margin: 0; }
+
+/* la colonna a sinistra: la foto, i muri, l'obiettivo, il realismo, dove sta ogni pezzo */
+aside.lato { grid-area: lato; background: var(--lato); border-top: 1px solid var(--riga); border-left: 1px solid var(--riga); border-top-left-radius: 12px; min-height: 0; overflow-y: auto; padding: 4px 10px 140px; scroll-behavior: smooth; }
+aside.lato section { margin: 0; }
+aside.lato h2 { margin: 14px 0 6px; padding: 0 2px 0 8px; min-height: 26px; font: 600 13.5px/1.2 "gg sans"; color: var(--tenue); display: flex; align-items: center; gap: 6px; }
+aside.lato h2 span { color: var(--testo); font-weight: 700; }
+.muro-r { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 6px 10px; align-items: center; padding: 9px 10px; border: 1px solid var(--riga); border-radius: 8px; margin-top: 6px; cursor: pointer; background: var(--box); }
+.muro-r:first-child { margin-top: 0; }
+.muro-r:hover { background: rgba(255, 255, 255, .5); }
+.muro-r.scelto { background: var(--chiaro); border-color: var(--testo); box-shadow: 0 0 0 1px var(--testo) inset; }
+.muro-r .pallino { width: 14px; height: 14px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 2px rgba(0, 40, 6, .55); }
+.muro-r .misure { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 6px 12px; color: var(--tenue); font-size: 13px; font-weight: 600; align-items: center; }
+.muro-r .misure label { display: inline-flex; align-items: center; gap: 5px; }
+.muro-r input.nome { width: 100%; }
+.muro-r .via { padding: 4px 9px; font-size: 13px; }
+.muro-r .via:hover { background: var(--rosso); color: #fff; border-color: transparent; }
+.pz-r { display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: 4px 10px; align-items: center; padding: 7px 0; border-top: 1px solid var(--riga); }
+.pz-r:first-child { border-top: 0; padding-top: 0; }
+.pz-r:last-child { padding-bottom: 0; }
+.pz-r b { font-weight: 600; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pz-r small { color: var(--tenue); font-size: 12px; }
+.pz-r small.su { color: var(--verde); font-weight: 700; }
+.pz-r select { width: 100%; }
+.pz-corpo { grid-column: 1 / -1; display: flex; align-items: center; gap: 7px; margin-top: 3px; font-size: 12px; color: var(--tenue); cursor: pointer; }
+.pz-corpo input { width: 15px; height: 15px; accent-color: var(--p); cursor: pointer; }
+
+/* in basso a sinistra: il filo col server, e si torna alla regia */
+.pannello { position: fixed; left: 8px; bottom: 8px; width: calc(var(--rail-w) + var(--lato-w) - 16px); z-index: 4; display: grid; gap: 8px; padding: 10px; border-radius: 10px; background: var(--carta); border: 1px solid var(--riga); box-shadow: 0 6px 20px rgba(0, 60, 10, .2); }
+.pn-filo { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.pn-filo > svg { width: 34px; height: 34px; flex: none; padding: 7px; border-radius: 8px; background: #8aff8a; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.filo { display: flex; align-items: center; gap: 7px; min-width: 0; font-size: 14px; font-weight: 700; color: var(--rosso); }
+.filo i { width: 9px; height: 9px; flex: none; border-radius: 50%; background: var(--rosso); }
+.filo.su { color: var(--verde); }
+.filo.su i { background: var(--verde); box-shadow: 0 0 0 3px rgba(11, 122, 51, .2); }
+.filo span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pn-io { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.pn-io img { width: 34px; height: 34px; flex: none; padding: 6px; border-radius: 50%; background: var(--testo); }
+.pn-io .chi { flex: 1; min-width: 0; display: grid; }
+.pn-io .marchio { font: 700 23px/1 "Pricedown"; color: var(--testo); }
+.pn-io small { color: var(--tenue); font-size: 11.5px; font-weight: 600; }
+.pn-io .tasto { padding: 6px 11px; font-size: 13px; white-space: nowrap; background: #8aff8a; }
+.pn-io .tasto:hover { background: #71f373; }
+
+/* il banco: la barra coi comandi principali, e la tela */
+main.palco { grid-area: palco; display: flex; flex-direction: column; min-width: 0; min-height: 0; border-top: 1px solid var(--riga); border-left: 1px solid var(--riga); }
+.testa { min-height: var(--testa); flex: none; display: flex; align-items: center; gap: 10px; padding: 0 16px; border-bottom: 1px solid var(--riga); min-width: 0; }
+.testa h1 { margin: 0; display: flex; align-items: center; gap: 9px; font: 700 16px/1 "gg sans"; white-space: nowrap; }
+.testa h1 svg { width: 22px; height: 22px; fill: none; stroke: var(--tenue); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.testa .sep { width: 1px; height: 24px; flex: none; background: var(--riga); }
+.testa .et { color: var(--tenue); font-size: 13px; font-weight: 600; white-space: nowrap; margin-right: -2px; }
+.testa .dx { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.testa button { white-space: nowrap; }
+.palco-dentro { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 14px 18px 24px; }
+/* la tela: grande quanto ci sta, con la riga sotto sempre in vista; la foto della stanza (o la webcam) con i pezzi veri
+   sopra, e i muri disegnati */
+.palco-dentro { --ant-w: min(100%, calc((100vh - var(--barra) - var(--testa) - 98px) * 16 / 9)); }
+.tela { position: relative; width: var(--ant-w); flex: none; aspect-ratio: 16 / 9; border-radius: 10px; overflow: hidden; border: 1px solid rgba(0, 50, 8, .45); background: #000; box-shadow: 0 10px 28px rgba(0, 60, 10, .28); touch-action: none; user-select: none; }
+.tela iframe { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; border: 0; transform-origin: 0 0; pointer-events: none; }
+.tela svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.tela .mano { position: absolute; inset: 0; }
+.tela.nascondi svg .muro:not(.scelto) { opacity: .25; }
+.tela.via-muri svg .muro { display: none; }
+svg .riempi { fill: var(--c); fill-opacity: .13; }
+svg .scelto .riempi { fill-opacity: .2; }
+svg .rotto .riempi { fill: #ff3d4a; fill-opacity: .25; }
+svg .griglia { stroke: var(--c); stroke-opacity: .45; fill: none; }
+svg .bordo { stroke: var(--c); fill: none; }
+svg .vertice { fill: #fff; stroke: var(--c); }
+svg .scelto .vertice { fill: var(--c); stroke: #0b090e; }
+svg .lato { fill: #0b090e; stroke: var(--c); }
+.tela svg text { font-family: "gg sans", sans-serif; font-weight: 800; fill: #fff; paint-order: stroke; stroke: #0b090e; stroke-linejoin: round; }
+svg .contorno { fill: none; stroke: var(--p); stroke-dasharray: 6 4; }
+svg .nuovo { stroke: #eb459e; fill: rgba(235, 69, 158, .12); }
+svg .nuovo-punto { fill: #eb459e; stroke: #fff; }
+/* sotto la tela, come la casella dei messaggi: cosa stai toccando, e cosa far vedere */
+.dice-r { width: var(--ant-w); flex: none; display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 5px 12px 5px 14px; border-radius: 8px; background: var(--carta); border: 1px solid var(--riga); }
+.dice-r > svg { width: 20px; height: 20px; flex: none; fill: none; stroke: var(--tenue); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.dice { flex: 1; min-width: 0; color: var(--tenue); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dice b { color: var(--testo); font-weight: 700; }
+.dice-r label { display: inline-flex; align-items: center; gap: 6px; flex: none; color: var(--testo); font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.sotto { width: var(--ant-w); }
+.sotto .avviso { margin-top: 0; }
+.sotto .nota { font-size: 13px; line-height: 1.5; }
+
+/* stretta: una colonna sola che scorre */
+@media (max-width: 1100px) {
+  html, body { height: auto; }
+  body { display: block; overflow: auto; }
+  .barra { height: var(--barra); }
+  .rail { display: none; }
+  main.palco { border-left: 0; }
+  .testa { flex-wrap: wrap; padding: 8px 14px; }
+  .palco-dentro { --ant-w: 100%; overflow: visible; }
+  aside.lato { border-radius: 0; border-left: 0; overflow: visible; padding-bottom: 16px; }
+  .pannello { position: static; width: auto; margin: 0 8px 8px; }
+}
+@media (max-height: 700px) and (min-width: 1101px) {
+  :root { --barra: 0px; }
+  .barra { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { button, .tasto, .rail a { transition: none !important; } aside.lato { scroll-behavior: auto; } }
+</style>
+<!-- il tema scuro: vale solo se in regia (Configurazione → Aspetto) hai scelto «Scuro»; se no resta il Discord verde qui sopra -->
+<style id="tema-scuro">
+/* ══ il tema di casa: il layout è quello di Claude, i colori e il carattere sono pzkko / Giugnoh ══ */
+:root {
+  --rail: #0b090e; --lato: #121016; --fondo: #0b090e; --carta: #1a161f; --chiaro: #0e0c11;
+  --testo: #f2eef6; --tenue: #aaa2b4;
+  --riga: rgba(255, 255, 255, .09); --vetro: rgba(255, 255, 255, .05); --vetro-2: rgba(255, 255, 255, .1);
+  --box: rgba(255, 255, 255, .04);
+  --p: #ccff00; --a: #9d00ff; --blu: #ccff00; --blu-2: #a8d400;
+  --verde: #2dff7a; --rosso: #ff3d4a; --giallo: #f0b232; --rosa: #eb459e; --ambra: #f0b232;
+  color-scheme: dark;
+}
+body {
+  background:
+    radial-gradient(900px 620px at 82% -12%, rgba(157, 0, 255, .18), transparent 65%),
+    radial-gradient(760px 520px at 8% 108%, rgba(204, 255, 0, .07), transparent 62%),
+    var(--fondo);
+}
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .14); }
+::-webkit-scrollbar-thumb:hover { background: rgba(204, 255, 0, .4); }
+::selection { background: rgba(204, 255, 0, .28); color: #fff; }
+button, .tasto { color: var(--testo); background: var(--vetro); border-color: var(--riga); }
+button:hover, .tasto:hover { background: var(--vetro-2); }
+button.forte { background: linear-gradient(135deg, var(--p), #a8d400); color: #0b090e; border-color: transparent; font-weight: 800; }
+button.forte:hover { background: linear-gradient(135deg, #d7ff33, var(--p)); }
+button.forte[aria-pressed=true] { background: linear-gradient(135deg, var(--a), #6a00ad); color: #fff; border-color: #c77dff; box-shadow: 0 0 0 3px rgba(157, 0, 255, .22); }
+.scelta button[aria-pressed=true] { background: var(--p); color: #0b090e; }
+.avviso { background: rgba(240, 178, 50, .1); color: #ffdca8; }
+.avviso b { color: #fff1d6; }
+input[type=text], input[type=number], select { color: var(--testo); background: var(--chiaro); border-color: var(--riga); }
+input[type=range] { accent-color: var(--p); }
+input[type=checkbox] { accent-color: var(--p); }
+kbd { background: var(--chiaro); border-color: var(--riga); color: var(--testo); }
+.carta { background: var(--box); border-color: var(--riga); }
+.barra { position: relative; background: linear-gradient(180deg, #0e0c12, var(--rail)); color: var(--tenue); border-bottom: 1px solid var(--riga); }
+.barra::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: linear-gradient(90deg, transparent 2%, var(--p) 28%, #c77dff 62%, var(--a) 92%, transparent); opacity: .75; }
+.barra img { padding: 2px; border-radius: 6px; background: #0b090e; box-shadow: 0 0 0 1px rgba(255, 255, 255, .12); }
+.barra span { color: var(--testo); font-weight: 700; letter-spacing: .02em; }
+.rail { background: var(--rail); border-right: 1px solid var(--riga); }
+.rail a { background: var(--vetro); color: var(--testo); }
+.rail a:hover { background: var(--p); color: #0b090e; }
+.rail .casa { background: linear-gradient(135deg, var(--p), #a8d400); color: #0b090e; box-shadow: 0 0 22px rgba(204, 255, 0, .18); }
+.rail .casa:hover { background: var(--a); color: #fff; }
+.rail hr { border-top-color: var(--riga); }
+aside.lato { background: var(--lato); border-color: var(--riga); box-shadow: inset -1px 0 0 rgba(0, 0, 0, .35); }
+aside.lato h2 { color: var(--tenue); }
+aside.lato h2 span { color: var(--testo); }
+.muro-r { background: var(--box); border-color: var(--riga); }
+.muro-r:hover { background: var(--vetro); }
+.muro-r.scelto { background: #0b090e; border-color: var(--p); box-shadow: 0 0 0 1px var(--p) inset, 0 0 22px rgba(204, 255, 0, .08); }
+.muro-r .pallino { box-shadow: 0 0 0 2px rgba(255, 255, 255, .18); }
+.pz-r small.su { color: var(--verde); }
+.pannello { background: linear-gradient(160deg, rgba(157, 0, 255, .12), transparent 60%), var(--carta); border-color: rgba(255, 255, 255, .12); box-shadow: 0 16px 46px rgba(0, 0, 0, .55), 0 0 0 1px rgba(204, 255, 0, .08); }
+.pn-filo > svg { background: rgba(204, 255, 0, .1); color: var(--p); }
+.filo.su i { box-shadow: 0 0 10px rgba(45, 255, 122, .65); }
+.pn-io img { background: #0b090e; box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); }
+.pn-io .marchio { font: 700 25px/1 "Pricedown"; background: linear-gradient(100deg, var(--p) 4%, #f0b3ff 58%, #c77dff 82%, var(--a)); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 12px rgba(157, 0, 255, .3)); }
+.pn-io .tasto { background: var(--vetro); border-color: var(--riga); }
+.pn-io .tasto:hover { background: var(--p); color: #0b090e; }
+main.palco { background: radial-gradient(900px 500px at 70% -10%, rgba(157, 0, 255, .09), transparent 70%), var(--fondo); border-color: var(--riga); }
+.testa { border-color: var(--riga); background: rgba(11, 9, 14, .55); }
+.testa h1 { color: var(--testo); }
+.testa h1 svg { stroke: var(--p); }
+.tela { border: 1px solid rgba(204, 255, 0, .3); box-shadow: 0 0 0 1px rgba(157, 0, 255, .16), 0 26px 80px rgba(0, 0, 0, .62), 0 0 42px rgba(157, 0, 255, .12); }
+.dice-r { background: linear-gradient(180deg, var(--carta), #141016); border-color: rgba(204, 255, 0, .16); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04); }
+.dice b { color: var(--testo); }
+</style>
+<script>try { if ((localStorage.getItem('regia-tema') || 'discord') !== 'scuro') document.getElementById('tema-scuro').media = 'not all' } catch {}</script>
+</head>
+<body>
+<!-- la striscia del titolo -->
+<div class="barra"><img src="/logo.svg" alt=""><span>Diretta OS · muri</span></div>
+
+<!-- la colonna delle icone: la regia, le sezioni della colonna accanto, la tv -->
+<nav class="rail" aria-label="Sezioni">
+  <a class="casa" href="/" title="torna alla regia" aria-label="Torna alla regia">G</a>
+  <hr>
+  <a href="#sez-foto" title="Foto della stanza" aria-label="Foto della stanza"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><circle cx="12" cy="12.5" r="3.2"/><path d="M8 6l1.5-2h5L16 6"/></svg></a>
+  <a href="#sez-muri" title="I muri" aria-label="I muri"><svg viewBox="0 0 24 24"><path d="M3 6l9-2 9 2v12l-9 2-9-2z"/><path d="M12 4v16M3 12h18"/></svg></a>
+  <a href="#sez-obiettivo" title="Obiettivo e realismo" aria-label="Obiettivo e realismo"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/><path d="M12 3.500v5M20.5 12h-5M12 20.500v-5M3.5 12h5"/></svg></a>
+  <a href="#sez-pezzi" title="Dove sta ogni pezzo" aria-label="Dove sta ogni pezzo"><svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="M3 13l9 5 9-5"/></svg></a>
+  <hr>
+  <a class="tondo" href="/tv" target="diretta-tv" title="la tv del podcast, su questo pc" aria-label="Apri la tv"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></svg></a>
+</nav>
+
+<!-- la colonna a sinistra: tutto quello che si regola -->
+<aside class="lato">
+  <section id="sez-foto"><h2>Foto della stanza</h2>
+    <div class="carta"><div class="riga" style="justify-content:space-between"><span id="foto-dice">–</span><button id="scatta">scatta adesso</button></div>
+      <p class="nota">La foto nuova prende il posto di quella di prima, che viene cancellata. Mentre scatta, i pezzi spariscono per un secondo (anche in diretta), così nella foto non ci sono. Si scatta la lente in onda.</p>
+      <div class="avviso" id="foto-cambiata" hidden>L’inquadratura non è più quella della foto: scattala di nuovo, poi sistema i muri.</div></div></section>
+  <section id="sez-muri"><h2>Muri <span id="muri-lente"></span></h2>
+    <div id="muri"></div>
+    <div class="riga" style="margin-top:8px"><button id="copia">copia dall’altra lente</button></div>
+    <p class="nota" style="padding:0 2px">La <b>distanza</b> è dal telefono al centro del muro. Se ne sai una sola (o l’altezza vera: dal soffitto al battiscopa di solito è 2,70 m), scrivila: i muri attaccati si regolano da soli.</p></section>
+  <section id="sez-obiettivo"><h2>Obiettivo</h2>
+    <div class="carta">
+      <label class="campo"><span>Campo visivo</span><input type="range" id="fov" min="40" max="130" step="0.5"><b id="fov-n">–</b></label>
+      <div class="riga" style="margin-top:10px"><button id="stima">stima dai muri</button><button id="fov-via">quello del telefono</button></div>
+      <p class="nota" id="stima-dice">Se i pezzi sul muro sembrano schiacciati o tirati, «stima dai muri» lo calcola dagli angoli dei muri (servono muri visti di sbieco, coi bordi che convergono).</p>
+    </div></section>
+  <section><h2>Realismo</h2>
+    <div class="carta">
+      <label class="campo"><span>Luce della stanza</span><input type="range" id="luce" min="0" max="100" step="5"><b id="luce-n">–</b></label>
+      <label class="campo"><span>Sfocatura lontano</span><input type="range" id="sfoca" min="0" max="100" step="5"><b id="sfoca-n">–</b></label>
+      <p class="nota">La luce viene dalla foto della stanza: dove il muro è in ombra il pezzo è più scuro. La sfocatura cresce coi metri, come la messa a fuoco del telefono su di te.</p>
+    </div></section>
+  <section id="sez-pezzi"><h2>Dove sta ogni pezzo</h2><div class="carta" id="pezzi"></div></section>
+</aside>
+
+<!-- il banco: i comandi principali in alto, la tela, e sotto cosa stai toccando -->
+<main class="palco">
+  <header class="testa">
+    <h1><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l9-2 9 2v12l-9 2-9-2z"/><path d="M12 4v16M3 12h18"/></svg>Muri</h1>
+    <span class="et">della</span>
+    <div class="scelta" id="lenti"><button data-lente="05" title="i muri della 0,5×">0,5×</button><button data-lente="10" title="i muri della 1,0×">1,0×</button></div>
+    <i class="sep"></i>
+    <span class="scelta" id="vista"><button data-vista="foto" aria-pressed="true">foto</button><button data-vista="vivo" aria-pressed="false">dal vivo</button></span>
+    <div class="dx">
+      <button id="annulla" title="Ctrl+Z">annulla</button>
+      <button class="forte" id="nuovo" aria-pressed="false">+ nuovo muro</button>
+    </div>
+  </header>
+  <div class="palco-dentro">
+    <div class="tela" id="tela"><iframe id="pagina" title="i pezzi sulla stanza"></iframe><svg id="disegno" viewBox="0 0 1920 1080" preserveAspectRatio="none"></svg><div class="mano" id="mano"></div></div>
+    <div class="dice-r">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 8-6 2-2 6z"/></svg>
+      <div class="dice" id="dice"></div>
+      <label><input type="checkbox" id="spenti"> anche i pezzi spenti</label>
+      <label><input type="checkbox" id="vedi-muri" checked> mostra i muri</label>
+    </div>
+    <div class="sotto">
+      <div class="avviso" id="foto-nuova" hidden></div>
+      <p class="nota"><b>Nuovo muro</b>: clicca i 4 angoli di un rettangolo vero sul muro (gli spigoli, la riga del soffitto, il battiscopa, il bordo di un quadro o della tv): la griglia deve seguire le righe vere della parete. Due muri che si toccano: metti i loro angoli sullo stesso punto (si attaccano da soli), così si sa anche quanto è lontano l’altro.
+      <p class="nota"><b>I pezzi</b>: trascinali sopra un muro e ci restano appesi, in prospettiva (con <kbd>Alt</kbd> restano in aria). Sul muro hanno una grandezza vera: portati su un muro più vicino diventano più grandi, su uno più lontano più piccoli. <b>Rotella</b> per la grandezza, <kbd>Shift</kbd> + rotella per girarli sul muro, <b>doppio clic</b> per staccarli (tornano al loro posto in aria). Tutto va in onda subito, nei livelli di Camo.</p>
+    </div>
+  </div>
+</main>
+
+<!-- in basso a sinistra, come nella regia: il filo col server, e il tasto per tornarci -->
+<div class="pannello">
+  <div class="pn-filo">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19a14 14 0 0 1 14 0M8 15.500a8 8 0 0 1 8 0"/><circle cx="12" cy="11" r="1.6"/><path d="M4 9a11 11 0 0 1 16 0"/></svg>
+    <div class="filo" id="filo"><i></i><span>scollegata</span></div>
+  </div>
+  <div class="pn-io">
+    <img src="/logo.svg" alt="">
+    <div class="chi"><span class="marchio">Giugnoh</span><small>Diretta OS · muri</small></div>
+    <a class="tasto" href="/">‹ torna alla regia</a>
+  </div>
+</div>
+<script type="module">
+import { PEZZI, NOMI } from '/pezzi.js'
+import { TECNICI } from '/nomi-tecnici.js' // gli stessi nomi tecnici della regia
+Object.assign(NOMI, TECNICI)
+import { C, F_LENTE, COLORI, MAI_SUL_MURO, fDi, gradi, daGradi, omografia, porta, ordina, convesso, dentro, piano, sulPiano, matrice, scalaIn, angoli, distanza, stimaF, propaga } from '/muri.js'
+
+const $ = (s) => document.querySelector(s)
+const fai = (a) => fetch('/api/azione', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(a) }).then((r) => r.json()).catch(() => ({ ok: false }))
+const LENTI = { '05': '0,5×', 10: '1,0×' }
+const virgola = (x, n = 1) => x.toFixed(n).replace('.', ',')
+const copia = (x) => JSON.parse(JSON.stringify(x))
+const quando = (t) => { if (!t) return 'non c’è'; const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'adesso' : m < 60 ? `${m}′ fa` : m < 1440 ? `${Math.floor(m / 60)} h fa` : new Date(t).toLocaleDateString('it-IT') }
+const SUL_MURO = PEZZI.filter((p) => !MAI_SUL_MURO.includes(p))
+
+let stato = null, L = null, M = null, sel = null
+let disegno = null // i punti del muro nuovo, mentre li clicchi
+let presa = null, sopra = null, mouse = null
+let prima = null // com'erano i muri all'inizio di un gesto (per «annulla»)
+const storia = []
+let mioFino = 0 // finché il server non ha rimandato i muri che ho appena mandato, valgono i miei
+let vista = 'foto', spenti = false
+
+// ── la tela ──
+const tela = $('#tela'), pagina = $('#pagina'), svg = $('#disegno'), mano = $('#mano')
+let scala = 1
+const adatta = () => { scala = tela.clientWidth / 1920; pagina.style.transform = `scale(${scala})`; disegna() }
+new ResizeObserver(adatta).observe(tela)
+const win = () => pagina.contentWindow
+const punto = (e) => { const r = tela.getBoundingClientRect(); return [(e.clientX - r.left) / scala, (e.clientY - r.top) / scala] }
+const lontano = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1])
+const R = () => 12 / scala // quanto vicino a un angolo (in pixel della tela) per prenderlo
+const f = () => fDi(M, L)
+const pianoDi = (m) => piano(m, f())
+const colore = (m) => COLORI[Math.max(0, M.pareti.indexOf(m)) % COLORI.length]
+function pagineSu() {
+  const q = new URLSearchParams({ lente: L })
+  q.set('sfondo', vista === 'vivo' ? 'vivo' : '')
+  if (spenti) q.set('sempre', '')
+  pagina.src = `/o/tutto?${q.toString().replace(/=(&|$)/g, '$1')}`
+}
+pagina.addEventListener('load', () => setTimeout(spingi, 50))
+// i muri di adesso alla pagina dei pezzi (subito, senza aspettare il server)
+function spingi(tiene = null) { try { win()?.__muri?.(L, M, tiene) } catch {} }
+
+// ── i pezzi: dove sono e cosa c'è sotto il mouse ──
+const posto = (t) => { const m = /translate\(([-\d.]+)px,\s*([-\d.]+)px\)\s*scale\(([\d.]+)\)/.exec(t ?? ''); return m ? m.slice(1).map(Number) : null }
+function pezzi() { try { return win()?.__pezzi?.() ?? {} } catch { return {} } }
+// il centro di un pezzo nell'immagine e quanto è grande (1 = un pixel del pezzo per pixel)
+function comeSta(nome, v) {
+  const q = M.pezzi[nome], m = q && M.pareti.find((x) => x.id === q.muro), pi = m && pianoDi(m)
+  if (pi) {
+    const G = matrice(pi, q, v.w, v.h), c = porta(G, v.w / 2, v.h / 2)
+    return { muro: m, pi, G, q, centro: [c[0], c[1]], scala: scalaIn(G, v.w / 2, v.h / 2), angoli: angoli(G, v.w, v.h) }
+  }
+  const p = posto(v.posto)
+  if (!p) return null
+  return { centro: [p[0] + v.w * p[2] / 2, p[1] + v.h * p[2] / 2], scala: p[2], aria: p, angoli: [[p[0], p[1]], [p[0] + v.w * p[2], p[1]], [p[0] + v.w * p[2], p[1] + v.h * p[2]], [p[0], p[1] + v.h * p[2]]] }
+}
+function pezzoSotto([x, y]) {
+  let meglio = null
+  for (const [nome, v] of Object.entries(pezzi())) {
+    if (!v.su || MAI_SUL_MURO.includes(nome)) continue
+    const c = comeSta(nome, v)
+    if (!c) continue
+    const a = c.angoli, area = Math.abs((a[2][0] - a[0][0]) * (a[3][1] - a[1][1]) - (a[3][0] - a[1][0]) * (a[2][1] - a[0][1])) / 2
+    const qui = c.muro ? dentro(a, x, y) : x >= v.box.left && x <= v.box.right && y >= v.box.top && y <= v.box.bottom
+    if (qui && (!meglio || area < meglio.area)) meglio = { nome, w: v.w, h: v.h, area, ...c }
+  }
+  return meglio
+}
+// il muro sotto un punto: prima quello dove sta già, poi il più vicino al telefono
+function muroSotto([x, y], ora) {
+  const qui = M.pareti.filter((m) => dentro(m.punti, x, y) && pianoDi(m))
+  if (!qui.length) return null
+  const gia = qui.find((m) => m.id === ora)
+  if (gia) return gia
+  return qui.map((m) => { const pi = pianoDi(m), [u, v] = sulPiano(pi, x, y); return [m, distanza(pi, { u, v })] }).sort((a, b) => a[1] - b[1])[0][0]
+}
+const manigliaLato = (pi, k) => porta(pi.H, ...[[0.5, 0], [1, 0.5], [0.5, 1], [0, 0.5]][k])
+
+// cosa c'è sotto il mouse: un angolo, la maniglia di un lato, un pezzo, un muro
+function colpisci(pt) {
+  const ordine = [...M.pareti].sort((a, b) => (b.id === sel) - (a.id === sel))
+  if ($('#vedi-muri').checked) {
+    for (const m of ordine) for (let i = 0; i < 4; i++) if (lontano(m.punti[i], pt) < R()) return { tipo: 'vertice', m, i }
+    for (const m of ordine) { const pi = pianoDi(m); if (pi) for (let k = 0; k < 4; k++) if (lontano(manigliaLato(pi, k), pt) < R()) return { tipo: 'lato', m, k } }
+  }
+  const pz = pezzoSotto(pt)
+  if (pz) return { tipo: 'pezzo', ...pz }
+  if ($('#vedi-muri').checked) for (const m of ordine) if (dentro(m.punti, ...pt)) return { tipo: 'muro', m }
+  return null
+}
+// l'angolo di un altro muro lì vicino: ci si attacca
+function aggancia(pt, salta = []) {
+  if (presa?.alt) return pt
+  let meglio = null
+  for (const m of M.pareti) m.punti.forEach((p, i) => { if (!salta.some(([mm, j]) => mm === m && j === i) && lontano(p, pt) < R() && (!meglio || lontano(p, pt) < lontano(meglio, pt))) meglio = p })
+  return meglio ? [...meglio] : pt
+}
+
+// ── il disegno sopra la tela: i muri con la griglia in prospettiva, gli angoli, le maniglie, il pezzo sotto il mouse ──
+function disegna() {
+  if (!M) return
+  const k = 1 / scala, out = []
+  const linea = (a, b, cl) => `<line class="${cl}" x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" vector-effect="non-scaling-stroke"/>`
+  for (const m of M.pareti) {
+    const pi = pianoDi(m), sc = m.id === sel, pts = m.punti.map((p) => p.map((v) => v.toFixed(1)).join(',')).join(' ')
+    out.push(`<g class="muro${sc ? ' scelto' : ''}${pi ? '' : ' rotto'}" style="--c:${colore(m)}">`)
+    out.push(`<polygon class="riempi" points="${pts}"/>`)
+    if (pi) {
+      for (let i = 1; i < 10; i++) out.push(linea(porta(pi.H, i / 10, 0), porta(pi.H, i / 10, 1), 'griglia'))
+      for (let j = 1; j < 8; j++) out.push(linea(porta(pi.H, 0, j / 8), porta(pi.H, 1, j / 8), 'griglia'))
+    }
+    out.push(`<polygon class="bordo" points="${pts}" stroke-width="${sc ? 2.5 : 1.5}" vector-effect="non-scaling-stroke"/>`)
+    const t = pi ? `${m.nome || 'muro'} · a ${virgola(m.d)} m · ${virgola(pi.largo)} × ${virgola(pi.alto)} m` : `${m.nome || 'muro'} · gli angoli si incrociano`
+    const [lx, ly] = pi ? porta(pi.H, 0.03, 0.04) : m.punti[0]
+    out.push(`<text x="${lx.toFixed(1)}" y="${(ly + 16 * k).toFixed(1)}" font-size="${(13 * k).toFixed(2)}" stroke-width="${(4 * k).toFixed(2)}">${esc(t)}</text>`)
+    if (pi && (sc || M.pareti.length === 1)) for (let i = 0; i < 4; i++) { const [x, y] = manigliaLato(pi, i); out.push(`<rect class="lato" x="${(x - 5 * k).toFixed(1)}" y="${(y - 5 * k).toFixed(1)}" width="${(10 * k).toFixed(1)}" height="${(10 * k).toFixed(1)}" stroke-width="2" vector-effect="non-scaling-stroke"/>`) }
+    for (const [x, y] of m.punti) out.push(`<circle class="vertice" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${((sc ? 7 : 5) * k).toFixed(1)}" stroke-width="2" vector-effect="non-scaling-stroke"/>`)
+    out.push('</g>')
+  }
+  // il pezzo sotto il mouse (o in mano): il suo contorno vero, e quanto è grande sul muro
+  const pz = presa?.tipo === 'pezzo' ? presa.ora : sopra?.tipo === 'pezzo' ? sopra : null
+  if (pz?.angoli) {
+    out.push(`<polygon class="contorno" points="${pz.angoli.map((p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ')}" stroke-width="2" vector-effect="non-scaling-stroke"/>`)
+    const top = pz.angoli.reduce((a, b) => (b[1] < a[1] ? b : a))
+    const t = pz.muro ? `${NOMI[pz.nome]} · ${pz.muro.nome || 'muro'} · ${Math.round(pz.w * pz.q.s / 10)} × ${Math.round(pz.h * pz.q.s / 10)} cm · a ${virgola(distanza(pz.pi, pz.q))} m${pz.q.r ? ` · ${virgola(pz.q.r, 0)}°` : ''}` : `${NOMI[pz.nome]} · in aria`
+    out.push(`<text x="${top[0].toFixed(1)}" y="${(top[1] - 8 * k).toFixed(1)}" font-size="${(14 * k).toFixed(2)}" stroke-width="${(4 * k).toFixed(2)}">${esc(t)}</text>`)
+  }
+  // il muro nuovo, mentre clicchi gli angoli
+  if (disegno) {
+    const pts = [...disegno, ...(mouse ? [aggancia(mouse)] : [])]
+    if (pts.length > 1) out.push(`<polygon class="nuovo" points="${pts.map((p) => p.join(',')).join(' ')}" stroke-width="2" vector-effect="non-scaling-stroke"/>`)
+    for (const [x, y] of disegno) out.push(`<circle class="nuovo-punto" cx="${x}" cy="${y}" r="${(6 * k).toFixed(1)}" stroke-width="2" vector-effect="non-scaling-stroke"/>`)
+  }
+  svg.innerHTML = out.join('')
+}
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+
+// ── mandare i muri al server ──
+function inizio() { prima = JSON.stringify(M) }
+function manda() {
+  const ora = JSON.stringify(M)
+  if (prima !== null && prima !== ora) { storia.push({ L, M: prima }); if (storia.length > 80) storia.shift() }
+  prima = null
+  if (stato) M.foto = stato.foto?.[L] ?? 0
+  mioFino = Date.now() + 2500
+  fai({ tipo: 'muri', lente: L, dati: M }).then((r) => { if (!r.ok) dice('<b>il server non ha preso i muri</b>: è acceso?') })
+  pannello()
+}
+function annulla() {
+  const u = storia.pop()
+  if (!u) return dice('niente da annullare')
+  const m = JSON.parse(u.M)
+  fai({ tipo: 'muri', lente: u.L, dati: m })
+  if (u.L === L) { M = m; mioFino = Date.now() + 2500; if (!M.pareti.some((x) => x.id === sel)) sel = null; spingi(); disegna(); pannello() }
+  dice('annullato')
+}
+const dice = (h) => { $('#dice').innerHTML = h }
+function riallinea() { propaga(M.pareti, f(), M.ancora ?? M.pareti[0]?.id) }
+
+// ── i gesti sulla tela ──
+mano.addEventListener('pointermove', (e) => {
+  const pt = punto(e)
+  mouse = pt
+  if (!M) return
+  if (!presa) {
+    if (disegno) { disegna(); return }
+    sopra = colpisci(pt)
+    mano.style.cursor = !sopra ? 'default' : sopra.tipo === 'pezzo' ? 'grab' : sopra.tipo === 'muro' ? 'move' : 'pointer'
+    dice(!sopra ? '' : sopra.tipo === 'vertice' ? `angolo di <b>${esc(sopra.m.nome)}</b>: trascinalo` : sopra.tipo === 'lato' ? `lato di <b>${esc(sopra.m.nome)}</b>: trascinalo per allungare il muro` : sopra.tipo === 'muro' ? `<b>${esc(sopra.m.nome)}</b>: trascina per spostarlo, con <kbd>Shift</kbd> sposti tutti i muri` : sopra.muro ? 'sul muro: trascina, rotella per la grandezza, <kbd>Shift</kbd> + rotella per girarlo, doppio clic per staccarlo' : 'in aria: trascinalo su un muro per appenderlo')
+    disegna(); return
+  }
+  presa.mosso = presa.mosso || lontano(pt, presa.da) > 2 / scala
+  if (!presa.mosso) return
+  const P = presa
+  if (P.tipo === 'vertice') {
+    const vero = aggancia(pt, P.legati)
+    const vecchi = P.legati.map(([m, i]) => m.punti[i])
+    for (const [m, i] of P.legati) m.punti[i] = [...vero]
+    if (!P.legati.every(([m]) => convesso(m.punti))) P.legati.forEach(([m, i], n) => { m.punti[i] = vecchi[n] }) // (non si incrociano mai)
+    riallinea()
+  } else if (P.tipo === 'lato') {
+    const [u, v] = sulPiano(P.pi0, ...pt), H = P.pi0.H, k = P.k, q = P.punti0.map((p) => [...p, 1]) // (gli angoli fermi: davanti, w = 1)
+    const n = k === 0 ? [porta(H, 0, Math.min(v, 0.95)), porta(H, 1, Math.min(v, 0.95)), q[2], q[3]]
+      : k === 1 ? [q[0], porta(H, Math.max(u, 0.05), 0), porta(H, Math.max(u, 0.05), 1), q[3]]
+        : k === 2 ? [q[0], q[1], porta(H, 1, Math.max(v, 0.05)), porta(H, 0, Math.max(v, 0.05))]
+          : [porta(H, Math.min(u, 0.95), 0), q[1], q[2], porta(H, Math.min(u, 0.95), 1)]
+    if (n.every((p) => p[2] > 0) && convesso(n)) {
+      const m = P.m
+      m.punti = n.map((p) => [p[0], p[1]])
+      // stesso piano, quadrato diverso: la distanza è quella del centro nuovo, e i pezzi restano dove sono
+      const c = porta(omografia(m.punti), 0.5, 0.5), [uc, vc] = sulPiano(P.pi0, c[0], c[1])
+      m.d = Math.min(100, Math.max(0.1, distanza(P.pi0, { u: uc, v: vc })))
+      const pi = pianoDi(m)
+      if (pi) for (const [p, q0] of Object.entries(P.pezzi0)) { const im = porta(P.pi0.H, q0.u, q0.v), [uu, vv] = sulPiano(pi, im[0], im[1]); M.pezzi[p] = { ...q0, u: uu, v: vv } }
+    }
+  } else if (P.tipo === 'muro') {
+    const dx = pt[0] - P.da[0], dy = pt[1] - P.da[1]
+    P.muri.forEach((m, n) => { m.punti = P.punti0[n].map(([x, y]) => [x + dx, y + dy]) })
+  } else if (P.tipo === 'pezzo') {
+    trascinaPezzo(pt, e.altKey)
+    disegna(); return
+  }
+  spingi(); disegna()
+})
+
+function trascinaPezzo(pt, aria) {
+  const P = presa, nome = P.nome, c = [pt[0] + P.off[0], pt[1] + P.off[1]]
+  const m = !aria && muroSotto(c, M.pezzi[nome]?.muro)
+  if (m) {
+    const pi = pianoDi(m), [u, v] = sulPiano(pi, c[0], c[1])
+    let q = M.pezzi[nome]
+    if (q) q = { ...q, muro: m.id, u, v } // (da un muro all'altro tiene la grandezza vera: più vicino, più grande)
+    else { // dall'aria: tiene la grandezza che aveva sullo schermo
+      q = { muro: m.id, u, v, s: 1, r: 0 }
+      q.s = Math.min(50, Math.max(0.05, P.scala / (scalaIn(matrice(pi, q, P.w, P.h), P.w / 2, P.h / 2) || 1)))
+    }
+    M.pezzi[nome] = q
+    const G = matrice(pi, q, P.w, P.h)
+    P.scala = scalaIn(G, P.w / 2, P.h / 2); P.aria = null
+    P.ora = { nome, w: P.w, h: P.h, muro: m, pi, q, angoli: angoli(G, P.w, P.h) }
+    spingi(nome)
+  } else {
+    if (M.pezzi[nome]) { delete M.pezzi[nome]; spingi(nome) }
+    const s = Math.min(3, Math.max(0.2, P.scala))
+    P.scala = s
+    P.aria = [c[0] - P.w * s / 2, c[1] - P.h * s / 2, s]
+    try { win().__posto(nome, ...P.aria, false) } catch {}
+    const [x, y] = P.aria
+    P.ora = { nome, w: P.w, h: P.h, angoli: [[x, y], [x + P.w * s, y], [x + P.w * s, y + P.h * s], [x, y + P.h * s]] }
+  }
+}
+
+mano.addEventListener('pointerdown', (e) => {
+  if (!M || e.button !== 0) return
+  const pt = punto(e)
+  try { mano.setPointerCapture(e.pointerId) } catch {}
+  if (disegno) {
+    disegno.push(aggancia(pt))
+    if (disegno.length === 4) creaMuro()
+    disegna(); return
+  }
+  const h = colpisci(pt)
+  inizio()
+  if (!h) { sel = null; presa = null; pannello(); disegna(); return }
+  if (h.tipo === 'vertice') {
+    sel = h.m.id
+    // gli angoli degli altri muri nello stesso punto si muovono insieme (con Alt no: si stacca)
+    const legati = e.altKey ? [[h.m, h.i]] : M.pareti.flatMap((m) => m.punti.map((p, i) => [m, i]).filter(([, i]) => lontano(m.punti[i], h.m.punti[h.i]) < 2))
+    presa = { tipo: 'vertice', legati, da: pt, alt: e.altKey }
+  } else if (h.tipo === 'lato') {
+    sel = h.m.id
+    const pezzi0 = Object.fromEntries(Object.entries(M.pezzi).filter(([, q]) => q.muro === h.m.id).map(([p, q]) => [p, { ...q }]))
+    presa = { tipo: 'lato', m: h.m, k: h.k, pi0: pianoDi(h.m), punti0: h.m.punti.map((p) => [...p]), pezzi0, da: pt }
+  } else if (h.tipo === 'muro') {
+    sel = h.m.id
+    const muri = e.shiftKey ? M.pareti : [h.m]
+    presa = { tipo: 'muro', muri, punti0: muri.map((m) => m.punti.map((p) => [...p])), da: pt }
+  } else if (h.tipo === 'pezzo') {
+    if (h.muro) sel = h.muro.id
+    presa = { tipo: 'pezzo', nome: h.nome, w: h.w, h: h.h, off: [h.centro[0] - pt[0], h.centro[1] - pt[1]], scala: h.scala, da: pt, eraSulMuro: !!h.muro, ora: h }
+    mano.style.cursor = 'grabbing'
+  }
+  pannello(); disegna()
+})
+const lascia = () => {
+  const P = presa
+  presa = null
+  if (!P) return
+  if (P.tipo === 'pezzo') {
+    mano.style.cursor = 'grab'
+    if (!P.mosso) { spingi(); disegna(); return }
+    if (P.aria) { // lasciato in aria: il suo posto in aria (per la lente dei muri che stai guardando)
+      try { win().__posto(P.nome, ...P.aria, true) } catch {}
+      fai({ tipo: 'posto', pezzo: P.nome, lente: L, x: P.aria[0], y: P.aria[1], s: P.aria[2] })
+    }
+    spingi()
+    if (M.pezzi[P.nome] || P.eraSulMuro) manda(); else prima = null
+    disegna(); return
+  }
+  if (P.mosso) { riallinea(); spingi(); manda() } else prima = null
+  disegna()
+}
+mano.addEventListener('pointerup', lascia)
+mano.addEventListener('pointercancel', lascia)
+mano.addEventListener('pointerleave', () => { if (!presa) { sopra = null; mouse = null; disegna() } })
+
+// la rotella: grandezza e giro dei pezzi; con Shift o Ctrl sopra un muro, tutti i muri insieme
+let rotFra = null, rotPezzoAria = null
+mano.addEventListener('wheel', (e) => {
+  if (!M || presa) return
+  const pt = punto(e), h = colpisci(pt), d = e.deltaY || e.deltaX
+  if (!d) return
+  if (h?.tipo === 'pezzo') {
+    e.preventDefault()
+    if (prima === null) inizio()
+    if (h.muro) {
+      const q = M.pezzi[h.nome]
+      if (e.shiftKey) q.r = Math.max(-180, Math.min(180, (q.r || 0) + (d < 0 ? 2.5 : -2.5)))
+      else q.s = Math.min(50, Math.max(0.05, q.s * (d < 0 ? 1.05 : 1 / 1.05)))
+      spingi()
+    } else {
+      const [x, y, s] = h.aria, n = Math.min(3, Math.max(0.2, s * (d < 0 ? 1.05 : 1 / 1.05)))
+      const nx = h.centro[0] - h.w * n / 2, ny = h.centro[1] - h.h * n / 2
+      try { win().__posto(h.nome, nx, ny, n, false) } catch {}
+      rotPezzoAria = [h.nome, nx, ny, n]
+    }
+  } else if (h && (e.shiftKey || e.ctrlKey) && M.pareti.length) {
+    e.preventDefault()
+    if (prima === null) inizio()
+    const k = e.shiftKey ? (d < 0 ? 1.015 : 1 / 1.015) : 1, a = e.ctrlKey ? (d < 0 ? 0.3 : -0.3) * Math.PI / 180 : 0
+    const co = Math.cos(a) * k, si = Math.sin(a) * k
+    for (const m of M.pareti) m.punti = m.punti.map(([x, y]) => [pt[0] + (x - pt[0]) * co - (y - pt[1]) * si, pt[1] + (x - pt[0]) * si + (y - pt[1]) * co])
+    riallinea(); spingi()
+  } else return
+  disegna()
+  sopra = colpisci(pt); disegna()
+  clearTimeout(rotFra)
+  rotFra = setTimeout(() => {
+    if (rotPezzoAria) { const [p, x, y, s] = rotPezzoAria; rotPezzoAria = null; try { win().__posto(p, x, y, s, true) } catch {} fai({ tipo: 'posto', pezzo: p, lente: L, x, y, s }); prima = null; return }
+    manda()
+  }, 350)
+}, { passive: false })
+
+// doppio clic su un pezzo appeso: torna in aria, al suo posto
+mano.addEventListener('dblclick', (e) => {
+  const h = colpisci(punto(e))
+  if (h?.tipo !== 'pezzo' || !h.muro) return
+  inizio(); delete M.pezzi[h.nome]; spingi(); manda(); disegna()
+})
+
+document.addEventListener('keydown', (e) => {
+  if (e.target?.matches?.('input, select, textarea')) return
+  if (e.key === 'Escape') { if (disegno) { disegno = null; $('#nuovo').setAttribute('aria-pressed', 'false'); tela.classList.remove('nascondi') } else sel = null; disegna(); pannello() }
+  else if ((e.key === 'Delete' || e.key === 'Backspace') && sel) { e.preventDefault(); togliMuro(sel) }
+  else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); annulla() }
+})
+
+// ── i muri: nuovo, togli, copia ──
+$('#nuovo').addEventListener('click', () => {
+  disegno = disegno ? null : []
+  $('#nuovo').setAttribute('aria-pressed', String(!!disegno))
+  tela.classList.toggle('nascondi', !!disegno)
+  mano.style.cursor = disegno ? 'crosshair' : 'default'
+  dice(disegno ? 'clicca i <b>4 angoli</b> del muro, in qualsiasi ordine (vicino all’angolo di un altro muro si attacca)' : '')
+  disegna()
+})
+function creaMuro() {
+  const punti = ordina(disegno)
+  disegno = null; $('#nuovo').setAttribute('aria-pressed', 'false'); tela.classList.remove('nascondi'); mano.style.cursor = 'default'
+  if (!convesso(punti)) { dice('<b>i quattro angoli si incrociano</b>: riprova, cliccali tutt’intorno al muro'); return }
+  inizio()
+  let n = M.pareti.length + 1
+  while (M.pareti.some((m) => m.nome === `muro ${n}`)) n++
+  const m = { id: Math.random().toString(36).slice(2, 9), nome: `muro ${n}`, punti, d: 3, corpo: true }
+  M.pareti.push(m)
+  if (!M.ancora) M.ancora = M.pareti[0].id
+  riallinea()
+  sel = m.id
+  spingi(); manda(); disegna()
+  dice(`<b>${m.nome}</b> fatto: sistema gli angoli finché la griglia segue le righe del muro, poi scrivi a quanti metri è`)
+}
+function togliMuro(id) {
+  inizio()
+  M.pareti = M.pareti.filter((m) => m.id !== id)
+  for (const [p, q] of Object.entries(M.pezzi)) if (q.muro === id) delete M.pezzi[p]
+  if (M.ancora === id) M.ancora = M.pareti[0]?.id ?? null
+  if (sel === id) sel = null
+  spingi(); manda(); disegna()
+}
+$('#copia').addEventListener('click', () => {
+  const altra = L === '05' ? '10' : '05', A = stato?.muri?.[altra]
+  if (!A?.pareti?.length) return dice(`la ${LENTI[altra]} non ha muri da copiare`)
+  if (M.pareti.length && !confirm(`Metto al posto dei muri della ${LENTI[L]} quelli della ${LENTI[altra]}?`)) return
+  inizio()
+  // le due lenti guardano dallo stesso punto: cambia solo l'ingrandimento attorno al centro
+  const k = f() / fDi(A, altra)
+  M.pareti = copia(A.pareti).map((m) => ({ ...m, punti: m.punti.map(([x, y]) => [C[0] + (x - C[0]) * k, C[1] + (y - C[1]) * k]) }))
+  M.ancora = A.ancora
+  for (const [p, q] of Object.entries(M.pezzi)) if (!M.pareti.some((m) => m.id === q.muro)) delete M.pezzi[p]
+  spingi(); manda(); disegna()
+  dice('copiati: le due lenti non sono proprio allineate, sistema gli angoli')
+})
+$('#annulla').addEventListener('click', annulla)
+
+// ── il pannello ──
+function pannello() {
+  if (!M || !stato) return
+  if (document.activeElement?.closest?.('#muri, #pezzi')) return // (mentre scrivi, non ti cambio il campo sotto le dita)
+  $('#muri-lente').textContent = `· ${LENTI[L]}`
+  for (const b of document.querySelectorAll('#lenti button')) b.setAttribute('aria-pressed', String(b.dataset.lente === L))
+  $('#muri').innerHTML = M.pareti.length ? M.pareti.map((m) => {
+    const pi = pianoDi(m)
+    return `<div class="muro-r${m.id === sel ? ' scelto' : ''}" data-id="${m.id}" style="--c:${colore(m)}"><i class="pallino"></i><input class="nome" type="text" maxlength="30" value="${esc(m.nome)}" aria-label="nome del muro"><button class="via" title="togli il muro">togli</button>
+      <div class="misure"><label>a <input class="d" type="number" min="0.3" max="40" step="0.1" value="${m.d.toFixed(2)}"> m</label>${pi ? `<label>alto <input class="alto" type="number" min="0.1" max="40" step="0.05" value="${pi.alto.toFixed(2)}"> m</label><span>largo ${virgola(pi.largo, 2)} m</span>` : '<span style="color:var(--rosso)">gli angoli si incrociano</span>'}<label title="quello che è appeso a questo muro resta dietro al tuo corpo"><input class="corpo" type="checkbox" ${m.corpo !== false ? 'checked' : ''}> dietro di me</label></div></div>`
+  }).join('') : '<p class="nota" style="margin:0">Nessun muro per questa lente: premi <b>+ nuovo muro</b> e clicca i quattro angoli.</p>'
+  const fv = f()
+  $('#fov').value = gradi(fv).toFixed(1); $('#fov-n').textContent = `${Math.round(gradi(fv))}°`
+  $('#luce').value = Math.round(M.luce * 100); $('#luce-n').textContent = `${Math.round(M.luce * 100)}%`
+  $('#sfoca').value = Math.round(M.sfoca * 100); $('#sfoca-n').textContent = `${Math.round(M.sfoca * 100)}%`
+  const opz = M.pareti.map((m) => `<option value="${m.id}">${esc(m.nome)}</option>`).join(''), tutti = pezzi()
+  $('#pezzi').innerHTML = SUL_MURO.map((p) => {
+    const q = M.pezzi[p], v = tutti[p]
+    const misura = q && v ? ` · ${Math.round(v.w * q.s / 10)} × ${Math.round(v.h * q.s / 10)} cm` : ''
+    const corpo = q ? `<label class="pz-corpo" title="Se qualcosa cambia sotto questo pezzo (ci passi davanti), sparisce. Togli la spunta per lasciarlo sempre davanti."><input class="corpo-p" type="checkbox" data-corpo="${p}" ${q.corpo !== false ? 'checked' : ''}> si toglie se passo davanti</label>` : ''
+    return `<div class="pz-r"><div><b>${esc(NOMI[p] ?? p)}</b><small class="${stato.attivi[p] ? 'su' : ''}">${stato.attivi[p] ? 'in onda' : 'spento'}${misura}</small></div><select data-pezzo="${p}" aria-label="dove sta ${esc(NOMI[p] ?? p)}"><option value="">in aria</option>${opz}</select>${corpo}</div>`
+  }).join('')
+  for (const s of document.querySelectorAll('#pezzi select')) s.value = M.pezzi[s.dataset.pezzo]?.muro ?? ''
+  fotoDice()
+}
+function fotoDice() {
+  if (!stato) return
+  const t = stato.foto?.[L], inOnda = stato.lente === L
+  $('#foto-dice').innerHTML = `${LENTI[L]}: <b>${quando(t)}</b>${inOnda ? '' : ` <span class="nota">(in onda c’è la ${LENTI[stato.lente]})</span>`}`
+  if (!scattando) $('#scatta').disabled = !inOnda
+  $('#scatta').title = inOnda ? '' : `si scatta la lente in onda: adesso è la ${LENTI[stato.lente]}`
+  $('#foto-cambiata').hidden = !stato.fotoCambiata?.[L]
+  const nuova = M?.pareti.length && t && M.foto && t > M.foto + 60000
+  $('#foto-nuova').hidden = !nuova
+  if (nuova) $('#foto-nuova').innerHTML = `La foto della stanza è più nuova dei muri (${quando(t)}). Se hai cambiato inquadratura, riporta i muri sulle pareti: <kbd>Shift</kbd> + trascina li sposta tutti insieme, <kbd>Shift</kbd> + rotella li ingrandisce, <kbd>Ctrl</kbd> + rotella li gira; poi gli angoli uno per uno. I pezzi appesi li seguono.`
+}
+setInterval(fotoDice, 30000)
+
+$('#muri').addEventListener('click', (e) => {
+  const r = e.target.closest('.muro-r')
+  if (!r) return
+  if (e.target.closest('.via')) return togliMuro(r.dataset.id)
+  if (sel !== r.dataset.id) { sel = r.dataset.id; disegna(); for (const x of document.querySelectorAll('.muro-r')) x.classList.toggle('scelto', x === r) }
+})
+$('#muri').addEventListener('change', (e) => {
+  const r = e.target.closest('.muro-r'), m = r && M.pareti.find((x) => x.id === r.dataset.id)
+  if (!m) return
+  inizio()
+  if (e.target.matches('.nome')) m.nome = e.target.value.trim().slice(0, 30) || m.nome
+  else if (e.target.matches('input.corpo')) m.corpo = e.target.checked
+  else if (e.target.matches('.d, .alto')) {
+    const v = parseFloat(String(e.target.value).replace(',', '.'))
+    if (!(v > 0)) return pannello()
+    const pi = pianoDi(m)
+    m.d = Math.min(100, Math.max(0.1, e.target.matches('.d') ? v : m.d * v / (pi?.alto || v)))
+    M.ancora = m.id // (questo l'hai scritto tu: gli altri muri attaccati si regolano su di lui)
+    riallinea()
+  }
+  e.target.blur()
+  spingi(); manda(); disegna()
+})
+$('#pezzi').addEventListener('change', (e) => {
+  const cb = e.target.closest('input.corpo-p')
+  if (cb) {
+    const p = cb.dataset.corpo, q = M.pezzi[p]
+    if (!q) return
+    inizio(); q.corpo = cb.checked; manda()
+    dice(q.corpo ? `<b>${esc(NOMI[p] ?? p)}</b>: si toglie quando ci passi davanti` : `<b>${esc(NOMI[p] ?? p)}</b>: resta sempre davanti`)
+    return
+  }
+  const s = e.target.closest('select[data-pezzo]')
+  if (!s) return
+  const p = s.dataset.pezzo, id = s.value
+  inizio()
+  if (!id) delete M.pezzi[p]
+  else {
+    const m = M.pareti.find((x) => x.id === id), pi = m && pianoDi(m), v = pezzi()[p]
+    if (!pi || !v) return pannello()
+    const c = comeSta(p, v)
+    // dove sta adesso, se è dentro quel muro; se no in mezzo al muro. Grande come appare adesso
+    const [u, vv] = c && dentro(m.punti, ...c.centro) ? sulPiano(pi, ...c.centro) : [0.5, 0.5]
+    const q = { muro: id, u, v: vv, s: 1, r: M.pezzi[p]?.r ?? 0, corpo: M.pezzi[p]?.corpo !== false }
+    q.s = M.pezzi[p]?.s ?? Math.min(50, Math.max(0.05, (c?.scala ?? 1) / (scalaIn(matrice(pi, q, v.w, v.h), v.w / 2, v.h / 2) || 1)))
+    M.pezzi[p] = q
+  }
+  s.blur()
+  spingi(); manda(); disegna()
+})
+
+// l'obiettivo e il realismo: si vede mentre muovi, si manda quando lasci
+const cursore = (id, fa) => {
+  $(id).addEventListener('input', (e) => { if (prima === null) inizio(); fa(+e.target.value); riallinea(); spingi(); disegna(); pannelloNumeri() })
+  $(id).addEventListener('change', () => manda())
+}
+const pannelloNumeri = () => { $('#fov-n').textContent = `${Math.round(gradi(f()))}°`; $('#luce-n').textContent = `${Math.round(M.luce * 100)}%`; $('#sfoca-n').textContent = `${Math.round(M.sfoca * 100)}%` }
+cursore('#fov', (v) => { M.f = Math.round(daGradi(v)) })
+cursore('#luce', (v) => { M.luce = v / 100 })
+cursore('#sfoca', (v) => { M.sfoca = v / 100 })
+$('#stima').addEventListener('click', () => {
+  const s = stimaF(M.pareti)
+  if (!s) { $('#stima-dice').innerHTML = '<b>Non ci riesco</b>: serve un muro visto di sbieco, coi lati in alto e in basso che convergono e anche quelli in verticale (il telefono un po’ inclinato).'; return }
+  inizio(); M.f = Math.round(s.f); riallinea(); spingi(); manda(); disegna()
+  $('#stima-dice').innerHTML = `Dai muri: <b>${Math.round(gradi(s.f))}°</b> di campo visivo (${s.n === 1 ? 'un muro' : `${s.n} muri`}). Il telefono dice ${Math.round(gradi(F_LENTE[L]))}°.`
+})
+$('#fov-via').addEventListener('click', () => { inizio(); M.f = null; riallinea(); spingi(); manda(); disegna(); $('#stima-dice').textContent = `Quello del telefono: ${Math.round(gradi(F_LENTE[L]))}°.` })
+
+// la foto della stanza: quella nuova prende il posto della vecchia
+let scattando = false
+$('#scatta').addEventListener('click', async () => {
+  const b = $('#scatta')
+  b.disabled = true; scattando = true; $('#foto-dice').textContent = 'Scatto… (i pezzi spariscono un attimo)'
+  let r = null
+  try { r = await (await fetch('/api/foto', { method: 'POST' })).json() } catch {}
+  scattando = false; b.disabled = false
+  if (r?.ok) fotoDice(); else $('#foto-dice').innerHTML = `Foto non fatta: <b>${esc(r?.dice ?? 'il server non risponde')}</b>`
+})
+
+// ── le scelte in alto ──
+$('#lenti').addEventListener('click', (e) => { const b = e.target.closest('[data-lente]'); if (b && b.dataset.lente !== L) scegliLente(b.dataset.lente) })
+function scegliLente(l) {
+  L = l; M = copia(stato.muri?.[L] ?? { pareti: [], pezzi: {}, luce: 0.6, sfoca: 0.25 }); sel = null; disegno = null; prima = null
+  if (vista === 'vivo' && stato.lente !== L) scegliVista('foto', false)
+  pagineSu(); pannello(); disegna()
+}
+$('#vista').addEventListener('click', (e) => { const b = e.target.closest('[data-vista]'); if (b) scegliVista(b.dataset.vista, true) })
+function scegliVista(v, ricarica) {
+  if (v === 'vivo' && stato && stato.lente !== L) { dice(`dal vivo c’è la lente in onda (${LENTI[stato.lente]}): per vederla scegli i suoi muri`); return }
+  vista = v
+  for (const b of document.querySelectorAll('#vista button')) b.setAttribute('aria-pressed', String(b.dataset.vista === v))
+  if (ricarica) pagineSu()
+}
+$('#spenti').addEventListener('change', (e) => { spenti = e.target.checked; pagineSu() })
+$('#vedi-muri').addEventListener('change', (e) => { tela.classList.toggle('via-muri', !e.target.checked); disegna() })
+
+// ── il filo col server (solo con la scheda in vista: il browser tiene al massimo 6 collegamenti per sito) ──
+let filo = null
+function collega() {
+  if (filo || document.hidden) return
+  filo = new EventSource('/api/flusso')
+  filo.addEventListener('stato', (e) => {
+    stato = JSON.parse(e.data)
+    if (!L) { L = stato.lente; M = copia(stato.muri?.[L]); pagineSu() }
+    else if (!presa && prima === null && Date.now() > mioFino) { M = copia(stato.muri?.[L]); if (!M.pareti.some((m) => m.id === sel)) sel = null; spingi() }
+    pannello(); disegna()
+  })
+  filo.onopen = () => { $('#filo').classList.add('su'); $('#filo span').textContent = 'collegata' }
+  filo.onerror = () => { $('#filo').classList.remove('su'); $('#filo span').textContent = 'scollegata: il server è spento?' }
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) return collega(); filo?.close(); filo = null })
+collega()
+adatta()
+</script>
+</body>
+</html>
