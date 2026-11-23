@@ -1,0 +1,60 @@
+/* Le app singole (telefono/schermo.js, 19.11): lo schermo di pzk os steso piatto in una finestra, coi tasti dello zero
+   sotto. Il vestito è quello del cercapersone zero: il guscio bianco, il vetro nero, i tasti arancioni. */
+
+.sch{position:fixed;inset:0;margin:auto;width:min(840px,calc(100vw - 24px));height:fit-content;max-width:none;max-height:none;padding:0;border:0;background:none;overflow:visible;color:#1b1a18;
+  font:400 14px/1.3 var(--font-sans,"gg sans","Noto Sans",system-ui,sans-serif);--arancio:#ff8a1a;--arancio-giu:#d96c00;--guscio:#f3f1ec}
+.sch::backdrop{background:rgba(10,8,14,.55);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.sch[open]{animation:sch-apre .26s cubic-bezier(.2,.9,.3,1.15)}
+.sch.chiude{animation:sch-chiude .2s ease-in forwards}
+@keyframes sch-apre{from{opacity:0;transform:translateY(14px) scale(.96)}}
+@keyframes sch-chiude{to{opacity:0;transform:translateY(8px) scale(.97)}}
+.sch *{box-sizing:border-box}
+
+.sch__corpo{display:flex;flex-direction:column;gap:12px;padding:14px 18px 16px;border-radius:26px;background:linear-gradient(180deg,#fbfaf7,var(--guscio) 40%,#e6e3dc);
+  box-shadow:inset 0 1px 0 #fff,inset 0 -3px 0 rgba(0,0,0,.08),0 2px 0 #c9c5bc,0 24px 60px -12px rgba(0,0,0,.55);outline:none}
+.sch__testa{display:flex;align-items:center;gap:10px;min-width:0}
+.sch__ico{width:36px;height:36px;flex:none;image-rendering:pixelated;object-fit:contain}
+.sch__nome{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:1px}
+.sch__nome b{font-weight:700;font-size:17px;line-height:1.15;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sch__nome span{font-size:12px;color:#77726a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sch__x{flex:none;display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:50%;background:rgba(0,0,0,.07);color:#2b2925;cursor:pointer;transition:background .15s,transform .15s}
+.sch__x:hover{background:rgba(0,0,0,.14)}
+.sch__x:active{transform:scale(.93)}
+
+.sch__vetro{padding:10px;border-radius:16px;background:#0f0d0b;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06),inset 0 6px 18px rgba(0,0,0,.8)}
+.sch__lcd{display:block;width:100%;aspect-ratio:2/1;height:auto;border-radius:6px;background:#f7a13a;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+
+.sch__tasti{display:flex;align-items:center;gap:16px;min-width:0}
+.sch__tasti button{border:0;background:var(--arancio);color:#3a1d00;font:700 14px/1 var(--font-sans,system-ui,sans-serif);cursor:pointer;-webkit-tap-highlight-color:transparent;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 3px 0 var(--arancio-giu),0 5px 8px rgba(0,0,0,.18);transition:transform .06s,box-shadow .06s,filter .15s}
+.sch__tasti button:hover{filter:brightness(1.06)}
+.sch__tasti button:active{transform:translateY(3px);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 0 0 var(--arancio-giu),0 1px 2px rgba(0,0,0,.2)}
+.sch__croce{flex:none;display:grid;grid-template:repeat(3,30px)/repeat(3,30px);gap:2px}
+.sch__croce button{font-size:11px;border-radius:7px}
+.sch__croce [data-t=su]{grid-area:1/2}.sch__croce [data-t=sx]{grid-area:2/1}.sch__croce [data-t=dx]{grid-area:2/3}.sch__croce [data-t=giu]{grid-area:3/2}
+.sch__croce::after{content:"";grid-area:2/2;border-radius:5px;background:var(--arancio);opacity:.55}
+.sch__come{flex:1 1 auto;min-width:0;margin:0;font-size:12.5px;line-height:1.7;color:#6b665e;text-align:center}
+.sch__come kbd{display:inline-block;min-width:20px;margin:0 2px;padding:1px 5px;border-radius:5px;background:#fff;box-shadow:0 1px 0 #bdb8ae,inset 0 0 0 1px #d9d5cc;font:600 11px/1.5 var(--font-mono,ui-monospace,monospace);color:#3b3832;text-align:center}
+.sch__due{flex:none;display:flex;align-items:center;gap:12px}
+.sch__ind{width:44px;height:44px;border-radius:50%;font-size:19px !important}
+.sch__ok{width:64px;height:64px;border-radius:50%;font-size:17px !important;letter-spacing:.02em}
+.sch :focus-visible{outline:3px solid #5865f2;outline-offset:2px}
+.sch__scrivi{position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;border:0;padding:0;font-size:16px}
+
+/* le finestre basse: lo schermo non esce (largo al più il doppio dell'altezza che resta) */
+@media (max-height:640px){.sch{width:min(840px,calc(100vw - 24px),calc((100dvh - 210px) * 2 + 56px))}}
+/* sul telefono: tutta la larghezza, i tasti grandi, niente scritta della tastiera */
+@media (max-width:640px){
+  .sch{width:calc(100vw - 12px)}
+  .sch__corpo{padding:12px 10px 14px;border-radius:22px;gap:10px}
+  .sch__vetro{padding:6px;border-radius:12px}
+  .sch__come{visibility:hidden;height:0;overflow:hidden}
+  .sch__tasti{justify-content:space-between;padding:4px 10px 0}
+  .sch__croce{grid-template:repeat(3,40px)/repeat(3,40px)}
+  .sch__croce button{font-size:14px}
+  .sch__ok{width:76px;height:76px}
+  .sch__ind{width:54px;height:54px}
+}
+@media (pointer:coarse){.sch__come{visibility:hidden}}
+@media (prefers-reduced-motion:reduce){.sch[open],.sch.chiude{animation:none}.sch__tasti button,.sch__x{transition:none}}
+.sch .sch__corpo:focus,.sch .sch__corpo:focus-visible{outline:0}

@@ -1,0 +1,98 @@
+/* ANGOLI (19.11): la figura a pennarello a sinistra, a destra il passo, i conti, la risposta e i numeri, sul foglio dei
+   giochi (../foglio.css). Verde a pennarello = più grande, rosso = più piccolo, giallo evidenziatore = quello che conta. */
+
+.an-corpo{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 318px;gap:6px 20px;padding-top:2px}
+
+/* a sinistra: la figura e il tempo */
+.an-foglio{position:relative;min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;justify-items:center;align-items:center}
+.an-figura{width:100%;height:100%;min-height:0;display:grid;place-items:center}
+.an-svg{display:block;width:auto;height:100%;max-width:100%;max-height:440px;aspect-ratio:1;overflow:visible}
+.an-spicchio{opacity:.16}
+.an-quanto{font:400 44px/1 var(--fa);paint-order:stroke;stroke:#f4f0e6;stroke-width:9px;stroke-linejoin:round}
+.an-svg.viva .an-semi,.an-svg.viva .an-arco{stroke-dasharray:1;stroke-dashoffset:1;animation:an-traccia .34s cubic-bezier(.3,.7,.3,1) forwards}
+.an-svg.viva .an-semi.s2{animation-delay:.1s}
+.an-svg.viva .an-arco{animation-delay:.24s;animation-duration:.4s}
+.an-svg.viva .an-punta,.an-svg.viva .an-spicchio,.an-svg.viva .an-quanto{animation:an-compare .2s .42s backwards}
+.an-svg.viva .an-vertice{transform-box:fill-box;transform-origin:center;animation:an-salta .3s cubic-bezier(.2,1.6,.4,1) backwards}
+@keyframes an-traccia{to{stroke-dashoffset:0}}
+@keyframes an-compare{from{opacity:0}}
+@keyframes an-salta{from{transform:scale(0)}}
+.an-tempo{margin:0;display:grid;grid-template-columns:auto auto;align-items:baseline;gap:0 8px;justify-content:center;width:min(100%,300px);padding-bottom:4px}
+.an-tempo b{font:400 40px/1 var(--fa);font-variant-numeric:tabular-nums;justify-self:end}
+.an-tempo small{font:400 15px/1 var(--marker);color:var(--matita)}
+.an-barra{grid-column:1/3;height:8px;margin-top:4px;border:2px solid var(--nero);border-radius:2px;background:rgba(255,255,255,.4);overflow:hidden}
+.an-barra i{display:block;height:100%;background:var(--verde);transform-origin:0 50%}
+.an-tempo.poco b{color:var(--rosso)}
+.an-tempo.poco .an-barra i{background:var(--rosso)}
+
+/* a destra */
+.an-lato{display:flex;flex-direction:column;gap:9px;min-width:0;min-height:0;padding-top:4px}
+.an-lato section{display:flex;flex-direction:column;gap:9px;min-height:0}
+.an-lato h3{margin:0;font:400 15px/1 var(--marker);color:var(--matita)}
+.an-regole{margin:0;padding:0 0 0 18px;display:grid;gap:5px;font-size:14px;line-height:1.25}
+.an-regole b{background:linear-gradient(transparent 55%,rgba(255,212,0,.75) 55%);font-weight:400}
+.an-passi{display:grid;gap:5px}
+.an-passo{display:flex;align-items:baseline;gap:10px;padding:5px 10px 4px;border:2px solid var(--nero);border-radius:3px;background:rgba(255,255,255,.34);text-align:left;cursor:pointer;transition:transform .15s}
+.an-passo b{min-width:44px;font:400 21px/1 var(--fa)}
+.an-passo span{font:400 15px/1 var(--marker)}
+.an-passo[aria-pressed=true]{background:var(--nero);transform:rotate(-1deg) translateX(4px);box-shadow:3px 3px 0 rgba(0,0,0,.18)}
+.fg .an-passo[aria-pressed=true]{color:#fff}
+.an-record{margin:0;font:400 14px/1.2 var(--marker);color:var(--matita)}
+.an-record b{font:400 18px/1 var(--fa);color:var(--nero)}
+
+.an-conti{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0}
+.an-conti div{padding:3px 6px 2px;border-bottom:2px dotted rgba(22,22,22,.3)}
+.an-conti dt{font:400 12px/1 var(--marker);color:var(--matita)}
+.an-conti dd{margin:2px 0 0;font:400 24px/1 var(--fa);font-variant-numeric:tabular-nums}
+.an-scritto{margin:0;display:flex;align-items:baseline;justify-content:center;gap:4px;height:56px;border:2px solid var(--nero);border-radius:3px;background:rgba(255,255,255,.45);font:400 42px/54px var(--fa)}
+.an-scritto b{font-weight:400;min-width:1ch;text-align:right}
+.an-scritto i{font:400 24px/1 var(--marker);font-style:normal;color:var(--matita)}
+.an-scritto.vuoto{border-style:dashed}
+.an-scritto.vuoto b::after{content:"?";color:rgba(22,22,22,.25)}
+.an-scritto.preso{background:var(--verde);border-color:var(--verde);transform:rotate(-1deg);box-shadow:3px 3px 0 rgba(0,0,0,.18)}
+.fg .an-scritto.preso,.fg .an-scritto.preso i{color:#fff}
+.an-scritto.scossa{animation:fg-scossa .36s}
+.an-storia{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:4px 6px;min-height:56px;align-content:start}
+.an-storia li{display:flex;align-items:baseline;gap:6px;padding:3px 7px 2px;border-left:4px solid var(--verde);background:rgba(35,134,74,.12);font-size:13px;white-space:nowrap;animation:an-compare .2s}
+.an-storia li b{font:400 17px/1 var(--fa)}
+.an-storia li.giu{border-left-color:var(--rosso);background:rgba(179,18,31,.1)}
+.an-tasti{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:auto}
+.an-k{height:40px;border:2px solid var(--nero);border-radius:4px;background:rgba(255,255,255,.4);font:400 22px/1 var(--fa);cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.28);transition:translate .08s}
+.an-k:active{translate:0 2px;box-shadow:none}
+.an-k.largo{font:400 15px/1 var(--marker)}
+.an-k[data-k=Enter]{background:var(--nero)}
+.fg .an-k[data-k=Enter]{color:#fff}
+
+.an-totale{margin:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.an-totale b{font:400 64px/1 var(--fa);font-variant-numeric:tabular-nums}
+.an-totale small{font:400 18px/1 var(--marker);color:var(--matita)}
+.an-totale em{padding:2px 8px;background:var(--giallo);font:400 16px/1.2 var(--marker);font-style:normal;transform:rotate(-3deg);box-shadow:2px 2px 0 rgba(0,0,0,.15)}
+.an-timbri{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.an-timbri li{display:flex;align-items:center;gap:7px;padding:4px 7px;border:2px dashed rgba(22,22,22,.3);border-radius:4px;font:400 12px/1.1 var(--marker);color:rgba(22,22,22,.4)}
+.an-timbri li b{font:400 22px/1 var(--fa)}
+.an-timbri li.preso{border:3px double var(--rosso);color:var(--rosso);transform:rotate(-2deg)}
+.an-timbri li.preso:nth-child(even){transform:rotate(1.5deg)}
+.an-azioni{display:flex;align-items:center;gap:18px;margin-top:auto;min-height:44px}
+.an-gioco:not([hidden])~.an-azioni{margin-top:0;min-height:0;justify-content:flex-end}
+.an-lato .an-gioco:not([hidden]){flex:1}
+
+@media (max-width:840px),(max-height:640px){
+  .an-corpo{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:6px;overflow-y:auto}
+  .an-foglio{grid-template-rows:auto auto}
+  .an-figura{height:auto}
+  .an-svg{width:min(70vw,32dvh);height:auto}
+  .an-quanto{font-size:50px}
+  .an-tempo{grid-template-columns:auto auto 1fr;width:100%;align-items:center}
+  .an-tempo b{font-size:28px}
+  .an-barra{grid-column:3;margin:0}
+  .an-lato{gap:7px;padding-top:0}
+  .an-lato section{gap:7px}
+  .an-regole{font-size:13px}
+  .an-passi{grid-template-columns:1fr 1fr}
+  .an-passo{padding:6px 8px 5px}
+  .an-scritto{height:48px;font-size:36px;line-height:46px}
+  .an-storia{min-height:28px}
+  .an-k{height:44px}
+  .an-totale b{font-size:48px}
+}
+@media (prefers-reduced-motion:reduce){.an-svg.viva *{animation:none !important;stroke-dashoffset:0 !important}.an-scritto.scossa,.an-storia li{animation:none}.an-passo,.an-k{transition:none}}

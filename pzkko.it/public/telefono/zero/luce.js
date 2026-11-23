@@ -5,14 +5,14 @@
 //   caricare la scena intera), con l'ora della pagina (window.pzkkoOrologio: anche quella finta della regia).
 // - La sera e la notte della pagina (window.pzkkoPagina.luci: notte, lampioni, insegna, l'auto che passa coi fari —
 //   auto-x dove sta, auto-l quanto abbaglia, auto-c il colore — e il neon), le stesse variabili che accendono il muro.
-// - L'ambiente per i riflessi: se la scena 3D della home è accesa (window.pzkkoScena), si fotografa DAVVERO il posto dal
-//   punto dove sta il cercapersone (sei facce con la telecamera della scena, lette dalla sua tela: la strada, i lampioni,
-//   l'auto, l'insegna); se no, un cielo disegnato con l'ora (il sole, l'orizzonte arancione dei lampioni di notte, la
+// - L'ambiente per i riflessi: un cielo disegnato con l'ora (il sole, l'orizzonte arancione dei lampioni di notte, la
 //   striscia calda dei fari dove passa l'auto).
+// (23.11, Alberto: «fallo sempre chiaro, è sempre scuro senza luce»): zero.js ora usa sempre la luce di giorno, e di qui
+// prende solo l'auto che passa (stato().auto); il cielo lo disegna con lo stato fisso di giorno. Non fotografa più la
+// scena della home per i riflessi: di sera era la strada buia, e il cercapersone diventava scuro con lei.
 //
 //   stato() → { sole: { el, az, dir }, giorno, notte, lampioni, insegna, auto: { x, l, c, neon } }
 //   cielo(stato) → la tela equirettangolare (256 × 128) dell'ambiente disegnato
-//   cattura(N) → Promise delle sei facce (Uint8Array N × N × 4) dalla scena 3D della home, o di null
 import * as T from './lib/three.js'
 
 const LAT = 45.1564, LON = 10.7914, RAD = Math.PI / 180
@@ -111,86 +111,4 @@ export function cielo(s) {
     g.fillStyle = ag; g.fillRect(u - r, vv - r / 2, 2 * r, r)
   }
   return tela
-}
-
-// ── la cattura dalla scena 3D della home (window.pzkkoScena): sei facce dal punto del cercapersone ──
-// (2.11, Alberto: «quando c'è il 3D acceso lagga un casino l'avvio… si freeza tutto il sito per 5 s»): la scena col
-// post-processing disegna in una tela intermedia (HalfFloat, lineare, senza tono): disegnarla dritta sullo schermo, come
-// si faceva, voleva un'altra versione di OGNI suo materiale (col tono e lo sRGB), e la scheda le compilava tutte lì, 5,8 s
-// col sito fermo. Ora si disegna in una tela come la sua (le versioni ci sono già) e il tono si fa qui, a mano; sul
-// telefono (diretta: niente post-processing) la scena disegna già sullo schermo, e lì si resta. E le facce non si leggono
-// più aspettando la scheda (readPixels fermava la pagina 60–70 ms): vanno in un buffer della scheda e si ritirano quando
-// lei dice di aver finito (fenceSync), qualche fotogramma dopo
-const VERSI = [[[1, 0, 0], [0, -1, 0]], [[-1, 0, 0], [0, -1, 0]], [[0, 1, 0], [0, 0, 1]], [[0, -1, 0], [0, 0, -1]], [[0, 0, 1], [0, -1, 0]], [[0, 0, -1], [0, -1, 0]]] // (come la CubeCamera di three)
-let tappa = null // la tela intermedia della cattura (della scena: il suo three, il suo contesto)
-/** Dal lineare HDR al byte sRGB: la curva ACES (Narkowicz) con l'esposizione della scena, poi lo sRGB. */
-const byte = (x) => { const y = Math.max(0, (x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14)); return Math.round(255 * Math.min(1, y <= 0.0031308 ? 12.92 * y : 1.055 * y ** (1 / 2.4) - 0.055)) }
-/** Aspetta che la scheda abbia eseguito tutto fin qui, senza fermare la pagina. → Promise<bool> */
-function finito(gl) {
-  const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0)
-  if (!sync) return Promise.resolve(false)
-  gl.flush()
-  return new Promise((ok) => {
-    const t0 = performance.now()
-    const guarda = () => {
-      const s = gl.clientWaitSync(sync, 0, 0)
-      if (s === gl.WAIT_FAILED || performance.now() - t0 > 3000) { gl.deleteSync(sync); return ok(false) }
-      if (s === gl.TIMEOUT_EXPIRED) return setTimeout(guarda, 8)
-      gl.deleteSync(sync); ok(true)
-    }
-    guarda()
-  })
-}
-/** → Promise delle sei facce (Uint8Array N × N × 4, sRGB), o di null se non si può */
-export async function cattura(N = 64) {
-  const S = window.pzkkoScena
-  if (!S?.renderer || !S.scene || !S.camera) return null
-  const cam = S.camera, r = S.renderer, gl = r.getContext()
-  const pezzo = S.f?.pezzi?.find((p) => p.el?.id === 'cercapersone-muro')
-  if (!pezzo?.mesh || !gl.fenceSync) return null
-  const diretta = !!S.liv?.diretta, prima = r.getRenderTarget()
-  if (!diretta && !tappa) { const RT = S.composer?.renderTarget1?.constructor; if (!RT) return null; tappa = new RT(N, N, { type: S.composer.renderTarget1.texture.type }) }
-  const salva = { p: cam.position.clone(), q: cam.quaternion.clone(), fov: cam.fov, aspect: cam.aspect, near: cam.near, far: cam.far, up: cam.up.clone() }
-  // (da una tela a virgola mobile si legge sempre in FLOAT, 16 byte a pixel; dallo schermo in byte)
-  const tipo = diretta ? gl.UNSIGNED_BYTE : gl.FLOAT, faccia = N * N * 4 * (diretta ? 1 : 4)
-  const pbo = gl.createBuffer()
-  try {
-    gl.bindBuffer(gl.PIXEL_PACK_BUFFER, pbo)
-    gl.bufferData(gl.PIXEL_PACK_BUFFER, faccia * 6, gl.STREAM_READ)
-    gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null)
-    const pos = pezzo.mesh.getWorldPosition(new (cam.position.constructor)())
-    pos.z += 0.08 // (un po' davanti alla lamiera)
-    cam.fov = 90; cam.aspect = 1; cam.near = 0.05; cam.far = 400
-    VERSI.forEach(([dir, up], i) => {
-      cam.position.copy(pos); cam.up.set(up[0], up[1], up[2])
-      cam.lookAt(pos.x + dir[0], pos.y + dir[1], pos.z + dir[2])
-      cam.updateProjectionMatrix(); cam.updateMatrixWorld(true)
-      if (diretta) { r.setRenderTarget(null); r.setViewport(0, 0, N, N); r.setScissor(0, 0, N, N); r.setScissorTest(true) }
-      else r.setRenderTarget(tappa)
-      r.render(S.scene, cam)
-      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, pbo)
-      gl.readPixels(0, 0, N, N, gl.RGBA, tipo, i * faccia)
-      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null)
-    })
-  } catch (e) { console.warn('cattura dell’ambiente', e); gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null); gl.deleteBuffer(pbo); return null }
-  finally {
-    cam.position.copy(salva.p); cam.quaternion.copy(salva.q); cam.fov = salva.fov; cam.aspect = salva.aspect; cam.near = salva.near; cam.far = salva.far; cam.up.copy(salva.up)
-    cam.updateProjectionMatrix(); cam.updateMatrixWorld(true)
-    r.setRenderTarget(prima)
-    if (diretta) { r.setScissorTest(false); r.setViewport(0, 0, r.domElement.width / r.getPixelRatio(), r.domElement.height / r.getPixelRatio()) }
-  }
-  const pronto = await finito(gl)
-  if (!pronto || gl.isContextLost()) { gl.deleteBuffer(pbo); return null }
-  const grezzo = diretta ? new Uint8Array(faccia * 6) : new Float32Array(faccia * 6 / 4)
-  gl.bindBuffer(gl.PIXEL_PACK_BUFFER, pbo)
-  gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, grezzo)
-  gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null)
-  gl.deleteBuffer(pbo)
-  const n = N * N * 4, esp = r.toneMappingExposure ?? 1
-  return VERSI.map((_, f) => {
-    if (diretta) return grezzo.slice(f * n, (f + 1) * n)
-    const buf = new Uint8Array(n)
-    for (let i = 0, j = f * n; i < n; i += 4, j += 4) { buf[i] = byte(grezzo[j] * esp); buf[i + 1] = byte(grezzo[j + 1] * esp); buf[i + 2] = byte(grezzo[j + 2] * esp); buf[i + 3] = 255 }
-    return buf
-  })
 }

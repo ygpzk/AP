@@ -1,0 +1,102 @@
+/* PZKMAPS (19.11): il foglio dei giochi (../foglio.css), più largo: a sinistra la strada, a destra l'elenco degli stati
+   oppure la mappa. La targa nera in alto a sinistra sta sopra l'indirizzo che la cornice di Street View scriverebbe lì. */
+
+.fg.pm{width:min(1180px,calc(100vw - 150px));height:min(720px,calc(100dvh - 130px))}
+.pm-corpo{flex:1;min-height:0;display:flex;flex-direction:column;padding-top:2px}
+.pm-corpo h3{margin:0;font:400 30px/1 var(--fa);text-transform:lowercase}
+
+/* la scelta: mondo, oppure una provincia degli amici */
+.pm-scegli{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,8fr);gap:26px;align-items:start;padding:10px 6px 0;overflow-y:auto}
+.pm-modo{display:grid;gap:12px;align-content:start;justify-items:start}
+.pm-modo p{margin:0;font-size:15px;line-height:1.35;max-width:46ch}
+.pm-modo p b{background:linear-gradient(transparent 55%,rgba(255,212,0,.75) 55%);font-weight:400}
+.pm-rec{font:400 15px/1.2 var(--marker) !important;color:var(--matita)}
+.pm-rec b{background:none !important;font:400 22px/1 var(--fa);color:var(--nero)}
+.pm-zone{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;width:100%}
+.pm-zona{display:grid;grid-template-columns:1fr auto;gap:1px 8px;align-items:baseline;padding:8px 12px 6px;border:2px solid var(--nero);border-radius:3px;background:rgba(255,255,255,.36);text-align:left;cursor:pointer;box-shadow:3px 3px 0 rgba(0,0,0,.14);transition:transform .16s cubic-bezier(.22,1,.36,1)}
+.pm-zona b{font:400 21px/1.05 var(--fa);text-transform:lowercase}
+.pm-zona span{grid-column:1;font:400 14px/1.15 var(--marker);color:var(--rosso)}
+.pm-zona small{grid-column:2;grid-row:1/3;align-self:center;font:400 12px/1 var(--marker);color:var(--matita);white-space:nowrap}
+.pm-zona.caso{background:var(--nero)}
+.fg .pm-zona.caso,.fg .pm-zona.caso span,.fg .pm-zona.caso small{color:#fff}
+.pm-zona:nth-child(odd){transform:rotate(-.5deg)}
+.pm-zona:nth-child(even){transform:rotate(.4deg)}
+@media (hover:hover){.pm-zona:hover{transform:translateY(-2px) rotate(-1deg)}}
+
+/* il gioco */
+.pm-gioco{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px}
+.pm-vista{position:relative;min-height:0;border:3px solid var(--nero);background:#111;overflow:hidden;box-shadow:4px 4px 0 rgba(0,0,0,.18)}
+.pm-sv{position:absolute;inset:0;width:100%;height:100%;border:0;background:#111}
+.pm-targa{position:absolute;left:0;top:0;margin:0;width:min(340px,82%);height:78px;display:flex;flex-direction:column;justify-content:center;gap:3px;padding:6px 14px 4px;background:var(--nero);border-bottom-right-radius:6px;box-shadow:3px 3px 0 rgba(0,0,0,.3)}
+.pm-targa b{font:400 30px/1 var(--fa);letter-spacing:.01em}
+.pm-targa span{font:400 14px/1.1 var(--marker);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fg .pm-targa b{color:var(--giallo)}
+.fg .pm-targa span{color:#fff}
+.pm-carica{position:absolute;inset:0;margin:0;display:grid;place-items:center;background:#111;font:400 22px/1.2 var(--marker)}
+.fg .pm-carica,.fg .pm-carica .fg-link{color:#fff}
+.pm-carica span{animation:pm-batte 1s ease-in-out infinite alternate}
+@keyframes pm-batte{to{opacity:.45}}
+
+.pm-lato{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0}
+.pm-conti{flex:none;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0}
+.pm-conti div{padding:2px 6px;border-bottom:2px dotted rgba(22,22,22,.3)}
+.pm-conti dt{font:400 12px/1 var(--marker);color:var(--matita)}
+.pm-conti dd{margin:2px 0 0;font:400 23px/1 var(--fa);font-variant-numeric:tabular-nums}
+.pm-paesi{flex:1;min-height:0;display:flex;flex-direction:column;gap:6px}
+.pm-cerca{flex:none;width:100%;height:38px;padding:0 10px;border:2px solid var(--nero);border-radius:3px;background:rgba(255,255,255,.55);font:400 16px/1 "Special Elite","Courier New",monospace;color:var(--nero)}
+.pm-cerca::placeholder{color:rgba(22,22,22,.45)}
+.pm-elenco{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:3px 6px;align-content:start;padding:0 4px 4px 0;scrollbar-width:thin;scrollbar-color:rgba(22,22,22,.4) transparent}
+.pm-elenco h4{grid-column:1/3;margin:6px 0 1px;font:400 14px/1 var(--marker);color:var(--rosso)}
+.pm-elenco h4:first-child{margin-top:0}
+.pm-paese{padding:5px 7px 3px;border:0;border-bottom:2px dotted rgba(22,22,22,.25);background:none;text-align:left;font-size:14px;line-height:1.15;cursor:pointer;border-radius:2px}
+.pm-paese[aria-selected=true]{background:var(--giallo);border-bottom-color:transparent;transform:rotate(-1deg);box-shadow:2px 2px 0 rgba(0,0,0,.15)}
+@media (hover:hover){.pm-paese:hover{background:rgba(255,212,0,.35)}}
+.pm-niente{grid-column:1/3;margin:10px 0;font:400 15px/1.2 var(--marker);color:var(--matita)}
+
+.pm-esito{flex:none;display:grid;gap:6px;justify-items:start}
+.pm-timbro{margin:2px 0 0 4px;padding:3px 12px 2px;border:3px double var(--nero);font:400 30px/1 var(--fa);text-transform:lowercase;transform:rotate(-3deg)}
+.pm-timbro.giusto{border-color:var(--verde)}
+.fg .pm-timbro.giusto{color:var(--verde)}
+.pm-timbro.sbagliato{border-color:var(--rosso)}
+.fg .pm-timbro.sbagliato{color:var(--rosso)}
+.pm-era{margin:0;font-size:15px;line-height:1.3}
+.pm-era b{font:400 24px/1.05 var(--fa)}
+.pm-era small{display:block;margin-top:2px;font:400 14px/1.2 var(--marker);color:var(--matita)}
+.pm-totale{margin:0;display:flex;align-items:baseline;gap:8px}
+.pm-totale b{font:400 52px/1 var(--fa);font-variant-numeric:tabular-nums}
+.pm-totale small{font:400 16px/1 var(--marker);color:var(--matita)}
+.pm-storia{margin:0;padding:0;list-style:none;display:grid;gap:2px;width:100%;counter-reset:g}
+.pm-storia li{display:grid;grid-template-columns:1fr auto 64px;gap:8px;align-items:baseline;padding:2px 6px;border-bottom:2px dotted rgba(22,22,22,.25);font-size:13px}
+.pm-storia li b{font:400 17px/1 var(--fa)}
+.pm-storia li i{font-style:normal;text-align:right;font:400 15px/1 var(--fa);color:var(--verde)}
+.pm-mappa{flex:1;min-height:150px;border:3px solid var(--nero);background:#ddd;box-shadow:3px 3px 0 rgba(0,0,0,.16);cursor:crosshair;font:12px/1.4 system-ui,sans-serif}
+.fg .pm-mappa .leaflet-container,.fg .pm-mappa.leaflet-container{cursor:crosshair}
+.fg .pm-mappa a{color:#1446a0}
+.pm-spillo i{display:block;width:22px;height:22px;margin:2px;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--rosso,#b3121f);box-shadow:-2px 2px 3px rgba(0,0,0,.45)}
+.pm-spillo.vero i{background:#23864a}
+.pm-azioni{flex:none;display:flex;align-items:center;gap:16px;min-height:44px;padding-left:4px}
+.pm-azioni .fg-tasto{font-size:26px}
+
+/* finestre strette o basse: a tutto schermo, senza nastro */
+@media (max-width:1040px),(max-height:700px){
+  .fg.pm{width:100vw;height:100dvh;margin:0}
+  .fg.pm::before{inset:0;left:0;right:0;top:0;bottom:0;transform:none;filter:none;background:#f2eee3 radial-gradient(120% 80% at 50% 0,rgba(255,255,255,.55),transparent 60%)}
+  .fg.pm .fg-dentro{padding:calc(6px + env(safe-area-inset-top)) 14px calc(10px + env(safe-area-inset-bottom)) 14px}
+}
+@media (max-width:840px){
+  .pm-scegli{grid-template-columns:minmax(0,1fr);gap:18px;padding:4px 0 8px}
+  .pm-corpo h3{font-size:26px}
+  .pm-zona{padding:7px 9px 5px}
+  .pm-zona b{font-size:18px}
+  .pm-zona small{grid-column:1;grid-row:auto}
+  .pm-gioco{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,45fr) minmax(0,55fr);gap:8px}
+  .pm-targa{height:74px;width:min(330px,86%)}
+  .pm-targa b{font-size:24px}
+  .pm-conti dd{font-size:19px}
+  .pm-elenco{grid-template-columns:1fr 1fr}
+  .pm-mappa{min-height:120px}
+  .pm-timbro{font-size:24px}
+  .pm-totale b{font-size:40px}
+  .pm-azioni{min-height:40px}
+}
+@media (prefers-reduced-motion:reduce){.pm-carica span{animation:none}.pm-zona{transition:none}}

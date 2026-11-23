@@ -1,6 +1,119 @@
 // Generato da scripts/media.mjs (npm run media): non modificare a mano.
 // Le catture vere dei progetti in public/media/p/, con misure, didascalie e impronta del file.
 export const MEDIA = {
+ "borsa": {
+  "cover": "/media/p/borsa/cover.webp?v=7396831c",
+  "video": null,
+  "shots": [
+   {
+    "src": "/media/p/borsa/01.webp?v=70c969b8",
+    "w": 1280,
+    "h": 720,
+    "it": "Il cursore sul grafico: il cambio di quel momento",
+    "en": "The cursor on the chart: the rate at that moment"
+   }
+  ]
+ },
+ "calcolatrice": {
+  "cover": "/media/p/calcolatrice/cover.webp?v=a537fd8b",
+  "video": null,
+  "shots": [
+   {
+    "src": "/media/p/calcolatrice/01.webp?v=1b994dfb",
+    "w": 1280,
+    "h": 720,
+    "it": "La scientifica in stile Discord: ANS per un seno in gon, e sotto il risultato mentre scrivi",
+    "en": "The Discord-style scientific mode: ANS times a sine in gons, with the result shown as you type"
+   },
+   {
+    "src": "/media/p/calcolatrice/02.webp?v=39362499",
+    "w": 1280,
+    "h": 720,
+    "it": "/calcola nella chat: il conto fatto lì, col tasto per aprire la calcolatrice",
+    "en": "/calcola in the chat: the sum done right there, with a button to open the calculator"
+   }
+  ]
+ },
+ "conversioni": {
+  "cover": "/media/p/conversioni/cover.webp?v=009313d5",
+  "video": null,
+  "shots": [
+   {
+    "src": "/media/p/conversioni/01.webp?v=f17d9452",
+    "w": 1280,
+    "h": 720,
+    "it": "Un numero più lungo, nelle quattro basi",
+    "en": "A longer number, in the four bases"
+   }
+  ]
+ },
+ "direttaos": {
+  "cover": "/media/p/direttaos/cover.webp?v=4956331d",
+  "video": {
+   "src": "/media/p/direttaos/loop.mp4?v=61b222f5",
+   "w": 960,
+   "h": 540,
+   "seconds": 9.8
+  },
+  "shots": [
+   {
+    "src": "/media/p/direttaos/01.webp?v=12481166",
+    "w": 1280,
+    "h": 720,
+    "it": "La regia: i pezzi, i «torno subito» e Giugnoh’s Cast (anteprima su fondo neutro, al posto della webcam)",
+    "en": "The control room: pieces, quick-away scenes and Giugnoh’s Cast (neutral preview backdrop instead of the webcam)"
+   },
+   {
+    "src": "/media/p/direttaos/02.webp?v=96c65cf4",
+    "w": 1280,
+    "h": 720,
+    "it": "«Torno subito»: sistemo la postazione, in pixel art",
+    "en": "“Back in a minute”: tidying the desk, in pixel art"
+   },
+   {
+    "src": "/media/p/direttaos/03.webp?v=3bc0082d",
+    "w": 1280,
+    "h": 720,
+    "it": "La tv 4K di Giugnoh’s Cast, con la puntata in onda",
+    "en": "The 4K TV of Giugnoh’s Cast, with the episode on air"
+   },
+   {
+    "src": "/media/p/direttaos/04.webp?v=828ae677",
+    "w": 1280,
+    "h": 720,
+    "it": "«Torno subito»: nel bosco, con la nebbia e le lucciole",
+    "en": "“Back in a minute”: in the woods, with fog and fireflies"
+   },
+   {
+    "src": "/media/p/direttaos/05.webp?v=2cb4582d",
+    "w": 1280,
+    "h": 720,
+    "it": "Il nome animato: otto animazioni e il colore che cambia",
+    "en": "The animated name: eight animations and a colour that changes"
+   },
+   {
+    "src": "/media/p/direttaos/06.webp?v=90d81d77",
+    "w": 1280,
+    "h": 720,
+    "it": "Meteo, Adigeo e gli animali che camminano sotto",
+    "en": "Weather, Adigeo and the animals walking below"
+   },
+   {
+    "src": "/media/p/direttaos/07.webp?v=5a0b0e9d",
+    "w": 1280,
+    "h": 720,
+    "it": "La tastiera e il mouse veri, coi tasti premuti che si accendono",
+    "en": "The real keyboard and mouse, with pressed keys lighting up"
+   },
+   {
+    "src": "/media/p/direttaos/08.webp?v=da6bd0f6",
+    "w": 1280,
+    "h": 720,
+    "it": "Le spie di microfono, cuffie e telefono",
+    "en": "The microphone, headset and phone indicators"
+   }
+  ]
+ },
  "email": {
   "cover": "/media/p/email/cover.webp?v=be2810ae",
   "video": null,
@@ -233,6 +346,33 @@ export const MEDIA = {
     "h": 720,
     "it": "Il terminale blu",
     "en": "The blue terminal"
+   }
+  ]
+ },
+ "miniera": {
+  "cover": "/media/p/miniera/cover.webp?v=3a63aff8",
+  "video": null,
+  "shots": [
+   {
+    "src": "/media/p/miniera/01.webp?v=9e8f2f4e",
+    "w": 1280,
+    "h": 720,
+    "it": "La postazione ancora vuota: dice cosa manca",
+    "en": "The rig still empty: it says what is missing"
+   },
+   {
+    "src": "/media/p/miniera/02.webp?v=238914e8",
+    "w": 1280,
+    "h": 720,
+    "it": "I pezzi, una categoria alla volta",
+    "en": "The parts, one category at a time"
+   },
+   {
+    "src": "/media/p/miniera/03.webp?v=560fd782",
+    "w": 1280,
+    "h": 720,
+    "it": "I pc già pronti, con quanto producono",
+    "en": "The ready-made PCs, with what they make"
    }
   ]
  },

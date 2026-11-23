@@ -125,13 +125,16 @@ let aprendo = null, richiesta = 0
 // 29.10, con l'app account): senza conto ogni app tranne LIBERE apre l'account, e l'app voluta aspetta in «dopo»; quando il
 // conto c'è, l'account chiama dopoAccesso() e si va lì
 const LIBERE = new Set(['account', 'impostazioni'])
+// (19.11) le app singole del profilo (telefono/schermo.js) si aprono anche da ospite, come la chat e i tavoli del sito, se
+// chi apre lo chiede (opz.libera: decide lui quali). Dal cercapersone la regola resta quella: senza conto non si entra
 let dopo = null
 export const serveConto = () => !pzk.conto()
 /** Dopo l'accesso (l'app account): via l'account, e si apre l'app che si voleva (o la home). */
 export function dopoAccesso() { const d = dopo; dopo = null; home(); if (d) apri(d) }
 /** Apre un'app (opz.comando: per la chat, un comando da mandare appena aperta: «vai» delle sfide, per esempio). */
 export async function apri(id, opz = {}) {
-  if (serveConto() && !LIBERE.has(id)) { dopo = id; id = 'account'; opz = {} }
+  const libera = !!opz.libera
+  if (serveConto() && !LIBERE.has(id) && !libera) { dopo = id; id = 'account'; opz = {} }
   const a = APP.find((x) => x.id === id)
   if (corrente()?.app === id && opz.comando) { corrente().comando?.(opz.comando); return } // (già aperta: solo il comando)
   if (!a || corrente()?.app === id || aprendo === id) return
@@ -149,6 +152,7 @@ export async function apri(id, opz = {}) {
     // e di due app chieste mentre la prima arriva si apre solo l'ultima)
     if (mia !== richiesta || corrente() !== sotto || corrente()?.app === id) return
     v.app ??= id
+    v.libera = libera
     spingi(v)
     suoni.sigla(id)
     if (opz.comando) v.comando?.(opz.comando)
@@ -305,7 +309,7 @@ async function leggiDati() {
   if (ancora) { ancora = false; leggiDati() }
 }
 zaino.ascolta(() => leggiDati())
-pzk.osserva(() => { leggiDati(); if (serveConto() && viste.some((v) => v.app && !LIBERE.has(v.app))) home() }) // (uscito dal conto: la home col lucchetto; 11.11: anche con un dialogo o una tastiera sopra l'app, prima restava sotto)
+pzk.osserva(() => { leggiDati(); if (serveConto() && viste.some((v) => v.app && !LIBERE.has(v.app) && !v.libera)) home() }) // (uscito dal conto: la home col lucchetto; 11.11: anche con un dialogo o una tastiera sopra l'app, prima restava sotto)
 function chiusa(l) {
   l.bitmap(icone.bitmap('lucchetto', 32), Math.round(W / 2 - 16), BARRA + 8)
   ;['serve il conto: un nome e quattro', 'cifre, un minuto. senza conto', 'il cercapersone resta chiuso.'].forEach((r, i) => l.testo(Math.round(W / 2 - Lcd.larghezza(r) / 2), BARRA + 46 + i * 10, r))
@@ -545,7 +549,7 @@ export function guida(forza = false) {
 const adatta = (s, w, scala = 1) => { s = String(s); if (Lcd.larghezza(s, scala) <= w) return s; while (s.length > 1 && Lcd.larghezza(s + '…', scala) > w) s = s.slice(0, -1); return s + '…' }
 let tastieraVera = null
 /** telefono.js: fn(true, { numeri }) fa uscire la tastiera del telefono, fn(false) la rimette via. */
-export function conTastieraVera(fn) { tastieraVera = fn }
+export function conTastieraVera(fn) { const prima = tastieraVera; tastieraVera = fn; return prima } // (→ quella di prima: chi la prende in prestito la rimette, telefono/schermo.js)
 const tocco = () => { try { return matchMedia('(pointer: coarse)').matches } catch { return false } }
 const RIGHE = 5, COL = Math.floor((W - 2 * MARGINE - 16) / 6) // (38 lettere per riga: con 39 il cursore toccava la cornice)
 

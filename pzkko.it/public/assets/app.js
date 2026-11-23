@@ -4,7 +4,7 @@
 // cornice e l'effetto veri. Niente librerie.
 
 import { CONFIG, COLLECTIBLES, NAME_FONTS, SOCIALS, PROJECTS, TOOLS, LANGS } from './config.js'
-import { I18N } from './i18n.js'
+import { I18N, LINGUE, caricaLingua } from './i18n.js'
 import { ICONS } from './icons.js'
 import { MEDIA } from './media.js'
 import { mountFrame, mountParallax, mountEffect } from './fx.js'
@@ -77,11 +77,14 @@ function brand(key, o = {}) {
 const LANG_KEY = 'pzkko-lang', THEME_KEY = 'pzkko-theme'
 const detectLang = () => {
   const saved = store.get(LANG_KEY)
-  if (saved && I18N[saved]) return saved
-  for (const l of navigator.languages || [navigator.language]) { const c = String(l).slice(0, 2).toLowerCase(); if (I18N[c]) return c }
+  if (saved && LINGUE.includes(saved)) return saved
+  for (const l of navigator.languages || [navigator.language]) { const c = String(l).slice(0, 2).toLowerCase(); if (LINGUE.includes(c)) return c }
   return 'en'
 }
 let lang = detectLang()
+// le lingue oltre a italiano e inglese arrivano solo adesso, e solo quella scelta
+if (!I18N[lang]) await caricaLingua(lang).catch(() => {})
+if (!I18N[lang]) lang = 'en'
 let theme = store.get(THEME_KEY) === 'dark' ? 'dark' : 'light'
 const profile = structuredClone(CONFIG.profile)
 const collectibles = structuredClone(COLLECTIBLES)
@@ -283,7 +286,7 @@ function connRow(c) {
   const ico = (m.icon && brand(m.icon)) || I.globe
   const ok = c.verified ? `<span class="conn__ok" title="${esc(ui().verified)}">${I.ok}<span class="sr">${esc(ui().verified)}</span></span>` : ''
   const inner = `<span class="conn__ico">${ico}</span><span>${esc(c.name)}</span>${ok}${m.url ? `<span class="conn__arrow">${I.ext}</span>` : ''}`
-  return `<li>${m.url ? `<a class="conn" href="${esc(encodeURI(m.url))}" target="_blank" rel="noopener me">${inner}</a>` : `<span class="conn">${inner}</span>`}</li>`
+  return `<li>${m.url ? `<a class="conn" href="${esc(encodeURI(m.url))}" target="_blank" rel="noopener noreferrer me">${inner}</a>` : `<span class="conn">${inner}</span>`}</li>`
 }
 function renderCard() {
   const u = presence?.discord_user
@@ -311,7 +314,7 @@ function renderCard() {
   if (g?.tag) { gt.innerHTML = `${g.badge && /^[a-z0-9_]+$/i.test(g.badge) && /^\d+$/.test(g.id) ? `<img src="${CDN}/clan-badges/${g.id}/${g.badge}.png?size=32" alt="">` : ''}${esc(g.tag)}`; gt.hidden = false } else gt.hidden = true
   $('#badges').innerHTML = p.badges.filter((b) => /^[a-z0-9_]+$/i.test(b.icon || '')).map((b) => {
     const img = `<img src="${CDN}/badge-icons/${b.icon}.png" alt="${esc(b.description)}" width="22" height="22" draggable="false">`
-    return b.link && /^https:\/\//.test(b.link) ? `<a href="${esc(b.link)}" target="_blank" rel="noopener" title="${esc(b.description)}">${img}</a>` : `<span title="${esc(b.description)}">${img}</span>`
+    return b.link && /^https:\/\//.test(b.link) ? `<a href="${esc(b.link)}" target="_blank" rel="noopener noreferrer" title="${esc(b.description)}">${img}</a>` : `<span title="${esc(b.description)}">${img}</span>`
   }).join('')
   $('#badges').hidden = !p.badges.length
   // sezioni
@@ -319,7 +322,7 @@ function renderCard() {
   $('#bio-sec').hidden = !p.bio
   $('#since').textContent = new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'short', year: 'numeric' }).format(sinceDate())
   $('#conns').innerHTML = p.connections.map(connRow).join('')
-  $('#social-icons').innerHTML = SOCIALS.filter((s) => s.key !== 'discord').map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener me" title="${esc(`${s.name} · ${s.handle}`)}" aria-label="${esc(`${s.name} ${s.handle}`)}">${brand(s.icon, s)}</a>`).join('')
+  $('#social-icons').innerHTML = SOCIALS.filter((s) => s.key !== 'discord').map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer me" title="${esc(`${s.name} · ${s.handle}`)}" aria-label="${esc(`${s.name} ${s.handle}`)}">${brand(s.icon, s)}</a>`).join('')
   renderCardActivity()
   fitBio()
 }
@@ -353,7 +356,7 @@ function bar(start, end, now) {
 function spotifyHtml(s, now) {
   const link = s.track_id ? `https://open.spotify.com/track/${encodeURIComponent(s.track_id)}` : null
   return `<div class="act"><div class="act__art"><img src="${esc(s.album_art_url)}" alt="" draggable="false"></div><div class="act__lines">
-      <b>${link ? `<a href="${link}" target="_blank" rel="noopener">${esc(s.song)}</a>` : esc(s.song)}</b>
+      <b>${link ? `<a href="${link}" target="_blank" rel="noopener noreferrer">${esc(s.song)}</a>` : esc(s.song)}</b>
       <span class="act__muted">${esc(ui().by)} ${esc(s.artist)}</span><span class="act__muted">${esc(ui().on)} ${esc(s.album)}</span></div></div>
     ${s.timestamps?.start && s.timestamps?.end ? bar(s.timestamps.start, s.timestamps.end, now) : ''}`
 }
@@ -410,7 +413,7 @@ function playHtml(p, all = false) {
 }
 function linksHtml(p, primary = false) {
   const u = ui()
-  return `${p.url ? `<a class="btn ${primary && !p.play ? 'btn--msg' : 'btn--ghost'}" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(u.open)} ${I.ext}</a>` : ''}${p.download ? `<a class="btn ${primary && !p.url && !p.play ? 'btn--msg' : 'btn--ghost'}" href="${esc(p.download)}" rel="noopener">${I.down}${esc(u.download)}</a>` : ''}${p.code ? `<a class="btn btn--ghost" href="${esc(p.code)}" target="_blank" rel="noopener">${brand('github', { dark: 'ffffff' }).replace('<svg ', '<svg width="16" height="16" ')}${esc(u.code)}</a>` : ''}`
+  return `${p.url ? `<a class="btn ${primary && !p.play ? 'btn--msg' : 'btn--ghost'}" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">${esc(u.open)} ${I.ext}</a>` : ''}${p.download ? `<a class="btn ${primary && !p.url && !p.play ? 'btn--msg' : 'btn--ghost'}" href="${esc(p.download)}" rel="noopener noreferrer">${I.down}${esc(u.download)}</a>` : ''}${p.code ? `<a class="btn btn--ghost" href="${esc(p.code)}" target="_blank" rel="noopener noreferrer">${brand('github', { dark: 'ffffff' }).replace('<svg ', '<svg width="16" height="16" ')}${esc(u.code)}</a>` : ''}`
 }
 // i filmati: al passaggio del mouse sul computer, quando la scheda è in vista sul telefono
 let autoIO = null
@@ -506,10 +509,6 @@ function renderBoard() {
       <div class="strip">${others.map((p) => `<button type="button" class="mini" data-open="${p.key}"><span class="mini__thumb media">${mediaHtml(p, { chips: false, video: false })}</span><span><b>${esc(p.title)}</b><span class="sub">${esc(u.kind[p.kind] || '')}</span></span></button>`).join('')}</div>
     </div>
     <div class="widget span2 rise" style="--i:4"><div class="widget__h"><span>${esc(u.tools)}</span></div>${rolesHtml(TOOLS)}</div>
-    <div class="widget main-site span2 rise" style="--i:5">
-      <div class="widget__h">${I.globe}<span>${esc(u.mainTitle)}</span></div>
-      <div class="cta"><p>${esc(u.mainText)}</p><a class="btn btn--msg" href="${esc(CONFIG.mainSite.url)}" target="_blank" rel="noopener">${esc(u.mainCta)} ${I.ext}</a></div>
-    </div>
   </div>`
   $('[data-zero-slot]', root)?.append(zeroButton())
   wireMedia(root)
@@ -561,10 +560,9 @@ function renderSocial() {
   const verified = new Set(profile.connections.filter((c) => c.verified).map((c) => `${(CONN[c.type]?.(c).icon) || c.type}:${String(c.name).toLowerCase()}`))
   const row = (s, i) => {
     const ok = s.key === 'discord' || verified.has(`${s.icon}:${s.handle.toLowerCase()}`)
-    return `<a class="srow rise" style="--i:${Math.min(i + 1, 10)};--c:#${ICONS[s.icon]?.[0] || '888'}" href="${esc(s.url)}" target="_blank" rel="noopener me"><span class="srow__ico">${brand(s.icon, s)}</span><span class="srow__txt"><span class="srow__name">${esc(s.name)}${ok ? `<span class="conn__ok" title="${esc(u.verified)}">${I.ok}<span class="sr">${esc(u.verified)}</span></span>` : ''}</span><span class="srow__handle">${esc(s.handle)}</span></span><span class="srow__go">${I.ext}</span></a>`
+    return `<a class="srow rise" style="--i:${Math.min(i + 1, 10)};--c:#${ICONS[s.icon]?.[0] || '888'}" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer me"><span class="srow__ico">${brand(s.icon, s)}</span><span class="srow__txt"><span class="srow__name">${esc(s.name)}${ok ? `<span class="conn__ok" title="${esc(u.verified)}">${I.ok}<span class="sr">${esc(u.verified)}</span></span>` : ''}</span><span class="srow__handle">${esc(s.handle)}</span></span><span class="srow__go">${I.ext}</span></a>`
   }
   $('#panel-social').innerHTML = `<div class="sgrid">
-    <a class="srow span2 main-site rise" href="${esc(CONFIG.mainSite.url)}" target="_blank" rel="noopener"><span class="srow__ico">${I.globe}</span><span class="srow__txt"><span class="srow__name">${esc(u.mainTitle)}</span><span class="srow__handle">${esc(CONFIG.mainSite.label)}</span></span><span class="srow__go">${I.ext}</span></a>
     ${SOCIALS.map(row).join('')}</div>`
 }
 // la chat col bot pzk: il modulo (e il motore dei comandi) si scarica solo quando si apre la scheda
@@ -724,7 +722,7 @@ function closeProject({ instant = false, pop = true } = {}) {
 // ─── quello che gira QUI, sopra il profilo: il cercapersone 3D (telefono/telefono.js, con pzk os) e i tavoli veri
 // (games/<gioco>/<gioco>.js). Niente finestra e niente muro dietro: sono gli stessi moduli della chat, quindi il conto,
 // i soldi e lo zaino sono gli stessi nello stesso momento ──
-const TAVOLI = ['roulette', 'blackjack', 'mine', 'dado', 'moneta', 'virtual', 'parole', 'trivia']
+const TAVOLI = ['roulette', 'blackjack', 'mine', 'dado', 'moneta', 'virtual', 'parole', 'trivia', 'angoli', 'pzkmaps', 'calcolatrice']
 let zeroBtn = null
 /** Il cercapersone vivo della bacheca: la foto a sfondo trasparente con pzk os acceso sul vetro. Un solo elemento, che a
  *  ogni ridisegno della bacheca torna al suo posto. */
@@ -749,6 +747,8 @@ function openHere(what, { app = null, comando = null } = {}) {
   for (const el of $$('.media.is-playing')) stopMedia(el)
   if (what === 'chat') { if (modal) closeProject(); showTab('chat', { focus: true }); return Promise.resolve() }
   if (TAVOLI.includes(what)) return import(`/games/${what}/${what}.js`).then((m) => m.apri()).catch((e) => { console.error(e); toast(ui().nothing) })
+  // le app singole («qui:app:miniera»): un'app del cercapersone da sola, sullo schermo steso piatto (telefono/schermo.js)
+  if (what === 'app' || what.startsWith('app:')) return import('/telefono/schermo.js').then((m) => m.apri(what.slice(4) || app)).catch((e) => { console.error(e); toast(ui().nothing) })
   const da = zeroBtn?.isConnected && activeTab === 'board' && !modal ? zeroBtn : null
   return import('/telefono/telefono.js').then((t) => t.apri(app, { ...(da && { da }), ...(comando && { comando }) })).catch((e) => { console.error(e); toast(ui().nothing) })
 }
@@ -766,7 +766,7 @@ function openApp(href, title = '') {
   box.setAttribute('aria-modal', 'true')
   box.setAttribute('aria-label', title)
   box.innerHTML = `<div class="app__bar"><span class="app__dot"></span><b>${esc(title)}</b><span class="app__sub">pzkko.it${esc(href.split('?')[0])}</span>
-      <a class="ctrl" href="${esc(href)}" target="_blank" rel="noopener" title="${esc(u.open)}" aria-label="${esc(u.open)}">${I.ext}</a>
+      <a class="ctrl" href="${esc(href)}" target="_blank" rel="noopener noreferrer" title="${esc(u.open)}" aria-label="${esc(u.open)}">${I.ext}</a>
       <button type="button" class="ctrl" data-close title="${esc(u.close)}" aria-label="${esc(u.close)}">${I.close.replace('width="18" height="18"', 'width="16" height="16"')}</button></div>
     <iframe class="app__frame" src="${esc(href)}" title="${esc(title)}" allow="fullscreen; autoplay; gamepad; clipboard-write"></iframe>`
   box.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeApp() })
@@ -836,7 +836,17 @@ addEventListener('resize', closeMenus)
 addEventListener('scroll', closeMenus, { passive: true })
 
 const flag = (f) => `/assets/flags/${f}.png`
-const setLang = (v) => { if (!I18N[v] || v === lang) return; lang = v; store.set(LANG_KEY, v); applyLang(); loadCollectibles() }
+let langSeq = 0
+const setLang = async (v) => {
+  if (!LINGUE.includes(v) || v === lang) return
+  const seq = ++langSeq
+  try { await caricaLingua(v) } catch { return }
+  if (seq !== langSeq) return // (se nel frattempo ne hai scelta un'altra, vince l'ultima)
+  lang = v
+  store.set(LANG_KEY, v)
+  applyLang()
+  loadCollectibles()
+}
 const toggleTheme = () => { theme = theme === 'dark' ? 'light' : 'dark'; store.set(THEME_KEY, theme); swap(applyTheme) }
 $('#lang-btn').addEventListener('click', (e) => showMenu(e.currentTarget, LANGS.map((l) => `<button role="menuitem" tabindex="-1" data-v="${l.code}"><img src="${flag(l.flag)}" alt="" width="20" height="15">${esc(l.name)}${l.code === lang ? `<span class="check">${I.check}</span>` : ''}</button>`).join(''), setLang))
 $('#more-btn').addEventListener('click', (e) => showMenu(e.currentTarget, `
@@ -845,7 +855,7 @@ $('#more-btn').addEventListener('click', (e) => showMenu(e.currentTarget, `
   <button role="menuitem" tabindex="-1" data-v="open">${I.chat}${esc(ui().openDiscord)}</button>`, (v) => {
   if (v === 'user') copy(username())
   else if (v === 'id') copy(ID)
-  else window.open(`https://discord.com/users/${ID}`, '_blank', 'noopener')
+  else window.open(`https://discord.com/users/${ID}`, '_blank', 'noopener,noreferrer')
 }))
 $('#copy-btn').addEventListener('click', () => copy(username()))
 $('#theme-btn').addEventListener('click', toggleTheme)
@@ -857,9 +867,8 @@ function searchItems() {
   const u = ui()
   return [
     ...TABS.map((k) => ({ group: u.pages, label: u.tabs[k], ico: k === 'chat' ? I.chat.replace('width="18" height="18"', 'width="15" height="15"') : I.search, run: () => showTab(k) })),
-    { group: u.pages, label: u.mainTitle, sub: CONFIG.mainSite.label, ico: I.globe, run: () => window.open(CONFIG.mainSite.url, '_blank', 'noopener') },
     ...PROJECTS.map((p) => ({ group: u.tabs.projects, label: p.title, sub: u.kind[p.kind], words: `${p.tags.map((x) => x[0]).join(' ')} ${t().projects[p.key].card}`, ico: MEDIA[p.key] ? `<img src="${esc(MEDIA[p.key].cover)}" alt="">` : I[p.kind], run: () => { showTab('projects'); openProject(p.key) } })),
-    ...SOCIALS.map((s) => ({ group: u.tabs.social, label: s.name, sub: s.handle, ico: brand(s.icon, s), run: () => window.open(s.url, '_blank', 'noopener') })),
+    ...SOCIALS.map((s) => ({ group: u.tabs.social, label: s.name, sub: s.handle, ico: brand(s.icon, s), run: () => window.open(s.url, '_blank', 'noopener,noreferrer') })),
     { group: u.actions, label: theme === 'dark' ? u.theme.light : u.theme.dark, ico: theme === 'dark' ? I.sun : I.moon, run: toggleTheme },
     { group: u.actions, label: u.copyUser, sub: username(), ico: I.copy, run: () => copy(username()) },
     ...(account() ? [] : [{ group: u.actions, label: acc().join, sub: acc().sub, ico: I_ACC, run: () => access('accedi') }]),
@@ -951,7 +960,7 @@ function applyLang() {
   $('#h-conns').textContent = u.connections
   $('#h-socials').textContent = u.otherSocials
   const date = new Intl.DateTimeFormat(l.locale, { dateStyle: 'long' }).format(new Date(`${CONFIG.updated}T12:00:00`))
-  $('#foot').innerHTML = `<b>${esc(CONFIG.domain)}</b> — ${esc(u.footFun)} · ${esc(u.footMain)} <a href="${esc(CONFIG.mainSite.url)}" target="_blank" rel="noopener">${esc(CONFIG.mainSite.label)}</a> · ${esc(u.updated)} ${esc(date)}<span id="views"></span>`
+  $('#foot').innerHTML = `<b>${esc(CONFIG.domain)}</b> — ${esc(u.footFun)} · ${esc(u.updated)} ${esc(date)} · <a href="/info/">info</a><span id="views"></span>`
   applyTheme()
   renderCard()
   renderTabs()
@@ -1082,20 +1091,12 @@ addEventListener('resize', () => { placeCard(); moveInk(); fitBio() })
 new ResizeObserver(placeCard).observe($('#card'))
 document.fonts?.ready.then(() => { moveInk(); fitBio() })
 
-// ─── visite (GoatCounter, solo se configurato) ───────────────────────────────
+// ─── visite: nessun contatore di terze parti (nessuno script esterno, niente cookie) ───
 let views = null
 function renderViews() {
   const box = $('#views')
   if (!box || views == null) return
   box.textContent = ` · ${views.toLocaleString(locale())} ${ui().views}`
-}
-function goatcounter(code) {
-  const s = document.createElement('script')
-  s.async = true
-  s.src = 'https://gc.zgo.at/count.js'
-  s.dataset.goatcounter = `https://${code}.goatcounter.com/count`
-  document.head.appendChild(s)
-  fetch(`https://${code}.goatcounter.com/counter/TOTAL.json`).then((r) => r.json()).then((j) => { const n = parseInt(String(j.count ?? '').replace(/[^\d]/g, ''), 10); if (!Number.isNaN(n)) { views = n; renderViews() } }).catch(() => {})
 }
 
 // ─── il conto (19.11): si entra con l'email e un codice, niente password (accesso/accesso.js). Nella scheda c'è il tasto:
@@ -1159,7 +1160,6 @@ connectLanyard()
 loadProfile()
 setInterval(loadProfile, 10 * 60 * 1000)
 if (first.proj) openProject(first.proj, { push: false })
-if (CONFIG.goatcounter) goatcounter(CONFIG.goatcounter)
 mountAccess()
 
 // Per le prove: import('/assets/app.js').then((m) => m.onPresence({...}))

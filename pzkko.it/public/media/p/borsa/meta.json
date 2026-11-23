@@ -1,0 +1,17 @@
+{
+ "key": "borsa",
+ "cover": {
+  "w": 1280,
+  "h": 720
+ },
+ "shots": [
+  {
+   "file": "01.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "Il cursore sul grafico: il cambio di quel momento",
+   "en": "The cursor on the chart: the rate at that moment"
+  }
+ ],
+ "notes": "Catture vere dell’app singola (telefono/schermo.js) in funzione il 19.11.2026, da ospite, contro la banca vera."
+}

@@ -169,6 +169,9 @@ export function leggiAngolo(testo, da) {
   else { const v = leggiNum(t); if (v === null || Number.isNaN(v)) return { errore: 'scrivi un numero, o gradi primi e secondi: 35°30\'15"' }; gradi = daRad(aRad(v, da), 'deg') }
   return { gradi, rad: aRad(gradi, 'deg') }
 }
+/** (20.11) Le parentesi lasciate aperte, chiuse alla fine come sulle calcolatrici vere: «12×(3+4» → «12×(3+4)». La usano la
+ *  calcolatrice in stile Discord (games/calcolatrice/) e /calcola della chat. */
+export function chiusa(expr) { const n = (expr.match(/\(/g) ?? []).length - (expr.match(/\)/g) ?? []).length; return n > 0 ? expr + ')'.repeat(n) : expr }
 /** L'uguale: calcola l'espressione, la mette negli ultimi, ANS prende il risultato, l'espressione si svuota. → il valore (o lancia l'errore). */
 export function registra() {
   const v = calcola(S.expr)

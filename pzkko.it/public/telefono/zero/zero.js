@@ -103,10 +103,11 @@ export function crea({ dlg, ledEl }) {
   const scene = new T.Scene()
   const camera = new T.PerspectiveCamera(30, 1, 5, 2000)
 
-  // ── LA LUCE È QUELLA DEL SITO (luce.js; Alberto: «la luce che spara addosso al modello deve essere = a quella del sito…
-  // luci lì e luci qui»): il sole di Mantova a quest'ora (direzione, colore, forza), il cielo come luce diffusa, e di notte
-  // la lampada a muro sopra la saracinesca e i fari dell'auto che passa (le stesse variabili che accendono il muro). Per i
-  // riflessi, l'ambiente: le sei facce fotografate nella scena 3D della home se c'è, se no il cielo disegnato con l'ora ──
+  // ── LA LUCE È SEMPRE QUELLA DI GIORNO (23.11, Alberto: «fallo sempre chiaro, è sempre scuro senza luce»). Prima era
+  // quella del sito a quest'ora (il sole vero di Mantova, la notte, la lampada a muro, i riflessi fotografati dalla scena
+  // della home): di sera il guscio bianco diventava marrone scuro. Ora il sole, il cielo diffuso e i riflessi sono quelli
+  // di giorno con cui è scattata la foto del tasto sul muro (FISSA), a qualunque ora; della sera restano solo i fari
+  // dell'auto che passa (luce.js), che aggiungono luce e non ne tolgono ──
   const sole = new T.DirectionalLight(0xffffff, 0)
   sole.castShadow = true
   sole.shadow.mapSize.set(1024, 1024)
@@ -117,9 +118,6 @@ export function crea({ dlg, ledEl }) {
   scene.add(sole, sole.target)
   const cielo = new T.HemisphereLight(0xcfe0ff, 0x4a3a2a, 0.4)
   scene.add(cielo)
-  const lampada = new T.PointLight(0xffe4c0, 0, 0, 2) // la lampada a muro (il colore di scena/mondo.js): in alto a sinistra, sopra la saracinesca
-  lampada.position.set(-40, 120, 140)
-  scene.add(lampada)
   const auto = new T.PointLight(0xffe2aa, 0, 0, 2) // i fari dell'auto che passa, davanti e in basso, da sinistra a destra
   auto.position.set(26, -110, 360)
   scene.add(auto)
@@ -146,68 +144,37 @@ export function crea({ dlg, ledEl }) {
   })()
   let ambiente = null
   const mettiAmbiente = (t) => { if (ambiente) ambiente.dispose(); ambiente = t; scene.environment = t; scene.environmentIntensity = 0.9; sporco = true }
-  let luceChiave = '', ambienteT = 0, catturaT = 0
-  // la foto del tasto sul muro è scattata con una luce fissa di giorno (FISSA): all'apertura il 3D parte con quella (così
-  // non si vede il cambio) e passa alla luce vera del sito durante il volo (luceMescola 0 → 1); al ritorno il contrario
+  let luceChiave = ''
+  // la luce di giorno della foto del tasto sul muro (FISSA): il sole davanti-sopra, il cielo azzurro, niente sera
   const FISSA = { sole: { el: 0.8, dir: V3(-0.35, 0.75, 0.56).normalize() }, giorno: 0.85, buio: 0, notte: 0, lampioni: 0, insegna: 0, auto: { x: 0.5, l: 0, c: [1, 0.89, 0.67] } }
+  {
+    const d = FISSA.sole.dir
+    sole.position.set(26 + d.x * 400, 14 + d.y * 400, -10 + d.z * 400)
+    sole.intensity = 2.3 * FISSA.giorno
+    const basso = Math.max(0, Math.min(1, 1 - Math.sin(FISSA.sole.el) * 4)) // (il sole basso è rosso: questo è alto, bianco)
+    sole.color.setRGB(1, 0.93 - 0.3 * basso, 0.84 - 0.5 * basso)
+    cielo.color.setRGB(0.72, 0.82, 1)
+    cielo.groundColor.setRGB(0.35, 0.3, 0.26)
+    cielo.intensity = 0.65
+  }
+  // sulla foto del muro l'auto non c'è: i fari entrano durante il volo d'apertura (luceMescola 0 → 1) ed escono al ritorno
   let luceMescola = 1
   function aggiornaLuce(forza = false) {
     if (!riflessiOk) { riflessiPronti.then(() => aggiornaLuce(true)); return } // (il filtro si sta ancora compilando)
-    const vera = luce.stato(), m = luceMescola
-    const s = m >= 1 ? vera : m <= 0 ? FISSA : { sole: { el: lerp(FISSA.sole.el, vera.sole.el, m), dir: FISSA.sole.dir.clone().lerp(vera.sole.dir, m).normalize() }, giorno: lerp(FISSA.giorno, vera.giorno, m), buio: vera.buio * m, notte: vera.notte * m, lampioni: vera.lampioni, insegna: vera.insegna, auto: { ...vera.auto, l: vera.auto.l * m } }
-    const d = s.sole.dir
-    sole.position.set(26 + d.x * 400, 14 + d.y * 400, -10 + d.z * 400)
-    sole.intensity = 2.3 * s.giorno
-    const basso = Math.max(0, Math.min(1, 1 - Math.sin(Math.max(0, s.sole.el)) * 4)) // il sole basso è rosso
-    sole.color.setRGB(1, 0.93 - 0.3 * basso, 0.84 - 0.5 * basso)
-    cielo.color.setRGB(0.72 - 0.6 * s.buio, 0.82 - 0.68 * s.buio, 1 - 0.78 * s.buio)
-    cielo.groundColor.setRGB(0.35 - 0.28 * s.buio, 0.3 - 0.24 * s.buio, 0.26 - 0.2 * s.buio)
-    cielo.intensity = 0.55 * (1 - s.buio) + 0.1
-    lampada.intensity = 15000 * s.notte * Math.max(s.lampioni, 0.35)
-    auto.intensity = 150000 * s.auto.l
-    auto.position.x = 26 + (s.auto.x - 0.5) * 520
-    auto.color.setRGB(s.auto.c[0], s.auto.c[1], s.auto.c[2])
-    const chiave = [s.giorno, s.buio, s.notte, s.lampioni, s.auto.l, s.auto.x, m].map((v) => v.toFixed(2)).join()
-    if (chiave === luceChiave && !forza) return
+    const a = luce.stato().auto, l = a.l * luceMescola
+    auto.intensity = 150000 * l
+    auto.position.x = 26 + (a.x - 0.5) * 520
+    auto.color.setRGB(a.c[0], a.c[1], a.c[2])
+    const chiave = [l, a.x].map((v) => v.toFixed(2)).join()
+    if (chiave === luceChiave && !forza && scene.environment) return
     luceChiave = chiave; sporco = true
-    const ora = performance.now()
-    // (2.11) la foto della scena si fa quando la pagina ha un momento libero (requestIdleCallback), mai dentro un clic o
-    // un fotogramma del volo: sono sei disegni della home, e il primo filtro dei riflessi può essere ancora in compilazione
-    // Fra una foto e l'altra resta la foto (prima ci tornava il cielo disegnato ogni 350 ms: i riflessi saltavano fra i due);
-    // se la foto non riesce, il cielo, e si riprova fra dieci secondi
-    if (m >= 1 && window.pzkkoScena && ora - fotoFallita > 10000) {
-      if (ora - catturaT > 1500 && !fotoChiesta) {
-        catturaT = ora; fotoChiesta = true
-        libero(async () => {
-          if (!fermo && luceMescola >= 1 && !(await ambienteReale())) { fotoFallita = performance.now(); if (!fermo) disegnaCielo(luce.stato()) }
-          fotoChiesta = false
-        })
-      }
-      if (scene.environment) return
-    }
-    if (ora - ambienteT < 350 && !forza) return
-    ambienteT = ora
-    disegnaCielo(s)
+    if (!scene.environment) disegnaCielo(FISSA) // (i riflessi: il cielo di giorno disegnato, una volta sola)
   }
-  let fotoChiesta = false, fotoFallita = -Infinity
-  const libero = (f) => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 600 }) : setTimeout(f, 60))
   function disegnaCielo(s) {
     const t = new T.CanvasTexture(luce.cielo(s))
     t.mapping = T.EquirectangularReflectionMapping; t.colorSpace = T.SRGBColorSpace
     mettiAmbiente(pmrem.fromEquirectangular(t).texture)
     t.dispose()
-  }
-  /** Le sei facce della scena 3D della home dal punto del cercapersone (luce.cattura) → l'ambiente. → Promise, false se non si può */
-  async function ambienteReale() {
-    const facce = await luce.cattura(64)
-    if (!facce || fermo || luceMescola < 1) return !!facce // (chiuso o in volo mentre la scheda finiva: la foto non serve più)
-    try {
-      const cubo = new T.CubeTexture(facce.map((b) => new T.DataTexture(b, 64, 64, T.RGBAFormat, T.UnsignedByteType)))
-      cubo.format = T.RGBAFormat; cubo.type = T.UnsignedByteType; cubo.colorSpace = T.SRGBColorSpace; cubo.needsUpdate = true
-      mettiAmbiente(pmrem.fromCubemap(cubo).texture)
-      cubo.dispose()
-      return true
-    } catch (e) { console.warn('ambiente dalla scena', e); return false }
   }
   // (la prima aggiornaLuce la fanno muro(), riprendi() e fotografa(): qui sotto `sporco` non esiste ancora)
 
@@ -672,7 +639,7 @@ export function crea({ dlg, ledEl }) {
   rig.dove = (nome, [fx, fy] = [0, 0]) => { const t = tasti[nome]; if (!t) return null; const b = t.mesh.geometry.boundingBox, q = t.mesh.localToWorld(V3(fx * (b.max.x - b.min.x) / 2, fy * (b.max.y - b.min.y) / 2, 0)).project(camera); return { x: (q.x + 1) / 2 * W(), y: (1 - q.y) / 2 * H() } }
   /** Dove sta sullo schermo il pixel (x, y) dell'lcd (per il collaudo: un clic lì). */
   rig.puntoLcd = (x, y) => { const p = lcd.localToWorld(V3(((x + 0.5) / 256 - 0.5) * (LCD.x1 - LCD.x0), (0.5 - (y + 0.5) / 128) * (LCD.y1 - LCD.y0), 0)).project(camera); return { x: (p.x + 1) / 2 * W(), y: (1 - p.y) / 2 * H() } }
-  rig.debug = () => ({ luceMescola, sole: sole.intensity, lampada: lampada.intensity, auto: auto.intensity, cielo: cielo.intensity, aperto })
+  rig.debug = () => ({ luceMescola, sole: sole.intensity, auto: auto.intensity, cielo: cielo.intensity, aperto })
   window.pzkkoZero = rig // (per la regia e le prove)
   function aRidimensiona() { if (dlg.open) sporco = true }
   addEventListener('resize', aRidimensiona)

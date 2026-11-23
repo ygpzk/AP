@@ -369,8 +369,32 @@ async function regaloQui() {
 }
 const apriConto = () => contoQui()
 
+/** /calcola (20.11): con un conto lo fa qui in chat coi conti della calcolatrice (gli stessi di quella in stile Discord e
+ *  del cercapersone: il risultato va negli ultimi e in ANS, l'espressione lasciata a metà là resta com'era); senza, apre la
+ *  calcolatrice sopra la pagina, come /telefono il cercapersone. */
+async function calcolaQui(args) {
+  const conto = args.join(' ').trim()
+  if (!conto) return apriQui('calcolatrice')
+  const [c, { ricorda }] = await Promise.all([import('/telefono/app/calcolatrice.js'), import('/telefono/ricordi.js')])
+  const apri = [['qui:calcolatrice', ':app-calcolatrice: apri la calcolatrice', 'oro']]
+  const prima = c.S.expr
+  const scritto = c.chiusa(conto)
+  c.S.expr = scritto
+  try {
+    const v = c.registra()
+    const angoli = /sin|cos|tan/i.test(conto) ? `<br><small>angoli in ${esc(c.MODI[c.S.modo][1])} (${esc(c.S.modo)}): si cambiano nella calcolatrice</small>` : ''
+    return scheda({ colore: 'viola', av: 'bot-occhiolino', t: ':app-calcolatrice: calcolatrice', d: `<code>${esc(scritto)}</code> = <b>${esc(c.num(v))}</b>${angoli}`, azioni: apri })
+  } catch (e) {
+    return scheda({ colore: 'rosso', av: 'bot-pensa', t: ':app-calcolatrice: non torna', d: `<code>${esc(conto)}</code>: ${esc(e.message)}.`, azioni: apri })
+  } finally {
+    c.S.expr = prima
+    ricorda('calcolatrice', c.S)
+  }
+}
+
 // ── i comandi che esistono solo qui (il conto): stanno fra i suggerimenti come gli altri ──
 const LOCALI = [
+  { nomi: ['calcola', 'calcolatrice', 'calc'], cat: 'app', icona: 'app-calcolatrice', breve: 'fa un conto qui in chat (calcola 12*(3+4), anche sin cos log √ π ans), o senza conto apre la calcolatrice', uso: 'calcola [conto]', fai: (args) => calcolaQui(args) },
   { nomi: ['parole', 'parola', 'wordle'], cat: 'giochi', icona: 'quiz', breve: 'indovina la parola italiana in sei tentativi: parole 50 (o parole 50 6 per sei lettere)', uso: 'parole [puntata] [5|6]', fai: (args) => paroleQui(args) },
   { nomi: ['account', 'accedi', 'entra', 'login', 'conto', 'registrati'], cat: 'soldi', icona: 'app-account', breve: 'entra o crea il conto con l’email (niente password): i progressi si salvano nella banca', uso: 'account', fai: () => contoQui() },
   { nomi: ['regalo', 'instagram', 'ig', 'seguimi'], cat: 'soldi', icona: 'regalo', breve: 'seguimi su tutti e due i profili di instagram e scrivi il tuo: 2.000 $pzk in regalo', uso: 'regalo', fai: () => regaloQui() },
@@ -441,6 +465,8 @@ export async function esegui(riga_, { muto = false, eti = null } = {}) {
 // ── la riga dove si scrive, coi suggerimenti dei comandi come su Discord ──
 const visibili = () => [...LOCALI, ...COMANDI.filter((c) => !c.nascosto)]
 let sel = 0, trovati = []
+// gli argomenti di un comando, senza ripetere il nome che sta già scritto accanto («mine <puntata>» → «<puntata>»)
+const argomenti = (c) => String(c.uso ?? '').replace(/^\/?\S+\s*/, '').trim()
 function suggerisci() {
   const v = campo.value
   const m = /^\/?([a-zà-ü0-9-]*)$/i.exec(v)
@@ -452,7 +478,7 @@ function suggerisci() {
   let cat = ''
   pop.innerHTML = trovati.map((c, i) => {
     const testa = c.cat !== cat ? `<div class="dc__cat">${esc(CATEGORIE.find((x) => x[0] === (cat = c.cat))?.[1] ?? c.cat ?? '')}</div>` : ''
-    return `${testa}<button type="button" class="dc__cmd" role="option" data-i="${i}" aria-selected="${i === sel}"><span class="dc__cmd-ico">${conIcone(c.icona ?? '')}</span><b>/${esc(c.nomi[0])}</b>${c.uso ? `<code>${esc(c.uso)}</code>` : ''}<span>${esc(c.breve ?? '')}</span></button>`
+    return `${testa}<button type="button" class="dc__cmd" role="option" data-i="${i}" aria-selected="${i === sel}"><span class="dc__cmd-ico">${c.icona && esiste(c.icona) ? icona(c.icona) : '<i>/</i>'}</span><span class="dc__cmd-txt"><span class="dc__cmd-riga"><b>/${esc(c.nomi[0])}</b>${argomenti(c) ? `<code>${esc(argomenti(c))}</code>` : ''}</span>${c.breve ? `<span class="dc__cmd-desc">${esc(c.breve)}</span>` : ''}</span></button>`
   }).join('')
   pop.hidden = false
   pop.querySelector('[aria-selected=true]')?.scrollIntoView({ block: 'nearest' })

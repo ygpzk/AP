@@ -1,0 +1,17 @@
+{
+ "key": "conversioni",
+ "cover": {
+  "w": 1280,
+  "h": 720
+ },
+ "shots": [
+  {
+   "file": "01.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "Un numero più lungo, nelle quattro basi",
+   "en": "A longer number, in the four bases"
+  }
+ ],
+ "notes": "Catture vere dell’app singola (telefono/schermo.js) in funzione il 19.11.2026, da ospite, contro la banca vera."
+}

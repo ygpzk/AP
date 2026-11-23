@@ -42,13 +42,7 @@ export const CONFIG = {
   // Dove Discord dà nome, immagini e misure di effetto, cornice e decorazione.
   collectiblesApi: 'https://discord.com/api/v9/collectibles-products/',
 
-  // Il sito principale, quello serio.
-  mainSite: { url: 'https://www.albertopecchini.it', label: 'albertopecchini.it' },
   domain: 'pzkko.it',
-
-  // Contatore delle visite con GoatCounter (gratis, senza cookie): scrivi qui il
-  // codice del sito, es. 'pzkko'. Vuoto = niente contatore e niente script.
-  goatcounter: '',
 
   updated: '2026-11-18',
 }
@@ -108,8 +102,6 @@ export const SOCIALS = [
 // `kind`: game (giochi), tool (programmi), site (siti). `tags`: [nome, icona di icons.js
 // oppure colore]. I testi stanno in i18n.js sotto `projects`.
 const GH = 'https://github.com/ygpzk/AP/tree/main'
-// Posta OS e Pulizia OS stanno nel ramo del sito, accanto a pzkko.it
-const OS = 'https://github.com/ygpzk/AP/tree/albertopecchini.it', RAW = 'https://github.com/ygpzk/AP/raw/albertopecchini.it'
 // `play`: le cose che girano dentro il sito, [etichetta, indirizzo]. «qui:zero», «qui:roulette»…: sopra il profilo, senza
 // finestra (openHere in app.js); un indirizzo vero (/serranda/): nella finestra dentro il sito (openApp).
 // `art`: la miniatura, [colore 1, colore 2, carattere della scritta, motivo dello sfondo].
@@ -121,15 +113,42 @@ export const PROJECTS = [
   { key: 'serranda', title: 'Il Muro', kind: 'site', art: ['#8d9499', '#2f3336', 'Headbang', 'lamiera'], tags: [['HTML', 'html5'], ['CSS', 'css'], ['gpt-image-2', '#10a37f']],
     play: [['Il Muro', '/serranda/']] },
   { key: 'matricios', title: 'Matrici OS', kind: 'tool', art: ['#0d3b1e', '#020a05', '8Bit', 'righe'], tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['Terminal', '#3fb950']], code: `${GH}/MatriciOS`, download: 'https://github.com/ygpzk/AP/raw/main/MatriciOS/MatriciOS.exe' },
-  { key: 'lezioni', title: 'pzk$meeting', kind: 'tool', art: ['#ffd60a', '#b88700', 'Tempo', 'punti'], tags: [['Python', 'python'], ['Whisper', '#10a37f'], ['LaTeX', 'latex']], code: `${GH}/albertopecchini.it/tools/lezioni`,
+  // (22.11) la regia delle sovrimpressioni: installer .exe, guida dentro il sito e tutti i comandi
+  { key: 'direttaos', title: 'Diretta OS', kind: 'tool', art: ['#ccff00', '#9d00ff', 'Pricedown', 'griglia'], tags: [['Node.js', 'nodejs'], ['PowerShell', 'powershell'], ['FFmpeg', 'ffmpeg']], download: '/direttaos/DirettaOS-Setup.exe',
+    play: [['Guida all’installazione', '/direttaos/']] },
+  { key: 'lezioni', title: 'pzk$meeting', kind: 'tool', art: ['#ffd60a', '#b88700', 'Tempo', 'punti'], tags: [['Python', 'python'], ['Whisper', '#10a37f'], ['LaTeX', 'latex']],
     play: [['pzk$meeting', '/tools/lezioni/']] },
   { key: 'parole', title: 'Parole', kind: 'game', art: ['#e8501c', '#3b0f24', 'Jellybean', 'tessere'], tags: [['JavaScript', 'javascript'], ['$pzk', '#7cc400'], ['Dizionario italiano', '#e8501c']],
     play: [['Parole', 'qui:parole']] },
   { key: 'trivia', title: 'Trivia', kind: 'game', art: ['#16c05a', '#062b16', 'Medieval', 'colonne'], tags: [['JavaScript', 'javascript'], ['$pzk', '#7cc400'], ['Quiz', '#16c05a']],
     play: [['Trivia', 'qui:trivia']] },
-  { key: 'wrapped', title: '5BT Wrapped', kind: 'tool', art: ['#1f6feb', '#0a0f1e', 'Modern', 'barre'], tags: [['Node.js', 'nodejs'], ['WhatsApp', '#25d366']], url: 'https://www.albertopecchini.it/wrapped5BT/', code: `${GH}/albertopecchini.it/tools/wrapped` },
-  { key: 'email', title: 'Posta OS', kind: 'tool', art: ['#9d00ff', '#2a0047', 'Monkey Bars', 'buste'], tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['HTML email', 'html5']], code: `${OS}/PostaOS`, download: `${RAW}/PostaOS/PostaOS.exe` },
-  { key: 'pulizia', title: 'Pulizia OS', kind: 'tool', art: ['#ccff00', '#5d7a00', 'Vampyre', 'scintille'], tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['Terminal', '#3fb950']], code: `${OS}/PuliziaOS`, download: `${RAW}/PuliziaOS/PuliziaOS.exe` },
+  { key: 'angoli', title: 'Angoli', kind: 'game', art: ['#b3121f', '#3a060b', 'Journal', 'righe'], tags: [['JavaScript', 'javascript'], ['SVG', '#e8b800'], ['Geometria', '#b3121f']],
+    play: [['Angoli', 'qui:angoli']] },
+  { key: 'pzkmaps', title: 'pzkmaps', kind: 'game', art: ['#1f6feb', '#0a1a33', 'Sakura', 'griglia'], tags: [['JavaScript', 'javascript'], ['OpenStreetMap', '#7ebc6f'], ['Street View', '#4285f4']],
+    play: [['pzkmaps', 'qui:pzkmaps']] },
+  // le app singole (19.11): il virtual col suo tavolo, e le app del cercapersone da sole sullo schermo steso piatto
+  // (telefono/schermo.js, «qui:app:<app di pzk os>»; «borsa» è la banca aperta sulla pagina della borsa)
+  { key: 'virtual', title: 'Virtual', kind: 'game', art: ['#1f9d55', '#06301a', 'Tempo', 'righe'], tags: [['JavaScript', 'javascript'], ['Pixel art', '#1f9d55'], ['$pzk', '#7cc400']],
+    play: [['Virtual', 'qui:virtual']] },
+  { key: 'miniera', title: 'Miniera', kind: 'game', art: ['#f0b232', '#3a2500', 'Mainframe', 'griglia'], tags: [['JavaScript', 'javascript'], ['LCD 8-bit', '#ff8a1a'], ['$pzk', '#7cc400']],
+    play: [['Miniera', 'qui:app:miniera']] },
+  { key: 'borsa', title: 'Borsa $pzk', kind: 'tool', art: ['#23a55a', '#0a1f14', 'Modern', 'barre'], tags: [['JavaScript', 'javascript'], ['LCD 8-bit', '#ff8a1a'], ['PZK/EUR€', '#23a55a']],
+    play: [['Borsa $pzk', 'qui:app:borsa']] },
+  { key: 'conversioni', title: 'Convertitori', kind: 'tool', art: ['#00b8a9', '#062a2a', '8Bit', 'punti'], tags: [['JavaScript', 'javascript'], ['LCD 8-bit', '#ff8a1a'], ['BigInt', '#00b8a9']],
+    play: [['Convertitori', 'qui:app:conversioni']] },
+  // (20.11) la calcolatrice in stile Discord coi colori pzk (games/calcolatrice/, «qui:calcolatrice»); quella del
+  // cercapersone resta il secondo tasto: i conti, ANS e gli ultimi risultati sono gli stessi
+  { key: 'calcolatrice', title: 'Calcolatrice', kind: 'tool', art: ['#5865f2', '#0e1238', 'Journal', 'tessere'], tags: [['Discord', 'discord'], ['LCD 8-bit', '#ff8a1a'], ['Topografia', '#5865f2']],
+    play: [['Calcolatrice', 'qui:calcolatrice'], ['Su pzk os', 'qui:app:calcolatrice']] },
+  { key: 'compilatore', title: 'Codice C', kind: 'tool', art: ['#3fb950', '#04130a', 'Mainframe', 'righe'], tags: [['C', '#5c6bc0'], ['GCC', '#3fb950'], ['LCD 8-bit', '#ff8a1a']],
+    play: [['Codice C', 'qui:app:compilatore']] },
+  { key: 'cucina', title: 'Cucina del Mincio', kind: 'game', art: ['#e8501c', '#3d1404', 'Sakura', 'rombi'], tags: [['JavaScript', 'javascript'], ['LCD 8-bit', '#ff8a1a'], ['Minigiochi', '#e8501c']],
+    play: [['Cucina', 'qui:app:cucina']] },
+  { key: 'rapina', title: 'Rapina', kind: 'game', art: ['#da373c', '#2a0507', 'Vampyre', 'lamiera'], tags: [['JavaScript', 'javascript'], ['LCD 8-bit', '#ff8a1a'], ['Multigiocatore', '#da373c']],
+    play: [['Rapina', 'qui:app:rapina']] },
+  { key: 'wrapped', title: '5BT Wrapped', kind: 'tool', art: ['#1f6feb', '#0a0f1e', 'Modern', 'barre'], tags: [['Node.js', 'nodejs'], ['WhatsApp', '#25d366']] },
+  { key: 'email', title: 'Posta OS', kind: 'tool', art: ['#9d00ff', '#2a0047', 'Monkey Bars', 'buste'], tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['HTML email', 'html5']] },
+  { key: 'pulizia', title: 'Pulizia OS', kind: 'tool', art: ['#ccff00', '#5d7a00', 'Vampyre', 'scintille'], tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['Terminal', '#3fb950']] },
 ]
 
 // Gli strumenti, in pillole come i ruoli di Discord: [nome, icona di icons.js].
