@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -24 364 160" role="img" aria-label="pzkko">
+  <defs>
+    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="340" y2="100">
+      <stop offset="0" stop-color="#ccff00"/>
+      <stop offset=".42" stop-color="#ccff00"/>
+      <stop offset="1" stop-color="#9d00ff"/>
+    </linearGradient>
+  </defs>
+  <!-- il segno: cinque lettere a tratto unico, tonde come quelle di Discord, dal verde acido al viola del profilo -->
+  <g fill="none" stroke="#0b090e" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" opacity=".92">
+    <path d="M10 24V118M66 50a28 28 0 1 1-56 0a28 28 0 1 1 56 0M84 22H128L84 78H128M148-8V78M190 22L150 56M166 42L192 78M210-8V78M252 22L212 56M228 42L254 78M330 50a28 28 0 1 1-56 0a28 28 0 1 1 56 0"/>
+  </g>
+  <g fill="none" stroke="url(#g)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 24V118M66 50a28 28 0 1 1-56 0a28 28 0 1 1 56 0"/>
+    <path d="M84 22H128L84 78H128"/>
+    <path d="M148-8V78M190 22L150 56M166 42L192 78"/>
+    <path d="M210-8V78M252 22L212 56M228 42L254 78"/>
+    <path d="M330 50a28 28 0 1 1-56 0a28 28 0 1 1 56 0"/>
+  </g>
+  <circle cx="302" cy="50" r="9" fill="#ccff00"/>
+</svg>

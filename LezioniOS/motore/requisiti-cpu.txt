@@ -1,0 +1,2 @@
+# Senza scheda video NVIDIA: ONNX Runtime per la sola CPU (con la scheda video c'è requisiti-gpu.txt al suo posto).
+onnxruntime>=1.20

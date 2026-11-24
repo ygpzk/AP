@@ -1,0 +1,10 @@
+# quello che si decide dalla regia e i registri restano sul pc
+stato.json
+stato-prova*.json
+config.locale.json
+lezioni.log
+# le prove di cattura (c'è dentro quello che c'era sullo schermo) e il profilo del browser della regia
+cache/
+*.json.nuovo
+__pycache__/
+*.pyc

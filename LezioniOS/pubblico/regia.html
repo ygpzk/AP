@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lezioni OS · Regia</title>
+<link rel="icon" href="/logo.svg">
+<!--
+  Lezioni OS · la regia. Le stesse quattro zone di Diretta OS, ognuna fa una cosa sola:
+  · SORGENTI (a sinistra): quello che Lezioni OS fa a una lezione, per gruppo, con l'interruttore. Resta sempre lì.
+  · MONITOR (al centro): la finestra della lezione com'è adesso, l'ultima frase sentita, il livello dell'audio.
+    Sopra, la materia, il tempo e il tasto per registrare; sotto, la riga di stato.
+  · CONTROLLI (sotto il monitor, a schede): Voce · Linea del tempo · Oggi · Registro. Una scheda alla volta.
+  · PROPRIETÀ (a destra): la sorgente selezionata (il modello, i suoi parametri).
+  La colonna delle icone cambia vista: Regia, Galleria (le lezioni registrate, col visore), Orario, Modelli.
+  In basso a sinistra lo stato del server, la scheda video e il disco; l'ingranaggio cambia tema.
+-->
+<script>try { document.documentElement.dataset.tema = localStorage.getItem('regia-tema') || 'discord' } catch {}</script>
+<link rel="stylesheet" href="/base.css">
+<link rel="stylesheet" href="/regia.css">
+<link rel="stylesheet" href="/katex/katex.min.css">
+</head>
+<body data-vista="regia">
+<div class="barra"><img src="/logo.svg" alt=""><span>Lezioni OS</span><small id="barra-vista">Regia</small></div>
+
+<!-- la colonna delle icone: le viste -->
+<nav class="rail" aria-label="Viste">
+  <button class="casa" data-vista="regia" title="Regia" aria-label="Regia"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg></button>
+  <hr>
+  <button data-vista="galleria" title="Galleria delle lezioni" aria-label="Galleria delle lezioni"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="7" rx="1.5"/><rect x="14" y="4" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><b class="conta" id="n-lezioni"></b></button>
+  <button data-vista="orario" title="Orario delle lezioni" aria-label="Orario delle lezioni"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></button>
+  <button data-vista="modelli" title="Modelli" aria-label="Modelli"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg></button>
+  <hr>
+  <button class="tondo" id="apri-base" title="Apri la cartella delle lezioni" aria-label="Apri la cartella delle lezioni"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></button>
+</nav>
+
+<!-- ZONA 1 -->
+<aside class="lato" aria-label="Elenco">
+  <div data-vista-p="regia">
+    <div class="zt"><h2>Sorgenti</h2><span class="conta-z" id="conta-accese"></span></div>
+    <div class="lista" id="lista"></div>
+  </div>
+  <div data-vista-p="galleria">
+    <div class="zt"><h2>Lezioni</h2><span class="conta-z" id="conta-lezioni"></span></div>
+    <div class="lista">
+      <input class="cerca" id="cerca" type="search" placeholder="Cerca in quello che è stato detto" aria-label="Cerca nelle trascrizioni" autocomplete="off">
+      <div id="gal-trovate" class="trovate" style="margin-top:8px" hidden></div>
+      <div id="gal-materie"></div>
+    </div>
+  </div>
+  <div data-vista-p="orario">
+    <div class="zt"><h2>Materie</h2><span class="conta-z" id="conta-cfu"></span></div>
+    <div class="lista" id="or-materie"></div>
+  </div>
+  <div data-vista-p="modelli">
+    <div class="zt"><h2>Modelli</h2><span class="conta-z" id="conta-modelli"></span></div>
+    <div class="lista" id="mod-gruppi"></div>
+  </div>
+</aside>
+
+<!-- ZONA 2 e 3 -->
+<main class="palco">
+  <!-- regia -->
+  <div data-vista-p="regia">
+    <header class="testa">
+      <h1>Monitor</h1>
+      <i class="sep"></i>
+      <span class="et">Materia</span>
+      <select id="materia" aria-label="Materia della lezione" title="La materia della prossima registrazione: dà il nome alla lezione e il lessico al trascrittore"></select>
+      <div class="veloci">
+        <span class="tempo" id="tempo">00:00</span>
+        <button class="rec" id="rec" title="Avvia la registrazione"><i></i><span>Registra</span></button>
+      </div>
+    </header>
+    <div class="palco-dentro">
+      <div class="monitor">
+        <div class="anteprima" id="anteprima">
+          <img class="vista" id="vista-img" alt="" hidden>
+          <div class="vuoto-m" id="vuoto-m"></div>
+          <div class="su-m" id="su-m"></div>
+          <div class="sottotitolo" id="sottotitolo"></div>
+          <div class="vu" id="vu" hidden><b></b></div>
+        </div>
+      </div>
+      <div class="dice-r">
+        <span class="aiuto" id="aiuto"></span>
+        <button class="piccolo" id="apri-corrente" hidden>Apri cartella</button>
+      </div>
+      <section class="dock" aria-label="Controlli">
+        <div class="dock-t" role="tablist">
+          <button role="tab" data-dock="voce" aria-selected="true"><i></i>Voce</button>
+          <button role="tab" data-dock="tempo" aria-selected="false">Linea del tempo</button>
+          <button role="tab" data-dock="oggi" aria-selected="false">Oggi</button>
+          <button role="tab" data-dock="registro" aria-selected="false">Registro</button>
+          <span class="dock-nota" id="dock-nota"></span>
+        </div>
+        <div class="dock-p" data-dock-p="voce"><div class="voce-l" id="voce-l"></div></div>
+        <div class="dock-p" data-dock-p="tempo" hidden><div class="striscia" id="striscia"></div></div>
+        <div class="dock-p" data-dock-p="oggi" hidden><div class="oggi" id="oggi"></div></div>
+        <div class="dock-p" data-dock-p="registro" hidden><pre class="registro" id="registro"></pre></div>
+      </section>
+    </div>
+  </div>
+
+  <!-- galleria: la griglia, o il visore di una lezione -->
+  <div data-vista-p="galleria">
+    <header class="testa" id="gal-testa"></header>
+    <div class="scorri" id="gal-griglia"></div>
+    <div class="visore" id="visore" hidden>
+      <div class="vis-sx">
+        <div class="vis-foto"><img id="vis-img" alt=""><div class="su-m" id="vis-su"></div></div>
+        <div class="linea" id="linea"><canvas id="linea-c"></canvas><div class="testina" id="testina"></div></div>
+        <div class="suona">
+          <button class="gioca forte" id="gioca" title="Spazio" aria-label="Ascolta"><svg viewBox="0 0 16 16"><path d="M4 2.5v11l9-5.500z"/></svg></button>
+          <span class="tempo" id="vis-tempo">00:00 <small>/ 00:00</small></span>
+          <select id="velocita" aria-label="Velocità" title="Velocità di ascolto"><option value="1">1×</option><option value="1.25">1,25×</option><option value="1.5">1,5×</option><option value="2">2×</option></select>
+          <div class="scelta" id="quale-audio" title="Quale audio"></div>
+          <div class="scelta spazio" id="quale-foto" style="margin-left:auto" title="Quale immagine della lavagna"></div>
+        </div>
+        <div class="vis-thumb" id="vis-thumb"></div>
+      </div>
+      <div class="vis-dx">
+        <div class="dock-t"><button aria-selected="true" data-vis="voce">Voce</button><button aria-selected="false" data-vis="lavagna">Lavagna letta</button><span class="dock-nota" id="vis-nota"></span></div>
+        <div class="vis-testo" id="vis-testo"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- orario -->
+  <div data-vista-p="orario">
+    <header class="testa">
+      <h1>Orario</h1>
+      <i class="sep"></i>
+      <span class="et" id="or-semestre"></span>
+      <div class="veloci">
+        <div class="auto-r" role="switch" tabindex="0" aria-checked="false" id="auto" title="All'ora della lezione, se la finestra della lezione è aperta, la registrazione parte da sola; si ferma dieci minuti dopo la fine"><span>Avvio automatico</span><div class="leva"></div></div>
+        <button class="piccolo" id="or-nuova">Aggiungi lezione</button>
+      </div>
+    </header>
+    <div class="scorri" style="display:flex;flex-direction:column"><div class="settimana" id="settimana"></div></div>
+  </div>
+
+  <!-- modelli -->
+  <div data-vista-p="modelli">
+    <header class="testa"><h1>Modelli</h1><i class="sep"></i><span class="et" id="mod-dove"></span></header>
+    <div class="scorri" id="mod-corpo"></div>
+  </div>
+</main>
+
+<!-- ZONA 4 -->
+<aside class="prop" aria-label="Proprietà">
+  <div data-vista-p="regia">
+    <div class="zt"><h2>Proprietà</h2><button class="piccolo" id="deseleziona" hidden style="margin-left:auto" title="Esc">Deseleziona</button></div>
+    <div class="prop-c" id="prop-regia"></div>
+  </div>
+  <div data-vista-p="galleria">
+    <div class="zt"><h2 id="prop-gal-t">Galleria</h2></div>
+    <div class="prop-c" id="prop-gal"></div>
+  </div>
+  <div data-vista-p="orario">
+    <div class="zt"><h2>Proprietà</h2></div>
+    <div class="prop-c" id="prop-or"></div>
+  </div>
+  <div data-vista-p="modelli">
+    <div class="zt"><h2>Questo PC</h2></div>
+    <div class="prop-c" id="prop-mod"></div>
+  </div>
+</aside>
+
+<!-- in basso a sinistra: server, lavoro in corso, scheda video, disco, tema -->
+<div class="pannello">
+  <div class="pn-filo">
+    <img src="/logo.svg" alt="">
+    <div><span class="pallino" id="filo"><i></i><span>Collegamento…</span></span><span class="pallino spento" id="filo-2"><i></i><span></span></span></div>
+    <button class="icona" id="tema" title="Tema chiaro / scuro" aria-label="Cambia tema"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.500 1.500M17.500 17.500 19 19M5 19l1.500-1.500M17.500 6.500 19 5"/></svg></button>
+  </div>
+  <div class="lavoro" id="lavoro" hidden><span class="pallino forse"><i></i><span id="lavoro-t"></span></span><div class="mic-barra"><b id="lavoro-b"></b></div></div>
+  <div class="pn-chips"><div><span>Scheda video</span><b id="pc-gpu">–</b></div><div><span>Disco lezioni</span><b id="pc-disco">–</b></div></div>
+</div>
+
+<audio id="suono" preload="none"></audio>
+<script src="/katex/katex.min.js" defer></script>
+<script src="/katex/auto-render.min.js" defer></script>
+<script type="module" src="/regia.js"></script>
+</body>
+</html>

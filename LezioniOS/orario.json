@@ -1,0 +1,39 @@
+{
+  "corso": "Costruzioni e gestione del territorio · I anno",
+  "semestre": { "nome": "I semestre 2026/2027", "da": "2026-09-21", "a": "2026-12-18" },
+  "fonte": "D:\\a\\scuola\\università\\01 Orari e organizzazione\\2026-09-18 - Orario ufficiale CGT I semestre con aule.pdf",
+  "materie": {
+    "informatica": {
+      "nome": "Laboratorio di Informatica e Statistica", "breve": "Informatica", "docente": "Prof. Renzi", "cfu": 6, "colore": "#f9be8f",
+      "lessico": "algoritmo, variabile, puntatore, array, ciclo while, do-while, for, funzione, booleano, De Morgan, binario, esadecimale, bit, byte, complemento a due, linguaggio C, printf, scanf, compilatore, media, varianza, deviazione standard"
+    },
+    "analisi": {
+      "nome": "Analisi matematica e geometria", "breve": "Analisi", "docente": "Prof.ssa C. Giacomoni", "cfu": 9, "colore": "#fff056",
+      "lessico": "limite, derivata, derivata prima, rapporto incrementale, coefficiente angolare, retta tangente, x con zero, f di x, simbolo di Landau, o piccolo, infinitesimo di ordine superiore, funzione continua, iniettiva, suriettiva, biiettiva, successione, estremo superiore, intorno, dominio, codominio, logaritmo, esponenziale, seno, coseno, arcotangente, teorema dei carabinieri, de l'Hôpital, Taylor, integrale, primitiva"
+    },
+    "analisi-es": {
+      "nome": "Esercitazioni di Analisi matematica e geometria", "breve": "Analisi · esercitazioni", "docente": "Dott. L. Cambria", "cfu": 0, "colore": "#fff9a8", "come": "analisi"
+    },
+    "fisica": {
+      "nome": "Fisica", "breve": "Fisica", "docente": "Prof. N. Lanconelli", "cfu": 6, "colore": "#b9f3f3",
+      "lessico": "cinematica, velocità istantanea, accelerazione, moto rettilineo uniforme, moto uniformemente accelerato, caduta libera, moto del proiettile, vettore, componente, dinamica, forza, massa, newton, attrito statico, attrito dinamico, forza elastica, costante elastica, lavoro, energia cinetica, energia potenziale, joule, moto armonico, quantità di moto, impulso, urto"
+    },
+    "fisica-es": {
+      "nome": "Esercitazioni di Fisica", "breve": "Fisica · esercitazioni", "docente": "Dott. P. Petrangolini", "cfu": 0, "colore": "#d6f8f8", "come": "fisica"
+    },
+    "diritto": {
+      "nome": "Elementi di Diritto Privato e di Diritto Agrario", "breve": "Diritto", "docente": "Prof. A. Levi", "cfu": 6, "colore": "#cfd8ee",
+      "lessico": "codice civile, capacità giuridica, capacità di agire, persona fisica, persona giuridica, obbligazione, contratto, nullità, annullabilità, proprietà, possesso, usucapione, servitù, usufrutto, enfiteusi, impresa agricola, imprenditore agricolo, affitto di fondo rustico, prelazione agraria, coltivatore diretto"
+    }
+  },
+  "lezioni": [
+    { "giorno": 1, "da": "09:00", "a": "13:00", "materia": "informatica", "aula": "Aula 6" },
+    { "giorno": 2, "da": "09:00", "a": "13:00", "materia": "analisi-es", "aula": "Aula 2", "nota": "Le esercitazioni seguono il calendario comunicato dal docente." },
+    { "giorno": 3, "da": "09:00", "a": "13:00", "materia": "analisi", "aula": "Aula 2" },
+    { "giorno": 3, "da": "14:00", "a": "16:00", "materia": "analisi", "aula": "Aula 2" },
+    { "giorno": 4, "da": "09:00", "a": "13:00", "materia": "fisica-es", "aula": "Aula 2", "nota": "Le esercitazioni seguono il calendario comunicato dal docente." },
+    { "giorno": 4, "da": "14:00", "a": "18:00", "materia": "diritto", "aula": "Aula 1" },
+    { "giorno": 5, "da": "09:00", "a": "13:00", "materia": "fisica", "aula": "Aula 2" },
+    { "giorno": 5, "da": "14:00", "a": "18:00", "materia": "fisica", "aula": "Aula 2" }
+  ]
+}
