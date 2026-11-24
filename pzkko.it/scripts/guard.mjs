@@ -24,6 +24,12 @@ const csp = regola?.headers?.find((h) => h.key === 'Content-Security-Policy')?.v
 if (csp !== cspAttesa()) errori.push('vercel.json: la Content-Security-Policy non è aggiornata (esegui: npm run csp)')
 
 // ── 2. niente dominio vietato, niente nome personale, niente percorsi del pc ──
+// L'eccezione voluta il 24.11: il profilo Instagram personale in bacheca.
+// Il nome può stare solo nei tre posti che lo mostrano davvero (la scheda,
+// la configurazione e i dati scaricati); il dominio personale e ogni altro
+// nome restano vietati.
+const ECCEZIONE_IG = /^(?:public\/assets\/(?:ig|config)\.js|public\/media\/ig\/)/i
+const NOME_IG = new RegExp(decodifica('YWxiZXJ0b3hwZWNjaGluaQ=='), 'gi')
 const TESTO = new Set(['.js', '.mjs', '.html', '.css', '.json', '.txt', '.xml', '.md', '.webmanifest', '.svg'])
 const VIETATI = [
   [new RegExp(DOMINIO.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), 'dominio vietato'],
@@ -38,10 +44,13 @@ const VIETATI = [
 
 function controllaFile(file) {
   if (!TESTO.has(extname(file).toLowerCase())) return
+  const rel = relative(radice, file).replaceAll('\\', '/')
+  const eccezione = ECCEZIONE_IG.test(rel)
   const righe = readFileSync(file, 'utf8').split(/\r?\n/)
   for (const [re, cosa] of VIETATI) {
     righe.forEach((riga, i) => {
-      if (re.test(riga)) errori.push(`${relative(radice, file)}:${i + 1}: ${cosa}`)
+      const testo = eccezione ? riga.replace(NOME_IG, '') : riga
+      if (re.test(testo)) errori.push(`${rel}:${i + 1}: ${cosa}`)
     })
   }
 }
@@ -63,4 +72,4 @@ if (errori.length) {
   console.error('')
   process.exit(1)
 }
-console.log('✓ controllo di sicurezza: CSP allineata, nessun dominio o nome personale, nessun segreto nel pubblicato')
+console.log('✓ controllo di sicurezza: CSP allineata, nessun dominio personale (tranne l’Instagram voluto), nessun segreto nel pubblicato')

@@ -89,6 +89,13 @@ export const SOCIALS = [
   { key: 'github', name: 'GitHub', handle: 'ygpzk', url: 'https://github.com/ygpzk', icon: 'github', dark: 'ffffff' },
 ]
 
+// L'eccezione voluta il 24.11: il profilo personale, accanto a quelli di pzkko.
+// Lo script guard.mjs ammette quel nome solo qui, in ig.js e nei dati di
+// /media/ig/ (vedi il commento in guard.mjs). Il dominio personale resta fuori.
+export const PERSONAL_SOCIALS = [
+  { key: 'instagram-personale', name: 'Instagram', handle: 'albertoxpecchini', url: 'https://www.instagram.com/albertoxpecchini/', icon: 'instagram' },
+]
+
 // I progetti per svago. Immagini e filmati sono catture vere dei progetti in funzione:
 // stanno in /media/p/<key>/ e le elenca media.js (lo riscrive `npm run media`).
 // `kind`: game (giochi), tool (programmi), site (siti). `tags`: [nome, icona di icons.js

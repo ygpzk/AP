@@ -72,6 +72,45 @@ restituisce nomi, messaggi, canali vocali o presenze individuali. Il modulo
 pagina `/community/` è stata tolta: `/community` e `/community/` rimandano a
 `/#community` in `vercel.json` (e nel server di prova).
 
+## Instagram in bacheca (24.11.2026)
+
+La scheda Instagram della bacheca è nativa: profilo, follower, storie in
+evidenza e visualizzatore a tutto schermo sono HTML e CSS del sito, non un
+iframe e non uno screenshot. I dati stanno in `public/media/ig/index.json` e i
+media in `public/media/ig/`; chi guarda non inserisce mai un account e il
+browser non parla con Instagram.
+
+Il raccoglitore gira sul pc, fuori dal repository
+(`%USERPROFILE%\Collegamenti\Instagram\raccogli.py`), con la sessione già
+salvata da `accedi.py`. La regola dei tempi è pensata per non pesare
+sull'account:
+
+- **follower sempre, ma leggeri.** Ogni due ore una sola chiamata `user_info`
+  per account: follower, seguiti, post e `latest_reel_media`. Un punto dello
+  storico si scrive solo quando il numero cambia.
+- **storie solo quando ci sono.** Se `latest_reel_media` non cambia non si
+  chiama `user_stories`; quando cambia si scaricano i media nuovi, e per tre
+  ore il controllo passa a 40 minuti per prendere anche le storie successive.
+- **evidenze ogni sei ore.** Si confronta solo la firma (numero di elementi,
+  titolo, copertina); `highlight_info` e i download partono solo per le
+  evidenze cambiate.
+- **se non cambia niente non si scrive l'indice e non si fa il push.**
+
+Il task di Windows `pzkko-instagram` batte ogni 30 minuti, ma è lo script a
+decidere se vale la pena chiamare Instagram. Il task si registra con
+`installa-attivita.ps1` nella stessa cartella. I profili sono l'account
+personale e `@pzkko`, seguiti dalla stessa sessione: non serve una seconda
+password.
+
+Le foto sono convertite in WebP alla stessa risoluzione dell'originale; i
+video restano MP4. Le storie attive spariscono da sole dopo 24 ore. Per un giro
+a mano: `python raccogli.py --forza --solo-dati` (senza push) oppure
+`python raccogli.py --forza --pubblica`.
+
+L'eccezione voluta: il nome dell'account personale può comparire solo in
+`public/assets/ig.js`, `public/assets/config.js` e `public/media/ig/` (vedi
+`scripts/guard.mjs`). Il dominio personale e ogni altro nome restano vietati.
+
 ## I progetti veri dentro il sito (18.11)
 
 Il muro, il cercapersone e i tavoli sono quelli veri, col codice dell’ultimo commit
@@ -203,10 +242,12 @@ Vercel esegue `npm run build` e pubblica `public/` (vedi `vercel.json`).
   non si salva); il tasto di moderazione si confronta in tempo costante; gli
   errori del server di casa non tornano al browser. Il segreto resta nelle
   variabili di Vercel.
-- **Niente collegamenti all’identità personale.** Non è un accordo fra siti: la
-  build cerca il dominio e i nomi/account personali in `public/`, `api/`,
-  `scripts/`, `vercel.json` e `README.md`, e si ferma se ricompaiono. `npm run
-  check` cerca anche percorsi del computer, chiavi private e token.
+- **Niente collegamenti all’identità personale, tranne l’Instagram voluto.**
+  La build cerca il dominio e i nomi/account personali in `public/`, `api/`,
+  `scripts/`, `vercel.json` e `README.md`, e si ferma se ricompaiono. L’unica
+  eccezione è la scheda Instagram (24.11), ammessa solo nei tre posti scritti
+  sopra; il dominio personale resta vietato. `npm run check` cerca anche
+  percorsi del computer, chiavi private e token.
 - **Prestazioni.** Italiano e inglese arrivano subito; le altre sette lingue
   stanno in `public/assets/i18n/` e si scaricano solo quando si sceglie quella.
   Cache lunga su CDN per asset, font, immagini e video; HTML sempre rivalidato.

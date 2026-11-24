@@ -3,7 +3,7 @@
 // banner, tema, bio, badge, collegamenti e gli oggetti da collezione; Discord dà la
 // cornice e l'effetto veri. Niente librerie.
 
-import { CONFIG, COLLECTIBLES, NAME_FONTS, SOCIALS, PROJECTS, TOOLS, LANGS } from './config.js'
+import { CONFIG, COLLECTIBLES, NAME_FONTS, SOCIALS, PERSONAL_SOCIALS, PROJECTS, TOOLS, LANGS } from './config.js'
 import { I18N, LINGUE, caricaLingua } from './i18n.js'
 import { ICONS } from './icons.js'
 import { MEDIA } from './media.js'
@@ -541,6 +541,7 @@ function renderBoard() {
         <div class="hero__actions">${playHtml(feat)}<button type="button" class="btn ${feat.play ? 'btn--ghost' : 'btn--msg'}" data-open="${feat.key}">${esc(u.details)}</button>${linksHtml(feat)}</div>
       </div>
     </article>
+    <section class="span2 rise" style="--i:2" id="ig-card" aria-label="Instagram"></section>
     <div class="widget rise" style="--i:1" id="now-widget">${nowWidget()}</div>
     <div class="widget rise" style="--i:2"><div class="widget__h"><span>${esc(u.aboutTitle)}</span></div><p>${esc(u.aboutText)}</p></div>
     <div class="widget span2 rise" style="--i:3">
@@ -551,6 +552,8 @@ function renderBoard() {
   </div>`
   $('[data-zero-slot]', root)?.append(zeroButton())
   wireMedia(root)
+  const ig = $('#ig-card', root)
+  if (ig) import('./ig.js').then((m) => m.monta(ig, { lang })).catch((e) => console.error(e))
 }
 function projectCard(p, i) {
   const u = ui(), tx = t().projects[p.key]
@@ -601,8 +604,9 @@ function renderSocial() {
     const ok = s.key === 'discord' || verified.has(`${s.icon}:${s.handle.toLowerCase()}`)
     return `<a class="srow rise" style="--i:${Math.min(i + 1, 10)};--c:#${ICONS[s.icon]?.[0] || '888'}" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer me"><span class="srow__ico">${brand(s.icon, s)}</span><span class="srow__txt"><span class="srow__name">${esc(s.name)}${ok ? `<span class="conn__ok" title="${esc(u.verified)}">${I.ok}<span class="sr">${esc(u.verified)}</span></span>` : ''}</span><span class="srow__handle">${esc(s.handle)}</span></span><span class="srow__go">${I.ext}</span></a>`
   }
-  $('#panel-social').innerHTML = `<div class="sgrid">
-    ${SOCIALS.map(row).join('')}</div>`
+  const personale = PERSONAL_SOCIALS.map(row).join('')
+  $('#panel-social').innerHTML = `<div class="sgrid sgrid--pzkko">${SOCIALS.map(row).join('')}</div>
+    ${personale ? `<p class="sgrid__title">${esc(cap({ it: 'Personale', en: 'Personal' }))}</p><div class="sgrid sgrid--personale">${personale}</div>` : ''}`
 }
 // la community: il modulo si scarica solo quando si apre #community
 let communityMounted = false, communityLang = null
