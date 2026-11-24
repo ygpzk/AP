@@ -1,11 +1,11 @@
-// Il canale sempre aperto (26.10, Alberto: «fai un server sempre connesso e che registra tutto subito»): chi è entrato nel
+// Il canale sempre aperto (26.10, pzkko: «fai un server sempre connesso e che registra tutto subito»): chi è entrato nel
 // conto tiene aperta una connessione, e gli si dice appena succede che il conto è cambiato sulla banca (da un altro
 // dispositivo, da un'altra scheda, da un invio ricevuto). L'avviso { k: 'conto', pzk, eur, agg }: games/pzk.js (dalCanale)
 // prende subito il saldo se è più nuovo di quello che ha (agg), poi si chiede il resto del conto (lo zaino, le mosse, i tavoli)
 // con pzk.sincronizza(), fra 300 ms (più avvisi di fila, una richiesta sola). Chi ascolta lo zaino lo sa da `su('conto')`.
 //
-// IL CANALE DIRETTO (29.10 notte, Alberto: «se entro con 2 telefoni e stesso account assieme devo vedere le cose
-// sincronizzati al millisecondo»): la connessione va dritta al server sul pc di Alberto (C:\pzkko-server, /v1/live,
+// IL CANALE DIRETTO (29.10 notte, pzkko: «se entro con 2 telefoni e stesso account assieme devo vedere le cose
+// sincronizzati al millisecondo»): la connessione va dritta al server sul pc di pzkko (C:\pzkko-server, /v1/live,
 // Server-Sent Events), che avvisa nell'istante in cui scrive i conti. Per aprirla serve un biglietto del conto
 // (pzk.biglietto(), dieci minuti per aprire); il server la chiude dopo mezz'ora e qui si riapre con un biglietto nuovo.
 // Dal 31.10 è l'unico: la banca sta sullo stesso pc, quindi quando il canale diretto non c'è non c'è nemmeno la banca, e

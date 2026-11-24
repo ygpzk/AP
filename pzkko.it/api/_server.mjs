@@ -1,4 +1,4 @@
-// Il server dei dati sul pc di Alberto (28.10, C:\pzkko-server\server.mjs): dalla notte del 28.10 Vercel Blob è bloccato
+// Il server dei dati sul pc di pzkko (28.10, C:\pzkko-server\server.mjs): dalla notte del 28.10 Vercel Blob è bloccato
 // su tutto l'account (le soglie gratuite del piano Hobby superate), e i file JSON che stavano lì stanno là. Questo è il
 // pezzo delle funzioni: un archivio ({ etag(), read(), write(db, etag) }), con le richieste al
 // server invece che a Blob.
@@ -106,15 +106,15 @@ async function chiama({ url, segreto }, metodo, nome, { corpo = null, ifMatch = 
   if (!b || b.length !== attesa.length || !timingSafeEqual(b, attesa)) {
     stato.giuFino = Date.now() + PAUSA
     // (del segreto si dice solo quanto è lungo e se è un segreto pulito: basta a capire se è stato incollato male)
-    throw errore(`risposta senza la firma giusta (HTTP ${r.status}: il segreto o l'ora non tornano, o non è il server di Alberto; il segreto qui è di ${segreto.length} caratteri${SEGRETO.test(segreto) && segreto.length === 43 ? '' : ', non i 43 di installa.ps1'})`, { offline: true })
+    throw errore(`risposta senza la firma giusta (HTTP ${r.status}: il segreto o l'ora non tornano, o non è il server di pzkko; il segreto qui è di ${segreto.length} caratteri${SEGRETO.test(segreto) && segreto.length === 43 ? '' : ', non i 43 di installa.ps1'})`, { offline: true })
   }
   stato.giuFino = 0
   return { status: r.status, etag, testo }
 }
 
 /**
- * IL PONTE (31.10, Alberto: «tutti i dati degli account nel mio server … nessun codice accessibile da fuori»): la banca
- * (i conti, i giochi, lo zaino, la borsa, i giocatori) gira sul pc di Alberto, dentro C:\pzkko-server, e il suo codice non
+ * IL PONTE (31.10, pzkko: «tutti i dati degli account nel mio server … nessun codice accessibile da fuori»): la banca
+ * (i conti, i giochi, lo zaino, la borsa, i giocatori) gira sul pc di pzkko, dentro C:\pzkko-server, e il suo codice non
  * sta in questo repository. Le funzioni /api/wallet, /api/borsa e /api/giocatori fanno solo da passaggio: portano la
  * richiesta del browser al server (POST /v1/api/<nome>, firmata come le altre, con l'indirizzo di chi chiede, che così il
  * server può usare per i limiti) e ne riportano la risposta, la cui firma si controlla prima di consegnarla.
@@ -161,7 +161,7 @@ export async function ponte(nome, req, res, { max = 16 * 1024 } = {}) {
 }
 
 /**
- * IL CONTROLLO (11.11.2026, Alberto: «un informatore che dice che i sistemi vanno sempre connessi dal mio pc»): per
+ * IL CONTROLLO (11.11.2026, pzkko: «un informatore che dice che i sistemi vanno sempre connessi dal mio pc»): per
  * /api/stato, una chiamata firmata qualsiasi in sola lettura (GET /v1/salute, o la GET pubblica di una funzione della
  * banca attraverso /v1/api/<nome>), con un'attesa più corta. Dà { status, ms, json } o lancia come le altre.
  */

@@ -1,4 +1,4 @@
-// L'app «profilo» di pzk os (29.10, Alberto: «ora crea app profilo fatta benissimo»): chi sei a pzkko, con tutti i numeri,
+// L'app «profilo» di pzk os (29.10, pzkko: «ora crea app profilo fatta benissimo»): chi sei a pzkko, con tutti i numeri,
 // sul cercapersone zero. La logica e i numeri sono quelli del profilo del cercapersone vecchio (telefono/app/profilo.js: le
 // facce con le rarità, i prezzi e i blocchi, compraFaccia, i colori e le cornici; i conti dal libro del server,
 // games/libro.mjs; le classifiche, chat/db.js). Qui c'è solo la faccia a 8 bit, fatta come il Flipper:
@@ -7,7 +7,7 @@
 // - OK apre la MODIFICA: la faccia, il colore, la cornice e il motto, con l'anteprima del cartellino che cambia subito.
 // - LA FACCIA: la griglia di tutte le facce (quelle non tue sbiadite), sotto la grande col nome, la rarità e il prezzo.
 //   OK la mette o la compra (con un dialogo); le leggendarie chiuse dicono cosa manca.
-// (11.11, Alberto: «fai colori a 8bit su tutto») il colore del cartellino è un colore vero (prima, sull'lcd a un bit, era
+// (11.11, pzkko: «fai colori a 8bit su tutto») il colore del cartellino è un colore vero (prima, sull'lcd a un bit, era
 // una trama): colora la cornice, che si disegna davvero (nastro, oro, neon, pixel) col bordino d'inchiostro. Verdi i $pzk
 // guadagnati e rossi i persi, le medaglie del podio, la rarità delle facce nel suo colore. Il resto del testo è d'inchiostro.
 // Le regole: os/REGOLE.md.
@@ -35,7 +35,7 @@ const pul = () => (pzk.sporchi() > 0 ? ' puliti' : '') // (si spendono solo quel
 const avOra = () => faccia(zaino.profilo().av, zaino.mestiere())
 /** Un'icona sempre: se la webp non è ancora arrivata, intanto la chiocciola (icone.ascolta ridisegna quando arriva). */
 const bm = (id, lato) => icone.bitmap(id, lato) ?? icone.bitmap('bot', lato)
-// ── i colori (11.11, Alberto: «fai colori a 8bit su tutto»): pochi, e solo dove dicono qualcosa ──
+// ── i colori (11.11, pzkko: «fai colori a 8bit su tutto»): pochi, e solo dove dicono qualcosa ──
 const SU = '#33cc33', GIU = '#ff0000', XP = '#3399ff' // (i $pzk che entrano, quelli che escono, la barra degli xp)
 const MEDAGLIE = ['#ffcc33', '#cccccc', '#cc6633'] // (oro, argento e bronzo del podio)
 const lum = (c) => { const f = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4 }); return 0.2126 * f[0] + 0.7152 * f[1] + 0.0722 * f[2] }

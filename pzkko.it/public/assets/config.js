@@ -16,7 +16,7 @@ export const CONFIG = {
     banner: 'a_ec2559d3be64aa2b509c96f456b28d19',
     bannerColor: '#110f10',
     theme: ['#ccff00', '#9d00ff'],
-    bio: 'alberto, from italy. trained surveyor, now studying construction & land management on a dual degree between italy and san marino. i also design and build websites and brand identities, hand-written code, no frameworks. building with claude code daily: custom skills, tools and too many side projects.',
+    bio: 'pzkko. small games, little tools, too many side projects. hand-written code, no frameworks. building with claude code daily: custom skills, experiments and things that were supposed to take an afternoon.',
     decoration: 'a_820da11285b1a68ad94c18fd9dcf8ca8',
     // lo stile del nome: carattere 17 (Pricedown), effetto 1 (tinta unita)
     nameStyle: { font_id: 17, effect_id: 1, colors: [] },
@@ -80,20 +80,12 @@ export const NAME_FONTS = {
 // quando quello del marchio è nero, `light` col tema chiaro quando è troppo chiaro.
 export const SOCIALS = [
   { key: 'discord', name: 'Discord', handle: 'pzkko', url: 'https://discord.com/users/459791358899519498', icon: 'discord' },
-  { key: 'instagram', name: 'Instagram', handle: 'albertoxpecchini', url: 'https://www.instagram.com/albertoxpecchini/', icon: 'instagram' },
-  { key: 'instagram2', name: 'Instagram', handle: 'pzkko', url: 'https://www.instagram.com/pzkko/', icon: 'instagram' },
-  { key: 'tiktok', name: 'TikTok', handle: 'albertoxpecchini', url: 'https://www.tiktok.com/@albertoxpecchini', icon: 'tiktok', dark: 'ffffff' },
+  { key: 'instagram', name: 'Instagram', handle: 'pzkko', url: 'https://www.instagram.com/pzkko/', icon: 'instagram' },
   { key: 'x', name: 'X', handle: 'ygpzk', url: 'https://x.com/ygpzk', icon: 'x', dark: 'ffffff' },
-  { key: 'youtube', name: 'YouTube', handle: 'alberto-h7y3h', url: 'https://www.youtube.com/@alberto-h7y3h', icon: 'youtube' },
-  { key: 'threads', name: 'Threads', handle: 'albertoxpecchini', url: 'https://www.threads.net/@albertoxpecchini', icon: 'threads', dark: 'ffffff' },
   { key: 'twitch', name: 'Twitch', handle: 'pzkko', url: 'https://www.twitch.tv/pzkko', icon: 'twitch' },
-  { key: 'kick', name: 'Kick', handle: 'albertoxpecchini', url: 'https://kick.com/albertoxpecchini', icon: 'kick', light: '2f9b0e' },
   { key: 'steam', name: 'Steam', handle: 'ygpzk', url: 'https://steamcommunity.com/profiles/76561198971719489', icon: 'steam', dark: 'ffffff' },
   { key: 'spotify', name: 'Spotify', handle: 'pzkko', url: 'https://open.spotify.com/user/qeefs44bv4bpoa7dk8epagrxf', icon: 'spotify', light: '169c46' },
   { key: 'reddit', name: 'Reddit', handle: 'u/yungpzkko', url: 'https://www.reddit.com/user/yungpzkko/', icon: 'reddit' },
-  { key: 'pinterest', name: 'Pinterest', handle: 'albertoxpecchini', url: 'https://www.pinterest.com/albertoxpecchini/', icon: 'pinterest' },
-  { key: 'snapchat', name: 'Snapchat', handle: 'albertoxpecchini', url: 'https://www.snapchat.com/add/albertoxpecchini', icon: 'snapchat', light: 'b89f00' },
-  { key: 'telegram', name: 'Telegram', handle: 'albertopecchini', url: 'https://t.me/albertopecchini', icon: 'telegram' },
   { key: 'github', name: 'GitHub', handle: 'ygpzk', url: 'https://github.com/ygpzk', icon: 'github', dark: 'ffffff' },
 ]
 
@@ -114,7 +106,7 @@ export const PROJECTS = [
     play: [['Il Muro', '/serranda/']] },
   { key: 'matricios', title: 'Matrici OS', kind: 'tool', art: ['#0d3b1e', '#020a05', '8Bit', 'righe'], tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['Terminal', '#3fb950']], code: `${GH}/MatriciOS`, download: 'https://github.com/ygpzk/AP/raw/main/MatriciOS/MatriciOS.exe' },
   // (22.11) la regia delle sovrimpressioni: installer .exe, guida dentro il sito e tutti i comandi
-  { key: 'direttaos', title: 'Diretta OS', kind: 'tool', art: ['#ccff00', '#9d00ff', 'Pricedown', 'griglia'], tags: [['Node.js', 'nodejs'], ['PowerShell', 'powershell'], ['FFmpeg', 'ffmpeg']], download: '/direttaos/DirettaOS-Setup.exe',
+  { key: 'direttaos', title: 'Diretta OS', kind: 'tool', art: ['#ccff00', '#9d00ff', 'Pricedown', 'griglia'], tags: [['Node.js', 'nodejs'], ['PowerShell', 'powershell'], ['FFmpeg', 'ffmpeg']],
     play: [['Guida all’installazione', '/direttaos/']] },
   { key: 'lezioni', title: 'pzk$meeting', kind: 'tool', art: ['#ffd60a', '#b88700', 'Tempo', 'punti'], tags: [['Python', 'python'], ['Whisper', '#10a37f'], ['LaTeX', 'latex']],
     play: [['pzk$meeting', '/tools/lezioni/']] },

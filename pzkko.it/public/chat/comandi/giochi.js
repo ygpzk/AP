@@ -1,6 +1,6 @@
 // I giochi via comando: veloce, slot, dadi, moneta (nati qui) e roulette, blackjack, mine, dado (le regole sono quelle dei
 // giochi veri in games/*/regole.js: stessi pagamenti, stesso banco).
-// DAL 31.10 LI GIOCA LA BANCA (Alberto: «il browser non decide più niente»): qui si legge cosa si vuole puntare, si chiede
+// DAL 31.10 LI GIOCA LA BANCA (pzkko: «il browser non decide più niente»): qui si legge cosa si vuole puntare, si chiede
 // alla banca ('chat.slot', 'chat.roulette', 'chat.blackjack'… in C:\pzkko-server\banca\giochi\chat-giochi.mjs), che tira,
 // paga e segna le attese, e si mostra quello che è uscito con le animazioni di prima. Le carte coperte, le mine e la parola
 // del veloce stanno sulla banca finché non tocca vederle.

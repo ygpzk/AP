@@ -1,4 +1,4 @@
-// L'app «codice C» di pzk os (29.10, Alberto: «crea uno alla volta … codice C …»): il compilatore C sul cercapersone zero. Il
+// L'app «codice C» di pzk os (29.10, pzkko: «crea uno alla volta … codice C …»): il compilatore C sul cercapersone zero. Il
 // C è vero come nell'app vecchia (telefono/app/compilatore.js: compila, cioè GCC 14.2 su Compiler Explorer e se non risponde
 // Wandbox; gli ESEMPI), e il codice e l'input sono gli stessi suoi (telefono/ricordi.js, «compilatore»).
 // - L'EDITOR: i numeri di riga, il cursore che lampeggia, le frecce lo muovono (← → vanno anche a capo), le righe con un
@@ -8,11 +8,11 @@
 //   output, gli esempi.
 // - L'OUTPUT: mentre compila la rotellina e i punti che corrono; poi gli avvisi, quello che ha stampato, il codice d'uscita, i
 //   secondi e dove. Scorre con ↑ ↓, OK lo rifà.
-// - I COLORI (11.11, Alberto: «fai colori a 8bit su tutto»): nell'editor le stringhe verdi, i commenti grigi, le direttive
+// - I COLORI (11.11, pzkko: «fai colori a 8bit su tutto»): nell'editor le stringhe verdi, i commenti grigi, le direttive
 //   (#include, #define) blu, il resto d'inchiostro; il numero di una riga con un errore su una fascia rossa, con un avviso su
 //   una gialla. Nell'output la riga «error:» su una fascia rossa e la «warning:» su una gialla, le righe che le spiegano (e lo
 //   stderr del programma) col filo del loro colore a sinistra; la riga del codice d'uscita verde se è 0, rossa se no.
-// Il codice esce dal sito per compilarlo (Alberto ha scelto così il 26.10): l'output lo ricorda. Le regole: os/REGOLE.md.
+// Il codice esce dal sito per compilarlo (pzkko ha scelto così il 26.10): l'output lo ricorda. Le regole: os/REGOLE.md.
 import { Lcd, W, H, esa } from './lcd.js'
 import { ESEMPI, compila, S } from '../../app/compilatore.js'
 import { ricorda } from '../../ricordi.js'

@@ -1,9 +1,9 @@
-// L'app «virtual» di pzk os (29.10, Alberto: «crea uno alla volta … virtual …»): il campionato virtuale sul cercapersone
+// L'app «virtual» di pzk os (29.10, pzkko: «crea uno alla volta … virtual …»): il campionato virtuale sul cercapersone
 // zero. La partita è quella del gioco grande (games/virtual/partita.js: il ciclo di cinque minuti, deciso dall'orario), lo
 // schermino è il SUO (games/virtual/schermo.js: il campo, gli omini, gli spalti, la telecamera, il meteo, i replay), con le
 // due primitive (il pixel e il rettangolo) che qui scrivono nei colori della tavolozza a 8 bit dell'lcd (11.11: fino al
 // 10.11 l'lcd era a un bit e ogni colore diventava una trama secondo la sua luce). Le scommesse e i pagamenti passano dalla
-// STESSA schedina della finestra grande (games/virtual/schedina.js), che dal 31.10 è quella della banca (Alberto: «il
+// STESSA schedina della finestra grande (games/virtual/schedina.js), che dal 31.10 è quella della banca (pzkko: «il
 // browser non decide più niente»): ogni giocata si chiede alla banca (con la rotellina in fondo, regola 8.6), il risultato
 // e la cronaca arrivano dalla banca a partita iniziata, e le partite finite le paga lei; qui si chiede e si mostra.
 // - LA PARTITA: lo schermino a metà, il tabellone (le sigle, il punteggio, il minuto o quanto manca al fischio), la voce
@@ -25,7 +25,7 @@ import { txt, corto, destra, centro, puntini, elenco, muovi, pagine, striscia } 
 const fmt = pzk.fmt, q = SC.fmtQuota
 const METEO = { sereno: 'sereno', nuvole: 'nuvoloso', pioggia: 'pioggia', nebbia: 'nebbia', neve: 'neve', vento: 'vento forte' }
 
-// ── lo schermino del gioco, a colori (11.11, Alberto: «fai colori a 8bit su tutto»): le sue primitive scrivono il colore di
+// ── lo schermino del gioco, a colori (11.11, pzkko: «fai colori a 8bit su tutto»): le sue primitive scrivono il colore di
 // ogni pixel grosso, trasparenze comprese (la pioggia, la nebbia, il buio, la luce dei riflettori), e a fotogramma finito
 // ogni pixel diventa il colore più vicino della tavolozza. (Fino al 10.11 l'lcd era a un bit: la luce di ogni colore
 // diventava una trama, e in campo l'erba si indovinava dal fotogramma perché gli omini non ci sparissero dentro.) ──

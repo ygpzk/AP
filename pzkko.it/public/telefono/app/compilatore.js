@@ -2,7 +2,7 @@
 // stato (il codice e l'input, telefono/ricordi.js, «compilatore») e compila. (31.10) L'interfaccia HTML di qui (la copia di
 // mycompiler.io con l'editor colorato e le schede INPUT e OUTPUT) se n'è andata col cercapersone vecchio.
 // Il C è vero: GCC 14.2 su Compiler Explorer (godbolt.org, gratis e senza chiave, accetta le chiamate dal browser); se non
-// risponde, Wandbox (wandbox.org, gcc-head). Alberto ha scelto così (26.10): il codice esce dal sito per compilarlo, e la
+// risponde, Wandbox (wandbox.org, gcc-head). pzkko ha scelto così (26.10): il codice esce dal sito per compilarlo, e la
 // pagina lo dice.
 
 import { ricordo } from '../ricordi.js'
@@ -11,7 +11,7 @@ const GODBOLT = 'https://godbolt.org/api/compiler/cg142/compile', WANDBOX = 'htt
 const OPZIONI = ['-std=c17', '-Wall', '-O1', '-lm']
 // (dal 29.10 gli esempi e la compilazione si esportano: li usa «codice C» di pzk os, telefono/zero/os/compilatore.js)
 export const ESEMPI = {
-  ciao: ['ciao, come ti chiami?', '#include <stdio.h>\n\nint main(void) {\n    char nome[50];\n    printf("come ti chiami? ");\n    scanf("%49s", nome);\n    printf("\\nciao %s, benvenuto su pzkko!\\n", nome);\n    return 0;\n}\n', 'alberto'],
+  ciao: ['ciao, come ti chiami?', '#include <stdio.h>\n\nint main(void) {\n    char nome[50];\n    printf("come ti chiami? ");\n    scanf("%49s", nome);\n    printf("\\nciao %s, benvenuto su pzkko!\\n", nome);\n    return 0;\n}\n', 'pzkko'],
   somma: ['somma di due numeri', '#include <stdio.h>\n\nint main(void) {\n    double a, b;\n    scanf("%lf %lf", &a, &b);\n    printf("%.2f + %.2f = %.2f\\n", a, b, a + b);\n    return 0;\n}\n', '3.5 4'],
   fattoriale: ['fattoriale (ricorsione)', '#include <stdio.h>\n\nunsigned long long fatt(int n) {\n    return n <= 1 ? 1 : n * fatt(n - 1);\n}\n\nint main(void) {\n    int n;\n    scanf("%d", &n);\n    for (int i = 0; i <= n; i++)\n        printf("%2d! = %llu\\n", i, fatt(i));\n    return 0;\n}\n', '10'],
   media: ['media di un vettore', '#include <stdio.h>\n\n#define N 5\n\nint main(void) {\n    int v[N], somma = 0;\n    for (int i = 0; i < N; i++) {\n        scanf("%d", &v[i]);\n        somma += v[i];\n    }\n    printf("media: %.2f\\n", (double)somma / N);\n    return 0;\n}\n', '7 8 6 9 10'],

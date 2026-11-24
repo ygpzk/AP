@@ -1,14 +1,20 @@
 // Il controllo che gira prima della build.  Fallisce se:
 //  - la Content-Security-Policy in vercel.json non è più allineata agli script
 //    in linea (in quel caso: npm run csp);
-//  - ricompare un collegamento o un testo che porta ad albertopecchini.it;
+//  - ricompare il dominio vietato o un nome/account personale nel pubblicato,
+//    nel README o negli script;
 //  - finiscono nel pubblicato percorsi del computer, segreti o chiavi.
+//
+// (I nomi vietati stanno in base64: questo file non li deve citare nemmeno lui.)
 import { cspAttesa } from './csp.mjs'
 import { readFileSync, readdirSync } from 'node:fs'
 import { dirname, join, relative, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const radice = join(dirname(fileURLToPath(import.meta.url)), '..')
+const decodifica = (s) => Buffer.from(s, 'base64').toString('utf8')
+const DOMINIO = decodifica('YWxiZXJ0b3BlY2NoaW5pLml0')
+const NOMI = [decodifica('YWxiZXJ0bw=='), decodifica('cGVjY2hpbmk=')]
 const errori = []
 
 // ── 1. la CSP è quella giusta? ───────────────────────────────────────────────
@@ -17,10 +23,11 @@ const regola = conf.headers?.find((r) => r.source === '/(.*)')
 const csp = regola?.headers?.find((h) => h.key === 'Content-Security-Policy')?.value
 if (csp !== cspAttesa()) errori.push('vercel.json: la Content-Security-Policy non è aggiornata (esegui: npm run csp)')
 
-// ── 2. niente rimandi al vecchio sito, niente percorsi del pc ─────────────────
+// ── 2. niente dominio vietato, niente nome personale, niente percorsi del pc ──
 const TESTO = new Set(['.js', '.mjs', '.html', '.css', '.json', '.txt', '.xml', '.md', '.webmanifest', '.svg'])
 const VIETATI = [
-  [/albertopecchini\.it/i, 'rimando ad albertopecchini.it'],
+  [new RegExp(DOMINIO.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), 'dominio vietato'],
+  ...NOMI.map((n) => [new RegExp(n, 'i'), 'nome o account personale']),
   [/C:[\\/]+Users[\\/]+[A-Za-z0-9._-]+/i, 'percorso del computer'],
   [/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/, 'chiave privata'],
   [/\bAKIA[0-9A-Z]{16}\b/, 'chiave AWS'],
@@ -47,8 +54,7 @@ function cammina(dir) {
   }
 }
 
-cammina(join(radice, 'public'))
-cammina(join(radice, 'api'))
+for (const d of ['public', 'api', 'scripts']) cammina(join(radice, d))
 for (const f of ['README.md', 'vercel.json', 'package.json']) controllaFile(join(radice, f))
 
 if (errori.length) {
@@ -57,4 +63,4 @@ if (errori.length) {
   console.error('')
   process.exit(1)
 }
-console.log('✓ controllo di sicurezza: CSP allineata, nessun rimando esterno vietato, nessun segreto nel pubblicato')
+console.log('✓ controllo di sicurezza: CSP allineata, nessun dominio o nome personale, nessun segreto nel pubblicato')

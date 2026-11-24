@@ -1,16 +1,16 @@
-// pzk os a 8 bit (29.10, Alberto: «rifai da 0 pzk os adattato allo strumento… prendi flipper zero os e riscrivilo con le mie
+// pzk os a 8 bit (29.10, pzkko: «rifai da 0 pzk os adattato allo strumento… prendi flipper zero os e riscrivilo con le mie
 // app, impara come funziona e usalo per rifare le app, aumenta i pixel dello schermo ma mantieni stile 8bit»): il sistema
 // del cercapersone zero, disegnato pixel per pixel su un lcd 256 × 128 a un bit (lcd.js) che vive SOTTO IL VETRO del
 // modello 3D (zero.js lo stende come trama sull'lcd; muro.js lo ricopia sul tasto del muro): niente finestra HTML sopra.
 // È fatto come il firmware del Flipper Zero: una BARRA DI STATO in cima (l'ora, la rete, il conto, la batteria), la HOME
-// (29.10 sera, Alberto: «fai la home con dati importanti come i miei soldi e le cose da fare oggi»: la chiocciolina di
+// (29.10 sera, pzkko: «fai la home con dati importanti come i miei soldi e le cose da fare oggi»: la chiocciolina di
 // chat/tomodachi.js a sinistra, i $pzk, il livello e le sfide a destra, sotto le cose da fare oggi), OK che apre il MENU
 // PRINCIPALE (la lista delle app, con l'icona a sinistra, la voce scelta rovesciata e la barra di scorrimento a destra,
 // come il suo), le app come VISTE impilate (INDIETRO torna a quella sotto), i DIALOGHI con la cornice smussata, la
 // riga dove si SCRIVE con la tastiera vera (dall'11.11; prima una tastiera sullo schermo, come la sua TextInput), le IMPOSTAZIONI (impostazioni.js) e la GUIDA al
 // primo accesso («al primo accesso spiega come funziona»). I sei tasti sono gli stessi del Flipper: su, giù, sinistra,
 // destra, OK, INDIETRO (telefono.js li manda da qui: dai tasti 3D e dalla tastiera). Niente nelle quattro punte dello
-// schermo (Alberto: «evita di mettere negli angoli cose che altrimenti con l'inclinazione non si vedono»): tutto sta dentro
+// schermo (pzkko: «evita di mettere negli angoli cose che altrimenti con l'inclinazione non si vedono»): tutto sta dentro
 // un margine di 6 pixel (MARGINE), e i suggerimenti in basso stanno in mezzo.
 //
 //   lcd                      l'lcd (la tela 768 × 384 è lcd.canvas)
@@ -121,7 +121,7 @@ const PRONTE = {
 export const pronta = (id) => !!PRONTE[id]
 let aprendo = null, richiesta = 0
 /** Apre un'app del menu per id, con la sua sigla (suoni.js). Due OK di fila non la aprono due volte. */
-// SENZA CONTO NON SI ENTRA (26.10, Alberto: «non puoi accedere al cercapersone se non ti registri/accedi»; sullo zero dal
+// SENZA CONTO NON SI ENTRA (26.10, pzkko: «non puoi accedere al cercapersone se non ti registri/accedi»; sullo zero dal
 // 29.10, con l'app account): senza conto ogni app tranne LIBERE apre l'account, e l'app voluta aspetta in «dopo»; quando il
 // conto c'è, l'account chiama dopoAccesso() e si va lì
 const LIBERE = new Set(['account', 'impostazioni'])
@@ -175,7 +175,7 @@ export function invio() { suoni.bip('pager'); const v = corrente(); if (v?.invio
 /** Si sta scrivendo (c'è del testo da cancellare con Backspace)? */
 export const scrivendo = () => !!corrente()?.scrivendo?.()
 
-// ── il clic del mouse sullo schermo (29.10, Alberto: «metti per sicurezza anche il click del mouse»): mentre disegna, la
+// ── il clic del mouse sullo schermo (29.10, pzkko: «metti per sicurezza anche il click del mouse»): mentre disegna, la
 // vista segna le sue zone cliccabili (zona); zero.js trasforma il clic sul vetro in un pixel dell'lcd e tocca() preme la
 // zona che c'è sotto (l'ultima segnata vince: un dialogo sopra la sua vista). È un in più: tutto si fa anche coi tasti ──
 let zone = []
@@ -209,7 +209,7 @@ export function avvia() {
   }, 100)
 }
 
-// ── la barra dello spegnimento (9.11, Alberto: «crea una barra di avanzamento per spegnerlo così uno capisce che sta
+// ── la barra dello spegnimento (9.11, pzkko: «crea una barra di avanzamento per spegnerlo così uno capisce che sta
 // avanzando»): mentre INDIETRO è tenuto, sopra a tutto un riquadro smussato con la barra a blocchetti che si riempie in tre
 // secondi; lasciando sparisce. La comanda telefono.js (spegnendo) ──
 let spegni = null
@@ -275,7 +275,7 @@ function chiocciolina(l, x0, y0, k) {
   } catch { return false }
 }
 
-/** Il saluto della chiusura (9.11, Alberto: «velocizza l'uscita… con un ciao da 1 secondo full schermo»): la chiocciolina
+/** Il saluto della chiusura (9.11, pzkko: «velocizza l'uscita… con un ciao da 1 secondo full schermo»): la chiocciolina
  *  che saluta (tomodachi.saluta: l'antenna, «CIAO», il cuoricino) a tutto schermo, 8 × 8 pixel per cella (32 × 16 celle =
  *  256 × 128, l'lcd intero), senza barra; i tasti non fanno niente. Se la tela non c'è, «ciao!» grande. Lo toglie home(). */
 export function saluta() {
@@ -364,7 +364,7 @@ const home_ = {
 }
 
 // ── il menu principale: le app, con l'icona a sinistra e la voce scelta rovesciata; in fondo cosa fa quella scelta (4.11,
-// Alberto: «uno che non ha mai aperto il sito fa fatica»: «virtual», «bin·hex», «decifra» non dicevano niente a chi arriva) ──
+// pzkko: «uno che non ha mai aperto il sito fa fatica»: «virtual», «bin·hex», «decifra» non dicevano niente a chi arriva) ──
 const RIGA = 20, VISIBILI = 5
 const COSA = {
   chat: 'parla col bot: lavora, gioca', profilo: 'la tua faccia e i tuoi numeri', account: 'il conto: cambio e invii',
@@ -416,7 +416,7 @@ function menu() {
   }
 }
 
-// ── «in arrivo»: le app che non ci sono ancora (Alberto, 29.10: «fai solo app chat completissima e se va bene… fai tutte le altre») ──
+// ── «in arrivo»: le app che non ci sono ancora (pzkko, 29.10: «fai solo app chat completissima e se va bene… fai tutte le altre») ──
 function presto(a) {
   return {
     nome: 'presto', app: a.id,
@@ -474,8 +474,8 @@ export function dialogo({ titolo = '', testo = '', icona = null, tasti = ['ok'] 
   })
 }
 
-// ── la guida (Alberto, 29.10: «al primo accesso spiega come funziona»), una volta sola (pzkko-zero-guida) e di nuovo dalle
-// impostazioni. (4.11, Alberto: «uno che non ha mai aperto il sito fa fatica a usare il flipper… fai cose super facili»:
+// ── la guida (pzkko, 29.10: «al primo accesso spiega come funziona»), una volta sola (pzkko-zero-guida) e di nuovo dalle
+// impostazioni. (4.11, pzkko: «uno che non ha mai aperto il sito fa fatica a usare il flipper… fai cose super facili»:
 // prima erano quattro dialoghi di solo testo, e chi arrivava non sapeva quale fosse «la croce» né che le frecce del
 // computer vanno. Adesso tre pagine: i tasti DISEGNATI come sono sul cercapersone, coi tasti del computer accanto; come si
 // usa, con un tasto scelto vero; da dove si comincia.) OK e → vanno avanti, ← torna, INDIETRO la salta, il clic va avanti ──
@@ -541,7 +541,7 @@ export function guida(forza = false) {
   })
 }
 
-// ── lo scrivere (11.11, Alberto: «elimina la tastiera che uso quella del mio pc»): niente più tastiera sullo schermo. Al
+// ── lo scrivere (11.11, pzkko: «elimina la tastiera che uso quella del mio pc»): niente più tastiera sullo schermo. Al
 // suo posto la riga dove compare quello che si scrive con la tastiera vera; sul telefono, toccando lo schermo, si apre la
 // tastiera del telefono (telefono.js le passa i tasti: conTastieraVera). OK o Invio fatto, Backspace cancella, INDIETRO o
 // Esc annulla. Prima c'erano le file di lettere da scegliere con la croce (la TextInput del Flipper, 29.10) ──
@@ -632,7 +632,7 @@ export function numero({ testo = '', titolo = 'il numero', gradi = false, max = 
 export function cifre({ titolo = 'le cifre', n = 4, min = n, nascoste = false, testo = '', prima = '' } = {}) {
   titolo = adatta(titolo, W - 2 * MARGINE)
   return new Promise((risolvi) => {
-    // (11.11, Alberto: «quando crei un account e scegli il pin l'ultima cifra non si oscura»: la casella scelta era sempre in
+    // (11.11, pzkko: «quando crei un account e scegli il pin l'ultima cifra non si oscura»: la casella scelta era sempre in
     // chiaro, e dopo la quarta cifra il cursore resta lì. Ora una cifra nascosta si vede solo mentre la giri con ↑↓, 1,5 s)
     let s = String(testo).replace(/\D/g, '').slice(0, n), c = Math.min(s.length, n - 1), avviso = 0, chiaro = 0
     const LATO = n > 6 ? 18 : 24, x0 = Math.round(W / 2 - (n * LATO + Lcd.larghezza(prima, 2) + (prima ? 4 : 0)) / 2) + (prima ? Lcd.larghezza(prima, 2) + 4 : 0), y0 = BARRA + 34

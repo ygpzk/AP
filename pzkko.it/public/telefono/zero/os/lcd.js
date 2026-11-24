@@ -1,4 +1,4 @@
-// L'lcd di pzk os (29.10): 256 × 128 pixel d'impaginazione, il doppio del Flipper (128 × 64). Dall'11.11 (Alberto:
+// L'lcd di pzk os (29.10): 256 × 128 pixel d'impaginazione, il doppio del Flipper (128 × 64). Dall'11.11 (pzkko:
 // «aumenta la qualità dei pixel in dpi e fai colori a 8bit su tutto») i pixel veri sono il doppio per lato (D = 2:
 // 512 × 256, come uno schermo retina) e ognuno ha un colore della tavolozza a 8 bit (256 colori). Le app disegnano come
 // prima, coi numeri di 256 × 128: un pixel loro è un quadratino di 2 × 2 pixel veri; il testo esce col carattere di
@@ -42,7 +42,7 @@ export const C = {
   bianco: esa('#ffffff'), nero: esa('#000000'), oro: esa('#ffcc33'), cielo: esa('#66ccff'), erba: esa('#669933'),
 }
 
-// ── gli sfondi (11.11, Alberto: «dammi impostazione per cambiare sfondo»): il fondo (un colore, o un motivo che dipende dal
+// ── gli sfondi (11.11, pzkko: «dammi impostazione per cambiare sfondo»): il fondo (un colore, o un motivo che dipende dal
 // pixel vero) e l'inchiostro che ci si legge sopra. Tutto passa dalla tavolozza: i passaggi di colore col retino di Bayer ──
 const BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
 const q = (c) => rgb(colore(c[0], c[1], c[2]))

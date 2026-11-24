@@ -5,7 +5,7 @@
 // giorno, fino a 7). Il pzkkonet (oggetto) aggiunge il 10 % ai premi. Lo stato sta nello zaino (zaino.sfideStato).
 // Lo usano il comando «sfide» della chat e l'app Sfide del telefono.
 //
-// DAL 31.10 LE DECIDE LA BANCA (Alberto: «il browser non decide più niente»; giochi/app-sfide.mjs sul server di Alberto): la
+// DAL 31.10 LE DECIDE LA BANCA (pzkko: «il browser non decide più niente»; giochi/app-sfide.mjs sul server di pzkko): la
 // scelta del giorno, la fotografia dei numeri, i premi, il bonus e la serie. Qui restano le parole e la vista: oggi() legge
 // la copia dello zaino che la banca manda, e se il giorno non c'è ancora chiede alla banca di prepararlo ('sfide.oggi');
 // riscuoti e riscuotiBonus sono azioni della banca (pzk.fai), e il premio arriva col conto nuovo.

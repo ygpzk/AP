@@ -1,4 +1,4 @@
-// LE APP SINGOLE (19.11, Alberto: «prendi anche virtual, miniera, borsa pzk/eur, convertitori numeri, ecc... e fai app singole
+// LE APP SINGOLE (19.11, pzkko: «prendi anche virtual, miniera, borsa pzk/eur, convertitori numeri, ecc... e fai app singole
 // per ognuno e mettile nei progetti»): un'app del cercapersone da sola, in una finestra sopra il profilo. Niente 3D e niente
 // menu: lo schermo di pzk os (telefono/zero/os/os.js, lo stesso lcd a 8 bit che sta sotto il vetro dello zero) steso piatto e
 // grande, fermo su quell'app, coi sei tasti dello zero sotto (la croce, OK, INDIETRO) per chi tocca. Le app sono quelle vere

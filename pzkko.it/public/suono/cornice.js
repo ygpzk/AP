@@ -1,4 +1,4 @@
-// La cornice (26.10, Alberto: «fai che la musica non si interrompa quando cambio pagina»). pzkko.it è fatto di pagine
+// La cornice (26.10, pzkko: «fai che la musica non si interrompa quando cambio pagina»). pzkko.it è fatto di pagine
 // vere: cambiare pagina butta via il documento, e con lui il contesto audio e la musica. Allora, mentre la musica suona,
 // la pagina in cui si è entrati resta e fa da cornice: un link del sito non la lascia, apre l'altra pagina in un riquadro
 // grande quanto la finestra, sopra di lei, e la musica va avanti fuori. La pagina di fuori dorme (nascosta, la scena 3D

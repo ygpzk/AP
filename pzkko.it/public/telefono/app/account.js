@@ -1,11 +1,11 @@
 // La logica dell'account in comune con l'app Account del cercapersone zero (telefono/zero/os/account.js): i nomi riservati
-// ad Alberto e le mosse del conto in parole. (31.10) Col cercapersone vecchio se n'è andata anche la sua interfaccia HTML
+// di pzkko e le mosse del conto in parole. (31.10) Col cercapersone vecchio se n'è andata anche la sua interfaccia HTML
 // (le quattro schede conto, cambio, invia, altro): le fa lo zero a 8 bit. I soldi e le chiamate restano quelli di games/pzk.js
 // (entra, crea, esci, sincronizza, converti, invia…).
 
 import * as pzk from '../../games/pzk.js'
 
-export const RISERVATI = /^\s*(pzkko|alberto|albertopecchini|pecchini|admin|banca|bancapzk|root)\s*$/i // come NOMI_PROTETTI in api/wallet.mjs (anche lo zero, os/account.js)
+export const RISERVATI = /^\s*(pzkko|admin|banca|bancapzk|root)\s*$/i // come NOMI_PROTETTI in api/wallet.mjs (anche lo zero, os/account.js)
 const fmt = pzk.fmt, fmtEur = pzk.fmtEur
 
 const NOMI_MOSSE = { nato: 'conto aperto', 'in-eur': 'in EUR€', 'in-pzk': 'in $pzk', inviato: 'inviati a', ricevuto: 'ricevuti da', indirizzo: 'indirizzo cambiato', instagram: 'regalo di instagram', trovato: 'trovati per terra', sussidio: 'sussidio', lumaca: 'la lumachina', rapina: 'rapina alla cassa (sporchi)', arresto: 'arresto: multa', cauzione: 'cauzione', lavatrice: 'lavatrice (commissione)', lavati: 'lavati: ora puliti', puliti: 'puliti dal tempo', decifrato: 'wallet decifrato', regalo: 'regalo di pzkko', premio: 'regalo di instagram' }

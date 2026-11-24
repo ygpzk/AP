@@ -1,4 +1,4 @@
-// L'app «lavatrice» di pzk os (1.11, Alberto: «sì» a farla, dopo che il cercapersone nero se n'era andato con la sua):
+// L'app «lavatrice» di pzk os (1.11, pzkko: «sì» a farla, dopo che il cercapersone nero se n'era andato con la sua):
 // i soldi sporchi delle rapine che tornano puliti. Le regole sono quelle della banca (wallet.mjs, lava: al più 50.000 a
 // lavaggio, 2.000 puliti di commissione, dieci minuti, una alla volta, in galera non parte) e la logica è quella di
 // telefono/app/lavatrice.js (stato, dopo, storia, lava, ritira): qui c'è solo la faccia, a colori dall'11.11 (la macchina

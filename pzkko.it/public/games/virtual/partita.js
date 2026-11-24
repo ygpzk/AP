@@ -14,7 +14,7 @@
 // bookmaker: gol attesi dalla differenza di forza, probabilità di 1 X 2 e dei totali da una Poisson, un margine del
 // 6,5%, arrotondate ai centesimi e mai sotto 1,05. Il meteo è solo scena: non tocca il risultato.
 //
-// IL RISULTATO E LA CRONACA NON SONO PIÙ QUI (31.10, Alberto: «il browser non decide più niente»). Fino a oggi il
+// IL RISULTATO E LA CRONACA NON SONO PIÙ QUI (31.10, pzkko: «il browser non decide più niente»). Fino a oggi il
 // risultato usciva da un secondo seme, anche lui dall'indice (mulberry32), scritto qui: chiunque poteva calcolare in
 // anticipo i risultati di tutte le partite. Ora li decide la banca (C:\pzkko-server, giochi/virtual.mjs: il seme è un
 // HMAC del segreto del server, i gol dalle stesse forze delle quote, il doppio giallo che diventa rosso, gli espulsi che

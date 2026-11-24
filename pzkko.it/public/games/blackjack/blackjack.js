@@ -6,7 +6,7 @@
 // sono quelle vere di tre casinò (regole.js); i $pzk sono gli stessi di tutti i
 // giochi (../pzk.js). Fino a tre caselle, con le puntate laterali dove ci sono.
 //
-// (31.10, Alberto: «il browser non decide più niente») LE CARTE LE DÀ LA BANCA: il sabot e il Tavolo stanno sul server
+// (31.10, pzkko: «il browser non decide più niente») LE CARTE LE DÀ LA BANCA: il sabot e il Tavolo stanno sul server
 // (C:\pzkko-server\banca\giochi\casino-blackjack.mjs, con una copia di regole.js). Qui si mettono le fiches, si chiede
 // («distribuisci», «carta», «raddoppia»…: pzk.fai) e si anima quello che la banca risponde: gli eventi del Tavolo e il
 // tavolo come si vede (V: le carte scoperte, la mano di turno, le mosse ammesse, il sabot). regole.js qui serve solo per

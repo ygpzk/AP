@@ -1,4 +1,4 @@
-// L'app «quiz» di pzk os (29.10, Alberto: «crea uno alla volta … quiz …»): i quiz che pagano sul cercapersone zero. Le
+// L'app «quiz» di pzk os (29.10, pzkko: «crea uno alla volta … quiz …»): i quiz che pagano sul cercapersone zero. Le
 // domande, i premi, la serie, il tetto giornaliero e la partita sono quelli di chat/quiz.js (nuova, prossima, rispondi,
 // restanti, record), come il quiz del cercapersone vecchio. (31.10) La partita la fa la banca: una domanda alla volta, senza
 // la giusta, col tempo della banca; aspettando la sua risposta in fondo gira la rotellina e i tasti sono fermi.
@@ -7,12 +7,12 @@
 //   tre ticchettano), la difficoltà col premio, la serie; il testo; le quattro risposte A–D (↑ ↓ e OK, o i tasti a–d e 1–4;
 //   la scelta lunga scorre da sola). Le foto arrivano a colori, nei 256 della tavolozza (se il browser non le lascia leggere, si
 //   tira a indovinare). Risposto: la giusta col ✓, la tua sbagliata con la x, al posto della domanda la spiegazione, in fondo il
-//   premio; poi la prossima arriva da sola (2.11, Alberto: «fai che i quiz avanzino senza premere ogni volta enter»): 2,5 s
+//   premio; poi la prossima arriva da sola (2.11, pzkko: «fai che i quiz avanzino senza premere ogni volta enter»): 2,5 s
 //   dopo una giusta, 4,5 s dopo una sbagliata (c'è la spiegazione da leggere), con la barretta che si accorcia sopra
 //   l'esito; OK va avanti subito. INDIETRO chiede se lasciare la partita (si ferma l'attesa dell'esito, non il tempo della
 //   domanda: quello lo conta la banca).
 // - IL RIEPILOGO: quante giuste, i pallini, quanto hai preso, e i tasti argomenti e ancora.
-// (11.11, Alberto: «fai colori a 8bit su tutto») I colori dicono com'è andata, e basta: verde la giusta (il pallino, la riga
+// (11.11, pzkko: «fai colori a 8bit su tutto») I colori dicono com'è andata, e basta: verde la giusta (il pallino, la riga
 // col ✓, l'esito, i soldi presi), rosso la sbagliata (il pallino con la x, la riga con la x, l'esito) e gli ultimi tre secondi
 // della barra del tempo. Il resto è d'inchiostro. Le scritte colorate stanno su una fascia col testo nero o bianco, che si
 // legge su tutti gli sfondi; il ✓ e la x restano per chi distingue male il verde dal rosso.

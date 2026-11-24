@@ -1,4 +1,4 @@
-// L'app «sfide» di pzk os (29.10, Alberto: «crea uno alla volta shop, pzkstore, sfide, …»): le tre sfide di oggi sul
+// L'app «sfide» di pzk os (29.10, pzkko: «crea uno alla volta shop, pzkstore, sfide, …»): le tre sfide di oggi sul
 // cercapersone zero. Le sfide, i premi, la serie e il bonus sono quelli di chat/sfide.js (oggi, riscuoti, riscuotiBonus: dal
 // 31.10 azioni della banca, con la rotellina in fondo mentre risponde);
 // dove si fa ogni sfida e il conto alla rovescia vengono dalle sfide del cercapersone vecchio (telefono/app/sfide.js).
@@ -6,7 +6,7 @@
 // - LE RIGHE (↑ ↓): le tre sfide (l'icona, la difficoltà e cosa fare, la barra, a che punto sei, il premio) e il bonus del
 //   giorno. OK: «riscuoti» se è pronta, «vai» se no (si apre l'app dove si fa: la chat col comando giusto, lo shop, il quiz…),
 //   «prendi» per il bonus. Riscuotere suona la moneta.
-// - I COLORI (11.11, Alberto: «fai colori a 8bit su tutto»): oro quello che aspetta di essere riscosso, verde quello già
+// - I COLORI (11.11, pzkko: «fai colori a 8bit su tutto»): oro quello che aspetta di essere riscosso, verde quello già
 //   riscosso, blu la strada che manca. Il testo resta d'inchiostro; le targhette hanno il testo nero sul loro colore.
 // Le regole: os/REGOLE.md.
 import { Lcd, W, H, C } from './lcd.js'

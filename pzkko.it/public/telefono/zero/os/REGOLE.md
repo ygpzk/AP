@@ -2,16 +2,16 @@
 
 pzk os è il sistema del cercapersone zero: un lcd di 256 × 128 pixel a un bit sotto il vetro del modello 3D, coi sei
 tasti del Flipper. Queste regole valgono per ogni app nuova e per ogni modifica a un'app che c'è già. Le ha volute
-Alberto il 29.10.2026: «regole su come creare app in pzk os dentro al flipper senza bugs, usando i tasti presenti, senza
+pzkko il 29.10.2026: «regole su come creare app in pzk os dentro al flipper senza bugs, usando i tasti presenti, senza
 bugs grafici, con icone, animazioni e suoni tutti funzionanti». Ogni regola viene da un errore vero, che sta fra
 parentesi.
 
-Un'app è finita quando il collaudo dice «tutto a posto», le sue foto sono state guardate una per una, e Alberto ha
+Un'app è finita quando il collaudo dice «tutto a posto», le sue foto sono state guardate una per una, e pzkko ha
 detto ok.
 
 ## 1. Prima di cominciare
 
-1. **Un'app alla volta, e solo quando Alberto la chiede.** Le app che non ci sono aprono la vista «in arrivo».
+1. **Un'app alla volta, e solo quando pzkko la chiede.** Le app che non ci sono aprono la vista «in arrivo».
 2. **La logica è quella del sito, pzk os è solo la faccia.** Prezzi, premi, regole e soldi passano dai moduli che usa già
    il cercapersone vecchio (`chat/`, `games/pzk.js`, `chat/zaino.js`). Mai una seconda copia delle regole di un gioco, mai
    un nuovo posto dove salvare dati del server. La chat l'ha fatto così: usa i comandi veri di `chat/comandi/`.
@@ -69,7 +69,7 @@ tenuti premuti.
    carattere che non va dice perché, in fondo.
 8. **Senza conto non si entra** (os.js, `LIBERE`): ogni app che non è account o impostazioni apre l'account, e dopo
    l'accesso (`os.dopoAccesso`) si apre quella voluta. Un'app nuova non deve fare niente: lo fa `apri`.
-9. **Niente tastiera sullo schermo.** (11.11, Alberto: «elimina la tastiera che uso quella del mio pc».) Chi scrive testo
+9. **Niente tastiera sullo schermo.** (11.11, pzkko: «elimina la tastiera che uso quella del mio pc».) Chi scrive testo
    usa `os.tastiera` (o `os.numero`): una riga dove compare quello che si scrive con la tastiera del computer; sul telefono,
    toccando lo schermo, esce la tastiera del telefono (telefono.js, `conTastieraVera`). OK o Invio fatto, INDIETRO o Esc
    annulla. Oppure l'app implementa carattere, cancella, invio e scrivendo, come la chat. Nessuna scritta dice più «scegli
@@ -77,11 +77,11 @@ tenuti premuti.
    cancella solo se `scrivendo()` è true, se no è INDIETRO. Dove Invio va a capo (l'editor di «codice C»), il tasto OK della
    tastiera vera è Ctrl+Invio.
 10. **Il tasto 3D che si abbassa e resta giù è del modello** (`zero.js`): le app non lo toccano.
-11. **Quando i tasti di una scelta sono direzioni, le frecce li premono subito.** (Alberto, col turno da rider: «le freccie
+11. **Quando i tasti di una scelta sono direzioni, le frecce li premono subito.** (pzkko, col turno da rider: «le freccie
    non vanno per la sequenza».) La chat lo fa da sola in `scegli` per i tasti sinistra, dritto o centro, destra, giù:
    ← ↑ → ↓ premono, il tasto porta la sua freccia, e sotto c'è scritto quali frecce premere. Un'app con un gioco a
    direzioni fa lo stesso: la freccia è l'azione, non uno spostamento del cursore seguito da OK.
-12. **C'è sempre una cosa scelta, e OK preme quella.** (4.11, Alberto: «i tasti che premo danno comandi diversi da quel che
+12. **C'è sempre una cosa scelta, e OK preme quella.** (4.11, pzkko: «i tasti che premo danno comandi diversi da quel che
    hanno di nome».) Mai uno stato «niente di scelto» in cui OK fa altro (la chat apriva la tastiera), mai un tasto scelto
    fuori schermo, mai due cursori. Il cursore si ricorda per chiave, non per posto: se la lista cambia, resta sullo stesso
    tasto o torna al primo. Quello che un tasto manda lo dice il suo nome: nella chat il fumetto è il nome del tasto.
@@ -90,7 +90,7 @@ tenuti premuti.
 
 ### Il clic del mouse
 
-Alberto, 29.10: «metti per sicurezza anche il click del mouse». Il clic sullo schermo 3D è un in più: tutto quello che
+pzkko, 29.10: «metti per sicurezza anche il click del mouse». Il clic sullo schermo 3D è un in più: tutto quello che
 si clicca si fa anche coi tasti.
 
 1. **Mentre disegna, la vista segna con `os.zona(x, y, w, h, fn)` ogni cosa che si preme:** i tasti, le righe di una
@@ -133,7 +133,7 @@ si clicca si fa anche coi tasti.
    timer. Una riga preparata prima e disegnata dopo copia i valori che usa: lo stato può essere diventato null nel
    frattempo. (La barra del tempo della chat leggeva `m.tempo.fermo` quando `m.tempo` era già null: l'errore
    «reading 'fermo'» a ogni fotogramma.)
-9. **I colori sono della tavolozza a 8 bit.** (11.11, Alberto: «aumenta la qualità dei pixel in dpi e fai colori a 8bit su
+9. **I colori sono della tavolozza a 8 bit.** (11.11, pzkko: «aumenta la qualità dei pixel in dpi e fai colori a 8bit su
    tutto».) Lo schermo ha 512 × 256 pixel veri, due per lato per ogni pixel dell'impaginazione (che resta 256 × 128), e 256
    colori: nel buffer 0 è il fondo (lo sfondo scelto nelle impostazioni, anche a motivi o sfumato), 1 l'inchiostro del tema,
    16–255 i colori (`colore(r, g, b)`, `esa('#rrggbb')` e i nomi di `C` in lcd.js; `px`, `riempi`, `testo({ col })`).
@@ -146,12 +146,12 @@ si clicca si fa anche coi tasti.
 
 1. **Le icone nuove sono tracciati SVG in `os/icone.js`** (la mappa `SVG`), col loro colore in `COLORI` (uno per
    tracciato, o uno per tutti; il bordino d'inchiostro lo mette icone.js): viewBox 16 × 16, solo forme piene, niente
-   contorni. Le forme stanno sulla griglia intera, e ogni dettaglio e ogni buco è largo almeno 1 unità. (Alberto: «rifai
+   contorni. Le forme stanno sulla griglia intera, e ogni dettaglio e ogni buco è largo almeno 1 unità. (pzkko: «rifai
    icone in svg consumando pochissimo».)
 2. **L'icona di un'app si chiama `app-<id>`.** Si usa a 16 (liste, titoli) e a 32 (le viste grandi): si guardano tutte e
    due le misure. Sulla riga scelta va rovesciata (`inv: true`).
 3. **Un nome che non c'è lascia un buco** (il collaudo lo segnala: «icone che non ci sono»).
-4. **Le webp di Alberto** (`chat/icone.js`) restano solo come riserva per i nomi che non hanno ancora un SVG. Un'icona
+4. **Le webp di pzkko** (`chat/icone.js`) restano solo come riserva per i nomi che non hanno ancora un SVG. Un'icona
    nuova non si fa mai così: la prima volta `icone.bitmap` torna null finché l'immagine non arriva, e lo schermo salta.
 5. **Nella chat un'icona si VEDE solo col campo `icone` della scheda** (`icone: ['canna']`, `lato: 32`): una fila di
    riquadri. Quelle dentro il testo (`:canna:`, `<img>`) la chat le toglie, e un tasto con la sola icona in fila non ha
@@ -190,7 +190,7 @@ si clicca si fa anche coi tasti.
 ## 8. I dati e le attese
 
 1. **Si legge e si scrive coi moduli del sito.** I soldi si muovono solo con le funzioni che ci sono (`pzk.js`, quelle
-   della chat). I dati del server stanno sul server di Alberto: nessun posto nuovo.
+   della chat). I dati del server stanno sul server di pzkko: nessun posto nuovo.
 2. **Il localStorage** usa la chiave `pzkko-zero-<id>`, e `pzkko-zero-<id>:<ind>` se il dato è di un conto. Sempre
    dentro `try`/`catch`.
 3. **Chi ascolta smette:** `zaino.ascolta`, `pzk.osserva` e `pzk.ascolta` tornano la funzione per smettere. Si chiamano
@@ -250,15 +250,15 @@ node tools/pzkko/zero/prova.mjs --app=<id>
 9. **Quello che apre la banca si collauda con la banca:** `prova.mjs --banca` la carica coi file in memoria, e
    `--turni` gioca i tredici minigiochi del turno coi sei tasti (`--sbaglia`, `--scade`: la risposta sbagliata e il tempo
    scaduto). Dal 31.10 al 6.11 nessun collaudo giocava un turno, e nessuno si è accorto che non si vedeva.
-6. **Si scrive un paragrafo nel README** (`pzkko/README.md`, «Il cercapersone zero»), con le parole di Alberto. Si dice ad
-   Alberto dove guardarla: http://localhost:5182/?zero.
+6. **Si scrive un paragrafo nel README** (`pzkko/README.md`, «Il cercapersone zero»), con le parole di pzkko. Si dice ad
+   pzkko dove guardarla: http://localhost:5182/?zero.
 
 ## 10. Il modello da copiare
 
 Questo modello passa il collaudo. Si copia, si rinomina, si cambia.
 
 ```js
-// L'app «esempio» di pzk os (GG.MM, Alberto: «…»): cosa fa, in due righe. Le regole: os/REGOLE.md.
+// L'app «esempio» di pzk os (GG.MM, pzkko: «…»): cosa fa, in due righe. Le regole: os/REGOLE.md.
 import { Lcd, W, H } from './lcd.js'
 import * as icone from './icone.js'
 import * as zaino from '../../../chat/zaino.js'

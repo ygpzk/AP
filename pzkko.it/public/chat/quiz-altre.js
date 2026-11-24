@@ -1,5 +1,5 @@
-// Gli argomenti nuovi dei quiz (26.10, Alberto: «crea altri quiz… aumenta i modi di rispondere»): [id, nome, icona].
-// (31.10) Le domande (e i vero/falso) stanno sulla banca, sul pc di Alberto (banca\dati\quiz-altre.mjs): qui c'erano con la
+// Gli argomenti nuovi dei quiz (26.10, pzkko: «crea altri quiz… aumenta i modi di rispondere»): [id, nome, icona].
+// (31.10) Le domande (e i vero/falso) stanno sulla banca, sul pc di pzkko (banca\dati\quiz-altre.mjs): qui c'erano con la
 // risposta giusta, e il browser non le deve sapere. Una domanda nuova si aggiunge là.
 
 export const ARGOMENTI_NUOVI = [

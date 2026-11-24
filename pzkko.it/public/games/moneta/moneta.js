@@ -4,7 +4,7 @@
 // moneta d'ottone in 3D (scena.js) che la fisica lancia davvero (Rapier, vedi
 // lancio.js): sale girando, cade nel piatto di legno, rimbalza, rotola, ondeggia
 // e si ferma. La faccia però la tira la banca (31.10: moneta.lancia, sul server
-// di Alberto), e la moneta ci arriva (vedi «il film del lancio»). Testa e croce
+// di pzkko), e la moneta ci arriva (vedi «il film del lancio»). Testa e croce
 // pagano 1 a 1; dopo una vincita, «lascia o raddoppia?»: si incassa, o si
 // rilancia tutto (la vincita intanto sta sul tavolo della banca, e ricaricando si
 // ritrova). Soldi finti ($pzk, gli stessi degli altri giochi: ../pzk.js).
@@ -444,8 +444,8 @@ function segna(l, anima = true) {
 function togliSegno() { if (T) T.segno.innerHTML = ''; stato.uscita = null }
 
 // ── il lancio ────────────────────────────────────────────────────────────────
-// (31.10, Alberto: il browser non decide più niente) La faccia la tira la banca (moneta.lancia, moneta.raddoppia, sul
-// server di Alberto): le puntate partono a «lancia», la banca le prende, tira e paga, e la vincita la tiene lei sul suo
+// (31.10, pzkko: il browser non decide più niente) La faccia la tira la banca (moneta.lancia, moneta.raddoppia, sul
+// server di pzkko): le puntate partono a «lancia», la banca le prende, tira e paga, e la vincita la tiene lei sul suo
 // tavolo per «lascia o raddoppia»; poi la moneta vola e ci arriva (il film del lancio, sotto). Se la banca dice di no le
 // fiches tornano e la moneta resta dov'è
 async function lancia() {

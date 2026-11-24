@@ -197,7 +197,7 @@ const attesa = () => [nota('il 3D sta arrivando: le sue regole compaiono qui app
 const senza3d = () => [nota('dal 6.11 il sito è solo in 2D: la strada in 3D è spenta, per tutti (faceva girare le ventole). questo è il muro, con l\'ora, la sera, le auto e i suoni.')]
 
 // ── come parte la pagina: le scelte di chi guarda, che restano nel browser (dal 23.10) ──
-// di partenza la pagina è il muro di sempre, in 2D, con l'ora vera (la sera e la notte) e il meteo vero (dal 29.10, Alberto;
+// di partenza la pagina è il muro di sempre, in 2D, con l'ora vera (la sera e la notte) e il meteo vero (dal 29.10, pzkko;
 // prima a mezzogiorno col sole); il 3D (pzkko-3d), sempre giorno (pzkko-ora) e sempre sole (pzkko-meteo) si scelgono qui,
 // apposta. pzkkoPagina.scegli (index.html) le
 // ricorda e mette subito l'ora e il meteo; il 3D si accende e si spegne ricaricando la pagina (senza ?scena e ?muro)

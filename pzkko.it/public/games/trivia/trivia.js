@@ -1,4 +1,4 @@
-// TRIVIA di pzkko.it (19.11, Alberto: «ricrea da zero trivia e parole in stile pzk»): otto domande, quindici secondi
+// TRIVIA di pzkko.it (19.11, pzkko: «ricrea da zero trivia e parole in stile pzk»): otto domande, quindici secondi
 // l'una, e ogni risposta giusta paga in $pzk. Rifatto da zero rispetto al primo Trivia (React, il quiz di Storia
 // dell'Architettura del vecchio sito): qui è un foglio col nastro come i tavoli (../foglio.css) e le domande sono quelle
 // del mondo pzk, le stesse del quiz del cercapersone. Non decide niente: le domande, le risposte giuste, il tempo e i

@@ -1,8 +1,8 @@
 // I $pzk di pzkko.it: soldi finti, gli stessi per tutti i giochi (roulette, blackjack, mine, dado, moneta, virtual, la chat,
 // le app del cercapersone) e per il wallet in alto a sinistra (wallet/wallet.js). Non valgono niente e non si comprano.
 //
-// DAL 31.10 IL SALDO STA SOLO SULLA BANCA (Alberto: «saldo sempre nel server immediatamente … browser modificato non può
-// accedere … solo da me stanno i dati»). La banca gira sul pc di Alberto (C:\pzkko-server, dietro /api/wallet/): lì si
+// DAL 31.10 IL SALDO STA SOLO SULLA BANCA (pzkko: «saldo sempre nel server immediatamente … browser modificato non può
+// accedere … solo da me stanno i dati»). La banca gira sul pc di pzkko (C:\pzkko-server, dietro /api/wallet/): lì si
 // tirano i dadi, si danno le carte, si pagano i premi, si tengono lo zaino e le attese. Questo file non decide più niente:
 // - fai(azione, dati) chiede alla banca di fare una cosa («roulette.gira» con le puntate, «chat.pesca», «quiz.rispondi»…)
 //   e restituisce quello che è successo ({ ok, esito } o { ok: false, errore }); il conto che torna (saldo, EUR€, zaino,
@@ -14,7 +14,7 @@
 // - chi non entra in un conto è un OSPITE: 1.000 $pzk che vivono nella memoria della banca (il biglietto sta in
 //   sessionStorage, e dura quanto la scheda);
 // - il canale (games/live.js) avvisa quando il conto cambia da un'altra parte (un altro telefono, un invio ricevuto).
-// Se la banca non risponde (il pc di Alberto spento), si aspetta: niente si gioca a credito.
+// Se la banca non risponde (il pc di pzkko spento), si aspetta: niente si gioca a credito.
 
 const API = '/api/wallet/' // con la barra finale: il sito ha trailingSlash, e senza ogni POST passava da un redirect 308
 const CHIAVE_OSPITE = 'pzkko-ospite'
@@ -173,7 +173,7 @@ async function manda(body, { keepalive = false } = {}) {
   const chi = W?.token ?? 'ospite' // (chi ha chiesto: se intanto si è entrati o usciti, la risposta è dell'altro e non si prende)
   try {
     // (11.11: una rete appesa teneva la promessa aperta per sempre, e la rotellina della banca girava senza fine. 25 secondi:
-    // più dei 20 che il ponte, _server.mjs, aspetta il pc di Alberto, così di solito arriva prima il suo «in pausa»)
+    // più dei 20 che il ponte, _server.mjs, aspetta il pc di pzkko, così di solito arriva prima il suo «in pausa»)
     const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dati), keepalive, signal: AbortSignal.timeout?.(25_000) })
     const d = await r.json().catch(() => ({ ok: false, offline: true, errore: 'la banca non risponde' }))
     online = !d.offline
@@ -223,7 +223,7 @@ export function dalCanale(s) {
  */
 export const fai = (cosa, args = {}) => chiama({ a: 'fai', cosa, args })
 
-// SI ENTRA CON L'EMAIL (19.11, Alberto: «no password, solo codici di verifica via email»; il riquadro è accesso/accesso.js).
+// SI ENTRA CON L'EMAIL (19.11, pzkko: «no password, solo codici di verifica via email»; il riquadro è accesso/accesso.js).
 /** Chiede alla banca di mandare a quell'email il codice di sei cifre (vale dieci minuti). → { ok, email (mascherata), fino } */
 export const codice = (email) => chiama({ a: 'codice', email })
 /** Entra col codice. Se l'email non ha un conto risponde { ok, nuovo } senza far entrare: si richiama col `nome`, e il conto nasce. */
@@ -318,10 +318,10 @@ export function rigaEuro({ classe = 'pzk-eur' } = {}) {
   return a
 }
 
-// ── il regalo per chi mi segue su tutti e due i profili di instagram (19.11): 2.000 $pzk, una volta per conto. Un sito non può
-// sapere chi segue chi: si scrive il proprio instagram (accesso/accesso.js, premio), la banca avvisa Alberto, che guarda fra i
+// ── il regalo per chi mi segue su instagram (19.11): 2.000 $pzk, una volta per conto. Un sito non può
+// sapere chi segue chi: si scrive il proprio instagram (accesso/accesso.js, premio), la banca avvisa pzkko, che guarda fra i
 // follower e decide. Prima erano 1.000 sulla fiducia, tornando dal profilo ──
-export const INSTAGRAM = 'https://www.instagram.com/albertoxpecchini/'
+export const INSTAGRAM = 'https://www.instagram.com/pzkko/'
 export const PREMIO_IG = 2000
 /** La richiesta del regalo: { ig, stato: 'attesa' | 'dato' | 'no' } o null. */
 export const seguo = () => W?.conto.seguo ?? null
@@ -334,7 +334,7 @@ export function linkInstagram({ classe = 'pzk-ig', fatto } = {}) {
   const a = document.createElement('a')
   a.href = '#regalo'
   a.className = classe
-  a.title = 'si apre il regalo: scrivi il tuo instagram, Alberto controlla e arrivano i $pzk'
+  a.title = 'si apre il regalo: scrivi il tuo instagram, pzkko controlla e arrivano i $pzk'
   a.innerHTML = `seguimi su instagram: <b>+${fmt(PREMIO_IG)} $pzk</b>`
   let era = premioPreso()
   const aggiorna = () => { const st = seguo()?.stato; a.hidden = st === 'dato' || st === 'attesa'; if (!era && premioPreso()) { era = true; fatto?.() } }
@@ -348,7 +348,7 @@ export function linkInstagram({ classe = 'pzk-ig', fatto } = {}) {
 sincronizza()
 document.addEventListener('visibilitychange', () => { if (!document.hidden) sincronizza() })
 
-// IN LOCALE SEMPRE DENTRO COL CONTO PZKKO (29.10, Alberto: «fai che in local abbia sempre il log fatto con pzkko»): sul server
+// IN LOCALE SEMPRE DENTRO COL CONTO PZKKO (29.10, pzkko: «fai che in local abbia sempre il log fatto con pzkko»): sul server
 // di prova (localhost e gli indirizzi numerici: tools/dev.mjs) chi non è già dentro come pzkko entra da solo, col token che il
 // server di prova chiede alla banca (/__dev/accesso). Online quell'indirizzo non esiste. ?ospite
 // nell'indirizzo lascia senza conto (per provare il lucchetto del cercapersone)

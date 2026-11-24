@@ -1,4 +1,4 @@
-// ANGOLI di pzkko.it (19.11, Alberto: «cerca in AP tanto tempo fa anche il gioco angoli e rifallo»): quanto è largo
+// ANGOLI di pzkko.it (19.11, pzkko: «cerca in AP tanto tempo fa anche il gioco angoli e rifallo»): quanto è largo
 // l'angolo? Rifatto da zero rispetto al primo Angoli (React, nel vecchio sito, giugno 2026): qui è un foglio col nastro come
 // Parole e Trivia (../foglio.css), col pennarello al posto dei colori al neon. Il gioco è rimasto quello:
 //

@@ -1,4 +1,4 @@
-// L'app «decifratore» di pzk os (1.11, Alberto: «sì» a farla, dopo che il cercapersone nero se n'era andato con la sua):
+// L'app «decifratore» di pzk os (1.11, pzkko: «sì» a farla, dopo che il cercapersone nero se n'era andato con la sua):
 // apre i wallet pzk cifrati e le chiavette usb che lo spazzino trova sul nastro. I giochini li prepara la banca
 // (giochi/app-decifratore.mjs: tre codici, due errori perdonati, al terzo il pezzo si blocca) e la banca paga
 // (wallet.mjs, decifra: tre al giorno); la logica è quella di telefono/app/decifratore.js (DOMANDE, DENTRO, TIPI, pezzi,
@@ -25,7 +25,7 @@ const nome = (id) => TIPI[id][1]
 const il = (id) => `${TIPI[id][0] === 'chiavetta' ? 'la' : 'il'} ${nome(id)}` // (11.11: «collego il chiavetta usb…»)
 const dentro = (id) => DENTRO[TIPI[id][0]]
 
-// (11.11, Alberto: «fai colori a 8bit su tutto») pochi colori, ognuno col suo senso: verde quello che va (il codice giusto, i
+// (11.11, pzkko: «fai colori a 8bit su tutto») pochi colori, ognuno col suo senso: verde quello che va (il codice giusto, i
 // $pzk, i pezzi aperti oggi), rosso quello che si perde (le vite, il pezzo bloccato, la galera), giallo l'avviso. Le scritte
 // stanno su una fascia piena col loro testo fisso (nero sul verde e sul giallo, bianco sul rosso scuro), così si leggono su
 // ogni sfondo: il verde acceso sull'arancione e il rosso scuro su «notte», da soli, sparivano

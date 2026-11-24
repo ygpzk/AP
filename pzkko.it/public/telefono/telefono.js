@@ -1,25 +1,25 @@
 // Il cercapersone (23.10; dal 31.10 c'è solo lo zero): si apre dal tasto sul muro (chat/chat.js → apri), il cercapersone
 // zero in 3D (telefono/zero/zero.js, il gadget bianco coi tasti arancioni) con dentro pzk os a 8 bit (zero/os/os.js).
 //
-// LO ZERO PER TUTTI (31.10, Alberto: «fai che cercapersone zero è predefinito e quello attuale si elimina per sempre»): fino
+// LO ZERO PER TUTTI (31.10, pzkko: «fai che cercapersone zero è predefinito e quello attuale si elimina per sempre»): fino
 // al 31.10 lo zero si comprava nello shop (9.999 $pzk) e agli altri si apriva il cercapersone nero, una foto
 // (art/chat-pager-grande/) con le app in HTML (telefono/app/) nello schermo. Il nero non c'è più, né la sua foto né le sue
 // app: di quelle restano in telefono/app/ solo le logiche che pzk os usa. Lo zero non si vende più; chi l'aveva comprato
 // tiene i suoi bonus.
 //
-// Come lo vuole Alberto:
-// - L'APERTURA (29.10, Alberto: «voglio lui come mockup, deve aprirsi con le stesse logiche… è in 3d mi raccomando»; poi:
+// Come lo vuole pzkko:
+// - L'APERTURA (29.10, pzkko: «voglio lui come mockup, deve aprirsi con le stesse logiche… è in 3d mi raccomando»; poi:
 //   «non fare una finestra sopra il modello 3d… lo schermo lo metti esattamente dove è nel modello… rifai da 0 pzk os
 //   adattato allo strumento»): la tela di zero.js prende la finestra e lo schermo è DENTRO il 3D, la trama dell'lcd sotto il
 //   vetro trasparente del modello. Il tasto sul muro «si ingrandisce» (vola la telecamera, dalla posa della foto a quella
-//   zoomata sullo schermo, 420 ms), lo schermo si accende (la retroilluminazione, 400 ms; Alberto: «appena premo il
+//   zoomata sullo schermo, 420 ms), lo schermo si accende (la retroilluminazione, 400 ms; pzkko: «appena premo il
 //   cercapers no caricamento ma solo animazione che lo accendo tipo 400ms») e sotto c'è già pzk os: l'app chiesta da chi
 //   l'ha aperto, se no l'ultima aperta, se no il desktop con la chiocciolina.
 // - I TASTI SONO QUELLI VERI: la croce e OK muovono pzk os, INDIETRO è una mossa indietro, tenuto tre secondi spegne
-//   (Alberto: «indietro premo una volta, spegni 3 secondi premuto indietro»). Dalla tastiera: le frecce, Invio, Backspace,
+//   (pzkko: «indietro premo una volta, spegni 3 secondi premuto indietro»). Dalla tastiera: le frecce, Invio, Backspace,
 //   Esc. Chiudendo (anche col clic fuori, subito alla pressione) la chiocciolina saluta a tutto schermo per un secondo, lo
 //   schermo si spegne e la telecamera torna sul tasto del muro (9.11).
-// - LA BARRA DI STATO VERA (29.10, Alberto: «nella topbar del cercapersone metti dati veri tipo quelli del pc tipo wifi»).
+// - LA BARRA DI STATO VERA (29.10, pzkko: «nella topbar del cercapersone metti dati veri tipo quelli del pc tipo wifi»).
 // Sul cellulare la tela prende tutta la finestra e sotto c'è una barra coi due tasti (indietro, chiudi), perché i tasti 3D
 // sono piccoli da toccare. (Il nome «telefono» è rimasto dalla prima versione, che era un telefono.)
 //
@@ -182,7 +182,7 @@ function lasciaIndietro() {
   clearTimeout(tenutaIndietro); tenutaIndietro = 0
   if (!spentoDaIndietro) { led.colpo(60); os.tasto('indietro') }
 }
-/** La barra dello spegnimento sull'lcd (os.spegnendo; 9.11, Alberto: «crea una barra di avanzamento per spegnerlo così
+/** La barra dello spegnimento sull'lcd (os.spegnendo; 9.11, pzkko: «crea una barra di avanzamento per spegnerlo così
  *  uno capisce che sta avanzando»): con true parte e si riempie nei tre secondi della tenuta, con false sparisce. Compare
  *  dopo 250 ms, così una pressione corta (una mossa indietro) non la fa lampeggiare; arrivata in fondo, chiudi() la toglie
  *  col ciao. */
@@ -198,7 +198,7 @@ function barraSpegni(si) {
     if (ms >= 3000) { clearInterval(barraT); barraT = 0 }
   }, 50)
 }
-// (11.11, Alberto: «elimina la tastiera che uso quella del mio pc») sul telefono una tastiera vera non c'è: quando pzk os
+// (11.11, pzkko: «elimina la tastiera che uso quella del mio pc») sul telefono una tastiera vera non c'è: quando pzk os
 // scrive (os.tastiera, os.numero) e si tocca lo schermo, un campo invisibile prende il fuoco e fa uscire quella del
 // telefono. Quello che arriva passa a pzk os lettera per lettera, come dalla tastiera del computer; il campo resta vuoto
 function tastieraTelefono() {
@@ -317,7 +317,7 @@ async function ingrandisci(prepara) {
   await prepara()
   dlg.classList.remove('zoom-nascosto', 'zoom', 'zoom-sfondo')
   await zero.luce(1, 270)
-  // al primo accesso la guida (Alberto: «al primo accesso spiega come funziona»); poi, senza conto, l'account (senza conto
+  // al primo accesso la guida (pzkko: «al primo accesso spiega come funziona»); poi, senza conto, l'account (senza conto
   // non si entra: la home col lucchetto, os.js)
   Promise.resolve(os.guidaVista() ? null : os.guida()).then(() => { if (dentro && !pzk.conto()) os.apri('account') })
 }
@@ -346,7 +346,7 @@ export async function apri(app = null, opz = {}) {
   aggiornaLed()
   misuraPing()
   // sotto lo schermo spento, pzk os: l'app chiesta da chi apre vince; se nessuno ne chiede una, quella che era aperta l'ultima
-  // volta (Alberto, 23.10: «memorizza sempre le azioni»; da scassato solo la chat), se no il desktop
+  // volta (pzkko, 23.10: «memorizza sempre le azioni»; da scassato solo la chat), se no il desktop
   const ultima = ricordo('cercapersone', { app: null }).app
   const a = app ?? (ultima && APP.some((x) => x.id === ultima) && (!zaino.pagerRotto() || ultima === 'chat') ? ultima : null)
   await ingrandisci(async () => { if (a) await vai(a, { ...opz, muto: true }); else home() })
@@ -357,7 +357,7 @@ export async function apri(app = null, opz = {}) {
   timerPing = setInterval(() => { if (dlg.open && !document.hidden) misuraPing() }, 30_000)
 }
 /** Il «ciao» a tutto schermo per un secondo, lo schermo che si spegne, e il cercapersone torna nel tasto da solo.
- *  (9.11, Alberto: «non si spegne e quindi non si chiude… velocizza l'uscita anche premendo fuori istantaneamente con un
+ *  (9.11, pzkko: «non si spegne e quindi non si chiude… velocizza l'uscita anche premendo fuori istantaneamente con un
  *  ciao da 1 secondo full schermo»): prima la luce calava a 0,2 e RISALIVA sul desktop, la chiocciolina salutava piccola
  *  per 2,3 s e solo dopo partiva il volo, 3,3 s in tutto; ora il ciao parte subito (nello stesso clic), dura un secondo,
  *  la retroilluminazione si spegne davvero (180 ms) e la telecamera torna sul tasto (400 ms), dove lo schermo si riaccende

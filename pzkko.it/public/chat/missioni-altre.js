@@ -1,4 +1,4 @@
-// Altre side quest (26.10, Alberto: «altre side quest»): nello stesso formato di missioni-dati.js (che le mette in coda alle
+// Altre side quest (26.10, pzkko: «altre side quest»): nello stesso formato di missioni-dati.js (che le mette in coda alle
 // prime cinque). Nessuna richiede oggetti per cominciare, tranne dove c'è scritto: si fanno con quello che c'è.
 
 export const MISSIONI_NUOVE = [

@@ -1,4 +1,4 @@
-// Il testo predittivo della riga dei comandi (29.10, Alberto: «nei comandi quando scrivo lavora deve esserci quasi un testo
+// Il testo predittivo della riga dei comandi (29.10, pzkko: «nei comandi quando scrivo lavora deve esserci quasi un testo
 // predittivo con i comandi disponibili così da poter finire col mouse oppure premendo tab e scorrendo con le freccie»).
 // Mentre si scrive, sopra la riga si apre un menù coi comandi che vanno bene: prima quelli il cui nome comincia con quello che
 // hai scritto, poi gli alias che cominciano così, poi quelli che lo contengono (a parità, prima quelli fatti da poco, i tasti

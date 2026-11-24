@@ -1,4 +1,4 @@
-// La luce sullo zero è quella del sito (29.10, Alberto: «la luce che spara addosso al modello deve essere = a quella del sito
+// La luce sullo zero è quella del sito (29.10, pzkko: «la luce che spara addosso al modello deve essere = a quella del sito
 // quindi non sta luce pazzesca anche di notte… fai i riflessi identici delle auto, lampioni… è come se fossi lì quindi luci
 // lì e luci qui»). Il cercapersone sta appeso alla saracinesca di pzkko: quello che illumina il muro illumina anche lui.
 // - Il sole dove sta davvero sopra Mantova a quest'ora (lo stesso calcolo NOAA di scena/luci.js, copiato qui per non
@@ -7,7 +7,7 @@
 //   auto-x dove sta, auto-l quanto abbaglia, auto-c il colore — e il neon), le stesse variabili che accendono il muro.
 // - L'ambiente per i riflessi: un cielo disegnato con l'ora (il sole, l'orizzonte arancione dei lampioni di notte, la
 //   striscia calda dei fari dove passa l'auto).
-// (23.11, Alberto: «fallo sempre chiaro, è sempre scuro senza luce»): zero.js ora usa sempre la luce di giorno, e di qui
+// (23.11, pzkko: «fallo sempre chiaro, è sempre scuro senza luce»): zero.js ora usa sempre la luce di giorno, e di qui
 // prende solo l'auto che passa (stato().auto); il cielo lo disegna con lo stato fisso di giorno. Non fotografa più la
 // scena della home per i riflessi: di sera era la strada buia, e il cercapersone diventava scuro con lei.
 //

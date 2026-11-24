@@ -1,5 +1,5 @@
-// L'app «banca» di pzk os (29.10, Alberto: «crea uno alla volta … banca …»): il portafoglio dei $pzk sul cercapersone zero.
-// È il wallet della home (wallet/wallet.js: «in portafoglio solo saldo e borsa», Alberto 26.10) sull'lcd: i soldi sono quelli
+// L'app «banca» di pzk os (29.10, pzkko: «crea uno alla volta … banca …»): il portafoglio dei $pzk sul cercapersone zero.
+// È il wallet della home (wallet/wallet.js: «in portafoglio solo saldo e borsa», pzkko 26.10) sull'lcd: i soldi sono quelli
 // di games/pzk.js, la borsa quella di api/borsa.mjs, il periodo scelto si ricorda insieme al pomello del wallet
 // (telefono/ricordi.js, «wallet-borsa»). Il conto, il cambio e gli invii sono dell'app account: OK ci porta.
 // - IL PORTAFOGLIO: il saldo a sette segmenti come i led del wallet (verdi, gli EUR€ ambra, su un vetrino nero; i segmenti
@@ -18,7 +18,7 @@ import * as pzk from '../../../games/pzk.js'
 import { ricordo, ricorda } from '../../ricordi.js'
 import { corto, destra, centro, puntini, pagine } from './pezzi.js'
 
-// ── i colori (11.11, Alberto: «fai colori a 8bit su tutto»): quelli del wallet della home (wallet.css: --led, --ambra, i
+// ── i colori (11.11, pzkko: «fai colori a 8bit su tutto»): quelli del wallet della home (wallet.css: --led, --ambra, i
 // cartellini .w-var su e giu). Il testo sopra un colore è nero e il colore sta su un vetrino o su una fascia sua: così si legge su
 // tutti gli sfondi (verde chiaro su «carta» o rosso su «arancione», da soli, non si leggevano) ──
 const LED = esa('#46ff7d'), LED_SPENTO = esa('#006633'), AMBRA = esa('#ffb02e'), AMBRA_SPENTA = esa('#663300'), VETRO = C.nero

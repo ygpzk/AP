@@ -1,4 +1,4 @@
-// La miniera di $pzk a pixel (23.10, Alberto: «fai tutte le immagini piatte e in pixel come tutto il resto… tutto deve
+// La miniera di $pzk a pixel (23.10, pzkko: «fai tutte le immagini piatte e in pixel come tutto il resto… tutto deve
 // essere adattabile e tutto deve incastrarsi perfettamente»). Tutta la grafica dell'app Miniera (telefono/app/miniera.js)
 // è disegnata qui in codice, come la chiocciolina del tomodachi: niente immagini, niente Replicate. Pixel art PIATTA:
 // colori pieni, contorni scuri di 1 pixel, niente sfumature né antialias, e niente animazioni (i disegni stanno fermi).

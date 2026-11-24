@@ -1,4 +1,4 @@
-// L'app «miniera» di pzk os (29.10, Alberto: «crea uno alla volta … miniera …»): la postazione che mina $pzk, sul
+// L'app «miniera» di pzk os (29.10, pzkko: «crea uno alla volta … miniera …»): la postazione che mina $pzk, sul
 // cercapersone zero. Le regole, il catalogo, i conti e lo stato sono quelli di chat/miniera.js; i disegni sono la pixel art
 // di chat/miniera-pixel.js (componi, componiPezzo), coi suoi colori nella tavolozza a 8 bit di lcd.js; i numeri di un pezzo
 // in una riga vengono dalla miniera del cercapersone vecchio (telefono/app/miniera.js: statsTesto). Il testo è d'inchiostro;
@@ -20,7 +20,7 @@ import { fmt, fmtCorto } from '../../../games/pzk.js'
 import { statsTesto, perOra, montatoDi } from '../../app/miniera.js'
 import { txt, corto, destra, centro, puntini, elenco, muovi, pagine, striscia, impagina, scorrevole, bottoni } from './pezzi.js'
 
-// ── la pixel art coi suoi colori (11.11, Alberto: «colori a 8bit su tutto»; prima era ridotta a un bit col retino di
+// ── la pixel art coi suoi colori (11.11, pzkko: «colori a 8bit su tutto»; prima era ridotta a un bit col retino di
 // Bayer, e la scena in negativo): ogni pixel del disegno prende il colore più vicino della tavolozza a 8 bit di lcd.js. A
 // metà misura i pixel del disegno sono i pixel veri dello schermo (D = 2): niente si perde ──
 function aColori(t, mezzo = false) {
@@ -37,7 +37,7 @@ const disegno = (id, mezzo) => { const k = `p:${mezzo}:${id}`; if (!cache.has(k)
 const nomeCat = (id) => M.CATEGORIE.find((k) => k.id === id)?.nome ?? id
 const gradi = (c) => `${Math.round(c.temperatura ?? 0)} °C`
 
-// ── i colori che dicono qualcosa (11.11, Alberto: «colori a 8bit su tutto»): il verde dei soldi e il rosso di quello che
+// ── i colori che dicono qualcosa (11.11, pzkko: «colori a 8bit su tutto»): il verde dei soldi e il rosso di quello che
 // manca o scotta. Un colore solo non si legge su tutti gli sfondi (il verde scuro sparisce su «notte», quello chiaro su
 // «carta» e sull'arancione): sugli sfondi chiari il tono scuro, su quelli scuri (l'inchiostro è chiaro) il tono chiaro ──
 const TONI = { chiaro: { verde: colore(0, 102, 0), rosso: colore(153, 0, 0) }, scuro: { verde: colore(102, 255, 102), rosso: colore(255, 102, 102) } }
@@ -90,7 +90,7 @@ function schedaPezzo(os, id) {
     const altri = montato && multipla && ho > m.n, piu = altri && M.compatibile(p.cat, p.id, m.n + 1).ok
     const t = [{ eti: `compra ${fmt(p.prezzo)}`, fai: 'compra', k: 'compra' }]
     if (montato ? piu : ho && ci.ok) t.push({ eti: montato ? 'monta +1' : 'monta', fai: 'monta' })
-    // (11.11, Alberto: «non posso montare i pezzi comprati»: una gpu media comprata col case da scarpe, e il tasto spariva
+    // (11.11, pzkko: «non posso montare i pezzi comprati»: una gpu media comprata col case da scarpe, e il tasto spariva
     // senza dire niente) se ce l'hai ma non ci sta, «monta» c'è lo stesso: dice perché e porta al pezzo che lo fa stare
     // (e così «monta +1»: la seconda scheda comprata col case da una scheda sola spariva uguale)
     else if (altri) t.push({ eti: 'monta +1', fai: 'nonci' })

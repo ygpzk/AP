@@ -1,4 +1,4 @@
-// LA CALCOLATRICE DI PZKKO.IT IN STILE DISCORD (20.11, Alberto: «crea una calcolatrice stile discord con colori pzk»).
+// LA CALCOLATRICE DI PZKKO.IT IN STILE DISCORD (20.11, pzkko: «crea una calcolatrice stile discord con colori pzk»).
 // Un riquadro come il profilo di Discord col tema Nitro (il velo sopra la sfumatura #ccff00 → #9d00ff, gli stessi colori
 // della scheda del profilo), gg sans, i tasti di Discord coi colori pzk: viola le operazioni, lime l'uguale, rosso AC.
 // Si apre sopra il profilo come i tavoli (openHere in app.js, «qui:calcolatrice»), e dalla chat con /calcola.

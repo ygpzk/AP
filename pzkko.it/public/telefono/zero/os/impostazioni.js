@@ -1,4 +1,4 @@
-// Le impostazioni di pzk os (29.10, Alberto: «fai impostazioni per regolare la luminosità, i suoni, il led rosso…»): la
+// Le impostazioni di pzk os (29.10, pzkko: «fai impostazioni per regolare la luminosità, i suoni, il led rosso…»): la
 // luminosità della retroilluminazione, i suoni (lo stesso interruttore del sito: localStorage pzkko-suono, come la regia),
 // il led rosso delle notifiche, l'inclinazione del cercapersone col mouse, e la guida da rivedere. Stanno in localStorage
 // (pzkko-zero-impostazioni) e chi le usa (zero.js, muro.js, os.js) le legge da qui e si mette in ascolto.
@@ -44,7 +44,7 @@ export function imposta(k, v) {
 
 const LIVELLI = [0.3, 0.45, 0.6, 0.8, 1]
 
-// (11.11, Alberto: «fai colori a 8bit su tutto»: i colori dove dicono qualcosa. Sulla riga dello sfondo scelta, la fila
+// (11.11, pzkko: «fai colori a 8bit su tutto»: i colori dove dicono qualcosa. Sulla riga dello sfondo scelta, la fila
 // dei campioni di tutti gli sfondi; la barra della luminosità coi quadretti gialli; il led rosso acceso o spento; il ✓ di
 // «di fabbrica» verde. Il testo resta d'inchiostro)
 const LED_SPENTO = colore(102, 0, 0)
@@ -65,7 +65,7 @@ function disegnaCampione(l, s, x, y, w, h) {
   const c = campione(s), n = 8 * D
   for (let j = 0; j < h * D; j++) for (let i = 0; i < w * D; i++) l.pv(x * D + i, y * D + j, c[j * n + i])
 }
-// IL 29.10 NOTTE (Alberto: «… e impostazioni: falle tutte maniacalmente perfette»): la testata e il suggerimento in fondo
+// IL 29.10 NOTTE (pzkko: «… e impostazioni: falle tutte maniacalmente perfette»): la testata e il suggerimento in fondo
 // come le altre app, la luminosità che con OK gira in tondo (prima al massimo si fermava), le informazioni del cercapersone
 // e «di fabbrica», che rimette luminosità, led e inclinazione com'erano (i suoni no: sono l'interruttore di tutto il sito)
 function informazioni(os) {
@@ -93,7 +93,7 @@ export function vista(os) {
     const k = livello(i) + d
     imposta('luminosita', LIVELLI[giro ? (k + LIVELLI.length) % LIVELLI.length : Math.max(0, Math.min(LIVELLI.length - 1, k))])
   }
-  // (11.11, Alberto: «dammi impostazione per cambiare sfondo»: ←→ lo cambiano e si vede subito, OK va avanti in tondo)
+  // (11.11, pzkko: «dammi impostazione per cambiare sfondo»: ←→ lo cambiano e si vede subito, OK va avanti in tondo)
   const passoSfondo = (i, d) => { const k = SFONDI.indexOf(sfondo(i.sfondo)); imposta('sfondo', SFONDI[(k + d + SFONDI.length) % SFONDI.length].id) }
   const righe = [
     { k: 'luminosita', nome: 'luminosità', valore: (i) => LIVELLI.map((l) => (l <= i.luminosita + 0.01 ? '■' : '□')).join(''), cambia: (i, d) => passoLuce(i, d), puo: (i, d) => LIVELLI[livello(i) + d] !== undefined, ok: () => passoLuce(leggi(), 1, true),

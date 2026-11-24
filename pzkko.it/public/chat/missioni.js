@@ -3,7 +3,7 @@
 // gli oggetti che chiede (alcuni si consumano), si va avanti scegliendo, e al nodo finale si prende il premio (una volta).
 // Lo usano il comando «missioni» della chat e l'app Missioni del telefono. Niente interfaccia qui: tutto torna come dati.
 //
-// DAL 31.10 LE GIOCA LA BANCA (Alberto: «il browser non decide più niente»; giochi/app-missioni.mjs sul server di Alberto):
+// DAL 31.10 LE GIOCA LA BANCA (pzkko: «il browser non decide più niente»; giochi/app-missioni.mjs sul server di pzkko):
 // cominciare, scegliere e abbandonare sono azioni della banca, che controlla il livello, gli oggetti, il cibo e i $pzk, tira
 // il caso e paga il premio. Qui restano le storie (per scriverle) e la vista: cosa si vede, cosa manca, perché una scelta è
 // spenta. Lo stato è la copia dello zaino che la banca manda con la risposta.

@@ -1,6 +1,6 @@
 // Il tubo catodico degli schermi a fosfori di pzkko (23.10): gli schermi verdi alla Fallout del wallet (wallet/wallet.js)
 // e del cercapersone (telefono/) devono sembrare vecchi tubi veri («VOGLIO LO SCHERMO CHE SFARFALLA E CHE ABBIA EFFETTO
-// TUBO CATODICO CON FILTRO», Alberto). tubo(el) appoggia sopra lo schermo un vetro: un elemento vero, l'ultimo figlio di
+// TUBO CATODICO CON FILTRO», pzkko). tubo(el) appoggia sopra lo schermo un vetro: un elemento vero, l'ultimo figlio di
 // `el`, largo e alto quanto lo schermo, che non tocca né la grandezza né il padding né il layout di `el` (nel wallet le
 // pagine dei tasti sono misurate perché stiano tutte nello schermo del grafico). Dentro il vetro ci sono gli strati
 // (crt.css): le righe di scansione, la maschera dei fosfori, la banda che scorre, lo sfarfallio e il vetro bombato

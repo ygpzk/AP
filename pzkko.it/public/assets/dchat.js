@@ -4,7 +4,7 @@
 // «ctx» e le schede diventano gli embed di Discord, coi tasti veri, le griglie dei minigiochi, i rulli e le barre del tempo.
 // I soldi e lo zaino sono gli stessi del cercapersone e dei tavoli: con l'account si salvano nella banca, senza si gioca
 // coi 1.000 $pzk della sessione.
-// TUTTO IN CHAT (19.11, Alberto: «non farmi uscire e andare al flipper, tutto qui gira, 100% qui tutto in chat»): quello che
+// TUTTO IN CHAT (19.11, pzkko: «non farmi uscire e andare al flipper, tutto qui gira, 100% qui tutto in chat»): quello che
 // nel cercapersone è un'app qui è una scheda. Il conto si apre e si crea nel riquadro dell’accesso (accesso/accesso.js: l’email e un codice, contoQui),
 // i tavoli partono dalla barra in alto (tavolo: quanto, su cosa, e parte il comando), il virtual, il pzkstore e la
 // lavatrice sono schede coi tasti (virtualQui, storeQui, lavatriceQui). Solo «/telefono» apre il cercapersone 3D, e lo apre
@@ -364,7 +364,7 @@ async function regaloQui() {
   await (await accesso()).premio()
   campo?.focus({ preventScroll: true }); stato()
   const s = pzk.seguo()
-  if (s?.stato === 'attesa') return scheda({ colore: 'blu', av: 'bot-occhiolino', t: ':regalo: richiesta mandata', d: `ho scritto ad Alberto che lo segui come <b>@${esc(s.ig)}</b>. Appena controlla fra i follower arrivano ${pzkHtml(pzk.PREMIO_IG)}, e ti scrive per email.` })
+  if (s?.stato === 'attesa') return scheda({ colore: 'blu', av: 'bot-occhiolino', t: ':regalo: richiesta mandata', d: `ho scritto a pzkko che lo segui come <b>@${esc(s.ig)}</b>. Appena controlla fra i follower arrivano ${pzkHtml(pzk.PREMIO_IG)}, e ti scrive per email.` })
   if (s?.stato === 'dato') return scheda({ colore: 'verde', av: 'bot-ride', t: ':regalo: regalo arrivato', d: `i ${pzkHtml(pzk.PREMIO_IG)} del follow sono sul conto. grazie!`, azioni: [['saldo', ':pzk: saldo']] })
 }
 const apriConto = () => contoQui()
@@ -397,7 +397,7 @@ const LOCALI = [
   { nomi: ['calcola', 'calcolatrice', 'calc'], cat: 'app', icona: 'app-calcolatrice', breve: 'fa un conto qui in chat (calcola 12*(3+4), anche sin cos log √ π ans), o senza conto apre la calcolatrice', uso: 'calcola [conto]', fai: (args) => calcolaQui(args) },
   { nomi: ['parole', 'parola', 'wordle'], cat: 'giochi', icona: 'quiz', breve: 'indovina la parola italiana in sei tentativi: parole 50 (o parole 50 6 per sei lettere)', uso: 'parole [puntata] [5|6]', fai: (args) => paroleQui(args) },
   { nomi: ['account', 'accedi', 'entra', 'login', 'conto', 'registrati'], cat: 'soldi', icona: 'app-account', breve: 'entra o crea il conto con l’email (niente password): i progressi si salvano nella banca', uso: 'account', fai: () => contoQui() },
-  { nomi: ['regalo', 'instagram', 'ig', 'seguimi'], cat: 'soldi', icona: 'regalo', breve: 'seguimi su tutti e due i profili di instagram e scrivi il tuo: 2.000 $pzk in regalo', uso: 'regalo', fai: () => regaloQui() },
+  { nomi: ['regalo', 'instagram', 'ig', 'seguimi'], cat: 'soldi', icona: 'regalo', breve: 'seguimi su instagram e scrivi il tuo nome: 2.000 $pzk in regalo', uso: 'regalo', fai: () => regaloQui() },
   { nomi: ['novita', 'novità', 'news'], cat: 'soldi', icona: 'app-account', breve: 'le novità del sito', uso: 'novita', fai: async () => { await (await accesso()).novita(); campo?.focus({ preventScroll: true }) } },
   { nomi: ['esci', 'logout'], cat: 'soldi', icona: 'app-account', breve: 'esci dal conto e torni alla sessione di prova', uso: 'esci',
     async fai() {

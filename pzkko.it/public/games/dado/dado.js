@@ -4,7 +4,7 @@
 // degli altri giochi) e la campana di vetro in 3D (three.js) coi tre dadi, che
 // muove la fisica (Rapier, vedi campana.js): la campana si scuote, i dadi
 // saltano e si fermano. Le facce però le tira la banca (31.10: dado.lancia, sul
-// server di Alberto), e i dadi ci arrivano (vedi «il film del colpo»). Le regole
+// server di pzkko), e i dadi ci arrivano (vedi «il film del colpo»). Le regole
 // sono quelle vere di Macao o di Atlantic City (regole.js); i $pzk sono gli
 // stessi di tutti i giochi (../pzk.js).
 //
@@ -565,7 +565,7 @@ function scuotiSaldo() {
 }
 
 // ── il colpo ─────────────────────────────────────────────────────────────────
-// (31.10, Alberto: il browser non decide più niente) Le facce le tira la banca (dado.lancia, sul server di Alberto): a
+// (31.10, pzkko: il browser non decide più niente) Le facce le tira la banca (dado.lancia, sul server di pzkko): a
 // «scuoti» le puntate partono, la banca le prende, tira, paga e risponde coi tre dadi; poi la campana si scuote e i dadi ci
 // arrivano (il film del colpo, sotto). Se la banca dice di no le fiches tornano e la campana resta ferma
 async function scuoti() {

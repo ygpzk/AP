@@ -1,4 +1,4 @@
-// PZKMAPS di pzkko.it (19.11, Alberto: «fai gioco geoguesser chiamandolo "pzkmaps"… solo posti su strade asfaltate ma di
+// PZKMAPS di pzkko.it (19.11, pzkko: «fai gioco geoguesser chiamandolo "pzkmaps"… solo posti su strade asfaltate ma di
 // tutto il mondo… voglio ogni volta un punto casuale, mai lo stesso di prima!!!»): ti trovi su una strada, e devi dire dove.
 // Un foglio col nastro come gli altri giochi (../foglio.css), più largo perché dentro c'è la strada.
 //

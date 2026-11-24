@@ -1,6 +1,6 @@
-// L'ACCESSO DI PZKKO.IT (19.11, Alberto: «riprogetta i login e i register e i recupera password … no password, solo codici
+// L'ACCESSO DI PZKKO.IT (19.11: «riprogetta i login e i register e i recupera password … no password, solo codici
 // di verifica via email … tutto molto stile discord … deve essere super facile … appena entri invita molto bene il visitatore
-// ad entrare in questo mondo, poi ricordali delle novità … se mi segue su entrambi i profili avrà 2000pzk in regalo,
+// ad entrare in questo mondo, poi ricordali delle novità … se mi segue su instagram avrà 2000pzk in regalo,
 // ovviamente dovrà scrivere prima il suo ig, poi a me arriva una notifica … e poi se mi segue inviali il premio»).
 //
 // Un riquadro solo, come quelli di Discord, che fa tutto e che aprono il profilo, la chat, il cercapersone e i tavoli:
@@ -8,16 +8,16 @@
 // - accedi(): l'email → il codice di sei cifre arrivato per posta (dieci minuti) → il nome, solo se il conto è nuovo. Accedere
 //   e registrarsi sono la stessa strada, e la password da recuperare non c'è: ogni volta arriva un codice;
 // - novita(): le novità, come il «Novità» di Discord (una volta per versione, dopo l'accesso o all'arrivo di chi è già dentro);
-// - premio(): il regalo per chi mi segue su tutti e due i profili di instagram: si scrive il proprio nome, la banca avvisa
-//   Alberto, che guarda fra i follower e decide; decidi(biglietto) è la sua parte (pzkko.it/?premio=…, dal tasto della lettera);
+// - premio(): il regalo per chi mi segue su Instagram: si scrive il proprio nome, la banca avvisa
+//   pzkko, che guarda fra i follower e decide; decidi(biglietto) è la sua parte (pzkko.it/?premio=…, dal tasto della lettera);
 // - arrivo(): quello che la pagina fa da sola quando si entra nel sito.
-// Tutto passa dalla banca sul pc di Alberto (games/pzk.js: codice, accedi, chiediPremio): se il pc è spento qui non si entra.
+// Tutto passa dalla banca sul pc di pzkko (games/pzk.js: codice, accedi, chiediPremio): se il pc è spento qui non si entra.
 // I testi in italiano e in inglese (le altre lingue del profilo vedono l'inglese).
 import * as pzk from '../games/pzk.js'
 
 const NOVITA = { v: '2026-11-19', foto: '/media/p/parole/cover.webp' } // la versione delle novità: cambiala e tornano fuori
 const K_NOVITA = 'pzkko-novita-profilo', K_EMAIL = 'pzkko-email', K_INVITO = 'pzkko-invito', K_REGALO = 'pzkko-regalo-poi'
-const PROFILI = [['albertoxpecchini', 'https://www.instagram.com/albertoxpecchini/'], ['pzkko', 'https://www.instagram.com/pzkko/']]
+const PROFILI = [['pzkko', 'https://www.instagram.com/pzkko/']]
 const API = '/api/wallet/'
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
@@ -32,19 +32,19 @@ const IT = {
     testo: 'Un conto solo per tutto il sito: quello che vinci, compri e sblocchi resta tuo, su ogni dispositivo.',
     cose: [['$', '<b>1.000 $pzk</b> appena entri'], ['♠', 'Roulette, blackjack, mine, <b>Parole</b>, <b>Trivia</b> e gli altri tavoli'], ['@', '<b>Niente password</b>: ti arriva un codice per email'], ['♥', `<b>+${'{P}'} $pzk</b> se mi segui su Instagram`]],
     accetta: 'Accetta l’invito', ospite: 'Continua come ospite', nota: 'Da ospite si gioca lo stesso, ma non si salva niente.' },
-  email: { t: 'Entra in pzkko.it', s: 'Scrivi la tua email: ti mando un codice. Che tu abbia già un conto o no, la strada è questa.', campo: 'Email', vai: 'Mandami il codice', nota: 'Niente password. L’email resta sul pc di Alberto e serve solo per farti entrare.', sbagliata: 'Questa email non mi torna: controllala.' },
+  email: { t: 'Entra in pzkko.it', s: 'Scrivi la tua email: ti mando un codice. Che tu abbia già un conto o no, la strada è questa.', campo: 'Email', vai: 'Mandami il codice', nota: 'Niente password. L’email resta sul server di pzkko e serve solo per farti entrare.', sbagliata: 'Questa email non mi torna: controllala.' },
   cod: { t: 'Controlla la posta', s: (e) => `Ho mandato un codice di sei cifre a <b>${e}</b>.`, campo: 'Codice di sei cifre', vale: (t) => `Vale ancora ${t}`, scaduto: 'Il codice è scaduto: chiedine uno nuovo.', entra: 'Entra', ancora: 'Non arriva? Mandalo di nuovo', fra: (s) => `Mandalo di nuovo fra ${s} s`, mandato: 'Rimandato: guarda anche nello spam.', cambia: 'Cambia email' },
   nome: { t: 'Come ti chiami?', s: 'È il nome che gli altri vedono in classifica. Da 2 a 20 lettere.', campo: 'Nome', vai: 'Crea il conto', corto: 'Almeno 2 lettere.' },
   ben: { t: (n) => `Benvenuto, ${n}!`, s: (i, p) => `Sul tuo conto ci sono <b>${p} $pzk</b>. Il tuo indirizzo è <code>${i}</code>: serve per farti mandare $pzk dagli amici.`, punti: ['Soldi, zaino e livelli si salvano da soli, nella banca.', 'La prossima volta scrivi l’email e ti arriva un codice nuovo.'] },
   nov: { t: 'Novità', quando: '19 novembre 2026',
     sez: [['verde', 'Nuove funzioni', ['<b>Parole e Trivia, rifatti da zero.</b> Due fogli nuovi fra i tavoli, coi $pzk sopra.', '<b>Tutto gira qui.</b> Cercapersone, tavoli e chat si aprono sopra il profilo: non si esce più.', '<b>La chat fa tutto in chat.</b> Conto, negozio, virtual e tavoli: scrivi / e scegli.']],
       ['blu', 'Conti', ['<b>Niente più PIN.</b> Si entra con un codice che arriva per email, nuovo ogni volta.']],
-      ['rosa', 'Regali', [`<b>${'{P}'} $pzk</b> se mi segui su tutti e due i profili di Instagram.`]]] },
-  reg: { t: (p) => `${p} $pzk in regalo`, s: 'Seguimi su tutti e due i profili, poi scrivi qui il tuo Instagram. Guardo io fra i follower: se ci sei, ti arrivano.', campo: 'Il tuo Instagram', vai: 'Chiedi il regalo', poi: 'Più tardi', vuoto: 'Scrivi il tuo nome di Instagram.',
+      ['rosa', 'Regali', [`<b>${'{P}'} $pzk</b> se mi segui su Instagram.`]]] },
+  reg: { t: (p) => `${p} $pzk in regalo`, s: 'Seguimi su Instagram, poi scrivi qui il tuo nome. Guardo io fra i follower: se ci sei, ti arrivano.', campo: 'Il tuo Instagram', vai: 'Chiedi il regalo', poi: 'Più tardi', vuoto: 'Scrivi il tuo nome di Instagram.',
     attesa: (g) => `Richiesta mandata come <b>@${g}</b>. Appena controllo ti arrivano i $pzk, e ti scrivo per email.`, tAttesa: 'Richiesta mandata', cambia: 'Ho sbagliato nome',
     dato: (p) => `Sono arrivati <b>${p} $pzk</b>. Grazie del follow!`, tDato: 'Regalo arrivato',
-    no: (g) => `Fra i follower non ho trovato <b>@${g}</b> su tutti e due i profili. Controlla il nome e riprova.`, serve: 'Per il regalo serve un conto: entra, ci metti un attimo.' },
-  dec: { t: (g, p) => `@${g} chiede i ${p} $pzk`, s: (n, q) => `<b>${n}</b> (conto del ${q}) dice di seguirti su tutti e due i profili.`, apri: (g) => `Apri @${g} su Instagram`, si: (p) => `Sì, mi segue: manda i ${p}`, no: 'No, non lo trovo',
+    no: (g) => `Fra i follower non ho trovato <b>@${g}</b>. Controlla il nome e riprova.`, serve: 'Per il regalo serve un conto: entra, ci metti un attimo.' },
+  dec: { t: (g, p) => `@${g} chiede i ${p} $pzk`, s: (n, q) => `<b>${n}</b> (conto del ${q}) dice di seguirti su Instagram.`, apri: (g) => `Apri @${g} su Instagram`, si: (p) => `Sì, mi segue: manda i ${p}`, no: 'No, non lo trovo',
     dato: (n, p) => `Fatto: ${p} $pzk mandati a <b>${n}</b>. Gli ho scritto.`, detto: (n) => `Detto di no a <b>${n}</b>: può richiederlo col nome giusto.`, gia: { dato: 'Il regalo gliel’hai già dato.', no: 'Gli hai già detto di no.' }, guarda: 'Guardo la richiesta…' },
 }
 const EN = {
@@ -53,18 +53,18 @@ const EN = {
     testo: 'One account for the whole site: what you win, buy and unlock stays yours, on every device.',
     cose: [['$', '<b>1,000 $pzk</b> as soon as you join'], ['♠', 'Roulette, blackjack, mines, <b>Parole</b>, <b>Trivia</b> and the other tables'], ['@', '<b>No password</b>: you get a code by email'], ['♥', `<b>+${'{P}'} $pzk</b> if you follow me on Instagram`]],
     accetta: 'Accept invite', ospite: 'Continue as guest', nota: 'Guests can play too, but nothing is saved.' },
-  email: { t: 'Join pzkko.it', s: 'Type your email: I’ll send you a code. New or returning, it’s the same road.', campo: 'Email', vai: 'Send me the code', nota: 'No password. Your email stays on Alberto’s pc and is only used to let you in.', sbagliata: 'That email doesn’t look right.' },
+  email: { t: 'Join pzkko.it', s: 'Type your email: I’ll send you a code. New or returning, it’s the same road.', campo: 'Email', vai: 'Send me the code', nota: 'No password. Your email stays on pzkko’s server and is only used to let you in.', sbagliata: 'That email doesn’t look right.' },
   cod: { t: 'Check your inbox', s: (e) => `I sent a six-digit code to <b>${e}</b>.`, campo: 'Six-digit code', vale: (t) => `Valid for ${t}`, scaduto: 'The code expired: ask for a new one.', entra: 'Log in', ancora: 'Didn’t get it? Send again', fra: (s) => `Send again in ${s}s`, mandato: 'Sent again: check spam too.', cambia: 'Change email' },
   nome: { t: 'What’s your name?', s: 'It’s the name others see on the leaderboard. 2 to 20 letters.', campo: 'Name', vai: 'Create account', corto: 'At least 2 letters.' },
   ben: { t: (n) => `Welcome, ${n}!`, s: (i, p) => `You have <b>${p} $pzk</b>. Your address is <code>${i}</code>: friends use it to send you $pzk.`, punti: ['Money, backpack and levels save themselves, in the bank.', 'Next time just type your email and a new code arrives.'] },
   nov: { t: 'What’s new', quando: 'November 19, 2026',
     sez: [['verde', 'New features', ['<b>Parole and Trivia, rebuilt from scratch.</b> Two new sheets among the tables, played with $pzk.', '<b>Everything runs here.</b> Pager, tables and chat open over the profile: you never leave.', '<b>The chat does it all in chat.</b> Account, shop, virtual and tables: type / and pick.']],
       ['blu', 'Accounts', ['<b>No more PIN.</b> You log in with a code sent by email, new every time.']],
-      ['rosa', 'Gifts', [`<b>${'{P}'} $pzk</b> if you follow me on both Instagram profiles.`]]] },
-  reg: { t: (p) => `${p} $pzk gift`, s: 'Follow me on both profiles, then type your Instagram here. I check my followers by hand: if you’re there, they’re yours.', campo: 'Your Instagram', vai: 'Ask for the gift', poi: 'Later', vuoto: 'Type your Instagram name.',
+      ['rosa', 'Gifts', [`<b>${'{P}'} $pzk</b> if you follow me on Instagram.`]]] },
+  reg: { t: (p) => `${p} $pzk gift`, s: 'Follow me on Instagram, then type your name here. I check my followers by hand: if you’re there, they’re yours.', campo: 'Your Instagram', vai: 'Ask for the gift', poi: 'Later', vuoto: 'Type your Instagram name.',
     attesa: (g) => `Request sent as <b>@${g}</b>. As soon as I check you get the $pzk, and an email.`, tAttesa: 'Request sent', cambia: 'Wrong name',
     dato: (p) => `<b>${p} $pzk</b> arrived. Thanks for the follow!`, tDato: 'Gift arrived',
-    no: (g) => `I couldn’t find <b>@${g}</b> among the followers of both profiles. Check the name and try again.`, serve: 'The gift needs an account: log in, it takes a moment.' },
+    no: (g) => `I couldn’t find <b>@${g}</b> among the followers. Check the name and try again.`, serve: 'The gift needs an account: log in, it takes a moment.' },
   dec: IT.dec,
 }
 const T = () => (it() ? IT : EN)
@@ -129,7 +129,7 @@ export async function invito() {
       <button type="button" class="ax-link" data-chiudi>${esc(t.ospite)}</button>
       <p class="ax-nota">${esc(t.nota)}</p>
     </div>`, { classe: 'invito' })
-  // i numeri veri: quanti conti ci sono, e se la banca (il pc di Alberto) risponde
+  // i numeri veri: quanti conti ci sono, e se la banca (il pc di pzkko) risponde
   fetch(API, { signal: AbortSignal.timeout?.(12_000) }).then((r) => r.json()).catch(() => null).then((d) => {
     if (scatola !== b || !b.querySelector('[data-banca]')) return
     const su = !!d?.ok
@@ -319,12 +319,12 @@ export async function premio() {
     await apri()
     return new Promise((fatto) => { allaChiusura = () => fatto({ ok: !!pzk.conto() }); S.nuovo = false; dep.set(K_REGALO, ''); passoEmail(T().reg.serve) })
   }
-  await pzk.sincronizza().catch(() => {}) // (lo stato di adesso: Alberto può aver deciso un minuto fa)
+  await pzk.sincronizza().catch(() => {}) // (lo stato di adesso: pzkko può aver deciso un minuto fa)
   await apri(); passoRegalo()
   return new Promise((fatto) => { allaChiusura = () => fatto({ ok: true }) })
 }
 
-// ── la parte di Alberto: il tasto della lettera (pzkko.it/?premio=…) ──
+// ── la parte di pzkko: il tasto della lettera (pzkko.it/?premio=…) ──
 const banca = (body) => fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout?.(25_000) }).then((r) => r.json()).catch(() => ({ ok: false, errore: IT.rete }))
 export async function decidi(biglietto) {
   await apri()
@@ -356,7 +356,7 @@ export async function decidi(biglietto) {
 }
 
 /**
- * ALL'ARRIVO NEL SITO (lo chiama il profilo quando la pagina è ferma). Col tasto della lettera: la decisione di Alberto. Chi
+ * ALL'ARRIVO NEL SITO (lo chiama il profilo quando la pagina è ferma). Col tasto della lettera: la decisione di pzkko. Chi
  * non ha un conto: l'invito, una volta per visita e non più di una volta ogni dodici ore. Chi ce l'ha: le novità, se non le
  * ha ancora viste. Gli strumenti che fotografano la pagina non vedono niente (navigator.webdriver), se non con ?invito.
  */

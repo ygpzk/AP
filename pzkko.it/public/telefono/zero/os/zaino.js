@@ -1,4 +1,4 @@
-// L'app «zaino» di pzk os (29.10, Alberto: «crea uno alla volta … zaino …»): quello che hai, sul cercapersone zero. Gli
+// L'app «zaino» di pzk os (29.10, pzkko: «crea uno alla volta … zaino …»): quello che hai, sul cercapersone zero. Gli
 // oggetti, i bonus, gli effetti e cosa si può fare con ogni pezzo sono quelli di chat/zaino.js e dello zaino del cercapersone
 // vecchio (telefono/app/zaino.js: FILTRI, tipoDi, azioniDi, usa, nomeCorto, resto).
 // - LE PAGINE (← →) sono i filtri: tutto, da usare, da tenere, attrezzi, casse, da vendere. In cima gli effetti in corso
@@ -6,7 +6,7 @@
 // - LA SCHEDA: l'icona grande, il nome, quanti ne hai e quanto vale, cosa fa (scorre con ↑ ↓) e i bonus; sotto i tasti:
 //   usa (si consuma qui, e parte l'effetto), gratta, apri, vendi, vendi tutto (li fa la chat, che ha le animazioni e i conti
 //   del bonus di vendita), allo shop o compra ancora.
-// - I COLORI (11.11, Alberto: «fai colori a 8bit su tutto»): pochi e con un senso. Il bonus è verde (in cima e nella
+// - I COLORI (11.11, pzkko: «fai colori a 8bit su tutto»): pochi e con un senso. Il bonus è verde (in cima e nella
 //   scheda), il tempo di un effetto che sta per finire è rosso, un pezzo leggendario è d'oro, uno che vale quasi niente è
 //   grigio. Il resto è d'inchiostro.
 // Le regole: os/REGOLE.md.

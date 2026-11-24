@@ -1,4 +1,4 @@
-// Due zaini dello stesso conto, uniti (26.10, Alberto: «dal telefono mi dà livello 1, dal pc 4: fai sti dati
+// Due zaini dello stesso conto, uniti (26.10, pzkko: «dal telefono mi dà livello 1, dal pc 4: fai sti dati
 // sincronizzati»). Lo zaino si salva intero, da più dispositivi; prima vinceva quello col `t` più recente, e un telefono
 // rimasto indietro (lo zaino del server si chiedeva solo entrando nel conto, non aprendo la pagina), alla prima mossa
 // cancellava i progressi fatti sul pc. Ora si uniscono: quello che cresce soltanto (l'esperienza, le statistiche, i giri

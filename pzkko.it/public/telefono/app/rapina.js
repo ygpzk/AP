@@ -1,4 +1,4 @@
-// Le regole della Rapina (26.10, Alberto: «modalità rapina con rischio prigione, minimo in due, contro pzk») in comune con la
+// Le regole della Rapina (26.10, pzkko: «modalità rapina con rischio prigione, minimo in due, contro pzk») in comune con la
 // rapina del cercapersone zero (telefono/zero/os/rapina.js): il colpo alla cassa di pzk (api/wallet.mjs, colpo; pzk.colpo e
 // pzk.cauzione in games/pzk.js). Chi organizza apre il colpo e ha un codice di quattro lettere da dare ai complici; i
 // complici entrano col codice (al più quattro); chi ha organizzato dà il via. Va a segno nel 32 % dei casi in due, 40 % in

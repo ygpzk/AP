@@ -7,8 +7,8 @@
 // smarriti (api/wallet.mjs, decifra: tre al giorno): soldi puliti, perché erano destinati a sparire. Il pezzo aperto lascia
 // lo zaino.
 //
-// DAL 31.10 I GIOCHINI LI PREPARA LA BANCA (Alberto: «decifra un wallet devi farlo se hai un wallet»; giochi/app-decifratore.mjs
-// sul server di Alberto): 'decifratore.apri' (apri) controlla che il decifratore sia installato e il pezzo nello zaino, e
+// DAL 31.10 I GIOCHINI LI PREPARA LA BANCA (pzkko: «decifra un wallet devi farlo se hai un wallet»; giochi/app-decifratore.mjs
+// sul server di pzkko): 'decifratore.apri' (apri) controlla che il decifratore sia installato e il pezzo nello zaino, e
 // manda un giochino alla volta senza la risposta; 'decifratore.risolvi' (risolvi) dice se è giusta; risolti tutti e tre,
 // pzk.decifra(v.tipo) (la banca: consuma il pezzo e paga). (31.10) L'interfaccia HTML di qui (la lista dei pezzi, lo schermo
 // del giochino, le scelte) se n'è andata col cercapersone vecchio; dall'1.11 la faccia è l'app di pzk os (os/decifratore.js).

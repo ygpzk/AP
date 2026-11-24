@@ -1,4 +1,4 @@
-// Il pzkstore (29.10, Alberto: «migliora app lavatrice e poi mettila in questo nuovo programma chiamato pzkstore dove si
+// Il pzkstore (29.10, pzkko: «migliora app lavatrice e poi mettila in questo nuovo programma chiamato pzkstore dove si
 // possono scaricare app nuove e a pagamento; ovviamente nelle task dove sarà richiesta scrivi tutto»): il negozio delle app
 // del cercapersone. Quelle di serie sono già nella home; qui c'è il catalogo di quelle da comprare (CATALOGO: l'icona, due
 // righe, il prezzo, e per la scheda tutto quanto: cosa fa, quanto costa, come si usa, cosa serve, le novità) e l'acquisto.
@@ -7,8 +7,8 @@
 // (chat/predittivo.js, CATALOGO); l'interfaccia HTML di qui (la vetrina e la scheda) se n'è andata col cercapersone vecchio.
 //
 // - SI PAGA COME NELLO SHOP: coi $pzk PULITI alla cassa di pzk: i soldi sporchi non valgono, in galera non si compra. Senza
-//   conto non si compra niente. Dal 31.10 (Alberto: «il browser non decide più niente») comprare e togliere sono azioni della
-//   banca (giochi/app-pzkstore.mjs sul server di Alberto, «pzkstore.compra» e «pzkstore.togli»), coi prezzi della banca:
+//   conto non si compra niente. Dal 31.10 (pzkko: «il browser non decide più niente») comprare e togliere sono azioni della
+//   banca (giochi/app-pzkstore.mjs sul server di pzkko, «pzkstore.compra» e «pzkstore.togli»), coi prezzi della banca:
 //   qui il catalogo è per la vetrina.
 // - L'APP COMPRATA SI INSTALLA nello zaino (lo installa la banca: vale su tutti i dispositivi del conto) e compare nella
 //   home del cercapersone, nella pagina dei soldi.

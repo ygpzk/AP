@@ -2,7 +2,7 @@
 // firme vere, salvate e uguali per tutti. Chi firma lascia il nome (2–32 caratteri) e la penna con cui firma (blu,
 // nera, rossa); l'ora la mette il server. Chi guarda vede le ultime firme sul foglio, con la data e l'ora di Mantova.
 //
-// Dove sta: `pzkko/firme.json` sul server dei dati di Alberto (C:\pzkko-server, dietro il tunnel: _server.mjs; fino al
+// Dove sta: `pzkko/firme.json` sul server dei dati di pzkko (C:\pzkko-server, dietro il tunnel: _server.mjs; fino al
 // 28.10 su Vercel Blob, tolto dal codice il 29.10), come il database di Better Call Pekko (api/bcp.js): riscritto solo
 // se l'ETag è ancora quello, così due firme nello stesso istante non si cancellano (chi perde riprova). Senza il server,
 // online, la funzione risponde «offline» (il foglio si vede, ma non si firma); in locale (il server di npm run
@@ -34,7 +34,7 @@ const json = (res, status, body, cache = 'no-store') => {
   res.end(JSON.stringify(body))
 }
 
-// ── l'archivio: il server di Alberto, oppure la memoria (in locale), oppure niente ─────
+// ── l'archivio: il server di pzkko, oppure la memoria (in locale), oppure niente ─────
 // (in memoria: su globalThis, perché il server di prova reimporta questo file a ogni richiesta)
 const memoria = (globalThis.__pzkkoFirme ??= { db: null, etag: 0 })
 const vuoto = () => ({ firme: [] })

@@ -1,4 +1,4 @@
-// Le scelte che si ricordano (23.10, Alberto: «applica questa regola a ogni menù del sito e memorizza sempre le azioni degli
+// Le scelte che si ricordano (23.10, pzkko: «applica questa regola a ogni menù del sito e memorizza sempre le azioni degli
 // user»): l'ultima app aperta nel cercapersone, la scheda, il filtro, la cosa aperta, il codice scritto nel compilatore.
 //
 //   ricordo(nome, predef)    le scelte di un'app, con i valori di serie sotto

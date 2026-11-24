@@ -5,7 +5,7 @@
 // una partita perfetta aggiunge 100 $pzk. Pagano solo le prime 40 risposte giuste di ogni giorno: dopo, il quiz resta un
 // allenamento (punti esperienza, niente $pzk). Le ultime domande fatte si ricordano (zaino.quizStato.visti).
 //
-// DAL 31.10 IL QUIZ LO FA LA BANCA (Alberto: «il browser non decide più niente»; giochi/app-quiz.mjs sul server di Alberto).
+// DAL 31.10 IL QUIZ LO FA LA BANCA (pzkko: «il browser non decide più niente»; giochi/app-quiz.mjs sul server di pzkko).
 // Prima questo file aveva tutte le domande con la risposta giusta, misurava il tempo da sé e si pagava: bastava la console.
 // Ora le domande e le risposte giuste stanno solo sulla banca, che ne manda una alla volta SENZA la giusta (le risposte già
 // mescolate); qui si risponde con l'indice, e la banca dice se era giusta, quanto paga (col bonus di velocità misurato con

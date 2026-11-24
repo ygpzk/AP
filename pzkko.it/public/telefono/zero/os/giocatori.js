@@ -1,4 +1,4 @@
-// L'app «giocatori» di pzk os (29.10, Alberto: «crea uno alla volta … giocatori …»): il database dei giocatori sul
+// L'app «giocatori» di pzk os (29.10, pzkko: «crea uno alla volta … giocatori …»): il database dei giocatori sul
 // cercapersone zero. I dati sono quelli di chat/db.js (top, notizie, cerca, profilo, io, statistiche) e della lumachina
 // (chat/lumaca.mjs, chat/lumaca-avvisi.js), i testi e i tempi quelli dei giocatori del cercapersone vecchio
 // (telefono/app/giocatori.js), la faccia quella del profilo (telefono/app/profilo.js).
@@ -10,11 +10,11 @@
 // - LA SCHEDA di un giocatore (OK su un nome): la faccia, il titolo, il livello, i numeri, le classifiche, i leggendari; sotto
 //   «manda $pzk» (lo fa la chat, col comando «manda»).
 // Il server può non rispondere: ogni pagina lo dice e i tasti continuano a funzionare.
-// (6.11, Alberto: «le classifiche dicono cose diverse da dentro i profili singoli») LA SCHEDA DICE I NUMERI DELLA CLASSIFICA:
+// (6.11, pzkko: «le classifiche dicono cose diverse da dentro i profili singoli») LA SCHEDA DICE I NUMERI DELLA CLASSIFICA:
 // il posto e il valore vengono dalla stessa funzione della banca (i pari merito hanno lo stesso posto: «1° pari»), e accanto
 // a ogni posto c'è il valore, così si confronta a occhio con la classifica. Nei numeri ci sono anche i soldi (guadagnati,
 // vinti o persi ai giochi) e le mani, quelle del libro dei conti: le stesse della pagina dei giochi del profilo.
-// (11.11, Alberto: «fai colori a 8bit su tutto») I COLORI dicono qualcosa, il resto resta d'inchiostro: i soldi presi su una
+// (11.11, pzkko: «fai colori a 8bit su tutto») I COLORI dicono qualcosa, il resto resta d'inchiostro: i soldi presi su una
 // targhetta verde e quelli persi su una rossa (anche quelli della lumachina e delle notizie), il podio d'oro, d'argento e di
 // bronzo, l'avviso urgente su una fascia gialla, la barra della salute verde, gialla o rossa, quella degli xp blu.
 // Le regole: os/REGOLE.md.

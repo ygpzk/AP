@@ -1,15 +1,15 @@
-// Il cercapersone «zero» in 3D (29.10, Alberto: «voglio lui come mockup, deve aprirsi con le stesse logiche, quando lo apro
+// Il cercapersone «zero» in 3D (29.10, pzkko: «voglio lui come mockup, deve aprirsi con le stesse logiche, quando lo apro
 // zoom sullo schermo e mettici pzk os, retroill arancione e sfondi arancioni, le icone tieni le mie, anche il cavo della
 // ricarica nel posto giusto, è in 3d mi raccomando»; poi: «non fare una finestra sopra il modello 3d… il modello ha
 // trasparenza quindi lo schermo lo metti esattamente dove è nel modello»): il gadget bianco coi tasti arancioni, dal mockup
 // di Rhino (tools/pzkko/zero/modello.mjs → art/zero/zero.glb), disegnato con three.js (lib/three.js) dentro il dialog del
-// cercapersone (telefono.js). Dal 31.10 è il cercapersone di tutti (Alberto: «fai che cercapersone zero è predefinito e
+// cercapersone (telefono.js). Dal 31.10 è il cercapersone di tutti (pzkko: «fai che cercapersone zero è predefinito e
 // quello attuale si elimina per sempre»): fino ad allora si comprava nello shop e agli altri restava quello nero.
 //
 // LO SCHERMO È NEL 3D: pzk os (os/os.js) disegna su un lcd 256 × 128 a un bit la cui tela (768 × 384) è la trama di un
 // piano appoggiato dove nel modello sta il modulo lcd, SOTTO il vetro, che è trasparente e riflette la stanza: niente
 // HTML sopra la tela. I tasti 3D (la croce, OK, INDIETRO) si premono col mouse (il raggio) e si vedono abbassare; la
-// tastiera vera arriva da telefono.js. INDIETRO tenuto tre secondi spegne (Alberto).
+// tastiera vera arriva da telefono.js. INDIETRO tenuto tre secondi spegne (pzkko).
 //
 // Come sta nello spazio: il modello è in millimetri con Y l'asse lungo, X quello corto (X− il bordo di sopra) e Z lo
 // spessore (Z+ il fronte); qui il gruppo è girato di −90° attorno a z, così nel mondo x va a destra (la Y del modello),
@@ -36,7 +36,7 @@ import * as luce from './luce.js'
 import * as impostazioni from './os/impostazioni.js'
 
 export const GLB = '/art/zero/zero.glb'
-// l'lcd acceso, dentro il vetro (mm, nel mondo): come nei render ufficiali del Flipper (Alberto, 29.10: «vedi che ho ragione
+// l'lcd acceso, dentro il vetro (mm, nel mondo): come nei render ufficiali del Flipper (pzkko, 29.10: «vedi che ho ragione
 // io?») riempie tutta la finestra del vetro (24 × 39,2, angoli stondati di 3 mm) meno un bordo scuro di 0,8 mm:
 // 37,6 × 22,4 mm. I 256 × 128 pixel di pzk os ci si stendono sopra. Gli angoli del modulo: 2,2 mm (raggio). Sta a z 0,9,
 // sotto il vetro (che va da 0,7 a 2,1) e sopra il labbro della cornice (0,7)
@@ -60,7 +60,7 @@ function bezier(x1, y1, x2, y2) {
 }
 const APRE = bezier(0.6, 0, 0.25, 1), CHIUDE = bezier(0.6, 0, 0.3, 1), DOLCE = bezier(0.42, 0, 0.58, 1)
 
-/** La scritta «PZKKO» sulla fascia di sotto, come il logo «FLIPPER» stampato sul Flipper vero (Alberto, 29.10: «la scritta
+/** La scritta «PZKKO» sulla fascia di sotto, come il logo «FLIPPER» stampato sul Flipper vero (pzkko, 29.10: «la scritta
  *  deve essere fatta così… pzkko sta solo sul lato sotto non a cavallo della smussatura»): lettere a pixel, maiuscole,
  *  inclinate, PIENE (i pixel si toccano, il bordo resta a gradini), coi tratti spessi tre celle e gli angoli esterni
  *  smussati. Disegnata qui a blocchi, niente carattere da caricare: uguale sul muro fotografato e dal vivo. Una tela
@@ -98,12 +98,12 @@ export function crea({ dlg, ledEl }) {
   const renderer = new T.WebGLRenderer({ canvas: tela, antialias: true, alpha: true, powerPreference: 'high-performance' })
   renderer.setClearColor(0x000000, 0)
   renderer.toneMapping = T.NeutralToneMapping
-  renderer.toneMappingExposure = 0.7 // (Alberto: «è troppo luminoso il modello 3d»)
+  renderer.toneMappingExposure = 0.7 // (pzkko: «è troppo luminoso il modello 3d»)
   renderer.shadowMap.enabled = true
   const scene = new T.Scene()
   const camera = new T.PerspectiveCamera(30, 1, 5, 2000)
 
-  // ── LA LUCE È SEMPRE QUELLA DI GIORNO (23.11, Alberto: «fallo sempre chiaro, è sempre scuro senza luce»). Prima era
+  // ── LA LUCE È SEMPRE QUELLA DI GIORNO (23.11, pzkko: «fallo sempre chiaro, è sempre scuro senza luce»). Prima era
   // quella del sito a quest'ora (il sole vero di Mantova, la notte, la lampada a muro, i riflessi fotografati dalla scena
   // della home): di sera il guscio bianco diventava marrone scuro. Ora il sole, il cielo diffuso e i riflessi sono quelli
   // di giorno con cui è scattata la foto del tasto sul muro (FISSA), a qualunque ora; della sera restano solo i fari
@@ -179,7 +179,7 @@ export function crea({ dlg, ledEl }) {
   // (la prima aggiornaLuce la fanno muro(), riprendi() e fotografa(): qui sotto `sporco` non esiste ancora)
 
   // ── il cercapersone: il modello girato nel mondo (vedi in cima), dentro un perno sul suo centro che s'inclina leggermente
-  // verso il mouse (Alberto: «in base a dove metto il mouse si inclini leggermente in tutte le angolazioni»; si spegne
+  // verso il mouse (pzkko: «in base a dove metto il mouse si inclini leggermente in tutte le angolazioni»; si spegne
   // nelle impostazioni). Nel corpo stanno anche l'lcd, la scritta e la spina: s'inclinano insieme ──
   const PIVOT = V3(26.15, 13.7, -10.25)
   const inclinazione = new T.Group()
@@ -200,7 +200,7 @@ export function crea({ dlg, ledEl }) {
   const pezzi = {} // nome → mesh
   const tasti = {} // croce, ok, indietro: { mesh, centro }
 
-  // i materiali: i colori di riferimento di Alberto (il mockup bianco coi tasti arancioni); il vetro è vetro: trasparente,
+  // i materiali: i colori di riferimento di pzkko (il mockup bianco coi tasti arancioni); il vetro è vetro: trasparente,
   // con la stanza riflessa sopra, e sotto c'è l'lcd
   const M = {
     bianco: new T.MeshPhysicalMaterial({ color: 0xf6f5f2, roughness: 0.4, metalness: 0, clearcoat: 0.35, clearcoatRoughness: 0.45 }),
@@ -239,7 +239,7 @@ export function crea({ dlg, ledEl }) {
   }
   const smetti = [LCD_OS.ascolta(disegnaLcd)] // (chi smettere di ascoltare in distruggi)
 
-  // la spina usb-c e il cavo (Alberto, 23.10: «il cavo si inserisca e faccia lo scatto che entra tutto, tipo si inclina
+  // la spina usb-c e il cavo (pzkko, 23.10: «il cavo si inserisca e faccia lo scatto che entra tutto, tipo si inclina
   // per entrare meglio»; 29.10: «la presa deve entrare centratissima al buco… dal cavo esce un cilindro stondato… sembra
   // stondato anche sul basamento di plastica nero il connettore»): la linguetta d'argento con la sezione dell'usb-c vero
   // (un rettangolo coi lati corti a semicerchio, in piedi), il corpo nero squadrato appena smussato, la guaina che si
@@ -261,7 +261,7 @@ export function crea({ dlg, ledEl }) {
     { const p = guaina.attributes.position; for (let i = 0; i < p.count; i++) { const t = (p.getX(i) + 4.5) / 9; p.setY(i, p.getY(i) * (1 - 0.42 * t)); p.setZ(i, p.getZ(i) * (1 - 0.25 * t)) } guaina.computeVertexNormals() }
     const gommino = new T.Mesh(guaina, new T.MeshStandardMaterial({ color: 0x232427, roughness: 0.8 }))
     gommino.position.set(PUNTA + 18 + 4.5, 0, 0)
-    // il filo (Alberto, 29.10: «fai un cavo più lungo almeno il triplo che esca dalla pagina»): 60 cm invece di 16, la
+    // il filo (pzkko, 29.10: «fai un cavo più lungo almeno il triplo che esca dalla pagina»): 60 cm invece di 16, la
     // stessa curva morbida e poi giù dritto, così la fine non si vede mai, in nessuna finestra e in nessun momento del volo
     const via = new T.CatmullRomCurve3([V3(PUNTA + 26, 0, 0), V3(PUNTA + 38, -0.5, 0), V3(PUNTA + 52, -6, 0.5), V3(PUNTA + 64, -24, 1), V3(PUNTA + 72, -60, 1), V3(PUNTA + 76, -140, 1), V3(PUNTA + 78, -260, 1.5), V3(PUNTA + 79, -400, 2), V3(PUNTA + 80, -580, 2)])
     const filo = new T.Mesh(new T.TubeGeometry(via, 160, 1.95, 12, false), new T.MeshStandardMaterial({ color: 0x1b1b1d, roughness: 0.85 }))
@@ -306,7 +306,7 @@ export function crea({ dlg, ledEl }) {
       dec.name = 'scritta'
       corpo.add(dec)
       disegnaLcd()
-      // (2.11, Alberto: «lagga un casino l'avvio»): i materiali si compilano senza fermare la pagina (compileAsync, coi
+      // (2.11, pzkko: «lagga un casino l'avvio»): i materiali si compilano senza fermare la pagina (compileAsync, coi
       // programmi che la scheda prepara in parallelo); fino ad allora non si disegna niente (compilato) e il tasto sul muro
       // resta lì. Prima il primo fotogramma li compilava tutti di colpo: mezzo secondo col sito fermo
       riflessiPronti.then(() => {
@@ -366,7 +366,7 @@ export function crea({ dlg, ledEl }) {
       // (9.11) mai più stretta di TASTI: lo schermo e TUTTI i tasti (da x −2 a 73,5, INDIETRO finisce a 69,5), spostata a
       // destra quanto serve. Prima a 1440 × 900 INDIETRO usciva a metà dal bordo destro, e sotto i 1100 px non c'era più
       const TASTI = [-2, 73.5]
-      const fw = Math.min(122, Math.max((46 * w) / h, w / 13.5, TASTI[1] - TASTI[0])) // (19.11, Alberto: «leggermente più lontano dai miei occhi»: prima 104,5 · 36 · w/19)
+      const fw = Math.min(122, Math.max((46 * w) / h, w / 13.5, TASTI[1] - TASTI[0])) // (19.11, pzkko: «leggermente più lontano dai miei occhi»: prima 104,5 · 36 · w/19)
       const xc = Math.max(32, TASTI[1] - fw / 2)
       x0 = xc - fw / 2; x1 = xc + fw / 2; yc = 13.7
     }
@@ -429,7 +429,7 @@ export function crea({ dlg, ledEl }) {
       const dx = p.y, dy = -p.x
       return { nome: 'croce', verso: Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'dx' : 'sx') : dy > 0 ? 'su' : 'giu' }
     }
-    // lo schermo (Alberto, 29.10: «metti per sicurezza anche il click del mouse»): il punto sul piano dell'lcd diventa un
+    // lo schermo (pzkko, 29.10: «metti per sicurezza anche il click del mouse»): il punto sul piano dell'lcd diventa un
     // pixel di pzk os (la trama è dritta: u da sinistra, v dal basso), e pzk os preme la zona che c'è lì (os.tocca)
     const sch = raggio.intersectObject(lcd, false)[0]
     if (sch?.uv) return { nome: 'lcd', verso: { x: Math.floor(sch.uv.x * 256), y: Math.floor((1 - sch.uv.y) * 128) } }
@@ -459,14 +459,14 @@ export function crea({ dlg, ledEl }) {
       t.mesh.position.copy(t.riposo); t.mesh.rotation.set(0, 0, 0); t.mesh.material.color.copy(t.colore); sporco = true; avvia()
     },
   }
-  // INDIETRO (Alberto: «indietro premo una volta, spegni 3 secondi premuto indietro»): premuto e lasciato è una mossa
+  // INDIETRO (pzkko: «indietro premo una volta, spegni 3 secondi premuto indietro»): premuto e lasciato è una mossa
   // indietro; tenuto premuto TRE SECONDI spegne (onTasto('spegni')), e lasciandolo dopo non fa niente
   const TENUTA = 3000
   let giu = null, tenuta = 0
   tela.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return
     giu = colpisci(e)
-    // fuori dal cercapersone si chiude SUBITO, alla pressione (9.11, Alberto: «premendo fuori istantaneamente»): prima
+    // fuori dal cercapersone si chiude SUBITO, alla pressione (9.11, pzkko: «premendo fuori istantaneamente»): prima
     // aspettava il rilascio; il rilascio poi non fa più niente (fuori)
     if (!giu) { giu = { nome: 'fuori' }; rig.onFuori(); return }
     if (giu && giu.nome !== 'corpo') rig.premi(giu.nome, giu.verso, { tieni: true }) // (giù finché non si lascia)

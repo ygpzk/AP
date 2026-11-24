@@ -1,4 +1,4 @@
-// I suoni di pzk os (29.10, Alberto: «regole… per creare app in pzk os… con l'aggiunta di icone, animazioni e suoni tutti
+// I suoni di pzk os (29.10, pzkko: «regole… per creare app in pzk os… con l'aggiunta di icone, animazioni e suoni tutti
 // funzionanti»): un posto solo. Tutto passa da suono/interfaccia.js (sintetizzato dal vivo, niente file: le sue sigle
 // MUSICHE e i suonini TASTI), e tace se nelle impostazioni di pzk os i suoni sono spenti (impostazioni.js, `suoni`, che è
 // lo stesso interruttore pzkko-suono del sito).

@@ -1,5 +1,5 @@
 // Le icone della chat col bot (chat.js) e del cercapersone: niente emoji di sistema, solo le nostre, in art/chat-<foglio>/<nome>.webp.
-// Dal 26.10 TUTTE a pixel, di retro-diffusion/rd-plus su Replicate, col bordo bianco dell'adesivo e pochi dettagli (Alberto:
+// Dal 26.10 TUTTE a pixel, di retro-diffusion/rd-plus su Replicate, col bordo bianco dell'adesivo e pochi dettagli (pzkko:
 // «tieni il modello per sempre»): tools/pzkko/pixel.mjs, una predizione per icona (prima erano fogli di gpt-image-2, di cui
 // restano le descrizioni in tools/pzkko/fogli-chat.js, che pixel.mjs usa come prompt). Nel testo del bot si scrive «:canna:»
 // e diventa <img class="emo">. Questo elenco è l'unica lista dei pezzi: un'icona nuova si aggiunge qui e in pixel.mjs (o
@@ -22,7 +22,7 @@ export const FOGLI_CHAT = {
   'chat-slot': ['ciliegia', 'limone', 'sette', 'campana', 'diamante', 'chiocciola-oro', 'bar', 'trifoglio', 'anguria', 'uva', 'stella', 'dado'],
   // i giochi
   'chat-giochi': ['carte', 'roulette', 'mina', 'gemma', 'testa', 'croce', 'dadi', 'quiz'],
-  // lo shop (23.10), pezzi citati da Alberto nelle chat: il cibo e le bevande…
+  // lo shop (23.10), pezzi citati da pzkko nelle chat: il cibo e le bevande…
   'chat-cibo': ['pzk-kola', 'estathe', 'frutti-bosco', 'zucca', 'tortelli', 'grissini', 'ramen', 'sbrisolona', 'mostarda', 'pomodoro'],
   // …le cose (i volantini, gli annunci, gli scontrini)…
   'chat-roba': ['eastpak', 'ciao-px', 'landini', 'stampante', 'iphone-duo', 'stufa', 'bonsai', 'penne-bic', 'tucson', 'manuale-landini'],

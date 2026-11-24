@@ -1,7 +1,7 @@
 // La schedina di «virtual», in comune fra la finestra grande (virtual.js), l'app del cercapersone (telefono/app/virtual.js) e
 // quella di pzk os (telefono/zero/os/virtual.js). Niente disegno: chi chiama decide cosa dire e come animare.
 //
-// DAL 31.10 LA SCHEDINA È DELLA BANCA (Alberto: «il browser non decide più niente»). Fino a qui stava in questo browser
+// DAL 31.10 LA SCHEDINA È DELLA BANCA (pzkko: «il browser non decide più niente»). Fino a qui stava in questo browser
 // (localStorage pzkko-virtual, unita fra le schede con un timbro per fiche e pagata sotto un lucchetto del browser) e la
 // pagava il browser, sul risultato che calcolava da sé. Ora:
 // - il palinsesto (le partite, le quote della banca, e il risultato con la cronaca solo a partita iniziata) si chiede alla

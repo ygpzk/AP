@@ -8,7 +8,7 @@
 // si prende tutto e scoppia davvero, e la bruciatura resta sul foglio. I $pzk
 // sono gli stessi di tutti i giochi (../pzk.js).
 //
-// (31.10, Alberto: «il browser non decide più niente») LE MINE LE POSA LA BANCA (C:\pzkko-server\banca\giochi\
+// (31.10, pzkko: «il browser non decide più niente») LE MINE LE POSA LA BANCA (C:\pzkko-server\banca\giochi\
 // casino-mine.mjs, con una copia di regole.js): prima il seme del banco nasceva qui, e chi apriva la console sapeva dove
 // stavano. Qui si punta, si chiede («gioca», «scopri c3», «incassa»: pzk.fai) e si anima quello che la banca risponde; del
 // giro si sa solo quello che si vede (le caselle girate, l'impronta del seme del banco), e a fine giro arrivano le mine e

@@ -1,9 +1,9 @@
-// La barra in alto di pzkko.it (26.10, Alberto: «fai una topbar con sezioni dove c'è la storia del sito, i gadget, elenchi di
+// La barra in alto di pzkko.it (26.10, pzkko: «fai una topbar con sezioni dove c'è la storia del sito, i gadget, elenchi di
 // oggetti, achievement, account, info e copyright»; poi: «più in stile pzk, senza sfondo: pixel che escono dall'alto, tasti
 // che sono pezzi di carta, scritte di vari font»; il 6.11: «rifallo stra figo»). Niente striscia: dall'alto cola vernice a
 // pixel (la colata: una tela piccola, più sotto), e le voci sono pezzi di carta veri, ognuno il suo oggetto (lo scontrino,
 // il cartone pinzato, il post-it, il biglietto con la puntina, la pagina di quaderno, lo strappo, il cartellino appeso
-// allo spago: CARTE), il suo carattere e la sua storta, in fila al centro (Alberto: «niente tasto pzk, allinea tutto
+// allo spago: CARTE), il suo carattere e la sua storta, in fila al centro (pzkko: «niente tasto pzk, allinea tutto
 // centralmente»: il muro c'è già sotto). Gli strappi e la colata vengono da un caso col seme fisso: sempre gli stessi.
 // La mette questo modulo in ogni pagina che lo carica (la home, la storia e la 404 che si generano da lei, e le pagine
 // nuove: gadget, oggetti, traguardi, info), così le voci stanno in un posto solo. L'altezza è --barra (barra.css): la home
@@ -27,8 +27,8 @@ const VOCI = [
   ['/info/', 'info', 'cuore', 'cos’è pzkko, chi l’ha fatto, il copyright', 'bianca', 'mano'],
   ['/wiki/', 'wiki', 'manuale-landini', 'pzkkopedia, l’enciclopedia libera del muro: una voce per ogni cosa del sito', 'grigia', 'bungee'],
 ]
-// (fuori dalla home, prima di tutte) INDIETRO (26.10, Alberto: «premendo i tasti in topbar non ho modo di tornare
-// indietro»): una freccia di cartoncino rosso; porta sempre alla home pulita, «/» (Alberto: «quando faccio indietro deve
+// (fuori dalla home, prima di tutte) INDIETRO (26.10, pzkko: «premendo i tasti in topbar non ho modo di tornare
+// indietro»): una freccia di cartoncino rosso; porta sempre alla home pulita, «/» (pzkko: «quando faccio indietro deve
 // tornare in home», non alla pagina di prima: quella poteva essere /#account, che riapriva l'account)
 const INDIETRO = ['/serranda/', 'indietro', null, 'torna indietro', 'indietro', 'pennarello']
 

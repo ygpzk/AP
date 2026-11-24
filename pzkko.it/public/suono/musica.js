@@ -1,4 +1,4 @@
-// La musica di pzkko.it (26.10, Alberto: «voglio le musichette… diverse, stile ocarina / animal crossing / minecraft in
+// La musica di pzkko.it (26.10, pzkko: «voglio le musichette… diverse, stile ocarina / animal crossing / minecraft in
 // 16 bit», i suoni della strada al 20% e la musica al 70%, poi al 30%: «musica 0.3»). Come il resto (voci.js, interfaccia.js) niente file: ogni nota
 // è sintetizzata dal vivo col Web Audio, con gli strumenti di una cartuccia del Super Nintendo (l'ocarina, l'arpa, la
 // marimba, il piano elettrico, il contrabbasso, il piano, gli archi, i campanelli, il flauto, la batteria a spazzole), la
@@ -282,7 +282,7 @@ function riverbero(c, sec = 2.6) {
   return b
 }
 
-// quanto forte, sopra il volume (0,3, il 30% di Alberto): misurato con ascolta.mjs musica
+// quanto forte, sopra il volume (0,3, il 30% di pzkko): misurato con ascolta.mjs musica
 const FORTE = 0.9
 const PAUSA = 7 // i secondi di strada sola fra un brano e l'altro
 

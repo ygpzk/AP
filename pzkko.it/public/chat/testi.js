@@ -197,8 +197,8 @@ export const PER_ID = Object.fromEntries([...NEGOZIO, ...NUOVI, ...PESCI, ...ANI
 /** Il nome di un oggetto, come si scrive nello zaino. */
 export const nomeDi = (id) => PER_ID[id]?.nome?.replace(/^(un’|un |una |uno |il |la |l’)/i, '') ?? id
 
-// ── quiz (31.10, Alberto: «il browser non decide più niente»): le domande con le risposte giuste non stanno più qui (chi
-// apriva la console le sapeva). Stanno sulla banca, sul pc di Alberto: banca/dati/testi.mjs (il quiz «a caso» del telefono)
+// ── quiz (31.10, pzkko: «il browser non decide più niente»): le domande con le risposte giuste non stanno più qui (chi
+// apriva la console le sapeva). Stanno sulla banca, sul pc di pzkko: banca/dati/testi.mjs (il quiz «a caso» del telefono)
 // e banca/dati/chat-domande.mjs (il quiz lampo e i minigiochi della chat) ──
 
 // ── le parole da riscrivere (veloce, riscrivi) ──

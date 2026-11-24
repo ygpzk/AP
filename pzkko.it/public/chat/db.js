@@ -10,7 +10,7 @@ const API = '/api/giocatori/' // con la barra finale (trailingSlash): niente red
 const cache = new Map()
 let versione = null // la versione del mio conto (conto.agg) con cui è stata riempita la memoria
 
-// (6.11, Alberto: «le classifiche dicono cose diverse da dentro i profili singoli») UNA MEMORIA SOLA E CORTA: prima una
+// (6.11, pzkko: «le classifiche dicono cose diverse da dentro i profili singoli») UNA MEMORIA SOLA E CORTA: prima una
 // classifica restava qui 30 secondi (e sul server fino a due minuti e mezzo) e una scheda 20, così le due pagine parlavano
 // di due momenti diversi. Adesso dieci secondi per tutto, e ogni richiesta porta la versione del mio conto (&v=): appena
 // faccio una mossa la memoria di qui si svuota e l'indirizzo cambia, quindi classifica e scheda arrivano tutte e due nuove.

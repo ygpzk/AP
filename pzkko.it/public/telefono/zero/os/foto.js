@@ -1,4 +1,4 @@
-// L'app «foto» di pzk os (29.10, Alberto: «crea uno alla volta … foto …»): le foto vere dei quiz (chat/immagini.js:
+// L'app «foto» di pzk os (29.10, pzkko: «crea uno alla volta … foto …»): le foto vere dei quiz (chat/immagini.js:
 // Mantova, il cibo, il Landini, il Ciao…, da Wikimedia Commons o da Imgur, con l'autore e la licenza), sul cercapersone zero.
 // Arrivano a colori a 8 bit col retino di Bayer (icone.foto, dall'11.11); una che il browser non lascia leggere ha il punto di domanda.
 // - LA GALLERIA: le miniature cinque per riga (le frecce si muovono, la riga scorre), sotto cosa è quella scelta. OK la apre.

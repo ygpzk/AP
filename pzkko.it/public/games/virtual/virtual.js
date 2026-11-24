@@ -5,7 +5,7 @@
 // scommesse, uno di diretta), tutto deciso dall'orario (partita.js). Le quote copiano la forza vera delle squadre, e i
 // risultati escono dagli stessi gol attesi (dal 31.10: prima erano a caso, e la sfavorita rendeva più della puntata). Soldi finti: i $pzk di ../pzk.js.
 //
-// (31.10, Alberto: «il browser non decide più niente») Le giocate, i risultati e i pagamenti sono della banca
+// (31.10, pzkko: «il browser non decide più niente») Le giocate, i risultati e i pagamenti sono della banca
 // (C:\pzkko-server, giochi/virtual.mjs; schedina.js qui): ogni giocata è una richiesta alla banca, che la accetta solo
 // fino a cinque secondi prima del fischio (secondo la sua ora) e blocca la quota; il risultato e la cronaca arrivano dalla
 // banca solo a partita iniziata, e lo schermino li anima; al fischio finale la banca paga, anche se la finestra era chiusa:

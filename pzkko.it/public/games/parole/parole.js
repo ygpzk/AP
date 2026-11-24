@@ -1,4 +1,4 @@
-// PAROLE di pzkko.it (19.11, Alberto: «ricrea da zero trivia e parole in stile pzk»): indovina la parola italiana in sei
+// PAROLE di pzkko.it (19.11, pzkko: «ricrea da zero trivia e parole in stile pzk»): indovina la parola italiana in sei
 // tentativi, coi $pzk sopra. Rifatto da zero rispetto al primo Parole (React, nel vecchio sito): qui è un foglio col nastro
 // come i tavoli (../foglio.css), e non decide niente. La parola la pesca la banca e la tiene lei; a ogni tentativo la banca
 // controlla che stia nel dizionario, fa i colori e a partita finita paga (azioni 'parole.inizia', 'parole.prova',

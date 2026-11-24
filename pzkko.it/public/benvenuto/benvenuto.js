@@ -1,6 +1,6 @@
 // Il messaggio d'ingresso (23.10.2026 notte): entrando nella home (solo lì), una volta per versione, esce lo SCONTRINO delle novità e
 // di tutto quello che c'è sul sito, stampato in Fake Receipt come quello dello shop del cercapersone. Si chiude toccando
-// fuori o con Esc (niente «×»); niente animazioni (Alberto: niente transizioni non chieste). Parte solo a pagina caricata
+// fuori o con Esc (niente «×»); niente animazioni (pzkko: niente transizioni non chieste). Parte solo a pagina caricata
 // e quando il browser è libero, così non rallenta l'apertura; se è aperta un'altra finestra (un gioco) aspetta; se il 3D
 // si sta preparando aspetta che la strada si veda. Gli strumenti che fotografano la pagina non lo vedono
 // (navigator.webdriver), se non con ?novita, che lo fa vedere sempre (anche a chi l'ha già letto).
@@ -66,7 +66,7 @@ export async function apri() {
   d.innerHTML = `<article class="bv-scontrino">
     <header>
       <h2>pzkko.it</h2>
-      <p>il muro di Alberto · Mantova</p>
+      <p>il muro di pzkko · Mantova</p>
       <p class="bv-ver">versione ${VERSIONE} «${NOME}»</p>
       <p>${ora.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })} · ${ora.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}</p>
       <p class="bv-chiudi">tocca fuori per chiudere</p>

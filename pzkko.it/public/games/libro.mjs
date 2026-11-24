@@ -1,7 +1,7 @@
 // Il libro dei conti di un giocatore (29.10 notte): c.libro, scritto dal server dei soldi (api/wallet.mjs) coi lotti del
 // browser e con le sue mosse, e letto QUI allo stesso modo dal server (le classifiche, api/_giocatori.mjs) e dal browser (il
 // profilo, telefono/app/profilo.js; la chat, «profilo»): un numero è lo stesso dappertutto. Prima ognuno contava a modo suo
-// nello zaino, e Alberto (29.10): «non posso avere 5.5k in vinti ai giochi e 2.0k guadagnati in tutto: deve avere senso».
+// nello zaino, e pzkko (29.10): «non posso avere 5.5k in vinti ai giochi e 2.0k guadagnati in tutto: deve avere senso».
 //
 // Il libro: g (per gioco: [mani, vinte, puntato, tornato, il colpo migliore]); lav (i soldi nuovi del lavoro, della miniera,
 // delle quest: i lotti 'c:'); pre (i premi che dà il server: il sussidio, le banconote, instagram, i wallet decifrati); spe (le

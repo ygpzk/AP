@@ -1,6 +1,6 @@
 // Il banner del wallet (23.10 sera), il tasto in alto a sinistra della home (index.html, .wallet-tasto): una striscia di
 // pelle cucita con la piastra d'acciaio e un pannello a led (art/wallet-banner/banner.webp, gpt-image-2, come il
-// portafoglio). Il pannello dice sempre i $pzk (Alberto: «sempre c'è il mio importo»); col cursore sopra ci scorrono tutti
+// portafoglio). Il pannello dice sempre i $pzk (pzkko: «sempre c'è il mio importo»); col cursore sopra ci scorrono tutti
 // i dati del wallet, come sui tabelloni di borsa: il saldo, quel che è sul tavolo, gli EUR€, quanto valgono i $pzk in
 // euro, il cambio PZK/EUR€ con la variazione delle 24 ore e dell'ultima ora, il grafico delle 24 ore fatto di led, il
 // minimo e il massimo, 1 € in $pzk, la capitalizzazione e i conti, il nome e l'indirizzo, la batteria, l'ultima mossa,

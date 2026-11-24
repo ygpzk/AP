@@ -12,7 +12,7 @@
 // una medaglia pagano $pzk (col moltiplicatore, come la chat) e xp; con l'oro, una volta al giorno per ricetta, il piatto
 // vero va nello zaino quando esiste (i tortelli, la sbrisolona). Lo stato sta nello zaino (zaino.cucinaStato).
 //
-// DAL 31.10 I VOTI LI DÀ LA BANCA (Alberto: «il browser non decide più niente»; giochi/app-cucina.mjs sul server di Alberto).
+// DAL 31.10 I VOTI LI DÀ LA BANCA (pzkko: «il browser non decide più niente»; giochi/app-cucina.mjs sul server di pzkko).
 // I minigiochi si giocano sullo zero, ma la ricetta la apre la banca ('cucina.apri') con la sua ora e i numeri a caso di ogni passo
 // (dove sono le righe da tagliare, l'ordine delle carte, la fascia del versa e del cuoci); finito un passo, si manda
 // quello che si è fatto ('cucina.passo': i millisecondi dei tagli, gli ingredienti toccati, i quarti di giro, i colpi, quanto è

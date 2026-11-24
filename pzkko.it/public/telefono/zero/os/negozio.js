@@ -1,4 +1,4 @@
-// L'app «shop» di pzk os (29.10, Alberto: «crea uno alla volta shop, pzkstore, … falle tutte maniacalmente perfette»): lo
+// L'app «shop» di pzk os (29.10, pzkko: «crea uno alla volta shop, pzkstore, … falle tutte maniacalmente perfette»): lo
 // shop dei $pzk sul cercapersone zero. La logica è quella dello shop del cercapersone vecchio (telefono/app/negozio.js: la
 // scelta dei prodotti, il pagamento, il conto alla rovescia, lo stesso carrello e gli stessi preferiti) e della chat
 // (chat/testi.js, chat/oggetti.js, chat/mercato.js): quello che compri qui lo trovi nello zaino e viceversa.
@@ -37,11 +37,11 @@ const puliti = () => pzk.puliti()
 const pul = () => (pzk.sporchi() > 0 ? ' puliti' : '') // (detto solo se ci sono anche gli sporchi)
 /** Perché non si possono spendere t $pzk (null: si può). */
 const nonPuoi = (t) => (pzk.inGalera() ? `in galera fino alle ${ora(pzk.galera())}` : t > puliti() ? `ti mancano ${fmt(t - puliti())} $pzk${pul()}` : null)
-/** Un'icona sempre: quella del prodotto (webp di Alberto, arriva dopo: icone.ascolta ridisegna), intanto quella dello shop. */
+/** Un'icona sempre: quella del prodotto (webp di pzkko, arriva dopo: icone.ascolta ridisegna), intanto quella dello shop. */
 const bm = (id, lato) => icone.bitmap(id, lato) ?? icone.bitmap('app-shop', lato)
 const ce = (x) => x.unico && zaino.ha(x.id)
 
-// ── i colori (11.11, Alberto: «fai colori a 8bit su tutto»): pochi e con un senso. Il testo resta d'inchiostro; quello che è
+// ── i colori (11.11, pzkko: «fai colori a 8bit su tutto»): pochi e con un senso. Il testo resta d'inchiostro; quello che è
 // colorato (lo sconto, i soldi che mancano, i risparmi) è un cartellino col testo bianco, che si legge su tutti gli sfondi
 // (rosso o verde chiaro su «arancione» spariva); il cuore dei preferiti è rosso; lo scontrino è un foglio di carta col testo
 // nero, come uno vero ──

@@ -1,6 +1,6 @@
-// Le icone di pzk os a un bit (29.10, Alberto: «rifai icone in svg consumando pochissimo… mantieni stile 8bit»): disegnate
+// Le icone di pzk os a un bit (29.10, pzkko: «rifai icone in svg consumando pochissimo… mantieni stile 8bit»): disegnate
 // qui come tracciati SVG (viewBox 16 × 16), riempiti su una tela della misura chiesta e ridotti a pixel acceso/spento
-// (niente immagini da scaricare, niente retino: sagome pulite anche a 16 pixel). Un'icona di Alberto che qui non c'è
+// (niente immagini da scaricare, niente retino: sagome pulite anche a 16 pixel). Un'icona di pzkko che qui non c'è
 // (art/chat-*, chat/icone.js) si prende dalla sua webp col retino di Bayer, come riserva. Le bitmap stanno in cache.
 //
 // Dall'11.11 a colori (la tavolozza a 8 bit di lcd.js, COLORI qui sotto) e ai pixel veri dello schermo (lato × D).
@@ -83,7 +83,7 @@ const SVG = {
 }
 
 
-// (11.11, Alberto: «colori a 8bit su tutto») i colori delle icone: uno per tracciato (o uno per tutti), presi dalla
+// (11.11, pzkko: «colori a 8bit su tutto») i colori delle icone: uno per tracciato (o uno per tutti), presi dalla
 // tavolozza a 8 bit di lcd.js. Chi non ha colore resta dell'inchiostro del tema, come prima
 const COLORI = {
   'app-chat': '#33ccff', 'app-profilo': '#ffcc66', 'app-account': '#99ccff', 'app-shop': '#ff6633', 'app-pzkstore': ['#3366ff', '#33cc33'],
@@ -149,7 +149,7 @@ function carica(nome) {
   immagini.set(nome, im)
   return im
 }
-/** La bitmap dell'icona, lato × lato (pixel d'impaginazione), a colori: l'SVG se c'è, se no la webp di Alberto coi suoi colori. */
+/** La bitmap dell'icona, lato × lato (pixel d'impaginazione), a colori: l'SVG se c'è, se no la webp di pzkko coi suoi colori. */
 export function bitmap(nome, lato = 16) {
   const k = `${nome}/${lato}`
   const c = cache.get(k)
@@ -164,7 +164,7 @@ export function bitmap(nome, lato = 16) {
   g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'
   const s = Math.min(L / im.naturalWidth, L / im.naturalHeight), w = im.naturalWidth * s, h = im.naturalHeight * s
   g.drawImage(im, (L - w) / 2, (L - h) / 2, w, h)
-  const b = { w: lato, h: lato, d: D, px: aIndici(g.getImageData(0, 0, L, L).data, L, { bordo: false }) } // (le webp di Alberto hanno già il bordo bianco)
+  const b = { w: lato, h: lato, d: D, px: aIndici(g.getImageData(0, 0, L, L).data, L, { bordo: false }) } // (le webp di pzkko hanno già il bordo bianco)
   cache.set(k, b)
   return b
 }

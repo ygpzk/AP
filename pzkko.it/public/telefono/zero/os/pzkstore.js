@@ -1,4 +1,4 @@
-// L'app «pzkstore» di pzk os (29.10, Alberto: «crea uno alla volta shop, pzkstore, …»): il negozio delle app del cercapersone
+// L'app «pzkstore» di pzk os (29.10, pzkko: «crea uno alla volta shop, pzkstore, …»): il negozio delle app del cercapersone
 // zero. Il catalogo, i prezzi, l'acquisto e la rimozione sono quelli del pzkstore vecchio (telefono/app/pzkstore.js:
 // CATALOGO, compra, togli, regalata): coi $pzk PULITI alla cassa di pzk, in galera non si compra, si toglie senza rimborso.
 // L'app comprata compare subito nel menu (telefono.js rifà la lista quando lo zaino cambia).
@@ -7,7 +7,7 @@
 // - LA SCHEDA: l'icona grande, il nome, il genere e la versione, lo stato; il testo intero che scorre con ↑ ↓ (cosa fa, in
 //   breve, come si usa, cosa serve, le novità, togliere); sotto i tasti: compra e scarica, o apri e togli. Comprare e togliere
 //   si confermano.
-// - I COLORI (11.11, Alberto: «fai colori a 8bit su tutto»): installata su una fascia verde, il prezzo che non ti puoi
+// - I COLORI (11.11, pzkko: «fai colori a 8bit su tutto»): installata su una fascia verde, il prezzo che non ti puoi
 //   permettere su una rossa, la galera rossa, il «!» di chi ti servirebbe su un bollino giallo. Il resto è d'inchiostro.
 // Le regole: os/REGOLE.md.
 import { Lcd, W, H, C } from './lcd.js'

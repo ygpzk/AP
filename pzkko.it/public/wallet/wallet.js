@@ -3,7 +3,7 @@
 // pagina: il saldo in $pzk a led verdi (le stesse cifre a sette segmenti del portachiavi per terra, portachiavi.js), gli
 // EUR€ a led ambra, la batteria su un lcd (100 % alle 7 di mattina, 2 % alle 7 di sera, poi in carica col cavo usb-c
 // infilato nella porta sul fianco sinistro), la targhetta con l'indirizzo, e a destra la borsa: il grafico del cambio
-// PZK/EUR€ (api/borsa.mjs; la manopola cambia il periodo) con la capitalizzazione. Dal 26.10 (Alberto: «in portafoglio
+// PZK/EUR€ (api/borsa.mjs; la manopola cambia il periodo) con la capitalizzazione. Dal 26.10 (pzkko: «in portafoglio
 // solo saldo e borsa») è tutto qui: il conto, il cambio, gli invii e il resto (prima le pagine dei quattro tasti gialli)
 // sono l'app Account del cercapersone (telefono/app/account.js), e i tasti gialli della foto ci portano, ognuno sulla sua
 // scheda. I soldi li tiene ../games/pzk.js, gli stessi dei giochi.

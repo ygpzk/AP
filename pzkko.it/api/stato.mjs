@@ -1,11 +1,11 @@
-// /api/stato (11.11.2026, Alberto: «crea in ap e in pzk da qualche parte un informatore che dice che i sistemi vanno
+// /api/stato (11.11.2026, pzkko: «crea in pzk da qualche parte un informatore che dice che i sistemi vanno
 // sempre connessi dal mio pc»). Il dato viene dal pc, attraverso il ponte che c'è già (_server.mjs, firmato HMAC), in sola
 // lettura e senza niente salvato su Vercel:
 //   pc       GET /v1/salute firmata: risponde il server di casa (C:\pzkko-server), quindi il pc è acceso, il tunnel va e
 //            il segreto torna. «acceso» = da quando gira il server
 //   banca    la GET pubblica di /api/wallet attraverso /v1/api/wallet (i totali, come la vede chiunque): la banca è carica
 //   tempo    la macchina del tempo (tempo-server) attraverso il tunnel, senza firma: è pubblica anche lei
-//   siti     i domini dei siti ospitati, misurati da qui (Vercel): 200, o il rimando a www
+//   siti     pzkko.it, misurato da qui (Vercel): 200, o il rimando a www
 // L'indirizzo del tunnel e il nome del pc non escono mai: solo sì/no, codici e millisecondi.
 //
 // La risposta resta in cache sul CDN 60 secondi (e fino a 5 minuti mentre se ne prepara una nuova): al server di casa
@@ -15,10 +15,6 @@ import { chiedi, intestazioniJson, serverOpzioni } from './_server.mjs'
 
 const SITI = [
   'https://www.pzkko.it/',
-  'https://www.rivaltasulmincio.it/',
-  'https://www.cascinafontana.xyz/',
-  'https://www.bettercallpekko.it/',
-  'https://dariodonelli.vercel.app/',
 ]
 const ATTESA = 6_000
 const UA = 'pzkko-stato (controllo dei sistemi)'

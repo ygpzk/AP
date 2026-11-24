@@ -1,4 +1,4 @@
-// L'app «quest» di pzk os (29.10, Alberto: «crea uno alla volta … quest …»): le side quest come un libro a bivi, sul
+// L'app «quest» di pzk os (29.10, pzkko: «crea uno alla volta … quest …»): le side quest come un libro a bivi, sul
 // cercapersone zero. Le storie, gli stati, le scelte (costi, rischi, oggetti), i premi sono quelli di chat/missioni.js
 // (elenco, vista, inizia, scegli, abbandona), come le quest del cercapersone vecchio: si può cominciare qui e finire in chat.
 // - L'ELENCO: quante finite; ogni storia con l'icona, il nome, lo stato (da fare, in corso, finita, bloccata) e una riga
@@ -25,7 +25,7 @@ const premioVero = (p) => ({ ...p, pzk: Math.round(p.pzk * zaino.moltiplicatore(
 /** Le quest con una scelta già partita verso la banca (11.11: INDIETRO esce mentre la banca decide; rientrando, una seconda
  *  scelta partiva lo stesso, e la banca la giocava sul passo DOPO, perché la scelta è solo il numero della riga). */
 const inVolo = new Set()
-// (11.11, Alberto: «fai colori a 8bit su tutto») i colori dicono qualcosa: verde i $pzk che arrivano e la quest finita, rosso
+// (11.11, pzkko: «fai colori a 8bit su tutto») i colori dicono qualcosa: verde i $pzk che arrivano e la quest finita, rosso
 // quelli che si pagano e la quest bloccata, blu l'xp e la quest in corso. Sempre in un bollino col suo testo bianco, mai testo
 // colorato sul fondo: un verde o un rosso che si leggono sull'arancione spariscono su «notte», e viceversa
 const VERDE = esa('#006633'), ROSSO = esa('#cc0000'), BLU = esa('#0066cc')

@@ -1,4 +1,4 @@
-// I suoni dell'interfaccia di pzkko.it (26.10, Alberto: «crea i suoni dove non ci sono: ogni app ha la sua musichetta, ogni
+// I suoni dell'interfaccia di pzkko.it (26.10, pzkko: «crea i suoni dove non ci sono: ogni app ha la sua musichetta, ogni
 // tasto ha un suonino»). Come la strada (suono.js), tutto sintetizzato dal vivo, niente file: chiptune a onde quadre,
 // triangoli e rumore.
 // - musichetta(nome): una sigla di un secondo o due per ogni app del cercapersone (telefono/telefono.js, vai), per
@@ -17,7 +17,7 @@
 // Nella home (e nella storia e nella 404) c'è il motore della strada: si usa il suo contesto (window.pzkkoSuono.ctx) e si
 // tace se il nastro «suono» è spento. Nelle pagine senza la strada (gadget, oggetti, traguardi, info, le prove) un contesto
 // suo, che nasce al primo gesto, e suona solo se nel browser i suoni sono stati accesi (pzkko-suono = si: dal 29.10 di
-// partenza sono spenti, Alberto: «impostazioni predefinite audio off»; prima suonava se non erano stati spenti).
+// partenza sono spenti, pzkko: «impostazioni predefinite audio off»; prima suonava se non erano stati spenti).
 
 import { avviaCornice, fuori, vai } from './cornice.js'
 export { vai }

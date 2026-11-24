@@ -1,4 +1,4 @@
-// L'app «calcoli» di pzk os (29.10, Alberto: «crea uno alla volta … calcoli …»): la scientifica del geometra sul cercapersone
+// L'app «calcoli» di pzk os (29.10, pzkko: «crea uno alla volta … calcoli …»): la scientifica del geometra sul cercapersone
 // zero. I conti e lo stato sono quelli della calcolatrice vecchia (telefono/app/calcolatrice.js: calcola, registra, risolvi,
 // polari, fraDue, gauss, leggiAngolo, num, dms, angolo, MODI, TASTI, e S, ricordato in telefono/ricordi.js): sono la stessa
 // calcolatrice, con due facce. Quattro pagine (← →):
@@ -19,7 +19,7 @@ import { ricorda } from '../../ricordi.js'
 import { txt, corto, destra, centro, pagine, impagina, scorrevole, senzaHtml, testata, striscia } from './pezzi.js'
 
 const salva = () => ricorda('calcolatrice', S)
-// (11.11, Alberto: «fai colori a 8bit su tutto»: pochi colori e con un senso, medi perché si leggano sull'arancione, sulla
+// (11.11, pzkko: «fai colori a 8bit su tutto»: pochi colori e con un senso, medi perché si leggano sull'arancione, sulla
 // carta e su «notte». Rosso: gli errori, AC e DEL che cancellano, il pezzo scelto del triangolo e l'angolo del goniometro;
 // verde: l'uguale; blu: il triangolo che si chiude, grigio quello qualunque. Il testo resta d'inchiostro)
 const ROSSO = esa('#cc0000'), VERDE = esa('#006600'), BLU = esa('#3366ff'), GRIGIO = esa('#999999'), BIANCO = esa('#ffffff')

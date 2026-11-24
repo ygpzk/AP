@@ -2,8 +2,8 @@
 // oggetti, le attese dei comandi, gli effetti in corso, le serie dei premi, le statistiche, le parti delle app (sfide,
 // missioni, quiz, miniera, cucina, profilo). I $pzk non stanno qui: sono quelli di games/pzk.js.
 //
-// DAL 31.10 LO ZAINO STA SULLA BANCA (Alberto: «decifra un wallet devi farlo se hai un wallet … browser modificato non può
-// accedere»): sta dentro il conto, sul pc di Alberto, e lo cambiano solo le azioni della banca (pzk.fai: «chat.pesca»,
+// DAL 31.10 LO ZAINO STA SULLA BANCA (pzkko: «decifra un wallet devi farlo se hai un wallet … browser modificato non può
+// accedere»): sta dentro il conto, sul pc di pzkko, e lo cambiano solo le azioni della banca (pzk.fai: «chat.pesca»,
 // «mercato.compra», «quiz.rispondi»…). Questo file ne tiene la COPIA che la banca manda con ogni risposta, per mostrarla:
 // qui non si aggiunge, non si toglie e non si salva niente. Le attese e gli effetti si misurano con l'ora di qui solo per
 // lo schermo (il conto alla rovescia): quella che conta è l'ora della banca.

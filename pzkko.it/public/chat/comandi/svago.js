@@ -1,4 +1,4 @@
-// I comandi per ridere (26.10, Alberto: «altre cose in chat»): non toccano i soldi né lo zaino, non hanno attesa. Il bot dice
+// I comandi per ridere (26.10, pzkko: «altre cose in chat»): non toccano i soldi né lo zaino, non hanno attesa. Il bot dice
 // la sua: una barzelletta, la palla otto, l'oroscopo del Mincio, testa o croce, il dado.
 
 const caso = (a) => a[Math.floor(Math.random() * a.length)]

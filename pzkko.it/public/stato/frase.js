@@ -1,5 +1,5 @@
-// La frase dell'informatore (11.11.2026, Alberto: «un informatore che dice che i sistemi vanno sempre connessi dal mio
-// pc»): da quello che risponde /api/stato/ (api/stato.mjs) a «● sistemi operativi · connessi dal pc di Alberto ·
+// La frase dell'informatore (11.11.2026, pzkko: «un informatore che dice che i sistemi vanno sempre connessi dal mio
+// pc»): da quello che risponde /api/stato/ (api/stato.mjs) a «● sistemi operativi · connessi dal pc di pzkko ·
 // controllato 2 min fa». Lo usa stato/informatore.js.
 
 export const API = '/api/stato/'
@@ -26,7 +26,7 @@ export function frase(d, ora = Date.now()) {
   const siti = Array.isArray(d.siti) ? d.siti : []
   const online = siti.filter((s) => s.su).length
   const titolo = [
-    d.pc ? `pc di Alberto: ${d.pc.su ? `connesso (${d.pc.ms} ms)` : 'spento o scollegato'}` : '',
+    d.pc ? `pc di pzkko: ${d.pc.su ? `connesso (${d.pc.ms} ms)` : 'spento o scollegato'}` : '',
     d.banca ? `banca: ${d.banca.su ? 'aperta' : 'in pausa'}` : '',
     d.tempo ? `macchina del tempo: ${d.tempo.su ? 'accesa' : 'spenta'}` : '',
     ...siti.map((s) => `${s.nome}: ${s.su ? `${s.codice} · ${s.ms} ms` : s.codice ? `${s.codice}` : 'non risponde'}`),
@@ -34,11 +34,11 @@ export function frase(d, ora = Date.now()) {
   if (ora - d.agg > VECCHIO) return { tono: 'ignoto', testo: `stato dei sistemi: ultimo controllo ${quando(d.agg, ora)}`, titolo }
   switch (d.stato) {
     case 'su':
-      return { tono: 'su', testo: `sistemi operativi · connessi dal pc di Alberto · ${visto}`, titolo }
+      return { tono: 'su', testo: `sistemi operativi · connessi dal pc di pzkko · ${visto}`, titolo }
     case 'parziale':
-      return { tono: 'parziale', testo: `connessi dal pc di Alberto, ma ${elenco(d.giu || [])} non ${(d.giu || []).length > 1 ? 'vanno' : 'va'} · ${visto}`, titolo }
+      return { tono: 'parziale', testo: `connessi dal pc di pzkko, ma ${elenco(d.giu || [])} non ${(d.giu || []).length > 1 ? 'vanno' : 'va'} · ${visto}`, titolo }
     case 'pc-spento':
-      return { tono: 'spento', testo: `il pc di Alberto è spento: banca in pausa${siti.length ? ` · siti online ${online}/${siti.length}` : ''} · ${visto}`, titolo }
+      return { tono: 'spento', testo: `il pc di pzkko è spento: banca in pausa${siti.length ? ` · siti online ${online}/${siti.length}` : ''} · ${visto}`, titolo }
     default:
       return { tono: 'ignoto', testo: 'stato dei sistemi: non lo so', titolo }
   }

@@ -1,4 +1,4 @@
-// La salute della lumachina (23.10 sera, Alberto): la chiocciolina del cercapersone ha una vita sua. Ogni giorno di Mantova
+// La salute della lumachina (23.10 sera, pzkko): la chiocciolina del cercapersone ha una vita sua. Ogni giorno di Mantova
 // (dalle 00:00 alle 00:00) si sveglia con una salute e decide lei com'è la giornata: se sta male prende medicine e spende i
 // tuoi soldi, se ha una visione ti fa guadagnare o perdere, a volte combina affari, disastri o miracoli, a volte niente.
 // Il giocatore non può farci niente: la giornata è decisa da un dado DETERMINISTICO (il conto e il giorno), quindi è la stessa

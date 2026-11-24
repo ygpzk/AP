@@ -35,7 +35,7 @@ export const SOLDI = [
         // (4.11) il tasto per provarlo: se vuole qualcosa dopo («slot <puntata>») apre la tastiera già scritta fin lì
         return ctx.dì({ colore: 'blu', t: `${c.icona ? `:${c.icona}: ` : ''}${c.nomi[0]}`, d: c.spiega ?? c.breve, azioni: [[/</.test(c.uso ?? '') ? c.uso : c.nomi[0], `prova «${c.nomi[0]}»`, 'oro']], campi: [['come si scrive', `<code>${String(c.uso ?? c.nomi[0]).replace(/[&<>]/g, (x) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[x])}</code>`], /* (29.10 notte: «<mestiere>», «<app>» senza escape diventavano tag finti e sparivano) */ ...(c.nomi.length > 1 ? [['anche', c.nomi.slice(1).map((n) => `<code>${n}</code>`).join(' ')]] : []), ...(c.attesa ? [['attesa', ctx.durata(c.attesa * 1000)]] : [])] })
       }
-      // (4.11, Alberto: «uno che non ha mai aperto il sito fa fatica»: prima diceva «le frecce in su ripetono gli ultimi», che
+      // (4.11, pzkko: «uno che non ha mai aperto il sito fa fatica»: prima diceva «le frecce in su ripetono gli ultimi», che
       // nello zero non è vero, ↑ scorre i messaggi; adesso i comandi per cominciare sono tasti)
       const PER_COMINCIARE = ['giornaliero', 'lavora', 'pesca', 'caccia', 'scava', 'quiz', 'negozio', 'zaino', 'sfide', 'classifica']
       ctx.dì({ colore: 'blu', t: 'i comandi', d: 'Premi un tasto, o scrivi un comando (anche <code>pzk pesca</code> o <code>/pesca</code>). <code>aiuto pesca</code> spiega un comando.',

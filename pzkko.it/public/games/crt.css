@@ -10,7 +10,7 @@
    contenuto, e il vetro non diventa il contenitore di niente (nel wallet, sul telefono, la pagina dei tasti è fixed dentro
    lo schermo del grafico e deve uscirne). Si muovono SOLO lo sfarfallio e la banda, con opacity e transform (animazioni
    composite, sul compositor: il thread della pagina resta fermo); niente accensioni, dissolvenze o transition, perché
-   Alberto non vuole movimenti che non ha chiesto.
+   pzkko non vuole movimenti che non ha chiesto.
 
    Il filtro SVG sul contenuto (i canali rosso e blu spostati di 0,7 px, l'aberrazione cromatica, più un alone sfocato in
    screen, il bloom) è stato provato e scartato il 23.10. Misure sul wallet aperto, 1300 × 860, Chromium headless con la

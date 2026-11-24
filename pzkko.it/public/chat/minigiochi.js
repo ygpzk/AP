@@ -1,5 +1,5 @@
 // I minigiochi del turno di lavoro (comandi/lavoro.js), RIFATTI DA CAPO il 6.11 per lo schermo del cercapersone zero.
-// (6.11, Bighurra: «il lavoro è un po' buggato, non vedo cosa devo replicare»; Alberto: «rifarei da zero… aggiusta
+// (6.11, Bighurra: «il lavoro è un po' buggato, non vedo cosa devo replicare»; pzkko: «rifarei da zero… aggiusta
 // benissimo tutto ricreando».) Erano nati per la chat in HTML: un'immagine da ricordare, la frase disegnata su una tela, le
 // parole colorate, una scatola col nastro dentro. Dal 31.10 la chat è solo quella a 8 bit di pzk os
 // (telefono/zero/os/chat.js), che di una scheda disegna il testo e i tasti: l'icona da ricordare non c'era e i cinque tasti
@@ -180,7 +180,7 @@ export const MINIGIOCHI = {
   /** nastro (26.10, lo spazzino di uffici): sul nastro passano 12 cose, una alla volta, un secondo ciascuna. → la tiene,
    *  ← la butta (le frecce premono subito; chi non decide la butta). In tasca ne stanno TRE: dopo, le altre si guardano
    *  passare, anche se valgono di più.
-   *  (31.10, Alberto: «decifra un wallet devi farlo se hai un wallet») I PEZZI LI DÀ LA BANCA, UNO ALLA VOLTA ('chat.nastro'):
+   *  (31.10, pzkko: «decifra un wallet devi farlo se hai un wallet») I PEZZI LI DÀ LA BANCA, UNO ALLA VOLTA ('chat.nastro'):
    *  la decisione sul pezzo che passa va alla banca, e la risposta porta il pezzo dopo; quello che viene dopo qui non si sa
    *  mai prima. In tasca va quello che la banca dice tenuto; all'ultimo pezzo la banca chiude il turno.
    *  (6.11) La scheda è una sola e cambia a ogni pezzo: il disegno, il nome, quanto vale, le tasche.

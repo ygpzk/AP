@@ -1,4 +1,4 @@
-// La miniera di $pzk (23.10): le REGOLE. Alberto: «crea app dove si minano pzk da pc. ovviamente bisogna comprare i
+// La miniera di $pzk (23.10): le REGOLE. pzkko: «crea app dove si minano pzk da pc. ovviamente bisogna comprare i
 // componenti e farsi la postazione. anche la sedia migliorata aumenta la produzione». Il catalogo e i PC pronti sono in
 // miniera-dati.mjs, il disegno in miniera-pixel.js, l'app in telefono/app/miniera.js. Niente interfaccia qui: tutto torna
 // come dati, e gli errori sono frasi pronte da mostrare.
@@ -27,8 +27,8 @@
 // che mancano, scontati. Lo stato sta nello zaino (zaino.minieraStato: { posseduti: { id: n }, montati: { cat: id | { id, n } },
 // dal, acc }). posseduti conta tutti i pezzi che hai, anche quelli montati.
 //
-// DAL 31.10 LA MINIERA LA FA GIRARE LA BANCA (Alberto: «il browser non decide più niente»; giochi/app-miniera.mjs sul server
-// di Alberto, con le stesse regole copiate): comprare, vendere, montare, smontare, i PC pronti e l'incasso sono azioni della
+// DAL 31.10 LA MINIERA LA FA GIRARE LA BANCA (pzkko: «il browser non decide più niente»; giochi/app-miniera.mjs sul server
+// di pzkko, con le stesse regole copiate): comprare, vendere, montare, smontare, i PC pronti e l'incasso sono azioni della
 // banca, coi suoi prezzi e col suo orologio (i $pzk maturano fino all'ora del server: spostare avanti l'ora del computer non
 // mina niente). Qui le regole restano per disegnare e per dire i numeri (calcola, maturati, compatibile, prezzoPronto) e le
 // azioni chiedono (pzk.fai): il risultato arriva con lo zaino nuovo.
@@ -183,7 +183,7 @@ export function piena(ora = Date.now()) {
   return c.completa && c.perOra > 0 && maturatiDi(s, ora) >= c.perOra * c.capienzaOre - 1e-6
 }
 
-/** (11.11, Alberto: «non posso montare i pezzi comprati») Il pezzo non ci sta: quale altro pezzo cambiare perché ci stia.
+/** (11.11, pzkko: «non posso montare i pezzi comprati») Il pezzo non ci sta: quale altro pezzo cambiare perché ci stia.
  *  Prima uno che hai già, poi il meno caro da comprare. → { cat, id, ho } o null (ci sta già, o niente lo fa stare)
  *  (11.11) `n`: quanti ne devono stare, per «monta +1» (il secondo monitor col tavolo da un posto solo, la seconda scheda
  *  col case da uno slot: prima cercava solo per il primo, e il «non ci sta» non sapeva suggerire il tavolo o il case) */

@@ -100,7 +100,7 @@ function pendoli(el) {
       p.dentro = su
     }
   }, { passive: true })
-  // (6.11, Alberto: «le penne si muovono sempre»): anche scorrendo. Quando la pagina scorre con le penne in vista
+  // (6.11, pzkko: «le penne si muovono sempre»): anche scorrendo. Quando la pagina scorre con le penne in vista
   // prendono una spinta, ognuna la sua, come appese davvero: col dito non c'è un puntatore che ci passi sopra. Al più
   // una spinta ogni 0,15 s; ferme, non chiedono niente
   let ys = scrollY, ts = 0

@@ -1,16 +1,16 @@
-// La Chat di pzk os a 8 bit (29.10, Alberto: «fai solo app chat completissima e se va bene e io ti dico ok fai tutte le
+// La Chat di pzk os a 8 bit (29.10, pzkko: «fai solo app chat completissima e se va bene e io ti dico ok fai tutte le
 // altre»): la chat col bot pzk dentro l'lcd 256 × 128 (os.js, lcd.js). I COMANDI SONO QUELLI VERI (chat/comandi/*, lo stesso
 // motore di chat/chat.js: le attese, gli eventi casuali, il cercapersone scassato, i soldi): ogni comando riceve un «ctx»
 // come quello della chat in HTML, ma qui le schede, i tasti, le griglie dei minigiochi (le mine, il gratta e vinci), i
 // rulli della slot, le barre del tempo e la riga da scrivere si disegnano a pixel. Le schede sono messaggi con la barra
-// a sinistra, l'icona di Alberto (a colori, icone.js) e il titolo, il testo a capo a 40 colonne, i campi «nome: valore»,
+// a sinistra, l'icona di pzkko (a colori, icone.js) e il titolo, il testo a capo a 40 colonne, i campi «nome: valore»,
 // il piè; i tasti di seguito e le scelte dei minigiochi sono riquadri che la croce sceglie e OK preme. Lo stile è quello
 // del Flipper: le cornici smussate, la voce scelta rovesciata, il testo d'inchiostro; dall'11.11 i colori a 8 bit dove
 // dicono qualcosa («i colori», qui sotto).
 //
-// Come si usa (4.11, Alberto: «i tasti che premo danno comandi diversi da quel che hanno di nome… fai una cosa più facile:
+// Come si usa (4.11, pzkko: «i tasti che premo danno comandi diversi da quel che hanno di nome… fai una cosa più facile:
 // uno che non ha mai aperto il sito fa fatica»): c'è SEMPRE un tasto scelto, rovesciato. ← → lo spostano su tutto quello
-// che si può premere adesso: i tasti dell'ultima scheda, poi i CONSIGLIATI nella fila in fondo (2.11, Alberto: «fai che la
+// che si può premere adesso: i tasti dell'ultima scheda, poi i CONSIGLIATI nella fila in fondo (2.11, pzkko: «fai che la
 // chat mostri subito dei tasti da dove cominciare»: i comandi pronti adesso, il premio giornaliero, le quest, lavora, pesca;
 // poi le ultime righe scritte, zaino.rapidi, e saldo, negozio, aiuto), poi «scrivi…», la riga dove si scrive con la
 // tastiera vera (os.tastiera; 11.11: la tastiera sullo schermo non c'è più). OK preme quello scelto, il clic quello sotto il mouse, e il fumetto dice il nome del tasto premuto. ↑ ↓
@@ -41,7 +41,7 @@ const BARRA = os.BARRA
 const COL = 40 // le colonne di testo dentro una scheda (x 10 → 250)
 const X0 = 10 // dove comincia il testo delle schede (la barra a sinistra sta a x 6, sul margine: REGOLE.md)
 
-// ── i colori (11.11, Alberto: «aumenta la qualità dei pixel in dpi e fai colori a 8bit su tutto»): pochi e col senso che hanno
+// ── i colori (11.11, pzkko: «aumenta la qualità dei pixel in dpi e fai colori a 8bit su tutto»): pochi e col senso che hanno
 // nella chat grande. La barra a sinistra di una scheda ha il colore della scheda (oro una vincita, rosso un errore o una
 // perdita, ambra un'attesa o una puntata, blu un gioco, grigio il resto); un tasto verde, oro o rosso ha la cornice del suo
 // colore; i soldi col + sono verdi, col − rossi (e quelli persi o di multa); le carte sono cartellini bianchi, cuori e quadri
@@ -200,7 +200,7 @@ export function tempo(s, ms) {
   return () => { if (m.tempo) m.tempo.fermo = true; os.ridisegna() }
 }
 /** I tasti sotto la scheda: → Promise dell'id premuto (null allo scadere). griglia: g3 | g5 (le celle di un minigioco). */
-// ── le scelte che sono direzioni (29.10, Alberto: «come faccio a premere quando faccio lavoro rider? le freccie non vanno
+// ── le scelte che sono direzioni (29.10, pzkko: «come faccio a premere quando faccio lavoro rider? le freccie non vanno
 // per la sequenza»): la consegna del rider (sinistra, dritto, destra), il rigore (sinistra, centro, destra). Lì le frecce
 // PREMONO il tasto della loro direzione, subito, e il tasto porta la sua freccia; OK preme ancora quello scelto ──
 const VERSO = { sinistra: 'sx', destra: 'dx', dritto: 'su', centro: 'su', su: 'su', giù: 'giu', giu: 'giu' }
@@ -368,7 +368,7 @@ function ctxDi(args, testo) {
   }
   return ctx
 }
-/** eti: il nome del tasto che l'ha mandato. Il fumetto dice quello (4.11, Alberto: «i tasti che premo danno comandi diversi
+/** eti: il nome del tasto che l'ha mandato. Il fumetto dice quello (4.11, pzkko: «i tasti che premo danno comandi diversi
  *  da quel che hanno di nome»: «comincia La rana che canta» diventava il fumetto «quest rana»), e fra gli ultimi comandi
  *  dei consigliati ci vanno solo quelli scritti o consigliati, non i tasti di una scheda. */
 export async function esegui(riga, { muto = false, eti = null } = {}) {
@@ -526,7 +526,7 @@ function rapidi() {
   return [...new Set([...l, ...zaino.rapidi().slice(0, 4), 'saldo', 'negozio', 'aiuto'])].slice(0, 8)
 }
 
-// ── i tasti di adesso (4.11, Alberto: «in chat è buggato perché i tasti che premo danno comandi diversi da quel che hanno di
+// ── i tasti di adesso (4.11, pzkko: «in chat è buggato perché i tasti che premo danno comandi diversi da quel che hanno di
 // nome… fai una cosa più facile: uno che non ha mai aperto il sito fa fatica»). Prima c'erano tre modi diversi (i consigliati
 // che riempivano la riga, le azioni dell'ultima scheda che li nascondevano, OK a vuoto che apriva la tastiera) e niente di
 // scelto finché non si toccava una freccia. Adesso UN cursore solo, sempre su un tasto che si vede: ← → lo spostano su tutto

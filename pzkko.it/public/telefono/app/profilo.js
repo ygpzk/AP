@@ -4,8 +4,8 @@
 // il motto. Si salvano nello zaino e col conto vanno nella riga pubblica del database (api/_giocatori.mjs): nell'app
 // Giocatori gli altri vedono la tua faccia, il colore e il motto. (31.10) L'interfaccia HTML di qui (le schede profilo e
 // modifica, il cartellino, i numeri) se n'è andata col cercapersone vecchio.
-// (31.10, Alberto: «il browser non decide più niente») comprare una faccia e salvare il profilo sono azioni della banca
-// (giochi/app-profilo.mjs sul server di Alberto, «profilo.compraFaccia» e «profilo.salva»): i prezzi sono i suoi, e salva solo
+// (31.10, pzkko: «il browser non decide più niente») comprare una faccia e salvare il profilo sono azioni della banca
+// (giochi/app-profilo.mjs sul server di pzkko, «profilo.compraFaccia» e «profilo.salva»): i prezzi sono i suoi, e salva solo
 // le facce tue, i colori e le cornici di queste liste, il motto corto. Le liste e i prezzi qui servono a mostrarli.
 
 import * as zaino from '../../chat/zaino.js'
@@ -16,7 +16,7 @@ import { esiste } from '../../chat/icone.js'
 // i colori del cartellino e le cornici: solo questi nomi vanno sul server (che controlla la forma, non la lista)
 export const COLORI = { verde: '#46ff7d', giallo: '#ffd400', rosso: '#ff5a4a', arancio: '#ff9a3c', rosa: '#ff7ac8', viola: '#b47cff', blu: '#4aa8ff', bianco: '#e9efe6' }
 export const CORNICI = [['nastro', 'nastro'], ['oro', 'oro'], ['neon', 'neon'], ['pixel', 'pixel'], ['nessuna', 'niente']]
-// le facce, per rarità (26.10, Alberto: «rankale come comuni rare… e mettile a pagamento almeno il 70 %»): cinque comuni sono
+// le facce, per rarità (26.10, pzkko: «rankale come comuni rare… e mettile a pagamento almeno il 70 %»): cinque comuni sono
 // di tutti, le altre 28 su 33 (85 %) si comprano coi $pzk; le leggendarie, prima, vanno anche sbloccate
 export const RARITA = {
   comune: { nome: 'comune', colore: '#b9c4b4', prezzo: 250 },

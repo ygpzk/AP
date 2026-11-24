@@ -1,4 +1,4 @@
-// L'app «account» di pzk os (29.10, Alberto: «fai app account con stesse serietà» del profilo): il conto dei $pzk sul
+// L'app «account» di pzk os (29.10, pzkko: «fai app account con stesse serietà» del profilo): il conto dei $pzk sul
 // cercapersone zero. La logica è quella dell'account del cercapersone vecchio (telefono/app/account.js: i nomi riservati,
 // le mosse in parole) e del wallet (games/pzk.js: entra, crea, esci, sincronizza, converti, invia, cambiaIndirizzo,
 // chiE, il regalo di instagram): qui c'è solo la faccia a 8 bit.
@@ -16,7 +16,7 @@ import * as pzk from '../../../games/pzk.js'
 import { descriviMossa } from '../../app/account.js'
 import { txt, corto, destra, centro, sposta, testata, striscia } from './pezzi.js'
 
-// ── i colori (11.11, Alberto: «fai colori a 8bit su tutto»): pochi e col loro senso. Il verde è quello che entra (le mosse
+// ── i colori (11.11, pzkko: «fai colori a 8bit su tutto»): pochi e col loro senso. Il verde è quello che entra (le mosse
 // col +, quanto ricevi, gli invii aperti, il conto trovato), il rosso quello che esce o non va (le mosse col −, quanto dai,
 // l'errore), l'oro i $pzk (la barra della quota), il giallo l'avviso su una fascia. Il testo resta d'inchiostro. Di ogni
 // tinta una versione scura per gli sfondi chiari e una chiara per «notte» (l'inchiostro chiaro): un verde chiaro su carta o
@@ -229,11 +229,11 @@ export function vista(os) {
   function email() { dì(true, 'si entra con un codice che arriva a questa email: niente PIN') }
   async function instagram() {
     if (pzk.premioPreso()) return dì(true, 'il regalo l’hai già avuto: grazie')
-    // (19.11) il regalo passa da Alberto: il riquadro (accesso/accesso.js, premio) chiede il nome di instagram e la banca lo avvisa
+    // (19.11) il regalo passa da pzkko: il riquadro (accesso/accesso.js, premio) chiede il nome di instagram e la banca lo avvisa
     const prima = pzk.seguo()?.stato
     await (await import('../../../accesso/accesso.js')).premio()
     const st = pzk.seguo()?.stato
-    if (st === 'attesa' && prima !== 'attesa') dì(true, 'richiesta mandata: Alberto controlla e arrivano')
+    if (st === 'attesa' && prima !== 'attesa') dì(true, 'richiesta mandata: pzkko controlla e arrivano')
   }
 
   // ── le pagine col conto (y da 34 a 116) ──
@@ -306,12 +306,12 @@ export function vista(os) {
         righe(l, oz, [
           { nome: 'indirizzo', valore: c.indCambiato ? `${c.ind} (tuo)` : `${c.ind} · cambialo` },
           { nome: 'email', valore: c.email ?? '—' },
-          { nome: 'instagram', valore: pzk.premioPreso() ? 'fatto, grazie' : pzk.seguo()?.stato === 'attesa' ? 'Alberto controlla' : `+${fmt(pzk.PREMIO_IG)} $pzk`, col: pzk.premioPreso() || pzk.seguo()?.stato === 'attesa' ? 1 : T.verde }, // (11.11: il regalo da prendere in verde, come quel che entra)
+          { nome: 'instagram', valore: pzk.premioPreso() ? 'fatto, grazie' : pzk.seguo()?.stato === 'attesa' ? 'pzkko controlla' : `+${fmt(pzk.PREMIO_IG)} $pzk`, col: pzk.premioPreso() || pzk.seguo()?.stato === 'attesa' ? 1 : T.verde }, // (11.11: il regalo da prendere in verde, come quel che entra)
         ], sel, 36, 12, (i) => { sel = i; PAGINE[4].fai() })
         const nota = [
           c.indCambiato ? 'l’indirizzo l’hai scelto tu: non si cambia più.' : 'è a caso: puoi cambiarlo una volta sola con sei cifre tue (studenti unimore: il numero dell’e-mail).',
           'niente PIN e niente password: per entrare ti arriva ogni volta un codice a questa email.',
-          'seguimi su tutti e due i profili e scrivi il tuo instagram: Alberto controlla e arrivano i $pzk, una volta sola.',
+          'seguimi su instagram e scrivi il tuo nome: pzkko controlla e arrivano i $pzk, una volta sola.',
         ][sel]
         Lcd.acapo(nota, 39).slice(0, 4).forEach((r, i) => l.testo(10, 78 + i * 9, r))
       },

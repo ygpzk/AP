@@ -1,4 +1,4 @@
-// L'app «bin·hex» di pzk os (29.10, Alberto: «crea uno alla volta … bin&hex …»): le conversioni fra le basi sul cercapersone
+// L'app «bin·hex» di pzk os (29.10, pzkko: «crea uno alla volta … bin&hex …»): le conversioni fra le basi sul cercapersone
 // zero. I conti sono quelli dell'app vecchia (telefono/app/conversioni.js: leggi, scritto, c2, passi, coi BigInt e la parte
 // dopo la virgola), e la scelta si ricorda con la sua (telefono/ricordi.js, «conversioni»): qui c'è la faccia a un bit.
 // - LE RIGHE (↑ ↓, in tondo): il numero (OK apre la riga dove si scrive; si scrive anche qui dalla tastiera vera, Backspace cancella), in che
@@ -7,7 +7,7 @@
 // - I PASSAGGI: quelli che si scrivono a scuola (le divisioni coi resti, le potenze, i gruppi di bit), che scorrono con ↑ ↓;
 //   ← → cambiano la base d'arrivo.
 // Quando il numero cambia i risultati si riscrivono da sinistra. Le regole: os/REGOLE.md.
-// I COLORI (11.11, Alberto: «fai colori a 8bit su tutto»): pochi e con un senso. In blu le cifre che fanno il risultato (i
+// I COLORI (11.11, pzkko: «fai colori a 8bit su tutto»): pochi e con un senso. In blu le cifre che fanno il risultato (i
 // resti delle divisioni, le cifre delle moltiplicazioni, i gruppi di bit d'arrivo) e il risultato in fondo: lo stesso
 // colore lega le cifre a quello che diventano. In rosso il «!» di un numero che non si legge e il bit del segno quando dice
 // «negativo». Sempre su una fascia sua con la cifra bianca, così si legge su tutti gli sfondi (anche «carta» e «notte»).

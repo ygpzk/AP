@@ -1,4 +1,4 @@
-// Le immagini vere dei quiz e delle app del telefono (23.10): foto di Mantova, del cibo e delle cose citate da Alberto, prese
+// Le immagini vere dei quiz e delle app del telefono (23.10): foto di Mantova, del cibo e delle cose citate da pzkko, prese
 // da Wikimedia Commons (libere, con l'autore e la licenza da citare: la scheda li mostra sotto la foto). Nel browser si
 // caricano da lì, mai copiate nel repository. Per usare invece IMGUR basta aggiungere una voce con `imgur: 'AbC123x'`
 // (l'id dell'immagine, quello di https://i.imgur.com/AbC123x.jpg) al posto di `url`: src() la trasforma nel link giusto.

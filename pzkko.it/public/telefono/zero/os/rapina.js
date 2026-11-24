@@ -1,7 +1,7 @@
-// L'app «rapina» di pzk os (29.10, Alberto: «crea uno alla volta … rapina …»): il colpo alla cassa di pzk sul cercapersone
+// L'app «rapina» di pzk os (29.10, pzkko: «crea uno alla volta … rapina …»): il colpo alla cassa di pzk sul cercapersone
 // zero. Le regole sono quelle del server (api/wallet.mjs, colpo e cauzione) e dell'app vecchia (telefono/app/rapina.js: PROB,
 // bottino, CAUZIONE, ora, resta); i soldi passano da games/pzk.js (colpo, cauzione). Qui c'è solo la faccia, a colori
-// dall'11.11 (Alberto: «fai colori a 8bit su tutto»): la cassaforte d'acciaio, il lampeggiante blu dei carabinieri, la cella
+// dall'11.11 (pzkko: «fai colori a 8bit su tutto»): la cassaforte d'acciaio, il lampeggiante blu dei carabinieri, la cella
 // con le sbarre di ferro, il codice sul biglietto, la quota presa verde e la multa rossa. Il testo resta d'inchiostro.
 // - IL COLPO, secondo com'è messo:
 //   · LA CASSA: quanto c'è dentro, e due righe: organizza un colpo, entra col codice di un complice (le quattro lettere

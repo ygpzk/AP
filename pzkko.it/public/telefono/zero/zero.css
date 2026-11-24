@@ -24,7 +24,7 @@
 .z-tela.ombra{filter:drop-shadow(0 3px 4px rgba(0,0,0,.5)) drop-shadow(0 10px 14px rgba(0,0,0,.3))} /* la stessa ombra del tasto sul muro, nella posa del muro */
 
 /* sul cellulare: la barra dei due tasti sopra la tela, perché i tasti 3D sono piccoli da toccare. Rossi tutti e due (29.10,
-   Alberto: «tasto indietro rosso come chiudi così uno non lo preme perché verde ma legge prima») */
+   pzkko: «tasto indietro rosso come chiudi così uno non lo preme perché verde ma legge prima») */
 .tel .t-nav{display:none}
 .tel.pieno .t-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(2,1fr);gap:8px;height:calc(48px + env(safe-area-inset-bottom,0px));padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));border-top:2px solid #000;background:#151816}
 .tel.pieno .t-nav button{border:2px solid #000;border-radius:7px;background:#c74337;color:#fff;font:400 15px/1 "Fake Receipt",ui-monospace,monospace;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;box-shadow:0 3px 0 #000;text-shadow:0 1px 0 rgba(0,0,0,.6)}

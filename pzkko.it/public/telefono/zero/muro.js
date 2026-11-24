@@ -62,7 +62,7 @@ export function veste(tasto) {
   tasto.classList.add('vestito') // (ora lcd e led stanno sul vetro: si vedono)
   // Il 3D si scalda quando chi guarda fa per aprirlo: il puntatore sul tasto, il dito che lo tocca, il fuoco della
   // tastiera. Fino al 6.11 si scaldava da sé appena la pagina era tranquilla: il modello (1,2 MB) e three.js (650 KB)
-  // scaricati e letti da tutti, anche da chi il cercapersone non lo apre mai (Alberto: «leggerissimo»). Chi lo tocca
+  // scaricati e letti da tutti, anche da chi il cercapersone non lo apre mai (pzkko: «leggerissimo»). Chi lo tocca
   // senza passarci sopra aspetta un attimo in più la prima volta; poi è in cache
   const scalda = () => { fetch(GLB, { priority: 'low' }).catch(() => {}); import('./zero.js').catch(() => {}) }
   for (const e of ['pointerenter', 'pointerdown', 'touchstart', 'focus']) tasto.addEventListener(e, scalda, { once: true, passive: true })
@@ -74,7 +74,7 @@ export function veste(tasto) {
 
 /** pzk os sul vetro del tasto: l'lcd di pzk os ricopiato ogni volta che cambia su una tela grande quanto il vetro sullo
  *  schermo (in pixel veri: ridisegnata quando il tasto cambia misura), passando da una tela 256 × 128 a pixel netti; così
- *  nessuno ristringe niente dopo (Alberto, 29.10: «è storto lo schermo»: la tela a 256 stretta in 230 px con pixelated
+ *  nessuno ristringe niente dopo (pzkko, 29.10: «è storto lo schermo»: la tela a 256 stretta in 230 px con pixelated
  *  saltava delle righe e le scritte venivano a gradini). La
  *  chiocciolina (chat/tomodachi.js, la sua tela sta nell'lcd del tasto) resta sotto, nascosta (.os), ed è lei che il
  *  desktop di pzk os disegna a tutto schermo. */

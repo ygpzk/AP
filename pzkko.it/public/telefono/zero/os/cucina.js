@@ -1,4 +1,4 @@
-// L'app «cucina» di pzk os (29.10, Alberto: «crea uno alla volta … cucina …»): le ricette del Mincio alla Cooking Mama sul
+// L'app «cucina» di pzk os (29.10, pzkko: «crea uno alla volta … cucina …»): le ricette del Mincio alla Cooking Mama sul
 // cercapersone zero, con la nonna che guarda e commenta. Le ricette, i voti, le medaglie e i premi sono quelli della
 // cucina vecchia (telefono/app/cucina.js: RICETTE, COME, commento, medaglia, PAGATE, stato, nomeIng; dal 31.10 apri e passo, sulla banca): i $pzk, gli xp,
 // il piatto nello zaino e il record passano da lì. Qui i sei minigiochi sono rifatti per i tasti del cercapersone:
@@ -10,11 +10,11 @@
 //   cuoci    la lancetta va su e giù: OK la ferma nella fascia
 // (niente tasti tenuti premuti, REGOLE.md 3: il versa della vecchia si teneva premuto, qui si apre e si chiude). Ogni gioco
 // ha la barra del tempo; il clic sullo schermo fa quello che fa OK. Le regole: os/REGOLE.md.
-// (31.10, Alberto: «il browser non decide più niente») I voti li dà la banca (app/cucina.js: apri, passo, votoDi): la ricetta
+// (31.10, pzkko: «il browser non decide più niente») I voti li dà la banca (app/cucina.js: apri, passo, votoDi): la ricetta
 // si apre sulla banca coi numeri a caso dei passi (le righe, le carte, le fasce), e finito ogni passo le mosse coi loro tempi
 // vanno alla banca, che fa il voto e alla fine la medaglia e i premi. Il coltello, la lancetta e il sacco si muovono col
 // tempo, come sulla banca: il voto che si vede è il suo. Aspettando la banca, in fondo «la nonna assaggia…».
-// (11.11, Alberto: «fai colori a 8bit su tutto») I colori, pochi e con un senso: il verde della fascia giusta e del tempo
+// (11.11, pzkko: «fai colori a 8bit su tutto») I colori, pochi e con un senso: il verde della fascia giusta e del tempo
 // che c'è (la cucina vecchia diceva già «la fascia verde»), il rosso del tempo che finisce, dei voti bassi e degli sbagli,
 // le medaglie coi colori di MEDAGLIE, il tagliere di legno, il sugo nella pentola, la sfoglia. Il testo resta d'inchiostro;
 // quello che deve spiccare (i premi, il voto, il record, gli sbagli) sta su una fascia di colore con la scritta di un colore

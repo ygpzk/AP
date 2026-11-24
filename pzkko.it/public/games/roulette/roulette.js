@@ -2,7 +2,7 @@
 // il foglio sono cose ferme (SVG e fotografie); la ruota è 3D (three.js) e la
 // pallina la muove la fisica (Rapier, vedi ruota.js): rotola, rallenta, cade,
 // sbatte sui rombi e sulle palette e si ferma in una casella. Il numero però lo
-// estrae la banca (31.10: roulette.gira, sul server di Alberto), e la pallina ci
+// estrae la banca (31.10: roulette.gira, sul server di pzkko), e la pallina ci
 // arriva (vedi «il film del giro»). Soldi finti ($pzk, gli stessi del blackjack
 // e degli altri giochi: ../pzk.js).
 //
@@ -35,7 +35,7 @@ function carica() {
   try {
     const s = JSON.parse(localStorage.getItem(CHIAVE) || 'null')
     if (s && Array.isArray(s.storia)) stato.storia = s.storia.filter((n) => Number.isInteger(n) && n >= 0 && n <= 36).slice(0, 12)
-    // le giocate dell'ultimo giro si ricordano anche ricaricando, per «rifai» (23.10, Alberto: «memorizza sempre le azioni»)
+    // le giocate dell'ultimo giro si ricordano anche ricaricando, per «rifai» (23.10, pzkko: «memorizza sempre le azioni»)
     const ult = Array.isArray(s?.ultime) ? s.ultime.filter(([id, imp]) => PUNTATE_PER_ID.has(id) && Number.isFinite(imp) && imp > 0) : []
     if (ult.length) stato.ultime = new Map(ult)
   } catch {}
@@ -478,7 +478,7 @@ function togliSegno(tutto = true) {
 }
 
 // ── il giro ──────────────────────────────────────────────────────────────────
-// (31.10, Alberto: il browser non decide più niente) Il numero lo estrae la banca (roulette.gira, sul server di Alberto):
+// (31.10, pzkko: il browser non decide più niente) Il numero lo estrae la banca (roulette.gira, sul server di pzkko):
 // a «gira» le puntate partono, la banca le prende, estrae, paga e risponde col numero; poi la pallina ci arriva, con la
 // fisica (il film del giro, sotto). Se la banca dice di no le fiches tornano e la pallina resta dov'è
 async function gira() {
