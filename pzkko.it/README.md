@@ -1,13 +1,15 @@
 # pzkko.it
 
-Il profilo per svago di Alberto Pecchini, fatto come il suo profilo di Discord e
+Il profilo per svago di pzkko, fatto come il suo profilo di Discord e
 con i pezzi veri di Discord: i caratteri (gg sans, gg mono, ABC Ginto Nord e
 Pricedown per il nome), la cornice «Crystals (Peridot)», l’effetto «Dreamy (Green)»,
 il tema `#ccff00 → #9d00ff` calcolato come lo calcola il client (velo bianco
 all’80 % col tema chiaro, nero al 60 % con quello scuro, tinta del testo, sfondo
 del pannello), banner, avatar con la decorazione, stato, stato personalizzato,
-tag NODE, badge, bio e collegamenti, tutto dal vivo. pzkko.it è autosufficiente:
-non rimanda e non si collega a nessun altro sito personale.
+tag NODE, badge e collezione, tutto dal vivo. La bio e i collegamenti restano
+quelli di pzkko: il profilo dal vivo non porta qui il nome o gli account
+personali. pzkko.it è autosufficiente: non rimanda e non si collega a nessun
+altro sito personale.
 
 ## Da dove arrivano i dati
 
@@ -15,8 +17,9 @@ non rimanda e non si collega a nessun altro sito personale.
   dispositivi, stato personalizzato, Spotify, giochi, tag del server, stile del
   nome (carattere ed effetto). Serve restare nel server <https://discord.gg/lanyard>.
 - **Profilo pubblico** (`dcdn.dstn.to/profile/<id>`): banner, colori del tema,
-  bio, badge, collegamenti e gli SKU di effetto, cornice e decorazione; si
-  ricarica ogni 10 minuti. Il campo dei pronomi non viene mai letto né mostrato.
+  badge e gli SKU di effetto, cornice e decorazione; si ricarica ogni 10 minuti.
+  Bio e collegamenti non vengono presi dal profilo dal vivo. Il campo dei pronomi
+  non viene mai letto né mostrato.
 - **Discord** (`discord.com/api/v9/collectibles-products/<sku>`, senza accesso):
   nome, immagini e misure di effetto e cornice; in memoria nel browser per un
   giorno. Le immagini arrivano da `cdn.discordapp.com`. Se cambi cornice, effetto,
@@ -43,16 +46,31 @@ nel sito.
   `cover.webp` (1280 × 720), `01.webp`… (la galleria), `loop.mp4` (il filmato
   che parte al passaggio del mouse) e `meta.json` (misure e didascalie). Niente
   disegni né simulazioni: se un progetto non gira, resta senza immagine.
-- **Diretta OS** (22.11): la scheda del progetto, la guida `/direttaos/` e il setup
-  `public/direttaos/DirettaOS-Setup.exe`. Il sorgente e l'installer sono nella
-  cartella `DirettaOS/` del repository; le catture in `public/media/p/direttaos/`
-  sono vere (la regia ha l'anteprima su fondo neutro al posto della webcam). Il
-  setup è autocontenuto: dentro ha il programma, le pagine, i caratteri e gli
-  oggetti del sito, e non scarica il progetto da GitHub.
+- **Diretta OS** (22.11): la scheda del progetto e la guida `/direttaos/`. Il
+  sorgente e l'installer sono nella cartella `DirettaOS/` del repository; le
+  catture in `public/media/p/direttaos/` sono vere (la regia ha l'anteprima su
+  fondo neutro al posto della webcam). L'installer è in aggiornamento e non è
+  più pubblicato: la copia che conteneva il vecchio percorso è stata tolta da
+  `public/` (la stessa resta in `../DirettaOS/installer/build/`). Quando il setup
+  viene rifatto, si rimette in `public/direttaos/` e si toglie il redirect in
+  `vercel.json`.
 - `public/fonts/`: i caratteri del client di Discord (vedi sotto).
 - `public/.well-known/discord`: la verifica del dominio per Discord.
 - `src/site.css`: Tailwind v4 e i componenti.
 - `scripts/media.mjs`: scrive `media.js` dalle cartelle di `public/media/p/`.
+
+## Community (24.11.2026)
+
+La scheda **`#community`** sta dentro la home, mai una pagina a sé: il banner in
+Bacheca e la voce nel piè di pagina portano lì con l'hash. Mette in fila i numeri
+pubblici dei due server Discord che seguo, OLLARE e SOLLARY: membri, presenze e
+boost. Non c'è un bot dentro i server: `api/community.mjs` legge solo gli inviti
+pubblici (`with_counts=true`), tiene i conteggi in cache cinque minuti e non
+restituisce nomi, messaggi, canali vocali o presenze individuali. Il modulo
+`public/assets/community-tab.js` si carica solo quando la scheda si apre; la hero
+è `public/assets/community/hero.svg`, disegnata con Claude Code (Opus). La vecchia
+pagina `/community/` è stata tolta: `/community` e `/community/` rimandano a
+`/#community` in `vercel.json` (e nel server di prova).
 
 ## I progetti veri dentro il sito (18.11)
 
@@ -141,11 +159,11 @@ chat, il cercapersone e i tavoli: `public/accesso/accesso.js` (con
   (`NOVITA.v` in `accesso.js`), dopo l’accesso o all’arrivo di chi è già dentro;
 - **il regalo di instagram** (`premio`): 2.000 $pzk a chi mi segue su tutti e
   due i profili. Instagram non dice a un sito chi segue chi, quindi si scrive
-  il proprio nome, la banca scrive ad Alberto (email, e Discord se c’è il
+  il proprio nome, la banca scrive a pzkko (email, e Discord se c’è il
   webhook) e lui decide dal tasto della lettera, che apre `/?premio=…`
   (`decidi`). Col sì i $pzk partono subito.
 
-I codici, le lettere e le email stanno sulla banca, sul pc di Alberto
+I codici, le lettere e le email stanno sulla banca, sul pc di pzkko
 (`C:\pzkko-server\banca\posta.mjs`, in SMTP): se il pc è spento non si entra.
 L’email non torna mai intera al browser. Le scritte dell’accesso sono in
 italiano e in inglese; le altre lingue del profilo vedono l’inglese.
@@ -185,10 +203,10 @@ Vercel esegue `npm run build` e pubblica `public/` (vedi `vercel.json`).
   non si salva); il tasto di moderazione si confronta in tempo costante; gli
   errori del server di casa non tornano al browser. Il segreto resta nelle
   variabili di Vercel.
-- **Niente collegamenti al vecchio sito personale.** Non è un accordo fra siti:
-  la build cerca il dominio in `public/`, `api/`, `vercel.json` e `README.md` e
-  si ferma se ricompare. `npm run check` cerca anche percorsi del computer,
-  chiavi private e token.
+- **Niente collegamenti all’identità personale.** Non è un accordo fra siti: la
+  build cerca il dominio e i nomi/account personali in `public/`, `api/`,
+  `scripts/`, `vercel.json` e `README.md`, e si ferma se ricompaiono. `npm run
+  check` cerca anche percorsi del computer, chiavi private e token.
 - **Prestazioni.** Italiano e inglese arrivano subito; le altre sette lingue
   stanno in `public/assets/i18n/` e si scaricano solo quando si sceglie quella.
   Cache lunga su CDN per asset, font, immagini e video; HTML sempre rivalidato.

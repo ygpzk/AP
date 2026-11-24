@@ -16,15 +16,42 @@
       ],
       "destination": "https://pzkko.it/$1",
       "permanent": true
+    },
+    {
+      "source": "/community",
+      "destination": "/#community",
+      "permanent": false
+    },
+    {
+      "source": "/community/",
+      "destination": "/#community",
+      "permanent": false
+    },
+    {
+      "source": "/direttaos/DirettaOS-Setup.exe",
+      "destination": "/direttaos/",
+      "permanent": false
     }
   ],
   "functions": {
-    "api/wallet.mjs": { "maxDuration": 30 },
-    "api/borsa.mjs": { "maxDuration": 30 },
-    "api/giocatori.mjs": { "maxDuration": 30 },
-    "api/firme.mjs": { "maxDuration": 30 },
-    "api/stato.mjs": { "maxDuration": 30 },
-    "api/meteo.mjs": { "maxDuration": 15 }
+    "api/wallet.mjs": {
+      "maxDuration": 30
+    },
+    "api/borsa.mjs": {
+      "maxDuration": 30
+    },
+    "api/giocatori.mjs": {
+      "maxDuration": 30
+    },
+    "api/firme.mjs": {
+      "maxDuration": 30
+    },
+    "api/stato.mjs": {
+      "maxDuration": 30
+    },
+    "api/meteo.mjs": {
+      "maxDuration": 15
+    }
   },
   "headers": [
     {
@@ -126,19 +153,6 @@
       ]
     },
     {
-      "source": "/direttaos/DirettaOS-Setup.exe",
-      "headers": [
-        {
-          "key": "Content-Disposition",
-          "value": "attachment; filename=DirettaOS-Setup.exe"
-        },
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=3600"
-        }
-      ]
-    },
-    {
       "source": "/(.*)",
       "headers": [
         {
@@ -183,7 +197,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-0r1y39vuI+p/Uq/EB6dMiDlVbFrR5wHqMuhV37yPB0k=' 'sha256-Aoc4MmsVaIszKBo1vTKadu3wwIKrInkYyG/VfAxRZtc=' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo=' 'sha256-NYWQ8pu7WmEwIfN9TH64qRUtd4ktc6kNpNODvjDyO4w=' 'sha256-OXmLHwvbvD5IW3xzaf0YHkgbBKRsa9KSMFNraF1fCpI=' 'sha256-P80Sgt+KtpHzg+JCTuwZ/CY0na2tthXrn5MkI+Akpqc=' 'sha256-UBO1ffjKEKsDeZtVJymRLvFnG7d0KSMacxzWIVr1D54=' 'sha256-XQxYiw5oLAr7fW3Yv3itz4T9ONiRMHhPl87lNwJFQp4=' 'sha256-aSHlEHUXp/3pQXB3jJhyYbF7+sx3HqeLI1GdYXmv0Bg=' 'sha256-dK8ZJSczlPmvwGBE1uUFduk3CKz/GXT4BhuPqABmV0Y=' 'sha256-m75/m7enboELz+m0/I07DgWwjCQ2Gqq4TXsOHC7U3JI=' 'sha256-wHWjdfu7Z9KBM23x5nC7y4k3mEWpvXC+Zjt7TJrJz68='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://dcdn.dstn.to https://tile.openstreetmap.org https://thumb.wikimedia.org https://upload.wikimedia.org https://i.imgur.com; font-src 'self'; connect-src 'self' https://api.lanyard.rest wss://api.lanyard.rest https://dcdn.dstn.to https://discord.com https://cdn.discordapp.com https://media.discordapp.net https://tiles.openfreemap.org https://api.bigdatacloud.net; media-src 'self' blob:; worker-src 'self' blob:; frame-src 'self' https://www.google.com https://maps.google.com https://consent.google.com; manifest-src 'self'; upgrade-insecure-requests"
+          "value": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' 'wasm-unsafe-eval' 'sha256-0fuyVicKuv7tFmHQUDCMthBNJ40izT344e/1FkgA8rs=' 'sha256-0r1y39vuI+p/Uq/EB6dMiDlVbFrR5wHqMuhV37yPB0k=' 'sha256-Aoc4MmsVaIszKBo1vTKadu3wwIKrInkYyG/VfAxRZtc=' 'sha256-Du+OJKJSbdUgz5nrHeWWINvez6XKDDU/tyj/5c2uvwo=' 'sha256-NYWQ8pu7WmEwIfN9TH64qRUtd4ktc6kNpNODvjDyO4w=' 'sha256-OXmLHwvbvD5IW3xzaf0YHkgbBKRsa9KSMFNraF1fCpI=' 'sha256-P80Sgt+KtpHzg+JCTuwZ/CY0na2tthXrn5MkI+Akpqc=' 'sha256-Xb3JKETx6HbpDFgoRiy6Xz+1pqmq4NmRVLvC+gxi4sI=' 'sha256-aSHlEHUXp/3pQXB3jJhyYbF7+sx3HqeLI1GdYXmv0Bg=' 'sha256-dK8ZJSczlPmvwGBE1uUFduk3CKz/GXT4BhuPqABmV0Y=' 'sha256-m75/m7enboELz+m0/I07DgWwjCQ2Gqq4TXsOHC7U3JI=' 'sha256-wHWjdfu7Z9KBM23x5nC7y4k3mEWpvXC+Zjt7TJrJz68='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://cdn.discordapp.com https://media.discordapp.net https://i.scdn.co https://dcdn.dstn.to https://tile.openstreetmap.org https://thumb.wikimedia.org https://upload.wikimedia.org https://i.imgur.com; font-src 'self'; connect-src 'self' https://api.lanyard.rest wss://api.lanyard.rest https://dcdn.dstn.to https://discord.com https://cdn.discordapp.com https://media.discordapp.net https://tiles.openfreemap.org https://api.bigdatacloud.net; media-src 'self' blob:; worker-src 'self' blob:; frame-src 'self' https://www.google.com https://maps.google.com https://consent.google.com; manifest-src 'self'; upgrade-insecure-requests"
         }
       ]
     }

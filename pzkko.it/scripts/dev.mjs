@@ -42,6 +42,8 @@ createServer(async (req, res) => {
       return await funzioni.get(f)(req, res)
     } catch (e) { console.error(e); res.writeHead(500, SICUREZZA); return res.end('{"ok":false}') }
   }
+  // la vecchia pagina /community/ non esiste più: la scheda sta nella home, a #community
+  if (p === '/community' || p === '/community/') { res.writeHead(308, { ...SICUREZZA, Location: '/#community' }); return res.end() }
   const radicePub = normalize(pub)
   let file = normalize(join(radicePub, p))
   if (file !== radicePub && !file.startsWith(radicePub + sep)) { res.writeHead(403, SICUREZZA); return res.end() }

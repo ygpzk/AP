@@ -93,7 +93,11 @@ const t = () => I18N[lang]
 const ui = () => t().ui
 const locale = () => (LANGS.find((l) => l.code === lang) || LANGS[0]).locale
 const cap = (s) => (s && (s[lang] || s.en || s.it)) || ''
-const username = () => presence?.discord_user?.username || profile.username
+const username = () => profile.username
+// la scheda Community non ha una voce nei nove file i18n: l'etichetta sta qui,
+// così il resto della scheda può restare italiano/inglese senza toccare i locale.
+const COMMUNITY_LABEL = { it: 'Community', en: 'Community', es: 'Comunidad', fr: 'Communauté', de: 'Community', pt: 'Comunidade', ru: 'Сообщество', ja: 'コミュニティ', zh: '社区' }
+const tabLabel = (k) => ui().tabs[k] || (k === 'community' ? COMMUNITY_LABEL[lang] || 'Community' : k)
 
 // ─── il tema del profilo, calcolato come lo calcola Discord ──────────────────
 const rgb2hsl = ([r, g, b]) => {
@@ -245,7 +249,7 @@ function renderAvatar() {
 }
 function renderName() {
   const u = presence?.discord_user, el = $('#dname')
-  el.textContent = u?.global_name || u?.display_name || profile.displayName
+  el.textContent = profile.displayName
   const st = u?.display_name_styles ?? profile.nameStyle
   const f = NAME_FONTS[st?.font_id]
   if (f) {
@@ -308,7 +312,7 @@ function renderCard() {
     bubble.hidden = false
   } else bubble.hidden = true
   // nome utente, tag del server, badge
-  $('#uname').textContent = u?.username || p.username
+  $('#uname').textContent = p.username
   const g = u?.primary_guild?.identity_enabled ? { tag: u.primary_guild.tag, id: u.primary_guild.identity_guild_id, badge: u.primary_guild.badge } : (u ? null : p.guild)
   const gt = $('#gtag')
   if (g?.tag) { gt.innerHTML = `${g.badge && /^[a-z0-9_]+$/i.test(g.badge) && /^\d+$/.test(g.id) ? `<img src="${CDN}/clan-badges/${g.id}/${g.badge}.png?size=32" alt="">` : ''}${esc(g.tag)}`; gt.hidden = false } else gt.hidden = true
@@ -444,11 +448,31 @@ function wireMedia(root) {
 const makeAutoIO = () => new IntersectionObserver((es) => { for (const e of es) e.isIntersecting && !modal ? playMedia(e.target) : stopMedia(e.target) }, { threshold: 0.7 })
 
 // ─── le schede a destra ──────────────────────────────────────────────────────
-const TABS = ['board', 'projects', 'chat', 'activity', 'social']
-const SLUG = { board: 'bacheca', projects: 'progetti', chat: 'chat', activity: 'attivita', social: 'social' }
+const TABS = ['board', 'community', 'projects', 'chat', 'activity', 'social']
+const SLUG = { board: 'bacheca', community: 'community', projects: 'progetti', chat: 'chat', activity: 'attivita', social: 'social' }
+// il banner in bacheca: Giugnoh's Cast e i due server, con il tema del profilo
+const COMMUNITY_COPY = {
+  it: {
+    kicker: "Giugnoh's Cast · community",
+    title1: 'Il podcast e le clip,',
+    title2: 'in due server.',
+    text: 'OLLARE e SOLLARY: i numeri pubblici della community, senza bot e senza nomi. Il podcast e le clip li registro io, in tutti e due.',
+    cta: 'Apri la community',
+    noNames: 'membri tracciati',
+  },
+  en: {
+    kicker: "Giugnoh's Cast · community",
+    title1: 'The podcast and the clips,',
+    title2: 'across two servers.',
+    text: 'OLLARE and SOLLARY: the community’s public numbers, no bots and no names. I record the podcast and the clips in both.',
+    cta: 'Open the community',
+    noNames: 'members tracked',
+  },
+}
+const communityCopy = () => COMMUNITY_COPY[lang] || COMMUNITY_COPY.en
 let activeTab = 'board', filter = 'all'
 function renderTabs() {
-  $('#tabs').innerHTML = TABS.map((k) => `<button class="tab" role="tab" id="tab-${k}" aria-controls="panel-${k}" aria-selected="${k === activeTab}" tabindex="${k === activeTab ? 0 : -1}" data-tab="${k}">${esc(ui().tabs[k])}${k === 'projects' ? `<span class="tab__n">${PROJECTS.length}</span>` : ''}</button>`).join('') + '<span class="tabs__ink" aria-hidden="true"></span>'
+  $('#tabs').innerHTML = TABS.map((k) => `<button class="tab" role="tab" id="tab-${k}" aria-controls="panel-${k}" aria-selected="${k === activeTab}" tabindex="${k === activeTab ? 0 : -1}" data-tab="${k}">${esc(tabLabel(k))}${k === 'projects' ? `<span class="tab__n">${PROJECTS.length}</span>` : ''}</button>`).join('') + '<span class="tabs__ink" aria-hidden="true"></span>'
   moveInk()
 }
 function moveInk() {
@@ -487,11 +511,26 @@ $('#tabs').addEventListener('keydown', (e) => {
 })
 
 function renderBoard() {
-  const u = ui()
+  const u = ui(), cc = communityCopy()
   const feat = PROJECTS.find((p) => p.featured && MEDIA[p.key]) || PROJECTS.find((p) => MEDIA[p.key]) || PROJECTS[0], tx = t().projects[feat.key]
   const others = PROJECTS.filter((p) => p !== feat)
   const root = $('#panel-board')
   root.innerHTML = `<div class="grid2">
+    <section class="cm-banner cm-banner--home span2 rise" style="--i:0" aria-label="${esc(cc.kicker)}">
+      <img class="cm-banner__art" src="/assets/community/hero.svg" alt="" width="1200" height="760" loading="lazy" aria-hidden="true">
+      <span class="cm-banner__shade" aria-hidden="true"></span>
+      <div class="cm-banner__body">
+        <span class="cm-kicker"><i></i>${esc(cc.kicker)}</span>
+        <h2>${esc(cc.title1)}<br>${esc(cc.title2)}</h2>
+        <p>${esc(cc.text)}</p>
+        <div class="cm-banner__actions">
+          <a class="btn btn--msg" href="#community" data-goto="community">${esc(cc.cta)} →</a>
+          <a class="btn btn--ghost" href="https://discord.gg/ollare" target="_blank" rel="noopener noreferrer">OLLARE ${I.ext}</a>
+          <a class="btn btn--ghost" href="https://discord.gg/sollary" target="_blank" rel="noopener noreferrer">SOLLARY ${I.ext}</a>
+        </div>
+      </div>
+      <span class="cm-banner__badge"><b>0</b>${esc(cc.noNames)}</span>
+    </section>
     <article class="hero span2 rise">
       ${feat.key === 'zero' ? '<div class="hero__media hero__zero" data-zero-slot></div>' : `<button type="button" class="hero__media media" data-open="${feat.key}" data-auto="1" aria-label="${esc(`${u.details}: ${feat.title}`)}">${mediaHtml(feat, { eager: true })}</button>`}
       <div class="hero__body">
@@ -565,6 +604,24 @@ function renderSocial() {
   $('#panel-social').innerHTML = `<div class="sgrid">
     ${SOCIALS.map(row).join('')}</div>`
 }
+// la community: il modulo si scarica solo quando si apre #community
+let communityMounted = false, communityLang = null
+function renderCommunity() {
+  if (communityMounted && communityLang === lang) return
+  communityMounted = true
+  communityLang = lang
+  const root = $('#panel-community')
+  root.innerHTML = `<div class="cm-tab"><div class="widget"><p class="cm-loading">${esc(cap({ it: 'Carico i numeri…', en: 'Loading the numbers…' }))}</p></div></div>`
+  import('./community-tab.js')
+    .then((m) => m.monta(root, { lang }))
+    .catch((e) => {
+      communityMounted = false
+      communityLang = null
+      console.error(e)
+      root.innerHTML = `<div class="widget"><p>${esc(cap({ it: 'Non riesco a caricare la community. Riprova.', en: 'I can’t load the community. Try again.' }))}</p></div>`
+    })
+}
+
 // la chat col bot pzk: il modulo (e il motore dei comandi) si scarica solo quando si apre la scheda
 let chatMounted = false
 function renderChat() {
@@ -577,6 +634,7 @@ function renderChat() {
 }
 function renderPanel() {
   if (activeTab === 'board') renderBoard()
+  else if (activeTab === 'community') renderCommunity()
   else if (activeTab === 'projects') renderProjects()
   else if (activeTab === 'chat') renderChat()
   else if (activeTab === 'activity') renderActivity()
@@ -866,7 +924,7 @@ const norm = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCa
 function searchItems() {
   const u = ui()
   return [
-    ...TABS.map((k) => ({ group: u.pages, label: u.tabs[k], ico: k === 'chat' ? I.chat.replace('width="18" height="18"', 'width="15" height="15"') : I.search, run: () => showTab(k) })),
+    ...TABS.map((k) => ({ group: u.pages, label: tabLabel(k), ico: k === 'chat' ? I.chat.replace('width="18" height="18"', 'width="15" height="15"') : I.search, run: () => showTab(k) })),
     ...PROJECTS.map((p) => ({ group: u.tabs.projects, label: p.title, sub: u.kind[p.kind], words: `${p.tags.map((x) => x[0]).join(' ')} ${t().projects[p.key].card}`, ico: MEDIA[p.key] ? `<img src="${esc(MEDIA[p.key].cover)}" alt="">` : I[p.kind], run: () => { showTab('projects'); openProject(p.key) } })),
     ...SOCIALS.map((s) => ({ group: u.tabs.social, label: s.name, sub: s.handle, ico: brand(s.icon, s), run: () => window.open(s.url, '_blank', 'noopener,noreferrer') })),
     { group: u.actions, label: theme === 'dark' ? u.theme.light : u.theme.dark, ico: theme === 'dark' ? I.sun : I.moon, run: toggleTheme },
@@ -960,7 +1018,7 @@ function applyLang() {
   $('#h-conns').textContent = u.connections
   $('#h-socials').textContent = u.otherSocials
   const date = new Intl.DateTimeFormat(l.locale, { dateStyle: 'long' }).format(new Date(`${CONFIG.updated}T12:00:00`))
-  $('#foot').innerHTML = `<b>${esc(CONFIG.domain)}</b> — ${esc(u.footFun)} · ${esc(u.updated)} ${esc(date)} · <a href="/info/">info</a><span id="views"></span>`
+  $('#foot').innerHTML = `<b>${esc(CONFIG.domain)}</b> — ${esc(u.footFun)} · ${esc(u.updated)} ${esc(date)} · <a href="#community">${esc(tabLabel('community'))}</a> · <a href="/info/">info</a><span id="views"></span>`
   applyTheme()
   renderCard()
   renderTabs()
@@ -1000,7 +1058,7 @@ function connectLanyard() {
   open()
 }
 
-// ─── il profilo pubblico (banner, tema, bio, badge, collegamenti, collezione) ─
+// ─── il profilo pubblico (banner, tema, badge, collezione) ─
 async function loadProfile() {
   try {
     const r = await fetch(`${CONFIG.profileApi}${ID}`, { cache: 'no-store' })
@@ -1010,10 +1068,10 @@ async function loadProfile() {
     if (Array.isArray(up.theme_colors) && up.theme_colors.length === 2) profile.theme = up.theme_colors.map((c) => '#' + Number(c).toString(16).padStart(6, '0'))
     if ('banner' in u) profile.banner = u.banner
     if (/^#[0-9a-f]{6}$/i.test(u.banner_color || '')) profile.bannerColor = u.banner_color
-    if (typeof up.bio === 'string') profile.bio = up.bio
+    // (la bio e i collegamenti restano quelli di pzkko: il profilo dal vivo può
+    // cambiare, ma non porta qui il nome o gli account personali)
     if (u.display_name_styles) profile.nameStyle = u.display_name_styles
     if (Array.isArray(d.badges)) profile.badges = d.badges.map((b) => ({ id: b.id, icon: b.icon, description: b.description, link: b.link }))
-    if (Array.isArray(d.connected_accounts)) profile.connections = d.connected_accounts.map((c) => ({ type: c.type, name: c.name, id: c.id, verified: !!c.verified }))
     // gli oggetti da collezione: l'effetto, la cornice (tipo 3) e la decorazione
     const sku = (v) => (/^\d+$/.test(String(v ?? '')) ? String(v) : null)
     if ('profile_effect' in up) profile.effectSku = sku(up.profile_effect?.sku_id)
@@ -1102,10 +1160,10 @@ function renderViews() {
 // ─── il conto (19.11): si entra con l'email e un codice, niente password (accesso/accesso.js). Nella scheda c'è il tasto:
 // verde «Entra» per chi non ha un conto, il nome e i $pzk per chi è dentro (col menu: novità, regalo di instagram, esci).
 // All'arrivo, a pagina ferma: l'invito per chi non ha un conto, le novità per chi ce l'ha, e col tasto della lettera
-// (?premio=…) la decisione di Alberto sul regalo. Le scritte in italiano e in inglese (le altre lingue vedono l'inglese) ──
+// (?premio=…) la decisione di pzkko sul regalo. Le scritte in italiano e in inglese (le altre lingue vedono l'inglese) ──
 const ACC = {
-  it: { join: 'Entra in pzkko.it', sub: '1.000 $pzk di benvenuto', news: 'Novità', gift: 'Regalo: +2.000 $pzk', giftWait: 'Regalo: Alberto controlla', out: 'Esci dal conto', bye: 'Uscito dal conto' },
-  en: { join: 'Join pzkko.it', sub: '1,000 $pzk to start', news: 'What’s new', gift: 'Gift: +2,000 $pzk', giftWait: 'Gift: Alberto is checking', out: 'Log out', bye: 'Logged out' },
+  it: { join: 'Entra in pzkko.it', sub: '1.000 $pzk di benvenuto', news: 'Novità', gift: 'Regalo: +2.000 $pzk', giftWait: 'Regalo: pzkko controlla', out: 'Esci dal conto', bye: 'Uscito dal conto' },
+  en: { join: 'Join pzkko.it', sub: '1,000 $pzk to start', news: 'What’s new', gift: 'Gift: +2,000 $pzk', giftWait: 'Gift: pzkko is checking', out: 'Log out', bye: 'Logged out' },
 }
 const acc = () => ACC[lang] || ACC.en
 const I_ACC = svg('<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/>', { s: 16, w: 2.4 })
