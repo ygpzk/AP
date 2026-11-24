@@ -53,7 +53,7 @@ Il contratto dati è questo (semplificato):
 4. **Solo ciò che è stato scelto.** Niente elenco follower, niente DM, niente
    commenti, niente didascalie: solo conteggi, storie attive e storie in
    evidenza.
-5. **Tempi leggeri.** Il raccoglitore controlla i follower ogni 2 ore, le
+5. **Tempi leggeri.** Il raccoglitore controlla i follower ogni ora, le
    storie solo quando `latest_reel_media` cambia, le evidenze ogni 6 ore. La
    UI non deve suggerire un live istantaneo: mostrare «aggiornato …» e
    «controllo automatico» è corretto.
@@ -94,7 +94,7 @@ Wireframe di riferimento (desktop):
 │  STORIE IN EVIDENZA                                       2    │
 │  ◯ Storia   ◯ Highlights 15   ◯ Highlights 27                  │
 │  Solo conteggi e storie scelte da me. Nessun elenco.  @pzkko → │
-│  ● aggiornato 2 ore fa · 24 nov, 22:17                         │
+│  ● aggiornato 1 ora fa · 24 nov, 22:17                         │
 └────────────────────────────────────────────────────────────────┘
 ```
 

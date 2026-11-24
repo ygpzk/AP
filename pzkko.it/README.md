@@ -85,12 +85,12 @@ Il raccoglitore gira sul pc, fuori dal repository
 salvata da `accedi.py`. La regola dei tempi è pensata per non pesare
 sull'account:
 
-- **follower sempre, ma leggeri.** Ogni due ore una sola chiamata `user_info`
+- **follower sempre, ma leggeri.** Ogni ora una sola chiamata `user_info`
   per account: follower, seguiti, post e `latest_reel_media`. Un punto dello
   storico si scrive solo quando il numero cambia.
 - **storie solo quando ci sono.** Se `latest_reel_media` non cambia non si
   chiama `user_stories`; quando cambia si scaricano i media nuovi, e per tre
-  ore il controllo passa a 40 minuti per prendere anche le storie successive.
+  ore il controllo passa a 30 minuti per prendere anche le storie successive.
 - **evidenze ogni sei ore.** Si confronta solo la firma (numero di elementi,
   titolo, copertina); `highlight_info` e i download partono solo per le
   evidenze cambiate.

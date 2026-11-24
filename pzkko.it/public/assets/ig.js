@@ -3,7 +3,7 @@
 // raccoglitore sul pc scrive in /media/ig/index.json: qui non si chiama
 // Instagram e non si chiede nessun account a chi guarda.
 //
-// Regola dei tempi: il raccoglitore controlla i follower ogni due ore, scarica
+// Regola dei tempi: il raccoglitore controlla i follower ogni ora, scarica
 // una storia solo quando compare e confronta le evidenze ogni sei ore. La
 // scheda mostra l'ultimo cambiamento vero, non un battito finto.
 
@@ -37,7 +37,7 @@ const TESTI = {
     nessunaEvidenza: 'Nessuna storia in evidenza.',
     storia: 'Storia',
     apri: 'Apri su Instagram',
-    controllato: 'controllo automatico ogni 2 ore',
+    controllato: 'controllo automatico ogni ora',
     aggiornato: 'aggiornato',
     errore: 'Instagram non risponde adesso. Riprovo più tardi.',
     vuoto: 'In attesa del primo aggiornamento.',
@@ -66,7 +66,7 @@ const TESTI = {
     nessunaEvidenza: 'No highlights yet.',
     storia: 'Story',
     apri: 'Open on Instagram',
-    controllato: 'automatic check every 2 hours',
+    controllato: 'automatic check every hour',
     aggiornato: 'updated',
     errore: 'Instagram is not answering right now. I’ll try again later.',
     vuoto: 'Waiting for the first update.',
