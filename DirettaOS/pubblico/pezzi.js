@@ -33,7 +33,7 @@ import { CAST, CAST_NOMI, CAST_POSTI, creaCast, castArriva } from '/cast-pezzi.j
 PEZZI.push(...CAST); Object.assign(NOMI, CAST_NOMI); for (const L of ['05', '10']) Object.assign(POSTI[L], CAST_POSTI[L])
 // le scene nuove: dove vivo, l'azienda di famiglia e il surf. Hanno lo stesso nome della regia e lo stesso
 // indirizzo (/o/dovevivo…), e stanno al loro posto in tutte e due le lenti.
-import { SCENE, SCENE_NOMI, SCENE_POSTI, creaScena, sceneArriva } from '/scene.js'
+import { SCENE, SCENE_NOMI, SCENE_POSTI, creaScena, sceneArriva, sceneComando } from '/scene.js'
 PEZZI.push(...SCENE); Object.assign(NOMI, SCENE_NOMI); for (const L of ['05', '10']) Object.assign(POSTI[L], SCENE_POSTI[L])
 // la bandiera appesa al muro (bandiera.js, il catalogo in bandiere.js): sta per prima, cioè sotto a tutti gli altri
 import { creaBandiera, bandieraArriva, bandieraMuro } from '/bandiera.js'
@@ -208,6 +208,7 @@ function avvia() {
     const fuori = document.createElement('div')
     fuori.className = 'pezzo'; fuori.dataset.pezzo = p
     fuori.style.zIndex = String(n + 1) // (il suo posto nell'ordine, anche quando torna da uno strato)
+    if (SCENE.includes(p)) { fuori.dataset.scena = p; fuori.style.zIndex = '9000' } // (una scena copre tutto, a schermo intero; sopra resta solo il podcast)
     if (ALTO.includes(p)) fuori.dataset.da = 'alto'
     dentro.classList.add('dentro')
     // sospesi: ognuno ondeggia piano, ognuno col suo passo, così non si muovono tutti insieme
@@ -249,7 +250,9 @@ function avvia() {
     if (Q.has('sfondo') && scena.style.backgroundImage !== sf) scena.style.backgroundImage = sf
     if (el.bandiera) bandieraArriva(s) // (quale bandiera: cambia l'altezza del pezzo, quindi prima di metterlo a posto)
     if (vistaEsterna) vistaEsterna.aggiorna(s)
-    sceneArriva(s) // (meteo e ora per «Dove vivo»; le altre scene non aspettano altro)
+    sceneArriva(s) // (lo stato alle scene: il meteo, l'ora da cui sono accese, l'ultimo comando)
+    // con una scena in onda (anche se sta in un altro livello di Camo) gli altri pezzi non si disegnano: è a schermo intero
+    scena.classList.toggle('in-scena', SCENE.some((p) => s.attivi[p]))
     for (const p of monta) {
       const su = Q.has('sempre') || !!s.attivi[p]
       if (p !== 'cornice' && !el[p].dataset.trascina && !el[p].classList.contains('segue')) posiziona(p)
@@ -576,6 +579,7 @@ function avvia() {
 
   // ── il posto normale di un pezzo (quello spostato dalla regia, o quello di POSTI) ──
   function posiziona(p) {
+    if (SCENE.includes(p)) return metti(el[p], 'transform', 'translate(0px, 0px) scale(1)') // (a schermo intero, sempre)
     const sul = sulMuroMetti(p)
     regolaMetti(p) // (sul muro lo gira il muro: salendo o scendendo cambia chi lo gira)
     if (sul) return
@@ -902,6 +906,7 @@ function avvia() {
     filo.addEventListener('occhio', (e) => occhioArriva(JSON.parse(e.data)))
     filo.addEventListener('nascondi', (e) => nascondi(JSON.parse(e.data).ms))
     filo.addEventListener('regola', (e) => regolaArriva(JSON.parse(e.data)))
+    filo.addEventListener('scena', (e) => sceneComando(JSON.parse(e.data)))
     if (pc) {
       filo.addEventListener('pc', (e) => pcArriva(JSON.parse(e.data)))
       filo.addEventListener('pcnomi', (e) => pcNomi(JSON.parse(e.data)))
@@ -918,7 +923,7 @@ function avvia() {
   collega()
   // la regia, quando trascina un pezzo, lo sposta qui senza aspettare il server
   window.__posto = (p, x, y, s, fermo) => {
-    if (!el[p]) return
+    if (!el[p] || SCENE.includes(p)) return
     if (fermo) delete el[p].dataset.trascina; else { el[p].dataset.trascina = '1'; el[p].classList.remove('coperto') } // (mentre lo sposti si vede)
     if (el[p].dataset.muro) { delete el[p].dataset.muro; metti(el[p], 'filter', '') } // (staccato da un muro, nella pagina dei muri)
     if (el[p].parentElement === stratoMuri) scena.append(el[p]) // (mentre lo trascini non è più sul muro: fuori dallo strato che si buca)

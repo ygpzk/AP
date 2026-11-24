@@ -1,0 +1,817 @@
+{
+  "attivi": {
+    "cornice": false,
+    "nome": false,
+    "spie": false,
+    "conto": true,
+    "meteo": false,
+    "tasti": false,
+    "social": true,
+    "meme": false,
+    "adv": false,
+    "adigeo": false,
+    "redbull": false,
+    "puff": false,
+    "legna": false,
+    "pipi": false,
+    "bere": false,
+    "mangiare": false,
+    "lattina": false,
+    "telefono": false,
+    "spacco": false,
+    "sistemo": false,
+    "riavvio": false,
+    "quadro": false,
+    "app": false,
+    "cpu": false,
+    "gpu": false,
+    "ram": false,
+    "ssd": false,
+    "hdd": false,
+    "temp": false,
+    "wifi": false,
+    "argomento": false,
+    "fine": false,
+    "dovevivo": true,
+    "azienda": false,
+    "surf": false,
+    "bandiera": false,
+    "cavi": false,
+    "esterna": false
+  },
+  "lenteModo": "10",
+  "letto": "01:30",
+  "tastiTutti": true,
+  "impara": {
+    "com.apple.avfoundation.avcapturedevice.built-in_video:5::zoom=1.0": "05",
+    "com.apple.avfoundation.avcapturedevice.built-in_video:0::zoom=1.0": "05"
+  },
+  "posti": {
+    "10": {
+      "redbull": [
+        41,
+        936,
+        1.797
+      ],
+      "tasti": [
+        188,
+        315,
+        0.794
+      ],
+      "spie": [
+        1702,
+        28,
+        0.577
+      ],
+      "adigeo": [
+        1123,
+        381,
+        0.677
+      ],
+      "conto": [
+        125,
+        72,
+        3
+      ],
+      "adv": [
+        565,
+        466,
+        1.408
+      ],
+      "meme": [
+        1539,
+        881,
+        0.645
+      ],
+      "puff": [
+        165,
+        839,
+        1
+      ],
+      "social": [
+        460,
+        812,
+        3
+      ],
+      "meteo": [
+        21,
+        21,
+        0.864
+      ],
+      "app": [
+        3,
+        305,
+        0.579
+      ],
+      "gpu": [
+        746,
+        206,
+        1.769
+      ],
+      "cpu": [
+        864,
+        177,
+        1.321
+      ],
+      "ram": [
+        135,
+        867,
+        1.605
+      ],
+      "ssd": [
+        277,
+        947,
+        0.634
+      ],
+      "wifi": [
+        12,
+        914,
+        1.035
+      ],
+      "temp": [
+        234,
+        703,
+        1.857
+      ],
+      "argomento": [
+        72,
+        154,
+        1.975
+      ],
+      "hdd": [
+        294,
+        86,
+        0.666
+      ],
+      "bandiera": [
+        965,
+        62,
+        0.5
+      ],
+      "esterna": [
+        50,
+        852,
+        0.968
+      ],
+      "cavi": [
+        -158,
+        950,
+        0.822
+      ],
+      "quadro": [
+        140,
+        19,
+        1.653
+      ],
+      "fine": [
+        76,
+        146,
+        1.341
+      ]
+    },
+    "05": {
+      "adigeo": [
+        192,
+        469,
+        0.953
+      ],
+      "conto": [
+        289,
+        964,
+        2.27
+      ],
+      "adv": [
+        0,
+        490,
+        0.784
+      ],
+      "tasti": [
+        509,
+        534,
+        0.327
+      ],
+      "meteo": [
+        764,
+        234,
+        1.244
+      ],
+      "spie": [
+        1350,
+        191,
+        0.784
+      ],
+      "meme": [
+        1492,
+        945,
+        0.746
+      ],
+      "puff": [
+        470,
+        694,
+        1
+      ],
+      "social": [
+        117,
+        769,
+        0.823
+      ],
+      "wifi": [
+        315,
+        981,
+        0.634
+      ],
+      "temp": [
+        384,
+        790,
+        0.634
+      ],
+      "ssd": [
+        365,
+        851,
+        0.85
+      ],
+      "ram": [
+        151,
+        733,
+        0.85
+      ],
+      "gpu": [
+        277,
+        761,
+        0.85
+      ],
+      "cpu": [
+        425,
+        651,
+        0.85
+      ],
+      "redbull": [
+        144,
+        557,
+        2.655
+      ],
+      "app": [
+        1231,
+        314,
+        0.614
+      ],
+      "quadro": [
+        769,
+        149,
+        1.282
+      ],
+      "esterna": [
+        772,
+        82,
+        0.804
+      ],
+      "cavi": [
+        -236,
+        898,
+        1
+      ]
+    }
+  },
+  "redbull": {
+    "giorno": "2026-11-24",
+    "n": 0,
+    "ultima": null
+  },
+  "segue": true,
+  "gpuLeggero": false,
+  "tv": {
+    "ip": "10.1.12.106",
+    "nome": "[LG] webOS TV QNED756RA",
+    "modello": "QNED756RA"
+  },
+  "testaRif": {
+    "10": null,
+    "05": null
+  },
+  "puff": {
+    "gusto": "rapsberry",
+    "batteria": 65,
+    "pod": 2,
+    "colore": {
+      "h": 190,
+      "dh": 16,
+      "smin": 0.32,
+      "vmin": 0.47,
+      "area": 190
+    },
+    "zona": {
+      "05": [
+        114,
+        531,
+        762,
+        388
+      ]
+    }
+  },
+  "socialSi": {
+    "instagram": true,
+    "tiktok": true,
+    "youtube": false,
+    "twitch": false,
+    "github": false,
+    "telegram": false,
+    "discord": false,
+    "instagram2": false
+  },
+  "social": {
+    "twitch": {
+      "n": 13,
+      "alle": 1795177790992,
+      "auto": true,
+      "vero": 13
+    },
+    "instagram": {
+      "n": 1662,
+      "alle": 1795134772551,
+      "auto": false
+    },
+    "tiktok": {
+      "n": 12317,
+      "alle": 1795134805038,
+      "auto": false
+    },
+    "youtube": {
+      "n": 166,
+      "alle": 1795138602126,
+      "auto": false
+    },
+    "discord": {
+      "n": 84,
+      "alle": 1795228075215,
+      "auto": false
+    },
+    "instagram2": {
+      "n": 186,
+      "alle": 1795228080259,
+      "auto": false
+    }
+  },
+  "muri": {
+    "10": {
+      "f": null,
+      "luce": 0,
+      "sfoca": 0.35,
+      "ancora": "vgq6g3k",
+      "foto": 1795372161453,
+      "pareti": [
+        {
+          "id": "vgq6g3k",
+          "nome": "muro 1",
+          "punti": [
+            [
+              418.9,
+              -34.3
+            ],
+            [
+              1799.3,
+              -55.6
+            ],
+            [
+              1416.7,
+              782.9
+            ],
+            [
+              641.3,
+              529.4
+            ]
+          ],
+          "d": 2.959,
+          "corpo": true
+        }
+      ],
+      "pezzi": {
+        "esterna": {
+          "muro": "vgq6g3k",
+          "u": 0.838,
+          "v": 0.1796,
+          "s": 1.297,
+          "r": 0,
+          "corpo": true
+        },
+        "bandiera": {
+          "muro": "vgq6g3k",
+          "u": 0.9417,
+          "v": 0.1591,
+          "s": 0.569,
+          "r": 0,
+          "corpo": true
+        }
+      }
+    },
+    "05": {
+      "f": 815,
+      "luce": 1,
+      "sfoca": 0,
+      "ancora": "6j4y6zh",
+      "foto": 1795444328174,
+      "pareti": [
+        {
+          "id": "6j4y6zh",
+          "nome": "muro 1",
+          "punti": [
+            [
+              1209,
+              556
+            ],
+            [
+              1476.3,
+              610.3
+            ],
+            [
+              1490.7,
+              1699.6
+            ],
+            [
+              825.1,
+              1292.1
+            ]
+          ],
+          "d": 2.355,
+          "corpo": true
+        },
+        {
+          "id": "6iuyy5n",
+          "nome": "muro 3",
+          "punti": [
+            [
+              401,
+              -240.2
+            ],
+            [
+              2018.3,
+              -514.2
+            ],
+            [
+              1430.3,
+              794.7
+            ],
+            [
+              594.8,
+              492.1
+            ]
+          ],
+          "d": 3.324,
+          "corpo": true
+        },
+        {
+          "id": "kszmntx",
+          "nome": "muro 4",
+          "punti": [
+            [
+              1481,
+              709.8
+            ],
+            [
+              2011.9,
+              -461.3
+            ],
+            [
+              2974,
+              -315.8
+            ],
+            [
+              1495.3,
+              1671.7
+            ]
+          ],
+          "d": 6.135,
+          "corpo": true
+        },
+        {
+          "id": "yf5yz7m",
+          "nome": "muro 5",
+          "punti": [
+            [
+              1268.3,
+              284.8
+            ],
+            [
+              1619.7,
+              532.8
+            ],
+            [
+              1421.7,
+              858.7
+            ],
+            [
+              1209,
+              556
+            ]
+          ],
+          "d": 2.589,
+          "corpo": true
+        },
+        {
+          "id": "znp0rnd",
+          "nome": "muro 6",
+          "punti": [
+            [
+              -5.5,
+              763.5
+            ],
+            [
+              400.6,
+              537.7
+            ],
+            [
+              1024.9,
+              829.2
+            ],
+            [
+              791.1,
+              1517.8
+            ]
+          ],
+          "d": 2.384,
+          "corpo": true
+        },
+        {
+          "id": "e5y6712",
+          "nome": "muro 7",
+          "punti": [
+            [
+              -12.5,
+              565.6
+            ],
+            [
+              275.1,
+              466.9
+            ],
+            [
+              323.6,
+              571.5
+            ],
+            [
+              71.7,
+              693.6
+            ]
+          ],
+          "d": 3.542,
+          "corpo": true
+        }
+      ],
+      "pezzi": {
+        "bandiera": {
+          "muro": "6iuyy5n",
+          "u": 0.7774,
+          "v": 0.3425,
+          "s": 0.937,
+          "r": 0,
+          "corpo": true
+        },
+        "meteo": {
+          "muro": "6iuyy5n",
+          "u": 0.8012,
+          "v": 0.449,
+          "s": 2.427,
+          "r": 0,
+          "corpo": true
+        },
+        "quadro": {
+          "muro": "6iuyy5n",
+          "u": 0.5475,
+          "v": 0.6306,
+          "s": 2.626,
+          "r": 0,
+          "corpo": true
+        },
+        "tasti": {
+          "muro": "kszmntx",
+          "u": 0.5791,
+          "v": 0.2949,
+          "s": 3.189,
+          "r": 90,
+          "corpo": true
+        },
+        "social": {
+          "muro": "6iuyy5n",
+          "u": 0.9058,
+          "v": 0.3152,
+          "s": 2.198,
+          "r": 0,
+          "corpo": true
+        },
+        "wifi": {
+          "muro": "znp0rnd",
+          "u": 0.5386,
+          "v": 0.3338,
+          "s": 1.884,
+          "r": -37.5,
+          "corpo": true
+        },
+        "redbull": {
+          "muro": "6iuyy5n",
+          "u": 0.1774,
+          "v": 0.3345,
+          "s": 4.7,
+          "r": 0,
+          "corpo": true
+        },
+        "app": {
+          "muro": "yf5yz7m",
+          "u": 0.554,
+          "v": -0.1979,
+          "s": 1.631,
+          "r": 2,
+          "corpo": true
+        },
+        "adv": {
+          "muro": "e5y6712",
+          "u": 0.4902,
+          "v": 0.4094,
+          "s": 1.458,
+          "r": 0,
+          "corpo": true
+        },
+        "esterna": {
+          "muro": "6iuyy5n",
+          "u": 0.5963,
+          "v": 0.4364,
+          "s": 2.646,
+          "r": 0,
+          "corpo": true
+        }
+      }
+    }
+  },
+  "inizio": {
+    "10": 0,
+    "05": 0
+  },
+  "viaPrima": null,
+  "viaCentro": true,
+  "podcast": {
+    "argomenti": [
+      "La figuraccia più grande della tua vita",
+      "Pizza con l’ananas: sì o no?",
+      "Il gioco che ti ha cambiato la vita",
+      "Cosa faresti con un milione di euro domani",
+      "Il prof che non dimenticherai mai",
+      "Il superpotere più inutile che vorresti",
+      "Mantova è la città più bella d’Italia?",
+      "Red Bull: quante sono troppe?",
+      "La cosa più cringe che hai fatto alle medie",
+      "Un giorno da invisibile: cosa fai?",
+      "Il film che tutti amano e tu no",
+      "Meglio l’estate o l’inverno",
+      "Il cibo più sopravvalutato del mondo",
+      "Se potessi vivere dentro un videogioco",
+      "La canzone che ascolti di nascosto",
+      "Tre cose su un’isola deserta",
+      "Tortelli di zucca contro tutto il resto",
+      "Il tuo primo telefono",
+      "La teoria del complotto più assurda",
+      "Quante volte rimandi la sveglia",
+      "Il sogno più strano che ricordi",
+      "Il viaggio dei sogni",
+      "Cosa cambieresti della scuola",
+      "L’animale che vorresti in casa",
+      "Il meme dell’anno",
+      "La chiamata su Discord più lunga di sempre",
+      "Dove sarai fra dieci anni",
+      "Il regalo più brutto che hai ricevuto",
+      "La nebbia padana: pro e contro",
+      "Hai mai creduto a una bufala?",
+      "L’app che non cancelleresti mai",
+      "La serie tv da vedere per forza",
+      "Colazione dolce o salata",
+      "Il soprannome più strano che hai avuto",
+      "La cosa più costosa che hai rotto",
+      "CS2, Minecraft o Fortnite",
+      "Sindaco per un giorno: la prima legge",
+      "La paura più irrazionale",
+      "Il lavoro dei sogni da bambino",
+      "La lite più stupida con un amico",
+      "Cosa non manca mai nel tuo frigo",
+      "Il messaggio che non dovevi mandare",
+      "Gaming su pc o su console",
+      "Il posto più bello dove hai dormito",
+      "Una regola di casa che odiavi",
+      "La moda di adesso che non capisci",
+      "Il tuo record più inutile",
+      "Cosa compreresti con i $pzk"
+    ],
+    "puntata": 5,
+    "inizio": 1795481751307,
+    "fine": 1795481951598,
+    "scaletta": [
+      {
+        "testo": "Cosa faresti con un milione di euro domani",
+        "da": 1795481751308
+      },
+      {
+        "testo": "Il gioco che ti ha cambiato la vita",
+        "da": 1795481827467
+      }
+    ],
+    "argomento": {
+      "testo": "Il gioco che ti ha cambiato la vita",
+      "da": 1795481827467,
+      "rullo": [
+        "La moda di adesso che non capisci",
+        "Tortelli di zucca contro tutto il resto",
+        "Mantova è la città più bella d’Italia?",
+        "Dove sarai fra dieci anni",
+        "L’animale che vorresti in casa",
+        "La figuraccia più grande della tua vita",
+        "La nebbia padana: pro e contro",
+        "Il tuo record più inutile",
+        "Il lavoro dei sogni da bambino",
+        "Cosa non manca mai nel tuo frigo",
+        "Quante volte rimandi la sveglia",
+        "Cosa compreresti con i $pzk",
+        "Il soprannome più strano che hai avuto",
+        "La cosa più cringe che hai fatto alle medie",
+        "La cosa più costosa che hai rotto",
+        "Dove sarai fra dieci anni",
+        "Il messaggio che non dovevi mandare",
+        "Meglio l’estate o l’inverno",
+        "Il film che tutti amano e tu no",
+        "Il tuo primo telefono",
+        "Cosa non manca mai nel tuo frigo",
+        "Sindaco per un giorno: la prima legge",
+        "L’app che non cancelleresti mai",
+        "La chiamata su Discord più lunga di sempre",
+        "Mantova è la città più bella d’Italia?",
+        "Il superpotere più inutile che vorresti",
+        "Il gioco che ti ha cambiato la vita",
+        "L’app che non cancelleresti mai",
+        "Il lavoro dei sogni da bambino"
+      ],
+      "indice": 26,
+      "n": 2
+    },
+    "specchio": true,
+    "schermo": {
+      "s": "podcast",
+      "testo": "",
+      "parla": "Giugnoh",
+      "nomi": [
+        "Giugnoh",
+        "ramallah",
+        "! Thermo",
+        "ZOLTAN",
+        ".",
+        "24ikmike",
+        "Lullaby",
+        "Marius",
+        "VI ODIO TUTTE",
+        "virgola__"
+      ]
+    }
+  },
+  "bandiera": "scozia",
+  "regola": {
+    "esterna": {
+      "op": 100,
+      "si": [
+        "op"
+      ],
+      "filtro": "mono",
+      "effetto": "ombra"
+    },
+    "redbull": {
+      "effetto": "lime"
+    },
+    "adv": {
+      "effetto": "lime"
+    },
+    "app": {
+      "effetto": "lime"
+    },
+    "wifi": {
+      "effetto": "viola"
+    },
+    "social": {
+      "effetto": "lime"
+    },
+    "tasti": {
+      "effetto": "lime"
+    },
+    "cavi": {
+      "r": 31
+    }
+  },
+  "scena": {
+    "dovevivo": {
+      "cam": {
+        "x": 1.5,
+        "y": 2,
+        "d": 120,
+        "az": 30,
+        "el": 50
+      },
+      "t": 3
+    }
+  },
+  "esterna": {
+    "nome": "iPad",
+    "specchia": true,
+    "adatta": true
+  }
+}

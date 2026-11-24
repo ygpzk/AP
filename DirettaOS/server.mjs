@@ -39,6 +39,15 @@ const SOCIALS = await import(pathToFileURL(path.join(SITO, 'assets', 'config.js'
 
 // ── lo stato: quello che la regia accende e quello che i sensori vedono ──
 const VIA = ['legna', 'pipi', 'bere', 'mangiare', 'lattina', 'telefono', 'spacco', 'sistemo', 'riavvio'] // i «torno subito» (lattina = la Red Bull)
+function scenaPulita(v, giu = 0) {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null
+  if (typeof v === 'string') return v.slice(0, 80)
+  if (typeof v === 'boolean' || v === null) return v
+  if (typeof v !== 'object' || giu > 3) return giu ? null : undefined
+  if (Array.isArray(v)) return v.slice(0, 24).map((x) => scenaPulita(x, giu + 1))
+  const o = Object.fromEntries(Object.entries(v).slice(0, 24).map(([k, x]) => [k.slice(0, 24), scenaPulita(x, giu + 1)]))
+  return giu || JSON.stringify(o).length <= 1500 ? o : undefined
+}
 const PEZZI = ['cornice', 'nome', 'spie', 'conto', 'meteo', 'tasti', 'social', 'meme', 'adv', 'adigeo', 'redbull', 'puff', ...VIA, ...PC, ...CAST, ...SCENE, 'bandiera', 'cavi', 'esterna']
 // (i pezzi del pc si accendono da soli, uno per uno: «tutti» non li tocca)
 const DA_SOLI = [...PC, ...CAST, ...SCENE, 'esterna'] // (e le scene, il podcast e la vista esterna: si accendono dai loro tasti)
@@ -86,11 +95,17 @@ const stato = {
   bandiera: BANDIERE.some((b) => b.id === salvato.bandiera) ? salvato.bandiera : BANDIERA_PRIMA,
   // le regolazioni di ogni sorgente, dalla regia (pubblico/regola.js): pezzo → { r, fx, fy, lum, con…, si, filtro, effetto }
   regola: Object.fromEntries(Object.entries(salvato.regola ?? {}).filter(([p]) => PEZZI.includes(p)).map(([p, v]) => [p, regolaPulita(v)]).filter(([, v]) => v)),
+  // le scene a schermo intero (pubblico/scene.js): l'ultimo comando di ognuna (la camera della mappa, lo scorrimento del
+  // sito: lo decide la scena, qui passa e basta) e da quando è accesa quella in onda: è l'orologio che tutte le pagine
+  // usano per disegnare lo stesso fotogramma
+  scena: Object.fromEntries(SCENE.map((p) => [p, scenaPulita(salvato.scena?.[p])]).filter(([, v]) => v)),
+  scenaDa: Date.now(),
 }
 // (i pezzi che non ci sono più, come la brocca, spariscono anche dai posti e dai muri salvati)
 for (const L of ['05', '10']) {
   for (const p of Object.keys(stato.muri[L]?.pezzi ?? {})) if (!PEZZI.includes(p)) delete stato.muri[L].pezzi[p]
-  for (const p of Object.keys(stato.posti[L] ?? {})) if (!PEZZI.includes(p)) delete stato.posti[L][p]
+  for (const p of Object.keys(stato.posti[L] ?? {})) if (!PEZZI.includes(p) || SCENE.includes(p)) delete stato.posti[L][p]
+  for (const p of SCENE) delete stato.muri[L]?.pezzi?.[p] // (e non si appendono ai muri)
 }
 // Quando premi un «torno subito» si spengono tutti gli altri link (resta la scena con la scritta al centro): quelli che
 // erano accesi stanno in viaPrima e si riaccendono quando torni. Non si riparte mai «via»: se il server si è fermato
@@ -109,6 +124,10 @@ stato.viaPrima = null
 // schermo: i posti di prima si buttano, una volta sola)
 if (!salvato.viaCentro) for (const L of ['05', '10']) for (const p of VIA) delete stato.posti[L]?.[p]
 const viaOra = () => VIA.some((p) => stato.attivi[p])
+// una scena a schermo intero copre la webcam come un «torno subito»: l'occhio e il sensore della lente vedrebbero la
+// scena, non la stanza
+const sceneOra = () => SCENE.some((p) => stato.attivi[p])
+const copertoOra = () => viaOra() || sceneOra()
 function viaSpegni() { // tutti i link spenti, e ci si ricorda quali erano accesi
   const accesi = PEZZI.filter((p) => !VIA.includes(p) && stato.attivi[p])
   stato.viaPrima = [...new Set([...(stato.viaPrima ?? []), ...accesi])]
@@ -125,7 +144,7 @@ function viaTorna() { // sei tornato: si riaccendono quelli di prima
 // riavvio si perdevano posti, muri, follower e tutto il resto. All'uscita si salva subito (salvaSubito).
 let salvaFra = null
 const FILE_SALVA = path.join(QUI, FILE_STATO)
-const daSalvare = () => JSON.stringify({ attivi: stato.attivi, lenteModo: stato.lenteModo, letto: stato.letto, tastiTutti: stato.tastiTutti, impara: stato.impara, posti: stato.posti, redbull: stato.redbull, segue: stato.segue, gpuLeggero: stato.gpuLeggero, tv: { ip: stato.tv?.ip ?? null, nome: stato.tv?.nome ?? null, modello: stato.tv?.modello ?? null }, testaRif: stato.testaRif, puff: stato.puff, socialSi: stato.socialSi, social: stato.social, muri: stato.muri, inizio: stato.inizio, viaPrima: stato.viaPrima, viaCentro: true, podcast: stato.podcast, bandiera: stato.bandiera, regola: stato.regola, esterna: vista?.salvaDati() ?? {} }, null, 2)
+const daSalvare = () => JSON.stringify({ attivi: stato.attivi, lenteModo: stato.lenteModo, letto: stato.letto, tastiTutti: stato.tastiTutti, impara: stato.impara, posti: stato.posti, redbull: stato.redbull, segue: stato.segue, gpuLeggero: stato.gpuLeggero, tv: { ip: stato.tv?.ip ?? null, nome: stato.tv?.nome ?? null, modello: stato.tv?.modello ?? null }, testaRif: stato.testaRif, puff: stato.puff, socialSi: stato.socialSi, social: stato.social, muri: stato.muri, inizio: stato.inizio, viaPrima: stato.viaPrima, viaCentro: true, podcast: stato.podcast, bandiera: stato.bandiera, regola: stato.regola, scena: stato.scena, esterna: vista?.salvaDati() ?? {} }, null, 2)
 function salva() {
   clearTimeout(salvaFra)
   salvaFra = setTimeout(() => {
@@ -174,10 +193,16 @@ const lenteDi = (id) => {
   const zoom = +(/zoom=([\d.]+)/.exec(id)?.[1] ?? 1)
   return /built-in_video:5(\D|$)/.test(id) || zoom < 1 ? '05' : '10'
 }
-let presetPrima = {}, presetAttivo = null
-function leggiPreset() {
+let presetPrima = {}, presetAttivo = null, presetLeggendo = false
+// (in lettura asincrona e una alla volta: Camo a volte tiene il file occupato e una readFileSync fermava tutto il server)
+async function leggiPreset() {
+  if (presetLeggendo) return
+  presetLeggendo = true
+  let testo
+  try { testo = await fs.promises.readFile(path.join(CAMO, 'Presets/DEFAULT.config'), 'utf8') } catch { presetLeggendo = false; return }
+  presetLeggendo = false
   let d
-  try { d = JSON.parse(fs.readFileSync(path.join(CAMO, 'Presets/DEFAULT.config'), 'utf8')).devicesSettings ?? {} } catch { return }
+  try { d = JSON.parse(testo).devicesSettings ?? {} } catch { return }
   const telefoni = Object.entries(d).filter(([, v]) => /avfoundation/.test(v?.CameraID ?? ''))
   // il telefono in uso è quello la cui voce è cambiata per ultima; all'avvio, quello che Camo ha scritto per ultimo nel file
   for (const [k, v] of telefoni) { const s = JSON.stringify(v); if (presetPrima[k] !== undefined && presetPrima[k] !== s) presetAttivo = k; presetPrima[k] = s }
@@ -203,7 +228,7 @@ const N = 64 * 36
 let rif = null, ffmpeg = null, nero = false
 function riferimenti() {
   const uno = (f) => {
-    const r = spawnSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-i', path.join(RIF, f), '-vf', 'scale=64:36', '-pix_fmt', 'gray', '-f', 'rawvideo', '-'], { maxBuffer: 1 << 20 })
+    const r = spawnSync('ffmpeg', ['-hide_banner', '-loglevel', 'error', '-i', path.join(RIF, f), '-vf', 'scale=64:36', '-pix_fmt', 'gray', '-f', 'rawvideo', '-'], { maxBuffer: 1 << 20, timeout: 15000 })
     return r.status === 0 && r.stdout?.length === N ? r.stdout : null
   }
   const a = uno('05.jpg'), b = uno('10.jpg')
@@ -244,7 +269,7 @@ function lenteVoto(f) {
   if (buio !== nero) { nero = buio; spie() }
   if (buio) { lenteVoti = []; return }
   // (quando sei via la webcam mostra la scena del «torno subito», non la stanza: niente voti, la lente resta quella)
-  if (viaOra()) { lenteVoti = []; return }
+  if (copertoOra()) { lenteVoti = []; return }
   const a = somiglia(f, rif['05']), b = somiglia(f, rif['10'])
   lenteVoti.push(Math.abs(a - b) < 0.08 || Math.max(a, b) < 0.12 ? null : a > b ? '05' : '10')
   // se per un po' non somiglia a nessuna delle due foto (stanza diversa, telefono spostato) l'immagine si fa da parte e torna a comandare il file
@@ -437,7 +462,7 @@ const testaOra = () => { const t = ultimoOcchio?.testa; return t && t.da !== 'pe
 // <lente>.jpg). Se cambia oltre la tolleranza, il pezzo si nasconde come se ci passassi davanti. `serveCopertura()` dice
 // se c'è almeno un pezzo da guardare; `serveCopertura(pezzo)` se quel pezzo è uno di loro.
 const serveCopertura = (solo = null) => {
-  if (stato.camLibera || viaOra()) return false
+  if (stato.camLibera || copertoOra()) return false
   const M = stato.muri[stato.lente]
   if (!M) return false
   const lista = solo ? [[solo, M.pezzi[solo]]] : Object.entries(M.pezzi)
@@ -471,7 +496,7 @@ function riferimentoCopertura() {
 }
 // (quando sei via l'occhio si spegne: non c'è niente da seguire, e la scena del «torno subito» ha dei volti disegnati.
 // Resta acceso solo per l'anteprima dal vivo della regia, ma senza cercare)
-const vuoleOcchio = () => !stato.camLibera && (Date.now() < anteprimaFino || (!viaOra() && ((stato.attivi.nome && stato.segue) || (stato.attivi.puff && !!stato.puff.colore) || serveCopertura())))
+const vuoleOcchio = () => !stato.camLibera && (Date.now() < anteprimaFino || (!copertoOra() && ((stato.attivi.nome && stato.segue) || (stato.attivi.puff && !!stato.puff.colore) || serveCopertura())))
 // ── la foto della stanza senza i pezzi (foto.mjs), per la lente in uso: quando la scatti dalla regia (o dai muri), e da
 // sola ogni mezz'ora. Risponde null se l'ha fatta, se no perché no. Non la fa quando sei via (c'è lo schermo del «torno
 // subito») o con Camo senza telefono.
@@ -583,8 +608,18 @@ function azione(a) {
     salva(); manda('regola', { p: a.pezzo, v })
     return true
   }
+  // il comando di una scena (la camera della mappa mentre la giri, lo scorrimento del sito): ne arrivano tanti, quindi
+  // alle pagine va solo quello («scena»), non tutto lo stato. `chi` è la pagina che l'ha mandato: lei non lo riapplica
+  if (a.tipo === 'scena' && SCENE.includes(a.nome)) {
+    const v = scenaPulita(a.v)
+    if (v === undefined) return false
+    if (v === null) delete stato.scena[a.nome]; else stato.scena[a.nome] = v
+    salva(); manda('scena', { p: a.nome, v, chi: typeof a.chi === 'string' ? a.chi.slice(0, 16) : null })
+    return true
+  }
   if (a.tipo === 'pezzo' && PEZZI.includes(a.nome)) {
     const su = a.su ?? !stato.attivi[a.nome]
+    if (su && SCENE.includes(a.nome) && !stato.attivi[a.nome]) stato.scenaDa = Date.now() // (l'orologio della scena riparte)
     stato.attivi[a.nome] = !!su
     // le scene e il quadro dei componenti sono grandi e si sovrappongono: una cosa grande alla volta
     // (la regia lo dice e i tasti si aggiornano da soli)
@@ -618,7 +653,7 @@ function azione(a) {
     stato.redbull.n = a.d === 0 ? 0 : Math.max(0, stato.redbull.n + a.d)
     if (a.d === 1) stato.redbull.ultima = Date.now()
     if (stato.redbull.n === 0) stato.redbull.ultima = null
-  } else if (a.tipo === 'posto' && PEZZI.includes(a.pezzo) && ['05', '10'].includes(a.lente)) {
+  } else if (a.tipo === 'posto' && PEZZI.includes(a.pezzo) && !SCENE.includes(a.pezzo) && ['05', '10'].includes(a.lente)) {
     if (a.via) delete stato.posti[a.lente][a.pezzo]
     else if ([a.x, a.y, a.s].every(Number.isFinite)) stato.posti[a.lente][a.pezzo] = [Math.round(a.x), Math.round(a.y), Math.min(3, Math.max(.2, +(+a.s).toFixed(3)))]
     else return false
@@ -674,7 +709,7 @@ function azione(a) {
     // riavvia.cmd: prima di chiudere il server si chiude la webcam con le buone (chiuderla di colpo mandava il PC in
     // schermata blu), poi si esce; il servizio lo rifà partire fra tre secondi
     setTimeout(spegniBene, 100)
-  } else if (a.tipo === 'muroPezzo' && ['05', '10'].includes(a.lente) && PEZZI.includes(a.pezzo)) {
+  } else if (a.tipo === 'muroPezzo' && ['05', '10'].includes(a.lente) && PEZZI.includes(a.pezzo) && !SCENE.includes(a.pezzo)) {
     // un pezzo solo, dalla regia: spostato, ingrandito o girato sul suo muro, portato su un altro, o staccato (q: null)
     const M = stato.muri[a.lente]
     if (a.q === null) delete M.pezzi[a.pezzo]
@@ -775,7 +810,7 @@ server.listen(PORTA, '127.0.0.1', () => {
       // (se non c'è né Giugnoh che segue né la puff, l'anteprima dal vivo continua ad avere le sue foto: non si cerca
       // niente. E la testa si cerca solo quando Giugnoh la segue davvero. La copertura dei muri «dietro di me» si cerca
       // anche da sola: lì basta il colore, non la faccia.)
-      cerca: () => !viaOra() && ((stato.attivi.nome && stato.segue) || stato.attivi.puff || serveCopertura()),
+      cerca: () => !copertoOra() && ((stato.attivi.nome && stato.segue) || stato.attivi.puff || serveCopertura()),
       serveTesta: () => !!(stato.attivi.nome && stato.segue),
       serveCopertura, riferimento: riferimentoCopertura, riquadriCopertura: riquadriAdesso,
       colore: () => stato.puff.colore, riquadri: riquadriOra, zona: () => stato.puff.zona?.[stato.lente] ?? null,

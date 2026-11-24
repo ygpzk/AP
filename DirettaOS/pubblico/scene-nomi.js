@@ -1,6 +1,6 @@
-// Diretta OS · le scene nuove: il nome che hanno in regia è lo stesso che hanno in onda e nel loro
-// indirizzo (/o/dovevivo, /o/azienda, /o/surf). Le posizioni sono per le due lenti: 0,5× (05) e 1,0× (10).
-// Stanno al centro, un po' sfalsate, perché sono grandi: si accendono una alla volta e si spostano dalla regia.
+// Diretta OS · le scene: il nome che hanno in regia è lo stesso che hanno in onda e nel loro indirizzo
+// (/o/dovevivo, /o/azienda, /o/surf). Sono sempre a schermo intero: non hanno un posto né una grandezza, e in
+// regia sono tasti (premuto = in onda), una alla volta.
 
 export const SCENE = ['dovevivo', 'azienda', 'surf']
 
@@ -11,20 +11,18 @@ export const SCENE_NOMI = {
 }
 
 export const SCENE_DICE = {
-  dovevivo: 'la mappa SVG di casa, dalle geometrie OpenStreetMap: bussola, meteo, ora, luci e trattore, senza indirizzi',
-  azienda: 'l’azienda di famiglia: un montaggio di foto e zoom, in loop (senza link e senza nome)',
+  dovevivo: 'la mappa in 3D di dove vivo: i confini veri, i fabbricati, la campagna attorno. Si gira col mouse dal monitor della regia, come Google Earth; senza indirizzi',
+  azienda: 'l’azienda di famiglia come un sito che si visita da solo, con le scritte grandi (senza link e senza nome)',
   surf: 'il mare al tramonto, il longboard e noi due: una scena illustrata e animata',
 }
 
-export const SCENE_POSTI = {
-  '05': {
-    dovevivo: [24, 360, .78],
-    azienda: [40, 380, .68],
-    surf: [360, 548, .64],
-  },
-  10: {
-    dovevivo: [30, 352, .8],
-    azienda: [48, 372, .7],
-    surf: [40, 640, .5],
-  },
+// come si usa col mouse quando è in onda (la riga di aiuto sotto il monitor della regia)
+export const SCENE_MANI = {
+  dovevivo: '<b>Trascina</b>: sposta · <b>rotella</b>: zoom · <b>tasto destro</b> o <b>Ctrl + trascina</b>: ruota e inclina · <b>doppio clic</b>: vola lì',
+  azienda: '<b>Rotella</b>: scorri il sito · <b>mouse</b>: il puntatore · <b>clic</b>: entra ed esci',
+  surf: 'Scena a schermo intero',
 }
+
+// (a tutto schermo: lo stesso posto per le due lenti. Resta per chi legge i posti di tutti i pezzi)
+const PIENO = Object.fromEntries(SCENE.map((p) => [p, [0, 0, 1]]))
+export const SCENE_POSTI = { '05': PIENO, 10: PIENO }

@@ -338,6 +338,17 @@ body { font-family: "gg sans", "Noto Sans", "Segoe UI", sans-serif; color: var(-
 .vivo-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
 .dal-vivo .vivo-foto { display: block; }
 .dal-vivo .pezzo, .dal-vivo .cornice, .dal-vivo .sfondo-via { visibility: hidden; }
+/* ── le scene (scene.js): sempre a schermo intero, sopra a tutto. Niente posto, niente ondeggiare, niente entrata che
+   le sposta: solo una dissolvenza. Accese prendono il mouse (la mappa si gira dal monitor della regia), e restano
+   disegnate anche nell'anteprima dal vivo. Sotto una scena gli altri pezzi non si vedono, quindi escono dal disegno;
+   restano sopra solo l'argomento e la fine del podcast. ── */
+.pezzo[data-scena] { transition: none; }
+.pezzo[data-scena] .aria { animation: none; }
+.pezzo[data-scena] .dentro { transform: none; filter: var(--reg, none); transition: opacity .6s ease; }
+.pezzo[data-scena].su .dentro { pointer-events: auto; }
+.dal-vivo .pezzo[data-scena].su { visibility: inherit; }
+.in-scena .pezzo:not([data-scena], [data-pezzo=argomento], [data-pezzo=fine]) .aria, .in-scena .cornice { opacity: 0; visibility: hidden; transition: opacity .4s ease, visibility 0s linear .5s; }
+.in-scena .pezzo:is([data-pezzo=argomento], [data-pezzo=fine]) { z-index: 9100 !important; }
 /* nell'anteprima dal vivo i pezzi non si vedono: fermi anche i loro movimenti, così la regia resta leggera */
 .dal-vivo .pezzo *, .dal-vivo .cornice * { animation-play-state: paused !important; }
 .dal-vivo .pezzo[data-trascina] { visibility: visible; opacity: .85; }

@@ -225,6 +225,17 @@ html[data-tema=scuro] a { color: var(--blu); }
 .via-r { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; }
 .via-r button { flex: 1 1 96px; min-width: 0; padding: 8px 6px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .via-r button[aria-pressed=true] { background: var(--a); border-color: transparent; color: #fff; }
+/* le scene sono tasti, non interruttori: premuto = in onda, a schermo intero (una alla volta) */
+.scene-t { display: grid; gap: 6px; padding: 2px 6px 4px 8px; }
+.scene-t button { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 38px; padding: 8px 10px; text-align: left; }
+.scene-t button b { font-weight: 700; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scene-t button small { margin-left: auto; font: 700 9.5px/1.7 "gg mono", monospace; letter-spacing: .03em; text-transform: uppercase; opacity: .65; white-space: nowrap; }
+.scene-t button[aria-pressed=true] { background: var(--a); border-color: transparent; color: #fff; }
+.scene-t button[aria-pressed=true] small { opacity: 1; }
+.scene-t button[aria-pressed=true] .led { background: #fff; box-shadow: 0 0 0 3px rgba(255, 255, 255, .28); }
+/* con una scena in onda il monitor è suo: niente contorni e maniglie (è a schermo intero), il mouse va alla scena */
+.anteprima.in-scena iframe { pointer-events: auto; }
+.anteprima.in-scena .mano, .anteprima.in-scena .sagome, .anteprima.in-scena .zona { display: none; }
 .cast-r, .tv-r { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 0; }
 .cast-r button { padding: 7px 12px; white-space: nowrap; }
 .cast-r .cast-dice { flex: 1 1 200px; min-width: 0; color: var(--tenue); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -488,7 +499,7 @@ dialog.imp[open] { display: grid; grid-template-columns: 214px minmax(0, 1fr); }
     <input class="cerca" id="cerca" type="search" placeholder="Cerca sorgente" aria-label="Cerca sorgente" autocomplete="off">
     <h2 id="sez-onda">Overlay <span class="poi"><button class="piccolo" data-tutti="1" title="Attiva tutti gli overlay">Tutti on</button><button class="piccolo" data-tutti="0" title="Disattiva tutti gli overlay">Tutti off</button></span></h2>
     <div class="box" id="pz-onda"></div>
-    <h2 id="sez-scene">Scene <span class="poi">esclusive</span></h2>
+    <h2 id="sez-scene">Scene <span class="poi">a schermo intero</span></h2>
     <div class="box" id="pz-scene"></div>
     <h2 id="sez-rete">Sorgenti remote <span class="poi"><button class="piccolo" id="apri-vista" title="Collega la webcam di un PC sulla stessa rete">Collega</button></span></h2>
     <div class="box" id="pz-rete"></div>
@@ -530,12 +541,15 @@ dialog.imp[open] { display: grid; grid-template-columns: 214px minmax(0, 1fr); }
     <section class="dock" aria-label="Controlli">
       <div class="dock-t" role="tablist">
         <button role="tab" data-dock="pausa" aria-selected="true"><i></i>Pausa</button>
+        <button role="tab" data-dock="scene" aria-selected="false"><i></i>Scene</button>
         <button role="tab" data-dock="podcast" aria-selected="false"><i></i>Podcast</button>
         <button role="tab" data-dock="tv" aria-selected="false">Uscita TV</button>
         <span class="dock-nota" id="dock-nota"></span>
       </div>
       <!-- pausa (BRB): una scena a tutto frame; attivarne una mette in mute tutte le altre sorgenti, al rientro tornano -->
       <div class="dock-p" data-dock-p="pausa"><div class="via-r" id="via"></div></div>
+      <!-- scene: tasti come le pause; premuto = in onda, a schermo intero, una alla volta -->
+      <div class="dock-p" data-dock-p="scene" hidden><div class="via-r" id="scene-dock"></div></div>
       <!-- podcast: la puntata -->
       <div class="dock-p" data-dock-p="podcast" hidden>
         <div class="cast-r" id="cast">
@@ -855,7 +869,7 @@ dialog.imp[open] { display: grid; grid-template-columns: 214px minmax(0, 1fr); }
 import { PEZZI, NOMI, POSTI, VIA } from '/pezzi.js'
 import { ICONS } from '/assets/icons.js'
 import { PC, PC_DICE } from '/pc.js'
-import { SCENE, SCENE_DICE } from '/scene-nomi.js' // le tre scene nuove (i nomi sono gli stessi dei pezzi in onda)
+import { SCENE, SCENE_DICE, SCENE_MANI } from '/scene-nomi.js' // le scene: tasti, sempre a schermo intero (i nomi sono gli stessi dei pezzi in onda)
 import { fDi, piano, sulPiano, matrice, scalaIn, angoli, dentro, distanza, porta, MAI_SUL_MURO } from '/muri.js'
 import { CAST, CAST_DICE } from '/cast-pezzi.js' // Giugnoh's Cast (e window.Cast, da cast.js)
 import { BANDIERE, svgUrl } from '/bandiere.js' // il catalogo della bandiera appesa
@@ -867,7 +881,7 @@ const DICE = DESCR
 const ONDA = ['cornice', 'nome', 'spie', 'conto', 'meteo', 'tasti', 'social', 'meme', 'adv', 'adigeo', 'redbull', 'puff', 'bandiera', 'cavi']
 // la grandezza «giusta» di ogni pezzo in onda (1 = un pixel del pezzo per pixel della webcam): nella webcam di Discord
 // l'immagine si vede a un terzo, e così le scritte restano leggibili senza coprire mezza stanza
-const GIUSTA = { meteo: .82, redbull: .85, conto: .9, social: 1.05, spie: .8, tasti: .8, meme: .95, adv: .95, app: .8, adigeo: 1, esterna: .85, quadro: .72, dovevivo: .78, azienda: .72, surf: .68, cpu: .72, gpu: .72, ram: .72, ssd: .72, hdd: .72, temp: .72, wifi: .72, legna: 1, pipi: 1, bere: 1, mangiare: 1, sistemo: 1 }
+const GIUSTA = { meteo: .82, redbull: .85, conto: .9, social: 1.05, spie: .8, tasti: .8, meme: .95, adv: .95, app: .8, adigeo: 1, esterna: .85, quadro: .72, cpu: .72, gpu: .72, ram: .72, ssd: .72, hdd: .72, temp: .72, wifi: .72, legna: 1, pipi: 1, bere: 1, mangiare: 1, sistemo: 1 }
 const L_ = { '05': '0,5×', 10: '1,0×' }
 const $ = (s) => document.querySelector(s)
 const fai = (a) => fetch('/api/azione', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(a) })
@@ -876,7 +890,7 @@ const copia = (x) => (x == null ? x : JSON.parse(JSON.stringify(x)))
 const pulito = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
 const virgola = (x, n = 1) => x.toFixed(n).replace('.', ',')
 const qui = location.origin
-let stato = null, conti = { acceso: false }
+let stato = null, conti = { acceso: false }, scenaInOnda = null
 // (tutto quello che ricordano l'anteprima e la scheda, qui in cima: le funzioni qui sotto le usano da subito)
 let scelto = null, sucoDi = null, tutte = [], presa = null, sopra = null, dentroAnt = false, Mloc = null, attesaMuri = null, barra = null, disegnoDa = null, scala = 1, fondo = 'vivo'
 const L = () => stato?.lente ?? '10'
@@ -892,10 +906,12 @@ const tintaDi = (p) => TINTE[[...p].reduce((n, c) => n + c.charCodeAt(0), 0) % T
 const iniziale = (p) => (NOMI[p] ?? p).replace(/[^\p{L}\p{N}]/gu, '').slice(0, 1) || '?'
 const riga = (p) => `<div class="pezzo-r" data-riga="${p}"><div class="vai" data-scegli="${p}" title="Seleziona"><i class="led" aria-hidden="true"></i><b>${NOMI[p]}</b><span class="reg-tag" hidden title="Trasformazione o regolazioni attive">FX</span><span class="dove"></span>${p === 'esterna' ? '<span class="rete-stato"></span>' : ''}<span class="torna" hidden title="In mute per la pausa: torna on air al rientro">mute</span></div><div role="switch" tabindex="0" aria-checked="false" data-pezzo="${p}" title="On air / off"><div class="leva"></div></div></div>`
 $('#pz-onda').innerHTML = ONDA.map(riga).join('')
-$('#pz-scene').innerHTML = SCENE.map(riga).join('')
+// (le scene non sono righe con l'interruttore: sono tasti, come le pause)
+$('#pz-scene').innerHTML = `<div class="scene-t">${SCENE.map((p) => `<button data-pezzo="${p}" aria-pressed="false" title="${pulito(SCENE_DICE[p] ?? '')}"><i class="led" aria-hidden="true"></i><b>${pulito(NOMI[p] ?? p)}</b><small></small></button>`).join('')}</div>`
 $('#pz-rete').innerHTML = riga('esterna')
 $('#pz-pc').innerHTML = PC.map(riga).join('')
 $('#pz-cast').innerHTML = CAST.map(riga).join('')
+$('#scene-dock').innerHTML = SCENE.map((p) => `<button data-pezzo="${p}" aria-pressed="false" title="${pulito(SCENE_DICE[p] ?? '')}">${pulito(NOMI[p] ?? p)}</button>`).join('')
 // (i «torno subito» sono quelli di pezzi.js, nell'ordine suo: se ne arrivano di nuovi, compaiono da soli)
 const CORTI = { legna: 'Legna', pipi: 'Pipì', bere: 'Da bere', mangiare: 'Da mangiare', lattina: 'Una Red Bull', telefono: 'Al telefono', spacco: 'Spacco la legna', sistemo: 'Sistemo', riavvio: 'Riavvio il pc' }
 $('#via').insertAdjacentHTML('beforeend', VIA.map((p) => `<button data-pezzo="${p}" aria-pressed="false" title="${pulito(NOMI[p] ?? p)}">${pulito(CORTI[p] ?? NOMI[p] ?? p)}</button>`).join(''))
@@ -1230,6 +1246,11 @@ function applica(s) {
     r.querySelector('.reg-tag').hidden = !s.regola?.[p]
   }
   for (const b of document.querySelectorAll('#via button')) b.setAttribute('aria-pressed', !!s.attivi[b.dataset.pezzo])
+  for (const b of document.querySelectorAll('#scene-dock button')) b.setAttribute('aria-pressed', !!s.attivi[b.dataset.pezzo])
+  for (const b of document.querySelectorAll('#pz-scene button')) { const su = !!s.attivi[b.dataset.pezzo]; b.setAttribute('aria-pressed', su); b.querySelector('small').textContent = su ? 'in onda' : '' }
+  // una scena in onda: il monitor passa il mouse a lei (la mappa si gira da lì) e la riga di aiuto dice come
+  const inScena = SCENE.find((p) => s.attivi[p]) ?? null
+  if (inScena !== scenaInOnda) { scenaInOnda = inScena; $('#anteprima').classList.toggle('in-scena', !!inScena); aiuto(inScena ? SCENE_MANI[inScena] : undefined) }
   for (const b of document.querySelectorAll('[data-modo]')) b.setAttribute('aria-pressed', b.dataset.modo === s.lenteModo)
   for (const b of document.querySelectorAll('#meteo-prova button')) b.setAttribute('aria-pressed', (b.dataset.meteo || null) === s.meteoProva)
   $('#tutti-tasti').setAttribute('aria-checked', !!s.tastiTutti)
@@ -1338,7 +1359,7 @@ function forme() {
   const M = muriOra()
   tutte = []
   for (const [nome, v] of Object.entries(P)) {
-    if (!v.su || v.nascosto) continue
+    if (!v.su || v.nascosto || SCENE.includes(nome)) continue // (le scene non si spostano: sono a schermo intero)
     const q = M.pezzi?.[nome], m = q && M.pareti.find((x) => x.id === q.muro), pi = m && pianoDi(M, m)
     if (pi) {
       const G = matrice(pi, q, v.w, v.h), c = porta(G, v.w / 2, v.h / 2)
@@ -1706,7 +1727,7 @@ document.querySelector('.rail').addEventListener('click', (e) => {
 })
 function railMostra() {
   for (const c of document.querySelectorAll('.rail [data-conta]')) {
-    const n = document.querySelectorAll(`#${c.dataset.conta} .pezzo-r.su`).length
+    const n = document.querySelectorAll(`#${c.dataset.conta} .pezzo-r.su, #${c.dataset.conta} button[aria-pressed=true]`).length
     c.textContent = n || ''
   }
 }
@@ -1714,7 +1735,8 @@ $('#cerca').addEventListener('input', (e) => {
   const q = e.target.value.trim().toLowerCase()
   let visti = 0
   for (const r of document.querySelectorAll('#lista [data-riga]')) { r.hidden = !!q && !(NOMI[r.dataset.riga] ?? '').toLowerCase().includes(q); if (!r.hidden) visti++ }
-  for (const b of document.querySelectorAll('#lista .box')) { const vuota = !!q && !b.querySelector('.pezzo-r:not([hidden])'); b.hidden = vuota; b.previousElementSibling.hidden = vuota }
+  for (const b of document.querySelectorAll('#pz-scene button')) { b.hidden = !!q && !(NOMI[b.dataset.pezzo] ?? '').toLowerCase().includes(q); if (!b.hidden) visti++ }
+  for (const b of document.querySelectorAll('#lista .box')) { const vuota = !!q && !b.querySelector('.pezzo-r:not([hidden]), .scene-t button:not([hidden])'); b.hidden = vuota; b.previousElementSibling.hidden = vuota }
   $('#cerca-vuoto').hidden = visti > 0
 })
 $('#cerca').addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.target.value = ''; e.target.dispatchEvent(new Event('input')) } })
@@ -1958,7 +1980,7 @@ $('#tr-azzera').addEventListener('click', async (e) => {
 })
 
 // ══ zona 3 · controlli: una scheda alla volta (pausa, podcast, uscita tv); resta quella dell'ultima volta ══
-const DOCK = { pausa: 'Attiva una scena di pausa: le altre sorgenti vanno in mute e tornano on air al rientro', podcast: '', tv: 'Schermata mostrata dalla TV (sulla TV non si tocca niente)' }
+const DOCK = { scene: 'Una scena copre tutto lo schermo: premi di nuovo per toglierla. La mappa si gira col mouse dal monitor', pausa: 'Attiva una scena di pausa: le altre sorgenti vanno in mute e tornano on air al rientro', podcast: '', tv: 'Schermata mostrata dalla TV (sulla TV non si tocca niente)' }
 function dockScegli(k) {
   if (!(k in DOCK)) k = 'pausa'
   for (const b of document.querySelectorAll('[data-dock]')) b.setAttribute('aria-selected', b.dataset.dock === k)
@@ -1976,6 +1998,7 @@ function ondaMostra() {
   const n = Object.entries(stato.attivi).filter(([p, su]) => su && !VIA.includes(p)).length
   $('#conta-onair').textContent = `${n} on air`
   document.querySelector('[data-dock=pausa]').classList.toggle('viva', VIA.some((p) => stato.attivi[p]))
+  document.querySelector('[data-dock=scene]').classList.toggle('viva', SCENE.some((p) => stato.attivi[p]))
   document.querySelector('[data-dock=podcast]').classList.toggle('viva', !!stato.podcast && Cast.fase(stato.podcast) === 'onda')
 }
 

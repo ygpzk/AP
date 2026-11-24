@@ -3,6 +3,10 @@
    Tutto quello che si muove di continuo sta in transform/opacity; le foto del montaggio sono due livelli
    che si scambiano. Le animazioni le fa girare giro.js, e si fermano da sole quando il pezzo è spento. */
 
+/* ── la tela di una scena: sempre 1920 × 1080, opaca (scene.js ci mette dentro la scena quando si accende) ── */
+.sc { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #0b090e; }
+.sc > * { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+
 /* ── Dove vivo: mappa SVG nativa, OSM + texture ───────────────────────────── */
 .dv { position: relative; width: 800px; height: 500px; transition: --notte .8s; }
 .dv-scena { position: relative; width: 800px; height: 500px; }
@@ -257,6 +261,12 @@
 .sf-noi img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: 50% 100%; transform: scale(1.08); }
 .sf-noi span.cambia { animation: sf-noi-pop .28s var(--molla); }
 @keyframes sf-noi-pop { 40% { transform: scale(.88); } 100% { transform: none; } }
+
+/* a schermo intero (scene/surf/surf.js): la foto riempie la tela, il medaglione sta nell'angolo, più grande */
+.sf.piena { width: 1920px; height: 1080px; }
+.sf.piena .sf-mappa { width: 1920px; height: 1080px; filter: none; }
+.sf.piena .sf-mondo { transform-origin: 50% 56%; }
+.sf.piena .sf-noi { right: 64px; bottom: 56px; transform: rotate(3deg) scale(1.7); transform-origin: 100% 100%; }
 
 /* ── il risparmio GPU e chi non vuole animazioni ──────────────────────────── */
 .niente-gpu .dv-mappa, .niente-gpu .sf-mappa, .niente-gpu .dv-bussola, .niente-gpu .az-sole, .niente-gpu .az-bordo { filter: none; }

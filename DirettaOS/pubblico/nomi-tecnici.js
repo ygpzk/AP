@@ -31,9 +31,9 @@ export const TECNICI = {
   argomento: 'Podcast · estrazione argomento',
   fine: 'Podcast · titoli di coda',
   // scene
-  dovevivo: 'Scena · mappa',
-  azienda: 'Scena · slideshow azienda',
-  surf: 'Scena · illustrazione surf',
+  dovevivo: 'Mappa 3D · dove vivo',
+  azienda: 'Sito · azienda',
+  surf: 'Illustrazione · surf',
   // pause (BRB)
   legna: 'Pausa · stufa',
   pipi: 'Pausa · bagno',
@@ -74,7 +74,7 @@ export const DESCR = {
   wifi: 'Throughput in download (speedtest periodico), in Mbps.',
   argomento: 'Rullo di estrazione dell’argomento e timer dell’argomento corrente.',
   fine: 'Chiusura puntata: saluti e titoli di coda, a centro frame.',
-  dovevivo: 'Mappa nativa in SVG da OpenStreetMap, con bussola corretta, meteo e ora; trattore e ufficio sono gli unici ritagli Replicate.',
-  azienda: 'Slideshow in loop di 9 foto con zoom e crossfade.',
-  surf: 'Illustrazione animata; medaglione che alterna le espressioni ogni 4 s.',
+  dovevivo: 'Mappa 3D a schermo intero: confini e fabbricati veri, campagna da OpenStreetMap; si naviga dal monitor.',
+  azienda: 'Sito a schermo intero che si visita da solo, con le scritte grandi; si può scorrere dal monitor.',
+  surf: 'Illustrazione animata a schermo intero; medaglione che alterna le espressioni ogni 4 s.',
 }
