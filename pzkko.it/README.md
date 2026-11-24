@@ -81,8 +81,8 @@ media in `public/media/ig/`; chi guarda non inserisce mai un account e il
 browser non parla con Instagram.
 
 Il raccoglitore gira sul pc, fuori dal repository
-(`%USERPROFILE%\Collegamenti\Instagram\raccogli.py`), con la sessione già
-salvata da `accedi.py`. La regola dei tempi è pensata per non pesare
+(`%USERPROFILE%\Collegamenti\Instagram\raccogli.py`), con le sessioni già
+salvate da `accedi.py`. La regola dei tempi è pensata per non pesare
 sull'account:
 
 - **follower sempre, ma leggeri.** Ogni ora una sola chiamata `user_info`
@@ -98,9 +98,13 @@ sull'account:
 
 Il task di Windows `pzkko-instagram` batte ogni 30 minuti, ma è lo script a
 decidere se vale la pena chiamare Instagram. Il task si registra con
-`installa-attivita.ps1` nella stessa cartella. I profili sono l'account
-personale e `@pzkko`, seguiti dalla stessa sessione: non serve una seconda
-password.
+`installa-attivita.ps1` nella stessa cartella. I due profili hanno **due
+sessioni separate**: `sessione.json` per l'account personale e
+`sessione-pzkko.json` per `@pzkko`. Il raccoglitore usa ciascuna solo per il
+suo account, quindi l'account personale non porta il peso di `@pzkko`. Se una
+sessione scade, si rilancia `accedi-instagram.cmd` o `accedi-pzkko.cmd`; se
+Instagram rifiuta il login via API, `accedi-pzkko-browser.cmd` apre Edge e
+salva la sessione dal browser.
 
 Le foto sono convertite in WebP alla stessa risoluzione dell'originale; i
 video restano MP4. Le storie attive spariscono da sole dopo 24 ore. Per un giro
