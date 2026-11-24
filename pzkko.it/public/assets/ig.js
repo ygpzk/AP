@@ -118,7 +118,7 @@ let richiesta = null
 async function dati(forza = false) {
   if (!forza && cache && Date.now() - cacheAt < 60_000) return cache
   if (!forza && richiesta) return richiesta
-  richiesta = fetch('/media/ig/index.json', { cache: 'no-store' })
+  richiesta = fetch(`/media/ig/index.json?v=${Date.now()}`, { cache: 'no-store' })
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`)
       return r.json()
