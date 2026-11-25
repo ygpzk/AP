@@ -62,7 +62,7 @@ function premi(nome) {
   if (!aperta) return
   if (nome === 'chiudi') return chiudi()
   if (nome === 'ok') os.tasto('ok')
-  else if (nome === 'indietro') { if (os.scrivendo()) os.cancella(); else if (!os.tasto('indietro')) chiudi() }
+  else if (nome === 'indietro') { if (!os.tasto('indietro')) chiudi() } // (il tondo è INDIETRO, non Backspace: nell'editor di codice C cancellare il testo non deve impedire di uscire)
   else os.tasto(nome)
 }
 

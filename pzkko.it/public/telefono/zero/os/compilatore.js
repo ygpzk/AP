@@ -22,7 +22,7 @@ import { txt, corto, destra, centro, testata, striscia, elenco, muovi } from './
 const salva = () => ricorda('compilatore', S)
 for (const k of ['codice', 'input']) if (typeof S[k] !== 'string') S[k] = String(S[k] ?? '') // (11.11: un ricordo rovinato, null, rompeva split a ogni disegno)
 S.codice = S.codice.replace(/\r\n?/g, '\n').replace(/\t/g, '    ') // (11.11: un codice incollato coi tab nell'editor vecchio: il tab si disegnava largo quattro e contava uno, il cursore finiva fuori posto e su un «?»)
-let ultimo = null, inCorso = false // l'ultima esecuzione (come l'app vecchia: si perde chiudendo la pagina)
+let ultimo = null, ultimoCodice = null, inCorso = false // l'ultima esecuzione e il codice con cui è stata fatta (come l'app vecchia: si perde chiudendo la pagina)
 const VIS = 9, COL = 36 // le righe e le colonne di codice che si vedono
 
 /** Un testo lungo a pezzi di n caratteri (il codice e l'output non si vanno a capo sulle parole: si tagliano). 37 e non 39:
@@ -106,7 +106,11 @@ function vistaOutput(os) {
     if (u.rete) return Lcd.acapo(txt(u.testo), 37).map((s) => ({ s, fascia: 'avv' })) // (11.11: è una frase, a capo sulle parole; a pezzi diceva «sei off» e sotto «line?»)
     const s = (u.ms / 1000).toLocaleString('it-IT', { maximumFractionDigits: 1 })
     if (u.messaggi) { // (le righe del compilatore: «error:» e «warning:» sulla fascia, le altre col filo del blocco a cui stanno)
-      const M = String(u.messaggi).split('\n'), tipo = (r) => (/\berror:/.test(r) ? 'err' : /\bwarning:/.test(r) ? 'avv' : null)
+      // (solo una vera riga di diagnosi: un pezzo di codice citato che contiene «error:» non è un errore)
+      const M = String(u.messaggi).split('\n'), tipo = (r) => {
+        const m = /^(?:[^\s:]+:\d+(?::\d+)?:\s*)?(?:fatal\s+)?(error|warning):/.exec(r) || /^(?:\S*\/)?(?:collect2|cc1|cc1plus|ld|as):\s*(?:fatal\s+)?(error|warning):/.exec(r)
+        return m ? (m[1] === 'error' ? 'err' : 'avv') : null
+      }
       const T = M.map(tipo), primo = T.find(Boolean) ?? (u.compilato ? 'avv' : 'err') // («In function 'main':» sta prima del suo errore: prende quello che viene dopo)
       let blocco = primo
       M.forEach((r, i) => { if (T[i]) blocco = T[i]; metti(aPezzi(r), T[i] ? { fascia: T[i], filo: T[i] } : { filo: blocco }) })
@@ -157,7 +161,8 @@ async function esegui(os) {
   if (inCorso) return // (niente due compilazioni insieme)
   inCorso = true; ultimo = null
   os.ridisegna()
-  try { ultimo = await compila(S.codice, S.input) } finally { inCorso = false }
+  const codice = S.codice, input = S.input
+  try { ultimo = await compila(codice, input); ultimoCodice = codice } finally { inCorso = false } // (se nel frattempo si cambia il codice, gli errori non si segnano sulle righe nuove)
   if (os.corrente()?.app === 'compilatore') os.suoni.bip(ultimo?.compilato ? 'pager' : 'pagerGiu') // (11.11: finito con l'app chiusa, suonava dentro un'altra app o a cercapersone chiuso)
   os.ridisegna()
 }
@@ -170,7 +175,15 @@ export function vista(os) {
   /** Le cifre dei numeri di riga oltre due (dalla riga 100 il separatore e il codice vanno più a destra, una colonna in meno). */
   const piu = () => Math.max(0, String(righe().length).length - 2)
   /** Il cursore dentro il codice e la finestra che lo mostra: dopo ogni tasto e ogni modifica (disegna non cambia lo stato). */
-  function segui() { tieni(); const col = COL - piu(); if (r < top) top = r; if (r >= top + VIS) top = r - VIS + 1; if (c < sx) sx = c; if (c >= sx + col) sx = c - col + 1 }
+  function segui() {
+    tieni()
+    const col = COL - piu(), L = righe()
+    if (r < top) top = r
+    if (r >= top + VIS) top = r - VIS + 1
+    if (c < sx) sx = c
+    if (c >= sx + col) sx = c - col + 1
+    sx = Math.min(sx, Math.max(0, L[r].length - col + 1)) // (su una riga corta non resta lo scorrimento di quella lunga: il testo si vede da capo)
+  }
   function scrivi(ch) {
     tieni()
     const L = righe(), riga = L[r]
@@ -194,10 +207,11 @@ export function vista(os) {
     else if (r > 0) { c = L[r - 1].length; L[r - 1] += L[r]; L.splice(r, 1); r-- }
     metti(L); segui()
   }
-  const grave = (e) => (e.severity ?? 3) >= 3 || /error/.test(e.text ?? '')
-  const erroriRiga = () => new Set((ultimo?.errori ?? []).filter(grave).map((e) => e.line))
+  const grave = (e) => (e.severity ?? 0) >= 3 || /^(?:[^\s:]+:\d+(?::\d+)?:\s*)?(?:fatal\s+)?error:/.test(e.text ?? '') // (non «error» dentro un nome: «unused variable 'error'» è un avviso)
+  const diagnostica = () => (S.codice === ultimoCodice ? ultimo?.errori ?? [] : [])
+  const erroriRiga = () => new Set(diagnostica().filter(grave).map((e) => e.line))
   /** Le righe con un avviso e nessun errore (11.11: la fascia gialla; prima a un bit si vedevano solo gli errori). */
-  const avvisiRiga = () => new Set((ultimo?.errori ?? []).filter((e) => !grave(e) && (e.severity === 2 || /warning/.test(e.text ?? ''))).map((e) => e.line))
+  const avvisiRiga = () => new Set(diagnostica().filter((e) => !grave(e) && (e.severity === 2 || /^(?:[^\s:]+:\d+(?::\d+)?:\s*)?(?:fatal\s+)?warning:/.test(e.text ?? ''))).map((e) => e.line))
 
   const menu = () => lista(os, {
     titolo: 'codice C: cosa fai', icona: 'app-compilatore',
@@ -256,7 +270,8 @@ export function vista(os) {
       const L = righe(), E = erroriRiga(), A = avvisiRiga(), p = piu(), col = COL - p, xc = 26 + p * 6
       const K = colori(L.map((x) => x.replace(/\t/g, '    '))), T = tinte(l)
       const rr = Math.max(0, Math.min(r, L.length - 1)), cc = Math.max(0, Math.min(c, L[rr].length))
-      const tp = Math.min(Math.max(top, rr - VIS + 1), rr), s0 = Math.min(Math.max(sx, cc - col + 1), cc)
+      const tp = Math.max(0, Math.min(Math.max(top, rr - VIS + 1), rr, Math.max(0, L.length - VIS)))
+      const s0 = Math.max(0, Math.min(Math.max(sx, cc - col + 1), cc, Math.max(0, L[rr].length - col + 1)))
       testata(l, os, { icona: 'app-compilatore', nome: 'codice C', n: 1 })
       destra(l, 245, 18, `${rr + 1}:${cc + 1}`)
       for (let i = 0; i < VIS && tp + i < L.length; i++) {

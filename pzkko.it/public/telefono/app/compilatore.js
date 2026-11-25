@@ -34,15 +34,21 @@ async function conTempo(url, corpo, ms = 25000) {
 }
 async function godbolt(codice, input) {
   const j = await conTempo(GODBOLT, { source: codice, lang: 'c', options: { userArguments: OPZIONI.join(' '), executeParameters: { args: [], stdin: input }, compilerOptions: { executorRequest: true }, filters: { execute: true } } })
-  const righe = (a) => (a ?? []).map((x) => pulisci(x.text)).join('\n'), b = j.buildResult ?? {}
+  const b = j.buildResult
+  if (!b || typeof b.code !== 'number') throw new Error('Compiler Explorer non ha restituito la compilazione') // (un 200 con un errore del servizio: si prova Wandbox)
+  const righe = (a) => (a ?? []).map((x) => pulisci(x.text)).join('\n')
   return { compilato: b.code === 0, messaggi: righe(b.stderr), errori: (b.stderr ?? []).filter((x) => x.tag).map((x) => x.tag), out: righe(j.stdout), err: righe(j.stderr), codice: j.didExecute ? j.code : null, dove: 'GCC 14.2 · Compiler Explorer' }
 }
 async function wandbox(codice, input) {
   const j = await conTempo(WANDBOX, { compiler: 'gcc-head-c', code: codice, stdin: input, options: 'warning', 'compiler-option-raw': OPZIONI.filter((o) => o !== '-Wall').join('\n'), save: false }, 40000)
   const messaggi = pulisci(j.compiler_error ?? j.compiler_message ?? '')
-  const errori = [...messaggi.matchAll(/main\.c:(\d+):(\d+): (error|warning): (.*)/g)].map(([, l, c, s, t]) => ({ line: +l, column: +c, text: `${s}: ${t}`, severity: s === 'error' ? 3 : 2 }))
-  const compilato = !errori.some((e) => e.severity === 3) && j.status !== undefined
-  return { compilato, messaggi, errori, out: j.program_output ?? '', err: pulisci(j.program_error ?? ''), codice: compilato ? Number(j.status) : null, dove: 'GCC · Wandbox' }
+  const errori = [...messaggi.matchAll(/^main\.c:(\d+):(\d+): (error|warning): (.*)$/gm)].map(([, l, c, s, t]) => ({ line: +l, column: +c, text: `${s}: ${t}`, severity: s === 'error' ? 3 : 2 }))
+  // (un errore del linker non ha «main.c:riga:colonna: error:»: senza questa riga il codice d'uscita 1
+  //  del programma diventava «compilato» e l'errore si vedeva come un avviso giallo)
+  const fatale = /(^|\n)\s*[^\s:]+:\d+(?::\d+)?:\s*(?:fatal\s+)?error:/.test(messaggi) || /(^|\n)\s*(?:\S*\/)?(?:collect2|cc1|cc1plus|ld|as):\s*(?:fatal\s+)?error:/.test(messaggi)
+  const compilato = !fatale && !errori.some((e) => e.severity === 3)
+  const uscita = compilato && j.status != null && j.status !== '' ? Number(j.status) : null
+  return { compilato, messaggi, errori, out: j.program_output ?? '', err: pulisci(j.program_error ?? ''), codice: Number.isFinite(uscita) ? uscita : null, dove: 'GCC · Wandbox' }
 }
 /** Compila ed esegue: GCC su Compiler Explorer, se non risponde Wandbox. → { compilato, messaggi, errori, out, err, codice, dove, ms }
  *  o { rete: true, testo, ms } se nessuno dei due risponde. */
