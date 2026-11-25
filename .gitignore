@@ -1,0 +1,18 @@
+# ── Archivio personale (fuori dal repo) ──────────────────────────────────────
+# L'archivio non sta nel repository: vive su D:. Mappa completa e regole di
+# salvataggio: D:\LEGGIMI.md
+#
+# D:\pecchini        famiglia e società (01 Cascina Fontana, 02 Famiglia,
+#                    03 Casa/terreni/successioni, 04 Veicoli, 05 Lavoro Primo,
+#                    06 Claude)
+# D:\a               personale di Alberto (scuola, website, documenti personali,
+#                    pc, claude, eventi, amici, musica…)
+# D:\disco documenti da smistare + MUSICA + FONT + REGISTRI PULIZIA
+# D:\disco immagini  Rullino (anno/mese) + rullino con etichetta (eventi/fonti)
+# D:\pzkko-server    dati vivi di pzkko.it (non è archivio)
+#
+# La copia locale della mappa serve agli agenti e non va pubblicata.
+/ARCHIVIO-D.local.md
+
+# Etichette di servizio con IP, nomi e hostname della rete di casa.
+/etichette/
