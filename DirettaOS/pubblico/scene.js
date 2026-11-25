@@ -3,7 +3,7 @@
 // Hanno lo stesso nome in regia, in onda e nell'indirizzo (/o/dovevivo, /o/azienda, /o/surf).
 //
 // Qui c'è solo il padrone di casa: ogni scena sta nella sua cartella e si carica la prima volta che si accende
-// (la mappa si porta dietro three.js: chi non la guarda non lo scarica). Il contratto è lo stesso per tutte:
+// (la casa in 3D si porta dietro Babylon.js: chi non la guarda non lo scarica). Il contratto è lo stesso per tutte:
 //
 //   export function crea(ctx) → { el, mostra(su), giro(dt, t), aggiorna(stato), comando(v) }
 //

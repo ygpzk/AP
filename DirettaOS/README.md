@@ -139,7 +139,7 @@ I **nomi** in regia sono tecnici (`pubblico/nomi-tecnici.js`: «Nametag · head 
 | `/o/bandiera` | una bandiera di stoffa appesa al muro dietro con lo scotch, con la luce vera della stanza: la scegli dal catalogo nella sua scheda (vedi «La bandiera») |
 | `/o/cavi` | la zona cavi: una macchia scura e sfocata presa dalla foto della stanza, da mettere dietro ai monitor (vedi «La zona cavi») |
 | `/o/esterna` | la webcam di un portatile sulla stessa wifi, dentro una finestra (vedi «La vista esterna») |
-| `/o/dovevivo` | «Dove vivo»: la mappa SVG nativa costruita da OpenStreetMap, senza indirizzi, con la bussola giusta, il meteo vero, l’ora, le luci e il trattore (vedi «Le scene nuove») |
+| `/o/dovevivo` | «Dove vivo»: la casa in 3D (Babylon.js), rifatta dalle foto, con il sole, la luna, la stagione e il meteo veri, senza indirizzi (vedi «Dove vivo in 3D») |
 | `/o/azienda` | «Azienda di Giugnoh»: il montaggio in loop delle foto dell’azienda di famiglia, con zoom e crossfade. Il nome vero e il link non compaiono mai |
 | `/o/surf` | «Surf con lei»: il tramonto, l’onda, il longboard e noi due; il medaglione delle espressioni cambia ogni quattro secondi |
 | `/o/legna`, `/o/pipi`, `/o/bere`, `/o/mangiare`, `/o/sistemo` | «torno subito»: le scritte in alto col tempo che passa, e sotto una scena dal vivo che copre tutta la webcam (vedi «Le scene dei torno subito») |
@@ -305,15 +305,9 @@ In regia c’è una sezione **Scene**, con lo stesso nome che hanno in onda e ne
 sezione dei componenti e si accende da solo, come gli altri pezzi del pc; è grande anche lui, quindi **scene e
 resoconto si escludono**: accendere uno spegne l'altro.
 
-- **Dove vivo**: la mappa è **SVG nativo**, costruita dalle geometrie di **OpenStreetMap** (ODbL) e disegnata a
-  mano con texture di erba, terra, ghiaia, acqua, coppi, alberi e orti. Non è un’immagine AI: il trattore e la
-  stanza dell’ufficio sono i due soli oggetti generati con Replicate, come chiesto. Ci sono la casa col fienile
-  fotovoltaico, la fontana vera con zampilli e airone, il canale, gli alberi, i campi, il vialetto e l’ufficio
-  nella falda più alta a nord-ovest (lontano dalla fontana e dai pannelli). La bussola ha il **nord in alto** ed è
-  ferma; il **meteo vero** di Open-Meteo e l’**ora** sono sopra la mappa, senza nome del luogo. Le luci cambiano
-  con l’ora (giorno, tramonto, sera, notte con lampade e finestre accese) e il meteo accende pioggia, neve,
-  nebbia e vento. La piccola attribuzione «© OpenStreetMap contributors» sta **dentro la cornice**, in basso al
-  centro; sotto 1× spariscono la riga secondaria del meteo e l’etichetta dell’ufficio, così la mappa resta pulita.
+- **Dove vivo**: la casa in 3D, rifatta da capo il 25 novembre 2026 con **Babylon.js** al posto di three.js e con
+  gli edifici presi dalle foto del cantiere (vedi «Dove vivo in 3D», qui sotto). La mappa SVG del 23 e la prima
+  versione three.js del 24 non ci sono più: le copie stanno in `copie/dove-three-prima-babylon-2026-11-25/`.
 - **Azienda di Giugnoh**: nove foto dell’azienda di famiglia, nove schede da 3–4 secondi, zoom e crossfade in loop;
   il nome vero dell’azienda e il link **non compaiono mai**. La card finale chiude su «Azienda di Giugnoh · dal 2007 ·
   in pianura». Le foto sono quelle vere del sito, tenute a 1200 px per non pesare; la grafica della card e il
@@ -332,8 +326,8 @@ resoconto si escludono**: accendere uno spegne l'altro.
 
 File: `pubblico/scene.js` (disegno e animazione), `pubblico/scene.css`, `pubblico/scene-nomi.js` (nomi e posti),
 `pubblico/scene/dove-osm.js` (solo geometrie OSM: nessun nome, indirizzo o operatore), `riferimenti/osm/mappa.osm`
-(l’estratto OSM grezzo da cui sono nate le geometrie), `pubblico/scene/dove-mappa.js`
-(la mappa SVG nativa, le texture, le luci e l’ufficio), `pubblico/scene/` (surf, nove foto dell’azienda, gli otto
+(l’estratto OSM grezzo da cui sono nate le geometrie), `pubblico/scene/dove/` (la casa in 3D, vedi sotto),
+`pubblico/scene/` (surf, nove foto dell’azienda, gli otto
 ritratti delle espressioni, `trattore.webp` e `ufficio.webp` fatti con Replicate),
 `riferimenti/claude-lavoro/` (brief, scelte, revisione e originali di Claude). Il resoconto del PC sta in
 `pubblico/pc.js` (`creaQuadro`), le foto in `pubblico/scene/pc/`, il componente vero in `macchina-info.ps1`
@@ -345,6 +339,54 @@ numero civico né marca della macchina, raggi del surf tolti, quadro con i nomi 
 più piccole a 1,0×, cuori e medaglione con le espressioni che si alternano, cornice a mano anche per
 l’azienda. La mappa di «Dove vivo» è stata poi rifatta in SVG nativo da OpenStreetMap, quindi le note
 grafiche della prima revisione sulla vecchia mappa non valgono più.
+
+## Dove vivo in 3D (25 novembre 2026)
+
+Alberto ha chiesto di rifare la scena 3D «completamente, con un programma diverso per disegnare», e ha passato sette
+foto del cantiere (`D:\disco immagini\rullino con etichetta\HPIM M417\HPIM09F93 (22–28).JPG`). Il programma nuovo è
+**Babylon.js 9.37** (Apache-2.0): un pacchetto su misura di 2,2 MB in `pubblico/scene/lib/babylon/babylon.js`, fatto
+con esbuild prendendo solo i pezzi che servono (niente WebGPU), più earcut (ISC) per i muri con le aperture. three.js è
+stato tolto: non lo usava nient'altro.
+
+- **Gli edifici, dalle foto**: cemento a vista grigio con le riprese dei pannelli, pilastri e davanzali in mattoni,
+  coppi, persiane verde scuro, modiglioni sotto le gronde, gronde e pluviali marrone scuro. Il corpo centrale ha
+  davanti il **portico a tutta altezza** (tre archi sul fronte e uno per lato, pilastri d'angolo in mattoni fino
+  all'imposta, pavimento in cotto, la **scala di ferro** che sale al pianerottolo), dietro due piani con il portone;
+  il **comignolo** in mattoni sul timpano est. L'ala ovest ha due piani e i pilastri d'angolo in mattoni, con il
+  **pergolato** e la vite sul lato corto; l'ala est è bassa, con la porta ad arco. Il **capannone** ha le lunette ad
+  arco, il grande arco verso la casa e **24 pannelli** sulla falda a sud; accanto c'è il casotto. Le sagome sono
+  quelle del rilievo (`dati.js`), le altezze e le aperture sono lette dalle foto.
+- **Fuori**: la **piscina** rialzata col bordo in cotto, l'acqua azzurra, due getti e due aironi; le reti con i pali,
+  il **cancello** a lance in fondo al viale, il **Landini** grigio con le ruote arancioni, i vasi di cotto.
+- **Il verde, con la stagione vera**: platani del viale (corteccia chiara a chiazze), gelsi capitozzati a file sul
+  prato, pioppi cipressini lungo i campi, alberelli a filari nel bosco nuovo, siepi lungo le reti. Rami veri e foglie a
+  ciuffi: quante ne restano e di che colore dipende dal giorno dell'anno (a fine novembre i platani sono gialli e mezzi
+  spogli, i pioppi quasi nudi, le siepi verdi; d'inverno solo rami). Le foglie cadute stanno sul prato.
+- **La luce vera**: il sole e la luna (con la fase) per l'ora vera, ombre morbide, occlusione ambientale, cielo con le
+  nuvole che vanno col vento e si chiudono col coperto, stelle, foschia della bassa. Il **meteo** del server accende
+  pioggia, neve, nebbia e lampi. La sera si accendono le finestre e le lanterne accanto alle porte.
+- **Il terreno**: una mappa dipinta in canvas (prato rasato a strisce, ghiaia del cortile e del viale, campi arati a
+  novembre, strade bianche, fossi con l'acqua che specchia il cielo) e oltre la campagna fino a 3 km, a campi lunghi,
+  con i filari lontani. Nessun dato geografico: tutto è in metri locali, la latitudine generica sta in `luce.js`.
+- **Comandi e regia**: come prima (trascina = sposta, destro o Ctrl = ruota, rotella = zoom, doppio clic = vola lì,
+  frecce, `N` o la bussola = nord in alto). La camera si scambia con la regia nello stesso formato di prima
+  (`{ c: [x, y, distanza, rotta, inclinazione] }`), quindi la posizione salvata vale ancora; adesso si può scendere
+  fino a 6° e vedere l'orizzonte. Dopo 20 s fermi parte la visita guidata (portico, piscina, pergolato, retro, viale,
+  capannone, dall'alto).
+- **Il peso**: la prima accensione dipinge le texture e costruisce tutto in circa 1,5 s (la tela compare quando è
+  pronta), le volte dopo in 0,7 s. In prova: 60 fotogrammi al secondo, 2,5 ms di processore a fotogramma,
+  ~480 000 triangoli. Le ombre si calcolano solo quando il sole si sposta (ogni 20 s). Spenta da un minuto, la scena
+  butta via il contesto WebGL e libera la scheda video. Con «risparmio GPU» (`niente-gpu`) niente ombre, niente
+  occlusione e niente MSAA. Senza WebGL resta la pianta del lotto in SVG.
+
+File, tutti in `pubblico/scene/dove/`: `dove.js` (il modulo della scena: motore, materiali, luci, resa, comandi,
+visita), `luce.js` (sole, luna, stagione, tavolozza), `tele.js` (le texture dipinte in canvas), `geo.js` (muri con
+aperture, tetti, tubi), `edifici.js` (casa e capannone), `esterni.js` (piscina, pergolato, reti, cancello, trattore),
+`verde.js` (alberi e siepi), `terra.js` (terreno vicino e lontano), `cielo.js` (la cupola), `dati.js` (il rilievo).
+**Per provarla**: `/scene/prova.html?scena=dovevivo&vista=portico&ora=17:30&meteo=pioggia&tour=0` (viste: `tre`,
+`alto`, `portico`, `casa`, `retro`, `fontana`, `pergolato`, `capannone`, `viale`, `campi`, `orizzonte`; `tour=1` fa
+partire subito la visita; `nogl` mostra il ripiego). Il pacchetto si rifà con esbuild da un elenco di import di
+`@babylonjs/core` (vedi la riga in cima a `babylon.js`).
 
 ## La vista esterna: la webcam di un portatile, in wifi
 

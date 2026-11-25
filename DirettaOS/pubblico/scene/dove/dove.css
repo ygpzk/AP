@@ -1,4 +1,4 @@
-/* «Dove vivo»: solo la bussola, la riga ora/temperatura e l'attribuzione OSM.
+/* «Dove vivo» (Babylon.js, 25 nov 2026): solo la bussola, la riga ora/temperatura e l'attribuzione OSM.
    Tutto galleggia con contorno scuro, niente riquadri: i colori sono quelli di Diretta OS. */
 .dvw {
   position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
@@ -9,7 +9,9 @@
 .dvw.dvw-accesa { opacity: 1; visibility: visible; transition: opacity .35s ease, visibility 0s; }
 .dvw.dvw-interagito { cursor: grab; }
 .dvw.dvw-trascina { cursor: grabbing; }
-.dvw-tela { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; display: block; z-index: 0; }
+.dvw-tela { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; display: block; z-index: 0; opacity: 0; transition: opacity .6s ease; outline: none; }
+/* la tela compare quando il mondo è pronto (la prima volta ci vuole un secondo: si dipingono le texture) */
+.dvw.dvw-pronta .dvw-tela { opacity: 1; }
 /* una vignettatura appena accennata: chiude i bordi senza scurire il centro */
 .dvw::after {
   content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
