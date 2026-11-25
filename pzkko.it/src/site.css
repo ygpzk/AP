@@ -1132,3 +1132,19 @@ span.igc__srv { cursor: default; }
   .igc__osso { animation: none; }
   .igv__bg, .igv__panel { animation: none; }
 }
+
+/* ─── la vetrina (25.11): dove è pzkko e le app aperte sul suo pc, nel riquadro «adesso» ─── */
+.luogo { display: inline-flex; align-items: center; gap: 5px; font-weight: 500; color: var(--muted); }
+.luogo::before { content: "·"; margin-right: 3px; }
+.luogo svg { flex: 0 0 auto; }
+.luogo[data-luogo="ufficio"] svg { color: var(--ok); }
+.pcapp { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.status-line + .pcapp { margin-top: 4px; padding-top: 0; border-top: 0; }
+.pcapp .widget__h { margin-bottom: 8px; }
+.pcapp__row { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.pcapp__i { position: relative; width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: var(--box-2); outline: none; }
+.pcapp__i img { width: 28px; height: 28px; object-fit: contain; }
+.pcapp__i b { font-size: 16px; font-weight: 700; color: var(--muted); }
+.pcapp__i.is-su::before { content: ""; position: absolute; right: -3px; bottom: -3px; width: 12px; height: 12px; border-radius: 50%; background: var(--ok); border: 3px solid var(--ring); }
+.pcapp__i:hover::after, .pcapp__i:focus::after { content: attr(data-n); position: absolute; bottom: calc(100% + 6px); left: 50%; translate: -50% 0; z-index: 5; padding: 4px 8px; border-radius: 6px; background: #111214; color: #fff; font-size: 12px; font-weight: 600; white-space: nowrap; pointer-events: none; }
+.pcapp__i:focus-visible { box-shadow: 0 0 0 2px var(--tint); }

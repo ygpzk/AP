@@ -1,13 +1,15 @@
 // pzkko.it: il profilo di Discord, dal vivo. Lanyard dà avatar, decorazione, stato,
-// Spotify, giochi, stato personalizzato e stile del nome; il profilo pubblico (dstn) dà
+// giochi, stato personalizzato e stile del nome; il profilo pubblico (dstn) dà
 // banner, tema, bio, badge, collegamenti e gli oggetti da collezione; Discord dà la
-// cornice e l'effetto veri. Niente librerie.
+// cornice e l'effetto veri. La musica (il suo Spotify, non quello di Lanyard), le app
+// aperte sul pc e dove è arrivano dalla vetrina (vetrina.js). Niente librerie.
 
 import { CONFIG, COLLECTIBLES, NAME_FONTS, SOCIALS, PERSONAL_SOCIALS, PROJECTS, TOOLS, LANGS } from './config.js'
 import { I18N, LINGUE, caricaLingua } from './i18n.js'
 import { ICONS } from './icons.js'
 import { MEDIA } from './media.js'
 import { mountFrame, mountParallax, mountEffect } from './fx.js'
+import { ascolta as ascoltaVetrina, vetrina, immagine } from './vetrina.js'
 
 const $ = (s, r = document) => r.querySelector(s)
 const $$ = (s, r = document) => [...r.querySelectorAll(s)]
@@ -357,12 +359,41 @@ function bar(start, end, now) {
   const total = Math.max(0, end - start), done = Math.min(total, Math.max(0, now - start)), pct = total ? (done / total) * 100 : 0
   return `<div class="bar-t"><span>${clock(done)}</span><div class="bar-t__track"><div class="bar-t__fill" style="width:${pct.toFixed(1)}%"></div></div><span>${clock(total)}</span></div>`
 }
-function spotifyHtml(s, now) {
-  const link = s.track_id ? `https://open.spotify.com/track/${encodeURIComponent(s.track_id)}` : null
-  return `<div class="act"><div class="act__art"><img src="${esc(s.album_art_url)}" alt="" draggable="false"></div><div class="act__lines">
-      <b>${link ? `<a href="${link}" target="_blank" rel="noopener noreferrer">${esc(s.song)}</a>` : esc(s.song)}</b>
-      <span class="act__muted">${esc(ui().by)} ${esc(s.artist)}</span><span class="act__muted">${esc(ui().on)} ${esc(s.album)}</span></div></div>
-    ${s.timestamps?.start && s.timestamps?.end ? bar(s.timestamps.start, s.timestamps.end, now) : ''}`
+// (25.11) la musica viene dalla vetrina, cioè dal suo Spotify: quella di Lanyard (presence.spotify) non si usa più
+function musicaHtml(m, now) {
+  const link = `https://open.spotify.com/search/${encodeURIComponent(`${m.artista} ${m.titolo}`)}`
+  const art = m.img ? `<img src="${esc(immagine(m.img))}" alt="" draggable="false">` : `<span class="act__ph">${brand('spotify', { light: '169c46' })}</span>`
+  return `<div class="act"><div class="act__art">${art}</div><div class="act__lines">
+      <b><a href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(m.titolo)}</a></b>
+      <span class="act__muted">${esc(ui().by)} ${esc(m.artista)}</span>${m.album ? `<span class="act__muted">${esc(ui().on)} ${esc(m.album)}</span>` : ''}</div></div>
+    ${m.inizio && m.fine ? bar(m.inizio, m.fine, now) : ''}`
+}
+// le scritte della vetrina: non hanno una voce nei nove file i18n, come la Community
+const VTX = {
+  it: { app: 'Aperte sul PC', luogo: { ufficio: 'in ufficio', giro: 'in giro per il mondo' } },
+  en: { app: 'Open on my PC', luogo: { ufficio: 'at the office', giro: 'somewhere in the world' } },
+  es: { app: 'Abiertas en el PC', luogo: { ufficio: 'en la oficina', giro: 'por el mundo' } },
+  fr: { app: 'Ouvertes sur le PC', luogo: { ufficio: 'au bureau', giro: 'quelque part dans le monde' } },
+  de: { app: 'Offen am PC', luogo: { ufficio: 'im Büro', giro: 'irgendwo auf der Welt' } },
+  pt: { app: 'Abertas no PC', luogo: { ufficio: 'no escritório', giro: 'pelo mundo fora' } },
+  ru: { app: 'Открыто на ПК', luogo: { ufficio: 'в офисе', giro: 'где-то в мире' } },
+  ja: { app: 'PCで開いているアプリ', luogo: { ufficio: 'オフィスにいます', giro: '世界のどこか' } },
+  zh: { app: '电脑上打开的应用', luogo: { ufficio: '在办公室', giro: '在世界某处' } },
+}
+const vtx = () => VTX[lang] || VTX.en
+const I_LUOGO = {
+  ufficio: svg('<path d="M12 21.500s-7-6.300-7-11.800a7 7 0 0 1 14 0c0 5.500-7 11.800-7 11.800z"/><circle cx="12" cy="9.700" r="2.600"/>', { s: 14, w: 2.2 }),
+  giro: svg('<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.300 15.300 0 0 1 4 10 15.300 15.300 0 0 1-4 10 15.300 15.300 0 0 1-4-10 15.300 15.300 0 0 1 4-10z"/>', { s: 14, w: 2.2 }),
+}
+function luogoHtml() {
+  const l = vetrina()?.luogo
+  return l ? `<span class="luogo" data-luogo="${l}">${I_LUOGO[l] || ''}${esc(vtx().luogo[l] || '')}</span>` : ''
+}
+function appPcHtml() {
+  const a = vetrina()?.app
+  if (!a?.length) return ''
+  return `<div class="pcapp"><div class="widget__h">${I.desktop}<span>${esc(vtx().app)}</span><span class="right live">${a.length}</span></div>
+    <ul class="pcapp__row">${a.map((x) => `<li class="pcapp__i${x.su ? ' is-su' : ''}" tabindex="0" data-n="${esc(x.n)}" title="${esc(x.n)}">${x.i ? `<img src="${esc(immagine(x.i))}" alt="" width="32" height="32" draggable="false" loading="lazy">` : `<b aria-hidden="true">${esc(x.n.slice(0, 1))}</b>`}<span class="sr">${esc(x.n)}</span></li>`).join('')}</ul></div>`
 }
 function gameHtml(a, now) {
   const big = assetUrl(a, 'large_image'), small = assetUrl(a, 'small_image'), ts = a.timestamps || {}
@@ -373,7 +404,8 @@ function gameHtml(a, now) {
 const liveItems = () => {
   const now = Date.now(), out = []
   for (const a of presence?.activities || []) if ([0, 1, 3, 5].includes(a.type)) out.push({ head: `${I.game}<span>${esc(ui().act[a.type] ?? ui().act[0])}</span>`, body: gameHtml(a, now), ticking: !!a.timestamps })
-  if (presence?.listening_to_spotify && presence.spotify) out.push({ head: `${brand('spotify', { light: '169c46' })}<span>${esc(ui().listening)}</span>`, body: spotifyHtml(presence.spotify, now), ticking: true })
+  const m = vetrina()?.musica
+  if (m) out.push({ head: `${brand('spotify', { light: '169c46' })}<span>${esc(ui().listening)}</span>`, body: musicaHtml(m, now), ticking: !!(m.inizio && m.fine) })
   return out
 }
 function renderCardActivity() {
@@ -389,10 +421,10 @@ function devicesHtml() {
 }
 function nowWidget() {
   const st = presence?.discord_status || 'offline'
-  const items = liveItems()
-  const body = items.length ? items.map((x) => `<div class="widget__h" style="margin-bottom:8px">${x.head}</div>${x.body}`).join('<hr class="act-sep">') : `<p class="act__muted">${esc(ui().nothing)}</p>`
+  const items = liveItems(), pc = appPcHtml()
+  const body = items.length ? items.map((x) => `<div class="widget__h" style="margin-bottom:8px">${x.head}</div>${x.body}`).join('<hr class="act-sep">') : pc ? '' : `<p class="act__muted">${esc(ui().nothing)}</p>`
   return `<div class="widget__h"><span>${esc(ui().now)}</span><span class="right live">${esc(ui().live)}</span></div>
-    <div class="status-line"><span class="status-dot" style="background:${STATUS_COLOR[st]}"></span>${esc(t().status[st])}</div>${body}${devicesHtml()}`
+    <div class="status-line"><span class="status-dot" style="background:${STATUS_COLOR[st]}"></span>${esc(t().status[st])}${luogoHtml()}</div>${body}${pc}${devicesHtml()}`
 }
 
 // ─── i progetti: copertine, filmati, ruoli ───────────────────────────────────
@@ -657,7 +689,7 @@ document.addEventListener('click', (e) => {
 
 // il battito per le barre di Spotify e i tempi dei giochi
 setInterval(() => {
-  if (!presence || document.hidden || !liveItems().some((x) => x.ticking)) return
+  if (document.hidden || !liveItems().some((x) => x.ticking)) return
   renderCardActivity()
   const n1 = $('#now-widget'), n2 = $('#now-widget-2')
   if (n1 && activeTab === 'board') n1.innerHTML = nowWidget()
@@ -1219,6 +1251,13 @@ applyLang()
 mountParallax($('#card'))
 mountFx()
 connectLanyard()
+// la vetrina: a ogni cambio si ridisegnano l'attività della scheda e il riquadro «adesso»
+ascoltaVetrina(() => {
+  renderCardActivity()
+  const n1 = $('#now-widget'), n2 = $('#now-widget-2')
+  if (n1 && activeTab === 'board') n1.innerHTML = nowWidget()
+  if (n2 && activeTab === 'activity') n2.innerHTML = nowWidget()
+})
 loadProfile()
 setInterval(loadProfile, 10 * 60 * 1000)
 if (first.proj) openProject(first.proj, { push: false })

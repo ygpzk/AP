@@ -1,9 +1,10 @@
 // pzkko.it: tutto quello che si cambia senza toccare il codice.
 
 export const CONFIG = {
-  // L'ID utente Discord. I dati dal vivo (avatar, decorazione, stato, Spotify,
-  // giochi, stato personalizzato, stile del nome) arrivano da Lanyard: bisogna
-  // restare nel server https://discord.gg/lanyard.
+  // L'ID utente Discord. I dati dal vivo (avatar, decorazione, stato, giochi,
+  // stato personalizzato, stile del nome) arrivano da Lanyard: bisogna restare
+  // nel server https://discord.gg/lanyard. La musica no: viene dalla vetrina
+  // (vetrina.js), cioè dal suo Spotify.
   discordId: '459791358899519498',
 
   // Il profilo pubblico (banner, tema, bio, badge, collegamenti, effetto e cornice)
@@ -88,7 +89,7 @@ export const SOCIALS = [
   { key: 'twitch', name: 'Twitch', handle: 'pzkko', url: 'https://www.twitch.tv/pzkko', icon: 'twitch' },
   { key: 'kick', name: 'Kick', handle: 'pzkko', url: 'https://kick.com/pzkko', icon: 'kick', light: '3a9b0e' },
   { key: 'steam', name: 'Steam', handle: 'ygpzk', url: 'https://steamcommunity.com/profiles/76561198971719489', icon: 'steam', dark: 'ffffff' },
-  { key: 'spotify', name: 'Spotify', handle: 'pzkko', url: 'https://open.spotify.com/user/qeefs44bv4bpoa7dk8epagrxf', icon: 'spotify', light: '169c46' },
+  { key: 'spotify', name: 'Spotify', handle: 'pzkko', url: 'https://open.spotify.com/user/31cmhsgssvyib5yi7nl6xeuv4rrm', icon: 'spotify', light: '169c46' },
   { key: 'reddit', name: 'Reddit', handle: 'u/yungpzkko', url: 'https://www.reddit.com/user/yungpzkko/', icon: 'reddit' },
   { key: 'snapchat', name: 'Snapchat', handle: 'albertopecchini', url: 'https://www.snapchat.com/add/albertopecchini', icon: 'snapchat', light: 'd4b800' },
   { key: 'github', name: 'GitHub', handle: 'ygpzk', url: 'https://github.com/ygpzk', icon: 'github', dark: 'ffffff' },
