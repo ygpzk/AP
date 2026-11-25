@@ -28,9 +28,9 @@ const HEX = (h) => [(h >> 16) & 255, (h >> 8) & 255, h & 255]
 const col = (c) => `rgb(${c.map((v) => Math.round(v)).join(',')})`
 
 // colori: notte → alba → giorno, con la tinta del meteo
-const NOTTE = { alto: HEX(0x08101f), orizzonte: HEX(0x172337), foschia: HEX(0x1b2430), terra: HEX(0x171b16), sole: HEX(0x9db4dd) }
-const ALBA = { alto: HEX(0x33577e), orizzonte: HEX(0xe9a979), foschia: HEX(0xd6a58b), terra: HEX(0x3e3429), sole: HEX(0xffb173) }
-const GIORNO = { alto: HEX(0x6fa9dd), orizzonte: HEX(0xd8e4e5), foschia: HEX(0xd9e2df), terra: HEX(0x7a7158), sole: HEX(0xfff2da) }
+const NOTTE = { alto: HEX(0x081321), orizzonte: HEX(0x1a2839), foschia: HEX(0x1d2731), terra: HEX(0x171c17), sole: HEX(0x9db4dd) }
+const ALBA = { alto: HEX(0x4d7397), orizzonte: HEX(0xf0b88c), foschia: HEX(0xdcb59c), terra: HEX(0x463a2d), sole: HEX(0xffb173) }
+const GIORNO = { alto: HEX(0x7fb4e2), orizzonte: HEX(0xe4ebe8), foschia: HEX(0xdde6e3), terra: HEX(0x8b7c5e), sole: HEX(0xfff3df) }
 function tavolozzaCielo(alt) {
   const gradi = alt / RAD
   if (gradi < -6) return { ...NOTTE }
@@ -54,12 +54,12 @@ export function tavolozza(ora, meteo = null) {
   const spegni = (v) => mix(v, [media(v) * 0.92, media(v) * 0.94, media(v) * 0.98], grigio)
   const alto = spegni(c.alto), orizzonte = spegni(c.orizzonte), foschia = spegni(c.foschia)
   const soleC = mix(c.sole, [245, 246, 242], nuvoloso * 0.6)
-  const intSole = Math.pow(Math.max(0, Math.sin(s.alt)), 0.7) * 5.0 * (1 - nuvoloso * 0.56)
+  const intSole = Math.pow(Math.max(0, Math.sin(s.alt)), 0.7) * 4.2 * (1 - nuvoloso * 0.52)
   const luna = s.alt < 0.02
   const dirLuce = luna ? [-s.dir[0] * 0.8 + 0.15, Math.abs(s.dir[1]) * 0.7 + 0.35, -s.dir[2] * 0.8 - 0.1] : s.dir
   const l = Math.hypot(...dirLuce)
   const dir = dirLuce.map((v) => v / l)
-  const visibilita = icona === 'nebbia' ? 170 : icona === 'pioggia' ? 330 : icona === 'temporale' ? 260 : icona === 'neve' ? 240 : 700
+  const visibilita = icona === 'nebbia' ? 190 : icona === 'pioggia' ? 400 : icona === 'temporale' ? 320 : icona === 'neve' ? 300 : 1050
   return {
     sole: s, notte, icona, gradi, vento,
     nuvolosita: nuvoloso,
@@ -69,11 +69,11 @@ export function tavolozza(ora, meteo = null) {
     emisfero: {
       cielo: col(mix(alto, orizzonte, 0.35)),
       terra: col(spegni(c.terra)),
-      intensita: notte ? 1.65 : 2.25 - nuvoloso * 0.25,
+      intensita: notte ? 1.35 : 1.5 - nuvoloso * 0.18,
     },
     cielo: { alto: col(alto), orizzonte: col(orizzonte), foschia: col(foschia), notte: luna ? 1 : 0 },
-    nebbia: { colore: col(foschia), vicino: visibilita * 0.42, lontano: visibilita },
-    esposizione: notte ? 1.12 : meteo?.icona === 'temporale' ? 0.82 : 1.0,
+    nebbia: { colore: col(foschia), vicino: visibilita * 0.5, lontano: visibilita },
+    esposizione: notte ? 1.12 : meteo?.icona === 'temporale' ? 0.9 : 1.22,
     finestre: s.alt < 0.04 ? 1 : 0,
     neve: icona === 'neve' ? 1 : 0,
   }

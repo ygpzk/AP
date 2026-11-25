@@ -3,6 +3,7 @@
 // niente immagini scaricate a runtime. Tre.js arriva da ../lib (vendorizzato, nessuna CDN).
 import * as THREE from '../lib/three.module.min.js'
 import { DATI } from './dati.js'
+import { creaTerreno, creaTerrenoLontano, TIPI_ALBERO } from './terreno.js'
 
 const RAD = Math.PI / 180
 const UP = new THREE.Vector3(0, 1, 0)
@@ -40,19 +41,30 @@ function disturbo(g, lato, alpha = 12, passo = 1) {
 }
 const T = {}
 function creaTele() {
-  // calcestruzzo a vista: assi di cassaforma in verticale, fori dei tiranti, macchie appena visibili
+  // intonaco caldo di campagna: macchie di calce, crepe sottili, il piede più sporco
   T.cemento = tela(512, (g, n) => {
-    g.fillStyle = '#c9c1b5'; g.fillRect(0, 0, n, n)
-    for (let i = 0; i < 80; i++) {
-      g.fillStyle = `rgba(${140 + rnd() * 30},${130 + rnd() * 30},${118 + rnd() * 25},${0.05 + rnd() * 0.07})`
-      g.beginPath(); g.ellipse(rnd() * n, rnd() * n, 20 + rnd() * 100, 10 + rnd() * 70, rnd() * 3, 0, 7); g.fill()
+    g.fillStyle = '#dfd5c0'; g.fillRect(0, 0, n, n)
+    for (let i = 0; i < 110; i++) {
+      const v = 185 + rnd() * 55
+      g.fillStyle = `rgba(${v},${v - 9},${v - 25},${0.05 + rnd() * 0.09})`
+      g.beginPath(); g.ellipse(rnd() * n, rnd() * n, 18 + rnd() * 105, 10 + rnd() * 65, rnd() * 3, 0, 7); g.fill()
     }
-    for (let x = 0; x < n; x += 64) { g.fillStyle = 'rgba(76,70,62,0.24)'; g.fillRect(x, 0, 2.5, n); g.fillStyle = 'rgba(255,252,245,0.22)'; g.fillRect(x + 2.5, 0, 1.5, n) }
-    for (let y = 32; y < n; y += 128) for (let x = 40; x < n; x += 128) {
-      g.fillStyle = 'rgba(58,52,46,0.62)'; g.beginPath(); g.arc(x, y, 3, 0, 7); g.fill()
-      g.fillStyle = 'rgba(255,255,250,0.3)'; g.beginPath(); g.arc(x - 1, y - 1, 1.4, 0, 7); g.fill()
+    // macchie di umidità in basso, dove il muro tocca la terra
+    const basso = g.createLinearGradient(0, n * 0.62, 0, n)
+    basso.addColorStop(0, 'rgba(120,105,82,0)'); basso.addColorStop(1, 'rgba(120,105,82,0.2)')
+    g.fillStyle = basso; g.fillRect(0, 0, n, n)
+    // crepe e colature appena accennate
+    for (let i = 0; i < 8; i++) {
+      g.strokeStyle = `rgba(112,98,80,${0.08 + rnd() * 0.1})`; g.lineWidth = 0.7 + rnd() * 0.8
+      g.beginPath(); let x = rnd() * n, y = rnd() * n * 0.55; g.moveTo(x, y)
+      for (let k = 0; k < 5; k++) { x += (rnd() - 0.5) * 18; y += 8 + rnd() * 24; g.lineTo(x, y) }
+      g.stroke()
     }
-    disturbo(g, n, 16)
+    for (let i = 0; i < 24; i++) {
+      g.fillStyle = `rgba(150,136,113,${0.04 + rnd() * 0.06})`
+      g.fillRect(rnd() * n, rnd() * n, 2 + rnd() * 9, 1 + rnd() * 3)
+    }
+    disturbo(g, n, 9)
   })
   // fontana: cassaforma più marcata, macchie d'acqua
   T.fontana = tela(512, (g, n) => {
@@ -62,23 +74,27 @@ function creaTele() {
     for (let y = 50; y < n; y += 100) for (let x = 30; x < n; x += 100) { g.fillStyle = 'rgba(58,52,46,0.45)'; g.beginPath(); g.arc(x, y, 2.2, 0, 7); g.fill() }
     disturbo(g, n, 18)
   })
-  // tegole: esattamente cinque tonalità di cotto, mescolate tegola per tegola
+  // tegole: cotto consumato, mescolato tegola per tegola, con muschio e ombre di sovrapposizione
   T.tegole = tela(512, (g, n) => {
-    const toni = ['#8a5646', '#96614e', '#a26d58', '#7d4a3c', '#ac7a64']
-    g.fillStyle = '#6d382b'; g.fillRect(0, 0, n, n)
-    const larg = 26, alt = 42
+    const toni = ['#8b5a45', '#96634c', '#a06b53', '#7e4f3d', '#a8765c', '#8f6b51', '#7a5c47']
+    g.fillStyle = '#5c3a2e'; g.fillRect(0, 0, n, n)
+    const larg = 22, alt = 34
     for (let riga = -1; riga < n / alt + 2; riga++) {
       const y = riga * alt
       for (let i = -1; i < n / larg + 2; i++) {
         const x = i * larg + (riga % 2 ? larg / 2 : 0)
-        g.fillStyle = toni[Math.floor(rnd() * 5)]
-        g.beginPath(); g.moveTo(x + 1, y + alt); g.lineTo(x + 1, y + alt * 0.34); g.quadraticCurveTo(x + larg * 0.5, y, x + larg - 1, y + alt * 0.34); g.lineTo(x + larg - 1, y + alt); g.closePath(); g.fill()
-        g.strokeStyle = 'rgba(55,26,18,0.55)'; g.lineWidth = 1.2; g.stroke()
-        g.strokeStyle = 'rgba(255,210,180,0.18)'; g.lineWidth = 1; g.beginPath(); g.moveTo(x + 3, y + alt * 0.4); g.quadraticCurveTo(x + larg * 0.5, y + 4, x + larg - 3, y + alt * 0.4); g.stroke()
+        const t = toni[Math.floor(rnd() * toni.length)]
+        g.fillStyle = t
+        g.beginPath(); g.moveTo(x + 0.8, y + alt); g.lineTo(x + 0.8, y + alt * 0.34); g.quadraticCurveTo(x + larg * 0.5, y - 1, x + larg - 0.8, y + alt * 0.34); g.lineTo(x + larg - 0.8, y + alt); g.closePath(); g.fill()
+        g.strokeStyle = 'rgba(48,25,18,0.42)'; g.lineWidth = 1; g.stroke()
+        g.strokeStyle = 'rgba(255,218,186,0.14)'; g.lineWidth = 0.9; g.beginPath(); g.moveTo(x + 3, y + alt * 0.4); g.quadraticCurveTo(x + larg * 0.5, y + 4, x + larg - 3, y + alt * 0.4); g.stroke()
+        // muschio e polvere fra le tegole
+        if (rnd() < 0.16) { g.fillStyle = 'rgba(77,89,50,0.3)'; g.beginPath(); g.ellipse(x + larg * 0.35, y + alt * 0.8, 3 + rnd() * 4, 1.5 + rnd() * 2, 0, 0, 7); g.fill() }
       }
-      g.fillStyle = 'rgba(48,22,15,0.4)'; g.fillRect(0, y + alt - 2, n, 2)
+      g.fillStyle = 'rgba(39,20,14,0.36)'; g.fillRect(0, y + alt - 1.8, n, 1.8)
+      g.fillStyle = 'rgba(255,235,210,0.08)'; g.fillRect(0, y + 2, n, 1)
     }
-    disturbo(g, n, 10)
+    disturbo(g, n, 9)
   })
   // copertina in cotto (lastre piane) per il bordo della fontana
   T.cotto = tela(256, (g, n) => {
@@ -89,54 +105,6 @@ function creaTele() {
       g.fillStyle = 'rgba(255,220,190,0.1)'; g.fillRect(x + 2, y + 2, 60, 2)
     }
     disturbo(g, n, 9)
-  })
-  T.ghiaia = tela(256, (g, n) => {
-    g.fillStyle = '#b8af9f'; g.fillRect(0, 0, n, n)
-    for (let i = 0; i < 7000; i++) {
-      const v = 130 + rnd() * 80
-      g.fillStyle = `rgba(${v},${v - 5},${v - 15},${0.35 + rnd() * 0.5})`
-      g.fillRect(rnd() * n, rnd() * n, 1 + rnd() * 2.2, 1 + rnd() * 2.2)
-    }
-    disturbo(g, n, 12)
-  })
-  T.prato = tela(512, (g, n) => {
-    g.fillStyle = '#879b5c'; g.fillRect(0, 0, n, n)
-    for (let i = 0; i < 9000; i++) {
-      g.fillStyle = `rgba(${70 + rnd() * 50},${90 + rnd() * 55},${45 + rnd() * 35},${0.08 + rnd() * 0.16})`
-      g.fillRect(rnd() * n, rnd() * n, 1 + rnd() * 4, 1 + rnd() * 2)
-    }
-    for (let x = 0; x < n; x += 128) { g.fillStyle = 'rgba(210,220,170,0.05)'; g.fillRect(x, 0, 64, n) }
-    disturbo(g, n, 8)
-  })
-  T.campo = tela(256, (g, n) => {
-    g.fillStyle = '#d8d3b6'; g.fillRect(0, 0, n, n)
-    for (let x = 0; x < n; x += 22) {
-      g.fillStyle = 'rgba(80,76,50,0.28)'; g.fillRect(x, 0, 5, n)
-      g.fillStyle = 'rgba(255,255,235,0.25)'; g.fillRect(x + 7, 0, 4, n)
-      g.fillStyle = 'rgba(110,100,65,0.14)'; g.fillRect(x + 13, 0, 7, n)
-    }
-    for (let i = 0; i < 2000; i++) { g.fillStyle = `rgba(120,110,70,${0.05 + rnd() * 0.12})`; g.fillRect(rnd() * n, rnd() * n, 1 + rnd() * 3, 1 + rnd() * 1.5) }
-    disturbo(g, n, 8)
-  })
-  T.bosco = tela(256, (g, n) => {
-    g.fillStyle = '#5f7648'; g.fillRect(0, 0, n, n)
-    for (let x = 0; x < n; x += 16) { g.fillStyle = 'rgba(40,55,30,0.25)'; g.fillRect(x, 0, 7, n) }
-    for (let i = 0; i < 4000; i++) { g.fillStyle = `rgba(${45 + rnd() * 45},${70 + rnd() * 50},${35 + rnd() * 30},${0.1 + rnd() * 0.2})`; g.fillRect(rnd() * n, rnd() * n, 1 + rnd() * 4, 1 + rnd() * 3) }
-    disturbo(g, n, 10)
-  })
-  T.siepe = tela(256, (g, n) => {
-    g.fillStyle = '#3f5b31'; g.fillRect(0, 0, n, n)
-    for (let i = 0; i < 6000; i++) {
-      const v = 40 + rnd() * 55
-      g.fillStyle = `rgba(${v},${v + 35 + rnd() * 30},${v - 5},${0.2 + rnd() * 0.4})`
-      g.fillRect(rnd() * n, rnd() * n, 1 + rnd() * 3, 1 + rnd() * 2)
-    }
-    disturbo(g, n, 12)
-  })
-  T.asfalto = tela(256, (g, n) => {
-    g.fillStyle = '#5b5c58'; g.fillRect(0, 0, n, n)
-    for (let i = 0; i < 6000; i++) { g.fillStyle = `rgba(${40 + rnd() * 70},${40 + rnd() * 70},${38 + rnd() * 65},${0.15 + rnd() * 0.3})`; g.fillRect(rnd() * n, rnd() * n, 1 + rnd() * 2, 1 + rnd() * 2) }
-    disturbo(g, n, 12)
   })
   T.legno = tela(256, (g, n) => {
     g.fillStyle = '#776a55'; g.fillRect(0, 0, n, n)
@@ -158,12 +126,60 @@ function creaTele() {
   })
   // vetro: un riflesso appena accennato di cielo e terra, così le finestre non sono buchi neri
   T.vetro = tela(256, (g, n) => {
-    const grad = g.createLinearGradient(0, 0, 0, n)
-    grad.addColorStop(0, '#50696e'); grad.addColorStop(0.55, '#374b4e'); grad.addColorStop(1, '#263433')
+    const grad = g.createLinearGradient(0, 0, n * 0.3, n)
+    grad.addColorStop(0, '#8aa7ae'); grad.addColorStop(0.35, '#587277'); grad.addColorStop(0.7, '#354a4b'); grad.addColorStop(1, '#243233')
     g.fillStyle = grad; g.fillRect(0, 0, n, n)
-    g.fillStyle = 'rgba(226,238,240,0.16)'; g.beginPath(); g.moveTo(0, n * 0.12); g.lineTo(n * 0.55, 0); g.lineTo(n, 0); g.lineTo(0, n * 0.52); g.fill()
-    g.fillStyle = 'rgba(255,225,190,0.08)'; g.fillRect(0, n * 0.72, n, n * 0.28)
-    disturbo(g, n, 6)
+    g.fillStyle = 'rgba(236,246,245,0.2)'; g.beginPath(); g.moveTo(0, n * 0.12); g.lineTo(n * 0.58, 0); g.lineTo(n, 0); g.lineTo(0, n * 0.58); g.fill()
+    g.fillStyle = 'rgba(255,230,198,0.1)'; g.fillRect(0, n * 0.72, n, n * 0.28)
+    g.strokeStyle = 'rgba(225,240,238,0.08)'; g.lineWidth = 1
+    for (let i = 0; i < 8; i++) { g.beginPath(); g.moveTo(rnd() * n, 0); g.lineTo(rnd() * n, n); g.stroke() }
+    disturbo(g, n, 5)
+  })
+  // pietra per zoccoli, cordoli, soglie: lastre irregolari, non un colore piatto
+  T.pietra = tela(512, (g, n) => {
+    g.fillStyle = '#8f897b'; g.fillRect(0, 0, n, n)
+    for (let y = 0; y < n; y += 42) for (let x = -20; x < n; x += 64) {
+      const v = 130 + rnd() * 35
+      g.fillStyle = `rgb(${v},${v - 5},${v - 15})`
+      g.beginPath(); g.moveTo(x + (y / 42 % 2) * 32 + 2, y + 2); g.lineTo(x + 62, y + 2); g.lineTo(x + 60, y + 39); g.lineTo(x + (y / 42 % 2) * 32, y + 40); g.closePath(); g.fill()
+      g.strokeStyle = 'rgba(63,58,50,0.35)'; g.lineWidth = 1.6; g.stroke()
+    }
+    disturbo(g, n, 12)
+  })
+  // le foglie: una trama chiara che, moltiplicata per il verde di ogni lobo, toglie l'effetto plastica
+  T.foglie = tela(256, (g, n) => {
+    g.fillStyle = '#d6ddc8'; g.fillRect(0, 0, n, n)
+    for (let i = 0; i < 260; i++) {
+      const v = rnd() < 0.5 ? 125 + rnd() * 35 : 205 + rnd() * 35
+      g.fillStyle = `rgba(${v},${v + 6},${v - 22},${0.08 + rnd() * 0.18})`
+      g.beginPath(); g.ellipse(rnd() * n, rnd() * n, 2 + rnd() * 12, 1 + rnd() * 6, rnd() * 3, 0, 7); g.fill()
+    }
+    for (let i = 0; i < 1200; i++) {
+      const v = 120 + rnd() * 120
+      g.fillStyle = `rgba(${v},${v + 8},${v - 25},${0.1 + rnd() * 0.22})`
+      g.beginPath(); g.ellipse(rnd() * n, rnd() * n, 0.7 + rnd() * 2.4, 0.4 + rnd() * 1.4, rnd() * 3, 0, 7); g.fill()
+    }
+    disturbo(g, n, 15)
+  }, 3)
+  T.foglie.anisotropy = 4
+  // la grana del terreno, ripetuta in piccolo dallo shader: ravviva le foto da vicino
+  T.grana = tela(256, (g, n) => {
+    g.fillStyle = '#808080'; g.fillRect(0, 0, n, n)
+    for (let i = 0; i < 14000; i++) {
+      const v = 70 + rnd() * 145
+      g.fillStyle = `rgba(${v},${v},${v},${0.16 + rnd() * 0.55})`
+      g.fillRect(rnd() * n, rnd() * n, 1 + rnd() * 2, 1 + rnd() * 2)
+    }
+    disturbo(g, n, 28)
+  })
+  // l'ombra morbida sotto le chiome: un disco nero che sfuma nel nulla
+  T.ombraAlbero = tela(128, (g, n) => {
+    const grad = g.createRadialGradient(n / 2, n / 2, n * 0.04, n / 2, n / 2, n * 0.49)
+    grad.addColorStop(0, 'rgba(20,29,16,0.72)')
+    grad.addColorStop(0.5, 'rgba(20,29,16,0.34)')
+    grad.addColorStop(1, 'rgba(20,29,16,0)')
+    g.fillStyle = grad
+    g.beginPath(); g.arc(n / 2, n / 2, n * 0.49, 0, 7); g.fill()
   })
 }
 creaTele()
@@ -171,31 +187,25 @@ creaTele()
 // ── materiali ──
 const MAT = {}
 function creaMateriali() {
-  MAT.cemento = new THREE.MeshStandardMaterial({ map: T.cemento, bumpMap: T.cemento, bumpScale: 0.03, color: 0xd0c9be, roughness: 0.92, metalness: 0.0, side: THREE.DoubleSide })
-  MAT.fontana = new THREE.MeshStandardMaterial({ map: T.fontana, bumpMap: T.fontana, bumpScale: 0.04, color: 0xe4ddd2, roughness: 0.95, side: THREE.DoubleSide })
-  MAT.tegole = new THREE.MeshStandardMaterial({ map: T.tegole, bumpMap: T.tegole, bumpScale: 0.06, color: 0xe3d2c4, roughness: 0.95, side: THREE.DoubleSide })
-  MAT.cotto = new THREE.MeshStandardMaterial({ map: T.cotto, color: 0xffeee2, roughness: 0.9, side: THREE.DoubleSide })
-  MAT.ghiaia = new THREE.MeshStandardMaterial({ map: T.ghiaia, color: 0xf2eadc, roughness: 1, side: THREE.DoubleSide })
-  MAT.prato = new THREE.MeshLambertMaterial({ map: T.prato, color: 0xd8e0bf, side: THREE.DoubleSide })
-  MAT.campo = new THREE.MeshLambertMaterial({ map: T.campo, vertexColors: true, side: THREE.DoubleSide })
-  MAT.bosco = new THREE.MeshLambertMaterial({ map: T.bosco, vertexColors: true, side: THREE.DoubleSide })
-  MAT.asfalto = new THREE.MeshLambertMaterial({ map: T.asfalto, color: 0xcfcfc9, side: THREE.DoubleSide })
-  MAT.sterrato = new THREE.MeshLambertMaterial({ map: T.ghiaia, color: 0xd8cdb9, side: THREE.DoubleSide })
-  MAT.siepe = new THREE.MeshLambertMaterial({ map: T.siepe, color: 0xe6f0d5, side: THREE.DoubleSide })
-  MAT.legno = new THREE.MeshLambertMaterial({ map: T.legno, color: 0xd8c9b0, side: THREE.DoubleSide })
-  MAT.persiana = new THREE.MeshStandardMaterial({ map: T.persiana, color: 0xc8d4c8, roughness: 0.9, side: THREE.DoubleSide })
-  MAT.vetro = new THREE.MeshStandardMaterial({ map: T.vetro, roughness: 0.14, metalness: 0.3, emissive: 0xff9c54, emissiveIntensity: 0, side: THREE.DoubleSide })
-  MAT.vetroCap = new THREE.MeshStandardMaterial({ map: T.vetro, color: 0x6d7876, roughness: 0.28, metalness: 0.2, side: THREE.DoubleSide })
-  MAT.telaio = new THREE.MeshStandardMaterial({ color: 0x3b3a35, roughness: 0.7, side: THREE.DoubleSide })
-  MAT.mattone = new THREE.MeshStandardMaterial({ map: T.cotto, color: 0xd8b49d, roughness: 0.92, side: THREE.DoubleSide })
-  MAT.solare = new THREE.MeshStandardMaterial({ map: T.solare, color: 0xdfe9f2, roughness: 0.22, metalness: 0.4, side: THREE.DoubleSide })
+  MAT.cemento = new THREE.MeshStandardMaterial({ map: T.cemento, bumpMap: T.cemento, bumpScale: 0.025, color: 0xffffff, roughness: 0.96, metalness: 0.0, side: THREE.DoubleSide })
+  MAT.fontana = new THREE.MeshStandardMaterial({ map: T.fontana, bumpMap: T.fontana, bumpScale: 0.05, color: 0xf0eae0, roughness: 0.96, side: THREE.DoubleSide })
+  MAT.tegole = new THREE.MeshStandardMaterial({ map: T.tegole, bumpMap: T.tegole, bumpScale: 0.045, color: 0xd9c9bc, roughness: 0.94, side: THREE.DoubleSide })
+  MAT.cotto = new THREE.MeshStandardMaterial({ map: T.cotto, color: 0xf2e2d4, roughness: 0.9, side: THREE.DoubleSide })
+  MAT.legno = new THREE.MeshLambertMaterial({ map: T.legno, color: 0xe0d2bb, side: THREE.DoubleSide })
+  MAT.persiana = new THREE.MeshStandardMaterial({ map: T.persiana, color: 0xd9e0d4, roughness: 0.88, side: THREE.DoubleSide })
+  MAT.vetro = new THREE.MeshStandardMaterial({ map: T.vetro, roughness: 0.08, metalness: 0.42, emissive: 0xff9c54, emissiveIntensity: 0, side: THREE.DoubleSide })
+  MAT.vetroCap = new THREE.MeshStandardMaterial({ map: T.vetro, color: 0x9da8a4, roughness: 0.16, metalness: 0.35, side: THREE.DoubleSide })
+  MAT.telaio = new THREE.MeshStandardMaterial({ color: 0xd6d0c2, roughness: 0.62, metalness: 0.05, side: THREE.DoubleSide })
+  MAT.fascia = new THREE.MeshStandardMaterial({ color: 0x6b5b48, roughness: 0.82, metalness: 0.05, side: THREE.DoubleSide })
+  MAT.ombraMuro = new THREE.MeshBasicMaterial({ color: 0x2d271d, transparent: true, opacity: 0.3, depthWrite: false, side: THREE.DoubleSide })
+  MAT.pietra = new THREE.MeshStandardMaterial({ map: T.pietra, bumpMap: T.pietra, bumpScale: 0.03, color: 0xffffff, roughness: 0.95, side: THREE.DoubleSide })
+  MAT.mattone = new THREE.MeshStandardMaterial({ map: T.cotto, color: 0xd9b9a2, roughness: 0.92, side: THREE.DoubleSide })
+  MAT.solare = new THREE.MeshStandardMaterial({ map: T.solare, color: 0xf0f7ff, roughness: 0.16, metalness: 0.55, side: THREE.DoubleSide })
   MAT.metallo = new THREE.MeshStandardMaterial({ color: 0x9ba3a4, roughness: 0.28, metalness: 0.75, side: THREE.DoubleSide })
-  MAT.erba = new THREE.MeshLambertMaterial({ map: T.prato, color: 0xc7d3a9, side: THREE.DoubleSide })
-  MAT.margine = new THREE.MeshLambertMaterial({ color: 0xbfc38f, side: THREE.DoubleSide })
-  MAT.terra = new THREE.MeshLambertMaterial({ map: T.ghiaia, color: 0xa9a08c, side: THREE.DoubleSide })
-  MAT.altro = new THREE.MeshLambertMaterial({ vertexColors: true, map: T.cemento, color: 0xd8d2c6, side: THREE.DoubleSide })
   MAT.lontani = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide })
   MAT.stelle = new THREE.PointsMaterial({ color: 0xdfe8ff, size: 2.2, sizeAttenuation: false, transparent: true, opacity: 0, depthWrite: false, fog: false })
+  // il legno delle persiane, più caldo
+  MAT.legnoScuro = new THREE.MeshStandardMaterial({ map: T.legno, color: 0x8d7b61, roughness: 0.85, side: THREE.DoubleSide })
 }
 creaMateriali()
 
@@ -347,16 +357,23 @@ function serramento(accVetro, accTelaio, accPersiane, accMattone, mur, info, col
   m.setPosition(p(0, 0, -0.15))
   aggiungiGeo(accVetro, br, m)
   br.dispose()
-  // montanti delle grandi vetrate: due verticali e una traversa
-  if (larg > 1.8) {
+  // montanti: le grandi vetrate in tre parti, le finestre normali in due
+  {
     const rot = Math.atan2(-d.z, d.x)
-    const altM = Math.min(alt - 0.18, info.arco ? alt - larg * 0.22 : alt - 0.18)
-    for (const f of [1 / 3, 2 / 3]) {
-      const q = p(info.s0 + larg * f, info.y0 + 0.09 + altM / 2, -0.02)
-      scatola(accTelaio, q.x, q.y, q.z, 0.055, altM, 0.07, rot)
+    const altM = Math.min(alt - 0.16, info.arco ? alt - larg * 0.22 : alt - 0.16)
+    if (larg > 1.8) {
+      for (const f of [1 / 3, 2 / 3]) {
+        const q = p(info.s0 + larg * f, info.y0 + 0.09 + altM / 2, -0.015)
+        scatola(accTelaio, q.x, q.y, q.z, 0.055, altM, 0.07, rot)
+      }
+      const q2 = p(centroS, info.y0 + altM * 0.62, -0.015)
+      scatola(accTelaio, q2.x, q2.y, q2.z, larg - 0.12, 0.05, 0.06, rot)
+    } else if (larg > 0.72 && alt > 0.9) {
+      const q = p(centroS, info.y0 + 0.07 + altM / 2, -0.012)
+      scatola(accTelaio, q.x, q.y, q.z, 0.04, altM, 0.06, rot)
+      const q2 = p(centroS, info.y0 + 0.06 + altM * 0.55, -0.012)
+      scatola(accTelaio, q2.x, q2.y, q2.z, larg - 0.1, 0.04, 0.05, rot)
     }
-    const q2 = p(centroS, info.y0 + altM * 0.62, -0.02)
-    scatola(accTelaio, q2.x, q2.y, q2.z, larg - 0.12, 0.05, 0.06, rot)
   }
   // telaio: cornice piatta attorno al vano
   const est = contornoApertura(info.s0 - 0.09, info.s1 + 0.09, info.y0 - 0.09, info.y1 + 0.09, info.arco)
@@ -368,8 +385,8 @@ function serramento(accVetro, accTelaio, accPersiane, accMattone, mur, info, col
     const pt = q.map((v) => p(v.x, v.y, 0.02))
     triangolo(accTelaio, pt[0], pt[1], pt[2], n, [q[0].x / 1, q[0].y / 1], [q[1].x, q[1].y], [q[2].x, q[2].y])
   }
-  // davanzale
-  if (info.davanzale !== false) {
+  // davanzale (non sotto le arcate che arrivano a terra: lì sarebbe una trave sul selciato)
+  if (info.davanzale !== false && info.y0 > 0.35) {
     const q = p(centroS, info.y0 - 0.04, 0.12)
     scatola(accTelaio, q.x, q.y, q.z, larg + 0.28, 0.09, 0.28, Math.atan2(-d.z, d.x))
   }
@@ -427,7 +444,7 @@ function tetto(acc, b, u0, u1, v0, v1, hEave, pendenza, tipo = 'padiglione', ov 
         const dir = new THREE.Vector3().subVectors(B, A); const lung = dir.length(); dir.normalize()
         const centro = A.clone().add(B).multiplyScalar(0.5)
         const rot = Math.atan2(-dir.z, dir.x)
-        scatola(accFascia, centro.x, centro.y - 0.14, centro.z, lung, 0.24, 0.12, rot)
+        scatola(accFascia, centro.x, centro.y - 0.1, centro.z, lung, 0.16, 0.09, rot)
       }
     }
     return H
@@ -448,7 +465,7 @@ function tetto(acc, b, u0, u1, v0, v1, hEave, pendenza, tipo = 'padiglione', ov 
       for (const v of [V0, V1]) {
         const A = P(U0, v, hEave + 0.02), B = P(U1, v, hEave + 0.02)
         const centro = A.clone().add(B).multiplyScalar(0.5), rot = Math.atan2(-(B.z - A.z), B.x - A.x)
-        scatola(accFascia, centro.x, centro.y - 0.14, centro.z, A.distanceTo(B), 0.24, 0.12, rot)
+        scatola(accFascia, centro.x, centro.y - 0.1, centro.z, A.distanceTo(B), 0.16, 0.09, rot)
       }
     }
   } else {
@@ -462,7 +479,7 @@ function tetto(acc, b, u0, u1, v0, v1, hEave, pendenza, tipo = 'padiglione', ov 
       for (const u of [U0, U1]) {
         const A = P(u, V0, hEave + 0.02), B = P(u, V1, hEave + 0.02)
         const centro = A.clone().add(B).multiplyScalar(0.5), rot = Math.atan2(-(B.z - A.z), B.x - A.x)
-        scatola(accFascia, centro.x, centro.y - 0.14, centro.z, A.distanceTo(B), 0.24, 0.12, rot)
+        scatola(accFascia, centro.x, centro.y - 0.1, centro.z, A.distanceTo(B), 0.16, 0.09, rot)
       }
     }
   }
@@ -484,7 +501,7 @@ function tettoia(acc, b, u0, u1, v0, v1, hAlto, hBasso, accFascia) {
     for (const [v, hh] of [[v0, hAlto], [v1, hBasso]]) {
       const A = P(u0, v, hh), B = P(u1, v, hh)
       const centro = A.clone().add(B).multiplyScalar(0.5), rot = Math.atan2(-(B.z - A.z), B.x - A.x)
-      scatola(accFascia, centro.x, centro.y - 0.12, centro.z, A.distanceTo(B), 0.22, 0.12, rot)
+      scatola(accFascia, centro.x, centro.y - 0.09, centro.z, A.distanceTo(B), 0.15, 0.09, rot)
     }
   }
 }
@@ -492,112 +509,174 @@ function tettoia(acc, b, u0, u1, v0, v1, hAlto, hBasso, accFascia) {
 export function costruisci(opz = {}) {
   const ombre = opz.ombre !== false
   const scena = new THREE.Scene()
-  scena.fog = new THREE.Fog(0xdfe7e2, 240, 780)
-  scena.background = new THREE.Color(0xdfe7e2)
+  scena.fog = new THREE.Fog(0xdde6e3, 300, 950)
+  scena.background = new THREE.Color(0xdde6e3)
   const radice = new THREE.Group()
   scena.add(radice)
-  const acc = { cemento: nuovo(), tegole: nuovo(), vetro: nuovo(), vetroCap: nuovo(), telaio: nuovo(), persiane: nuovo(), mattone: nuovo(), legno: nuovo(), metallo: nuovo(), cotto: nuovo(), fontana: nuovo(), fascia: nuovo(), lontani: nuovo(), neve: nuovo() }
+  const acc = { cemento: nuovo(), tegole: nuovo(), vetro: nuovo(), vetroCap: nuovo(), telaio: nuovo(), persiane: nuovo(), mattone: nuovo(), pietra: nuovo(), legno: nuovo(), metallo: nuovo(), cotto: nuovo(), fontana: nuovo(), fascia: nuovo(), ombra: nuovo(), lontani: nuovo(), neve: nuovo() }
 
-  // ── fondo e campi ──
-  const texFondo = T.prato.clone(); texFondo.needsUpdate = true; texFondo.repeat.set(90, 90)
-  const fondo = new THREE.Mesh(new THREE.CircleGeometry(1450, 96), new THREE.MeshLambertMaterial({ map: texFondo, color: 0xaebb8d }))
-  fondo.rotation.x = -Math.PI / 2
-  fondo.receiveShadow = true
-  radice.add(fondo)
-
+  // ── dove stanno le cose: la sagoma del lotto, il giardino, il cortile, il viale ──
+  const senzaDup = (p) => (p.length > 1 && Math.hypot(p[0][0] - p.at(-1)[0], p[0][1] - p.at(-1)[1]) < 0.05 ? p.slice(0, -1) : p)
   const angoloLato = (p) => {
     let L = 0, a = 0
-    for (let i = 0; i < p.length; i++) { const q = p[(i + 1) % p.length], d = Math.hypot(q[0] - p[i][0], q[1] - p[i][1]); if (d > L) { L = d; a = Math.atan2(q[1] - p[i][1], q[0] - p[i][0]) } }
+    for (let i = 0; i < p.length; i++) {
+      const q = p[(i + 1) % p.length], d = Math.hypot(q[0] - p[i][0], q[1] - p[i][1])
+      if (d > L) { L = d; a = Math.atan2(q[1] - p[i][1], q[0] - p[i][0]) }
+    }
     return a
   }
-  const tavolozzeCampi = [[0xa9b279, 0xb7b37f, 0x9fae73, 0xc0b98d, 0xa5b074], [0x8fa768, 0x9db274, 0x839f60, 0xaab37b]]
-  const accCampi = nuovo(), accPrati = nuovo(), accBosco = nuovo(), accFondo = nuovo()
-  const senzaDup = (p) => (p.length > 1 && Math.hypot(p[0][0] - p.at(-1)[0], p[0][1] - p.at(-1)[1]) < 0.05 ? p.slice(0, -1) : p)
-  for (let i = 0; i < DATI.campi.length; i++) {
-    const c = DATI.campi[i], p = senzaDup(c.p)
-    if (p.length < 3) continue
-    const ang = angoloLato(p)
-    const g = geoPoligono(p, ang, 6.4)
-    const tipo = c.c
-    let accD = accPrati, vill = [0x8fa768, 0x9db274, 0x839f60][i % 3]
-    if (tipo === 'farmland' || tipo === 'greenfield' || tipo === 'meadow' || tipo === 'grass') {
-      accD = accCampi; const pal = tavolozzeCampi[i % 2]; vill = pal[i % pal.length]
-      aggiungiGeo(accD, g, new THREE.Matrix4().makeTranslation(0, 0.018, 0), coloreV(vill))
-    } else if (tipo === 'wood' || tipo === 'orchard' || tipo === 'vineyard') {
-      accD = accBosco; vill = [0x5f7b4b, 0x567447, 0x688251][i % 3]
-      aggiungiGeo(accD, g, new THREE.Matrix4().makeTranslation(0, 0.03, 0), coloreV(vill))
-    } else if (tipo === 'residential' || tipo === 'industrial' || tipo === 'commercial' || tipo === 'retail' || tipo === 'cemetery' || tipo === 'quarry') {
-      accD = accFondo; aggiungiGeo(accD, g, new THREE.Matrix4().makeTranslation(0, 0.012, 0), coloreV(0xbdb5a4))
-    } else {
-      aggiungiGeo(accD, g, new THREE.Matrix4().makeTranslation(0, 0.022, 0), coloreV(vill))
-    }
-    g.dispose()
-  }
-  // campi lontani, per non lasciare la pianura tutta uguale: appezzamenti regolari fuori dal lotto
-  {
-    const bC = base(19 * RAD)
-    const rett = (u0, u1, v0, v1) => [aMondo(bC, u0, v0), aMondo(bC, u1, v0), aMondo(bC, u1, v1), aMondo(bC, u0, v1)]
-    const appezzamenti = [
-      [-270, -95, 95, 270, 0x9aa873, 109], [55, 300, 95, 285, 0xb1ad7d, 19],
-      [-380, -110, -170, 60, 0x8fa268, 19], [-300, -40, -400, -185, 0xb8b083, 109],
-      [100, 360, -400, -180, 0x9caa72, 19], [110, 390, -95, 70, 0xa8ad79, 109],
-      [-30, 280, -680, -430, 0xa6a978, 19], [-160, 240, 350, 650, 0x96a76c, 109],
-      [-430, -180, 300, 560, 0xb2ad80, 109], [-150, 65, -300, -155, 0xb1ae7f, 19],
-      [-90, 110, 88, 150, 0xa3ab76, 109], [82, 190, -60, 32, 0xc0b27f, 109],
-    ]
-    for (const [u0, u1, v0, v1, tinta, ang] of appezzamenti) {
-      const g = geoPoligono(rett(u0, u1, v0, v1), ang * RAD, 6.4)
-      aggiungiGeo(accCampi, g, new THREE.Matrix4().makeTranslation(0, 0.009, 0), coloreV(tinta))
-      g.dispose()
-    }
+  const bbox2 = (p) => {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity
+    for (const q of p) { x0 = Math.min(x0, q[0]); y0 = Math.min(y0, q[1]); x1 = Math.max(x1, q[0]); y1 = Math.max(y1, q[1]) }
+    return [x0, y0, x1, y1]
   }
   const giardino = [[-25, 27], [15, 30], [21, 18], [21, -21], [14, -27], [-11, -27], [-21, -16], [-25, 0]]
-  const accGiardino = nuovo()
-  { const g = geoPoligono(giardino, 0.3, 7); aggiungiGeo(accGiardino, g, new THREE.Matrix4().makeTranslation(0, 0.045, 0), coloreV(0xb3c48d)); g.dispose() }
-  // vialetto d'ingresso e piazzale
-  const accGhiaia = nuovo()
-  { const g = geoPoligono([[-4, 10], [14, 13], [21, 6], [22, -18], [16, -25], [3, -29], [-3, -25], [-5, -16], [1, -8]], 0.2, 4); aggiungiGeo(accGhiaia, g, new THREE.Matrix4().makeTranslation(0, 0.062, 0)); g.dispose() }
-  if (DATI.viale?.length > 1) {
-    const viale = [[17.7, 29.5], ...DATI.viale, [15.5, -22]]
-    const g = geoNastro(viale, 3.6, 0.068, 4); aggiungiGeo(accGhiaia, g, new THREE.Matrix4()); g.dispose()
-  }
-  // sentiero verso la fontana
-  { const g = geoNastro([[-2, -17], [-6.5, -17], [-8.5, -15.5]], 2.2, 0.064, 3); aggiungiGeo(accGhiaia, g, new THREE.Matrix4()); g.dispose() }
+  const ghiaia = [[-4, 10], [14, 13], [21, 6], [22, -18], [16, -25], [3, -29], [-3, -25], [-5, -16], [1, -8]]
+  const viale = DATI.viale?.length > 1 ? [[17.7, 29.5], ...DATI.viale, [15.5, -22]] : []
+  const fc = DATI.fonte.centro
+  const casaMeta = DATI.case.casa
+  const capMeta = DATI.case.capannone
+  const bCap = base(capMeta.angolo, capMeta.centro[0], capMeta.centro[1])
 
-  const meshGiardino = meshDa(accGiardino, MAT.prato); meshGiardino.castShadow = false; radice.add(meshGiardino)
-  const meshCampi = meshDa(accCampi, MAT.campo); meshCampi.castShadow = false; radice.add(meshCampi)
-  const meshPrati = meshDa(accPrati, MAT.prato); meshPrati.castShadow = false; radice.add(meshPrati)
-  const meshBosco = meshDa(accBosco, MAT.bosco); meshBosco.castShadow = false; radice.add(meshBosco)
-  const meshFondo = meshDa(accFondo, MAT.ghiaia); meshFondo.castShadow = false; radice.add(meshFondo)
-  const meshGhiaia = meshDa(accGhiaia, MAT.ghiaia); meshGhiaia.castShadow = false; radice.add(meshGhiaia)
-
-  // ── strade, fossi, specchi d'acqua ──
-  const accAsfalto = nuovo(), accSterrato = nuovo(), accAcqua = nuovo(), accRiva = nuovo()
-  for (const s of DATI.strade) {
-    if (s.p.length < 2) continue
-    const g = geoNastro(s.p, s.w, 0.085, 5)
-    const accD = s.c === 'track' || s.c === 'service' || s.c === 'footway' || s.c === 'path' || s.c === 'cycleway' ? accSterrato : accAsfalto
-    aggiungiGeo(accD, g, new THREE.Matrix4()); g.dispose()
+  // ── gli alberi veri (posizioni calcolate prima del terreno: le loro ombre finiscono nell'ortofoto) ──
+  const dentroPoligono = (p, poly) => {
+    let d = false
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const xi = poly[i][0], yi = poly[i][1], xj = poly[j][0], yj = poly[j][1]
+      if ((yi > p[1]) !== (yj > p[1]) && p[0] < (xj - xi) * (p[1] - yi) / (yj - yi) + xi) d = !d
+    }
+    return d
   }
+  const puntiFilare = (f, passo, jitter = 0) => {
+    const out = []
+    for (let i = 0; i < f.p.length - 1; i++) {
+      const a = f.p[i], b = f.p[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1])
+      const n = Math.max(1, Math.round(L / passo))
+      for (let k = 0; k < n; k++) { const t = (k + 0.5) / n; out.push([a[0] + (b[0] - a[0]) * t + (rnd() - 0.5) * jitter, a[1] + (b[1] - a[1]) * t + (rnd() - 0.5) * jitter]) }
+    }
+    return out
+  }
+  const alberi = [] // {x,y,tipo,s}
+  const siepi = [] // {p, spessore, altezza}
+  // filari OSM: platani lungo il viale, pioppi lungo i campi
+  for (const f of DATI.filari) {
+    if (f.p.length < 2) continue
+    const vicinoSud = f.p.some((q) => Math.hypot(q[0] + 18.4, q[1] + 43.4) < 5) || f.p.some((q) => Math.hypot(q[0] - 17.4, q[1] + 15.4) < 4)
+    if (vicinoSud) continue
+    const filareVialeOvest = f.p.some((q) => Math.hypot(q[0] - 17.3, q[1] - 21.9) < 3)
+    const filareVialeEst = f.p.some((q) => Math.hypot(q[0] - 19.2, q[1] - 22.1) < 3)
+    if (filareVialeEst) continue
+    const vicinoCasa = f.p.some((q) => Math.hypot(q[0] + 16.7, q[1] - 10.3) < 4)
+    const tipo = filareVialeOvest || vicinoCasa ? 'platano' : 'pioppo'
+    const passo = tipo === 'platano' ? 7.4 : 10.2
+    for (const q of puntiFilare(f, passo, tipo === 'platano' ? 0.75 : 1.1)) {
+      if (Math.hypot(q[0], q[1]) > 178) continue
+      if (dentroPoligono(q, giardino) && tipo !== 'platano') continue
+      const autunno = tipo === 'pioppo' ? rnd() < 0.07 : rnd() < 0.04
+      alberi.push({ x: q[0], y: q[1], tipo: autunno ? 'autunno' : tipo, s: tipo === 'platano' ? 0.88 + rnd() * 0.3 : 0.9 + rnd() * 0.32 })
+    }
+  }
+  // alberi del giardino, con qualche autunno
+  for (const [x, y, s] of [[-26, -2, 1.05], [-25, -27, 1.0], [18.2, -3.5, 1.0], [7, 14.5, 1.0], [-7, 17, 0.95], [-3.5, 14.8, 0.9]]) alberi.push({ x, y, tipo: rnd() < 0.1 ? 'autunno' : 'platano', s })
+  // gelsi nei bordi del giardino
+  for (const [x, y, s] of [[-22, 8, 0.95], [19, 6, 0.9], [-9, -24, 0.85]]) alberi.push({ x, y, tipo: 'gelso', s })
+  // frutteto a filari dentro il bosco, fuori dal giardino
+  const boscoPoly = DATI.campi.filter((c) => c.c === 'wood').map((c) => senzaDup(c.p)).sort((a, b) => b.length - a.length)[0]
+  if (boscoPoly) {
+    const xx = boscoPoly.map((p) => p[0]), yy = boscoPoly.map((p) => p[1])
+    const x0 = Math.min(...xx), x1 = Math.max(...xx), y0 = Math.min(...yy), y1 = Math.max(...yy)
+    const ang = 108 * RAD, dx = Math.cos(ang), dy = Math.sin(ang), nx = -dy, ny = dx
+    for (let a = -140; a < 140; a += 5.5) for (let t = -140; t < 140; t += 4.3) {
+      const x = a * nx + t * dx, y = a * ny + t * dy
+      if (x < x0 - 4 || x > x1 + 4 || y < y0 - 4 || y > y1 + 4) continue
+      if (!dentroPoligono([x, y], boscoPoly)) continue
+      if (dentroPoligono([x, y], giardino)) continue
+      if (Math.hypot(x, y) > 125) continue
+      if (x > -20 && x < 24 && y > -32 && y < 14) continue
+      if (Math.hypot(x - fc[0], y - fc[1]) < 9) continue
+      alberi.push({ x: x + (rnd() - 0.5) * 0.7, y: y + (rnd() - 0.5) * 0.7, tipo: 'frutteto', s: 0.8 + rnd() * 0.38 })
+    }
+    // qualche grande albero nel bosco
+    for (let i = 0; i < 26; i++) {
+      const x = x0 + rnd() * (x1 - x0), y = y0 + rnd() * (y1 - y0)
+      if (!dentroPoligono([x, y], boscoPoly) || dentroPoligono([x, y], giardino) || Math.hypot(x, y) > 160) continue
+      if (x > -30 && x < 30 && y > -34 && y < 22) continue
+      alberi.push({ x, y, tipo: rnd() < 0.07 ? 'autunno' : 'pioppo', s: 1.05 + rnd() * 0.45 })
+    }
+  }
+  // un po' di verde attorno alle case vicine, così non sono scatole sul prato
+  for (const e of DATI.edifici) {
+    const p = senzaDup(e.p)
+    if (p.length < 3) continue
+    const bb = bbox2(p), cx = (bb[0] + bb[2]) / 2, cy = (bb[1] + bb[3]) / 2
+    const dist = Math.hypot(cx, cy)
+    if (dist < 28 || dist > 180) continue
+    const quanti = dist < 100 ? 4 : 2
+    for (let k = 0; k < quanti; k++) {
+      const ang = rnd() * 6.28, raggio = 8 + rnd() * 13
+      const x = cx + Math.cos(ang) * raggio, y = cy + Math.sin(ang) * raggio
+      if (dentroPoligono([x, y], p)) continue
+      if (Math.hypot(x, y) > 180) continue
+      alberi.push({ x, y, tipo: rnd() < 0.1 ? 'autunno' : rnd() < 0.5 ? 'platano' : 'gelso', s: 0.8 + rnd() * 0.45 })
+    }
+  }
+  // le siepi: filari bassi, il bordo est, la linea davanti al capannone
+  {
+    const filareEst = DATI.filari.find((f) => f.p.some((q) => Math.hypot(q[0] - 19.2, q[1] - 22.1) < 3))
+    if (filareEst) siepi.push({ p: filareEst.p.filter((p) => p[1] > -22), spessore: 1.15, altezza: 1.75 })
+    for (const f of DATI.filari) {
+      if (f.p.some((q) => Math.hypot(q[0] + 18.4, q[1] + 43.4) < 5) || f.p.some((q) => Math.hypot(q[0] - 17.4, q[1] + 15.4) < 4)) siepi.push({ p: f.p, spessore: 1.35, altezza: 1.7 })
+    }
+    siepi.push({ p: [aMondo(bCap, -8.1, 6.4), aMondo(bCap, 8.1, 6.4)], spessore: 1.1, altezza: 1.75 })
+  }
+
+  // ── il terreno: una finta ortofoto disegnata tutta insieme, e la campagna oltre il lotto ──
+  const terra = creaTerreno({ lato: 4096, metri: 700, alberi, siepi, giardino, ghiaia, viale })
+  const texTerra = new THREE.CanvasTexture(terra.canvas)
+  texTerra.colorSpace = THREE.SRGBColorSpace; texTerra.anisotropy = 8
+  texTerra.minFilter = THREE.LinearMipmapLinearFilter; texTerra.magFilter = THREE.LinearFilter
+  const matTerra = new THREE.MeshLambertMaterial({ map: texTerra })
+  matTerra.onBeforeCompile = (shader) => {
+    shader.uniforms.tGrana = { value: T.grana }
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform sampler2D tGrana;')
+      .replace('#include <map_fragment>', '#include <map_fragment>\nfloat g = texture2D(tGrana, vMapUv * 220.0).r;\n diffuseColor.rgb *= 0.91 + 0.18 * g;')
+  }
+  matTerra.customProgramCacheKey = () => 'terreno-grana'
+  const fondoTerra = new THREE.Mesh(new THREE.PlaneGeometry(700, 700, 1, 1), matTerra)
+  fondoTerra.name = 'terreno'
+  fondoTerra.rotation.x = -Math.PI / 2
+  fondoTerra.receiveShadow = true
+  radice.add(fondoTerra)
+  {
+    const lontana = creaTerrenoLontano()
+    const texLontana = new THREE.CanvasTexture(lontana.canvas)
+    texLontana.colorSpace = THREE.SRGBColorSpace; texLontana.anisotropy = 4
+    const sfondo = new THREE.Mesh(new THREE.CircleGeometry(1480, 128), new THREE.MeshLambertMaterial({ map: texLontana }))
+    sfondo.name = 'terrenoLontano'
+    sfondo.rotation.x = -Math.PI / 2
+    sfondo.position.y = -0.06
+    radice.add(sfondo)
+  }
+
+  // ── acqua animata (fossi, vasche lontane): il resto è nell'ortofoto ──
+  const accAcqua = nuovo()
   for (const s of DATI.acqua) {
     if (s.p.length < 2) continue
-    const riva = geoNastro(s.p, s.w + 1.6, 0.05, 6), acqua = geoNastro(s.p, s.w, 0.045, 6)
-    aggiungiGeo(accRiva, riva, new THREE.Matrix4()); aggiungiGeo(accAcqua, acqua, new THREE.Matrix4())
-    riva.dispose(); acqua.dispose()
+    const acqua = geoNastro(s.p, s.w, 0.045, 6)
+    aggiungiGeo(accAcqua, acqua, new THREE.Matrix4())
+    acqua.dispose()
   }
-  for (const s of DATI.specchi) { const g = geoPoligono(senzaDup(s.p), 0, 6); aggiungiGeo(accAcqua, g, new THREE.Matrix4().makeTranslation(0, 0.05, 0)); g.dispose() }
-  radice.add(meshDa(accAsfalto, MAT.asfalto))
-  radice.add(meshDa(accSterrato, MAT.sterrato))
-  const meshRiva = meshDa(accRiva, MAT.terra); meshRiva.castShadow = false; radice.add(meshRiva)
-
-  // ── confine del lotto: un margine falciato chiaro e una traccia di terra battuta ──
-  { const g = geoNastro([...DATI.confine, DATI.confine[0]], 0.8, 0.06, 5); const m = new THREE.Mesh(g, MAT.margine); m.receiveShadow = true; radice.add(m) }
-  { const g = geoNastro([...DATI.confine, DATI.confine[0]], 0.34, 0.064, 5); const m = new THREE.Mesh(g, MAT.terra); m.receiveShadow = true; radice.add(m) }
+  for (const s of DATI.specchi) {
+    const g = geoPoligono(senzaDup(s.p), 0, 6)
+    aggiungiGeo(accAcqua, g, new THREE.Matrix4().makeTranslation(0, 0.05, 0))
+    g.dispose()
+  }
 
   // ── acqua animata (fossi e fontana) ──
   const acquaUniformi = {
-    uTempo: { value: 0 }, uColore: { value: new THREE.Color(0x5f8f86) }, uFondo: { value: new THREE.Color(0x3e5d55) },
-    uSole: { value: new THREE.Vector3(0.4, 0.8, 0.3) }, uCielo: { value: new THREE.Color(0xb7d3d6) }, uOnde: { value: 0.5 },
+    uTempo: { value: 0 }, uColore: { value: new THREE.Color(0x47716c) }, uFondo: { value: new THREE.Color(0x2b4541) },
+    uSole: { value: new THREE.Vector3(0.4, 0.8, 0.3) }, uCielo: { value: new THREE.Color(0xa9c1bf) }, uOnde: { value: 0.32 },
   }
   const matAcqua = new THREE.ShaderMaterial({    uniforms: acquaUniformi, transparent: true, depthWrite: true, side: THREE.DoubleSide,
     vertexShader: `varying vec3 vM; varying vec3 vN; void main(){ vec4 m = modelMatrix * vec4(position,1.0); vM = m.xyz; vN = normalize(mat3(modelMatrix) * normal); gl_Position = projectionMatrix * viewMatrix * m; }`,
@@ -609,15 +688,15 @@ export function costruisci(opz = {}) {
         vec3 v = normalize(cameraPosition - vM);
         float fres = pow(1.0 - max(dot(n, v), 0.0), 3.0);
         float spec = pow(max(dot(reflect(-normalize(uSole), n), v), 0.0), 90.0);
-        vec3 c = mix(uFondo, uColore, 0.55 + 0.2*o);
-        c = mix(c, uCielo, clamp(fres*0.55, 0.0, 0.55));
+        vec3 c = mix(uFondo, uColore, 0.55 + 0.16*o);
+        c = mix(c, uCielo, clamp(fres*0.42, 0.0, 0.44));
         float spec2 = pow(max(dot(reflect(-normalize(uSole), n), v), 0.0), 8.0);
-        c += vec3(1.0, 0.96, 0.86) * spec * 1.2 + vec3(0.9, 0.95, 0.9) * spec2 * 0.09;
-        c *= 0.95 + 0.05 * sin(p.x * 7.0 + uTempo * 2.1) * sin(p.y * 5.0 - uTempo * 1.7);
-        c += vec3(0.025, 0.04, 0.04) * sin(p.x * 4.2 + uTempo * 1.7) * sin(p.y * 3.6 - uTempo * 1.3);
-        float ca = smoothstep(0.55, 1.0, sin(p.x * 5.2 + uTempo * 1.1 + sin(p.y * 2.3)) * sin(p.y * 4.7 - uTempo * 1.3));
-        c += vec3(0.10, 0.13, 0.12) * ca * 0.35;
-        gl_FragColor = vec4(c, 0.9);
+        c += vec3(1.0, 0.96, 0.86) * spec * 0.55 + vec3(0.9, 0.95, 0.9) * spec2 * 0.045;
+        c *= 0.97 + 0.03 * sin(p.x * 7.0 + uTempo * 2.1) * sin(p.y * 5.0 - uTempo * 1.7);
+        c += vec3(0.012, 0.022, 0.022) * sin(p.x * 4.2 + uTempo * 1.7) * sin(p.y * 3.6 - uTempo * 1.3);
+        float ca = smoothstep(0.72, 1.0, sin(p.x * 5.2 + uTempo * 1.1 + sin(p.y * 2.3)) * sin(p.y * 4.7 - uTempo * 1.3));
+        c += vec3(0.07, 0.09, 0.085) * ca * 0.16;
+        gl_FragColor = vec4(c, 0.94);
       }`,
   })
   const meshAcqua = new THREE.Mesh(new THREE.BufferGeometry(), matAcqua)
@@ -630,7 +709,6 @@ export function costruisci(opz = {}) {
   radice.add(meshAcqua)
 
   // ── casa ──
-  const casaMeta = DATI.case.casa
   const bCasa = base(19 * RAD, 0, 0)
   // corpo principale, veranda, ali: la sagoma esatta è nel rilievo
   const corpo = { u0: -8.12, u1: 8.12, v0: -3.7, v1: 8.58, h: 6.35 }
@@ -650,12 +728,35 @@ export function costruisci(opz = {}) {
     })
     return { p0, p1, nrm, lista, H }
   }
+  function zoccolo(blocco, b = bCasa) {
+    for (const lato of ['S', 'E', 'N', 'O']) {
+      const [u0, u1, v0, v1] = [blocco.u0, blocco.u1, blocco.v0, blocco.v1]
+      const p0 = lato === 'S' ? [u0, v0 - 0.045] : lato === 'E' ? [u1 + 0.045, v0] : lato === 'N' ? [u1, v1 + 0.045] : [u0 - 0.045, v1]
+      const p1 = lato === 'S' ? [u1, v0 - 0.045] : lato === 'E' ? [u1 + 0.045, v1] : lato === 'N' ? [u0, v1 + 0.045] : [u0 - 0.045, v0]
+      const A = aMondo(b, p0[0], p0[1]), B = aMondo(b, p1[0], p1[1])
+      const cx = (A[0] + B[0]) / 2, cy = (A[1] + B[1]) / 2, L = Math.hypot(B[0] - A[0], B[1] - A[1])
+      if (L < 0.4) continue
+      scatola(acc.pietra, cx, 0.2, -cy, L + 0.08, 0.4, 0.11, Math.atan2(B[1] - A[1], B[0] - A[0]))
+    }
+  }
+  function ombraGronda(blocco, b) {
+    for (const lato of ['S', 'E', 'N', 'O']) {
+      const [u0, u1, v0, v1] = [blocco.u0, blocco.u1, blocco.v0, blocco.v1]
+      const p0 = lato === 'S' ? [u0, v0 - 0.035] : lato === 'E' ? [u1 + 0.035, v0] : lato === 'N' ? [u1, v1 + 0.035] : [u0 - 0.035, v1]
+      const p1 = lato === 'S' ? [u1, v0 - 0.035] : lato === 'E' ? [u1 + 0.035, v1] : lato === 'N' ? [u0, v1 + 0.035] : [u0 - 0.035, v0]
+      const A = aMondo(b, p0[0], p0[1]), B = aMondo(b, p1[0], p1[1])
+      const cx = (A[0] + B[0]) / 2, cy = (A[1] + B[1]) / 2, L = Math.hypot(B[0] - A[0], B[1] - A[1])
+      if (L > 0.4) scatola(acc.ombra, cx, blocco.h - 0.15, -cy, L, 0.3, 0.05, Math.atan2(B[1] - A[1], B[0] - A[0]))
+    }
+  }
   function costruisciBlocco(blocco, lati) {
     for (const lato of ['S', 'E', 'N', 'O']) {
       const { p0, p1, nrm, lista, H } = apertureLato(blocco, lato, lati[lato] ?? [])
       const mur = muro(acc.cemento, bCasa, p0, p1, H, nrm, lista)
       for (const a of lista) serramento(acc.vetro, acc.telaio, acc.persiane, acc.mattone, mur, a, null)
     }
+    zoccolo(blocco, bCasa)
+    ombraGronda(blocco, bCasa)
   }
   // corpo: finestre grandi ad arco al piano terra, finestre con persiane al piano alto
   costruisciBlocco(corpo, {
@@ -737,8 +838,6 @@ export function costruisci(opz = {}) {
   }
 
   // ── capannone ──
-  const capMeta = DATI.case.capannone
-  const bCap = base(capMeta.angolo, capMeta.centro[0], capMeta.centro[1])
   const cap = { u0: -8.12, u1: 8.12, v0: -5.075, v1: 5.075, h: 4.95 }
   for (const [u, v] of [[-8.0, -5.0], [8.0, 5.0], [-8.0, 5.0], [8.0, -5.0]]) {
     const p = puntoMondo(bCap, u, v, 2.4)
@@ -756,6 +855,8 @@ export function costruisci(opz = {}) {
       const mur = muro(acc.cemento, bCap, p0, p1, blocco.h, nrm, lista)
       for (const a of lista) serramento(acc.vetroCap, acc.telaio, acc.persiane, acc.mattone, mur, a, null)
     }
+    zoccolo(blocco, bCap)
+    ombraGronda(blocco, bCap)
   }
   bloccoCap(cap, {
     S: [ap('S', -1.5, 2.92, 0.06, 3.0, { arco: true, mattone: true }), ap('S', 2.2, 2.92, 0.06, 3.0, { arco: true, mattone: true }), ap('S', 5.85, 2.92, 0.06, 3.0, { arco: true, mattone: true }), ap('S', -5.0, 1.1, 1.5, 2.55), ap('S', -3.55, 1.1, 1.5, 2.55)],
@@ -800,6 +901,7 @@ export function costruisci(opz = {}) {
     geo.setAttribute('normal', new THREE.Float32BufferAttribute([n.x, n.y, n.z, n.x, n.y, n.z, n.x, n.y, n.z, n.x, n.y, n.z, n.x, n.y, n.z, n.x, n.y, n.z], 3))
     geo.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1], 2))
     const pannello = new THREE.Mesh(geo, matSolare)
+    pannello.name = 'pannello'
     pannello.castShadow = true
     radice.add(pannello)
     for (const [p1, p2] of [[a, c], [c, d], [d, e], [e, a]]) {
@@ -810,7 +912,7 @@ export function costruisci(opz = {}) {
   }
 
   // ── fontana (sagoma esatta da OSM) ──
-  const fp = DATI.fonte.p, fc = DATI.fonte.centro
+  const fp = DATI.fonte.p
   const rimpicciolisci = (p, f) => p.map((q) => [fc[0] + (q[0] - fc[0]) * f, fc[1] + (q[1] - fc[1]) * f])
   const fonteEsterna = senzaDup(fp), fonteInterna = rimpicciolisci(fonteEsterna, 0.9)
   {
@@ -837,15 +939,12 @@ export function costruisci(opz = {}) {
     acquaGeo.rotateX(-Math.PI / 2); acquaGeo.translate(0, 0.47, 0)
     const matFonte = matAcqua.clone()
     matFonte.uniforms = THREE.UniformsUtils.clone(matAcqua.uniforms)
-    matFonte.uniforms.uColore.value = new THREE.Color(0x8fd8d2)
-    matFonte.uniforms.uFondo.value = new THREE.Color(0x4ea79f)
-    matFonte.uniforms.uOnde.value = 2.2
+    matFonte.uniforms.uColore.value = new THREE.Color(0x5f9a92)
+    matFonte.uniforms.uFondo.value = new THREE.Color(0x386b67)
+    matFonte.uniforms.uOnde.value = 1.2
     acquee.push(matFonte)
     const acquaFonte = new THREE.Mesh(acquaGeo, matFonte); acquaFonte.receiveShadow = true; radice.add(acquaFonte)
-    // ghiaia attorno
-    const aperta = rimpicciolisci(fonteEsterna, 1.35)
-    const g3 = geoPoligono(aperta, 0, 4); g3.translate(0, 0.061, 0)
-    const m3 = new THREE.Mesh(g3, MAT.ghiaia); m3.receiveShadow = true; radice.add(m3)
+    // (la ghiaia attorno alla fontana è già nell'ortofoto: niente disco piatto sopra)
   }
   // becchetta a cigno e zampilli
   const pBecco = new THREE.Vector3(-6.3, 0.66, 14.9) // (x, y, -nord): punto sull'abside
@@ -874,7 +973,7 @@ export function costruisci(opz = {}) {
     radice.add(caduta)
   }
   // zampilli centrali: coni sottili, trasparenti, senza tappi
-  const zampilloMat = new THREE.MeshBasicMaterial({ color: 0xdff8f2, transparent: true, opacity: 0.22, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide })
+  const zampilloMat = new THREE.MeshBasicMaterial({ color: 0xd6efea, transparent: true, opacity: 0.11, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide })
   const zampilli = new THREE.Group()
   const getti = [[0, 0, 1.85, 0.07], [-0.55, 0.2, 1.25, -0.16], [0.5, -0.25, 1.35, 0.15], [0.35, 0.55, 1.05, 0.1]]
   for (const [dx, dz, h, tilt] of getti) {
@@ -885,7 +984,7 @@ export function costruisci(opz = {}) {
     m.userData.getto = true
     zampilli.add(m)
   }
-  const schiuma = new THREE.Mesh(new THREE.RingGeometry(0.15, 0.65, 20), new THREE.MeshBasicMaterial({ color: 0xe8fffb, transparent: true, opacity: 0.18, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }))
+  const schiuma = new THREE.Mesh(new THREE.RingGeometry(0.15, 0.65, 20), new THREE.MeshBasicMaterial({ color: 0xe8fffb, transparent: true, opacity: 0.09, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }))
   schiuma.rotation.x = -Math.PI / 2; schiuma.position.set(fc[0], 0.505, -fc[1])
   zampilli.add(schiuma)
   radice.add(zampilli)
@@ -919,122 +1018,180 @@ export function costruisci(opz = {}) {
   // il primo sul lato lungo a nord-ovest, il secondo sull'abside
   radice.add(airone(-13.0, -17.37, 0.95), airone(-5.65, -16.35, 0.85))
 
-  // ── alberi, siepi, bosco ──
-  const alberi = [] // {x,y,tipo,s}
-  const dentroPoligono = (p, poly) => {
-    let d = false
-    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
-      const xi = poly[i][0], yi = poly[i][1], xj = poly[j][0], yj = poly[j][1]
-      if ((yi > p[1]) !== (yj > p[1]) && p[0] < (xj - xi) * (p[1] - yi) / (yj - yi) + xi) d = !d
+  // ── il cortile vissuto: un'auto, il trattore, la legna e qualche vaso ──
+  {
+    const mVernice = new THREE.MeshStandardMaterial({ color: 0x5a6870, roughness: 0.32, metalness: 0.5 })
+    const mVerde = new THREE.MeshStandardMaterial({ color: 0x335a37, roughness: 0.52, metalness: 0.28 })
+    const mGomma = new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.92 })
+    const mVetroAuto = new THREE.MeshStandardMaterial({ color: 0x1b2a2e, roughness: 0.12, metalness: 0.45 })
+    const mFaro = new THREE.MeshStandardMaterial({ color: 0xfff2c8, roughness: 0.15, emissive: 0xffedb0, emissiveIntensity: 0.08 })
+    const mRosso = new THREE.MeshStandardMaterial({ color: 0x6f1f1c, roughness: 0.35, metalness: 0.3 })
+    const gruppo = (x, y, rot) => { const g = new THREE.Group(); g.position.set(x, 0, -y); g.rotation.y = rot; g.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true } }); radice.add(g); return g }
+    const pezzo = (g, mat, x, y, z, sx, sy, sz) => { const m = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; g.add(m); return m }
+    const ruota = (g, x, y, z, r, sp) => {
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, sp, 18), mGomma); m.rotation.x = Math.PI / 2; m.position.set(x, y, z); m.castShadow = true; g.add(m)
+      const c = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.52, r * 0.52, sp + 0.015, 12), MAT.metallo); c.rotation.x = Math.PI / 2; c.position.set(x, y, z); c.castShadow = true; g.add(c)
     }
-    return d
-  }
-  const giardinoPoly = giardino
-  const puntiFilare = (f, passo, jitter = 0) => {
-    const out = []
-    for (let i = 0; i < f.p.length - 1; i++) {
-      const a = f.p[i], b = f.p[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1])
-      const n = Math.max(1, Math.round(L / passo))
-      for (let k = 0; k < n; k++) { const t = (k + 0.5) / n; out.push([a[0] + (b[0] - a[0]) * t + (rnd() - 0.5) * jitter, a[1] + (b[1] - a[1]) * t + (rnd() - 0.5) * jitter]) }
+    const piedeOmbra = (x, y, rot, w, h) => {
+      const g = new THREE.Group(); g.position.set(x, 0.062, -y); g.rotation.y = rot
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: T.ombraAlbero, transparent: true, depthWrite: false, color: 0x1f2a16, opacity: 0.55, polygonOffset: true, polygonOffsetFactor: -2 }))
+      m.rotation.x = -Math.PI / 2; m.scale.set(w, h, 1); m.renderOrder = 1
+      g.add(m); radice.add(g)
     }
-    return out
-  }
-  // filari OSM: platani lungo il viale, pioppi lungo i campi (i filari vicini a sud diventano siepi basse:
-  // non devono nascondere il capannone quando si guarda la casa dal giardino)
-  for (const f of DATI.filari) {
-    if (f.p.length < 2) continue
-    const vicinoSud = f.p.some((q) => Math.hypot(q[0] + 18.4, q[1] + 43.4) < 5) || f.p.some((q) => Math.hypot(q[0] - 17.4, q[1] + 15.4) < 4)
-    if (vicinoSud) continue
-    const filareVialeOvest = f.p.some((q) => Math.hypot(q[0] - 17.3, q[1] - 21.9) < 3)
-    const filareVialeEst = f.p.some((q) => Math.hypot(q[0] - 19.2, q[1] - 22.1) < 3)
-    if (filareVialeEst) continue
-    const vicinoCasa = f.p.some((q) => Math.hypot(q[0] + 16.7, q[1] - 10.3) < 4)
-    const tipo = filareVialeOvest || vicinoCasa ? 'platano' : 'pioppo'
-    const passo = tipo === 'platano' ? 7.2 : 11.5
-    for (const q of puntiFilare(f, passo, tipo === 'platano' ? 0.8 : 1.2)) {
-      if (Math.hypot(q[0], q[1]) > 170) continue
-      if (dentroPoligono(q, giardinoPoly) && tipo !== 'platano') continue
-      alberi.push({ x: q[0], y: q[1], tipo, s: tipo === 'platano' ? 0.9 + rnd() * 0.3 : 0.95 + rnd() * 0.35 })
+    // l'auto in cortile
+    const auto = gruppo(14.8, -8.6, -0.5)
+    piedeOmbra(14.8, -8.6, -0.5, 5.1, 3.5)
+    pezzo(auto, mVernice, 0, 0.62, 0, 4.2, 0.56, 1.78)
+    pezzo(auto, mVetroAuto, -0.15, 1.13, 0, 2.15, 0.52, 1.62)
+    pezzo(auto, mVernice, -0.15, 1.42, 0, 2.05, 0.09, 1.56)
+    pezzo(auto, mVernice, 1.65, 0.98, 0, 0.9, 0.22, 1.64)
+    ruota(auto, -1.28, 0.34, 0.86, 0.34, 0.22); ruota(auto, -1.28, 0.34, -0.86, 0.34, 0.22)
+    ruota(auto, 1.3, 0.34, 0.86, 0.34, 0.22); ruota(auto, 1.3, 0.34, -0.86, 0.34, 0.22)
+    for (const z of [0.58, -0.58]) {
+      pezzo(auto, mFaro, 2.11, 0.68, z, 0.05, 0.16, 0.34)
+      pezzo(auto, mRosso, -2.11, 0.68, z, 0.05, 0.14, 0.34)
     }
-  }
-  // alberi del giardino
-  for (const [x, y, s] of [[-26, -2, 1.05], [-25, -27, 1.0], [18.2, -3.5, 1.0], [7, 14.5, 1.0], [-7, 17, 0.95], [-3.5, 14.8, 0.9]]) alberi.push({ x, y, tipo: 'platano', s })
-  // gelsi nei bordi del giardino (le foto ne mostrano pi� di uno)\n  for (const [x, y, s] of [[-22, 8, 0.95], [19, 6, 0.9], [-9, -24, 0.85]]) alberi.push({ x, y, tipo: 'gelso', s })\n  // frutteto a filari dentro il bosco, fuori dal giardino
-  const boscoPoly = DATI.campi.filter((c) => c.c === 'wood').map((c) => senzaDup(c.p)).sort((a, b) => b.length - a.length)[0]
-  if (boscoPoly) {
-    const xx = boscoPoly.map((p) => p[0]), yy = boscoPoly.map((p) => p[1])
-    const x0 = Math.min(...xx), x1 = Math.max(...xx), y0 = Math.min(...yy), y1 = Math.max(...yy)
-    const ang = 108 * RAD, dx = Math.cos(ang), dy = Math.sin(ang), nx = -dy, ny = dx
-    for (let a = -140; a < 140; a += 5.5) for (let t = -140; t < 140; t += 4.3) {
-      const x = a * nx + t * dx, y = a * ny + t * dy
-      if (x < x0 - 4 || x > x1 + 4 || y < y0 - 4 || y > y1 + 4) continue
-      if (!dentroPoligono([x, y], boscoPoly)) continue
-      if (dentroPoligono([x, y], giardinoPoly)) continue
-      if (Math.hypot(x, y) > 125) continue
-      // niente alberi dentro i fabbricati o sulla fontana
-      if (x > -20 && x < 24 && y > -32 && y < 14) continue
-      if (Math.hypot(x - fc[0], y - fc[1]) < 9) continue
-      alberi.push({ x: x + (rnd() - 0.5) * 0.6, y: y + (rnd() - 0.5) * 0.6, tipo: 'frutteto', s: 0.85 + rnd() * 0.3 })
+    // il trattore davanti al capannone
+    const trattore = gruppo(18.2, -18.6, 0.5)
+    piedeOmbra(18.2, -18.6, 0.5, 4.3, 3.2)
+    pezzo(trattore, mVerde, -0.1, 0.86, 0, 2.6, 0.8, 1.35)
+    pezzo(trattore, mVerde, 0.75, 1.42, 0, 1.25, 0.58, 1.15)
+    pezzo(trattore, mVetroAuto, -0.55, 1.65, 0, 1.15, 1.05, 1.2)
+    pezzo(trattore, mVerde, -0.55, 2.22, 0, 1.3, 0.1, 1.3)
+    ruota(trattore, -0.8, 0.72, 0.82, 0.72, 0.4); ruota(trattore, -0.8, 0.72, -0.82, 0.72, 0.4)
+    ruota(trattore, 1.12, 0.45, 0.7, 0.45, 0.28); ruota(trattore, 1.12, 0.45, -0.7, 0.45, 0.28)
+    pezzo(trattore, mGomma, 0.98, 1.55, 0.35, 0.1, 0.6, 0.1)
+    // la legna accatastata sotto la pergola
+    const legna = gruppo(-12.2, 3.8, -0.3)
+    for (let i = 0; i < 9; i++) {
+      const t = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.13, 2.2, 8), MAT.legnoScuro)
+      t.rotation.z = Math.PI / 2; t.position.set(0, 0.16 + Math.floor(i / 3) * 0.25, (i % 3) * 0.28 - 0.28)
+      t.castShadow = true; t.receiveShadow = true; legna.add(t)
     }
-    // qualche grande albero nel bosco
-    for (let i = 0; i < 26; i++) {
-      const x = x0 + rnd() * (x1 - x0), y = y0 + rnd() * (y1 - y0)
-      if (!dentroPoligono([x, y], boscoPoly) || dentroPoligono([x, y], giardinoPoly) || Math.hypot(x, y) > 160) continue
-      if (x > -30 && x < 30 && y > -34 && y < 22) continue
-      alberi.push({ x, y, tipo: 'pioppo', s: 1.1 + rnd() * 0.5 })
+    // due vasi con il bosso davanti alla casa
+    for (const [x, y] of [[10.7, -3.4], [12.1, -5.1]]) {
+      const vaso = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.27, 0.45, 12), MAT.cotto)
+      vaso.position.set(x, 0.22, -y); vaso.castShadow = true; radice.add(vaso)
+      const cesp = new THREE.Mesh(new THREE.SphereGeometry(0.48, 10, 8), new THREE.MeshLambertMaterial({ color: 0x4e6b3e }))
+      cesp.position.set(x, 0.75, -y); cesp.scale.y = 0.8; cesp.castShadow = true; radice.add(cesp)
     }
   }
-  // istanzia: tronchi e chiome, tre tipi ma una sola chiamata per pezzo
-  const geomTronco = new THREE.CylinderGeometry(0.13, 0.2, 1, 5)
-  const geomChioma = new THREE.IcosahedronGeometry(1, 1)
+
+  // ── alberi e siepi in 3D: chiome a lobi irregolari, non palline perfette ──
+  // ogni chioma è fatta di 3–5 sfere schiacciate e ruotate, con un colore diverso per lobo:
+  // da lontano si legge il volume, da vicino non si vede la sfera singola.
+  function deforma(geo, seme) {
+    const p = geo.attributes.position
+    for (let i = 0; i < p.count; i++) {
+      const x = p.getX(i), y = p.getY(i), z = p.getZ(i)
+      const n = 1 + 0.11 * Math.sin(x * 7.1 + y * 5.3 + z * 8.7 + seme) + 0.06 * Math.sin(x * 13.3 - y * 11.1 + z * 7.7 + seme * 2)
+      p.setXYZ(i, x * n, y * n, z * n)
+    }
+    geo.computeVertexNormals()
+    return geo
+  }
+  const geoLobo = deforma(new THREE.SphereGeometry(1, 14, 10), 7)
+  const geoLoboPiccolo = deforma(new THREE.SphereGeometry(1, 9, 7), 13)
+  const matChioma = new THREE.MeshLambertMaterial({ map: T.foglie, color: 0xffffff })
   const matTronco = new THREE.MeshLambertMaterial({ color: 0xffffff })
-  const matChioma = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true })
-  const perTipo = { platano: { h: 3.2, r: 2.45, rc: 0.98, tronco: 0xc4bca9, chioma: 0x6e8d55 }, gelso: { h: 2.9, r: 2.75, tronco: 0x6b5a44, chioma: 0x5b7a48 }, pioppo: { h: 2.4, r: 1.4, ry: 4.2, tronco: 0x6b5a44, chioma: 0x5e7b49 }, frutteto: { h: 1.45, r: 1.3, rc: 0.8, tronco: 0x6d5c46, chioma: 0x789558 } }
-  for (const [tipo, cfg] of Object.entries(perTipo)) {
-    const lista = alberi.filter((a) => a.tipo === tipo)
-    if (!lista.length) continue
-    const tronchi = new THREE.InstancedMesh(geomTronco, matTronco, lista.length)
-    const chiome = new THREE.InstancedMesh(geomChioma, matChioma, lista.length)
-    tronchi.castShadow = chiome.castShadow = true; chiome.receiveShadow = true
-    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), pos = new THREE.Vector3()
-    const cT = new THREE.Color(cfg.tronco), cC = new THREE.Color(cfg.chioma)
-    lista.forEach((a, i) => {
-      const H = cfg.h * a.s, R = cfg.r * a.s, RY = (cfg.ry ?? cfg.r) * a.s
-      pos.set(a.x, H / 2, -a.y); sc.set(a.s * (tipo === 'pioppo' ? 0.7 : 1), H, a.s * (tipo === 'pioppo' ? 0.7 : 1)); q.setFromAxisAngle(UP, rnd() * 6.28)
-      m.compose(pos, q, sc); tronchi.setMatrixAt(i, m)
-      pos.set(a.x, H + RY * 0.55, -a.y); sc.set(R, RY, R); q.setFromAxisAngle(UP, rnd() * 6.28)
-      m.compose(pos, q, sc); chiome.setMatrixAt(i, m)
-      const varia = 0.86 + rnd() * 0.26
-      tronchi.setColorAt(i, cT.clone().multiplyScalar(varia))
-      chiome.setColorAt(i, cC.clone().multiplyScalar(varia))
-    })
-    tronchi.instanceMatrix.needsUpdate = true; chiome.instanceMatrix.needsUpdate = true
-    if (tronchi.instanceColor) tronchi.instanceColor.needsUpdate = true
-    if (chiome.instanceColor) chiome.instanceColor.needsUpdate = true
-    radice.add(tronchi, chiome)
+  const colora = (cfg, basso = 0) => {
+    const c = new THREE.Color(cfg.colori[Math.floor(rnd() * cfg.colori.length)])
+    return c.multiplyScalar((0.7 + rnd() * 0.22) * (1 - basso * 0.14))
   }
-  // siepi: lungo il viale, davanti al capannone e sul confine est
-  const accSiepe = nuovo()
-  const siepe = (punti, altezza, spessore, buco = null) => {
-    for (let i = 0; i < punti.length - 1; i++) {
-      const a = punti[i], b = punti[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1])
-      if (L < 0.4) continue
-      const cx = (a[0] + b[0]) / 2, cy = (a[1] + b[1]) / 2
-      if (buco && Math.hypot(cx - buco[0], cy - buco[1]) < 4.2) continue
-      const rot = Math.atan2(-(b[1] - a[1]), b[0] - a[0])
-      scatola(accSiepe, cx, altezza / 2, -cy, L + spessore * 0.5, altezza, spessore, rot)
+  const lobi = [], tronchi = []
+  for (const a of alberi) {
+    const cfg = TIPI_ALBERO[a.tipo] ?? TIPI_ALBERO.platano
+    const sc = a.s ?? 1
+    const altT = cfg.tronco * sc
+    tronchi.push({ x: a.x, y: -a.y, alt: altT, r: 0.19 * sc * (a.tipo === 'pioppo' ? 0.8 : 1), col: new THREE.Color(a.tipo === 'pioppo' ? 0xa99f8f : 0x6b5a47).multiplyScalar(0.82 + rnd() * 0.18) })
+    const R = cfg.chioma * sc
+    if (a.tipo === 'pioppo') {
+      // colonna di pioppo: cinque lobi sovrapposti, un po' sbilanciati
+      const H = (cfg.alto ?? 6) * sc
+      const strati = [[0.16, 1.02, 0.84, 0.34], [0.35, 1.16, 0.9, 0.4], [0.55, 1.05, 0.86, 0.38], [0.75, 0.86, 0.78, 0.32], [0.91, 0.58, 0.58, 0.22]]
+      for (let i = 0; i < strati.length; i++) {
+        const [f, sx, sz, sy] = strati[i]
+        const c = colora(cfg, 1 - f)
+        lobi.push({ x: a.x + (rnd() - 0.5) * R * 0.55 * (1 - f), y: altT + H * f, z: -a.y + (rnd() - 0.5) * R * 0.55 * (1 - f), rx: R * sx, ry: H * sy, rz: R * sz, rot: rnd() * 6.28, col: c })
+      }
+    } else {
+      // latifoglie e frutteto: lobi sovrapposti, una sola chioma tondeggiante
+      const frutto = a.tipo === 'frutteto'
+      const n = frutto ? 3 : 4
+      const cy = altT + R * (frutto ? 0.38 : 0.62)
+      const off = frutto
+        ? [[0, 0.02, 0, 1.12, 0.92, 1.12], [0.34, -0.14, 0.12, 0.88, 0.76, 0.9], [-0.3, -0.08, -0.16, 0.9, 0.78, 0.88]]
+        : [[0, 0.1, 0, 1.02, 0.92, 1.02], [0.4, -0.05, 0.2, 0.84, 0.74, 0.86], [-0.38, -0.02, -0.22, 0.86, 0.72, 0.84], [0.04, 0.44, -0.04, 0.72, 0.6, 0.68]]
+      for (let i = 0; i < n; i++) {
+        const [ox, oy, oz, sx, sy, sz] = off[i]
+        lobi.push({ x: a.x + ox * R, y: cy + oy * R, z: -a.y + oz * R, rx: R * sx, ry: R * sy, rz: R * sz, rot: rnd() * 6.28, col: colora(cfg, oy < 0 ? 1 : 0) })
+      }
     }
   }
-  const filareEst = DATI.filari.find((f) => f.p.some((q) => Math.hypot(q[0] - 19.2, q[1] - 22.1) < 3))
-  if (filareEst) siepe(filareEst.p.filter((p) => p[1] > -22), 1.75, 1.1)
-  // i due filari bassi a sud del capannone: siepi, non pioppi alti
-  for (const f of DATI.filari) {
-    if (f.p.some((q) => Math.hypot(q[0] + 18.4, q[1] + 43.4) < 5) || f.p.some((q) => Math.hypot(q[0] - 17.4, q[1] + 15.4) < 4)) siepe(f.p, 1.75, 1.3)
+  // le siepi: due file di lobi bassi, una sopra l'altra, così il bordo non è una scatola
+  const lobiSiepe = []
+  for (const si of siepi) {
+    const sp = si.spessore ?? 1.2, alt = si.altezza ?? 1.7
+    for (let i = 0; i < si.p.length - 1; i++) {
+      const a = si.p[i], b = si.p[i + 1], L = Math.hypot(b[0] - a[0], b[1] - a[1])
+      if (L < 0.3) continue
+      const n = Math.max(1, Math.round(L / 1.15))
+      for (let k = 0; k < n; k++) {
+        const t = (k + 0.5) / n
+        const x = a[0] + (b[0] - a[0]) * t + (rnd() - 0.5) * 0.35
+        const y = a[1] + (b[1] - a[1]) * t + (rnd() - 0.5) * 0.35
+        const rr = (0.52 + rnd() * 0.15) * Math.max(0.85, sp)
+        lobiSiepe.push({ x, y: rr * 0.85, z: -y, rx: rr, ry: rr * 0.82, rz: rr, rot: rnd() * 6.28, col: colora(TIPI_ALBERO.siepe) })
+        lobiSiepe.push({ x: x + (rnd() - 0.5) * 0.4, y: alt * 0.65 + rr * 0.25, z: -y + (rnd() - 0.5) * 0.4, rx: rr * 0.8, ry: rr * 0.7, rz: rr * 0.8, rot: rnd() * 6.28, col: colora(TIPI_ALBERO.siepe, 0.5) })
+      }
+    }
   }
-  const capLinea = [aMondo(bCap, -8.1, 6.4), aMondo(bCap, 8.1, 6.4)]
-  siepe(capLinea, 1.8, 1.1)
-  // confine del lotto: margine falciato e filo, non una siepe alta (non deve tagliare la vista)
-  const accSiepeMesh = meshDa(accSiepe, MAT.siepe); radice.add(accSiepeMesh)
+  const creaLobi = (lista, geo, ombre) => {
+    if (!lista.length) return
+    const mesh = new THREE.InstancedMesh(geo, matChioma, lista.length)
+    mesh.castShadow = ombre; mesh.receiveShadow = true
+    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), pos = new THREE.Vector3(), eu = new THREE.Euler()
+    lista.forEach((l, i) => {
+      pos.set(l.x, l.y, l.z); sc.set(l.rx, l.ry, l.rz)
+      eu.set((rnd() - 0.5) * 0.22, l.rot, (rnd() - 0.5) * 0.22); q.setFromEuler(eu)
+      m.compose(pos, q, sc); mesh.setMatrixAt(i, m); mesh.setColorAt(i, l.col)
+    })
+    mesh.instanceMatrix.needsUpdate = true
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
+    radice.add(mesh)
+  }
+  creaLobi(lobi, geoLobo, true)
+  creaLobi(lobiSiepe, geoLoboPiccolo, false)
+  // il piede d'ombra delle chiome: àncora gli alberi al prato, come nell'occlusione ambientale di una foto aerea
+  {
+    const geo = new THREE.PlaneGeometry(1, 1)
+    const mat = new THREE.MeshBasicMaterial({ map: T.ombraAlbero, transparent: true, depthWrite: false, color: 0xffffff, opacity: 0.45, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })
+    const mesh = new THREE.InstancedMesh(geo, mat, alberi.length)
+    mesh.name = 'piediAlberi'
+    mesh.renderOrder = 1
+    const m = new THREE.Matrix4(), q = new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0)), sc = new THREE.Vector3(), pos = new THREE.Vector3()
+    alberi.forEach((a, i) => {
+      const cfg = TIPI_ALBERO[a.tipo] ?? TIPI_ALBERO.platano
+      const rr = cfg.chioma * (a.s ?? 1)
+      pos.set(a.x, 0.055, -a.y); sc.set(rr * 2.5, rr * 1.75, 1)
+      m.compose(pos, q, sc); mesh.setMatrixAt(i, m)
+    })
+    mesh.instanceMatrix.needsUpdate = true
+    radice.add(mesh)
+  }
+  {
+    const geo = new THREE.CylinderGeometry(1, 1.25, 1, 6)
+    const mesh = new THREE.InstancedMesh(geo, matTronco, tronchi.length)
+    mesh.castShadow = true; mesh.receiveShadow = true
+    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), pos = new THREE.Vector3()
+    tronchi.forEach((t, i) => {
+      pos.set(t.x, t.alt / 2, t.y); sc.set(t.r, t.alt, t.r); q.setFromAxisAngle(UP, rnd() * 6.28)
+      m.compose(pos, q, sc); mesh.setMatrixAt(i, m); mesh.setColorAt(i, t.col)
+    })
+    mesh.instanceMatrix.needsUpdate = true
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true
+    radice.add(mesh)
+  }
 
   // ── recinzioni: paletti e filo lungo le linee rosse del rilievo ──
   const accRecinti = nuovo(), fili = []
@@ -1054,53 +1211,91 @@ export function costruisci(opz = {}) {
   }
   for (const r of DATI.recinzioni) recinto(r)
   recinto([...DATI.confine, DATI.confine[0]], 1.05, [17.7, 29.5])
-  radice.add(meshDa(accRecinti, MAT.legno))
+  const meshRecinti = meshDa(accRecinti, MAT.legno); meshRecinti.name = 'recinti'; radice.add(meshRecinti)
   {
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(fili, 3))
-    radice.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x5a564c, transparent: true, opacity: 0.6 })))
+    const f = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x5a564c, transparent: true, opacity: 0.6 }))
+    f.name = 'fili'; radice.add(f)
   }
 
-  // ── edifici lontani (OSM, solo volumi) ──
+  // ── edifici OSM: i vicini con le finestre, i lontani come volumi colorati ──
+  const muriLontani = [0xdfd3bd, 0xd8c9ad, 0xe4d8c0, 0xcdbfa6, 0xd9c6ab], tettiLontani = [0x8a5540, 0x96604a, 0x7f4d39, 0xa06850]
   for (const e of DATI.edifici) {
     const p = senzaDup(e.p)
     if (p.length < 3) continue
-    const forma = formaLocali(p)
-    const geo = new THREE.ExtrudeGeometry(forma, { depth: e.h, bevelEnabled: false })
-    geo.rotateX(-Math.PI / 2)
-    const cv = coloreV(0xc8c1b4)
-    aggiungiGeo(acc.lontani, geo, new THREE.Matrix4(), cv); geo.dispose()
-    // tetto a due falde basso sul rettangolo d'ingombro (non un padiglione gigante)
     const xs = p.map((q) => q[0]), ys = p.map((q) => q[1])
     const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys)
     const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2, ang = angoloLato(p)
     const bb = base(ang, cx, cy), u = (x1 - x0) / 2, v = (y1 - y0) / 2
+    const vicino = Math.hypot(cx, cy) < 132
+    const forma = formaLocali(p)
+    const geo = new THREE.ExtrudeGeometry(forma, { depth: e.h, bevelEnabled: false })
+    geo.rotateX(-Math.PI / 2)
+    const cv = coloreV(vicino ? muriLontani[Math.round(Math.abs(cx + cy)) % muriLontani.length] : muriLontani[Math.round(Math.abs(cx * 3 + cy)) % muriLontani.length])
+    aggiungiGeo(acc.lontani, geo, new THREE.Matrix4(), cv); geo.dispose()
+    // tetto a due falde basso sul rettangolo d'ingombro (non un padiglione gigante)
     const P = (a, c, h) => puntoMondo(bb, a, c, h)
-    const colTetto = coloreV(0x7d5445)
+    const colTetto = coloreV(tettiLontani[Math.round(Math.abs(cx - cy)) % tettiLontani.length])
     const H = e.h + clamp(Math.min(u, v) * 0.32, 0.55, 2.0)
-    const e0 = P(-u - 0.25, -v - 0.25, e.h), e1 = P(u + 0.25, -v - 0.25, e.h), e2 = P(u + 0.25, v + 0.25, e.h), e3 = P(-u - 0.25, v + 0.25, e.h)
+    const ov = vicino ? 0.38 : 0.25
+    const e0 = P(-u - ov, -v - ov, e.h), e1 = P(u + ov, -v - ov, e.h), e2 = P(u + ov, v + ov, e.h), e3 = P(-u - ov, v + ov, e.h)
     const tri = (a, b, c, col) => {
       const n = new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a)).normalize()
       if (n.y < 0) n.negate()
       triangolo(acc.lontani, a, b, c, n, [0, 0], [1, 0], [0.5, 1], col)
     }
     if (u >= v) {
-      const r1 = P(-u - 0.25, 0, H), r2 = P(u + 0.25, 0, H)
+      const r1 = P(-u - ov, 0, H), r2 = P(u + ov, 0, H)
       tri(e0, e1, r2, colTetto); tri(e0, r2, r1, colTetto)
       tri(e2, e3, r1, colTetto); tri(e2, r1, r2, colTetto)
       tri(e1, e2, r2, colTetto); tri(e3, e0, r1, colTetto)
     } else {
-      const r1 = P(0, -v - 0.25, H), r2 = P(0, v + 0.25, H)
+      const r1 = P(0, -v - ov, H), r2 = P(0, v + ov, H)
       tri(e1, e2, r2, colTetto); tri(e1, r2, r1, colTetto)
       tri(e3, e0, r1, colTetto); tri(e3, r1, r2, colTetto)
       tri(e0, e1, r1, colTetto); tri(e2, e3, r2, colTetto)
     }
+    // caminetto, per i vicini
+    if (vicino) {
+      const c = P(-u * 0.35, 0, H + 0.05)
+      scatola(acc.cotto, c.x, c.y, c.z, 0.5, 1.1, 0.5, ang)
+    }
+    // finestre e portoncino, solo dove si vedono davvero
+    if (vicino) {
+      const finestre = (n, lungo) => {
+        for (let i = 0; i < n; i++) {
+          const t = n === 1 ? 0 : (i / (n - 1) - 0.5) * 0.7
+          for (const lat of [-1, 1]) {
+            const uu = lungo ? t * u * 1.6 : lat * (u - 0.02)
+            const vv = lungo ? lat * (v - 0.02) : t * v * 1.6
+            const q = P(uu, vv, 1.45)
+            const rot = lungo ? ang : ang + Math.PI / 2
+            scatola(acc.telaio, q.x, q.y, q.z, 1.04, 1.4, 0.08, rot)
+            const q2 = P(uu + (lungo ? 0 : lat * 0.055), vv + (lungo ? lat * 0.055 : 0), 1.45)
+            scatola(acc.vetroCap, q2.x, q2.y, q2.z, 0.84, 1.16, 0.05, rot)
+            // davanzale chiaro
+            const q3 = P(uu + (lungo ? 0 : lat * 0.08), vv + (lungo ? lat * 0.08 : 0), 0.71)
+            scatola(acc.telaio, q3.x, q3.y, q3.z, 1.18, 0.08, 0.14, rot)
+          }
+        }
+      }
+      finestre(u > v ? 3 : 2, true)
+      finestre(u > v ? 2 : 3, false)
+    }
   }
-  const meshLontani = meshDa(acc.lontani, MAT.lontani, false); meshLontani.receiveShadow = true; radice.add(meshLontani)
+  const meshLontani = meshDa(acc.lontani, MAT.lontani, true); meshLontani.name = 'lontani'; meshLontani.receiveShadow = true; radice.add(meshLontani)
 
   // ── costruisci le mesh della casa, del capannone, dei dettagli ──
-  for (const [chiave, mat] of [['cemento', MAT.cemento], ['tegole', MAT.tegole], ['vetro', MAT.vetro], ['vetroCap', MAT.vetroCap], ['telaio', MAT.telaio], ['persiane', MAT.persiana], ['mattone', MAT.mattone], ['metallo', MAT.metallo], ['cotto', MAT.cotto], ['fascia', MAT.telaio], ['fontana', MAT.fontana]]) {
+  for (const [chiave, mat] of [['cemento', MAT.cemento], ['tegole', MAT.tegole], ['vetro', MAT.vetro], ['vetroCap', MAT.vetroCap], ['telaio', MAT.telaio], ['persiane', MAT.persiana], ['mattone', MAT.mattone], ['pietra', MAT.pietra], ['metallo', MAT.metallo], ['cotto', MAT.cotto], ['fascia', MAT.fascia], ['fontana', MAT.fontana]]) {
     if (!acc[chiave].pos.length) continue
     const m = meshDa(acc[chiave], mat)
+    m.name = chiave
+    radice.add(m)
+  }
+  if (acc.ombra.pos.length) {
+    const m = meshDa(acc.ombra, MAT.ombraMuro)
+    m.name = 'ombra'
+    m.castShadow = false; m.receiveShadow = false; m.renderOrder = 1
     radice.add(m)
   }
 
@@ -1158,20 +1353,25 @@ export function costruisci(opz = {}) {
   stelle.frustumCulled = false
   scena.add(stelle)
 
-  // ── luci ──
-  const emisfero = new THREE.HemisphereLight(0xbcd3e2, 0x6d6853, 1.15)
+  // ── luci: sole alto, cielo che riempie le ombre, ombre morbide ──
+  const emisfero = new THREE.HemisphereLight(0xc9dce8, 0x7c7358, 1.7)
   scena.add(emisfero)
-  const sole = new THREE.DirectionalLight(0xfff2da, 2.4)
-  sole.position.set(80, 120, 60)
+  const sole = new THREE.DirectionalLight(0xfff2da, 2.8)
+  sole.position.set(80, 130, 60)
   sole.castShadow = ombre
   if (ombre) {
     sole.shadow.mapSize.set(2048, 2048)
-    sole.shadow.camera.left = -135; sole.shadow.camera.right = 135
-    sole.shadow.camera.top = 135; sole.shadow.camera.bottom = -135
-    sole.shadow.camera.near = 1; sole.shadow.camera.far = 500
-    sole.shadow.bias = -0.0004; sole.shadow.normalBias = 0.03
+    sole.shadow.camera.left = -140; sole.shadow.camera.right = 140
+    sole.shadow.camera.top = 140; sole.shadow.camera.bottom = -140
+    sole.shadow.camera.near = 1; sole.shadow.camera.far = 520
+    sole.shadow.bias = -0.00025; sole.shadow.normalBias = 0.045
+    sole.shadow.radius = 2.2; sole.shadow.blurSamples = 10
+    if ('intensity' in sole.shadow) sole.shadow.intensity = 1
   }
   scena.add(sole)
+  // una luce di riempimento dalla parte opposta, senza ombre: schiarisce i lati in ombra senza spegnere il volume
+  const riempimento = new THREE.DirectionalLight(0xaec9dc, 0.42)
+  scena.add(riempimento)
   const luna = new THREE.DirectionalLight(0x9fb8e6, 0)
   scena.add(luna)
   const luceFontana = new THREE.PointLight(0x8ad8cf, 0, 28, 2)
@@ -1236,6 +1436,9 @@ export function costruisci(opz = {}) {
     sole.color.set(pal.coloreSole); sole.intensity = pal.intensitaSole
     sole.position.set(pal.dirLuce[0] * 210, pal.dirLuce[1] * 210, pal.dirLuce[2] * 210)
     sole.visible = pal.intensitaSole > 0.02
+    riempimento.color.set(pal.emisfero.cielo)
+    riempimento.intensity = pal.notte ? 0.16 : 0.38
+    riempimento.position.set(-pal.dirLuce[0] * 170, Math.max(55, pal.dirLuce[1] * 100), -pal.dirLuce[2] * 170)
     luna.position.set(-pal.dirLuce[0] * 210, Math.abs(pal.dirLuce[1]) * 210 + 50, -pal.dirLuce[2] * 210)
     luna.intensity = pal.notte ? 1.15 : 0
     luceFontana.intensity = pal.notte ? 28 : 0
@@ -1280,7 +1483,7 @@ export function costruisci(opz = {}) {
       m.scale.y = 0.94 + Math.sin(t * 3.2 + i) * 0.05
       m.scale.x = m.scale.z = 0.95 + Math.sin(t * 2.3 + i * 1.7) * 0.06
     })
-    zampilloMat.opacity = 0.2 + Math.sin(t * 2.7) * 0.03
+    zampilloMat.opacity = 0.1 + Math.sin(t * 2.7) * 0.02
     cieloUniformi.uTempo.value = t
     stelle.rotation.y = t * 0.003
     pioggia.u.uTempo.value = t

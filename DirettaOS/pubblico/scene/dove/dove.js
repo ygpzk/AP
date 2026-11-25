@@ -21,29 +21,29 @@ const adesso = () => performance.now()
 // comandi / viste di prova (solo con ctx.prova)
 const Q = new URLSearchParams(location.search)
 const VISTE = {
-  tre: { x: 4, y: -11, d: 78, h: 26, p: 33 },
-  alto: { x: 4, y: -42, d: 315, h: 0, p: 86 },
-  confine: { x: 2, y: -38, d: 345, h: 0, p: 84 },
-  casa: { x: 0, y: -5, d: 30, h: 34, p: 19 },
-  fontana: { x: -10, y: -16.5, d: 18, h: 38, p: 28 },
-  capannone: { x: 8, y: -22, d: 28, h: -38, p: 26 },
-  viale: { x: 18, y: 12, d: 26, h: 0, p: 10 },
-  campi: { x: 32, y: -35, d: 185, h: -58, p: 42 },
-  orizzonte: { x: 3, y: -4, d: 62, h: 0, p: 10 },
-  giardino: { x: -2, y: -12, d: 42, h: 26, p: 27 },
+  tre: { x: 2, y: -9, d: 92, h: 28, p: 42 },
+  alto: { x: 2, y: -18, d: 285, h: 330, p: 82 },
+  confine: { x: 2, y: -38, d: 300, h: 0, p: 80 },
+  casa: { x: -1, y: -4, d: 46, h: 30, p: 32 },
+  fontana: { x: -10, y: -16.5, d: 27, h: 38, p: 30 },
+  capannone: { x: 8, y: -22, d: 38, h: -38, p: 30 },
+  viale: { x: 18, y: 12, d: 38, h: 0, p: 25 },
+  campi: { x: 32, y: -35, d: 190, h: -58, p: 42 },
+  orizzonte: { x: 3, y: -4, d: 62, h: 0, p: 16 },
+  giardino: { x: -2, y: -12, d: 58, h: 26, p: 34 },
 }
 
 // la visita guidata: pura funzione di ctx.tempo(), così tutte le pagine vedono lo stesso fotogramma
 const TOUR = [
-  { t: 0, x: 3, y: -8, d: 150, h: 22, p: 40 },
-  { t: 12, x: -9, y: -16, d: 26, h: 38, p: 28 },
-  { t: 25, x: -10, y: -16, d: 30, h: 150, p: 30 },
-  { t: 36, x: -1, y: -5, d: 38, h: 32, p: 20 },
-  { t: 48, x: 7, y: -21, d: 34, h: -38, p: 28 },
-  { t: 60, x: 18, y: 12, d: 26, h: 0, p: 10 },
-  { t: 72, x: 34, y: -34, d: 135, h: -58, p: 40 },
-  { t: 84, x: 3, y: -12, d: 175, h: 18, p: 43 },
-  { t: 96, x: 3, y: -8, d: 150, h: 22, p: 40 },
+  { t: 0, x: 2, y: -9, d: 92, h: 28, p: 42 },
+  { t: 12, x: -10, y: -16, d: 32, h: 38, p: 31 },
+  { t: 25, x: -10, y: -16, d: 34, h: 150, p: 32 },
+  { t: 36, x: -1, y: -5, d: 52, h: 32, p: 30 },
+  { t: 48, x: 7, y: -21, d: 48, h: -38, p: 31 },
+  { t: 60, x: 18, y: 12, d: 38, h: 0, p: 26 },
+  { t: 72, x: 34, y: -34, d: 152, h: -58, p: 40 },
+  { t: 84, x: 2, y: -14, d: 172, h: 18, p: 43 },
+  { t: 96, x: 2, y: -9, d: 92, h: 28, p: 42 },
 ]
 function tourA(t) {
   const durata = TOUR.at(-1).t
@@ -121,7 +121,7 @@ export function crea(ctx) {
     return { el, mostra() {}, giro() {}, aggiorna() {}, comando() {} }
   }
 
-  camera = new THREE.PerspectiveCamera(48, 1920 / 1080, 0.4, 2400)
+  camera = new THREE.PerspectiveCamera(40, 1920 / 1080, 0.4, 2400)
   if (ctx.prova && Q.has('nogl')) return caduta()
   try {
     renderer = new THREE.WebGLRenderer({ antialias: ombre, alpha: false, powerPreference: 'high-performance' })
@@ -129,9 +129,9 @@ export function crea(ctx) {
     renderer.setSize(1920, 1080, false)
     renderer.outputColorSpace = THREE.SRGBColorSpace
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1
+    renderer.toneMappingExposure = 1.22
     renderer.shadowMap.enabled = ombre
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.shadowMap.type = THREE.VSMShadowMap
     renderer.shadowMap.autoUpdate = false
     renderer.domElement.className = 'dvw-tela'
     renderer.domElement.style.cssText = 'position:absolute;left:0;top:0;width:1920px;height:1080px;display:block;z-index:0'
@@ -146,7 +146,7 @@ export function crea(ctx) {
   }
 
   // ── camera: bersaglio a terra, distanza, rotta (0 = nord), inclinazione ──
-  const cam = { x: 4, y: -11, d: 78, h: 26 * RAD, p: 33 * RAD }
+  const cam = { x: 2, y: -9, d: 92, h: 28 * RAD, p: 42 * RAD }
   const des = { ...cam }
   let seguendo = false, trascinando = false, mescolaTour = 0, ultimaAttivita = ctx.tempo()
   const forzaTour = ctx.prova && Q.get('tour') === '1'
@@ -160,10 +160,10 @@ export function crea(ctx) {
   if (vista) Object.assign(cam, { x: vista.x, y: vista.y, d: vista.d, h: vista.h * RAD, p: vista.p * RAD })
   Object.assign(des, cam)
   const limite = (c) => {
-    c.d = clamp(c.d, 13, 430)
-    c.p = clamp(c.p, 10 * RAD, 86 * RAD)
+    c.d = clamp(c.d, 15, 310)
+    c.p = clamp(c.p, 22 * RAD, 82 * RAD)
     const r = Math.hypot(c.x, c.y)
-    if (r > 340) { c.x *= 340 / r; c.y *= 340 / r }
+    if (r > 320) { c.x *= 320 / r; c.y *= 320 / r }
   }
   function applicaCamera() {
     const cp = Math.cos(cam.p), sp = Math.sin(cam.p)
@@ -209,7 +209,7 @@ export function crea(ctx) {
     const prima = { x: cam.x, y: cam.y, h: cam.h, p: cam.p }
     if (modo === 'ruota') {
       cam.h = inizio.cam.h - dx * 0.005
-      cam.p = clamp(inizio.cam.p + dy * 0.004, 10 * RAD, 86 * RAD)
+      cam.p = clamp(inizio.cam.p + dy * 0.004, 22 * RAD, 82 * RAD)
     } else {
       const g = suolo(e.clientX, e.clientY)
       if (g && inizio.g) {
@@ -244,7 +244,7 @@ export function crea(ctx) {
     segnaAttivita(); volo = null; inerzia.x = inerzia.y = inerzia.h = inerzia.p = 0
     const g = suolo(e.clientX, e.clientY)
     const vecchio = cam.d
-    cam.d = clamp(cam.d * Math.exp(clamp(e.deltaY, -220, 220) * 0.0012), 13, 430)
+    cam.d = clamp(cam.d * Math.exp(clamp(e.deltaY, -220, 220) * 0.0012), 15, 310)
     if (g) { const f = cam.d / vecchio; cam.x = g.x + (cam.x - g.x) * f; cam.y = g.y + (cam.y - g.y) * f }
     limite(cam); des.x = cam.x; des.y = cam.y; des.d = cam.d
     segnaPubblicabile()
@@ -315,7 +315,7 @@ export function crea(ctx) {
     if (trascinando) return
     const [x, y, d, h, p] = v.c.map(Number)
     if (![x, y, d, h, p].every(Number.isFinite)) return
-    des.x = x; des.y = y; des.d = clamp(d, 13, 430); des.h = h * RAD; des.p = clamp(p * RAD, 10 * RAD, 86 * RAD)
+    des.x = x; des.y = y; des.d = clamp(d, 15, 310); des.h = h * RAD; des.p = clamp(p * RAD, 22 * RAD, 82 * RAD)
     seguendo = true; mescolaTour = 0; ultimaAttivita = ctx.tempo(); daPubblicare = false
     inerzia.x = inerzia.y = inerzia.h = inerzia.p = 0
     limite(des)
@@ -326,8 +326,8 @@ export function crea(ctx) {
     renderer = new THREE.WebGLRenderer({ antialias: ombre, alpha: false, powerPreference: 'high-performance' })
     renderer.setPixelRatio(1); renderer.setSize(1920, 1080, false)
     renderer.outputColorSpace = THREE.SRGBColorSpace
-    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = pal?.esposizione ?? 1
-    renderer.shadowMap.enabled = ombre; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = pal?.esposizione ?? 1.22
+    renderer.shadowMap.enabled = ombre; renderer.shadowMap.type = THREE.VSMShadowMap; renderer.shadowMap.autoUpdate = false
     renderer.domElement.className = 'dvw-tela'
     renderer.domElement.style.cssText = 'position:absolute;left:0;top:0;width:1920px;height:1080px;display:block;z-index:0'
     renderer.domElement.addEventListener('webglcontextlost', (e) => { if (!renderer || e.target !== renderer.domElement) return; e.preventDefault(); contestoPerso = true })

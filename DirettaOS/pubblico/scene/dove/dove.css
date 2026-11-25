@@ -10,6 +10,11 @@
 .dvw.dvw-interagito { cursor: grab; }
 .dvw.dvw-trascina { cursor: grabbing; }
 .dvw-tela { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; display: block; z-index: 0; }
+/* una vignettatura appena accennata: chiude i bordi senza scurire il centro */
+.dvw::after {
+  content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: radial-gradient(ellipse 72% 68% at 52% 46%, transparent 60%, rgba(10, 17, 8, .19) 100%);
+}
 .dvw-ui { position: absolute; inset: 0; z-index: 3; pointer-events: none; font-family: "gg sans", "Noto Sans", "Segoe UI", sans-serif; }
 
 /* la bussola: un anello leggero, la rosa gira con la rotta della camera */
