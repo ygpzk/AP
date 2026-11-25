@@ -28,12 +28,15 @@ const IMMAGINI = [
 const CONNESSIONI = [
   'https://api.lanyard.rest',
   'wss://api.lanyard.rest',
+  'https://desktop-inpvhr2.tail6c90b3.ts.net', // (il canale diretto: SSE dei conti e della vetrina, dal pc)
   'https://dcdn.dstn.to',
   'https://discord.com',
   'https://cdn.discordapp.com',
   'https://media.discordapp.net',
   'https://tiles.openfreemap.org',
   'https://api.bigdatacloud.net',
+  'https://godbolt.org', // (codice C: GCC 14.2 su Compiler Explorer)
+  'https://wandbox.org', // (codice C: il secondo compilatore, se il primo non risponde)
 ]
 const CORNICI = [
   "'self'",
