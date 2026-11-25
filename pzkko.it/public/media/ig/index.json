@@ -1,6 +1,6 @@
 {
   "v": 1,
-  "updated": "2026-11-24T21:19:32+00:00",
+  "updated": "2026-11-25T13:40:46+00:00",
   "accounts": [
     {
       "username": "albertoxpecchini",
@@ -13,7 +13,7 @@
       ],
       "stats": {
         "followers": 1667,
-        "following": 815,
+        "following": 816,
         "posts": 0
       },
       "avatar": "albertoxpecchini/avatar-dc93c8ebe395.webp",
@@ -380,7 +380,7 @@
           ]
         }
       ],
-      "synced": "2026-11-24T21:17:38+00:00",
+      "synced": "2026-11-25T13:40:42+00:00",
       "stories": []
     },
     {
