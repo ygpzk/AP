@@ -215,6 +215,43 @@ Nella scheda del profilo c’è il tasto del conto: verde «Entra» per chi è f
 il nome e i $pzk per chi è dentro (col menu: novità, regalo, esci). In chat:
 `/account`, `/regalo`, `/novita`.
 
+## I popup in stile pzk e le app in vetrina (25.11)
+
+Il profilo resta quello di Discord; tutto quello che **si apre sopra** è un
+pezzo del muro, come i tavoli: l’accesso (invito, email, codice, nome,
+benvenuto, novità, regalo), la scheda del progetto, la ricerca (Ctrl K), i menu,
+l’avviso in basso e la testata della finestra delle app. Il foglio è
+`art/roulette/carta.webp` allungato con `border-image` (gli angoli col nastro
+restano interi a ogni misura; sul telefono la scheda del progetto è carta
+piena, senza nastro). Anton per i titoli, Permanent Marker per la voce, Special
+Elite per il resto, il tasto nero storto, l’evidenziatore giallo e i timbri.
+Gli stili stanno in fondo a `src/site.css` (le variabili `--pz-*`) e in
+`accesso/accesso.css`, che resta autonomo. Restano come sono, apposta: i tavoli
+(già fogli), la calcolatrice (Discord), lo schermo di pzk os, la chat e il
+visualizzatore di Instagram (vedi `design/instagram-bacheca.md`).
+
+Le app si spingono da sole, senza server: il browser si ricorda quali app hai
+aperto (`pzkko-provate` in localStorage) e `daProvare()` in `app.js` propone
+prima le nuove mai provate (`nuovo: 'AAAA-MM-GG'` in `config.js`, per tre
+settimane), poi le altre mai provate, poi il resto, in un giro che cambia ogni
+giorno. Le stesse proposte stanno:
+
+- in bacheca, **«da provare»**: quattro volantini col tasto e la tessera con un
+  tondo per ogni app, timbrato quando la apri;
+- nel **volantino** in basso a destra: esce quando chiudi un’app (un’altra da
+  provare) e una volta per visita dopo 40 secondi; mai sopra qualcosa di
+  aperto, mai nella chat, e dopo due X per quella visita tace
+  (`?volantino` lo fa uscire subito, anche negli strumenti di prova);
+- nella scheda del progetto, **«prova anche»**: tre volantini in fondo;
+- nella ricerca, **«gioca subito»**: ogni cosa che gira qui (Roulette, Parole,
+  la Miniera…) si apre dalla ricerca senza passare dalla scheda;
+- nell’invito, quattro polaroid (PZK Zero, Parole, Roulette, Trivia) che si
+  aprono subito anche da ospite, e nelle **novità** del 25.11 un tasto «gioca»
+  accanto a ogni app nuova. Dall’accesso un tasto d’app manda l’evento
+  `pzkko-apri`: il profilo lo raccoglie, altrove si va a `/#progetti/<app>`.
+
+I timbri «nuovo» e «provata ✓» stanno anche sulle schede dei progetti.
+
 ## Comandi
 
 ```sh

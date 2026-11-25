@@ -175,7 +175,7 @@ function statusSvg(st) {
 let toastTimer
 function toast(msg) {
   const el = $('#toast')
-  el.innerHTML = `${I.check}<span>${esc(msg)}</span>`
+  el.innerHTML = `<b aria-hidden="true">✓</b><span>${esc(msg)}</span>` // (25.11) un pezzo di nastro scritto a pennarello
   el.classList.add('is-on')
   clearTimeout(toastTimer)
   toastTimer = setTimeout(() => el.classList.remove('is-on'), 1700)
@@ -451,6 +451,128 @@ function linksHtml(p, primary = false) {
   const u = ui()
   return `${p.url ? `<a class="btn ${primary && !p.play ? 'btn--msg' : 'btn--ghost'}" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">${esc(u.open)} ${I.ext}</a>` : ''}${p.download ? `<a class="btn ${primary && !p.url && !p.play ? 'btn--msg' : 'btn--ghost'}" href="${esc(p.download)}" rel="noopener noreferrer">${I.down}${esc(u.download)}</a>` : ''}${p.code ? `<a class="btn btn--ghost" href="${esc(p.code)}" target="_blank" rel="noopener noreferrer">${brand('github', { dark: 'ffffff' }).replace('<svg ', '<svg width="16" height="16" ')}${esc(u.code)}</a>` : ''}`
 }
+// ─── le app di casa, in vetrina (25.11, pzkko: «invoglia la gente a usare le mie app, fai il sito più sponsorizzato
+// internamente»). Il browser si ricorda quali app hai aperto (pzkko-provate, solo qui, niente server): gli annunci propongono
+// prima quelle nuove che non hai mai provato, poi le altre mai provate, poi il resto, in un giro che cambia ogni giorno.
+// Le stesse proposte stanno nella bacheca («da provare», con la tessera da riempire), nel volantino che esce quando chiudi
+// un'app o dopo un po' che giri, nella scheda del progetto («prova anche») e nella ricerca («gioca subito») ──
+const SPOT = {
+  it: { titolo: 'da provare', voce: 'girano tutte qui dentro, senza scaricare niente', tessera: (a, b) => `la tua tessera: ${a} su ${b}`, piena: 'tessera piena: le hai provate tutte!', provata: 'provata', nuovo: 'nuovo', dopo: 'ti è piaciuto? prova anche', mai: 'non l’hai ancora provato', giorno: 'l’app del giorno', cose: 'cos’è', altre: 'prova anche', subito: 'Gioca subito', chiudi: 'Chiudi', annuncio: 'Annuncio' },
+  en: { titolo: 'try these', voce: 'they all run right here, nothing to download', tessera: (a, b) => `your card: ${a} of ${b}`, piena: 'card full: you tried them all!', provata: 'tried', nuovo: 'new', dopo: 'liked it? try this next', mai: 'you haven’t tried this yet', giorno: 'app of the day', cose: 'what is it', altre: 'try also', subito: 'Play now', chiudi: 'Close', annuncio: 'Ad' },
+}
+const spot = () => SPOT[lang] || SPOT.en
+const PROVATE_KEY = 'pzkko-provate'
+// le app che girano qui (Diretta OS è un programma da installare: la sua guida non si propone come un gioco)
+const APPS = PROJECTS.filter((p) => p.play?.length && p.key !== 'direttaos')
+const provate = () => { try { const v = JSON.parse(store.get(PROVATE_KEY) || '[]'); return new Set(Array.isArray(v) ? v : []) } catch { return new Set() } }
+const provata = (p, s = provate()) => (p.play || []).some(([, h]) => s.has(h))
+const isNew = (p) => !!p.nuovo && Date.now() - Date.parse(p.nuovo) < 21 * 864e5
+const appDi = (target) => APPS.filter((p) => p.play.some(([, h]) => h === target)).map((p) => p.key)
+/** Ricorda che quell'app (`qui:parole`, `/serranda/`…) è stata aperta. */
+function segna(target) {
+  const s = provate()
+  if (s.has(target)) return
+  s.add(target)
+  store.set(PROVATE_KEY, JSON.stringify([...s].slice(-80)))
+  if (activeTab === 'board') renderAnnunci()
+}
+const seme = (s) => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return h >>> 0 }
+/** Le prossime `n` app da proporre (tranne quelle in `tranne`). */
+function daProvare(n = 4, tranne = []) {
+  const s = provate(), giorno = Math.floor(Date.now() / 864e5)
+  const peso = (p) => (provata(p, s) ? 3 : isNew(p) ? 0 : 1) * 2 ** 32 + seme(`${p.key}${giorno}`)
+  return APPS.filter((p) => !tranne.includes(p.key)).sort((a, b) => peso(a) - peso(b)).slice(0, n)
+}
+const verbo = (p) => (p.kind === 'game' ? ui().play : ui().open)
+/** Apre una cosa del sito: «qui:…» sopra il profilo, un indirizzo nella finestra. */
+function lancia(target, titolo = '') { if (target.startsWith('qui:')) return openHere(target.slice(4)); openApp(target, titolo) }
+const stampHtml = (p, s) => (isNew(p) ? `<span class="timbro timbro--nuovo">${esc(spot().nuovo)}</span>` : provata(p, s) ? `<span class="timbro timbro--fatto">${esc(spot().provata)} ✓</span>` : '')
+/** Un volantino di carta per un'app: la cattura, il nome, una riga, il tasto. */
+function flyerHtml(p, i = 0, { s = provate(), cls = '' } = {}) {
+  const [label, href] = p.play[0]
+  return `<article class="fly ${cls}" style="--r:${[-1.6, 1.2, -.6, 1.8, -1.1][i % 5]}deg">
+      <i class="pz-nastro" aria-hidden="true"></i>
+      <button type="button" class="fly__foto media" data-open="${p.key}" aria-label="${esc(`${spot().cose}: ${p.title}`)}">${mediaHtml(p, { chips: false, video: false })}</button>
+      ${stampHtml(p, s)}
+      <h3 class="fly__t">${esc(p.title)}</h3>
+      <p class="fly__d">${esc(t().projects[p.key]?.card || '')}</p>
+      <div class="fly__tasti"><button type="button" class="pz-tasto" data-app="${esc(href)}" data-app-title="${esc(label)}">${esc(verbo(p))}</button><button type="button" class="pz-link" data-open="${p.key}">${esc(spot().cose)}</button></div>
+    </article>`
+}
+/** La tessera: un tondo per ogni app, timbrato quando l'hai provata. */
+function tesseraHtml(s = provate()) {
+  const n = APPS.filter((p) => provata(p, s)).length
+  return `<div class="tessera" role="img" aria-label="${esc(spot().tessera(n, APPS.length))}">
+      <span class="tessera__t">${esc(n === APPS.length ? spot().piena : spot().tessera(n, APPS.length))}</span>
+      <span class="tessera__buchi">${APPS.map((p) => `<i class="${provata(p, s) ? 'on' : ''}" title="${esc(p.title)}"></i>`).join('')}</span>
+    </div>`
+}
+function annunciHtml() {
+  const s = provate()
+  return `<header class="annunci__h"><h2>${esc(spot().titolo)}</h2><p class="annunci__voce">${esc(spot().voce)}</p>${tesseraHtml(s)}</header>
+    <div class="annunci__fila">${daProvare(4).map((p, i) => flyerHtml(p, i, { s })).join('')}</div>`
+}
+function renderAnnunci() {
+  const box = $('#annunci')
+  if (!box) return
+  box.innerHTML = annunciHtml()
+}
+
+// il volantino: esce quando chiudi un'app (un'altra da provare) e una volta per visita dopo un po' che giri. Non copre
+// niente di aperto, non esce nella chat (sta dove si scrive) e dopo due chiusure con la X per questa visita tace
+let vol = null, volZitto = 0, volTimer = 0
+const VOL_GIORNO = 'pzkko-vol-giorno'
+const occupato = () => !!(document.querySelector('dialog[open]') || modal || qs || appWin || openMenu)
+function volantino(motivo = 'giorno', tranne = []) {
+  if (volZitto >= 2 || activeTab === 'chat' || occupato()) return false
+  const s = provate()
+  const p = daProvare(1, tranne)[0]
+  if (!p) return false
+  togliVolantino(true)
+  const k = motivo === 'dopo' ? spot().dopo : provata(p, s) ? spot().giorno : spot().mai
+  const el = document.createElement('aside')
+  el.className = 'vol'
+  el.setAttribute('aria-label', `${spot().annuncio}: ${p.title}`)
+  el.innerHTML = `<button type="button" class="pz-x vol__x" data-x aria-label="${esc(spot().chiudi)}"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 8l18 17M25 7L8 25"/></svg></button>
+    <p class="vol__voce">${esc(k)}</p>
+    ${flyerHtml(p, 0, { s, cls: 'fly--vol' })}`
+  el.addEventListener('click', (e) => {
+    if (e.target.closest('[data-x]')) { volZitto++; togliVolantino(); return }
+    if (e.target.closest('[data-app],[data-open]')) togliVolantino()
+  })
+  el.addEventListener('keydown', (e) => { if (e.key === 'Escape') { volZitto++; togliVolantino() } })
+  document.body.appendChild(el)
+  vol = el
+  requestAnimationFrame(() => el.classList.add('is-on'))
+  return true
+}
+function togliVolantino(subito = false) {
+  const el = vol
+  vol = null
+  if (!el) return
+  if (subito) return el.remove()
+  el.classList.remove('is-on')
+  setTimeout(() => el.remove(), 260)
+}
+// l'app del giorno: dopo 40 secondi di giro, una volta per visita, quando niente è aperto (se c'è qualcosa, riprova)
+function volantinoDelGiorno() {
+  try { if (sessionStorage.getItem(VOL_GIORNO)) return } catch {}
+  if (navigator.webdriver && !new URLSearchParams(location.search).has('volantino')) return
+  let tentativi = 0
+  const prova = () => {
+    if (document.hidden || !volantino('giorno')) { if (++tentativi < 12) volTimer = setTimeout(prova, 15000); return }
+    try { sessionStorage.setItem(VOL_GIORNO, '1') } catch {}
+  }
+  volTimer = setTimeout(prova, new URLSearchParams(location.search).has('volantino') ? 1500 : 40000)
+}
+/** Dopo che si apre un'app (un <dialog> nuovo), quando la chiudi esce il volantino con un'altra. */
+function dopoChiusura(prima, tranne) {
+  requestAnimationFrame(() => {
+    const d = $$('dialog[open]').find((x) => !prima.includes(x))
+    d?.addEventListener('close', () => setTimeout(() => { if (!occupato()) volantino('dopo', tranne) }, 600), { once: true })
+  })
+}
+
 // i filmati: al passaggio del mouse sul computer, quando la scheda è in vista sul telefono
 let autoIO = null
 function playMedia(el) {
@@ -522,6 +644,7 @@ function showTab(k, { focus = false, url = true } = {}) {
     for (const b of $$('.tab')) { const on = b.dataset.tab === k; b.setAttribute('aria-selected', on); b.tabIndex = on ? 0 : -1 }
     moveInk()
     for (const p of $$('.tabpanel')) p.hidden = p.id !== `panel-${k}`
+    if (k === 'chat') togliVolantino(true)
     renderPanel()
   }
   if (changed) swap(go); else go()
@@ -573,6 +696,7 @@ function renderBoard() {
         <div class="hero__actions">${playHtml(feat)}<button type="button" class="btn ${feat.play ? 'btn--ghost' : 'btn--msg'}" data-open="${feat.key}">${esc(u.details)}</button>${linksHtml(feat)}</div>
       </div>
     </article>
+    <section class="annunci span2 rise" style="--i:1" id="annunci" aria-label="${esc(spot().titolo)}">${annunciHtml()}</section>
     <section class="span2 rise" style="--i:2" id="ig-card" aria-label="Instagram"></section>
     <div class="widget rise" style="--i:1" id="now-widget">${nowWidget()}</div>
     <div class="widget rise" style="--i:2"><div class="widget__h"><span>${esc(u.aboutTitle)}</span></div><p>${esc(u.aboutText)}</p></div>
@@ -587,10 +711,10 @@ function renderBoard() {
   const ig = $('#ig-card', root)
   if (ig) import('./ig.js').then((m) => m.monta(ig, { lang })).catch((e) => console.error(e))
 }
-function projectCard(p, i) {
+function projectCard(p, i, s = provate()) {
   const u = ui(), tx = t().projects[p.key]
   return `<article class="pcard rise" style="--i:${Math.min(i, 8)}">
-    <button type="button" class="pcard__cover media" data-open="${p.key}" aria-label="${esc(`${u.details}: ${p.title}`)}">${mediaHtml(p, { eager: i < 2 })}</button>
+    <button type="button" class="pcard__cover media" data-open="${p.key}" aria-label="${esc(`${u.details}: ${p.title}`)}">${mediaHtml(p, { eager: i < 2 })}</button>${stampHtml(p, s)}
     <div class="pcard__body">
       <h3 class="pcard__title">${esc(p.title)}${archived(p) ? `<span class="tag">${esc(u.archived)}</span>` : ''}</h3>
       <p class="pcard__desc">${esc(tx.card)}</p>
@@ -603,7 +727,7 @@ function renderProjects() {
   const kinds = ['all', ...new Set(PROJECTS.map((p) => p.kind))]
   const list = PROJECTS.filter((p) => filter === 'all' || p.kind === filter)
   root.innerHTML = `<div class="filters" role="group" aria-label="${esc(u.tabs.projects)}">${kinds.map((k) => `<button type="button" class="filter" data-filter="${k}" aria-pressed="${k === filter}">${esc(u.filters[k])}<b>${k === 'all' ? PROJECTS.length : PROJECTS.filter((p) => p.kind === k).length}</b></button>`).join('')}<span class="filters__note">${I.image}${esc(u.real)}</span></div>
-    <div class="grid2" id="pgrid">${list.map(projectCard).join('')}</div>`
+    <div class="grid2" id="pgrid">${list.map((p, i) => projectCard(p, i)).join('')}</div>`
   wireMedia(root)
 }
 function renderCollection() {
@@ -678,7 +802,7 @@ function renderPanel() {
 }
 document.addEventListener('click', (e) => {
   const ap = e.target.closest('[data-app]')
-  if (ap) { ap.dataset.app.startsWith('qui:') ? openHere(ap.dataset.app.slice(4)) : openApp(ap.dataset.app, ap.dataset.appTitle); return }
+  if (ap && !ap.closest('dialog')) { lancia(ap.dataset.app, ap.dataset.appTitle); return }
   const o = e.target.closest('[data-open]')
   if (o) { openProject(o.dataset.open, { from: o.classList.contains('media') ? o : o.closest('.pcard, .hero')?.querySelector('.media') }); return }
   const g = e.target.closest('[data-goto]')
@@ -686,6 +810,8 @@ document.addEventListener('click', (e) => {
   const f = e.target.closest('[data-filter]')
   if (f && f.dataset.filter !== filter) { filter = f.dataset.filter; swap(renderProjects) }
 })
+// i tasti d'app dell'accesso (l'invito, le novità): il riquadro si chiude e l'app si apre qui
+document.addEventListener('pzkko-apri', (e) => { const a = e.detail?.app; if (typeof a !== 'string' || !/^(qui:[a-z:]+|\/[a-z])/.test(a)) return; e.preventDefault(); lancia(a) })
 
 // il battito per le barre di Spotify e i tempi dei giochi
 setInterval(() => {
@@ -712,11 +838,14 @@ function openProject(key, { from = null, push = true } = {}) {
   root.setAttribute('role', 'dialog')
   root.setAttribute('aria-modal', 'true')
   root.setAttribute('aria-labelledby', 'pv-title')
+  // (25.11) la scheda è un manifesto del muro: il foglio col nastro, le catture attaccate come foto, Anton e la macchina da
+  // scrivere, il tasto nero; in fondo «prova anche», tre volantini di altre app da aprire subito
+  const altre = daProvare(3, [key])
   root.innerHTML = `<div class="pv__bg" data-close></div>
     <div class="pv__panel" tabindex="-1">
       <div class="pv__top">
-        <button type="button" class="ctrl" data-share aria-label="${esc(u.copyLink)}" title="${esc(u.copyLink)}">${I.link.replace('width="18" height="18"', 'width="16" height="16"')}</button>
-        <button type="button" class="ctrl" data-close aria-label="${esc(u.close)}" title="${esc(u.close)}">${I.close.replace('width="18" height="18"', 'width="16" height="16"')}</button>
+        <button type="button" class="pz-ico" data-share aria-label="${esc(u.copyLink)}" title="${esc(u.copyLink)}">${I.link.replace('width="18" height="18"', 'width="20" height="20"')}</button>
+        <button type="button" class="pz-x" data-close aria-label="${esc(u.close)}" title="${esc(u.close)}"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 8l18 17M25 7L8 25"/></svg></button>
       </div>
       ${slides.length ? `<div class="pv__stage">
         <div class="pv__strip" data-strip tabindex="0" aria-label="${esc(`${slides.length} ${u.shots}`)}">${slides.map((s, i) => `<div class="pv__slide" style="--img:url('${esc(s.img)}')">${s.video
@@ -728,15 +857,16 @@ function openProject(key, { from = null, push = true } = {}) {
       ${slides.length > 1 ? `<div class="pv__thumbs" data-thumbs>${slides.map((s, i) => `<button type="button" class="pv__thumb" data-go="${i}" aria-label="${i + 1}" aria-current="${i === 0}"><img src="${esc(s.video ? s.img : s.img)}" alt="" loading="lazy" decoding="async">${s.video ? `<span class="play">${I.play.replace('width="12" height="12"', 'width="18" height="18"')}</span>` : ''}</button>`).join('')}</div>` : ''}` : ''}
       <div class="pv__body">
         <div class="pv__head">
-          <div style="min-width:0;flex:1 1 280px"><span class="pv__kind">${esc(u.kind[p.kind] || '')}${archived(p) ? ` · ${esc(u.archived)}` : ''}</span><h2 class="pv__title" id="pv-title">${esc(p.title)}</h2>${rolesHtml(p.tags)}</div>
+          <div style="min-width:0;flex:1 1 280px"><span class="pv__kind">${esc(u.kind[p.kind] || '')}${archived(p) ? ` · ${esc(u.archived)}` : ''}</span>${stampHtml(p)}<h2 class="pv__title" id="pv-title">${esc(p.title)}</h2>${rolesHtml(p.tags)}</div>
           ${p.url || p.code || p.download || p.play ? `<div class="pv__links">${playHtml(p, true)}${linksHtml(p, true)}</div>` : ''}
         </div>
-        <div class="widget"><div class="widget__h"><span>${esc(u.overview)}</span></div><p>${esc(tx.full)}</p></div>
+        <section class="pv__sez"><h3>${esc(u.overview)}</h3><p>${esc(tx.full)}</p></section>
         <div class="grid2">
-          <div class="widget"><div class="widget__h"><span>${esc(u.features)}</span></div><ul class="feat">${tx.features.map((f) => `<li>${esc(f)}</li>`).join('')}</ul></div>
-          <div class="widget"><div class="widget__h"><span>${esc(u.role)}</span></div><p>${esc(tx.role)}</p></div>
+          <section class="pv__sez"><h3>${esc(u.features)}</h3><ul class="feat">${tx.features.map((f) => `<li>${esc(f)}</li>`).join('')}</ul></section>
+          <section class="pv__sez"><h3>${esc(u.role)}</h3><p>${esc(tx.role)}</p></section>
         </div>
         ${slides.length ? `<p class="fine">${I.image}${esc(u.real)}</p>` : ''}
+        ${altre.length ? `<section class="pv__altre"><h3>${esc(spot().altre)}</h3><div class="pv__fila">${altre.map((x, i) => flyerHtml(x, i + 1)).join('')}</div></section>` : ''}
       </div>
     </div>`
   const strip = $('[data-strip]', root), capEl = $('[data-cap]', root)
@@ -837,21 +967,26 @@ function zeroButton() {
   return b
 }
 function openHere(what, { app = null, comando = null } = {}) {
-  closeMenus(); closeSearch()
+  closeMenus(); closeSearch(); togliVolantino(true)
   for (const el of $$('.media.is-playing')) stopMedia(el)
+  // (25.11) l'app aperta finisce nella tessera, e quando la chiudi il volantino ne propone un'altra
+  const target = `qui:${what}`, prima = $$('dialog[open]'), tranne = appDi(target)
+  segna(target)
+  const poi = () => dopoChiusura(prima, tranne)
   if (what === 'chat') { if (modal) closeProject(); showTab('chat', { focus: true }); return Promise.resolve() }
-  if (TAVOLI.includes(what)) return import(`/games/${what}/${what}.js`).then((m) => m.apri()).catch((e) => { console.error(e); toast(ui().nothing) })
+  if (TAVOLI.includes(what)) return import(`/games/${what}/${what}.js`).then((m) => m.apri()).then(poi).catch((e) => { console.error(e); toast(ui().nothing) })
   // le app singole («qui:app:miniera»): un'app del cercapersone da sola, sullo schermo steso piatto (telefono/schermo.js)
-  if (what === 'app' || what.startsWith('app:')) return import('/telefono/schermo.js').then((m) => m.apri(what.slice(4) || app)).catch((e) => { console.error(e); toast(ui().nothing) })
+  if (what === 'app' || what.startsWith('app:')) return import('/telefono/schermo.js').then((m) => m.apri(what.slice(4) || app)).then(poi).catch((e) => { console.error(e); toast(ui().nothing) })
   const da = zeroBtn?.isConnected && activeTab === 'board' && !modal ? zeroBtn : null
-  return import('/telefono/telefono.js').then((t) => t.apri(app, { ...(da && { da }), ...(comando && { comando }) })).catch((e) => { console.error(e); toast(ui().nothing) })
+  return import('/telefono/telefono.js').then((t) => t.apri(app, { ...(da && { da }), ...(comando && { comando }) })).then(poi).catch((e) => { console.error(e); toast(ui().nothing) })
 }
 
 // ─── le pagine intere (il muro, pzk$meeting) in una finestra dentro il sito ──
 let appWin = null
 function openApp(href, title = '') {
   if (!/^\/[a-z]/.test(href) || appWin) return
-  closeMenus(); closeSearch()
+  closeMenus(); closeSearch(); togliVolantino(true)
+  segna(href)
   for (const el of $$('.media.is-playing')) stopMedia(el)
   $('.pv video')?.pause()
   const u = ui(), box = document.createElement('div')
@@ -859,27 +994,29 @@ function openApp(href, title = '') {
   box.setAttribute('role', 'dialog')
   box.setAttribute('aria-modal', 'true')
   box.setAttribute('aria-label', title)
-  box.innerHTML = `<div class="app__bar"><span class="app__dot"></span><b>${esc(title)}</b><span class="app__sub">pzkko.it${esc(href.split('?')[0])}</span>
-      <a class="ctrl" href="${esc(href)}" target="_blank" rel="noopener noreferrer" title="${esc(u.open)}" aria-label="${esc(u.open)}">${I.ext}</a>
-      <button type="button" class="ctrl" data-close title="${esc(u.close)}" aria-label="${esc(u.close)}">${I.close.replace('width="18" height="18"', 'width="16" height="16"')}</button></div>
+  // (25.11) la testata è una striscia di carta col nastro: il nome in Anton, l'indirizzo a macchina
+  box.innerHTML = `<div class="app__bar"><i class="pz-nastro" aria-hidden="true"></i><b>${esc(title)}</b><span class="app__sub">pzkko.it${esc(href.split('?')[0])}</span>
+      <a class="pz-ico" href="${esc(href)}" target="_blank" rel="noopener noreferrer" title="${esc(u.open)}" aria-label="${esc(u.open)}">${I.ext.replace('width="14" height="14"', 'width="20" height="20"')}</a>
+      <button type="button" class="pz-x" data-close title="${esc(u.close)}" aria-label="${esc(u.close)}"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M7 8l18 17M25 7L8 25"/></svg></button></div>
     <iframe class="app__frame" src="${esc(href)}" title="${esc(title)}" allow="fullscreen; autoplay; gamepad; clipboard-write"></iframe>`
   box.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeApp() })
   history.pushState({ app: href }, '')
   document.body.appendChild(box)
   document.documentElement.style.overflow = 'hidden'
-  appWin = { box, last: document.activeElement }
+  appWin = { box, last: document.activeElement, href }
   requestAnimationFrame(() => box.classList.add('is-on'))
   $('iframe', box).focus()
 }
 function closeApp({ pop = true } = {}) {
   if (!appWin) return
-  const { box, last } = appWin
+  const { box, last, href } = appWin
   appWin = null
   box.classList.remove('is-on')
   setTimeout(() => { box.parentNode?.removeChild(box); if (!modal && !appWin) document.documentElement.style.overflow = '' }, 200)
   if (pop) history.back()
   last?.focus?.({ preventScroll: true })
   window.dispatchEvent(new Event('pzkko-app-chiusa'))
+  setTimeout(() => { if (!occupato()) volantino('dopo', appDi(href)) }, 700)
 }
 
 // ─── gli indirizzi: #progetti, #progetti/zero… e il tasto «indietro» ─────────
@@ -958,8 +1095,13 @@ $('#theme-btn').addEventListener('click', toggleTheme)
 let qs = null
 const norm = (s) => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 function searchItems() {
-  const u = ui()
+  const u = ui(), s = provate(), primi = daProvare(5).map((p) => p.key)
+  // (25.11) «gioca subito»: ogni cosa che gira qui (la roulette, parole, la miniera…) si apre dalla ricerca senza passare
+  // dalla scheda; a ricerca vuota restano solo le cinque da provare, a ricerca piena ci sono tutte
+  const gioca = APPS.flatMap((p) => p.play.map(([label, href], i) => ({ group: spot().subito, label, sub: label === p.title ? verbo(p) : p.title, words: `${p.title} ${p.tags.map((x) => x[0]).join(' ')}`, ico: MEDIA[p.key] ? `<img src="${esc(MEDIA[p.key].cover)}" alt="">` : I[p.kind], play: true, top: i === 0 && primi.includes(p.key), giro: primi.includes(p.key) ? primi.indexOf(p.key) : 99, fresh: isNew(p) || !provata(p, s), run: () => lancia(href, label) })))
+  gioca.sort((a, b) => b.top - a.top || a.giro - b.giro)
   return [
+    ...gioca,
     ...TABS.map((k) => ({ group: u.pages, label: tabLabel(k), ico: k === 'chat' ? I.chat.replace('width="18" height="18"', 'width="15" height="15"') : I.search, run: () => showTab(k) })),
     ...PROJECTS.map((p) => ({ group: u.tabs.projects, label: p.title, sub: u.kind[p.kind], words: `${p.tags.map((x) => x[0]).join(' ')} ${t().projects[p.key].card}`, ico: MEDIA[p.key] ? `<img src="${esc(MEDIA[p.key].cover)}" alt="">` : I[p.kind], run: () => { showTab('projects'); openProject(p.key) } })),
     ...[...SOCIALS, ...PERSONAL_SOCIALS].map((s) => ({ group: u.tabs.social, label: s.name, sub: s.handle, ico: brand(s.icon, s), run: () => window.open(s.url, '_blank', 'noopener,noreferrer') })),
@@ -990,7 +1132,7 @@ function openSearch() {
   const draw = () => {
     const q = norm(input.value.trim())
     found = items.filter((it) => !q || norm(`${it.label} ${it.sub || ''} ${it.words || ''} ${it.group}`).includes(q))
-    if (!q) found = found.filter((it) => it.group !== u.language && it.group !== u.tabs.social)
+    if (!q) found = found.filter((it) => it.group !== u.language && it.group !== u.tabs.social && (!it.play || it.top))
     // prima chi ha la parola nel nome, poi gli altri (i gruppi restano uniti)
     else {
       const rank = (it) => { const l = norm(it.label); return l.startsWith(q) ? 0 : l.includes(q) ? 1 : 2 }
@@ -999,7 +1141,7 @@ function openSearch() {
     }
     sel = Math.min(sel, Math.max(0, found.length - 1))
     let group = ''
-    list.innerHTML = found.length ? found.map((it, i) => `${it.group !== group ? `<li class="qs__group" role="presentation">${esc(group = it.group)}</li>` : ''}<li role="presentation"><button type="button" class="qs__item" role="option" id="qs-${i}" data-i="${i}" aria-selected="${i === sel}" tabindex="-1"><span class="ico">${it.ico || ''}</span><span>${esc(it.label)}</span>${it.sub ? `<span class="sub">${esc(it.sub)}</span>` : ''}</button></li>`).join('') : `<li class="qs__empty">${esc(u.noResults)}</li>`
+    list.innerHTML = found.length ? found.map((it, i) => `${it.group !== group ? `<li class="qs__group" role="presentation">${esc(group = it.group)}</li>` : ''}<li role="presentation"><button type="button" class="qs__item" role="option" id="qs-${i}" data-i="${i}" aria-selected="${i === sel}" tabindex="-1"><span class="ico">${it.ico || ''}</span><span>${esc(it.label)}</span>${it.play && it.fresh ? `<span class="qs__nuovo" title="${esc(spot().mai)}" aria-hidden="true">★</span>` : ''}${it.sub ? `<span class="sub${it.play ? ' sub--play' : ''}">${it.play ? '▶ ' : ''}${esc(it.sub)}</span>` : ''}</button></li>`).join('') : `<li class="qs__empty">${esc(u.noResults)}</li>`
     input.setAttribute('aria-activedescendant', found.length ? `qs-${sel}` : '')
   }
   const mark = (i) => { sel = (i + found.length) % Math.max(1, found.length); for (const b of $$('.qs__item', list)) b.setAttribute('aria-selected', +b.dataset.i === sel); $(`#qs-${sel}`, list)?.scrollIntoView({ block: 'nearest' }); input.setAttribute('aria-activedescendant', `qs-${sel}`) }
@@ -1262,6 +1404,7 @@ loadProfile()
 setInterval(loadProfile, 10 * 60 * 1000)
 if (first.proj) openProject(first.proj, { push: false })
 mountAccess()
+volantinoDelGiorno()
 
 // Per le prove: import('/assets/app.js').then((m) => m.onPresence({...}))
 export { onPresence }

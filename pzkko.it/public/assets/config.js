@@ -115,6 +115,7 @@ const GH = 'https://github.com/ygpzk/AP/tree/main'
 // `play`: le cose che girano dentro il sito, [etichetta, indirizzo]. «qui:zero», «qui:roulette»…: sopra il profilo, senza
 // finestra (openHere in app.js); un indirizzo vero (/serranda/): nella finestra dentro il sito (openApp).
 // `art`: la miniatura, [colore 1, colore 2, carattere della scritta, motivo dello sfondo].
+// `nuovo` (25.11): il giorno in cui è uscito; per tre settimane porta il timbro «nuovo» e passa avanti negli annunci.
 export const PROJECTS = [
   { key: 'zero', title: 'PZK Zero', kind: 'game', featured: true, art: ['#ff8a1a', '#7a2d00', 'Mainframe', 'griglia'], tags: [['three.js', 'threejs'], ['JavaScript', 'javascript'], ['LCD 1-bit', '#ff8a1a']],
     play: [['PZK Zero', 'qui:zero'], ['Chat', 'qui:chat']] },
@@ -122,11 +123,11 @@ export const PROJECTS = [
     play: [['Roulette', 'qui:roulette'], ['Blackjack', 'qui:blackjack'], ['Mine', 'qui:mine'], ['Dado', 'qui:dado'], ['Testa o croce', 'qui:moneta'], ['Virtual', 'qui:virtual']] },
   { key: 'serranda', title: 'Il Muro', kind: 'site', art: ['#8d9499', '#2f3336', 'Headbang', 'lamiera'], tags: [['HTML', 'html5'], ['CSS', 'css'], ['gpt-image-2', '#10a37f']],
     play: [['Il Muro', '/serranda/']] },
-  { key: 'synesthesia', title: 'Synesthesia', kind: 'site', art: ['#ebe7dd', '#0b0b0c', 'Modern', 'righe'], tags: [['HTML', 'html5'], ['CSS', 'css'], ['Vercel', 'vercel']],
+  { key: 'synesthesia', title: 'Synesthesia', kind: 'site', nuovo: '2026-11-25', art: ['#ebe7dd', '#0b0b0c', 'Modern', 'righe'], tags: [['HTML', 'html5'], ['CSS', 'css'], ['Vercel', 'vercel']],
     url: 'https://synesthesia-five-omega.vercel.app/' },
   { key: 'matricios', title: 'Matrici OS', kind: 'tool', art: ['#0d3b1e', '#020a05', '8Bit', 'righe'], tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['Terminal', '#3fb950']], code: `${GH}/MatriciOS`, download: 'https://github.com/ygpzk/AP/raw/main/MatriciOS/MatriciOS.exe' },
   // (22.11) la regia delle sovrimpressioni: installer .exe, guida dentro il sito e tutti i comandi
-  { key: 'direttaos', title: 'Diretta OS', kind: 'tool', art: ['#ccff00', '#9d00ff', 'Pricedown', 'griglia'], tags: [['Node.js', 'nodejs'], ['PowerShell', 'powershell'], ['FFmpeg', 'ffmpeg']],
+  { key: 'direttaos', title: 'Diretta OS', kind: 'tool', nuovo: '2026-11-22', art: ['#ccff00', '#9d00ff', 'Pricedown', 'griglia'], tags: [['Node.js', 'nodejs'], ['PowerShell', 'powershell'], ['FFmpeg', 'ffmpeg']],
     play: [['Guida all’installazione', '/direttaos/']] },
   { key: 'lezioni', title: 'pzk$meeting', kind: 'tool', art: ['#ffd60a', '#b88700', 'Tempo', 'punti'], tags: [['Python', 'python'], ['Whisper', '#10a37f'], ['LaTeX', 'latex']],
     play: [['pzk$meeting', '/tools/lezioni/']] },
@@ -134,9 +135,9 @@ export const PROJECTS = [
     play: [['Parole', 'qui:parole']] },
   { key: 'trivia', title: 'Trivia', kind: 'game', art: ['#16c05a', '#062b16', 'Medieval', 'colonne'], tags: [['JavaScript', 'javascript'], ['$pzk', '#7cc400'], ['Quiz', '#16c05a']],
     play: [['Trivia', 'qui:trivia']] },
-  { key: 'angoli', title: 'Angoli', kind: 'game', art: ['#b3121f', '#3a060b', 'Journal', 'righe'], tags: [['JavaScript', 'javascript'], ['SVG', '#e8b800'], ['Geometria', '#b3121f']],
+  { key: 'angoli', title: 'Angoli', kind: 'game', nuovo: '2026-11-20', art: ['#b3121f', '#3a060b', 'Journal', 'righe'], tags: [['JavaScript', 'javascript'], ['SVG', '#e8b800'], ['Geometria', '#b3121f']],
     play: [['Angoli', 'qui:angoli']] },
-  { key: 'pzkmaps', title: 'pzkmaps', kind: 'game', art: ['#1f6feb', '#0a1a33', 'Sakura', 'griglia'], tags: [['JavaScript', 'javascript'], ['OpenStreetMap', '#7ebc6f'], ['Street View', '#4285f4']],
+  { key: 'pzkmaps', title: 'pzkmaps', kind: 'game', nuovo: '2026-11-20', art: ['#1f6feb', '#0a1a33', 'Sakura', 'griglia'], tags: [['JavaScript', 'javascript'], ['OpenStreetMap', '#7ebc6f'], ['Street View', '#4285f4']],
     play: [['pzkmaps', 'qui:pzkmaps']] },
   // le app singole (19.11): il virtual col suo tavolo, e le app del cercapersone da sole sullo schermo steso piatto
   // (telefono/schermo.js, «qui:app:<app di pzk os>»; «borsa» è la banca aperta sulla pagina della borsa)
@@ -150,7 +151,7 @@ export const PROJECTS = [
     play: [['Convertitori', 'qui:app:conversioni']] },
   // (20.11) la calcolatrice in stile Discord coi colori pzk (games/calcolatrice/, «qui:calcolatrice»); quella del
   // cercapersone resta il secondo tasto: i conti, ANS e gli ultimi risultati sono gli stessi
-  { key: 'calcolatrice', title: 'Calcolatrice', kind: 'tool', art: ['#5865f2', '#0e1238', 'Journal', 'tessere'], tags: [['Discord', 'discord'], ['LCD 8-bit', '#ff8a1a'], ['Topografia', '#5865f2']],
+  { key: 'calcolatrice', title: 'Calcolatrice', kind: 'tool', nuovo: '2026-11-20', art: ['#5865f2', '#0e1238', 'Journal', 'tessere'], tags: [['Discord', 'discord'], ['LCD 8-bit', '#ff8a1a'], ['Topografia', '#5865f2']],
     play: [['Calcolatrice', 'qui:calcolatrice'], ['Su pzk os', 'qui:app:calcolatrice']] },
   { key: 'compilatore', title: 'Codice C', kind: 'tool', art: ['#3fb950', '#04130a', 'Mainframe', 'righe'], tags: [['C', '#5c6bc0'], ['GCC', '#3fb950'], ['LCD 8-bit', '#ff8a1a']],
     play: [['Codice C', 'qui:app:compilatore']] },
