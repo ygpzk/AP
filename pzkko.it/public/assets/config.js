@@ -78,22 +78,32 @@ export const NAME_FONTS = {
 
 // I social. `icon` è il nome dell'icona in icons.js; `dark` il colore col tema scuro
 // quando quello del marchio è nero, `light` col tema chiaro quando è troppo chiaro.
+// Il primo gruppo è il profilo pzkko; `PERSONAL_SOCIALS` sono i profili personali,
+// mostrati accanto a questi in «Altri social» e nel gruppo «Personale» della scheda.
 export const SOCIALS = [
   { key: 'discord', name: 'Discord', handle: 'pzkko', url: 'https://discord.com/users/459791358899519498', icon: 'discord' },
   { key: 'instagram', name: 'Instagram', handle: 'pzkko', url: 'https://www.instagram.com/pzkko/', icon: 'instagram' },
   { key: 'x', name: 'X', handle: 'ygpzk', url: 'https://x.com/ygpzk', icon: 'x', dark: 'ffffff' },
+  { key: 'threads', name: 'Threads', handle: 'pzkko', url: 'https://www.threads.com/@pzkko', icon: 'threads', dark: 'ffffff' },
   { key: 'twitch', name: 'Twitch', handle: 'pzkko', url: 'https://www.twitch.tv/pzkko', icon: 'twitch' },
+  { key: 'kick', name: 'Kick', handle: 'pzkko', url: 'https://kick.com/pzkko', icon: 'kick', light: '3a9b0e' },
   { key: 'steam', name: 'Steam', handle: 'ygpzk', url: 'https://steamcommunity.com/profiles/76561198971719489', icon: 'steam', dark: 'ffffff' },
   { key: 'spotify', name: 'Spotify', handle: 'pzkko', url: 'https://open.spotify.com/user/qeefs44bv4bpoa7dk8epagrxf', icon: 'spotify', light: '169c46' },
   { key: 'reddit', name: 'Reddit', handle: 'u/yungpzkko', url: 'https://www.reddit.com/user/yungpzkko/', icon: 'reddit' },
+  { key: 'snapchat', name: 'Snapchat', handle: 'albertopecchini', url: 'https://www.snapchat.com/add/albertopecchini', icon: 'snapchat', light: 'd4b800' },
   { key: 'github', name: 'GitHub', handle: 'ygpzk', url: 'https://github.com/ygpzk', icon: 'github', dark: 'ffffff' },
 ]
 
-// L'eccezione voluta il 24.11: il profilo personale, accanto a quelli di pzkko.
-// Lo script guard.mjs ammette quel nome solo qui, in ig.js e nei dati di
-// /media/ig/ (vedi il commento in guard.mjs). Il dominio personale resta fuori.
+// I profili personali, accanto a quelli di pzkko. Lo script guard.mjs ammette
+// questi nomi solo qui, in ig.js e nei dati di /media/ig/ (vedi il commento in
+// guard.mjs). Il dominio personale resta fuori.
 export const PERSONAL_SOCIALS = [
   { key: 'instagram-personale', name: 'Instagram', handle: 'albertoxpecchini', url: 'https://www.instagram.com/albertoxpecchini/', icon: 'instagram' },
+  { key: 'tiktok', name: 'TikTok', handle: 'albertoxpecchini', url: 'https://www.tiktok.com/@albertoxpecchini', icon: 'tiktok', dark: 'ffffff' },
+  { key: 'youtube', name: 'YouTube', handle: 'alberto-h7y3h', url: 'https://www.youtube.com/@alberto-h7y3h', icon: 'youtube' },
+  { key: 'pinterest', name: 'Pinterest', handle: 'albertoxpecchini', url: 'https://www.pinterest.com/albertoxpecchini/', icon: 'pinterest' },
+  { key: 'soundcloud', name: 'SoundCloud', handle: 'albertoxpecchini', url: 'https://soundcloud.com/albertoxpecchini', icon: 'soundcloud' },
+  { key: 'telegram', name: 'Telegram', handle: 'albertopecchini', url: 'https://t.me/albertopecchini', icon: 'telegram' },
 ]
 
 // I progetti per svago. Immagini e filmati sono catture vere dei progetti in funzione:
@@ -111,6 +121,8 @@ export const PROJECTS = [
     play: [['Roulette', 'qui:roulette'], ['Blackjack', 'qui:blackjack'], ['Mine', 'qui:mine'], ['Dado', 'qui:dado'], ['Testa o croce', 'qui:moneta'], ['Virtual', 'qui:virtual']] },
   { key: 'serranda', title: 'Il Muro', kind: 'site', art: ['#8d9499', '#2f3336', 'Headbang', 'lamiera'], tags: [['HTML', 'html5'], ['CSS', 'css'], ['gpt-image-2', '#10a37f']],
     play: [['Il Muro', '/serranda/']] },
+  { key: 'synesthesia', title: 'Synesthesia', kind: 'site', art: ['#ebe7dd', '#0b0b0c', 'Modern', 'righe'], tags: [['HTML', 'html5'], ['CSS', 'css'], ['Vercel', 'vercel']],
+    url: 'https://synesthesia-five-omega.vercel.app/' },
   { key: 'matricios', title: 'Matrici OS', kind: 'tool', art: ['#0d3b1e', '#020a05', '8Bit', 'righe'], tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['Terminal', '#3fb950']], code: `${GH}/MatriciOS`, download: 'https://github.com/ygpzk/AP/raw/main/MatriciOS/MatriciOS.exe' },
   // (22.11) la regia delle sovrimpressioni: installer .exe, guida dentro il sito e tutti i comandi
   { key: 'direttaos', title: 'Diretta OS', kind: 'tool', art: ['#ccff00', '#9d00ff', 'Pricedown', 'griglia'], tags: [['Node.js', 'nodejs'], ['PowerShell', 'powershell'], ['FFmpeg', 'ffmpeg']],

@@ -15,10 +15,13 @@ File:
 
 - `public/assets/ig.js` — dati, scheda, visualizzatore. Esporta `monta(root,
   { lang })` e `apri(account, items, titolo, lang, partenza)`.
+- `public/assets/ig-sfondi.js` — gli sfondi vivi del palco: 24 temi in pixel,
+  uno per ora (vedi «Sfondi vivi»). Caricato dopo la scheda.
 - `src/site.css` — regole `.igc*` (scheda) e `.igv*` (visualizzatore), in fondo.
 - `public/assets/app.js` — `renderBoard()` monta `#ig-card`; `renderSocial()`
   mostra il gruppo «Personale».
-- `public/assets/config.js` — `PERSONAL_SOCIALS` (l'eccezione voluta).
+- `public/assets/config.js` — `PERSONAL_SOCIALS` (i profili personali, l'eccezione
+  voluta).
 - `public/media/ig/index.json` — il contratto dati; **non riscriverlo a mano**.
 - `public/media/ig/<account>/…` — media già scaricati (WebP/MP4, risoluzione
   nativa). Non cancellare, non rinominare, non ricomprimere.
@@ -61,47 +64,112 @@ Il contratto dati è questo (semplificato):
    raccoglitore fuori dal repo, `vercel.json` (CSP) e `README.md` (spiegazione
    della regola). Se serve un dato nuovo, chiedilo prima.
 
-## Direzione visiva
+## Direzione visiva (rifatta il 24.11 sera, su richiesta: «una nuova visione»)
 
-La scheda deve sembrare **una parte del profilo di Discord**, non un plugin
-Instagram incollato: stesso fondo `--box`, stessi raggi 14–16 px, stessa
-tipografia `gg sans`, stessi bordi `--line`. L'Instagram si riconosce da un
-dettaglio: la linea gradiente in cima e i cerchi delle storie. Il resto resta
-pzkko.
+La scheda non è più un riquadro con i cerchi delle storie. È **un palco a sé
+dentro la bacheca**, parente del banner della community (`.cm-banner`): stessi
+occhielli in `gg mono` maiuscolo, stessi titoli in ABC Ginto Nord.
 
-- Gradiente Instagram: `#f9ce34 → #ee2a7b → #6228d7`, usato con parsimonia
-  (linea superiore, anello delle storie, chip `@pzkko`).
-- Tema chiaro e scuro: tutto deve passare dalle variabili già esistenti
-  (`--text`, `--muted`, `--box`, `--box-2`, `--line`, `--p`, `--a`).
-- Numeri in `font-variant-numeric: tabular-nums`; bio su due righe massimo,
-  con ellissi o `line-clamp` solo se non si perde il senso.
-- La scheda è `span2`: su desktop può respirare, su mobile resta una colonna.
-- Niente ombre pesanti, niente bianco assoluto, niente loghi Meta.
+Ha **due vesti** (dal 25.11): col tema scuro è nera (`#0b090e`, testo bianco),
+col tema chiaro è carta lilla (`#f8f5fc`, inchiostro `#17121f`). Tutto passa
+da due variabili su `.igc__in`: `--ig-c` (i tre numeri dell'inchiostro) e
+`--ig-b` (i tre numeri del fondo); il resto ne deriva. Restano scure in
+entrambi i temi solo le tessere (sono foto), il marchio e le etichette nere.
+Per un colore nuovo si usa `rgba(var(--ig-c), …)`, mai un bianco fisso.
 
-Wireframe di riferimento (desktop):
+Quattro idee, e solo queste:
+
+1. **I profili sono una colonna di server.** A sinistra c'è la colonna di
+   Discord: in cima il marchio (dove Discord mette la casa), poi un avatar per
+   profilo. Quello scelto diventa quadrato arrotondato e ha la tacca bianca;
+   al passaggio compare l'etichetta nera con `@nome`.
+2. **I follower sono il titolo.** Il numero è in Ginto Nord, enorme, riempito
+   col gradiente di Instagram (`--ig-gt`: schiarito sul nero, più carico sulla
+   carta). È l'unico punto in cui il gradiente fa da protagonista.
+3. **Le evidenze sono tessere 9:16**, non cerchi: la foto vera della storia più
+   recente, il titolo in Ginto Nord, e in alto **una barra per ogni storia**
+   (quelle vere: 15 storie, 15 tacche). Sono appena ruotate, come carte sul
+   tavolo; si raddrizzano al passaggio.
+4. **Le tessere si sfogliano.** Muovendo il puntatore da sinistra a destra si
+   scorrono le storie del mazzo (foto dopo 90 ms di sosta, video muto), con il
+   contatore e la data di ogni storia; il clic apre il visualizzatore **da
+   quella storia**. Da tastiera: frecce sinistra/destra sulla tessera.
+
+Regole che restano:
+
+- Gradiente Instagram `#f9ce34 → #ee2a7b → #6228d7` solo su: marchio in cima
+  alla colonna, numero dei follower (versione schiarita), anello delle storie
+  attive (avatar e tessera «Storia»). Nient'altro.
+- Il verde lime del profilo (`--p`) compare solo nel puntino dell'occhiello.
+- Numeri in `tabular-nums`, sempre col separatore («1.667», non «1667»).
+- Niente loghi Meta oltre al glifo, niente ombre colorate, niente bagliori in
+  più: c'è già una luce rosa/viola in basso a sinistra e basta.
+- La scheda è `span2`. Sopra i 640 px di **larghezza della scheda** (non della
+  finestra: è una `@container`) è a due colonne; sotto, una colonna sola con
+  le tessere che si dividono la riga. La colonna dei profili resta sempre.
+
+Schema (scheda larga):
 
 ```
-┌ Instagram ─────────────────────────────── controllo automatico ┐
-│ [ap] @personale   [albi] @pzkko                                │
-│                                                                │
-│  ◯ avatar      αp🕯️  🔒          [Apri su Instagram ↗]        │
-│                @account                                        │
-│                giugnoh · unirsm                                │
-│  ┌────────────┬────────────┬────────────┐                      │
-│  │ 0 post     │ 1.667      │ 815 seguiti│                      │
-│  └────────────┴────────────┴────────────┘                      │
-│  ~sparkline~  +12 negli ultimi 7 giorni                        │
-│  STORIE IN EVIDENZA                                       2    │
-│  ◯ Storia   ◯ Highlights 15   ◯ Highlights 27                  │
-│  Solo conteggi e storie scelte da me. Nessun elenco.  @pzkko → │
-│  ● aggiornato 1 ora fa · 24 nov, 22:17                         │
-└────────────────────────────────────────────────────────────────┘
+┌────┬─────────────────────────────────────────────────────────────┐
+│ IG │ ● INSTAGRAM  [🔒 PROFILO PRIVATO]     CONTROLLO … OGNI ORA │
+│ ── │ (ava) nome                     STORIE IN EVIDENZA        2 │
+│▌ap │       @account                 ┌▬▬▬▬▬▬┐ ┌▬▬▬▬▬▬┐           │
+│ al │ bio                            │      │ │      │           │
+│    │                                │ foto │ │ foto │           │
+│    │ 1.667   ← Ginto Nord, gradiente│      │ │      │           │
+│    │ FOLLOWER  ~spark~ +12 …        │Titolo│ │Titolo│           │
+│    │ 815 seguiti  0 post            │15 st.│ │27 st.│           │
+│    │ [Apri su Instagram ↗]          └──────┘ └──────┘           │
+│    │                                Passa sopra per sfogliare…  │
+│    │ ─────────────────────────────────────────────────────────── │
+│    │ Solo conteggi e storie scelte…   ● aggiornato 1 ora fa · … │
+└────┴─────────────────────────────────────────────────────────────┘
 ```
 
-Il visualizzatore deve sembrare Instagram senza copiarlo: pannello nero,
-barre di avanzamento sottili, chiudi e pausa in alto, didascalia minima in
-basso. Su desktop è un pannello centrato `min(92vh, 900px)`; su mobile è tutto
-schermo con `100dvh` e `env(safe-area-inset-bottom)`.
+Il visualizzatore sembra Instagram senza copiarlo: pannello nero 9:16 alto
+`min(92vh, 900px)`, la foto lo riempie da bordo a bordo senza tagli
+(`object-fit: contain`), comandi e barre sono sovrapposti in alto, contatore e
+collegamento in basso, frecce **fuori** dal pannello. Dietro, la stessa foto
+sfocata fa da luce d'ambiente (nessuno scarico in più). In pausa compare la
+targhetta «IN PAUSA». Su mobile è tutto schermo con `100dvh` e
+`env(safe-area-inset-*)`.
+
+## Sfondi vivi (25.11)
+
+Dietro al palco gira uno sfondo animato in pixel: **24 temi, uno per ogni ora**.
+L'ordine si rimescola ogni giorno con un seme fatto dalla data (stesso giorno,
+stesso ordine per tutti; ogni tema esce una volta al giorno). In fondo alla
+colonna dei profili c'è il dado: ne pesca uno a caso, che resta fino al cambio
+dell'ora. L'etichetta del dado dice l'ora e il nome del tema.
+
+I temi riprendono le cose di pzkko: Cercapersone (lo schermo arancione a un
+bit), Matrici, Il Muro, Fiches, Roulette, Semi, Borsa, Miniera, Frequenze (il
+podcast), più Stelle, Orbite, Pioggia, Onde, Lucciole, Aurora, Griglia, Neve,
+Plasma, Circuito, Radar, Vita, Serpente, Città, Tramonto.
+
+Regole per aggiungerne o toccarli:
+
+- Un tema è `{ id, it, en, avvia(g) }` in `TEMI`; `avvia` prepara la scena e
+  restituisce `(t, dt) => …` in secondi. Se i temi non sono 24, l'ora si
+  prende col resto: meglio tenerli 24.
+- La tela è piccola (un pixel ogni 4 dello schermo: 192×108 sulla scheda
+  larga) e ingrandita con `image-rendering: pixelated`. Niente tela a piena
+  risoluzione, niente WebGL, niente immagini scaricate.
+- Leggeri: 20 fotogrammi al secondo, sotto i 2 ms l'uno (misurati: il più
+  caro è Plasma, 1,7 ms). Fermi quando la scheda è fuori schermo o la pagina
+  è in secondo piano; con `prefers-reduced-motion` resta un fotogramma fisso.
+- Colori solo dai nomi della tavolozza (lime, viola, rosa, giallo, lcd, verde,
+  cielo, bianco) con `c(nome, alfa)` o `sfuma(da, a)`, mai numeri scritti a
+  mano: le tavolozze sono due, `NOTTE` (luci sul nero) e `GIORNO` (inchiostri
+  sulla carta; «bianco» lì è quasi nero), e la scelta segue il tema del sito
+  anche quando cambia dal vivo. Sempre con trasparenza: sopra c'è un velo
+  (`.igc__in::after`) e il testo deve restare leggibile.
+- Di giorno alcune scene cambiano anche nome (`giorno: { it, en }`): Stelle →
+  Coriandoli, Lucciole → Polline, Neve → Petali, Tramonto → Alba; la Città ha
+  sole e nuvole al posto di luna e stelle. `g.chiaro` dice al tema se è giorno.
+- La tela sta dentro `.igc__in` con `z-index: -1`; quando la scheda viene
+  ridisegnata la stessa tela viene spostata nel nuovo palco (`sposta`).
 
 ## Stati da coprire
 
@@ -120,9 +188,11 @@ schermo con `100dvh` e `env(safe-area-inset-bottom)`.
 
 ## Interazioni
 
-- Click sull'avatar con anello → storie attive, dalla prima.
-- Click su un cerchio → quell'evidenza, dal primo elemento.
-- Switcher in alto → cambia account senza ricaricare la pagina.
+- Click sull'avatar con anello (o sulla tessera «Storia») → storie attive.
+- Click su una tessera → quell'evidenza, dalla storia che si stava sfogliando
+  (dalla prima se non si è sfogliato, come sul tocco).
+- Colonna dei profili → cambia account senza ricaricare la pagina; frecce
+  su/giù da tastiera.
 - Nel visualizzatore: tap a sinistra/destra per prev/next, tap al centro per
   pausa, swipe orizzontale, swipe in basso per chiudere, `Esc`, frecce,
   spazio. Focus visibile, focus trap, ritorno al punto di partenza.
@@ -141,22 +211,29 @@ schermo con `100dvh` e `env(safe-area-inset-bottom)`.
   variabili del tema.
 - Non usare `outline: none` senza un sostituto visibile.
 
-## Cosa rifinire (in ordine di valore)
+## Cosa è stato rifinito e cosa resta
 
-1. Proporzioni della scheda: la testata, lo switcher e la riga delle storie
-   oggi sono corretti ma un po' rigidi; far respirare il profilo e dare più
-   peso al numero dei follower.
-2. Anello delle storie: deve sembrare un anello, non un bordo pieno; provare
-   con `mask` o con un gradiente conico e uno stacco del colore della scheda.
-3. Cerchi delle evidenze: copertine diverse hanno luminosità diverse; valutare
-   un velo scuro leggero sotto il titolo e un badge contatore più leggibile.
-4. Visualizzatore: barre di avanzamento, spaziatura dei controlli, testo del
-   contatore, pulsante audio. Il pannello deve sfruttare tutta l'altezza senza
-   tagliare l'immagine (`object-fit: contain` già attivo).
-5. Tema scuro: verificare che la linea gradiente e il chip `@pzkko` non
-   stonino.
-6. Micro-movimento: entrata della scheda, hover dei cerchi, apertura del
-   visualizzatore. Sobrio, 150–250 ms.
+Fatto: proporzioni e peso dei follower, anello vero (maschera, non bordo
+pieno), tessere al posto dei cerchi, visualizzatore a tutta altezza, micro
+movimenti (entrata, tessere, apertura), andamento calcolato davvero sugli
+ultimi sette giorni.
+
+Attenzioni per chi ci rimette mano:
+
+- Il profilo scelto sta nella variabile `scelto` di `ig.js`, **non** in un
+  `data-ig-acc` sul nodo della scheda: quel nodo contiene i pulsanti dei
+  profili e un `closest('[data-ig-acc]')` lo scambierebbe per uno di loro
+  (era il motivo per cui, dopo un cambio profilo, le tessere non si aprivano).
+- Cambiando profilo si riscrive solo `#ig-pan`; la colonna resta, così la
+  tacca bianca scorre e il fuoco della tastiera non si perde.
+- Lo sfoglio non tiene in memoria le foto già viste: ci pensa la cache del
+  browser. Non aggiungere una mappa di `Image`: sono 10 MB decodificati l'una.
+- Le barre di una tessera sono al massimo 48; oltre, la tacca accesa è in
+  proporzione.
+
+Resta da vedere dal vivo: una storia attiva (oggi non ce n'è: la tessera
+«Storia» con l'anello e l'avatar cliccabile sono scritti ma provati solo con
+dati finti) e l'andamento con più di un punto in `history`.
 
 ## Prove da fare prima di dire fatto
 

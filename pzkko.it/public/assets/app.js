@@ -326,7 +326,7 @@ function renderCard() {
   $('#bio-sec').hidden = !p.bio
   $('#since').textContent = new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'short', year: 'numeric' }).format(sinceDate())
   $('#conns').innerHTML = p.connections.map(connRow).join('')
-  $('#social-icons').innerHTML = SOCIALS.filter((s) => s.key !== 'discord').map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer me" title="${esc(`${s.name} · ${s.handle}`)}" aria-label="${esc(`${s.name} ${s.handle}`)}">${brand(s.icon, s)}</a>`).join('')
+  $('#social-icons').innerHTML = [...SOCIALS, ...PERSONAL_SOCIALS].filter((s) => s.key !== 'discord').map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer me" title="${esc(`${s.name} · ${s.handle}`)}" aria-label="${esc(`${s.name} ${s.handle}`)}">${brand(s.icon, s)}</a>`).join('')
   renderCardActivity()
   fitBio()
 }
@@ -930,7 +930,7 @@ function searchItems() {
   return [
     ...TABS.map((k) => ({ group: u.pages, label: tabLabel(k), ico: k === 'chat' ? I.chat.replace('width="18" height="18"', 'width="15" height="15"') : I.search, run: () => showTab(k) })),
     ...PROJECTS.map((p) => ({ group: u.tabs.projects, label: p.title, sub: u.kind[p.kind], words: `${p.tags.map((x) => x[0]).join(' ')} ${t().projects[p.key].card}`, ico: MEDIA[p.key] ? `<img src="${esc(MEDIA[p.key].cover)}" alt="">` : I[p.kind], run: () => { showTab('projects'); openProject(p.key) } })),
-    ...SOCIALS.map((s) => ({ group: u.tabs.social, label: s.name, sub: s.handle, ico: brand(s.icon, s), run: () => window.open(s.url, '_blank', 'noopener,noreferrer') })),
+    ...[...SOCIALS, ...PERSONAL_SOCIALS].map((s) => ({ group: u.tabs.social, label: s.name, sub: s.handle, ico: brand(s.icon, s), run: () => window.open(s.url, '_blank', 'noopener,noreferrer') })),
     { group: u.actions, label: theme === 'dark' ? u.theme.light : u.theme.dark, ico: theme === 'dark' ? I.sun : I.moon, run: toggleTheme },
     { group: u.actions, label: u.copyUser, sub: username(), ico: I.copy, run: () => copy(username()) },
     ...(account() ? [] : [{ group: u.actions, label: acc().join, sub: acc().sub, ico: I_ACC, run: () => access('accedi') }]),

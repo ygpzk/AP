@@ -246,11 +246,12 @@ Vercel esegue `npm run build` e pubblica `public/` (vedi `vercel.json`).
   non si salva); il tasto di moderazione si confronta in tempo costante; gli
   errori del server di casa non tornano al browser. Il segreto resta nelle
   variabili di Vercel.
-- **Niente collegamenti all’identità personale, tranne l’Instagram voluto.**
+- **Niente collegamenti all’identità personale, tranne i profili scelti.**
   La build cerca il dominio e i nomi/account personali in `public/`, `api/`,
-  `scripts/`, `vercel.json` e `README.md`, e si ferma se ricompaiono. L’unica
-  eccezione è la scheda Instagram (24.11), ammessa solo nei tre posti scritti
-  sopra; il dominio personale resta vietato. `npm run check` cerca anche
+  `scripts/`, `vercel.json` e `README.md`, e si ferma se ricompaiono. Le uniche
+  eccezioni sono i profili di `PERSONAL_SOCIALS` e la scheda Instagram (24.11),
+  ammessi solo in `public/assets/config.js`, `ig.js` e nei dati di
+  `/media/ig/`; il dominio personale resta vietato. `npm run check` cerca anche
   percorsi del computer, chiavi private e token.
 - **Prestazioni.** Italiano e inglese arrivano subito; le altre sette lingue
   stanno in `public/assets/i18n/` e si scaricano solo quando si sceglie quella.
