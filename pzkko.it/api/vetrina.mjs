@@ -2,13 +2,16 @@
 // e la musica dal suo Spotify invece che da Lanyard). Il dato lo prepara il pc di pzkko e lo lascia nel server dei dati
 // (pzkko/vetrina.json, le immagini in pzkko/vetrina-immagini.json); qui si legge attraverso il ponte firmato e si passa
 // solo il risultato: dove è, i nomi e le icone delle app aperte, il brano che suona.
-//   GET /api/vetrina/            { ok, luogo, app: [{ n, i, su }], musica, agg }   (sul CDN 10 secondi)
+//   GET /api/vetrina/            { ok, luogo, app: [{ n, i, su }], musica, agg }   (sempre fresco: no-store)
 //   GET /api/vetrina/?img=<id>   l'icona o la copertina (png/jpeg), per sempre: l'id è l'impronta del contenuto
+//   GET /api/vetrina/?biglietto=1 { ok, url, biglietto } per il canale diretto (Server-Sent Events) sul pc:
+//                                così il brano cambia nel browser appena Spotify cambia, senza aspettare il CDN.
 // Se il pc non scrive da 3 minuti (spento, o il ponte giù): niente app, niente musica, «in giro per il mondo».
-import { archivioServer, ipDi, troppeRichieste } from './_server.mjs'
+import { createHmac } from 'node:crypto'
+import { archivioServer, ipDi, serverGiu, serverOpzioni, troppeRichieste } from './_server.mjs'
 
 const FILE = 'pzkko/vetrina.json', FILE_IMG = 'pzkko/vetrina-immagini.json'
-const FRESCO = 3 * 60_000
+const FRESCO = 3 * 60_000, VITA_BIGLIETTO = 10 * 60_000
 const vuoto = () => ({})
 const testo = (s, n = 80) => (typeof s === 'string' ? s.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, n) : '')
 const id = (s) => (typeof s === 'string' && /^[0-9a-f]{16}$/.test(s) ? s : null)
@@ -47,6 +50,16 @@ export default async function handler(req, res) {
   let q
   try { q = new URL(req.url || '/', 'http://x').searchParams } catch { return manda(400, { ok: false, errore: 'richiesta sbagliata' }) }
 
+  // il biglietto del canale diretto: vale dieci minuti per aprire /v1/live sul pc, poi il browser ne chiede un altro.
+  // (È lo stesso schema del canale dei conti: id «vetrina», scadenza in base 36, firma HMAC col segreto del server.)
+  if (q.get('biglietto') !== null) {
+    const opz = serverOpzioni()
+    if (!opz) return manda(200, { ok: false }, 'no-store')
+    const scade = (Date.now() + VITA_BIGLIETTO).toString(36)
+    const firma = createHmac('sha256', opz.segreto).update(`pzk-live\nvetrina\n${scade}`).digest('base64url')
+    return manda(200, { ok: true, url: opz.url, biglietto: `vetrina.${scade}.${firma}` }, 'no-store')
+  }
+
   const quale = q.get('img')
   if (quale !== null) {
     const k = id(quale)
@@ -68,12 +81,13 @@ export default async function handler(req, res) {
   }
 
   const arch = archivioServer(FILE, vuoto)
-  if (!arch) return manda(200, pulisci(null), 'public, max-age=0, s-maxage=30')
+  // (il server non ha risposto da poco: non si aspetta il timeout a ogni caricamento della pagina)
+  if (!arch || serverGiu()) return manda(200, pulisci(null), 'no-store')
   try {
     const { db } = await arch.read()
-    return manda(200, pulisci(db), 'public, max-age=0, s-maxage=10, stale-while-revalidate=30')
+    return manda(200, pulisci(db), 'no-store')
   } catch (e) {
     console.warn('vetrina:', e?.message)
-    return manda(200, pulisci(null), 'public, max-age=0, s-maxage=15')
+    return manda(200, pulisci(null), 'no-store')
   }
 }
