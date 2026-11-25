@@ -4,171 +4,107 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#f8f6f0">
+<meta name="theme-color" content="#0b090e">
 <title>e-vision &mdash; pzkko</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='116' fill='%23007acc'/%3E%3Cpath d='M142 256H370A114 114 0 1 0 329.3 343.3' fill='none' stroke='%23faf9f5' stroke-width='46' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<link rel="preload" href="fonts/fraunces.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' rx='3.5' fill='%230b090e'/%3E%3Cpath fill='%23cf0' d='M4 2h8v1h-8zM3 3h10v1h-10zM2 4h3v1h-3zM11 4h3v1h-3zM2 5h2v3h-2zM12 5h2v3h-2zM2 8h12v2h-12zM2 10h2v1h-2zM2 11h3v1h-3zM10 11h3v1h-3zM3 12h10v1h-10zM4 13h8v1h-8z'/%3E%3Cpath fill='%239d00ff' d='M7 5h2v1h-2zM6 6h1v1h-1zM8 6h2v1h-2zM7 7h2v1h-2z'/%3E%3Cpath fill='%23fff' d='M7 6h1v1h-1z'/%3E%3C/svg%3E">
+<link rel="preload" href="/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-  /* e-vision ha il suo vestito: carta calda, inchiostro, un solo blu */
-  @font-face {
-    font-family: 'Hanken Grotesk Variable';
-    font-style: normal;
-    font-display: swap;
-    font-weight: 100 900;
-    src: url('fonts/hanken-grotesk.woff2') format('woff2');
-  }
-  @font-face {
-    font-family: 'Fraunces Variable';
-    font-style: normal;
-    font-display: swap;
-    font-weight: 100 900;
-    src: url('fonts/fraunces.woff2') format('woff2');
-  }
-  @font-face {
-    font-family: 'Geist Mono Variable';
-    font-style: normal;
-    font-display: swap;
-    font-weight: 100 900;
-    src: url('fonts/geist-mono.woff2') format('woff2');
-  }
+  /* la porta di e-vision: un foglio del muro (carta col nastro, Anton, pennarello, macchina da scrivere)
+     sopra i due colori di pzkko */
+  @font-face { font-family: "Anton"; src: url(/fonts/anton.woff2) format("woff2"); font-display: swap; }
+  @font-face { font-family: "Special Elite"; src: url(/fonts/special-elite.woff2) format("woff2"); font-display: swap; }
+  @font-face { font-family: "Permanent Marker"; src: url(/fonts/permanent-marker.woff2) format("woff2"); font-display: swap; }
   :root {
-    --bg: #f8f6f0;
-    --card: #faf9f5;
-    --fg: #1a1b1a;
-    --muted: #525252;
-    --line: rgb(26 27 26 / 0.12);
-    --accent: #007acc;
-    --accent-text: #005c9e;
-    --glow: rgb(0 122 204 / 0.22);
-    --vivo: #2f9e5b;
-    --sans: 'Hanken Grotesk Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Consolas, monospace;
-    --serif: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
-    --silk: cubic-bezier(0.22, 1, 0.36, 1);
-    color-scheme: light;
+    --ink: #1b1916;
+    --testo: #36312b;
+    --rosso: #b3121f;
+    --giallo: #ffd400;
+    --fa: "Anton", Impact, "Arial Narrow", sans-serif;
+    --marker: "Permanent Marker", "Comic Sans MS", cursive;
+    --mac: "Special Elite", "Courier New", monospace;
+    color-scheme: dark;
   }
   * { box-sizing: border-box; }
-  html, body { min-height: 100%; }
+  html { min-height: 100%; background: #0b090e; }
   body {
     margin: 0;
     min-height: 100vh;
     min-height: 100dvh;
     display: grid;
     place-items: center;
-    padding: calc(1.5rem + env(safe-area-inset-top, 0px)) 1.25rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
-    background: var(--bg);
-    color: var(--fg);
-    font-family: var(--sans);
-    font-size: 1.0625rem;
-    line-height: 1.6;
-    text-transform: lowercase;
+    padding: calc(64px + env(safe-area-inset-top, 0px)) 44px calc(64px + env(safe-area-inset-bottom, 0px));
+    background:
+      radial-gradient(900px 620px at 6% -8%, rgba(204, 255, 0, .34), transparent 70%),
+      radial-gradient(1000px 760px at 104% 108%, rgba(157, 0, 255, .42), transparent 70%),
+      #0b090e;
+    color: var(--testo);
+    font: 400 16px/1.55 var(--mac);
     -webkit-font-smoothing: antialiased;
   }
   main {
+    position: relative;
+    isolation: isolate;
     display: grid;
-    gap: 1.5rem;
-    width: min(100%, 34rem);
-    padding: clamp(1.6rem, 1rem + 3vw, 2.75rem);
-    border: 1px solid var(--line);
-    border-radius: 1.75rem;
-    background: var(--card);
+    justify-items: center;
+    gap: 12px;
+    width: min(100%, 400px);
+    padding: 24px 20px 18px;
+    text-align: center;
+    color-scheme: light;
+    animation: posa .5s cubic-bezier(.2, 1.3, .4, 1) both;
   }
-  .marchio {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    font-family: var(--serif);
-    font-weight: 340;
-    font-size: 1.75rem;
-    line-height: 1;
-    letter-spacing: -0.02em;
-    font-variation-settings: 'opsz' 144;
+  main::before {
+    content: "";
+    position: absolute;
+    inset: -36px;
+    z-index: -1;
+    pointer-events: none;
+    border: 0 solid transparent;
+    border-image: url(/art/roulette/carta.webp) 300 fill / 96px stretch;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .35)) drop-shadow(0 24px 30px rgba(0, 0, 0, .4));
   }
-  .marchio svg { display: block; width: 2.1rem; height: 2.1rem; }
-  .marchio b, h1 b { font-weight: inherit; color: var(--accent-text); }
-  .pillola {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    width: fit-content;
-    padding: 0.3rem 0.75rem 0.3rem 0.6rem;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.02em;
-  }
-  .pillola::before {
-    content: '';
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: var(--vivo);
-    box-shadow: 0 0 0 3px rgb(47 158 91 / 0.18);
-  }
-  h1 {
-    margin: 0;
-    font-family: var(--serif);
-    font-weight: 340;
-    font-size: clamp(2.5rem, 1.4rem + 5vw, 4rem);
-    line-height: 0.98;
-    letter-spacing: -0.02em;
-    font-variation-settings: 'opsz' 144;
-  }
-  p { margin: 0; color: var(--muted); max-width: 44ch; }
+  .foto { display: block; width: 86px; height: 96px; padding: 6px 6px 16px; background: #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, .3); transform: rotate(-3deg); }
+  .foto svg { display: block; width: 100%; height: 100%; }
+  .voce { margin: 0; font: 400 15px/1.2 var(--marker); color: var(--rosso); text-transform: uppercase; letter-spacing: .02em; transform: rotate(-2deg); }
+  h1 { margin: -6px 0 0; font: 400 clamp(52px, 17vw, 68px)/1 var(--fa); color: var(--ink); text-transform: lowercase; letter-spacing: .005em; }
+  p { margin: 0; max-width: 34ch; }
+  mark { color: inherit; background: linear-gradient(transparent 12%, rgba(255, 212, 0, .58) 12% 88%, transparent 88%); }
+  .timbro { display: inline-block; padding: 3px 8px 2px; border: 2.5px solid currentColor; border-radius: 3px; color: #1f7a45; background: rgba(255, 255, 255, .6); font: 400 12px/1.1 var(--mac); letter-spacing: .12em; text-transform: uppercase; transform: rotate(-4deg); }
+  .fine { display: grid; justify-items: center; gap: 12px; width: 100%; margin-top: 4px; padding-top: 18px; border-top: 2px dashed rgba(27, 25, 22, .28); }
   .tasto {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-    min-height: 3.5rem;
-    padding: 0.5rem 1.5rem;
-    border: 1px solid var(--accent);
-    border-radius: 999px;
-    background: var(--accent);
+    display: inline-block;
+    padding: .12em .5em .16em;
+    background: var(--ink);
     color: #fff;
-    font-weight: 540;
+    font: 400 30px/1.05 var(--fa);
+    text-transform: lowercase;
     text-decoration: none;
-    transition: transform 0.36s var(--silk), box-shadow 0.36s var(--silk);
+    white-space: nowrap;
+    transform: rotate(-2deg);
+    box-shadow: 0 0 0 3px var(--giallo), 4px 5px 0 2px rgba(0, 0, 0, .2);
+    transition: transform .18s cubic-bezier(.22, 1, .36, 1);
   }
-  .tasto svg { width: 1.2rem; height: 1.2rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.36s var(--silk); }
-  @media (hover: hover) {
-    .tasto:hover { transform: translateY(-2px); box-shadow: 0 1rem 2rem -1rem var(--glow), 0 0.35rem 0.9rem -0.5rem rgb(0 0 0 / 0.25); }
-    .tasto:hover svg { transform: translateX(3px); }
-  }
-  .tasto:active { transform: scale(0.97); }
-  .tasto:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 3px; }
-  .piede {
-    display: grid;
-    gap: 0.2rem;
-    padding-top: 1.1rem;
-    border-top: 1px solid var(--line);
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    line-height: 1.5;
-    letter-spacing: 0.02em;
-    color: var(--muted);
-    max-width: none;
-  }
+  @media (hover: hover) { .tasto:hover { transform: rotate(-2deg) translateY(-2px); } }
+  .tasto:active { transform: rotate(-2deg) translateY(2px); }
+  .tasto:focus-visible { outline: 3px solid var(--giallo); outline-offset: 5px; }
+  .piede { font-size: 13px; line-height: 1.45; color: #5a544c; }
+  @keyframes posa { from { opacity: 0; transform: translateY(26px) rotate(-2deg) scale(.96); } }
+  @media (prefers-reduced-motion: reduce) { main { animation: none; } .tasto { transition: none; } }
 </style>
 </head>
 <body>
 <main>
-  <div class="marchio">
-    <svg viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="116" fill="#007acc"/><path d="M142 256H370A114 114 0 1 0 329.3 343.3" fill="none" stroke="#faf9f5" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <span><b>e</b>-vision</span>
+  <span class="foto" aria-hidden="true">
+    <svg viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="#0b090e"/><path fill="#cf0" d="M4 2h8v1h-8zM3 3h10v1h-10zM2 4h3v1h-3zM11 4h3v1h-3zM2 5h2v3h-2zM12 5h2v3h-2zM2 8h12v2h-12zM2 10h2v1h-2zM2 11h3v1h-3zM10 11h3v1h-3zM3 12h10v1h-10zM4 13h8v1h-8z"/><path fill="#9d00ff" d="M7 5h2v1h-2zM6 6h1v1h-1zM8 6h2v1h-2zM7 7h2v1h-2z"/><path fill="#fff" d="M7 6h1v1h-1z"/></svg>
+  </span>
+  <p class="voce">le telecamere, in diretta</p>
+  <h1>e-vision</h1>
+  <span class="timbro">accesso riservato</span>
+  <p>Otto telecamere dal vivo, sul server di casa. Dal telefono <mark>si aggiunge alla schermata Home</mark> e si apre a tutto schermo, come un&rsquo;app.</p>
+  <div class="fine">
+    <a class="tasto" href="https://desktop-inpvhr2.tail6c90b3.ts.net/telecamere/" target="_blank" rel="noopener noreferrer">apri e-vision</a>
+    <p class="piede">HTTPS e password. Se non hai la password, chiedila a pzkko.</p>
   </div>
-  <span class="pillola">Accesso riservato</span>
-  <h1>Le telecamere, <b>in diretta</b>.</h1>
-  <p>Otto telecamere dal vivo, sul server di casa. Dal telefono si aggiunge alla schermata Home e si apre a tutto schermo, come un&rsquo;app.</p>
-  <a class="tasto" href="https://desktop-inpvhr2.tail6c90b3.ts.net/telecamere/" target="_blank" rel="noopener noreferrer">
-    Apri e-vision
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg>
-  </a>
-  <p class="piede">
-    <span>HTTPS e password</span>
-    <span>Se non hai la password, chiedila a pzkko.</span>
-  </p>
 </main>
 </body>
 </html>
