@@ -59,11 +59,16 @@ const filtri = argv
 
 // ── Siti ─────────────────────────────────────────────────────────────────────
 
+// Solo i progetti pubblicati: un sito nascosto (NASCOSTI in projects.js) o tolto dal
+// portfolio non ha più le sue immagini e si salta, senza fermare gli altri.
 const progetti = new Map(projects.map((p) => [p.slug, p]))
-const elenco = Object.entries(siti).map(([slug, conf]) => {
+const elenco = Object.entries(siti).flatMap(([slug, conf]) => {
   const url = (conf.url || progetti.get(slug)?.web?.url || '').replace(/\/$/, '')
-  if (!url) throw new Error(`${slug}: manca web.url in src/data/projects.js`)
-  return { ...conf, slug, url }
+  if (!url) {
+    console.log(`· ${slug}: non è fra i progetti pubblicati, lo salto`)
+    return []
+  }
+  return [{ ...conf, slug, url }]
 })
 const corrisponde = (sito, f) => sito.slug.includes(f) || sito.catture.some((c) => c.file.startsWith(`${f}-`))
 

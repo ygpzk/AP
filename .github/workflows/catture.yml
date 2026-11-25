@@ -51,7 +51,7 @@ jobs:
 
       # l'ultima impronta di ogni sito sta nella cache delle Actions, non nel repository
       - name: Ultimo stato
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: albertopecchini.it/tools/catture/stato.json
           key: catture-stato-${{ github.run_id }}
@@ -101,7 +101,7 @@ jobs:
       # lo stato si salva solo se le immagini sono state pubblicate, altrimenti si rifà al prossimo giro
       - name: Salva lo stato
         if: always() && steps.catture.outcome != 'skipped' && steps.pubblica.outcome == 'success'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: albertopecchini.it/tools/catture/stato.json
           key: catture-stato-${{ github.run_id }}

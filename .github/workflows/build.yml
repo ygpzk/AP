@@ -48,7 +48,7 @@ jobs:
       # le versioni ridotte delle immagini (plugins/responsive-images.js): si rifanno
       # solo quelle degli originali cambiati
       - name: Immagini ridotte
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: albertopecchini.it/node_modules/.cache/ap-varianti
           key: varianti-${{ hashFiles('albertopecchini.it/public/media/**') }}
