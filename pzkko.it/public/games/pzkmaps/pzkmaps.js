@@ -12,7 +12,8 @@
 // cornice scrive l'indirizzo in alto a sinistra, e lì sopra c'è la targa del gioco; il marchio e i crediti di Google in
 // basso restano in vista. Il sito non può sapere se in quel punto un panorama c'è (ogni tanto la cornice dice «Street View
 // non disponibile», o mostra la foto di un passante): per questo «altro posto» non costa niente.
-// La mappa delle risposte è Leaflet con le tessere di OpenStreetMap (da jsdelivr, come nel vecchio Mappa).
+// La mappa delle risposte è Leaflet con le tessere di OpenStreetMap: Leaflet sta in vendor/, così la CSP non deve
+// fidarsi di un CDN di terzi.
 //
 // Niente $pzk: si gioca per il record, che resta nel browser (localStorage «pzkko-pzkmaps»).
 //
@@ -22,7 +23,7 @@ import { puntoMondo, puntoZona, visto, vista, metri } from './punti.js'
 
 const GIRI = 5, PIENO = 5000, SCALA_M = 1500
 const CHIAVE = 'pzkko-pzkmaps'
-const LEAFLET = 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet'
+const LEAFLET = new URL('./vendor/leaflet', import.meta.url).href
 const RIDOTTO = matchMedia('(prefers-reduced-motion: reduce)')
 const it = (n) => n.toLocaleString('it-IT')
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
