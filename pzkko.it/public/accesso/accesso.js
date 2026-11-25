@@ -13,9 +13,17 @@
 // - arrivo(): quello che la pagina fa da sola quando si entra nel sito.
 // Tutto passa dalla banca sul pc di pzkko (games/pzk.js: codice, accedi, chiediPremio): se il pc è spento qui non si entra.
 // I testi in italiano e in inglese (le altre lingue del profilo vedono l'inglese).
+//
+// 25.11 (pzkko: «rifai tutti i popup di pzkko con il mio stile pzk, invoglia la gente a usare le mie app»): il riquadro è
+// un foglio del muro (accesso.css), e dentro l'invito e le novità ci sono le app vere coi loro tasti. Un tasto d'app chiude
+// il riquadro e chiede alla pagina di aprirla (l'evento «pzkko-apri», che il profilo raccoglie); dove nessuno lo raccoglie
+// (il muro e le pagine vecchie) si va alla scheda del progetto sul profilo.
 import * as pzk from '../games/pzk.js'
 
-const NOVITA = { v: '2026-11-19', foto: '/media/p/parole/cover.webp' } // la versione delle novità: cambiala e tornano fuori
+const NOVITA = { v: '2026-11-25', foto: '/media/p/calcolatrice/cover.webp' } // la versione delle novità: cambiala e tornano fuori
+// le app che l'invito mette in vetrina: [progetto, cosa apre, nome]. Le catture arrivano da media.js
+const VETRINA = [['zero', 'qui:zero', 'PZK Zero'], ['parole', 'qui:parole', 'Parole'], ['giochini', 'qui:roulette', 'Roulette'], ['trivia', 'qui:trivia', 'Trivia']]
+const FICHE = { '$': 'f500', '♠': 'f100', '@': 'f25', '♥': 'f5' }
 const K_NOVITA = 'pzkko-novita-profilo', K_EMAIL = 'pzkko-email', K_INVITO = 'pzkko-invito', K_REGALO = 'pzkko-regalo-poi'
 const PROFILI = [['pzkko', 'https://www.instagram.com/pzkko/']]
 const API = '/api/wallet/'
@@ -30,15 +38,18 @@ const IT = {
   chiudi: 'Chiudi', indietro: 'Indietro', avanti: 'Avanti', capito: 'Capito', rete: 'La banca non risponde: riprova fra poco.',
   inv: { da: 'pzkko ti ha invitato a entrare', accesa: 'banca accesa', pausa: 'banca in pausa', membri: (n) => `${n} ${n === 1 ? 'membro' : 'membri'}`,
     testo: 'Un conto solo per tutto il sito: quello che vinci, compri e sblocchi resta tuo, su ogni dispositivo.',
-    cose: [['$', '<b>1.000 $pzk</b> appena entri'], ['♠', 'Roulette, blackjack, mine, <b>Parole</b>, <b>Trivia</b> e gli altri tavoli'], ['@', '<b>Niente password</b>: ti arriva un codice per email'], ['♥', `<b>+${'{P}'} $pzk</b> se mi segui su Instagram`]],
+    cose: [['$', '<b>1.000 $pzk</b> appena entri'], ['♠', 'Roulette, blackjack, mine, <b>Parole</b>, <b>Trivia</b>, <b>pzkmaps</b> e gli altri tavoli'], ['@', '<b>Niente password</b>: ti arriva un codice per email'], ['♥', `<b>+${'{P}'} $pzk</b> se mi segui su Instagram`]],
+    app: 'provale subito, anche da ospite:',
     accetta: 'Accetta l’invito', ospite: 'Continua come ospite', nota: 'Da ospite si gioca lo stesso, ma non si salva niente.' },
-  email: { t: 'Entra in pzkko.it', s: 'Scrivi la tua email: ti mando un codice. Che tu abbia già un conto o no, la strada è questa.', campo: 'Email', vai: 'Mandami il codice', nota: 'Niente password. L’email resta sul server di pzkko e serve solo per farti entrare.', sbagliata: 'Questa email non mi torna: controllala.' },
+  email: { t: 'Entra in pzkko.it', s: 'Scrivi la tua email: ti mando un codice. Serve per salvare i $pzk, lo zaino, i livelli e la chat su ogni dispositivo. Che tu abbia già un conto o no, la strada è questa.', campo: 'Email', vai: 'Mandami il codice', nota: 'Niente password: il codice vale 10 minuti e una volta sola. L’email resta sul server di pzkko e non va a nessun altro.', sicuro: 'Come funziona e perché è sicuro', sbagliata: 'Questa email non mi torna: controllala.' },
+  prova: { link: 'Apri la lettera di prova', nota: 'Fase sperimentale: la lettera non arriva nella posta, si apre qui in una casella usa e getta. Appena c’è l’indirizzo @pzkko.it si torna alla posta normale.' },
   cod: { t: 'Controlla la posta', s: (e) => `Ho mandato un codice di sei cifre a <b>${e}</b>.`, campo: 'Codice di sei cifre', vale: (t) => `Vale ancora ${t}`, scaduto: 'Il codice è scaduto: chiedine uno nuovo.', entra: 'Entra', ancora: 'Non arriva? Mandalo di nuovo', fra: (s) => `Mandalo di nuovo fra ${s} s`, mandato: 'Rimandato: guarda anche nello spam.', cambia: 'Cambia email' },
   nome: { t: 'Come ti chiami?', s: 'È il nome che gli altri vedono in classifica. Da 2 a 20 lettere.', campo: 'Nome', vai: 'Crea il conto', corto: 'Almeno 2 lettere.' },
   ben: { t: (n) => `Benvenuto, ${n}!`, s: (i, p) => `Sul tuo conto ci sono <b>${p} $pzk</b>. Il tuo indirizzo è <code>${i}</code>: serve per farti mandare $pzk dagli amici.`, punti: ['Soldi, zaino e livelli si salvano da soli, nella banca.', 'La prossima volta scrivi l’email e ti arriva un codice nuovo.'] },
-  nov: { t: 'Novità', quando: '19 novembre 2026',
-    sez: [['verde', 'Nuove funzioni', ['<b>Parole e Trivia, rifatti da zero.</b> Due fogli nuovi fra i tavoli, coi $pzk sopra.', '<b>Tutto gira qui.</b> Cercapersone, tavoli e chat si aprono sopra il profilo: non si esce più.', '<b>La chat fa tutto in chat.</b> Conto, negozio, virtual e tavoli: scrivi / e scegli.']],
-      ['blu', 'Conti', ['<b>Niente più PIN.</b> Si entra con un codice che arriva per email, nuovo ogni volta.']],
+  nov: { t: 'Novità', quando: '25 novembre 2026',
+    // una voce è il testo, oppure [testo, cosa apre, scritta del tasto]
+    sez: [['verde', 'Giochi e app nuovi', [['<b>pzkmaps.</b> Sei su una strada, da qualche parte nel mondo: indovina dove.', 'qui:pzkmaps', 'gioca'], ['<b>Angoli.</b> Un minuto per indovinare quanto è largo l’angolo, in gradi centesimali.', 'qui:angoli', 'gioca'], ['<b>Calcolatrice.</b> Quella scientifica del geometra: gon, triangoli, coordinate.', 'qui:calcolatrice', 'apri'], ['<b>Le app del cercapersone, da sole.</b> Miniera, Borsa $pzk, Cucina del Mincio, Codice C, Rapina.', 'qui:app:miniera', 'prova']]],
+      ['blu', 'Sul sito', ['<b>Tutto in stile pzk.</b> Accesso, ricerca, schede e menu sono fogli del muro, come i tavoli.', '<b>Community e Instagram in bacheca.</b> I numeri dei due server e le storie in evidenza, senza account.']],
       ['rosa', 'Regali', [`<b>${'{P}'} $pzk</b> se mi segui su Instagram.`]]] },
   reg: { t: (p) => `${p} $pzk in regalo`, s: 'Seguimi su Instagram, poi scrivi qui il tuo nome. Guardo io fra i follower: se ci sei, ti arrivano.', campo: 'Il tuo Instagram', vai: 'Chiedi il regalo', poi: 'Più tardi', vuoto: 'Scrivi il tuo nome di Instagram.',
     attesa: (g) => `Richiesta mandata come <b>@${g}</b>. Appena controllo ti arrivano i $pzk, e ti scrivo per email.`, tAttesa: 'Richiesta mandata', cambia: 'Ho sbagliato nome',
@@ -51,15 +62,17 @@ const EN = {
   chiudi: 'Close', indietro: 'Back', avanti: 'Next', capito: 'Got it', rete: 'The bank isn’t answering: try again in a moment.',
   inv: { da: 'pzkko invited you to join', accesa: 'bank online', pausa: 'bank paused', membri: (n) => `${n} ${n === 1 ? 'member' : 'members'}`,
     testo: 'One account for the whole site: what you win, buy and unlock stays yours, on every device.',
-    cose: [['$', '<b>1,000 $pzk</b> as soon as you join'], ['♠', 'Roulette, blackjack, mines, <b>Parole</b>, <b>Trivia</b> and the other tables'], ['@', '<b>No password</b>: you get a code by email'], ['♥', `<b>+${'{P}'} $pzk</b> if you follow me on Instagram`]],
+    cose: [['$', '<b>1,000 $pzk</b> as soon as you join'], ['♠', 'Roulette, blackjack, mines, <b>Parole</b>, <b>Trivia</b>, <b>pzkmaps</b> and the other tables'], ['@', '<b>No password</b>: you get a code by email'], ['♥', `<b>+${'{P}'} $pzk</b> if you follow me on Instagram`]],
+    app: 'try them now, even as a guest:',
     accetta: 'Accept invite', ospite: 'Continue as guest', nota: 'Guests can play too, but nothing is saved.' },
-  email: { t: 'Join pzkko.it', s: 'Type your email: I’ll send you a code. New or returning, it’s the same road.', campo: 'Email', vai: 'Send me the code', nota: 'No password. Your email stays on pzkko’s server and is only used to let you in.', sbagliata: 'That email doesn’t look right.' },
+  email: { t: 'Join pzkko.it', s: 'Type your email: I’ll send you a code. It saves your $pzk, backpack, levels and chat on every device. New or returning, it’s the same road.', campo: 'Email', vai: 'Send me the code', nota: 'No password: the code lasts 10 minutes and works once. Your email stays on pzkko’s server and goes nowhere else.', sicuro: 'How it works and why it’s safe', sbagliata: 'That email doesn’t look right.' },
+  prova: { link: 'Open the test letter', nota: 'Experimental phase: the letter is not delivered, it opens here in a disposable inbox. Once the @pzkko.it address is ready, we go back to normal email.' },
   cod: { t: 'Check your inbox', s: (e) => `I sent a six-digit code to <b>${e}</b>.`, campo: 'Six-digit code', vale: (t) => `Valid for ${t}`, scaduto: 'The code expired: ask for a new one.', entra: 'Log in', ancora: 'Didn’t get it? Send again', fra: (s) => `Send again in ${s}s`, mandato: 'Sent again: check spam too.', cambia: 'Change email' },
   nome: { t: 'What’s your name?', s: 'It’s the name others see on the leaderboard. 2 to 20 letters.', campo: 'Name', vai: 'Create account', corto: 'At least 2 letters.' },
   ben: { t: (n) => `Welcome, ${n}!`, s: (i, p) => `You have <b>${p} $pzk</b>. Your address is <code>${i}</code>: friends use it to send you $pzk.`, punti: ['Money, backpack and levels save themselves, in the bank.', 'Next time just type your email and a new code arrives.'] },
-  nov: { t: 'What’s new', quando: 'November 19, 2026',
-    sez: [['verde', 'New features', ['<b>Parole and Trivia, rebuilt from scratch.</b> Two new sheets among the tables, played with $pzk.', '<b>Everything runs here.</b> Pager, tables and chat open over the profile: you never leave.', '<b>The chat does it all in chat.</b> Account, shop, virtual and tables: type / and pick.']],
-      ['blu', 'Accounts', ['<b>No more PIN.</b> You log in with a code sent by email, new every time.']],
+  nov: { t: 'What’s new', quando: 'November 25, 2026',
+    sez: [['verde', 'New games and apps', [['<b>pzkmaps.</b> You’re on a road somewhere in the world: guess where.', 'qui:pzkmaps', 'play'], ['<b>Angoli.</b> One minute to guess how wide the angle is, in gradians.', 'qui:angoli', 'play'], ['<b>Calculator.</b> The surveyor’s scientific one: gon, triangles, coordinates.', 'qui:calcolatrice', 'open'], ['<b>The pager apps, on their own.</b> Mine, $pzk Exchange, Mincio Kitchen, C Code, Heist.', 'qui:app:miniera', 'try']]],
+      ['blu', 'On the site', ['<b>Everything in pzk style.</b> Login, search, project cards and menus are sheets from the wall, like the tables.', '<b>Community and Instagram on the board.</b> The two servers’ numbers and the story highlights, no account needed.']],
       ['rosa', 'Gifts', [`<b>${'{P}'} $pzk</b> if you follow me on Instagram.`]]] },
   reg: { t: (p) => `${p} $pzk gift`, s: 'Follow me on Instagram, then type your name here. I check my followers by hand: if you’re there, they’re yours.', campo: 'Your Instagram', vai: 'Ask for the gift', poi: 'Later', vuoto: 'Type your Instagram name.',
     attesa: (g) => `Request sent as <b>@${g}</b>. As soon as I check you get the $pzk, and an email.`, tAttesa: 'Request sent', cambia: 'Wrong name',
@@ -95,16 +108,23 @@ async function apri() {
   document.body.append(dlg)
   dlg.showModal()
 }
-function chiudi() { if (!aperto()) return; dlg.classList.add('via'); setTimeout(() => dlg?.close(), 130) }
+function chiudi() { if (!aperto()) return; dlg.classList.add('via'); setTimeout(() => dlg?.close(), 140) }
 /** Mette un passo nel riquadro. `largo`: il riquadro delle novità. → la scatola, per attaccarci i tasti */
 function passo(html, { largo = false, classe = '' } = {}) {
   clearInterval(orologio)
   scatola.className = `ax-box ${largo ? 'largo' : ''} ${classe}`
-  scatola.innerHTML = `<button type="button" class="ax-x" data-chiudi aria-label="${esc(T().chiudi)}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button><div class="ax-passo">${html}</div>`
-  scatola.scrollTop = 0
+  scatola.innerHTML = `<button type="button" class="ax-x" data-chiudi aria-label="${esc(T().chiudi)}"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="4.2" stroke-linecap="round" aria-hidden="true"><path d="M7 8l18 17M25 7L8 25"/></svg></button><div class="ax-passo">${html}</div>`
   const primo = scatola.querySelector('[autofocus]') ?? scatola.querySelector('.ax-b')
   requestAnimationFrame(() => primo?.focus({ preventScroll: true }))
   return scatola
+}
+/** Un tasto d'app: chiude il riquadro e chiede alla pagina di aprire l'app; se nessuno risponde, la scheda sul profilo. */
+function apriApp(app, chiave = String(app).replace(/^qui:(app:)?/, '')) {
+  chiudi()
+  setTimeout(() => {
+    const e = new CustomEvent('pzkko-apri', { detail: { app, chiave }, cancelable: true })
+    if (document.dispatchEvent(e)) location.href = chiave ? `/#progetti/${encodeURIComponent(chiave)}` : '/#progetti'
+  }, 160)
 }
 const maiuscola = (t) => (t ? t.charAt(0).toUpperCase() + t.slice(1) + (/[.!?…]$/.test(t) ? '' : '.') : '')
 const errore = (b, t) => { const e = b.querySelector('.ax-err'); if (!e) return; e.textContent = maiuscola(t ?? ''); e.hidden = !t; b.querySelector('.ax-campo')?.classList.toggle('ko', !!t) }
@@ -119,12 +139,13 @@ export async function invito() {
   await apri()
   const t = T().inv
   const b = passo(`<div class="ax-inv">
-      <img class="ax-av" src="${esc(avatar())}" alt="" width="84" height="84">
-      <p class="ax-da">${esc(t.da)}</p>
+      <div class="ax-foto-av"><img src="${esc(avatar())}" alt="" width="96" height="96"></div>
+      <p class="ax-voce">${esc(t.da)}</p>
       <h2>pzkko.it</h2>
-      <p class="ax-conta"><span data-banca><i class="ax-punto"></i>…</span><span data-membri hidden><i class="ax-punto grigio"></i><b></b></span></p>
+      <p class="ax-conta"><span class="ax-timbro" data-banca>…</span><span class="ax-timbro" data-membri hidden><b></b></span></p>
       <p class="ax-s">${esc(t.testo)}</p>
-      <ul class="ax-cose">${t.cose.map(([i, x]) => `<li><i>${i}</i><span>${conP(x)}</span></li>`).join('')}</ul>
+      <ul class="ax-cose">${t.cose.map(([i, x]) => `<li><img src="/art/fiches/${FICHE[i] ?? 'f5'}.webp" alt="" width="32" height="32"><span>${conP(x)}</span></li>`).join('')}</ul>
+      <div class="ax-app" data-vetrina hidden><p>${esc(t.app)}</p><ul></ul></div>
       <button type="button" class="ax-b" data-accetta>${esc(t.accetta)}</button>
       <button type="button" class="ax-link" data-chiudi>${esc(t.ospite)}</button>
       <p class="ax-nota">${esc(t.nota)}</p>
@@ -132,14 +153,30 @@ export async function invito() {
   // i numeri veri: quanti conti ci sono, e se la banca (il pc di pzkko) risponde
   fetch(API, { signal: AbortSignal.timeout?.(12_000) }).then((r) => r.json()).catch(() => null).then((d) => {
     if (scatola !== b || !b.querySelector('[data-banca]')) return
-    const su = !!d?.ok
-    b.querySelector('[data-banca]').innerHTML = `<i class="ax-punto ${su ? '' : 'spento'}"></i>${esc(su ? t.accesa : t.pausa)}`
+    const su = !!d?.ok, banca = b.querySelector('[data-banca]')
+    banca.textContent = su ? t.accesa : t.pausa
+    banca.classList.add(su ? 'su' : 'giu')
     if (su && Number.isFinite(d.conti) && d.conti > 0) { const m = b.querySelector('[data-membri]'); m.hidden = false; m.querySelector('b').textContent = t.membri(d.conti) }
   })
+  // la vetrina: le app vere, con la loro cattura; un clic e si gioca, anche da ospite
+  vetrina(b.querySelector('[data-vetrina]'))
   return new Promise((fatto) => {
     allaChiusura = () => fatto({ ok: !!pzk.conto() })
     b.querySelector('[data-accetta]').addEventListener('click', () => passoEmail())
   })
+}
+
+/** Le polaroid delle app nell'invito: la cattura vera (media.js) o, senza cattura, i colori del progetto (config.js). */
+async function vetrina(box) {
+  if (!box) return
+  const [{ MEDIA }, { PROJECTS }] = await Promise.all([import('/assets/media.js'), import('/assets/config.js')]).catch(() => [{}, {}])
+  if (!MEDIA || !box.isConnected) return
+  box.querySelector('ul').innerHTML = VETRINA.map(([k, app, nome]) => {
+    const m = MEDIA[k], art = PROJECTS?.find((p) => p.key === k)?.art ?? []
+    return `<li><button type="button" data-app="${esc(app)}" data-chiave="${esc(k)}"><span class="ax-pic" style="--c1:${esc(art[0] ?? '#333')};--c2:${esc(art[1] ?? '#111')}">${m ? `<img src="${esc(m.cover)}" alt="" width="1280" height="720" loading="lazy" decoding="async">` : `<i>${esc(nome)}</i>`}</span><b>${esc(nome)}</b></button></li>`
+  }).join('')
+  box.hidden = false
+  box.addEventListener('click', (e) => { const x = e.target.closest('[data-app]'); if (x) apriApp(x.dataset.app, x.dataset.chiave) })
 }
 
 // ── entrare: l'email, il codice, il nome ──
@@ -159,6 +196,7 @@ function passoEmail(messaggio = '') {
       <p class="ax-err" role="alert" hidden></p>
       <button type="submit" class="ax-b">${esc(t.vai)}</button>
       <p class="ax-nota">${esc(t.nota)}</p>
+      <p class="ax-nota"><a class="ax-link" href="/accesso/" target="_blank" rel="noopener noreferrer">${esc(t.sicuro)}</a></p>
     </form>`)
   if (messaggio) errore(b, messaggio)
   const f = b.querySelector('form')
@@ -174,12 +212,12 @@ function passoEmail(messaggio = '') {
     if (!d?.ok) return errore(b, d?.errore ?? T().rete)
     S.email = email; S.fino = d.fino ?? Date.now() + 600_000
     dep.set(K_EMAIL, email)
-    passoCodice()
+    passoCodice('', d.prova)
   })
 }
 const minuti = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}` }
-function passoCodice(nota = '') {
-  const t = T().cod
+function passoCodice(nota = '', prova = '') {
+  const t = T().cod, pv = T().prova
   const b = passo(`<form novalidate>
       <h2>${esc(t.t)}</h2><p class="ax-s">${t.s(esc(S.email))}</p>
       <label class="ax-campo"><span>${esc(t.campo)}</span><input class="ax-cifre" name="codice" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" placeholder="••••••" autofocus required></label>
@@ -187,8 +225,11 @@ function passoCodice(nota = '') {
       <p class="ax-tempo" data-tempo></p>
       <button type="submit" class="ax-b">${esc(t.entra)}</button>
       <p class="ax-riga"><button type="button" class="ax-link" data-ancora disabled></button><button type="button" class="ax-link" data-cambia>${esc(t.cambia)}</button></p>
+      <p class="ax-prova" data-prova hidden><a href="" target="_blank" rel="noopener noreferrer">${esc(pv.link)}</a><span>${esc(pv.nota)}</span></p>
     </form>`)
-  const f = b.querySelector('form'), ancora = b.querySelector('[data-ancora]'), tempo = b.querySelector('[data-tempo]')
+  const f = b.querySelector('form'), ancora = b.querySelector('[data-ancora]'), tempo = b.querySelector('[data-tempo]'), provaEl = b.querySelector('[data-prova]')
+  const mostraProva = (url) => { if (!url || !provaEl) return; provaEl.querySelector('a').href = url; provaEl.hidden = false }
+  if (prova) mostraProva(prova)
   let dopo = Date.now() + 30_000, inCorso = false
   if (nota) { tempo.textContent = nota; tempo.classList.add('ok') }
   const batti = () => {
@@ -217,7 +258,7 @@ function passoCodice(nota = '') {
     const d = await pzk.codice(S.email).catch(() => null)
     if (scatola !== b) return
     if (!d?.ok) return errore(b, d?.errore ?? T().rete)
-    S.fino = d.fino ?? S.fino; errore(b, ''); nota = t.mandato; tempo.textContent = nota; tempo.classList.add('ok'); f.codice.focus()
+    S.fino = d.fino ?? S.fino; errore(b, ''); nota = t.mandato; tempo.textContent = nota; tempo.classList.add('ok'); mostraProva(d.prova); f.codice.focus()
   })
 }
 function passoNome(codice) {
@@ -252,7 +293,7 @@ function dopoAccesso(nuovo) {
   if (!nuovo) return novita()
   const t = T().ben, c = pzk.conto()
   const b = passo(`<div class="ax-ben">
-      <div class="ax-festa" aria-hidden="true"><img src="${esc(avatar())}" alt="" width="64" height="64"><b>+1.000</b></div>
+      <div class="ax-foto-av" aria-hidden="true"><img src="${esc(avatar())}" alt="" width="96" height="96"><b>+1.000</b></div>
       <h2>${esc(t.t(c?.nome ?? ''))}</h2><p class="ax-s">${t.s(esc(c?.ind ?? ''), pzk.fmt(pzk.saldo()))}</p>
       <ul class="ax-punti">${t.punti.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
       <button type="button" class="ax-b" data-avanti>${esc(T().avanti)}</button>
@@ -264,14 +305,19 @@ function dopoAccesso(nuovo) {
 function passoNovita(poi, avanti) {
   const t = T().nov
   dep.set(K_NOVITA, NOVITA.v)
+  const voce = (v) => {
+    const [testo, app, tasto] = Array.isArray(v) ? v : [v]
+    return `<li><span>${conP(testo)}</span>${app ? `<button type="button" class="ax-gioca" data-app="${esc(app)}">${esc(tasto)}</button>` : ''}</li>`
+  }
   const b = passo(`<div class="ax-nov">
       <header><h2>${esc(t.t)}</h2><time>${esc(t.quando)}</time></header>
-      <img class="ax-foto" src="${NOVITA.foto}" alt="" width="1280" height="800" loading="eager">
-      ${t.sez.map(([col, titolo, voci]) => `<h3 class="${col}"><span>${esc(titolo)}</span></h3><ul>${voci.map((v) => `<li>${conP(v)}</li>`).join('')}</ul>`).join('')}
+      <img class="ax-foto" src="${NOVITA.foto}" alt="" width="1280" height="720" loading="eager">
+      ${t.sez.map(([col, titolo, voci]) => `<h3 class="${col}">${esc(titolo)}</h3><ul>${voci.map(voce).join('')}</ul>`).join('')}
       <button type="button" class="ax-b" data-poi>${esc(avanti ? T().avanti : T().capito)}</button>
     </div>`, { largo: true })
   b.querySelector('.ax-foto').addEventListener('error', (e) => e.currentTarget.remove())
   b.querySelector('[data-poi]').addEventListener('click', () => (poi ? poi() : chiudi()))
+  for (const x of b.querySelectorAll('.ax-gioca')) x.addEventListener('click', () => apriApp(x.dataset.app))
 }
 /** Le novità, da sole. */
 export async function novita() { await apri(); passoNovita(null, false); return new Promise((fatto) => { allaChiusura = fatto }) }

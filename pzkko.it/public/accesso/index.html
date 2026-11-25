@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accesso a pzkko.it — come funziona e perché è sicuro</title>
+<meta name="description" content="Come si entra in pzkko.it: niente password, un codice di sei cifre via email. Cosa serve, come è protetto e perché in questa fase i codici passano da una casella di prova usa e getta.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#0b090e">
+<style>
+  @font-face { font-family: "Anton"; src: url(/fonts/anton.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "Special Elite"; src: url(/fonts/special-elite.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+  @font-face { font-family: "Permanent Marker"; src: url(/fonts/permanent-marker.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+  :root { --ink: #1b1916; --text: #36312b; --pencil: #5a544c; --red: #b3121f; --pen: #1446a0; --green: #1f7a45; --yellow: #ffd400; --paper: #f6efdd; --wall: #0b090e; --lime: #ccff00; --violet: #9d00ff; }
+  * { box-sizing: border-box; }
+  html { background: var(--wall); }
+  body { margin: 0; min-height: 100svh; color: var(--text); font: 400 17px/1.45 "Special Elite", "Courier New", monospace;
+    background:
+      radial-gradient(70% 60% at 12% 0%, rgba(204, 255, 0, .12), transparent 60%),
+      radial-gradient(60% 60% at 92% 100%, rgba(157, 0, 255, .18), transparent 62%),
+      linear-gradient(180deg, #0b090e, #120d18 60%, #0b090e);
+    background-attachment: fixed; }
+  .wrap { width: min(100% - 32px, 760px); margin: 0 auto; padding: 56px 0 64px; }
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; color: #fff; }
+  .brand { font: 400 22px/1 "Anton", Impact, sans-serif; letter-spacing: .01em; color: var(--lime); text-transform: lowercase; text-decoration: none; }
+  .brand span { color: #fff; }
+  .top a.back { color: #ffffffbd; font: 400 12px/1.2 "Special Elite", monospace; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; border-bottom: 1px solid #ffffff4d; padding-bottom: 3px; }
+  .top a.back:hover { color: var(--lime); border-color: var(--lime); }
+
+  .sheet { position: relative; padding: 46px 42px 40px; background: var(--paper);
+    box-shadow: 0 4px 8px #0006, 0 34px 70px -18px #000c;
+    rotate: -.45deg; }
+  .sheet::before { content: ""; position: absolute; z-index: 2; top: -14px; left: 50%; width: 150px; height: 34px; translate: -50% 0; rotate: -2.5deg;
+    background: linear-gradient(rgba(255,255,255,.35), rgba(255,255,255,0) 38%, rgba(110,90,40,.16)), rgba(234,222,182,.88);
+    clip-path: polygon(0 0, 3px 17%, 0 34%, 3px 50%, 0 67%, 3px 84%, 0 100%, 100% 100%, calc(100% - 3px) 84%, 100% 67%, calc(100% - 3px) 50%, 100% 34%, calc(100% - 3px) 17%, 100% 0); }
+  .sheet::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .22;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E"); }
+
+  .kicker { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; font: 400 12px/1 "Special Elite", monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--red); }
+  .kicker i { width: 8px; height: 8px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 3px rgba(204,255,0,.2); flex: none; }
+  h1 { margin: 0; font: 400 clamp(44px, 9vw, 76px)/.92 "Anton", Impact, sans-serif; font-weight: 400; text-transform: lowercase; letter-spacing: .005em; color: var(--ink); text-wrap: balance; }
+  .voce { margin: 12px 0 0; font: 400 22px/1.15 "Permanent Marker", cursive; color: var(--red); rotate: -1.2deg; }
+  .lead { margin: 18px 0 0; max-width: 54ch; font-size: 18px; color: var(--text); }
+  .lead b, .body b { font-weight: 400; color: var(--ink); background: linear-gradient(transparent 52%, rgba(255,212,0,.62) 52% 90%, transparent 90%); padding: 0 .12em; }
+
+  h2 { display: flex; align-items: center; gap: 10px; margin: 34px 0 10px; font: 400 30px/1 "Anton", Impact, sans-serif; text-transform: lowercase; color: var(--ink); }
+  h2::after { content: ""; flex: 1; height: 2px; background: repeating-linear-gradient(90deg, rgba(27,25,22,.28) 0 6px, transparent 6px 11px); }
+  .body { margin: 0; color: var(--text); }
+  .body + .body { margin-top: 8px; }
+
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 10px; }
+  ol.steps li { counter-increment: s; position: relative; padding: 10px 12px 10px 52px; border: 2px dashed rgba(27,25,22,.26); background: rgba(255,255,255,.34); }
+  ol.steps li::before { content: counter(s); position: absolute; left: 12px; top: 8px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: #fff; font: 400 18px/1 "Anton", sans-serif; }
+  ol.steps b { font-weight: 400; color: var(--ink); }
+
+  ul.safe { margin: 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+  ul.safe li { position: relative; padding-left: 30px; }
+  ul.safe li::before { content: "✓"; position: absolute; left: 2px; top: -2px; color: var(--green); font: 400 22px/1 "Permanent Marker", cursive; }
+
+  .box { position: relative; margin: 30px 0 0; padding: 20px 20px 18px; border: 3px solid var(--ink); background: rgba(255,255,255,.42); box-shadow: 5px 5px 0 rgba(27,25,22,.14); }
+  .box::before { content: "fase sperimentale"; position: absolute; top: -13px; left: 16px; padding: 2px 8px 1px; rotate: -2deg; background: var(--yellow); color: var(--ink); font: 400 12px/1.2 "Special Elite", monospace; letter-spacing: .12em; text-transform: uppercase; }
+  .box h2 { margin-top: 0; }
+  .box .body { font-size: 16px; }
+  .box a { color: var(--pen); text-decoration: none; border-bottom: 2px solid currentColor; }
+  .box a:hover { color: var(--red); }
+
+  .stamp { position: absolute; right: 18px; top: 42px; rotate: 8deg; padding: 4px 12px 3px; border: 3px double var(--green); border-radius: 4px; color: var(--green); font: 400 18px/1 "Anton", sans-serif; letter-spacing: .08em; text-transform: uppercase; opacity: .82; }
+  .stamp::after { content: "accesso sicuro"; }
+
+  .cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 34px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: .16em .8em .2em; background: var(--ink); color: #fff; font: 400 28px/1.05 "Anton", sans-serif; text-transform: lowercase; text-decoration: none; rotate: -1.4deg; box-shadow: 3px 3px 0 rgba(0,0,0,.2); transition: transform .18s cubic-bezier(.22,1,.36,1); }
+  .btn:hover { transform: translateY(-2px) rotate(-1.4deg); }
+  .fine { margin: 18px 0 0; color: var(--pencil); font-size: 12px; line-height: 1.5; }
+  .fine a { color: var(--pen); }
+
+  .foot { margin: 26px 0 0; text-align: center; color: #ffffff80; font: 400 11px/1.5 "Special Elite", monospace; letter-spacing: .06em; text-transform: uppercase; }
+  .foot a { color: #ffffffb3; }
+
+  @media (max-width: 620px) {
+    .wrap { padding: 28px 0 40px; }
+    .sheet { padding: 36px 22px 30px; rotate: 0deg; }
+    .stamp { position: static; display: inline-block; margin: 14px 0 0; rotate: -2deg; }
+    h1 { font-size: clamp(40px, 14vw, 64px); }
+    .voce { font-size: 19px; }
+    h2 { font-size: 25px; margin-top: 28px; }
+    .lead { font-size: 16px; }
+    .body { font-size: 15.5px; }
+    .btn { font-size: 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top">
+    <a class="brand" href="/">pzkko<span>.it</span></a>
+    <a class="back" href="/">torna al sito →</a>
+  </div>
+
+  <article class="sheet">
+    <p class="kicker"><i></i> accesso · identità · sicurezza</p>
+    <h1>entrare in pzkko.it</h1>
+    <p class="voce">niente password. solo un codice.</p>
+    <p class="lead">Un conto solo per tutto il sito: quello che vinci, compri e sblocchi resta tuo, <b>su ogni dispositivo</b>. Da ospite giochi lo stesso, ma non si salva niente.</p>
+
+    <span class="stamp" aria-hidden="true"></span>
+
+    <h2>cosa serve accedere</h2>
+    <p class="body">Il conto tiene insieme i <b>$pzk</b>, lo zaino, i livelli, la chat, la classifica e le cose che compri nel negozio. Serve anche per il regalo di Instagram e per farti mandare $pzk dagli amici. Senza conto puoi provare i giochi, ma tutto resta nella sessione e sparisce quando chiudi.</p>
+
+    <h2>come funziona</h2>
+    <ol class="steps">
+      <li><b>Scrivi la tua email.</b> È il tuo nome per entrare: non serve una password, non serve un nome utente.</li>
+      <li><b>Arriva un codice di sei cifre.</b> Vale <b>10 minuti</b> e una volta sola. Se lo chiedi di nuovo entro quei dieci minuti, resta lo stesso.</li>
+      <li><b>Lo scrivi nella finestra.</b> Se l'email è nuova ti chiedo solo un nome, quello che gli altri vedono in classifica. Poi sei dentro.</li>
+    </ol>
+
+    <h2>è sicuro?</h2>
+    <ul class="safe">
+      <li><b>Non c'è una password da rubare.</b> Ogni accesso ha un codice nuovo, e il codice scade da solo.</li>
+      <li><b>L'email resta sul server di pzkko</b> e serve solo per farti entrare. Niente pubblicità, niente terze parti, niente elenchi.</li>
+      <li><b>Dopo sei tentativi sbagliati il codice si brucia.</b> Se non l'hai chiesto tu, non entra nessuno: senza codice la lettera non serve.</li>
+      <li><b>I $pzk sono soldi finti.</b> Non si comprano, non si prelevano e non valgono niente.</li>
+    </ul>
+
+    <section class="box">
+      <h2>perché una casella usa e getta</h2>
+      <p class="body">Fino a quando non c'è un indirizzo <b>@pzkko.it</b> per i codici di verifica, la lettera parte da una <b>casella di prova usa e getta</b> (Ethereal). Non arriva nella tua posta: si apre dal link <b>«Apri la lettera di prova»</b> nella finestra di accesso. È una fase sperimentale, e serve a non usare la posta personale di nessuno.</p>
+      <p class="body">La casella di prova non conserva niente che ti riguardi: il codice vive dieci minuti, poi non vale più. Quando l'indirizzo del dominio sarà pronto, i codici torneranno nella posta normale e questa nota sparirà.</p>
+    </section>
+
+    <h2>quando cambia</h2>
+    <p class="body">Appena l'email <b>@pzkko.it</b> è pronta, i codici arrivano nella posta come su qualsiasi sito. Fino ad allora, se il link della lettera non si apre, chiedi un codice nuovo dalla stessa finestra: non serve altro.</p>
+
+    <div class="cta">
+      <a class="btn" href="/">torna a pzkko.it →</a>
+    </div>
+    <p class="fine">Nessuna password, nessun cookie di tracciamento, nessun servizio di terze parti per l'accesso. Se qualcosa non torna, scrivi a <a href="/info/">info e copyright</a>.</p>
+  </article>
+
+  <p class="foot">pzkko.it · accesso con codice · <a href="/">home</a> · <a href="/info/">info</a></p>
+</main>
+</body>
+</html>
