@@ -1,6 +1,6 @@
 {
   "v": 1,
-  "updated": "2026-11-26T01:36:26+00:00",
+  "updated": "2026-11-26T12:40:21+00:00",
   "accounts": [
     {
       "username": "albertoxpecchini",
@@ -12,7 +12,7 @@
       "verified": false,
       "stats": {
         "followers": 12310,
-        "following": 577,
+        "following": 578,
         "likes": 227691,
         "videos": 0
       },
@@ -29,7 +29,7 @@
           "at": "2020-06-21T10:01:14+00:00",
           "type": "video",
           "pinned": false,
-          "durata": 13.03,
+          "durata": 13,
           "w": 576,
           "h": 1024,
           "cover": "albertoxpecchini/v/6840739021480627461.webp",
@@ -47,7 +47,7 @@
           "at": "2021-06-20T07:48:20+00:00",
           "type": "video",
           "pinned": false,
-          "durata": 5.97,
+          "durata": 6,
           "w": 576,
           "h": 1024,
           "cover": "albertoxpecchini/v/6975779758739131654.webp",
@@ -63,6 +63,21 @@
       ],
       "reposts": [
         {
+          "id": "7702094481151053089",
+          "at": "2026-10-29T14:20:20+00:00",
+          "type": "video",
+          "durata": 44,
+          "w": 768,
+          "h": 576,
+          "cover": "albertoxpecchini/r/7702094481151053089.webp",
+          "author": "philippe.297",
+          "stats": {
+            "views": 547,
+            "likes": 43
+          },
+          "url": "https://www.tiktok.com/@philippe.297/video/7702094481151053089"
+        },
+        {
           "id": "7699000703666326815",
           "at": "2026-10-21T06:15:05+00:00",
           "type": "video",
@@ -72,8 +87,8 @@
           "cover": "albertoxpecchini/r/7699000703666326815.webp",
           "author": "wakemorrow",
           "stats": {
-            "views": 320700,
-            "likes": 34800
+            "views": 321500,
+            "likes": 34900
           },
           "url": "https://www.tiktok.com/@wakemorrow/video/7699000703666326815"
         },
@@ -87,8 +102,8 @@
           "cover": "albertoxpecchini/r/7703262761307950350.webp",
           "author": "yourcopiumdealer",
           "stats": {
-            "views": 130200,
-            "likes": 23200
+            "views": 134100,
+            "likes": 24000
           },
           "url": "https://www.tiktok.com/@yourcopiumdealer/video/7703262761307950350"
         },
@@ -103,7 +118,7 @@
           "author": "soft.like.poison",
           "stats": {
             "views": 3400000,
-            "likes": 558800
+            "likes": 561500
           },
           "url": "https://www.tiktok.com/@soft.like.poison/video/7694799466615934241"
         },
@@ -118,7 +133,7 @@
           "author": "vladrybchinskiy0",
           "stats": {
             "views": 1300000,
-            "likes": 262700
+            "likes": 266200
           },
           "url": "https://www.tiktok.com/@vladrybchinskiy0/video/7708027322338872594"
         },
@@ -132,8 +147,8 @@
           "cover": "albertoxpecchini/r/7711408795603176712.webp",
           "author": "themostrelatableeee",
           "stats": {
-            "views": 757400,
-            "likes": 222900
+            "views": 796600,
+            "likes": 230500
           },
           "url": "https://www.tiktok.com/@themostrelatableeee/video/7711408795603176712"
         },
@@ -147,8 +162,8 @@
           "cover": "albertoxpecchini/r/7708283843056356622.webp",
           "author": "musox777",
           "stats": {
-            "views": 87700,
-            "likes": 20900
+            "views": 96100,
+            "likes": 22800
           },
           "url": "https://www.tiktok.com/@musox777/video/7708283843056356622"
         },
@@ -162,8 +177,8 @@
           "cover": "albertoxpecchini/r/7711856370257022228.webp",
           "author": "yanepridumaluser",
           "stats": {
-            "views": 4300000,
-            "likes": 1200000
+            "views": 5400000,
+            "likes": 1500000
           },
           "url": "https://www.tiktok.com/@yanepridumaluser/video/7711856370257022228"
         },
@@ -177,8 +192,8 @@
           "cover": "albertoxpecchini/r/7710652932013722912.webp",
           "author": "yungpipsxd",
           "stats": {
-            "views": 4857,
-            "likes": 889
+            "views": 4912,
+            "likes": 895
           },
           "url": "https://www.tiktok.com/@yungpipsxd/video/7710652932013722912"
         },
@@ -192,8 +207,8 @@
           "cover": "albertoxpecchini/r/7709189213954067745.webp",
           "author": "peacelovexox",
           "stats": {
-            "views": 383800,
-            "likes": 53700
+            "views": 394200,
+            "likes": 55500
           },
           "url": "https://www.tiktok.com/@peacelovexox/video/7709189213954067745"
         },
@@ -207,8 +222,8 @@
           "cover": "albertoxpecchini/r/7705331199845223702.webp",
           "author": "iaries11",
           "stats": {
-            "views": 166900,
-            "likes": 32600
+            "views": 171900,
+            "likes": 33400
           },
           "url": "https://www.tiktok.com/@iaries11/video/7705331199845223702"
         },
@@ -222,8 +237,8 @@
           "cover": "albertoxpecchini/r/7711352118031977760.webp",
           "author": "yungpipsxd",
           "stats": {
-            "views": 27300,
-            "likes": 5690
+            "views": 27500,
+            "likes": 5707
           },
           "url": "https://www.tiktok.com/@yungpipsxd/video/7711352118031977760"
         },
@@ -237,7 +252,7 @@
           "cover": "albertoxpecchini/r/7709594098704977185.webp",
           "author": "alicepaiardi",
           "stats": {
-            "views": 176900,
+            "views": 177200,
             "likes": 40400
           },
           "url": "https://www.tiktok.com/@alicepaiardi/video/7709594098704977185"
@@ -251,8 +266,8 @@
           "cover": "albertoxpecchini/r/7709634234050284813.webp",
           "author": "saint",
           "stats": {
-            "views": 31500,
-            "likes": 4987
+            "views": 31800,
+            "likes": 5025
           },
           "url": "https://www.tiktok.com/@saint/photo/7709634234050284813"
         },
@@ -281,8 +296,8 @@
           "cover": "albertoxpecchini/r/7707777678979403030.webp",
           "author": "ai.tech.syn",
           "stats": {
-            "views": 390300,
-            "likes": 53400
+            "views": 392200,
+            "likes": 53800
           },
           "url": "https://www.tiktok.com/@ai.tech.syn/video/7707777678979403030"
         },
@@ -310,7 +325,7 @@
           "cover": "albertoxpecchini/r/7686884295322914081.webp",
           "author": "fatt_i_cz_tuoi",
           "stats": {
-            "views": 913,
+            "views": 914,
             "likes": 63
           },
           "url": "https://www.tiktok.com/@fatt_i_cz_tuoi/photo/7686884295322914081"
@@ -325,8 +340,8 @@
           "cover": "albertoxpecchini/r/7687532522447621398.webp",
           "author": "daoneandonlygoatz",
           "stats": {
-            "views": 690500,
-            "likes": 112500
+            "views": 694000,
+            "likes": 112800
           },
           "url": "https://www.tiktok.com/@daoneandonlygoatz/video/7687532522447621398"
         },
@@ -341,7 +356,7 @@
           "author": "gmac.styledit",
           "stats": {
             "views": 1300000,
-            "likes": 284400
+            "likes": 285400
           },
           "url": "https://www.tiktok.com/@gmac.styledit/video/7704860002225294614"
         },
@@ -355,7 +370,7 @@
           "cover": "albertoxpecchini/r/7703955982665141537.webp",
           "author": "giacotorto",
           "stats": {
-            "views": 126100,
+            "views": 126200,
             "likes": 24400
           },
           "url": "https://www.tiktok.com/@giacotorto/video/7703955982665141537"
@@ -371,7 +386,7 @@
           "author": "gmac.styledit",
           "stats": {
             "views": 2000000,
-            "likes": 440500
+            "likes": 441100
           },
           "url": "https://www.tiktok.com/@gmac.styledit/video/7704154554329271574"
         },
@@ -385,7 +400,7 @@
           "cover": "albertoxpecchini/r/7698028571352157462.webp",
           "author": "luchana037",
           "stats": {
-            "views": 616800,
+            "views": 617000,
             "likes": 93100
           },
           "url": "https://www.tiktok.com/@luchana037/video/7698028571352157462"
@@ -401,7 +416,7 @@
           "author": "yungcochise",
           "stats": {
             "views": 1000000,
-            "likes": 196900
+            "likes": 197100
           },
           "url": "https://www.tiktok.com/@yungcochise/video/7700698300084653343"
         },
@@ -416,7 +431,7 @@
           "author": "wakemorrow",
           "stats": {
             "views": 1700000,
-            "likes": 215000
+            "likes": 216000
           },
           "url": "https://www.tiktok.com/@wakemorrow/video/7703414766781484302"
         },
@@ -431,7 +446,7 @@
           "author": "ekstday",
           "stats": {
             "views": 1100000,
-            "likes": 188300
+            "likes": 188600
           },
           "url": "https://www.tiktok.com/@ekstday/video/7699500021024050440"
         },
@@ -460,8 +475,8 @@
           "cover": "albertoxpecchini/r/7702471914454830350.webp",
           "author": "wincentsh1ts2",
           "stats": {
-            "views": 574000,
-            "likes": 110900
+            "views": 574600,
+            "likes": 111000
           },
           "url": "https://www.tiktok.com/@wincentsh1ts2/video/7702471914454830350"
         },
@@ -475,8 +490,8 @@
           "cover": "albertoxpecchini/r/7696642801999662350.webp",
           "author": "wakemorrow",
           "stats": {
-            "views": 312500,
-            "likes": 46100
+            "views": 313600,
+            "likes": 46200
           },
           "url": "https://www.tiktok.com/@wakemorrow/video/7696642801999662350"
         },
@@ -490,8 +505,8 @@
           "cover": "albertoxpecchini/r/7697666162083073302.webp",
           "author": "fixupboy",
           "stats": {
-            "views": 525100,
-            "likes": 74000
+            "views": 525600,
+            "likes": 74100
           },
           "url": "https://www.tiktok.com/@fixupboy/video/7697666162083073302"
         },
@@ -506,7 +521,7 @@
           "author": "agata.czubinska",
           "stats": {
             "views": 1200000,
-            "likes": 230300
+            "likes": 230500
           },
           "url": "https://www.tiktok.com/@agata.czubinska/video/7702479768838524192"
         },
@@ -535,8 +550,8 @@
           "cover": "albertoxpecchini/r/7701137570737982753.webp",
           "author": "dalesio01",
           "stats": {
-            "views": 317700,
-            "likes": 67900
+            "views": 318100,
+            "likes": 68000
           },
           "url": "https://www.tiktok.com/@dalesio01/video/7701137570737982753"
         },
@@ -551,7 +566,7 @@
           "author": "sburttt",
           "stats": {
             "views": 1700000,
-            "likes": 191400
+            "likes": 192100
           },
           "url": "https://www.tiktok.com/@sburttt/video/7699990683066649869"
         },
@@ -595,7 +610,7 @@
           "cover": "albertoxpecchini/r/7699993686515502368.webp",
           "author": "francesconeee",
           "stats": {
-            "views": 900000,
+            "views": 900300,
             "likes": 159400
           },
           "url": "https://www.tiktok.com/@francesconeee/video/7699993686515502368"
@@ -610,7 +625,7 @@
           "author": "houseedit68",
           "stats": {
             "views": 11500,
-            "likes": 1080
+            "likes": 1081
           },
           "url": "https://www.tiktok.com/@houseedit68/photo/7679794847573708065"
         },
@@ -624,8 +639,8 @@
           "cover": "albertoxpecchini/r/7699270217783921933.webp",
           "author": "yourcopiumdealer",
           "stats": {
-            "views": 586300,
-            "likes": 86200
+            "views": 590600,
+            "likes": 87100
           },
           "url": "https://www.tiktok.com/@yourcopiumdealer/video/7699270217783921933"
         },
@@ -639,7 +654,7 @@
           "cover": "albertoxpecchini/r/7701024272935914775.webp",
           "author": "bf0g3n",
           "stats": {
-            "views": 187900,
+            "views": 188000,
             "likes": 36200
           },
           "url": "https://www.tiktok.com/@bf0g3n/video/7701024272935914775"
@@ -669,7 +684,7 @@
           "author": "yungpipsxd",
           "stats": {
             "views": 39300,
-            "likes": 5396
+            "likes": 5397
           },
           "url": "https://www.tiktok.com/@yungpipsxd/video/7700667942437948705"
         },
@@ -683,7 +698,7 @@
           "cover": "albertoxpecchini/r/7700541278508895521.webp",
           "author": "urg0dd",
           "stats": {
-            "views": 564100,
+            "views": 564300,
             "likes": 93500
           },
           "url": "https://www.tiktok.com/@urg0dd/video/7700541278508895521"
@@ -698,7 +713,7 @@
           "cover": "albertoxpecchini/r/7699962515253431585.webp",
           "author": "1bisouuuh",
           "stats": {
-            "views": 24500000,
+            "views": 24700000,
             "likes": 3800000
           },
           "url": "https://www.tiktok.com/@1bisouuuh/video/7699962515253431585"
@@ -713,7 +728,7 @@
           "cover": "albertoxpecchini/r/7698838983064718624.webp",
           "author": "_spam.martii",
           "stats": {
-            "views": 115000,
+            "views": 115100,
             "likes": 26300
           },
           "url": "https://www.tiktok.com/@_spam.martii/video/7698838983064718624"
@@ -728,7 +743,7 @@
           "cover": "albertoxpecchini/r/7696521180408253729.webp",
           "author": "giovannibaronee_",
           "stats": {
-            "views": 218700,
+            "views": 218800,
             "likes": 38700
           },
           "url": "https://www.tiktok.com/@giovannibaronee_/video/7696521180408253729"
@@ -743,7 +758,7 @@
           "cover": "albertoxpecchini/r/7666840719524498720.webp",
           "author": "yungpipsxd",
           "stats": {
-            "views": 435900,
+            "views": 436000,
             "likes": 8193
           },
           "url": "https://www.tiktok.com/@yungpipsxd/video/7666840719524498720"
@@ -758,7 +773,7 @@
           "cover": "albertoxpecchini/r/7699164269597691169.webp",
           "author": "cll3y",
           "stats": {
-            "views": 390400,
+            "views": 390500,
             "likes": 65700
           },
           "url": "https://www.tiktok.com/@cll3y/video/7699164269597691169"
@@ -787,8 +802,8 @@
           "cover": "albertoxpecchini/r/7698453081150770446.webp",
           "author": "yourcopiumdealer",
           "stats": {
-            "views": 774400,
-            "likes": 130900
+            "views": 786000,
+            "likes": 133400
           },
           "url": "https://www.tiktok.com/@yourcopiumdealer/video/7698453081150770446"
         },
@@ -803,7 +818,7 @@
           "author": "imongopreti8",
           "stats": {
             "views": 3000000,
-            "likes": 483400
+            "likes": 483500
           },
           "url": "https://www.tiktok.com/@imongopreti8/video/7697970903350660385"
         },
@@ -817,7 +832,7 @@
           "cover": "albertoxpecchini/r/7697622130334207265.webp",
           "author": "speedysongsitaly",
           "stats": {
-            "views": 499500,
+            "views": 499700,
             "likes": 66300
           },
           "url": "https://www.tiktok.com/@speedysongsitaly/video/7697622130334207265"
@@ -831,7 +846,7 @@
           "cover": "albertoxpecchini/r/7697953835486022944.webp",
           "author": "suuuzy7",
           "stats": {
-            "views": 477100,
+            "views": 477300,
             "likes": 64700
           },
           "url": "https://www.tiktok.com/@suuuzy7/photo/7697953835486022944"
@@ -846,8 +861,8 @@
           "cover": "albertoxpecchini/r/7695170170003655969.webp",
           "author": "bho272",
           "stats": {
-            "views": 168100,
-            "likes": 37700
+            "views": 168500,
+            "likes": 37900
           },
           "url": "https://www.tiktok.com/@bho272/video/7695170170003655969"
         },
@@ -861,8 +876,8 @@
           "cover": "albertoxpecchini/r/7696696078707510534.webp",
           "author": "denervations",
           "stats": {
-            "views": 759400,
-            "likes": 113400
+            "views": 761800,
+            "likes": 113900
           },
           "url": "https://www.tiktok.com/@denervations/video/7696696078707510534"
         },
@@ -890,7 +905,7 @@
           "author": "pirog25",
           "stats": {
             "views": 2400000,
-            "likes": 473700
+            "likes": 473800
           },
           "url": "https://www.tiktok.com/@pirog25/photo/7697383051545906454"
         },
@@ -903,8 +918,8 @@
           "cover": "albertoxpecchini/r/7697626398525099286.webp",
           "author": "pirog25",
           "stats": {
-            "views": 891800,
-            "likes": 125800
+            "views": 893300,
+            "likes": 126000
           },
           "url": "https://www.tiktok.com/@pirog25/photo/7697626398525099286"
         },
@@ -918,7 +933,7 @@
           "author": "_la.vittoo_",
           "stats": {
             "views": 59700,
-            "likes": 5338
+            "likes": 5342
           },
           "url": "https://www.tiktok.com/@_la.vittoo_/photo/7695509390723468577"
         },
@@ -932,8 +947,8 @@
           "cover": "albertoxpecchini/r/7696593564230290720.webp",
           "author": "angygerox",
           "stats": {
-            "views": 500400,
-            "likes": 98200
+            "views": 500900,
+            "likes": 98300
           },
           "url": "https://www.tiktok.com/@angygerox/video/7696593564230290720"
         },
@@ -948,7 +963,7 @@
           "author": "sbobbins___",
           "stats": {
             "views": 2100000,
-            "likes": 467800
+            "likes": 467900
           },
           "url": "https://www.tiktok.com/@sbobbins___/video/7696545847596666144"
         },
@@ -963,7 +978,7 @@
           "author": "quincy5ive",
           "stats": {
             "views": 1300000,
-            "likes": 264600
+            "likes": 264700
           },
           "url": "https://www.tiktok.com/@quincy5ive/video/7695184092739996960"
         },
@@ -978,7 +993,7 @@
           "author": "seasn25",
           "stats": {
             "views": 6100000,
-            "likes": 758100
+            "likes": 759000
           },
           "url": "https://www.tiktok.com/@seasn25/video/7685079135764417814"
         },
@@ -992,8 +1007,8 @@
           "cover": "albertoxpecchini/r/7695866622480796959.webp",
           "author": "puresnowing",
           "stats": {
-            "views": 295900,
-            "likes": 57600
+            "views": 296100,
+            "likes": 57700
           },
           "url": "https://www.tiktok.com/@puresnowing/video/7695866622480796959"
         },
@@ -1007,7 +1022,7 @@
           "author": "secrett.gg12",
           "stats": {
             "views": 16200,
-            "likes": 1587
+            "likes": 1588
           },
           "url": "https://www.tiktok.com/@secrett.gg12/photo/7695865857930546464"
         },
@@ -1036,8 +1051,8 @@
           "cover": "albertoxpecchini/r/7693625342677748998.webp",
           "author": "enzoedits812",
           "stats": {
-            "views": 771300,
-            "likes": 148400
+            "views": 772200,
+            "likes": 148600
           },
           "url": "https://www.tiktok.com/@enzoedits812/video/7693625342677748998"
         },
@@ -1050,8 +1065,8 @@
           "cover": "albertoxpecchini/r/7695093690603228448.webp",
           "author": "martedihater",
           "stats": {
-            "views": 366100,
-            "likes": 67900
+            "views": 366200,
+            "likes": 68000
           },
           "url": "https://www.tiktok.com/@martedihater/photo/7695093690603228448"
         },
@@ -1065,7 +1080,7 @@
           "cover": "albertoxpecchini/r/7693296267069295904.webp",
           "author": "sempree.isa",
           "stats": {
-            "views": 219200,
+            "views": 219300,
             "likes": 45900
           },
           "url": "https://www.tiktok.com/@sempree.isa/video/7693296267069295904"
@@ -1080,7 +1095,7 @@
           "cover": "albertoxpecchini/r/7680283494051810592.webp",
           "author": "clara.b333",
           "stats": {
-            "views": 845400,
+            "views": 845800,
             "likes": 88200
           },
           "url": "https://www.tiktok.com/@clara.b333/video/7680283494051810592"
@@ -1109,7 +1124,7 @@
           "cover": "albertoxpecchini/r/7687939711293328673.webp",
           "author": "im_.mery_",
           "stats": {
-            "views": 313600,
+            "views": 313700,
             "likes": 63800
           },
           "url": "https://www.tiktok.com/@im_.mery_/video/7687939711293328673"
@@ -1124,25 +1139,10 @@
           "cover": "albertoxpecchini/r/7691715661252267297.webp",
           "author": "uni.girlsssss",
           "stats": {
-            "views": 296100,
-            "likes": 63400
+            "views": 296200,
+            "likes": 63500
           },
           "url": "https://www.tiktok.com/@uni.girlsssss/video/7691715661252267297"
-        },
-        {
-          "id": "7692963341643320609",
-          "at": "2026-10-04T23:47:05+00:00",
-          "type": "video",
-          "durata": 24,
-          "w": 1024,
-          "h": 576,
-          "cover": "albertoxpecchini/r/7692963341643320609.webp",
-          "author": "lkrzcnf",
-          "stats": {
-            "views": 1200000,
-            "likes": 184200
-          },
-          "url": "https://www.tiktok.com/@lkrzcnf/video/7692963341643320609"
         },
         {
           "id": "7684261982417030422",
@@ -1154,7 +1154,7 @@
           "cover": "albertoxpecchini/r/7684261982417030422.webp",
           "author": "puresnowhq",
           "stats": {
-            "views": 581400,
+            "views": 581900,
             "likes": 89900
           },
           "url": "https://www.tiktok.com/@puresnowhq/video/7684261982417030422"
@@ -1170,7 +1170,7 @@
           "author": "cfu.champagne",
           "stats": {
             "views": 72300,
-            "likes": 9274
+            "likes": 9276
           },
           "url": "https://www.tiktok.com/@cfu.champagne/video/7691721946718899488"
         },
@@ -1185,7 +1185,7 @@
           "author": "pinkcannelle",
           "stats": {
             "views": 1000000,
-            "likes": 246300
+            "likes": 246500
           },
           "url": "https://www.tiktok.com/@pinkcannelle/video/7690066807654255873"
         },
@@ -1199,7 +1199,7 @@
           "cover": "albertoxpecchini/r/7685532028959329554.webp",
           "author": "itsnotyaz1",
           "stats": {
-            "views": 447000,
+            "views": 447100,
             "likes": 92800
           },
           "url": "https://www.tiktok.com/@itsnotyaz1/video/7685532028959329554"
@@ -1215,7 +1215,7 @@
           "author": "yungpipsxd",
           "stats": {
             "views": 27800,
-            "likes": 3726
+            "likes": 3727
           },
           "url": "https://www.tiktok.com/@yungpipsxd/video/7659121729830276385"
         },
@@ -1243,8 +1243,8 @@
           "cover": "albertoxpecchini/r/7687665871946370326.webp",
           "author": "noctenfilms",
           "stats": {
-            "views": 916000,
-            "likes": 180200
+            "views": 917200,
+            "likes": 180400
           },
           "url": "https://www.tiktok.com/@noctenfilms/video/7687665871946370326"
         },
@@ -1258,7 +1258,7 @@
           "cover": "albertoxpecchini/r/7688116954741198102.webp",
           "author": "madebydoni",
           "stats": {
-            "views": 458800,
+            "views": 459300,
             "likes": 80000
           },
           "url": "https://www.tiktok.com/@madebydoni/video/7688116954741198102"
@@ -1288,8 +1288,8 @@
           "cover": "albertoxpecchini/r/7684441636604071188.webp",
           "author": "fe_thamson07",
           "stats": {
-            "views": 803800,
-            "likes": 101000
+            "views": 804200,
+            "likes": 101100
           },
           "url": "https://www.tiktok.com/@fe_thamson07/video/7684441636604071188"
         },
@@ -1303,8 +1303,8 @@
           "cover": "albertoxpecchini/r/7685456164313779478.webp",
           "author": "twoazuna",
           "stats": {
-            "views": 417500,
-            "likes": 74100
+            "views": 417900,
+            "likes": 74200
           },
           "url": "https://www.tiktok.com/@twoazuna/video/7685456164313779478"
         },
@@ -1319,7 +1319,7 @@
           "author": "yxu51",
           "stats": {
             "views": 4000000,
-            "likes": 643500
+            "likes": 643900
           },
           "url": "https://www.tiktok.com/@yxu51/video/7685450722929904916"
         },
@@ -1422,7 +1422,7 @@
           "cover": "albertoxpecchini/r/7684277229857033504.webp",
           "author": "ricciospam",
           "stats": {
-            "views": 209700,
+            "views": 209800,
             "likes": 32400
           },
           "url": "https://www.tiktok.com/@ricciospam/video/7684277229857033504"
@@ -1443,7 +1443,7 @@
           "url": "https://www.tiktok.com/@stefania_rega_/video/7687711335433489696"
         }
       ],
-      "synced": "2026-11-26T01:36:26+00:00"
+      "synced": "2026-11-26T12:40:21+00:00"
     }
   ]
 }
