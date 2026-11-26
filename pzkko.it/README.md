@@ -112,8 +112,60 @@ a mano: `python raccogli.py --forza --solo-dati` (senza push) oppure
 `python raccogli.py --forza --pubblica`.
 
 L'eccezione voluta: il nome dell'account personale può comparire solo in
-`public/assets/ig.js`, `public/assets/config.js` e `public/media/ig/` (vedi
-`scripts/guard.mjs`). Il dominio personale e ogni altro nome restano vietati.
+`public/assets/ig.js`, `public/assets/config.js`, `public/media/ig/` e (dal
+26.11) `public/media/tt/` (vedi `scripts/guard.mjs`). Il dominio personale e
+ogni altro nome restano vietati.
+
+## TikTok in bacheca (26.11.2026)
+
+Sotto la scheda Instagram c'è la sua sorella TikTok (`#tt-card`), con la stessa
+regola: HTML e CSS del sito, dati statici in `public/media/tt/index.json`, media
+in `public/media/tt/`, nessuna chiamata a TikTok dal browser e nessun account
+chiesto a chi guarda.
+
+- `public/assets/tt.js`: la scheda (numeri sdoppiati ciano e rosso, colonna
+  delle azioni a destra, fila dei video 3:4, storie di oggi) e gli stati.
+- `public/assets/tt-sfondi.js`: dodici scene vive, una ogni due ore, disegnate
+  con un solo inchiostro e stampate due volte (ciano a sinistra, rosso a destra),
+  a tempo sullo stesso battito. Il disco in fondo alla colonna passa alla scena
+  dopo. Non sono i pixel della scheda Instagram.
+- `src/site.css`: le regole `.ttc*`.
+- `design/tiktok-bacheca.md`: il brief per chi rifinisce l'esperienza (il
+  visualizzatore, l'anteprima al passaggio, la tastiera).
+
+Il raccoglitore gira sul pc, fuori dal repository
+(`%USERPROFILE%\Collegamenti\TikTok\raccogli.py`). TikTok non mostra un profilo
+a chi non ha fatto l'accesso, quindi non c'è un'API: il raccoglitore apre senza
+finestra un profilo di Edge dedicato (`browser-tiktok`, dove si accede una volta
+con `accedi-tiktok.cmd`, la password non passa da lì), carica la pagina pubblica
+del profilo e legge le risposte che la pagina chiede da sola. Un giro all'ora
+(task `pzkko-tiktok`, ogni 30 minuti, decide il file); copertine e filmati si
+scaricano una volta sola; se non cambia niente non si scrive e non si pubblica.
+
+Cosa entra: follower, seguiti, mi piace, numero di video, l'avatar, i video
+pubblici (copertina WebP alla risoluzione nativa, MP4, durata, data, fissato,
+visualizzazioni e mi piace) e le storie di oggi. In più:
+
+- **i video scelti** (`VIDEO_SCELTI` nel raccoglitore; dal 26.11 i due virali,
+  1,6 milioni e 757 mila visualizzazioni): su TikTok non sono pubblici e la
+  loro visibilità si cambia solo dall'app, quindi si leggono da TikTok Studio
+  (ogni 6 ore) e nel sito sono pubblici, con l'etichetta ciano «solo qui» e il
+  filmato servito dal sito (`solo_qui: true`, senza collegamento al video su
+  TikTok, che per chi guarda non si apre);
+- **tutti i repost** (`reposts`): la prima pagina a ogni giro, la lista intera
+  ogni 6 ore. Sono video di altri: del repost si tengono solo copertina,
+  `@autore`, durata, visualizzazioni, mi piace e il collegamento all'originale;
+  il filmato resta su TikTok.
+
+Cosa resta fuori: didascalie, commenti, elenchi di follower, i nomi degli
+autori dei repost (solo `@account`), e ogni contenuto che TikTok segna come
+privato, segreto o per amici e che non è fra i video scelti. Il nome del
+profilo, se contiene il nome personale, non viene scritto: la scheda mostra solo
+@account.
+
+Il raccoglitore pubblica i dati solo quando su `origin` c'è già il
+`guard.mjs` con l'eccezione per `public/media/tt/`: prima, un push farebbe
+fallire la build su Vercel (anche quella di Instagram).
 
 ## I progetti veri dentro il sito (18.11)
 
@@ -204,7 +256,10 @@ chat, il cercapersone e i tavoli: `public/accesso/accesso.js` (con
   due i profili. Instagram non dice a un sito chi segue chi, quindi si scrive
   il proprio nome, la banca scrive a pzkko (email, e Discord se c’è il
   webhook) e lui decide dal tasto della lettera, che apre `/?premio=…`
-  (`decidi`). Col sì i $pzk partono subito.
+  (`decidi`). Col sì i $pzk partono subito. Se la lettera non parte la
+  richiesta resta lo stesso: nel conto di pzkko il tasto del conto mostra un
+  numero rosso («Regali da decidere»), e all’arrivo nel sito la richiesta
+  nuova si apre da sola (`premi`).
 
 I codici, le lettere e le email stanno sulla banca, sul pc di pzkko
 (`C:\pzkko-server\banca\posta.mjs`, in SMTP): se il pc è spento non si entra.
@@ -289,7 +344,8 @@ Vercel esegue `npm run build` e pubblica `public/` (vedi `vercel.json`).
   eccezioni sono i profili di `PERSONAL_SOCIALS` e la scheda Instagram (24.11),
   ammessi solo in `public/assets/config.js`, `ig.js` e nei dati di
   `/media/ig/`; il dominio personale resta vietato. `npm run check` cerca anche
-  percorsi del computer, chiavi private e token.
+  percorsi del computer, indirizzi di rete privati (LAN e Tailscale), chiavi
+  private e token.
 - **Prestazioni.** Italiano e inglese arrivano subito; le altre sette lingue
   stanno in `public/assets/i18n/` e si scaricano solo quando si sceglie quella.
   Cache lunga su CDN per asset, font, immagini e video; HTML sempre rivalidato.
