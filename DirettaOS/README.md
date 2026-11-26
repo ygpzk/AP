@@ -348,7 +348,20 @@ foto del cantiere (`D:\disco immagini\rullino con etichetta\HPIM M417\HPIM09F93 
 con esbuild prendendo solo i pezzi che servono (niente WebGPU), più earcut (ISC) per i muri con le aperture. three.js è
 stato tolto: non lo usava nient'altro.
 
-- **Gli edifici, dalle foto**: cemento a vista grigio con le riprese dei pannelli, pilastri e davanzali in mattoni,
+- **I fabbricati dal CAD** (25 novembre 2026, sera: «faceva cagare… intanto disegnamo solo i fabbricati come poligoni
+  3d dandoti le misure su cad»): `fabbricati.js` li costruisce come poligoni a tinta unita, senza texture, con le misure
+  della «Pianta dei fabbricati per l'IMU, pulita.dwg» (`D:\pecchini\01 Cascina Fontana (società)\2025\Disegni`, copia
+  in `riferimenti/lotto/pulita.dxf`, in centimetri). Nel file i numeri sono quelli del CAD, portati nel telaio da `U()`
+  e `V()`: corpo centrale 16,00 × 17,80 m col portico (tre arcate fra i pilastri 50 × 50, un arco per lato fino alle
+  spalle da 70 cm), facciata sotto il portico con finestra–portone–finestra e sopra il piano primo aperto (nel CAD lì
+  non c'è muro), retro con portone da 4,08 m e tre finestre da 3 m sopra; ali da 6,00 × 10,00 m (ovest due piani, est
+  uno) con le finestre e le porte del CAD; rimessa 16,00 × 10,00 m aperta verso la casa fra quattro pilastri 40 × 40,
+  tre lunette verso i campi, tetto dalla sezione del CAD (colmo 5,08 m a 3,70 m dal lato casa, gronde 4,05 e 3,32 m,
+  falde al 27,94 %). Le sagome a terra del CAD prendono il posto di quelle della planimetria (`IMPRONTE`). Le altezze della
+  casa il CAD non le ha: stanno in `ALTEZZE` (gronde 6,5 / 5,9 / 3,6 m, solaio 3,1 m, falde a 18°, dal modello di
+  prima). Rispetto a prima non ci sono più la scala di ferro, il comignolo, il casotto, gronde e pluviali (nel CAD non
+  ci sono). La versione di prima, dalle foto, è ancora in `edifici.js` (basta rimetterla nell'import di `dove.js`):
+- **Gli edifici, dalle foto** (la versione di prima): cemento a vista grigio con le riprese dei pannelli, pilastri e davanzali in mattoni,
   coppi, persiane verde scuro, modiglioni sotto le gronde, gronde e pluviali marrone scuro. Il corpo centrale ha
   davanti il **portico a tutta altezza** (tre archi sul fronte e uno per lato, pilastri d'angolo in mattoni fino
   all'imposta, pavimento in cotto, la **scala di ferro** che sale al pianerottolo), dietro due piani con il portone;
@@ -377,11 +390,23 @@ stato tolto: non lo usava nient'altro.
   pronta), le volte dopo in 0,7 s. In prova: 60 fotogrammi al secondo, 2,5 ms di processore a fotogramma,
   ~480 000 triangoli. Le ombre si calcolano solo quando il sole si sposta (ogni 20 s). Spenta da un minuto, la scena
   butta via il contesto WebGL e libera la scheda video. Con «risparmio GPU» (`niente-gpu`) niente ombre, niente
-  occlusione e niente MSAA. Senza WebGL resta la pianta del lotto in SVG.
+  occlusione e niente MSAA. Senza WebGL resta la pianta del lotto in SVG (e alla riaccensione si riprova, al massimo
+  una volta ogni 15 s: prima restava la pianta finché non si ricaricava la pagina).
+- **Senza GPU** (25 novembre 2026, sera: «mappa 3d è rotto»): la regia aperta con **Diretta OS (Chromium senza GPU)**
+  fa disegnare il WebGL al Microsoft Basic Render Driver, cioè al processore, e la mappa intera lì andava a **2,9 fps**
+  (65 con la RTX 3060 Ti). Adesso la scena se ne accorge (chiede a una tela minuscola chi disegna) e:
+  - nell'**anteprima Live** con l'immagine di Camo sotto (non nera: con Camo chiuso la sua camera manda fotogrammi neri)
+    non disegna niente: si vede la mappa di Camo, che la disegna con la scheda video, e questa pagina fa da
+    **telecomando** (il mouse funziona uguale, la camera si manda anche mentre trascini, la bussola è cliccabile dove
+    sta nell'immagine). In alto c'è la scritta «Questa finestra è senza GPU: vedi la mappa di Camo, la guidi da qui»;
+  - senza l'immagine di Camo (chiuso, camera rilasciata, «Riferimento») la disegna **piccola**: 960 × 540, senza
+    ombre, occlusione, bagliore e vignetta. Misurata col suo Chromium senza GPU: **11 fps** invece di 2,9.
+  Per provarlo: `?gl=software` nella prova fa finta di non avere la GPU.
 
 File, tutti in `pubblico/scene/dove/`: `dove.js` (il modulo della scena: motore, materiali, luci, resa, comandi,
 visita), `luce.js` (sole, luna, stagione, tavolozza), `tele.js` (le texture dipinte in canvas), `geo.js` (muri con
-aperture, tetti, tubi), `edifici.js` (casa e capannone), `esterni.js` (piscina, pergolato, reti, cancello, trattore),
+aperture, tetti, tubi), `fabbricati.js` (casa e rimessa dal CAD, quella in uso), `edifici.js` (casa e capannone dalle
+foto, la versione di prima), `esterni.js` (piscina, pergolato, reti, cancello, trattore),
 `verde.js` (alberi e siepi), `terra.js` (terreno vicino e lontano), `cielo.js` (la cupola), `dati.js` (il rilievo).
 **Per provarla**: `/scene/prova.html?scena=dovevivo&vista=portico&ora=17:30&meteo=pioggia&tour=0` (viste: `tre`,
 `alto`, `portico`, `casa`, `retro`, `fontana`, `pergolato`, `capannone`, `viale`, `campi`, `orizzonte`; `tour=1` fa

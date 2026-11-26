@@ -15,11 +15,16 @@ import { DATI } from './dati.js'
 import { tavolozza, stagione } from './luce.js'
 import * as TELE from './tele.js'
 import { Pezzi } from './geo.js'
-import { costruisciEdifici, ANGOLO } from './edifici.js'
+// (i fabbricati dal CAD, poligoni a tinta unita; edifici.js è la versione di prima, dalle foto, con le texture dipinte)
+import { costruisciFabbricati, ANGOLO, IMPRONTE } from './fabbricati.js'
 import { costruisciEsterni } from './esterni.js'
 import { piantaAlberi, creaAlberi, creaLontani } from './verde.js'
 import { dipingiMappa, dipingiLontano, filariLontani, MAPPA, LONTANO } from './terra.js'
 import { creaCielo } from './cielo.js'
+
+// le sagome a terra dei fabbricati: quelle del CAD al posto di quelle della planimetria (servono al terreno e agli alberi)
+DATI.case.casa.impronta = IMPRONTE.casa
+DATI.case.capannone.impronta = IMPRONTE.capannone
 
 const RAD = Math.PI / 180
 const GRADI = 180 / Math.PI
@@ -36,6 +41,26 @@ const pausa = () => new Promise((r) => setTimeout(r, 0))
 const lin = (c) => c.map((v) => Math.pow(v, 2.2))
 const linHex = (h) => lin([((h >> 16) & 255) / 255, ((h >> 8) & 255) / 255, (h & 255) / 255])
 const C3 = (a, k = 1) => new Color3(a[0] * k, a[1] * k, a[2] * k)
+
+// Chi disegna il WebGL di questa pagina: la scheda video o il processore. Senza GPU (la regia aperta con «Chromium
+// senza GPU», Edge con l'accelerazione spenta) il WebGL lo fa il Microsoft Basic Render Driver: la mappa intera lì
+// va a 3 fotogrammi al secondo e si mangia il processore. Si chiede una volta sola, a una tela minuscola.
+// (?gl=software nella prova fa finta di non averla)
+let GRAFICA = null
+function grafica() {
+  if (GRAFICA) return GRAFICA
+  if (new URLSearchParams(location.search).get('gl') === 'software') return (GRAFICA = 'software')
+  try {
+    const c = document.createElement('canvas'); c.width = c.height = 4
+    const gl = c.getContext('webgl2') || c.getContext('webgl')
+    if (!gl) return (GRAFICA = 'software')
+    const info = gl.getExtension('WEBGL_debug_renderer_info')
+    const chi = String(gl.getParameter(info ? info.UNMASKED_RENDERER_WEBGL : gl.RENDERER) ?? '')
+    gl.getExtension('WEBGL_lose_context')?.loseContext()
+    GRAFICA = /SwiftShader|Basic Render|WARP|llvmpipe|softpipe|Software/i.test(chi) ? 'software' : 'gpu'
+  } catch { GRAFICA = 'gpu' }
+  return GRAFICA
+}
 
 // dal telaio della casa (u, v) ai metri locali (x est, y nord)
 const CA = Math.cos(ANGOLO), SA = Math.sin(ANGOLO)
@@ -118,10 +143,10 @@ function zone() {
 }
 
 // ═══════════════ il mondo: motore, scena, luci, materiali, tutto ═══════════════
-async function costruisciMondo(canvas, { leggero }) {
+async function costruisciMondo(canvas, { leggero, software = false, lato = [1920, 1080] }) {
   Logger.LogLevels = Logger.ErrorLogLevel
   const engine = new Engine(canvas, false, { preserveDrawingBuffer: false, stencil: true, powerPreference: 'high-performance', alpha: false, antialias: false, doNotHandleContextLost: false }, false)
-  engine.setSize(1920, 1080)
+  engine.setSize(lato[0], lato[1])
   engine.enableOfflineSupport = false
   const scene = new Scene(engine)
   scene.clearColor = new Color4(0.05, 0.05, 0.06, 1)
@@ -231,10 +256,24 @@ async function costruisciMondo(canvas, { leggero }) {
   for (const tipo of ['platano', 'scura']) { const c = TELE.corteccia(tipo); M['legno-' + tipo] = pbr('corteccia-' + tipo, { col: tex('corteccia-' + tipo, c.col, { scala: 1 }), ...(c.nor ? { nor: tex('corteccia-n-' + tipo, c.nor, { normale: true }), bump: 0.6 } : {}), rough: 0.95 }) }
   for (const tipo of ['platano', 'gelso', 'pioppo', 'tondo', 'siepe', 'vite']) { const f = TELE.foglie(tipo); M['foglie-' + tipo] = pbr('foglie-' + tipo, { col: tex('foglie-' + tipo, f.col, { alpha: true }), alpha: true, doppio: true, rough: 0.78 }); await pausa() }
   M.vite = M['foglie-vite']
-  M.siepeAnima = pbr('siepeAnima', { colore: linHex(0x1d3015), nor: tex('grana-n', gra.nor, { normale: true, scala: 0.5 }), bump: 1.2, rough: 0.95 })
+  // i fabbricati dal CAD: tinte piatte, niente texture (i colori sono quelli delle foto: cemento grigio, spigoli e
+  // davanzali in mattoni, coppi, persiane e porte verde scuro)
+  M.pMuro = pbr('pMuro', { colore: linHex(0x9c9e99), rough: 0.9 })
+  M.pDentro = pbr('pDentro', { colore: linHex(0x26262a), rough: 1 })
+  M.pMattone = pbr('pMattone', { colore: linHex(0x98563d), rough: 0.88 })
+  M.pDavanzale = pbr('pDavanzale', { colore: linHex(0xa06148), rough: 0.85 })
+  M.pTetto = pbr('pTetto', { colore: linHex(0x8c4a35), rough: 0.78 })
+  M.pColmo = pbr('pColmo', { colore: linHex(0x733a29), rough: 0.78 })
+  M.pSotto = pbr('pSotto', { colore: linHex(0x6b5646), rough: 0.9 })
+  M.pFascia = pbr('pFascia', { colore: linHex(0x33261d), rough: 0.6 })
+  M.pPorta = pbr('pPorta', { colore: linHex(0x26372d), rough: 0.6 })
+  M.pPersiana = pbr('pPersiana', { colore: linHex(0x2e4436), rough: 0.6, doppio: true })
+  M.pSolaio = pbr('pSolaio', { colore: linHex(0x8e908b), rough: 0.9 })
+  M.pCotto = pbr('pCotto', { colore: linHex(0xa8654a), rough: 0.85 })
+  M.siepeAnima = pbr('siepeAnima',{ colore: linHex(0x1d3015), nor: tex('grana-n', gra.nor, { normale: true, scala: 0.5 }), bump: 1.2, rough: 0.95 })
 
   // ── gli edifici e quello che c'è fuori ──
-  const ed = costruisciEdifici()
+  const ed = costruisciFabbricati()
   for (const m of ed.pz.mesh(scene, M, { nome: 'edifici' })) caster(m)
   await pausa()
   const fuori = costruisciEsterni(DATI, ed.T, sta)
@@ -400,15 +439,19 @@ async function costruisciMondo(canvas, { leggero }) {
       ao.radius = 1.4; ao.totalStrength = 1.15; ao.base = 0.08; ao.samples = 16; ao.maxZ = 420; ao.minZAspect = 0.4; ao.expensiveBlur = true
     } catch (e) { console.warn('dove: niente occlusione ambientale', e); ao = null }
   }
-  pipe = new DefaultRenderingPipeline('resa', true, scene, [camera])
-  pipe.samples = leggero ? 1 : 4
-  pipe.fxaaEnabled = !!leggero
-  pipe.imageProcessingEnabled = true
-  pipe.bloomEnabled = true; pipe.bloomThreshold = 0.9; pipe.bloomWeight = 0.22; pipe.bloomKernel = 48; pipe.bloomScale = 0.5
-  pipe.sharpenEnabled = !leggero; if (pipe.sharpen) { pipe.sharpen.edgeAmount = 0.18; pipe.sharpen.colorAmount = 1 }
-  pipe.grainEnabled = !leggero; if (pipe.grain) { pipe.grain.intensity = 5; pipe.grain.animated = true }
-  pipe.imageProcessing.vignetteEnabled = true; pipe.imageProcessing.vignetteWeight = 0.8; pipe.imageProcessing.vignetteStretch = 0.4
-  pipe.imageProcessing.vignetteColor = new Color4(0.02, 0.03, 0.02, 0)
+  // (senza GPU niente passaggi dopo: col processore il bagliore e la vignetta costano metà del fotogramma. Il tono
+  // e l'esposizione li fanno lo stesso i materiali, con la configurazione della scena)
+  if (!software) {
+    pipe = new DefaultRenderingPipeline('resa', true, scene, [camera])
+    pipe.samples = leggero ? 1 : 4
+    pipe.fxaaEnabled = !!leggero
+    pipe.imageProcessingEnabled = true
+    pipe.bloomEnabled = true; pipe.bloomThreshold = 0.9; pipe.bloomWeight = 0.22; pipe.bloomKernel = 48; pipe.bloomScale = 0.5
+    pipe.sharpenEnabled = !leggero; if (pipe.sharpen) { pipe.sharpen.edgeAmount = 0.18; pipe.sharpen.colorAmount = 1 }
+    pipe.grainEnabled = !leggero; if (pipe.grain) { pipe.grain.intensity = 5; pipe.grain.animated = true }
+    pipe.imageProcessing.vignetteEnabled = true; pipe.imageProcessing.vignetteWeight = 0.8; pipe.imageProcessing.vignetteStretch = 0.4
+    pipe.imageProcessing.vignetteColor = new Color4(0.02, 0.03, 0.02, 0)
+  }
 
   // ── la luce di un momento ──
   let pal = null, lampo = 0, prossimoLampo = 4
@@ -493,8 +536,19 @@ export function crea(ctx) {
   const bussola = ui.querySelector('.dvw-bussola'), rosa = ui.querySelector('.dvw-rosa')
   const elOra = ui.querySelector('.dvw-ora'), elGradi = ui.querySelector('.dvw-gradi'), elMeteo = ui.querySelector('.dvw-meteo')
 
-  const leggero = document.documentElement.classList.contains('niente-gpu')
-  let mondo = null, costruendo = null, tela = null, su = false, pal = null, meteo = null, timerSpegni = 0, guasto = false
+  // senza GPU: nell'anteprima dal vivo della regia la mappa non si disegna qui, si guarda quella di Camo (che la disegna
+  // con la scheda video) e il mouse la guida da qui, come un telecomando. Senza l'immagine di Camo si disegna piccola
+  // (960 × 540, senza ombre né occlusione), così resta girabile anche col processore.
+  const software = grafica() === 'software'
+  const leggero = software || document.documentElement.classList.contains('niente-gpu')
+  const LATO = software ? [960, 540] : [1920, 1080]
+  let mondo = null, costruendo = null, tela = null, su = false, pal = null, meteo = null, timerSpegni = 0, guasto = false, guastoAlle = 0
+  let telecomando = false, senzaVivoDa = 0
+  const aspettaVivo = software && new URLSearchParams(location.search).get('sfondo') === 'vivo' ? performance.now() + 4000 : 0
+  const avviso = document.createElement('div')
+  avviso.className = 'dvw-avviso'
+  avviso.textContent = 'Questa finestra è senza GPU: vedi la mappa di Camo, la guidi da qui'
+  el.appendChild(avviso)
 
   // ── ripiego senza WebGL: la pianta del lotto, disegnata in SVG ──
   function caduta() {
@@ -709,27 +763,73 @@ export function crea(ctx) {
 
   // ── accendere e spegnere: il mondo si costruisce la prima volta (e dopo un minuto spento si butta via) ──
   function costruisci() {
-    if (mondo || costruendo || guasto) return costruendo
+    if (mondo || costruendo || telecomando) return costruendo
+    // (nella regia dal vivo l'immagine di Camo arriva dopo un attimo: senza GPU la si aspetta, invece di costruire
+    // per sei secondi col processore un mondo che poi si butta)
+    if (software && performance.now() < aspettaVivo) return null
+    // (se la volta prima il 3D non è partito si riprova, ma non più di una volta ogni 15 secondi: prima restava la
+    // pianta in 2D finché non si ricaricava la pagina)
+    if (guasto) {
+      if (ctx.prova && Q.has('nogl')) return null
+      if (performance.now() - guastoAlle < 15000) return null
+      guasto = false; el.querySelector('.dvw-caduta')?.remove(); ui.style.display = ''; el.classList.remove('dvw-pronta')
+    }
     if (ctx.prova && Q.has('nogl')) { guasto = true; caduta(); el.classList.add('dvw-pronta'); return null }
     tela = document.createElement('canvas')
     tela.className = 'dvw-tela'
-    tela.width = 1920; tela.height = 1080
+    tela.width = LATO[0]; tela.height = LATO[1]
     el.insertBefore(tela, ui)
     const t0 = performance.now()
-    costruendo = costruisciMondo(tela, { leggero }).then((m) => {
+    costruendo = costruisciMondo(tela, { leggero, software, lato: LATO }).then((m) => {
       mondo = m; costruendo = null
       mondo.engine.onContextLostObservable.add(() => { console.warn('dove: contesto perso') })
       ricalcola(); applicaCamera()
       el.classList.add('dvw-pronta')
-      if (ctx.prova) { window.__dove = { mondo, cam, des, ricalcola, applicaCamera }; console.log(`dove: pronta in ${Math.round(performance.now() - t0)} ms`) }
+      if (ctx.prova) { window.__dove = { mondo, cam, des, ricalcola, applicaCamera }; console.log(`dove: pronta in ${Math.round(performance.now() - t0)} ms${software ? ' (senza GPU: piccola e leggera)' : ''}`) }
       return m
     }).catch((e) => {
       console.warn('dove: niente 3D', e)
-      costruendo = null; guasto = true
+      costruendo = null; guasto = true; guastoAlle = performance.now()
       try { tela?.remove() } catch {}
       caduta(); el.classList.add('dvw-pronta')
     })
     return costruendo
+  }
+  // senza GPU, con l'immagine di Camo sotto (l'anteprima dal vivo della regia): niente mondo qui, solo il telecomando.
+  // Se l'immagine di Camo manca da 5 secondi (camera rilasciata, «Riferimento»), si torna a disegnarla piccola.
+  // (l'immagine di Camo deve avere qualcosa dentro: con Camo chiuso la sua camera manda fotogrammi neri. Si guarda una
+  // volta al secondo, rimpicciolita a 16 × 9)
+  let camoPiena = false, camoGuardata = 0, assaggio = null
+  function camoHaImmagine() {
+    const scena = el.closest('.dal-vivo')
+    if (!scena) return (camoPiena = false)
+    const ora = performance.now()
+    if (ora - camoGuardata < 1000) return camoPiena
+    camoGuardata = ora
+    const foto = scena.querySelector('.vivo-foto')
+    if (!foto) return (camoPiena = false)
+    try {
+      assaggio ??= Object.assign(document.createElement('canvas'), { width: 16, height: 9 }).getContext('2d', { willReadFrequently: true })
+      assaggio.drawImage(foto, 0, 0, 16, 9)
+      const d = assaggio.getImageData(0, 0, 16, 9).data
+      let somma = 0
+      for (let i = 0; i < d.length; i += 4) somma += d[i] + d[i + 1] + d[i + 2]
+      camoPiena = somma / (16 * 9 * 3) > 6
+    } catch { camoPiena = false }
+    return camoPiena
+  }
+  function scegliModo() {
+    if (!software) return
+    const vivo = camoHaImmagine()
+    if (vivo) senzaVivoDa = 0
+    else if (!senzaVivoDa) senzaVivoDa = performance.now()
+    const vuole = vivo || (telecomando && performance.now() - senzaVivoDa < 5000)
+    if (vuole === telecomando) return
+    telecomando = vuole
+    el.classList.toggle('dvw-telecomando', telecomando)
+    el.style.background = telecomando ? 'transparent' : '#0b090e'
+    if (telecomando) butta()
+    else costruisci()
   }
   function butta() {
     if (!mondo) return
@@ -746,8 +846,9 @@ export function crea(ctx) {
     clearTimeout(timerSpegni)
     if (su) {
       ultimaAttivita = forzaTour ? ctx.tempo() - 30 : ctx.tempo(); mescolaTour = 0; daPubblicare = false; inMovimento = false
+      scegliModo()
       costruisci()
-      if (mondo) { mondo.engine.setSize(1920, 1080); ricalcola(); applicaCamera() }
+      if (mondo) { mondo.engine.setSize(LATO[0], LATO[1]); ricalcola(); applicaCamera() }
     } else {
       timerSpegni = setTimeout(() => { if (!su) butta() }, 60000)
     }
@@ -794,8 +895,9 @@ export function crea(ctx) {
     }
     limite(cam)
     applicaCamera()
-    // pubblica al massimo 12 volte al secondo, più un messaggio finale
-    if (daPubblicare && !seguendo && !trascinando && mescolaTour < 0.01 && !senzaTour) {
+    // pubblica al massimo 12 volte al secondo, più un messaggio finale (col telecomando anche mentre trascini: la mappa
+    // che vedi è quella di Camo, deve muoversi sotto il mouse)
+    if (daPubblicare && !seguendo && (!trascinando || telecomando) && mescolaTour < 0.01 && !senzaTour) {
       const firma = `${cam.x.toFixed(2)},${cam.y.toFixed(2)},${cam.d.toFixed(1)},${(cam.h * GRADI).toFixed(1)},${(cam.p * GRADI).toFixed(1)}`
       const ora = adesso()
       const manda = () => { try { ctx.manda({ c: [+cam.x.toFixed(2), +cam.y.toFixed(2), +cam.d.toFixed(1), +(cam.h * GRADI).toFixed(1), +(cam.p * GRADI).toFixed(1)] }) } catch {} }
@@ -807,13 +909,17 @@ export function crea(ctx) {
 
   let prossimoOrologio = 0
   function giro(dt, t) {
-    if (!su || !mondo) return
+    if (!su) return
+    scegliModo()
+    if (!mondo && !telecomando) { if (!costruendo) costruisci(); return }
     const tScena = ctx.tempo()
     passoCamera(dt, tScena)
-    mondo.anima(Math.min(dt, 0.1), { x: cam.x, z: cam.y })
-    mondo.engine.beginFrame()
-    mondo.scene.render()
-    mondo.engine.endFrame()
+    if (mondo) {
+      mondo.anima(Math.min(dt, 0.1), { x: cam.x, z: cam.y })
+      mondo.engine.beginFrame()
+      mondo.scene.render()
+      mondo.engine.endFrame()
+    }
     if (t > prossimoOrologio) { prossimoOrologio = t + 1; aggiornaOrologio() }
     if (tScena - ultimoAggiornamentoLuce > 20) { ultimoAggiornamentoLuce = tScena; ricalcola() }
   }

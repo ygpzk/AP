@@ -56,7 +56,7 @@ export function costruisciEsterni(D, T, sta) {
 
   // ── il pergolato con la vite, sul lato ovest dell'ala a due piani ──
   {
-    const u0 = -20.6, u1 = -14.3, v0 = -2.2, v1 = 4.6, alto = 2.65
+    const u0 = -20.6, u1 = -14.05, v0 = -2.2, v1 = 4.6, alto = 2.65 // (u1: il muro ovest dal CAD è a −14,00)
     const punti = []
     for (const u of [u0, (u0 + u1) / 2, u1 - 0.1]) for (const v of [v0, (v0 + v1) / 2, v1]) {
       if (u > u1 - 0.2 && Math.abs(v - (v0 + v1) / 2) < 0.1) continue

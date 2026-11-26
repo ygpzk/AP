@@ -61,6 +61,18 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, .8), 0 0 3px rgba(0, 0, 0, .8);
 }
 
+/* senza GPU, nell'anteprima dal vivo della regia: la mappa è quella di Camo (qui sotto), questa pagina fa solo da
+   telecomando. La bussola resta cliccabile ma invisibile: nell'immagine di Camo è nello stesso punto */
+.dvw-avviso { display: none; }
+.dvw.dvw-telecomando { background: transparent; }
+.dvw.dvw-telecomando::after { display: none; }
+.dvw.dvw-telecomando .dvw-ui { opacity: 0; }
+.dvw.dvw-telecomando .dvw-avviso {
+  display: block; position: absolute; left: 50%; top: 26px; translate: -50% 0; z-index: 4; pointer-events: none;
+  padding: 10px 22px; border-radius: 999px; background: rgba(11, 9, 14, .74); color: #f6f4f8;
+  font: 700 26px/1.2 "gg sans", "Segoe UI", sans-serif; white-space: nowrap;
+}
+
 /* ripiego senza WebGL: una pianta disegnata, sobria */
 .dvw-caduta { position: absolute; inset: 0; background: #0b090e; z-index: 1; }
 .dvw-caduta svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
