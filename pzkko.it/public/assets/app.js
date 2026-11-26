@@ -1343,29 +1343,32 @@ function renderViews() {
 // All'arrivo, a pagina ferma: l'invito per chi non ha un conto, le novità per chi ce l'ha, e col tasto della lettera
 // (?premio=…) la decisione di pzkko sul regalo. Le scritte in italiano e in inglese (le altre lingue vedono l'inglese) ──
 const ACC = {
-  it: { join: 'Entra in pzkko.it', sub: '1.000 $pzk di benvenuto', news: 'Novità', gift: 'Regalo: +2.000 $pzk', giftWait: 'Regalo: pzkko controlla', out: 'Esci dal conto', bye: 'Uscito dal conto' },
-  en: { join: 'Join pzkko.it', sub: '1,000 $pzk to start', news: 'What’s new', gift: 'Gift: +2,000 $pzk', giftWait: 'Gift: pzkko is checking', out: 'Log out', bye: 'Logged out' },
+  it: { join: 'Entra in pzkko.it', sub: '1.000 $pzk di benvenuto', news: 'Novità', gift: 'Regalo: +2.000 $pzk', giftWait: 'Regalo: pzkko controlla', gifts: (n) => `Regali da decidere (${n})`, out: 'Esci dal conto', bye: 'Uscito dal conto' },
+  en: { join: 'Join pzkko.it', sub: '1,000 $pzk to start', news: 'What’s new', gift: 'Gift: +2,000 $pzk', giftWait: 'Gift: pzkko is checking', gifts: (n) => `Gifts to decide (${n})`, out: 'Log out', bye: 'Logged out' },
 }
 const acc = () => ACC[lang] || ACC.en
 const I_ACC = svg('<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/>', { s: 16, w: 2.4 })
 let pzkMod = null
 const account = () => { if (pzkMod) return pzkMod.conto(); try { return JSON.parse(localStorage.getItem('pzkko-wallet') || 'null')?.conto ?? null } catch { return null } }
+const premiDaDecidere = () => { if (pzkMod) return pzkMod.premi(); try { return JSON.parse(localStorage.getItem('pzkko-wallet') || 'null')?.premi ?? [] } catch { return [] } } // (25.11) i regali di instagram da decidere, solo nel conto di pzkko
 const access = (what, ...a) => import('/accesso/accesso.js').then((m) => m[what](...a)).catch((e) => console.error(e))
 function renderAcc() {
   const b = $('#acc-btn'), c = account()
   if (!b) return
+  const regali = c ? premiDaDecidere().length : 0
   b.classList.toggle('btn--join', !c); b.classList.toggle('btn--ghost', !!c)
   b.setAttribute('aria-haspopup', c ? 'menu' : 'dialog')
   b.innerHTML = c
-    ? `<i class="acc__dot"></i><span class="acc__name">${esc(c.nome)}</span><span class="acc__pzk">$pzk ${Number(c.pzk || 0).toLocaleString(locale(), { maximumFractionDigits: 1 })}</span>`
+    ? `<i class="acc__dot"></i><span class="acc__name">${esc(c.nome)}</span>${regali ? `<i class="acc__badge" title="${esc(acc().gifts(regali))}">${regali}</i>` : ''}<span class="acc__pzk">$pzk ${Number(c.pzk || 0).toLocaleString(locale(), { maximumFractionDigits: 1 })}</span>`
     : `${I_ACC}<span>${esc(acc().join)}</span><small>${esc(acc().sub)}</small>`
 }
 $('#acc-btn').addEventListener('click', (e) => {
   const c = account()
   if (!c) return access('accedi')
-  const st = c.seguo?.stato
+  const st = c.seguo?.stato, regali = premiDaDecidere().length
   showMenu(e.currentTarget, `
     <button role="menuitem" tabindex="-1" data-v="novita">${I.search}${esc(acc().news)}</button>
+    ${regali ? `<button role="menuitem" tabindex="-1" data-v="premi">${I_ACC}${esc(acc().gifts(regali))}</button>` : ''}
     ${st === 'dato' ? '' : `<button role="menuitem" tabindex="-1" data-v="premio">${I_ACC}${esc(st === 'attesa' ? acc().giftWait : acc().gift)}</button>`}<hr>
     <button role="menuitem" tabindex="-1" data-v="esci">${I.copy}${esc(acc().out)}</button>`, async (v) => {
     if (v !== 'esci') return access(v)

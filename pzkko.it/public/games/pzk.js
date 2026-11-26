@@ -142,6 +142,8 @@ export function fmtCorto(n) {
 // ── il conto ─────────────────────────────────────────────────────────────────
 /** Il conto come l'ha detto la banca ({ nome, ind, pzk, eur, zaino, tavoli, mosse… }), o null da ospite. */
 export const conto = () => (W ? W.conto : null)
+/** I regali di instagram da decidere (solo per il conto di pzkko): [{ nome, ig, t, biglietto }]. */
+export const premi = () => W?.premi ?? []
 /** Lo zaino come l'ha detto la banca (anche da ospite), o null prima della prima risposta. */
 export const zainoBanca = () => attuale()?.zaino ?? null
 /** Il tavolo aperto di un gioco come lo vede il giocatore (le carte scoperte, le caselle già girate…, e `banco`), o null. */
@@ -204,6 +206,7 @@ function accogli(d) {
   if (!W || d.conto.ospite) return
   if (Number.isFinite(d.tasso)) W.tasso = d.tasso
   if (Number.isFinite(d.t)) W.t = d.t
+  if (Array.isArray(d.premi)) W.premi = d.premi // (25.11: i regali da decidere di pzkko, per il tasto «regali»)
   if ((d.conto.agg ?? 0) >= (W.conto.agg ?? 0)) W.conto = d.conto
   scriviJSON(localStorage, CHIAVE_CONTO, W)
   avvisa()
@@ -234,7 +237,7 @@ export async function accedi(email, cod, nome) {
 }
 function prendi(d) {
   tavoli.clear() // (le fiche messe da ospite restano dell'ospite)
-  W = { token: d.token, conto: d.conto, tasso: d.tasso, t: d.t }
+  W = { token: d.token, conto: d.conto, tasso: d.tasso, t: d.t, ...(Array.isArray(d.premi) && { premi: d.premi }) }
   scriviJSON(localStorage, CHIAVE_CONTO, W)
   avvisa()
   avvisaCambioConto()

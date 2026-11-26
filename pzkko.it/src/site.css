@@ -900,6 +900,9 @@ dialog.tel.pieno .t-nav button { font: 600 15px/1 var(--font-sans); letter-spaci
 .acc { min-width: 0; gap: 8px; font-variant-numeric: tabular-nums; }
 .acc small { margin-left: auto; padding-left: 8px; font-size: 12px; font-weight: 500; opacity: .85; overflow: hidden; text-overflow: ellipsis; }
 .acc__dot { flex: 0 0 auto; width: 10px; height: 10px; border-radius: 50%; background: var(--ok, #23a55a); }
+
+/* (25.11) i regali di instagram da decidere, per il conto di pzkko: il numero sul tasto del conto */
+.acc__badge { flex: 0 0 auto; display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: #d83c3e; color: #fff; font: 700 11px/1 var(--font-mono, ui-monospace, monospace); }
 .acc__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
 .acc__pzk { margin-left: auto; padding-left: 8px; color: var(--muted); }
 

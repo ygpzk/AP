@@ -24,7 +24,7 @@ const NOVITA = { v: '2026-11-25', foto: '/media/p/calcolatrice/cover.webp' } // 
 // le app che l'invito mette in vetrina: [progetto, cosa apre, nome]. Le catture arrivano da media.js
 const VETRINA = [['zero', 'qui:zero', 'PZK Zero'], ['parole', 'qui:parole', 'Parole'], ['giochini', 'qui:roulette', 'Roulette'], ['trivia', 'qui:trivia', 'Trivia']]
 const FICHE = { '$': 'f500', '♠': 'f100', '@': 'f25', '♥': 'f5' }
-const K_NOVITA = 'pzkko-novita-profilo', K_EMAIL = 'pzkko-email', K_INVITO = 'pzkko-invito', K_REGALO = 'pzkko-regalo-poi'
+const K_NOVITA = 'pzkko-novita-profilo', K_EMAIL = 'pzkko-email', K_INVITO = 'pzkko-invito', K_REGALO = 'pzkko-regalo-poi', K_PREMI = 'pzkko-regali-visti'
 const PROFILI = [['pzkko', 'https://www.instagram.com/pzkko/']]
 const API = '/api/wallet/'
 
@@ -57,6 +57,7 @@ const IT = {
     no: (g) => `Fra i follower non ho trovato <b>@${g}</b>. Controlla il nome e riprova.`, serve: 'Per il regalo serve un conto: entra, ci metti un attimo.' },
   dec: { t: (g, p) => `@${g} chiede i ${p} $pzk`, s: (n, q) => `<b>${n}</b> (conto del ${q}) dice di seguirti su Instagram.`, apri: (g) => `Apri @${g} su Instagram`, si: (p) => `Sì, mi segue: manda i ${p}`, no: 'No, non lo trovo',
     dato: (n, p) => `Fatto: ${p} $pzk mandati a <b>${n}</b>. Gli ho scritto.`, detto: (n) => `Detto di no a <b>${n}</b>: può richiederlo col nome giusto.`, gia: { dato: 'Il regalo gliel’hai già dato.', no: 'Gli hai già detto di no.' }, guarda: 'Guardo la richiesta…' },
+  premi: { t: 'Regali da decidere', s: (n) => `${n === 1 ? 'C’è una richiesta' : `Ci sono ${n} richieste`}: chi ha scritto il suo Instagram e dice di seguirti. Guardo fra i follower e decido io.`, vuoto: 'Nessuna richiesta: quando qualcuno chiede il regalo, lo trovi qui.', apri: 'controlla', quando: (q) => `chiesto il ${q}`, lettera: 'la lettera', guarda: 'Guardo le richieste…' },
 }
 const EN = {
   chiudi: 'Close', indietro: 'Back', avanti: 'Next', capito: 'Got it', rete: 'The bank isn’t answering: try again in a moment.',
@@ -79,6 +80,7 @@ const EN = {
     dato: (p) => `<b>${p} $pzk</b> arrived. Thanks for the follow!`, tDato: 'Gift arrived',
     no: (g) => `I couldn’t find <b>@${g}</b> among the followers. Check the name and try again.`, serve: 'The gift needs an account: log in, it takes a moment.' },
   dec: IT.dec,
+  premi: { t: 'Gifts to decide', s: (n) => `${n === 1 ? 'There’s one request' : `There are ${n} requests`}: people who wrote their Instagram and say they follow you. I check my followers and decide.`, vuoto: 'No requests: when someone asks for the gift, you’ll find them here.', apri: 'check', quando: (q) => `asked on ${q}`, lettera: 'the letter', guarda: 'Looking at the requests…' },
 }
 const T = () => (it() ? IT : EN)
 const conP = (s) => s.replaceAll('{P}', premioTxt())
@@ -372,6 +374,34 @@ export async function premio() {
 
 // ── la parte di pzkko: il tasto della lettera (pzkko.it/?premio=…) ──
 const banca = (body) => fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout?.(25_000) }).then((r) => r.json()).catch(() => ({ ok: false, errore: IT.rete }))
+/** L'elenco dei regali da decidere (solo il conto di pzkko): il tasto «regali» del sito, e l'arrivo quando ne arriva uno.
+ *  Le richieste ci sono anche se la lettera non è partita: la posta della banca può essere giù, la richiesta no. */
+export async function premi() {
+  if (!pzk.conto()) return premio() // senza conto prima si entra (e si chiede il regalo)
+  await apri()
+  const chiuso = new Promise((fatto) => { allaChiusura = fatto })
+  const t = T().premi
+  const attesa = passo(`<div class="ax-reg fatto"><h2>${esc(t.t)}</h2><p class="ax-s">${esc(t.guarda)}</p></div>`)
+  const d = await banca({ a: 'premio-lista', token: pzk.token() })
+  if (scatola !== attesa) return chiuso
+  if (!d?.ok) {
+    passo(`<div class="ax-reg fatto"><h2>${esc(t.t)}</h2><p class="ax-s">${esc(d?.errore ?? T().rete)}</p><button type="button" class="ax-b" data-chiudi>${esc(T().capito)}</button></div>`)
+    return chiuso
+  }
+  const lista = d.premi ?? []
+  if (!lista.length) {
+    passo(`<div class="ax-reg fatto"><h2>${esc(t.t)}</h2><p class="ax-s">${esc(t.vuoto)}</p><button type="button" class="ax-b" data-chiudi>${esc(T().capito)}</button></div>`)
+    return chiuso
+  }
+  const data = (ms) => new Date(ms).toLocaleDateString(it() ? 'it-IT' : 'en-GB', { day: 'numeric', month: 'long' })
+  const b = passo(`<div class="ax-nov">
+      <h2>${esc(t.t)}</h2><p class="ax-s">${esc(t.s(lista.length))}</p>
+      <ul>${lista.map((x) => `<li><span><b>@${esc(x.ig)}</b> · ${esc(x.nome)}<br><small>${esc(t.quando(data(x.t)))}${x.lettera ? ` · <a href="${esc(x.lettera)}" target="_blank" rel="noopener noreferrer">${esc(t.lettera)}</a>` : ''}</small></span><button type="button" class="ax-gioca" data-premio="${esc(x.biglietto)}">${esc(t.apri)}</button></li>`).join('')}</ul>
+      <button type="button" class="ax-b" data-chiudi>${esc(T().capito)}</button>
+    </div>`, { largo: true })
+  for (const x of b.querySelectorAll('[data-premio]')) x.addEventListener('click', () => decidi(x.dataset.premio))
+  return chiuso
+}
 export async function decidi(biglietto) {
   await apri()
   const t = IT.dec, P = premioTxt()
@@ -404,7 +434,8 @@ export async function decidi(biglietto) {
 /**
  * ALL'ARRIVO NEL SITO (lo chiama il profilo quando la pagina è ferma). Col tasto della lettera: la decisione di pzkko. Chi
  * non ha un conto: l'invito, una volta per visita e non più di una volta ogni dodici ore. Chi ce l'ha: le novità, se non le
- * ha ancora viste. Gli strumenti che fotografano la pagina non vedono niente (navigator.webdriver), se non con ?invito.
+ * ha ancora viste, e i regali di instagram da decidere quando ne arriva uno nuovo (solo il conto di pzkko). Gli strumenti che
+ * fotografano la pagina non vedono niente (navigator.webdriver), se non con ?invito.
  */
 export async function arrivo() {
   const q = new URLSearchParams(location.search), biglietto = q.get('premio')
@@ -414,7 +445,13 @@ export async function arrivo() {
   }
   const forza = q.has('invito')
   if ((navigator.webdriver && !forza) || document.querySelector('dialog[open]')) return
-  if (pzk.conto()) { if (novitaDaVedere()) return novita(); return }
+  if (pzk.conto()) {
+    if (novitaDaVedere()) return novita()
+    await pzk.sincronizza().catch(() => {}) // (25.11: i regali da decidere arrivano dalla banca: si guardano adesso)
+    const ultimo = pzk.premi().reduce((m, x) => Math.max(m, Number(x.t) || 0), 0)
+    if (ultimo && ultimo > (Number(dep.get(K_PREMI)) || 0)) { dep.set(K_PREMI, String(ultimo)); return premi() }
+    return
+  }
   let visto = 0
   try { if (sessionStorage.getItem(K_INVITO)) visto = Date.now(); else visto = Number(dep.get(K_INVITO)) || 0 } catch {}
   if (!forza && Date.now() - visto < 12 * 3600_000) return

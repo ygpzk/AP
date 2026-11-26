@@ -137,6 +137,8 @@ dialog.ax [hidden] { display: none !important; }
 .ax-nov li { position: relative; display: flex; align-items: flex-start; gap: 10px; padding-left: 20px; }
 .ax-nov li::before { content: "–"; position: absolute; left: 2px; top: 0; color: var(--matita); }
 .ax-nov li span { flex: 1 1 auto; min-width: 0; }
+.ax-nov li a { color: var(--penna); font: 400 15px/1.2 var(--marker); text-decoration: underline; text-underline-offset: 2px; }
+.ax-nov li a:hover { color: var(--rosso); }
 .ax-gioca { flex: none; margin-top: 1px; padding: .1em .45em .14em; border: 0; background: var(--inchiostro); color: #fff; font: 400 17px/1 var(--fa); text-transform: lowercase; cursor: pointer; transform: rotate(-3deg); box-shadow: 2px 2px 0 rgba(0, 0, 0, .2); transition: transform .18s cubic-bezier(.22, 1, .36, 1); }
 .ax-gioca:hover { transform: rotate(-3deg) translateY(-2px); }
 
