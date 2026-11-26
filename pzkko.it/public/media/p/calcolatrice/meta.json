@@ -1,0 +1,24 @@
+{
+ "key": "calcolatrice",
+ "cover": {
+  "w": 1280,
+  "h": 720
+ },
+ "shots": [
+  {
+   "file": "01.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "La scientifica in stile Discord: ANS per un seno in gon, e sotto il risultato mentre scrivi",
+   "en": "The Discord-style scientific mode: ANS times a sine in gons, with the result shown as you type"
+  },
+  {
+   "file": "02.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "/calcola nella chat: il conto fatto lì, col tasto per aprire la calcolatrice",
+   "en": "/calcola in the chat: the sum done right there, with a button to open the calculator"
+  }
+ ],
+ "notes": "Catture vere della calcolatrice in stile Discord (games/calcolatrice/) in funzione il 20.11.2026, da ospite, col tema chiaro."
+}

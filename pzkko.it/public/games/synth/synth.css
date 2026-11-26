@@ -1,0 +1,35 @@
+/* SYNTH: il banco. La carta è quella del laboratorio; qui c'è il pannello scuro dell'oscilloscopio, la tastiera e i
+   cursori. Claude Code: .sy-* è il disegno, i ganci sono data-osc, data-piano, data-midi, data-s. */
+
+.sy-scena{background:#0f120e;border:1.5px solid #2a2e26;min-height:170px}
+.sy-scena canvas{width:100%;height:100%}
+.sy-display{position:absolute;left:12px;bottom:9px;display:flex;align-items:baseline;gap:8px;pointer-events:none;color:#ccff00;text-shadow:0 0 8px rgba(204,255,0,.35)}
+.sy-display b{font:400 30px/1 "Anton",Impact,sans-serif;letter-spacing:.02em}
+.sy-display span{font:400 12px/1 "Special Elite","Courier New",monospace;color:#9fb35e}
+.sy-eti{position:absolute;top:7px;right:10px;font:400 10px/1 "Special Elite","Courier New",monospace;letter-spacing:.14em;text-transform:uppercase;color:#687a35;pointer-events:none}
+
+.sy-piano{position:relative;height:clamp(92px,13.5vh,108px);min-height:92px;margin-top:2px;border:1.5px solid var(--lab-inchiostro);background:#f7f3e7;touch-action:none;user-select:none}
+.sy-tasto{position:absolute;top:0;border:0;padding:0;cursor:pointer;touch-action:none;transition:background .05s,transform .05s}
+.sy-bianco{height:100%;background:linear-gradient(#fffdf5,#efe9d8);border-right:1px solid rgba(22,22,22,.35);border-radius:0 0 4px 4px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;z-index:1}
+.sy-bianco span{font:400 9px/1 "Special Elite","Courier New",monospace;color:#8a8479;pointer-events:none}
+.sy-bianco:first-child{border-left:0}
+.sy-bianco.is-on{background:linear-gradient(#fff0a8,#f0d24a);box-shadow:inset 0 -4px 0 rgba(22,22,22,.12)}
+.sy-nero{height:62%;background:linear-gradient(#2c2c2c,#0c0c0c);border-radius:0 0 3px 3px;z-index:2;box-shadow:0 2px 3px rgba(0,0,0,.35)}
+.sy-nero.is-on{background:linear-gradient(#6b6b6b,#262626);box-shadow:inset 0 -3px 0 rgba(255,255,255,.12)}
+.sy-slider{display:grid;grid-template-columns:74px minmax(0,1fr) 48px;align-items:center;gap:6px;margin-top:5px}
+.sy-slider span{font:400 11px/1.1 "Special Elite","Courier New",monospace;color:var(--lab-matita);text-transform:lowercase}
+.sy-slider .lab-valore{font-size:11px;text-align:right;color:var(--lab-inchiostro);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sy-slider .lab-range{height:18px}
+.lab-colonna--lato .lab-pannello{padding:8px 10px}
+.lab-colonna--lato .lab-pannello h3{font-size:13px;margin-bottom:5px}
+
+@media (max-width:900px){
+  .sy-piano{height:112px}
+  .lab-colonna--lato{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .lab-colonna--lato .lab-pannello{min-width:0}
+}
+@media (max-width:560px){
+  .lab-colonna--lato{grid-template-columns:minmax(0,1fr)}
+  .sy-piano{height:94px}
+  .sy-display b{font-size:24px}
+}

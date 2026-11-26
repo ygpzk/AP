@@ -1,0 +1,53 @@
+{
+ "key": "pulizia",
+ "cover": {
+  "w": 1280,
+  "h": 720
+ },
+ "video": null,
+ "shots": [
+  {
+   "file": "os-01.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "Pulizia OS: il menù, nello stesso terminale di Matrici OS",
+   "en": "Pulizia OS: the menu, in the same terminal as Matrici OS"
+  },
+  {
+   "file": "os-02.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "Pulizia OS: l’analisi, che guarda e riferisce",
+   "en": "Pulizia OS: the analysis, which looks and reports"
+  },
+  {
+   "file": "os-03.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "Pulizia OS: le dieci prove di sicurezza",
+   "en": "Pulizia OS: the ten safety tests"
+  },
+  {
+   "file": "01.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "«pulizia»: guarda e riferisce, senza toccare niente",
+   "en": "“pulizia”: it looks and reports, touching nothing"
+  },
+  {
+   "file": "02.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "«pulizia prove»: le otto prove di sicurezza",
+   "en": "“pulizia prove”: the eight safety tests"
+  },
+  {
+   "file": "03.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "«pulizia aiuto»: tutti i comandi",
+   "en": "“pulizia aiuto”: every command"
+  }
+ ],
+ "notes": "Finestra vera del Prompt dei comandi; il programma gira su un progettino di prova usa e getta."
+}

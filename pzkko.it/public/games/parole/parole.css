@@ -1,0 +1,73 @@
+/* PAROLE (19.11): la griglia dei tentativi, la tabella di quanto torna, le fiches della puntata e la tastiera, sul foglio
+   dei giochi (../foglio.css). I colori sono quelli del gioco, fatti come sul muro: verde a pennarello (giusta, al posto
+   giusto), giallo evidenziatore (c'è, ma altrove), grigio matita (non c'è). */
+
+.pa-corpo{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 300px;grid-template-rows:minmax(0,1fr) auto;gap:8px 22px;padding-top:2px}
+
+/* la griglia: sei righe, cinque o sei caselle */
+.pa-griglia{--n:5;--lato:52px;align-self:center;justify-self:center;display:grid;grid-template-rows:repeat(6,var(--lato));gap:6px}
+.pa-griglia[data-n="6"]{--lato:46px}
+.pa-riga{display:grid;grid-template-columns:repeat(var(--n),var(--lato));gap:6px}
+.pa-riga.scossa{animation:fg-scossa .36s}
+.pa-c{display:grid;place-items:center;border:2px solid rgba(22,22,22,.28);border-radius:3px;background:rgba(255,255,255,.34);font:400 30px/1 var(--fa);text-transform:uppercase;color:var(--nero);transform:rotate(var(--r,0deg))}
+.pa-riga:nth-child(odd) .pa-c:nth-child(odd),.pa-riga:nth-child(even) .pa-c:nth-child(even){--r:-.6deg}
+.pa-riga:nth-child(odd) .pa-c:nth-child(even){--r:.5deg}
+.pa-c.piena{border-color:var(--nero);animation:pa-batte .12s}
+.pa-c.g,.pa-c.c,.pa-c.n{border-color:transparent;color:#fff}
+.pa-c.g{background:var(--verde);box-shadow:2px 2px 0 rgba(0,0,0,.2)}
+.pa-c.c{background:var(--giallo);color:var(--nero);box-shadow:2px 2px 0 rgba(0,0,0,.2)}
+.pa-c.n{background:var(--grigio)}
+.pa-c.gira{animation:pa-gira .46s cubic-bezier(.3,.7,.3,1) backwards;animation-delay:calc(var(--i) * 110ms)}
+.pa-riga.attiva .pa-c:not(.piena){border-style:dashed}
+@keyframes pa-batte{50%{scale:1.1}}
+@keyframes pa-gira{0%{transform:rotate(var(--r,0deg)) rotateX(0);background:rgba(255,255,255,.34);color:var(--nero);border-color:var(--nero);box-shadow:none}49%{transform:rotate(var(--r,0deg)) rotateX(90deg);background:rgba(255,255,255,.34);color:var(--nero);border-color:var(--nero);box-shadow:none}50%{transform:rotate(var(--r,0deg)) rotateX(90deg)}}
+
+/* a destra: quanto torna, le lettere, la puntata, il tasto, il saldo */
+.pa-lato{display:flex;flex-direction:column;gap:10px;min-width:0;padding-top:4px}
+.pa-lato h3{margin:0;font:400 15px/1 var(--marker);color:var(--matita)}
+.pa-paga{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 8px;margin:0;padding:0;list-style:none}
+.pa-paga li{display:flex;justify-content:space-between;align-items:baseline;gap:6px;padding:3px 7px 2px;border-bottom:2px dotted rgba(22,22,22,.3);font-size:14px}
+.pa-paga li b{font:400 19px/1 var(--fa)}
+.pa-paga li b small{margin-right:1px;font:400 14px/1 "Special Elite",monospace}
+.pa-paga li.ora{background:var(--giallo);border-bottom-color:transparent;transform:rotate(-1deg);box-shadow:2px 2px 0 rgba(0,0,0,.15)}
+.pa-paga li.passato{opacity:.35;text-decoration:line-through}
+.pa-scelte{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pa-let{min-width:44px;height:38px;padding:0 10px;border:2px solid var(--nero);border-radius:3px;background:rgba(255,255,255,.34);font:400 20px/1 var(--fa);cursor:pointer;transition:transform .15s}
+.pa-let[aria-pressed=true]{background:var(--nero);color:#fff;transform:rotate(-2deg)}
+.fg .pa-let[aria-pressed=true]{color:#fff}
+.pa-fiche{width:48px;height:48px;border-radius:50%;border:4px dashed rgba(255,255,255,.85);background:var(--f,#b3121f);font:400 17px/1 var(--fa);cursor:pointer;box-shadow:0 0 0 2px var(--f,#b3121f),0 3px 4px rgba(0,0,0,.35);transition:transform .16s cubic-bezier(.2,1.4,.4,1)}
+.fg .pa-fiche{color:#fff}
+.fg .pa-fiche[data-n="500"]{color:#161616}
+.pa-fiche[aria-pressed=true]{transform:translateY(-6px) rotate(-8deg)}
+.pa-fiche:disabled,.pa-let:disabled{cursor:default;opacity:.45}
+.pa-fiche[aria-pressed=true]:disabled{opacity:1}
+.pa-azioni{display:flex;align-items:center;gap:16px;margin-top:2px;min-height:44px}
+.pa-fondo{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:auto}
+
+/* la tastiera: i tasti di carta, che prendono il colore migliore visto fin qui */
+.pa-tasti{grid-column:1/3;display:grid;gap:5px;justify-content:center;padding-bottom:2px}
+.pa-tasti div{display:flex;gap:5px;justify-content:center}
+.pa-k{min-width:40px;height:38px;padding:0 6px;border:2px solid var(--nero);border-radius:4px;background:rgba(255,255,255,.4);font:400 17px/1 "Special Elite","Courier New",monospace;text-transform:uppercase;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.28);transition:translate .08s,background .2s}
+.pa-k:active{translate:0 2px;box-shadow:none}
+.pa-k.largo{min-width:66px;font:400 13px/1 var(--marker);text-transform:none}
+.pa-k.g{background:var(--verde);border-color:var(--verde)}
+.fg .pa-k.g,.fg .pa-k.n{color:#fff}
+.pa-k.c{background:var(--giallo)}
+.pa-k.n{background:var(--grigio);border-color:var(--grigio);box-shadow:none}
+
+@media (max-width:840px),(max-height:640px){
+  .pa-corpo{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr);gap:8px;overflow-y:auto;align-content:start}
+  .pa-griglia{--lato:min(46px,calc((100vw - 28px - 5 * 5px) / 6));gap:5px;grid-row:1}
+  .pa-griglia[data-n="6"]{--lato:min(44px,calc((100vw - 28px - 5 * 5px) / 6))}
+  .pa-riga{gap:5px}
+  .pa-c{font-size:26px}
+  .pa-lato{grid-row:3;gap:8px;padding-top:0}
+  .pa-paga li{font-size:13px;padding:2px 5px}
+  .pa-paga li b{font-size:16px}
+  .pa-tasti{grid-column:1;grid-row:2;gap:4px}
+  .pa-tasti div{gap:3px}
+  .pa-k{min-width:0;flex:1 1 0;max-width:38px;height:42px;padding:0;font-size:16px}
+  .pa-k.largo{flex:1.5 1 0;min-width:0;max-width:56px;font-size:10px}
+  .pa-fiche{width:44px;height:44px}
+}
+@media (prefers-reduced-motion:reduce){.pa-c.gira,.pa-c.piena,.pa-riga.scossa{animation:none}}

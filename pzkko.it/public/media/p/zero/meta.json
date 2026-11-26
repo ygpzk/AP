@@ -1,0 +1,72 @@
+{
+  "key": "zero",
+  "cover": {
+    "w": 1280,
+    "h": 720
+  },
+  "video": {
+    "file": "loop.mp4",
+    "w": 960,
+    "h": 540,
+    "seconds": 7.5
+  },
+  "shots": [
+    {
+      "file": "01.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "Il menu di pzk os: chat, profilo, account, shop, pzkstore…",
+      "en": "The pzk os menu: chat, profile, account, shop, pzkstore…"
+    },
+    {
+      "file": "02.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "Codice C: l’editor con i colori sull’lcd",
+      "en": "C code: the editor with syntax colours on the LCD"
+    },
+    {
+      "file": "03.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "bin·hex: il numero in decimale, binario, ottale ed esadecimale",
+      "en": "bin·hex: the number in decimal, binary, octal and hex"
+    },
+    {
+      "file": "04.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "Virtual sul cercapersone: la presentazione della partita a tutto schermo",
+      "en": "Virtual on the pager: the full-screen match intro"
+    },
+    {
+      "file": "05.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "Il profilo: il cartellino col livello e l’esperienza",
+      "en": "The profile: the name tag with level and XP"
+    },
+    {
+      "file": "06.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "Lo shop: le offerte del giorno, con lo sconto e il tempo che scade",
+      "en": "The shop: today’s deals, with discount and countdown"
+    },
+    {
+      "file": "07.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "La guida al primo avvio: i tasti del cercapersone e quelli del computer",
+      "en": "The first-run guide: the pager keys and the computer keys"
+    },
+    {
+      "file": "08.webp",
+      "w": 740,
+      "h": 1600,
+      "it": "Sul telefono lo schermo prende tutta la larghezza",
+      "en": "On the phone the screen takes the full width"
+    }
+  ],
+  "notes": "Il cercapersone vero (ultima versione prima della rimozione, commit a5e42f1) sulla pagina di prova del progetto, tools/pzkko/prove/cercapersone.html, con ?ora=12:00 (la luce sul modello segue l’ora vera: di notte è al buio). La banca dei $pzk stava sul server di casa, qui non raggiungibile: senza conto pzk os resta chiuso sulla porta del conto, quindi ho usato il conto e lo zaino finti del collaudo del progetto stesso (tools/pzkko/zero/prova.mjs: 52.340 $pzk, livello 3), col nome «pzkko». Schermate, menu e app sono quelli veri; i numeri del conto sono del collaudo. Lasciate fuori le app che senza server dicono «il server non risponde» (classifiche, rapina, sfide), la cucina e i quiz (nominano il Mincio e Mantova)."
+}

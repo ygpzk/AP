@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0b090e">
+<title>e-vision &mdash; pzkko</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3E%3Crect width='16' height='16' rx='3.5' fill='%230b090e'/%3E%3Cpath fill='%23cf0' d='M4 2h8v1h-8zM3 3h10v1h-10zM2 4h3v1h-3zM11 4h3v1h-3zM2 5h2v3h-2zM12 5h2v3h-2zM2 8h12v2h-12zM2 10h2v1h-2zM2 11h3v1h-3zM10 11h3v1h-3zM3 12h10v1h-10zM4 13h8v1h-8z'/%3E%3Cpath fill='%239d00ff' d='M7 5h2v1h-2zM6 6h1v1h-1zM8 6h2v1h-2zM7 7h2v1h-2z'/%3E%3Cpath fill='%23fff' d='M7 6h1v1h-1z'/%3E%3C/svg%3E">
+<link rel="preload" href="/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+  /* la porta di e-vision: un foglio del muro (carta col nastro, Anton, pennarello, macchina da scrivere)
+     sopra i due colori di pzkko */
+  @font-face { font-family: "Anton"; src: url(/fonts/anton.woff2) format("woff2"); font-display: swap; }
+  @font-face { font-family: "Special Elite"; src: url(/fonts/special-elite.woff2) format("woff2"); font-display: swap; }
+  @font-face { font-family: "Permanent Marker"; src: url(/fonts/permanent-marker.woff2) format("woff2"); font-display: swap; }
+  :root {
+    --ink: #1b1916;
+    --testo: #36312b;
+    --rosso: #b3121f;
+    --giallo: #ffd400;
+    --fa: "Anton", Impact, "Arial Narrow", sans-serif;
+    --marker: "Permanent Marker", "Comic Sans MS", cursive;
+    --mac: "Special Elite", "Courier New", monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { min-height: 100%; background: #0b090e; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: calc(64px + env(safe-area-inset-top, 0px)) 44px calc(64px + env(safe-area-inset-bottom, 0px));
+    background:
+      radial-gradient(900px 620px at 6% -8%, rgba(204, 255, 0, .34), transparent 70%),
+      radial-gradient(1000px 760px at 104% 108%, rgba(157, 0, 255, .42), transparent 70%),
+      #0b090e;
+    color: var(--testo);
+    font: 400 16px/1.55 var(--mac);
+    -webkit-font-smoothing: antialiased;
+  }
+  main {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    width: min(100%, 400px);
+    padding: 24px 20px 18px;
+    text-align: center;
+    color-scheme: light;
+    animation: posa .5s cubic-bezier(.2, 1.3, .4, 1) both;
+  }
+  main::before {
+    content: "";
+    position: absolute;
+    inset: -36px;
+    z-index: -1;
+    pointer-events: none;
+    border: 0 solid transparent;
+    border-image: url(/art/roulette/carta.webp) 300 fill / 96px stretch;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .35)) drop-shadow(0 24px 30px rgba(0, 0, 0, .4));
+  }
+  .foto { display: block; width: 86px; height: 96px; padding: 6px 6px 16px; background: #fff; box-shadow: 0 3px 8px rgba(0, 0, 0, .3); transform: rotate(-3deg); }
+  .foto svg { display: block; width: 100%; height: 100%; }
+  .voce { margin: 0; font: 400 15px/1.2 var(--marker); color: var(--rosso); text-transform: uppercase; letter-spacing: .02em; transform: rotate(-2deg); }
+  h1 { margin: -6px 0 0; font: 400 clamp(52px, 17vw, 68px)/1 var(--fa); color: var(--ink); text-transform: lowercase; letter-spacing: .005em; }
+  p { margin: 0; max-width: 34ch; }
+  mark { color: inherit; background: linear-gradient(transparent 12%, rgba(255, 212, 0, .58) 12% 88%, transparent 88%); }
+  .timbro { display: inline-block; padding: 3px 8px 2px; border: 2.5px solid currentColor; border-radius: 3px; color: #1f7a45; background: rgba(255, 255, 255, .6); font: 400 12px/1.1 var(--mac); letter-spacing: .12em; text-transform: uppercase; transform: rotate(-4deg); }
+  .fine { display: grid; justify-items: center; gap: 12px; width: 100%; margin-top: 4px; padding-top: 18px; border-top: 2px dashed rgba(27, 25, 22, .28); }
+  .tasto {
+    display: inline-block;
+    padding: .12em .5em .16em;
+    background: var(--ink);
+    color: #fff;
+    font: 400 30px/1.05 var(--fa);
+    text-transform: lowercase;
+    text-decoration: none;
+    white-space: nowrap;
+    transform: rotate(-2deg);
+    box-shadow: 0 0 0 3px var(--giallo), 4px 5px 0 2px rgba(0, 0, 0, .2);
+    transition: transform .18s cubic-bezier(.22, 1, .36, 1);
+  }
+  @media (hover: hover) { .tasto:hover { transform: rotate(-2deg) translateY(-2px); } }
+  .tasto:active { transform: rotate(-2deg) translateY(2px); }
+  .tasto:focus-visible { outline: 3px solid var(--giallo); outline-offset: 5px; }
+  .piede { font-size: 13px; line-height: 1.45; color: #5a544c; }
+  @keyframes posa { from { opacity: 0; transform: translateY(26px) rotate(-2deg) scale(.96); } }
+  @media (prefers-reduced-motion: reduce) { main { animation: none; } .tasto { transition: none; } }
+</style>
+</head>
+<body>
+<main>
+  <span class="foto" aria-hidden="true">
+    <svg viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="#0b090e"/><path fill="#cf0" d="M4 2h8v1h-8zM3 3h10v1h-10zM2 4h3v1h-3zM11 4h3v1h-3zM2 5h2v3h-2zM12 5h2v3h-2zM2 8h12v2h-12zM2 10h2v1h-2zM2 11h3v1h-3zM10 11h3v1h-3zM3 12h10v1h-10zM4 13h8v1h-8z"/><path fill="#9d00ff" d="M7 5h2v1h-2zM6 6h1v1h-1zM8 6h2v1h-2zM7 7h2v1h-2z"/><path fill="#fff" d="M7 6h1v1h-1z"/></svg>
+  </span>
+  <p class="voce">le telecamere, in diretta</p>
+  <h1>e-vision</h1>
+  <span class="timbro">accesso riservato</span>
+  <p>Otto telecamere dal vivo, sul server di casa. Dal telefono <mark>si aggiunge alla schermata Home</mark> e si apre a tutto schermo, come un&rsquo;app.</p>
+  <div class="fine">
+    <a class="tasto" href="https://desktop-inpvhr2.tail6c90b3.ts.net/telecamere/" target="_blank" rel="noopener noreferrer">apri e-vision</a>
+    <p class="piede">HTTPS e password. Se non hai la password, chiedila a pzkko.</p>
+  </div>
+</main>
+</body>
+</html>

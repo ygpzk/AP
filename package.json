@@ -1,18 +1,19 @@
 {
-  "$comment": "Il progetto vero è in albertopecchini.it/. Questo file esiste solo perché i comandi funzionino anche lanciati dalla radice del repository, senza dover ricordare il `cd`.",
+  "$comment": "Le scorciatoie per i comandi lanciati dalla radice del repository. Il progetto del portfolio è in albertopecchini.it/, quello di pzkko in pzkko.it/.",
   "name": "ap",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "npm --prefix albertopecchini.it run dev",
-    "dev:pzkko": "npm --prefix albertopecchini.it run dev:pzkko",
-    "dev:bcp": "npm --prefix albertopecchini.it run dev:bcp",
     "build": "npm --prefix albertopecchini.it run build",
     "preview": "npm --prefix albertopecchini.it run preview",
     "email": "npm --prefix albertopecchini.it run email --",
     "email:new": "npm --prefix albertopecchini.it run email:new --",
     "email:list": "npm --prefix albertopecchini.it run email:list",
     "email:profiles": "npm --prefix albertopecchini.it run email:profiles",
-    "email:theme": "npm --prefix albertopecchini.it run email:theme"
+    "email:theme": "npm --prefix albertopecchini.it run email:theme",
+    "pzkko:serve": "npm --prefix pzkko.it run serve",
+    "pzkko:build": "npm --prefix pzkko.it run build",
+    "pzkko:check": "npm --prefix pzkko.it run check"
   }
 }

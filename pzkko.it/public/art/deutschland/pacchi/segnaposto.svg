@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 180" width="120" height="180">
+  <!-- Deutschland (9.11.2026): il segnaposto dei 16 pacchetti di sigarette dei filtri (filtri.js): una scatola neutra
+       con il coperchio a scatto e il riquadro dell'avvertenza, il corpo trasparente così sotto si vede il colore del
+       pacchetto (la variabile c del bottone) e sopra l'HTML scrive il nome. Quando l'Agente 2 genera pacchi/<tag>.webp questo
+       file resta il ripiego di onerror. -->
+  <rect x="8" y="8" width="14" height="164" rx="5" fill="#fff" opacity=".2"/>
+  <rect x="96" y="8" width="18" height="164" rx="5" fill="#000" opacity=".16"/>
+  <rect x="4" y="4" width="112" height="172" rx="8" fill="none" stroke="#111" stroke-width="4"/>
+  <path d="M4 58 H44 L50 50 H116" fill="none" stroke="#111" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="4" y="4" width="112" height="46" rx="8" fill="#000" opacity=".12"/>
+  <rect x="14" y="130" width="92" height="36" fill="#fff" stroke="#111" stroke-width="3"/>
+  <rect x="21" y="138" width="60" height="4" fill="#111"/>
+  <rect x="21" y="146" width="74" height="4" fill="#111"/>
+  <rect x="21" y="154" width="42" height="4" fill="#111"/>
+</svg>

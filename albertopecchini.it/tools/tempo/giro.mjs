@@ -7,6 +7,8 @@
 //   4. --fase=foto           finite TUTTE le versioni, le foto dal deposito, un processo per sito
 //   5. --fase=pagine         le istantanee: l'HTML di ogni giorno in un solo index leggero
 //   6. prova.mjs             ogni versione aperta come dal tunnel
+//   7. oscura-pagine.mjs     le istantanee oscurate (niente numeri, luoghi, social: 26.11.2026) e
+//                            le foto -t e -v rifatte da lì; senza questo passo la build si ferma
 //
 // Si segue dal cruscotto (powershell -File tools\tempo\cruscotto.ps1).
 //
@@ -38,22 +40,25 @@ function lancia(script, args, chi) {
 
 const t0 = Date.now()
 if (!argv.includes('--senza-scarico')) {
-  nota('1/6 · scarico la storia intera dei repository')
+  nota('1/7 · scarico la storia intera dei repository')
   await lancia('scarica.mjs', [], 'scarica')
 }
 if (siti.includes('ap')) {
-  nota('2/6 · ripasso le 108 versioni già depositate: riservatezza, scudo, router delle app React')
+  nota('2/7 · ripasso le 108 versioni già depositate: riservatezza, scudo, router delle app React')
   await lancia('tempo.mjs', ['--sito=ap', '--ripassa', ...avanti], 'ripassa-ap')
 }
-nota(`3/6 · ricostruisco e deposito le versioni di ${siti.length} siti insieme`)
+nota(`3/7 · ricostruisco e deposito le versioni di ${siti.length} siti insieme`)
 const versioni = await Promise.all(siti.map((id) => lancia('tempo.mjs', [`--sito=${id}`, '--fase=versioni', ...avanti], `versioni-${id}`)))
 log('giro', `versioni finite: ${versioni.filter((c) => c === 0).length}/${siti.length} processi senza errori, ${Math.round((Date.now() - t0) / 60000)} min`)
-nota('4/6 · tutte le versioni sono in locale: ora le foto, dal deposito, come le vede il pubblico')
+nota('4/7 · tutte le versioni sono in locale: ora le foto, dal deposito, come le vede il pubblico')
 const foto = await Promise.all(siti.map((id) => lancia('tempo.mjs', [`--sito=${id}`, '--fase=foto', ...avanti], `foto-${id}`)))
 log('giro', `foto finite: ${foto.filter((c) => c === 0).length}/${siti.length} processi senza errori`)
-nota('5/6 · le istantanee: l’HTML di ogni giorno in un solo index leggero (istantanea.mjs)')
+nota('5/7 · le istantanee: l’HTML di ogni giorno in un solo index leggero (istantanea.mjs)')
 const pagine = await Promise.all(siti.map((id) => lancia('tempo.mjs', [`--sito=${id}`, '--fase=pagine', ...avanti], `pagine-${id}`)))
 log('giro', `istantanee finite: ${pagine.filter((c) => c === 0).length}/${siti.length} processi senza errori`)
-nota('6/6 · la prova: ogni versione aperta come dal tunnel')
+nota('6/7 · la prova: ogni versione aperta come dal tunnel')
 const prova = await lancia('prova.mjs', siti.length < SITI.length ? [`--sito=${siti.join(',')}`] : [], 'prova')
+nota('7/7 · oscuro le istantanee e rifaccio le foto da quelle (oscura-pagine.mjs)')
+const oscura = await lancia('oscura-pagine.mjs', [`--sito=${siti.filter((id) => id !== 'rivalta').join(',')}`], 'oscura')
+log('giro', `oscuramento: ${oscura === 0 ? 'fatto' : 'con errori (lavoro/diretta/oscura.out)'}`)
 nota(`giro finito in ${Math.round((Date.now() - t0) / 60000)} min · prova ${prova === 0 ? 'tutta a posto' : 'con qualcosa da guardare (lavoro/diretta/prova.out)'}`)

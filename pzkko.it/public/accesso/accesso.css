@@ -1,0 +1,174 @@
+/* L'ACCESSO DI PZKKO.IT. Il 19.11 era un riquadro di Discord; il 25.11 (pzkko: «rifai tutti i popup di pzkko con il mio
+   stile pzk») è un foglio del muro: la stessa carta col nastro dei tavoli (art/roulette/carta.webp, che qui si allunga
+   con border-image senza deformare gli angoli), Anton per i titoli, il pennarello per la voce, la macchina da scrivere
+   per il resto, il tasto nero storto, le fiches al posto dei pallini e i timbri per la banca. Sta in piedi da solo: lo
+   aprono il profilo, la chat, il cercapersone e i tavoli, anche sul muro, dove il foglio di stile del profilo non c'è. */
+@font-face { font-family: "Anton"; src: url(/fonts/anton.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Special Elite"; src: url(/fonts/special-elite.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Permanent Marker"; src: url(/fonts/permanent-marker.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+
+dialog.ax { --inchiostro: #1b1916; --testo: #36312b; --matita: #5a544c; --rosso: #b3121f; --penna: #1446a0; --verde: #1f7a45; --giallo: #ffd400;
+  --fa: "Anton", Impact, "Arial Narrow", sans-serif; --marker: "Permanent Marker", "Comic Sans MS", cursive; --mac: "Special Elite", "Courier New", monospace;
+  --nastro: 96px; --fuori: 36px; /* il bordo della carta (con gli angoli e il nastro) e quanto esce dal foglio */
+  position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 50px 46px; border: 0; background: transparent;
+  color: var(--testo); display: grid; place-items: center; overflow: hidden; font: 400 16px/1.42 var(--mac); -webkit-font-smoothing: antialiased; color-scheme: light; }
+dialog.ax:not([open]) { display: none; }
+dialog.ax::backdrop { background: rgba(12, 10, 8, .66); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); animation: ax-velo .2s ease-out; }
+dialog.ax.via .ax-box { animation: ax-stacca .14s ease-in forwards; }
+dialog.ax.via::backdrop { opacity: 0; transition: opacity .14s; }
+dialog.ax * { box-sizing: border-box; }
+dialog.ax [hidden] { display: none !important; }
+
+/* il foglio: la carta è il ::before (esce di --fuori per far vedere il nastro), il passo scorre dentro */
+.ax-box { position: relative; isolation: isolate; display: flex; flex-direction: column; width: min(100%, 460px); max-height: 100%; outline: 0; animation: ax-attacca .34s cubic-bezier(.22, 1, .36, 1); }
+.ax-box::before { content: ""; position: absolute; inset: calc(var(--fuori) * -1); z-index: -1; pointer-events: none; border: 0 solid transparent;
+  border-image: url(/art/roulette/carta.webp) 300 fill / var(--nastro) stretch; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .35)) drop-shadow(0 24px 30px rgba(0, 0, 0, .4)); }
+.ax-box.largo { width: min(100%, 540px); }
+.ax-passo { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 30px 30px 24px; animation: ax-passo .22s ease-out; scrollbar-width: thin; scrollbar-color: rgba(27, 25, 22, .3) transparent; }
+@keyframes ax-velo { from { opacity: 0; } }
+@keyframes ax-attacca { from { opacity: 0; transform: translateY(18px) rotate(-1deg) scale(.97); } }
+@keyframes ax-stacca { to { opacity: 0; transform: translateY(10px) rotate(.8deg) scale(.98); } }
+@keyframes ax-passo { from { opacity: 0; transform: translateY(6px); } }
+
+/* la X a mano, come quella dei tavoli */
+.ax-x { position: absolute; top: 6px; right: 6px; z-index: 3; display: grid; place-items: center; width: 42px; height: 42px; padding: 7px; border: 0; border-radius: 50%; background: none; color: var(--inchiostro); cursor: pointer; transform: rotate(-6deg); transition: transform .2s cubic-bezier(.22, 1, .36, 1); }
+.ax-x svg { width: 100%; height: 100%; }
+.ax-x:hover { transform: rotate(-6deg) scale(1.12); }
+.ax-x:focus-visible { outline: 3px solid var(--giallo); outline-offset: 0; }
+
+.ax-box h2 { margin: 0 0 6px; font: 400 42px/1 var(--fa); letter-spacing: .005em; text-transform: lowercase; color: var(--inchiostro); text-align: center; text-wrap: balance; overflow-wrap: anywhere; }
+.ax-voce { margin: 0 0 6px; font: 400 18px/1.2 var(--marker); color: var(--rosso); text-align: center; transform: rotate(-2deg); text-wrap: balance; }
+.ax-s { margin: 0 0 18px; color: var(--testo); text-align: center; text-wrap: pretty; }
+/* il grassetto è l'evidenziatore giallo */
+.ax-s b, .ax-cose b, .ax-nov li b, .ax-punti b { font-weight: 400; color: var(--inchiostro); background: linear-gradient(transparent 52%, rgba(255, 212, 0, .62) 52% 90%, transparent 90%); padding: 0 .12em; }
+.ax-s code { padding: 0 6px; border: 1.5px dashed rgba(27, 25, 22, .45); font: 400 15px/1.3 var(--mac); color: var(--inchiostro); }
+
+/* i campi: un modulo da riempire a macchina */
+.ax-campo { display: block; margin: 0 0 8px; text-align: left; }
+.ax-campo > span:first-child { display: block; margin-bottom: 6px; font: 400 12px/1 var(--mac); letter-spacing: .12em; text-transform: uppercase; color: var(--matita); }
+.ax-campo.ko > span:first-child { color: var(--rosso); }
+.ax-campo input { display: block; width: 100%; height: 48px; padding: 0 12px; border: 2px solid var(--inchiostro); border-radius: 3px 6px 4px 7px; background: rgba(255, 255, 255, .62); color: var(--inchiostro); font: 400 17px/1 var(--mac); outline: 0; transition: box-shadow .15s, border-color .15s; }
+.ax-campo input:focus { box-shadow: 4px 4px 0 var(--giallo); }
+.ax-campo.ko input, .ax-campo.ko .ax-chiocciola { border-color: var(--rosso); }
+.ax-campo input::placeholder { color: rgba(27, 25, 22, .32); }
+.ax-campo input.ax-cifre { height: 64px; padding: 0 0 0 .5em; text-align: center; font: 400 38px/1 var(--fa); letter-spacing: .5em; }
+.ax-chiocciola { display: flex; align-items: center; border: 2px solid var(--inchiostro); border-radius: 3px 6px 4px 7px; background: rgba(255, 255, 255, .62); transition: box-shadow .15s; }
+.ax-chiocciola:focus-within { box-shadow: 4px 4px 0 var(--giallo); }
+.ax-chiocciola i { padding-left: 12px; font: 400 18px/1 var(--fa); font-style: normal; color: var(--matita); }
+.ax-chiocciola input, .ax-chiocciola input:focus { border: 0; padding-left: 4px; background: none; box-shadow: none; }
+.ax-err { margin: 2px 0 8px; font: 400 15px/1.25 var(--marker); color: var(--rosso); text-align: left; }
+.ax-tempo { margin: 0 0 4px; font-size: 13px; color: var(--matita); font-variant-numeric: tabular-nums; text-align: left; }
+.ax-tempo.ok { color: var(--verde); }
+.ax-nota { margin: 14px 0 0; font-size: 12px; line-height: 1.4; color: var(--matita); text-align: center; text-wrap: pretty; }
+/* (25.11) la posta di prova: la lettera non arriva, si apre da qui */
+.ax-prova { margin: 16px 0 0; padding: 10px 12px; border: 2px dashed rgba(27, 25, 22, .3); background: rgba(255, 212, 0, .12); text-align: left; }
+.ax-prova a { display: inline-block; margin-bottom: 4px; border-bottom: 2px solid currentColor; color: var(--penna); font: 400 17px/1.2 var(--marker); text-decoration: none; }
+.ax-prova a:hover { color: var(--rosso); }
+.ax-prova span { display: block; font-size: 12px; line-height: 1.4; color: var(--matita); }
+
+/* i tasti: quello nero storto dei tavoli, e il collegamento a pennarello */
+.ax-b { position: relative; display: block; width: fit-content; min-width: 62%; max-width: 100%; margin: 18px auto 0; padding: .14em .7em .18em; border: 0; background: var(--inchiostro); color: #fff; font: 400 28px/1.05 var(--fa); text-transform: lowercase; text-align: center; cursor: pointer; transform: rotate(-1.6deg); box-shadow: 3px 3px 0 rgba(0, 0, 0, .2); transition: transform .18s cubic-bezier(.22, 1, .36, 1), opacity .15s; }
+.ax-b:hover:not(:disabled) { transform: rotate(-1.6deg) translateY(-2px); }
+.ax-b:active:not(:disabled) { transform: rotate(-1.6deg) translateY(2px); box-shadow: 1px 1px 0 rgba(0, 0, 0, .2); }
+.ax-b:focus-visible, .ax-link:focus-visible, .ax-profili a:focus-visible, .ax-app button:focus-visible, .ax-gioca:focus-visible { outline: 3px solid var(--giallo); outline-offset: 3px; }
+.ax-b:disabled { opacity: .45; cursor: default; }
+.ax-b.gira { color: transparent; }
+.ax-b.gira::after { content: ""; position: absolute; left: 50%; top: 50%; width: 30px; height: 8px; margin: -4px 0 0 -15px; background: radial-gradient(circle 4px, #fff 96%, transparent) 0 0 / 11px 8px repeat-x; animation: ax-punti .9s steps(4) infinite; }
+@keyframes ax-punti { 50% { opacity: .35; } }
+.ax-b.verde { background: var(--verde); }
+.ax-b.rosso { background: transparent; color: var(--rosso); box-shadow: inset 0 0 0 3px var(--rosso); transform: rotate(1.2deg); }
+.ax-b.rosso:hover:not(:disabled) { transform: rotate(1.2deg) translateY(-2px); }
+.ax-link { display: table; margin: 14px auto 0; padding: 0 0 1px; border: 0; border-bottom: 2px solid currentColor; background: none; color: var(--penna); font: 400 15px/1.2 var(--marker); cursor: pointer; }
+.ax-link:disabled { color: var(--matita); border-bottom-color: transparent; cursor: default; }
+.ax-riga { display: flex; justify-content: space-between; gap: 12px; margin: 0; }
+.ax-riga .ax-link { margin: 14px 0 0; }
+
+/* la foto attaccata (l'avatar) e i timbri */
+.ax-foto-av { position: relative; width: 96px; margin: 0 auto 12px; transform: rotate(-4deg); }
+.ax-foto-av img { display: block; width: 96px; height: 96px; object-fit: cover; border: 5px solid #fff; border-bottom-width: 16px; background: #ddd; box-shadow: 0 2px 3px rgba(0, 0, 0, .3), 0 10px 18px -6px rgba(0, 0, 0, .35); }
+.ax-foto-av::after { content: ""; position: absolute; left: 50%; top: -9px; width: 56px; height: 18px; margin-left: -28px; rotate: 5deg; background: linear-gradient(rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 38%, rgba(110, 90, 40, .16)), rgba(234, 222, 182, .86);
+  clip-path: polygon(0 0, 3px 17%, 0 34%, 3px 50%, 0 67%, 3px 84%, 0 100%, 100% 100%, calc(100% - 3px) 84%, 100% 67%, calc(100% - 3px) 50%, 100% 34%, calc(100% - 3px) 17%, 100% 0); }
+.ax-foto-av b { position: absolute; right: -26px; bottom: -6px; padding: 2px 8px 1px; border: 2.5px solid currentColor; border-radius: 4px; color: var(--verde); background: rgba(255, 255, 255, .5); font: 400 20px/1.1 var(--fa); transform: rotate(9deg); white-space: nowrap; animation: ax-timbra .45s .25s cubic-bezier(.2, 1.6, .4, 1) backwards; }
+@keyframes ax-timbra { from { opacity: 0; transform: rotate(9deg) scale(1.8); } }
+.ax-conta { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 14px; margin: 10px 0 16px; }
+.ax-timbro { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px 2px; border: 2px solid currentColor; border-radius: 3px; font: 400 12px/1.2 var(--mac); letter-spacing: .1em; text-transform: uppercase; color: var(--matita); transform: rotate(-2.5deg); opacity: .9; }
+.ax-timbro + .ax-timbro { transform: rotate(2deg); }
+.ax-timbro.su { color: var(--verde); }
+.ax-timbro.giu { color: #b86b00; }
+.ax-timbro b { font-weight: 400; }
+
+/* l'invito */
+.ax-inv { text-align: center; }
+.ax-inv h2 { font-size: 56px; }
+.ax-cose { display: grid; gap: 10px; margin: 0 0 4px; padding: 14px 2px; border-block: 2px dashed rgba(27, 25, 22, .28); list-style: none; text-align: left; font-size: 15px; color: var(--testo); }
+.ax-cose li { display: flex; align-items: center; gap: 12px; }
+.ax-cose img { flex: 0 0 32px; width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(1px 2px 1px rgba(0, 0, 0, .3)); }
+.ax-cose li:nth-child(2n) img { rotate: 24deg; }
+/* le app vere, da aprire subito: polaroid attaccate in fila */
+.ax-app { margin: 16px 0 4px; }
+.ax-app > p { margin: 0 0 8px; font: 400 16px/1.2 var(--marker); color: var(--rosso); transform: rotate(-1.5deg); }
+.ax-app ul { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.ax-app button { display: block; width: 100%; padding: 4px 4px 6px; border: 0; background: #fff; color: var(--inchiostro); cursor: pointer; box-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 12px -6px rgba(0, 0, 0, .4); transform: rotate(var(--r, -2deg)); transition: transform .2s cubic-bezier(.2, 1.5, .4, 1); }
+.ax-app li:nth-child(2n) button { --r: 2.5deg; }
+.ax-app li:nth-child(3n) button { --r: -1deg; }
+.ax-app button:hover { transform: rotate(0deg) scale(1.08); }
+.ax-app .ax-pic { position: relative; display: block; aspect-ratio: 16 / 11; overflow: hidden; background: linear-gradient(135deg, var(--c1, #333), var(--c2, #111)); }
+.ax-app .ax-pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ax-app .ax-pic i { position: absolute; inset: 0; display: grid; place-items: center; padding: 4px; font: 400 15px/1 var(--fa); font-style: normal; text-transform: lowercase; color: #fff; text-align: center; }
+.ax-app b { display: block; margin-top: 5px; font: 400 14px/1 var(--fa); font-weight: 400; text-transform: lowercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* il benvenuto */
+.ax-ben { text-align: center; }
+.ax-punti { display: grid; gap: 8px; margin: 0 0 4px; padding: 0; list-style: none; text-align: left; font-size: 15px; color: var(--testo); }
+.ax-punti li { position: relative; padding-left: 28px; }
+.ax-punti li::before { content: "✓"; position: absolute; left: 4px; top: -3px; font: 400 20px/1 var(--marker); color: var(--verde); }
+
+/* le novità */
+.ax-nov { text-align: left; }
+.ax-nov header { display: flex; align-items: baseline; justify-content: center; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 14px; }
+.ax-nov header h2 { margin: 0; }
+.ax-nov time { display: inline-block; padding: 2px 8px 1px; border: 2px solid currentColor; border-radius: 3px; font: 400 12px/1.2 var(--mac); letter-spacing: .1em; text-transform: uppercase; color: var(--rosso); transform: rotate(-3deg); }
+.ax-foto { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: top; border: 6px solid #fff; border-bottom-width: 18px; background: #ddd; box-shadow: 0 2px 3px rgba(0, 0, 0, .3), 0 12px 20px -8px rgba(0, 0, 0, .35); transform: rotate(-1.2deg); }
+.ax-nov h3 { width: fit-content; margin: 22px 0 10px; padding: 0 .3em; font: 400 19px/1.2 var(--marker); color: var(--inchiostro); transform: rotate(-1.5deg); background: linear-gradient(transparent 30%, var(--ev) 30% 88%, transparent 88%); }
+.ax-nov h3.verde { --ev: rgba(54, 200, 110, .5); }
+.ax-nov h3.blu { --ev: rgba(90, 160, 255, .48); }
+.ax-nov h3.rosa { --ev: rgba(255, 120, 185, .5); }
+.ax-nov ul { display: grid; gap: 10px; margin: 0; padding: 0 0 0 4px; list-style: none; color: var(--testo); font-size: 15px; }
+.ax-nov li { position: relative; display: flex; align-items: flex-start; gap: 10px; padding-left: 20px; }
+.ax-nov li::before { content: "–"; position: absolute; left: 2px; top: 0; color: var(--matita); }
+.ax-nov li span { flex: 1 1 auto; min-width: 0; }
+.ax-nov li a { color: var(--penna); font: 400 15px/1.2 var(--marker); text-decoration: underline; text-underline-offset: 2px; }
+.ax-nov li a:hover { color: var(--rosso); }
+.ax-gioca { flex: none; margin-top: 1px; padding: .1em .45em .14em; border: 0; background: var(--inchiostro); color: #fff; font: 400 17px/1 var(--fa); text-transform: lowercase; cursor: pointer; transform: rotate(-3deg); box-shadow: 2px 2px 0 rgba(0, 0, 0, .2); transition: transform .18s cubic-bezier(.22, 1, .36, 1); }
+.ax-gioca:hover { transform: rotate(-3deg) translateY(-2px); }
+
+/* il regalo di instagram: il biglietto rosa */
+.ax-reg { text-align: center; }
+.ax-reg .ax-campo, .ax-reg .ax-err { text-align: left; }
+.ax-dono { position: relative; display: inline-grid; place-items: center; min-width: 120px; height: 70px; margin: 2px auto 14px; padding: 0 22px; background: #ff9fc8; color: #5a1033; font: 400 34px/1 var(--fa); transform: rotate(-3deg); filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .28)) drop-shadow(0 8px 10px rgba(0, 0, 0, .2));
+  -webkit-mask: radial-gradient(circle 8px at 0 50%, #0000 96%, #000) 0 0 / 51% 100% no-repeat, radial-gradient(circle 8px at 100% 50%, #0000 96%, #000) 100% 0 / 51% 100% no-repeat;
+  mask: radial-gradient(circle 8px at 0 50%, #0000 96%, #000) 0 0 / 51% 100% no-repeat, radial-gradient(circle 8px at 100% 50%, #0000 96%, #000) 100% 0 / 51% 100% no-repeat; }
+.ax-dono::before { content: ""; position: absolute; inset: 6px 14px; border: 1.5px dashed rgba(90, 16, 51, .5); }
+.ax-dono.dato { background: #7fd89a; color: #0d3b1e; font-size: 44px; }
+.ax-dono.attesa { background: #cfc8bb; color: #3a3632; font-size: 44px; }
+.ax-profili { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 0 0 16px; }
+.ax-profili a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 2px solid var(--inchiostro); background: #fff; color: var(--inchiostro); font: 400 16px/1 var(--mac); text-decoration: none; transform: rotate(-1.5deg); box-shadow: 3px 3px 0 rgba(0, 0, 0, .16); transition: transform .18s cubic-bezier(.22, 1, .36, 1); }
+.ax-profili a:hover { transform: rotate(0deg) translateY(-2px); }
+.ax-profili a svg { flex: 0 0 auto; color: #d6286f; }
+.ax-profili a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ax-profili a i { margin-left: 2px; font: 400 16px/1 var(--marker); font-style: normal; color: var(--matita); }
+.ax-profili a.visto i { color: var(--verde); }
+.ax-profili a.visto i::before { content: "✓ "; }
+
+/* sul telefono il foglio prende la larghezza, col nastro più piccolo */
+@media (max-width: 520px) {
+  dialog.ax { --nastro: 64px; --fuori: 24px; padding: 34px 26px; }
+  .ax-passo { padding: 26px 18px 18px; }
+  .ax-box h2 { font-size: 36px; }
+  .ax-inv h2 { font-size: 46px; }
+  .ax-app ul { gap: 7px; }
+  .ax-app b { font-size: 12px; }
+  .ax-b { font-size: 26px; }
+}
+@media (max-height: 560px) { dialog.ax { padding-block: 30px; } }
+@media (prefers-reduced-motion: reduce) { .ax-box, .ax-passo, dialog.ax::backdrop, .ax-foto-av b, dialog.ax.via .ax-box { animation: none; } .ax-b, .ax-x, .ax-app button, .ax-profili a, .ax-gioca { transition: none; } }

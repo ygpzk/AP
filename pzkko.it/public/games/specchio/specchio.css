@@ -1,0 +1,21 @@
+/* SPECCHIO: la finestra dello specchio. Il video vero sta nascosto (1 px trasparente), il canvas è quello che si vede.
+   Claude Code: .sc-* è il disegno, i ganci sono data-camera, data-eff, data-specchio, data-scatta. */
+
+.sc-comandi{padding:8px 12px;display:flex;flex-direction:column;gap:8px}
+.sc-effetti{display:flex;flex-wrap:wrap;gap:6px}
+.sc-effetti .lab-tasto{flex:1 1 auto;padding:5px 10px}
+.sc-scena{background:#0b0d0a;border:1.5px solid #2a2e26;min-height:380px;overflow:hidden}
+.sc-canvas,.sc-scena canvas{display:block;width:100%;height:100%}
+.sc-video{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:0;top:0}
+.sc-vuoto{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font:400 16px/1.4 "Permanent Marker","Comic Sans MS",cursive;color:rgba(204,255,0,.5);pointer-events:none}
+.sc-vuoto[hidden]{display:none}
+.sc-eti{position:absolute;right:10px;bottom:8px;font:400 10px/1 "Special Elite","Courier New",monospace;letter-spacing:.12em;text-transform:uppercase;color:rgba(204,255,0,.35);pointer-events:none}
+a.lab-tasto{display:inline-block;text-decoration:none}
+
+@media (max-width:900px){
+  .sc-scena{min-height:320px}
+}
+@media (max-width:560px){
+  .sc-effetti .lab-tasto{flex:1 1 30%}
+  .sc-scena{min-height:260px}
+}

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b090e">
+<title>Giugnoh's Cast · TV</title>
+<link rel="icon" href="/logo.svg">
+<link rel="stylesheet" href="/tv.css">
+<!--
+  La tv: una pagina sola, 3840 × 2160 (4K). Tutto è misurato in «rem» e la pagina li ricalcola sulla grandezza dello
+  schermo, così il browser della tv la disegna con i pixel veri del pannello, non ingrandita.
+  Sulla tv non si tocca niente: cosa fa vedere lo sceglie la regia (le «schermate»: il podcast, solo il logo, solo l'ora,
+  il nome, chi sta parlando, un testo qualsiasi, il meteo di Mantova), e quando il server riparte o cambiano i suoi file
+  si ricarica da sola. Il podcast arriva dal pc (podcast.mjs, /api/tv): in onda o no, l'argomento estratto (lo stesso
+  rullo della diretta, allo stesso istante), la fine puntata coi titoli di coda, e la voce del microfono che fa ballare
+  le barre.
+-->
+</head>
+<body data-fase="spento" data-schermo="podcast">
+<div id="palco">
+  <div class="sfondo"><i class="lu lu1"></i><i class="lu lu2"></i><i class="lu lu3"></i><div class="pavimento"><i></i></div><i class="scansione"></i></div>
+
+  <!-- la schermata del podcast: la puntata, l'argomento a caso, la fine -->
+  <div class="podcast" id="podcast">
+    <header class="testa">
+      <div class="onair" id="onair"><i class="pallino"></i><span class="on">ON AIR</span><span class="off">OFF AIR</span></div>
+      <div class="dx">
+        <div class="orologio" id="orologio">00:00</div>
+        <div class="ep"><span id="ep">puntata 1</span><span class="da" id="in-onda"></span></div>
+      </div>
+    </header>
+
+    <div class="marchio" id="marchio">
+      <img class="cuffie" src="/art/chat-ufficio/cuffie.webp" alt="">
+      <div class="logo" id="logo"></div>
+      <div class="motto" id="motto">il podcast di Giugnoh</div>
+    </div>
+
+    <section class="argo" id="argo">
+      <div class="ar-testa"><span class="chip" id="ar-chip">argomento a caso</span></div>
+      <div class="ar-corpo">
+        <i class="banda"></i>
+        <div class="rullo"><div class="nastro scia2"></div><div class="nastro scia1"></div><div class="nastro vero"></div></div>
+        <i class="freccia sx"></i><i class="freccia dx"></i>
+        <i class="lampo"></i>
+        <div class="titolo"><span id="titolo"></span></div>
+      </div>
+      <div class="ar-sotto"><i class="rec"></i><span id="ar-da">da 0:00</span><span class="dopo" id="ar-dopo"></span></div>
+    </section>
+
+    <section class="fine" id="fine">
+      <div class="fi-grazie" id="fi-grazie"></div>
+      <div class="fi-dice" id="fi-dice"></div>
+      <div class="fi-numeri"><div><b id="fi-durata">0:00</b><small>in onda</small></div><div><b id="fi-n">0</b><small>argomenti</small></div><div><b id="fi-ora">00:00</b><small>finita alle</small></div></div>
+      <div class="fi-titoli"><div class="fi-scorre" id="fi-scorre"></div></div>
+    </section>
+
+    <img class="lumaca" src="/art/chat-pzk/neon.webp" alt="">
+    <footer class="nastrino"><div class="scorre" id="scorre"></div></footer>
+  </div>
+
+  <!-- le altre schermate: una alla volta, a tutto schermo -->
+  <section class="sch" id="s-logo"><img class="sc-cuffie" src="/art/chat-ufficio/cuffie.webp" alt=""><div class="logo sc-logo" id="s-logo-n"></div><div class="sc-motto">il podcast di Giugnoh</div></section>
+  <section class="sch" id="s-ora"><div class="sc-ora"><span id="s-ora-h">00</span><span class="due">:</span><span id="s-ora-m">00</span></div><div class="sc-data" id="s-data"></div></section>
+  <section class="sch" id="s-nome"><div class="sc-nome" id="s-nome-n"></div></section>
+  <section class="sch" id="s-parla"><div class="sc-chip"><i class="rec"></i><span>sta parlando</span></div><div class="sc-parla" id="s-parla-n"></div></section>
+  <section class="sch" id="s-testo"><div class="sc-testo" id="s-testo-n"></div></section>
+  <section class="sch" id="s-meteo">
+    <div class="sc-m-su"><div class="sc-m-ico" id="s-m-ico"></div><div class="sc-m-gradi" id="s-m-gradi">–°</div></div>
+    <div class="sc-m-dove"><b id="s-m-citta">Mantova</b><span id="s-m-testo"></span></div>
+    <div class="sc-m-numeri"><div><b id="s-m-min">–</b><small>minima</small></div><div><b id="s-m-max">–</b><small>massima</small></div><div><b id="s-m-perc">–</b><small>percepiti</small></div><div><b id="s-m-vento">–</b><small>vento km/h</small></div></div>
+  </section>
+
+  <div class="eq" id="eq"></div>
+
+  <div class="tenda" id="tenda"><i></i><i></i><i></i></div>
+  <div class="flash" id="flash"></div>
+  <div class="cor" id="cor"></div>
+  <div class="filo" id="filo">mi collego al pc…</div>
+  <div class="schermo" id="schermo">premi OK per lo schermo intero</div>
+</div>
+<script src="/cast.js"></script>
+<script src="/tv.js"></script>
+</body>
+</html>

@@ -80,10 +80,46 @@ export const values = [
   { title: 'Formati che non ti chiudono in gabbia', text: 'Consegno i sorgenti e uso formati standard. Se un giorno vuoi cambiare fornitore, il lavoro te lo porti dietro.' },
 ]
 
+// 26.11.2026: la stessa lista, con gli stessi nomi, della scheda «Strumenti» di
+// pzkko.it (public/assets/config.js): le due pagine sono la stessa persona e non
+// possono raccontare due cassette degli attrezzi diverse. Se cambia una voce,
+// cambia in tutte e due.
+//
+// Qui i 42 strumenti stanno in sei gruppi da 4-10 voci, così la griglia a tre
+// colonne resta piena anche sotto (con tre gruppi la colonna Web faceva 27 righe
+// e le altre due restavano vuote). `fig` è la figurina già ritagliata: i nomi
+// nuovi non avrebbero un disegno in public/media/figurine/.
 export const tools = [
-  { group: 'Rilievo e disegno', items: ['AutoCAD', 'cadwork', 'Archicad', 'QGIS', 'CloudCompare', 'Agisoft Metashape', 'Pregeo e Docfa'] },
-  { group: 'Web', items: ['HTML e CSS', 'JavaScript e TypeScript', 'React e Next.js', 'Astro e Vite', 'Tailwind CSS', 'GSAP', 'Git e Vercel'] },
-  { group: 'Grafica', items: ['Figma', 'Illustrator', 'InDesign', 'Photoshop', 'DaVinci Resolve', 'Fotografia commerciale'] },
+  {
+    group: 'Web',
+    fig: 'strumenti-web',
+    items: ['HTML', 'CSS', 'JavaScript', 'TypeScript', 'React', 'Next.js', 'Astro', 'Svelte', 'Tailwind CSS', 'GSAP'],
+  },
+  {
+    group: 'Runtime e linguaggi',
+    fig: 'computer-codice',
+    items: ['Node.js', 'Bun', 'Vite', 'C#', 'Rust', 'Python', 'PowerShell'],
+  },
+  {
+    group: '3D e calcolo',
+    fig: 'tecnico-modellazione-3d',
+    items: ['three.js', 'Babylon.js', 'WebGPU', 'WebAssembly'],
+  },
+  {
+    group: 'AI e infrastruttura',
+    fig: 'computer-stack',
+    items: ['Claude Code', 'Ollama', 'Docker', 'PostgreSQL', 'Vercel', 'Git'],
+  },
+  {
+    group: 'Tecnica e disegno',
+    fig: 'strumenti-rilievo-e-disegno',
+    items: ['AutoCAD', 'cadwork', 'Archicad', 'QGIS', 'CloudCompare', 'Agisoft Metashape', 'Pregeo e Docfa', 'Blender', 'Figma'],
+  },
+  {
+    group: 'Grafica e media',
+    fig: 'strumenti-grafica',
+    items: ['Illustrator', 'InDesign', 'Photoshop', 'DaVinci Resolve', 'FFmpeg', 'OBS Studio'],
+  },
 ]
 
 // Curriculum sintetico per la pagina /studio/profilo/

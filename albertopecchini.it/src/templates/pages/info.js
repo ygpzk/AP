@@ -294,7 +294,7 @@ export function studioPage() {
       <div class="container">
         ${sectionHead({ index: 'D', label: 'Strumenti', title: 'Con cosa lavoro' })}
         <div class="stools__grid">
-          ${tools.map((g) => `<div data-reveal="up">${figurina(figName('strumenti', g.group), { className: 'stools__fig' })}<h3 class="label">${esc(g.group)}</h3><ul>${g.items.map((it) => `<li>${esc(it)}</li>`).join('')}</ul></div>`)}
+          ${tools.map((g) => `<div data-reveal="up">${figurina(g.fig || figName('strumenti', g.group), { className: 'stools__fig' })}<h3 class="label">${esc(g.group)}</h3><ul>${g.items.map((it) => `<li>${esc(it)}</li>`).join('')}</ul></div>`)}
         </div>
         ${stackRow()}
       </div>

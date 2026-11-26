@@ -1,0 +1,59 @@
+/* Il foglio dei giochi nuovi di pzkko.it (19.11: parole, trivia): lo stesso foglio col nastro della roulette, del blackjack
+   e di testa o croce (art/roulette/carta.webp), 800 × 600 sul computer e a tutto schermo sul telefono, coi caratteri e i
+   colori del muro (Anton per i titoli, il pennarello per la voce, la macchina da scrivere per il resto). Qui sta solo
+   quello che i due giochi hanno in comune: la finestra, la testata, il saldo, il tasto nero. */
+
+.fg{position:fixed;inset:0;margin:auto;width:800px;height:600px;max-width:none;max-height:none;padding:0;border:0;background:none;overflow:visible;color:#161616;
+  font:400 15px/1.3 "Special Elite","Courier New",monospace;--rosso:#b3121f;--nero:#161616;--verde:#23864a;--giallo:#ffd400;--grigio:#8a8479;--matita:#3a3632;--marker:"Permanent Marker","Comic Sans MS",cursive;--fa:"Anton",Impact,sans-serif}
+.fg::backdrop{background:rgba(12,10,8,.62);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+.fg[open]{animation:fg-attacca .32s cubic-bezier(.22,1,.36,1)}
+.fg.chiude{animation:fg-stacca .22s ease-in forwards}
+@keyframes fg-attacca{from{opacity:0;transform:translateY(18px) rotate(-1deg) scale(.97)}}
+@keyframes fg-stacca{to{opacity:0;transform:translateY(10px) rotate(.8deg) scale(.98)}}
+.fg::before{content:"";position:absolute;left:-8.66%;right:-9.04%;top:-12.49%;bottom:-12.6%;z-index:-1;background:url(/art/roulette/carta.webp) 0 0/100% 100% no-repeat;filter:drop-shadow(0 4px 6px rgba(0,0,0,.35)) drop-shadow(0 24px 30px rgba(0,0,0,.4));pointer-events:none}
+.fg.rovescio::before{transform:scaleY(-1);filter:drop-shadow(0 -4px 6px rgba(0,0,0,.35)) drop-shadow(0 -24px 30px rgba(0,0,0,.4))}
+.fg *{box-sizing:border-box}
+:where(.fg) button{font:inherit;color:inherit;-webkit-tap-highlight-color:transparent} /* (:where: le classi dei tasti vincono) */
+.fg :focus-visible{outline:3px solid var(--giallo);outline-offset:2px}
+.fg [hidden]{display:none !important}
+.fg .fg-dentro:focus,.fg .fg-dentro:focus-visible{outline:0}
+.fg .emo{display:inline-block;height:1.3em;width:auto;vertical-align:-.28em;image-rendering:pixelated}
+
+.fg-dentro{position:absolute;inset:0;display:flex;flex-direction:column;padding:10px 22px 12px 20px;outline:none}
+.fg-testa{flex:none;display:flex;align-items:center;gap:16px;min-height:54px;min-width:0}
+.fg-testa h2{margin:0;font:400 44px/1 var(--fa);letter-spacing:.005em;flex:none;text-transform:lowercase}
+.fg-voce{margin:0;flex:1;min-width:0;font:400 19px/1.15 var(--marker);color:var(--rosso);transform:rotate(-1.5deg);transform-origin:0 50%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.fg-voce.scossa{animation:fg-scossa .36s}
+@keyframes fg-scossa{20%{translate:-5px 0}40%{translate:5px 0}60%{translate:-3px 0}80%{translate:3px 0}}
+.fg-chiudi{flex:none;width:44px;height:44px;padding:6px;border:0;border-radius:50%;background:none;cursor:pointer;color:#161616;transform:rotate(-6deg);transition:transform .2s cubic-bezier(.22,1,.36,1)}
+.fg-chiudi svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:4.2;stroke-linecap:round}
+@media (hover:hover){.fg-chiudi:hover{transform:rotate(-6deg) scale(1.12)}}
+
+/* il saldo, come sui tavoli: «hai» a pennarello e la cifra in Anton */
+.fg-saldo{margin:0;line-height:1}
+.fg-saldo small{display:block;font:400 12px/1 var(--marker);color:var(--matita)}
+.fg-saldo b{display:block;font:400 26px/1.05 var(--fa)}
+.fg-saldo i{display:block;margin-top:3px;font-style:normal;font-size:11px;color:#5a544c}
+/* il tasto nero storto («gira» della roulette) e il collegamento a pennarello */
+.fg-tasto{padding:.12em .5em .16em;border:0;background:var(--nero);color:#fff;font:400 30px/1 var(--fa);text-transform:lowercase;cursor:pointer;transform:rotate(-2deg);transition:transform .18s cubic-bezier(.22,1,.36,1),opacity .15s;box-shadow:3px 3px 0 rgba(0,0,0,.18)}
+.fg .fg-tasto{color:#fff}
+.fg-tasto:disabled{opacity:.35;cursor:default}
+.fg-tasto:active:not(:disabled){transform:rotate(-2deg) translateY(2px)}
+@media (hover:hover){.fg-tasto:not(:disabled):hover{transform:rotate(-2deg) translateY(-2px)}}
+.fg-link{padding:0 0 1px;border:0;border-bottom:2px solid currentColor;background:none;font:400 14px/1.15 var(--marker);color:#1446a0;cursor:pointer}
+.fg .fg-link{color:#1446a0}
+.fg-link:disabled{opacity:.4;cursor:default}
+.fg-nota{margin:0;font:400 13px/1.25 var(--marker);color:var(--matita)}
+
+/* sul telefono (e nelle finestre basse): il foglio prende tutto lo schermo, senza nastro */
+@media (max-width:840px),(max-height:640px){
+  .fg{width:100vw;height:100dvh;margin:0}
+  .fg::before,.fg.rovescio::before{inset:0;left:0;right:0;top:0;bottom:0;transform:none;filter:none;background:#f2eee3 radial-gradient(120% 80% at 50% 0,rgba(255,255,255,.55),transparent 60%)}
+  .fg[open]{animation:fg-sale .28s cubic-bezier(.22,1,.36,1)}
+  @keyframes fg-sale{from{opacity:0;transform:translateY(24px)}}
+  .fg-dentro{padding:calc(6px + env(safe-area-inset-top)) 14px calc(10px + env(safe-area-inset-bottom)) 14px}
+  .fg-testa{min-height:46px;gap:10px}
+  .fg-testa h2{font-size:34px}
+  .fg-voce{font-size:15px}
+}
+@media (prefers-reduced-motion:reduce){.fg[open],.fg.chiude,.fg-voce.scossa{animation:none}.fg-tasto,.fg-chiudi{transition:none}}

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" width="900" height="1200">
+  <!-- il segnaposto della macchinetta delle sigarette (9.11.2026): una Zigarettenautomat grigia stilizzata, 3:4, con lo
+       schermo verde pieno (#00FF00) negli angoli dichiarati in deutschland/muro-dati.js (x 162–738, y 168–480 su 900×1200)
+       e la fila delle manopole a y 774 (0,645). Serve solo per provare la pagina e il muro: la foto vera la fa
+       tools/pzkko/deutschland/immagini.mjs -->
+  <defs>
+    <linearGradient id="smalto" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7d8287"/><stop offset=".12" stop-color="#9aa0a5"/><stop offset=".5" stop-color="#868b90"/><stop offset=".88" stop-color="#9aa0a5"/><stop offset="1" stop-color="#6f7479"/>
+    </linearGradient>
+    <linearGradient id="cromo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f4f6f7"/><stop offset=".5" stop-color="#b9bfc4"/><stop offset="1" stop-color="#5c6166"/>
+    </linearGradient>
+    <radialGradient id="pomello" cx=".35" cy=".3" r=".8">
+      <stop offset="0" stop-color="#ffffff"/><stop offset=".3" stop-color="#cfd3d6"/><stop offset=".75" stop-color="#6e7479"/><stop offset="1" stop-color="#33373a"/>
+    </radialGradient>
+  </defs>
+  <!-- la cassa smaltata, col bordo scuro e la cornice in rilievo -->
+  <rect x="60" y="40" width="780" height="1120" rx="22" fill="#2f3235"/>
+  <rect x="72" y="52" width="756" height="1096" rx="16" fill="url(#smalto)"/>
+  <rect x="96" y="76" width="708" height="1048" rx="10" fill="none" stroke="#5a5f64" stroke-width="4"/>
+  <!-- la fascia in cima -->
+  <rect x="96" y="76" width="708" height="68" rx="8" fill="#3a3d40"/>
+  <rect x="300" y="96" width="300" height="28" rx="4" fill="#dd0000"/>
+  <rect x="300" y="96" width="300" height="9" fill="#111"/>
+  <rect x="300" y="115" width="300" height="9" fill="#ffd400"/>
+  <!-- lo schermo: verde pieno, lo trova schermo.mjs -->
+  <rect x="150" y="156" width="600" height="336" rx="6" fill="#1b1d1f"/>
+  <rect x="162" y="168" width="576" height="312" fill="#00FF00"/>
+  <!-- le vetrinette dei pacchetti -->
+  <g fill="#1f2224" stroke="#4a4f54" stroke-width="3">
+    <rect x="130" y="530" width="150" height="150" rx="6"/><rect x="300" y="530" width="150" height="150" rx="6"/>
+    <rect x="450" y="530" width="150" height="150" rx="6"/><rect x="620" y="530" width="150" height="150" rx="6"/>
+  </g>
+  <g fill="#2c3033">
+    <rect x="150" y="548" width="110" height="112" rx="3"/><rect x="320" y="548" width="110" height="112" rx="3"/>
+    <rect x="470" y="548" width="110" height="112" rx="3"/><rect x="640" y="548" width="110" height="112" rx="3"/>
+  </g>
+  <!-- la fila delle manopole (ziehen), a y 774 -->
+  <rect x="120" y="730" width="660" height="88" rx="8" fill="#3a3d40"/>
+  <g>
+    <rect x="186" y="760" width="78" height="28" rx="6" fill="url(#cromo)"/><circle cx="225" cy="774" r="40" fill="url(#pomello)" stroke="#2a2d30" stroke-width="3"/>
+    <rect x="411" y="760" width="78" height="28" rx="6" fill="url(#cromo)"/><circle cx="450" cy="774" r="40" fill="url(#pomello)" stroke="#2a2d30" stroke-width="3"/>
+    <rect x="636" y="760" width="78" height="28" rx="6" fill="url(#cromo)"/><circle cx="675" cy="774" r="40" fill="url(#pomello)" stroke="#2a2d30" stroke-width="3"/>
+  </g>
+  <!-- la fessura delle monete e il pulsante del resto -->
+  <rect x="640" y="860" width="110" height="60" rx="6" fill="#3a3d40"/>
+  <rect x="686" y="872" width="18" height="38" rx="3" fill="#0e0d0c"/>
+  <circle cx="610" cy="890" r="14" fill="#dd0000" stroke="#4a1010" stroke-width="3"/>
+  <!-- la targhetta -->
+  <rect x="150" y="866" width="400" height="48" rx="4" fill="#e8e4da"/>
+  <rect x="166" y="882" width="250" height="8" rx="2" fill="#6a6458"/>
+  <rect x="166" y="896" width="180" height="6" rx="2" fill="#9a948a"/>
+  <!-- la vaschetta in fondo, dove cade il pacchetto -->
+  <rect x="150" y="980" width="600" height="120" rx="10" fill="#1b1d1f"/>
+  <rect x="166" y="996" width="568" height="88" rx="8" fill="#0e0d0c"/>
+  <rect x="166" y="1070" width="568" height="14" rx="4" fill="#3a3d40"/>
+  <!-- le viti agli angoli -->
+  <g fill="#c7ccd0" stroke="#4a4f54" stroke-width="2">
+    <circle cx="112" cy="92" r="9"/><circle cx="788" cy="92" r="9"/><circle cx="112" cy="1108" r="9"/><circle cx="788" cy="1108" r="9"/>
+  </g>
+</svg>

@@ -1,0 +1,45 @@
+{
+ "key": "parole",
+ "cover": {
+  "w": 1280,
+  "h": 720
+ },
+ "shots": [
+  {
+   "file": "01.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "Si sceglie quante lettere e la puntata",
+   "en": "Pick the word length and the stake"
+  },
+  {
+   "file": "02.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "Il secondo tentativo, scritto e non ancora mandato",
+   "en": "The second guess, typed and not sent yet"
+  },
+  {
+   "file": "03.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "Presa al terzo: la banca paga ×4",
+   "en": "Got it on the third try: the bank pays ×4"
+  },
+  {
+   "file": "04.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "La stessa partita nella chat",
+   "en": "The same game in the chat"
+  },
+  {
+   "file": "05.webp",
+   "w": 390,
+   "h": 844,
+   "it": "Sul telefono",
+   "en": "On a phone"
+  }
+ ],
+ "notes": "Catture vere del gioco nuovo (19.11.2026) in funzione, contro la banca vera."
+}

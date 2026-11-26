@@ -1,0 +1,28 @@
+POSTA-OS v1.0
+=============
+
+Il generatore di email dentro lo stesso terminale di MatriciOS (stessi file
+Term.cs e Sfx.cs: la cornice, i colori, i menu', i suoni).
+
+Da appunti disordinati a un'email HTML autosufficiente: scegli chi scrive, a
+chi, l'oggetto, e gli appunti li prendi da un file .md o .txt nella cartella
+bozze\ oppure li scrivi nel terminale. Ogni email finisce in
+email\AAAA-MM-GG_oggetto\ con:
+
+  anteprima.html   si apre nel browser: il tasto COPIA EMAIL FORMATTATA la
+                   copia, e si incolla in Yahoo, Proton o Gmail
+  email.html       il sorgente HTML completo (niente script, niente CSS esterni)
+  email-lite.html  la stessa senza caratteri particolari (consigliata per Gmail)
+  email.txt        la versione in testo semplice
+  rapporto.txt     cosa e' stato fatto e come inviarla
+
+Come si scrivono gli appunti: # titolo, - elenco, 1. passi, > nota,
+| a | b | tabella, **forte**, *corsivo*, [testo](https://indirizzo),
+[[testo del tasto]](https://indirizzo).
+
+Tre temi (fine settembre, carta, notte), i mittenti che vuoi (nome, ruolo,
+sito), e in fondo a ogni email l'informativa privacy. Un solo .exe, niente da
+installare: le opzioni stanno in PostaOS_dati.txt accanto al programma.
+
+build.bat lo ricompila col compilatore gia' presente in Windows e lancia le
+10 prove (PostaOS.exe --selftest).

@@ -1,0 +1,22 @@
+{
+  "name": "pzkko.it",
+  "private": true,
+  "type": "module",
+  "description": "pzkko.it: il profilo di Discord dal vivo, la chat col bot pzk e i progetti veri (il muro, il cercapersone, i tavoli) che girano dentro il sito.",
+  "scripts": {
+    "build": "node scripts/guard.mjs && tailwindcss -i src/site.css -o public/assets/site.css --minify",
+    "check": "node scripts/guard.mjs",
+    "csp": "node scripts/csp.mjs --write",
+    "dev": "tailwindcss -i src/site.css -o public/assets/site.css --watch",
+    "media": "node scripts/media.mjs",
+    "preview": "node scripts/preview.mjs",
+    "serve": "node scripts/dev.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.0",
+    "tailwindcss": "^4.1.0"
+  }
+}

@@ -1,0 +1,31 @@
+{
+ "key": "miniera",
+ "cover": {
+  "w": 1280,
+  "h": 720
+ },
+ "shots": [
+  {
+   "file": "01.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "La postazione ancora vuota: dice cosa manca",
+   "en": "The rig still empty: it says what is missing"
+  },
+  {
+   "file": "02.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "I pezzi, una categoria alla volta",
+   "en": "The parts, one category at a time"
+  },
+  {
+   "file": "03.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "I pc già pronti, con quanto producono",
+   "en": "The ready-made PCs, with what they make"
+  }
+ ],
+ "notes": "Catture vere dell’app singola (telefono/schermo.js) in funzione il 19.11.2026, da ospite, contro la banca vera."
+}

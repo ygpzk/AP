@@ -1,0 +1,37 @@
+/* SPETTRO: il monitor. Pannello scuro, barre logaritmiche, forma d'onda e croma dell'accordo.
+   Claude Code: .sp-* è il disegno, i ganci sono data-tela, data-mic, data-accordo, data-croma. */
+
+.sp-scena{background:#0d100c;border:1.5px solid #2a2e26;min-height:360px;overflow:hidden}
+.sp-scena canvas{width:100%;height:100%}
+.sp-comandi{padding:8px 12px}
+.sp-lettura{position:absolute;left:12px;top:8px;display:flex;align-items:baseline;gap:9px;pointer-events:none;flex-wrap:wrap;max-width:calc(100% - 130px)}
+.sp-lettura b{font:400 40px/1 "Anton",Impact,sans-serif;color:#ccff00;letter-spacing:.02em;text-shadow:0 0 12px rgba(204,255,0,.35)}
+.sp-lettura span{font:400 12px/1 "Special Elite","Courier New",monospace;color:#9fb35e}
+.sp-livello{position:absolute;right:12px;top:10px;width:96px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;pointer-events:none}
+.sp-livello b{font:400 11px/1 "Special Elite","Courier New",monospace;color:#ccff00}
+.sp-livello i{display:block;width:100%;height:5px;background:rgba(204,255,0,.16);position:relative}
+.sp-livello i::after{content:"";position:absolute;inset:0;right:auto;width:calc(var(--v,0) * 100%);background:#ccff00;box-shadow:0 0 8px rgba(204,255,0,.5)}
+.sp-vuoto{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font:400 16px/1.4 "Permanent Marker","Comic Sans MS",cursive;color:rgba(204,255,0,.55);pointer-events:none}
+.sp-vuoto[hidden]{display:none}
+.sp-accordo{margin:0 0 8px;font:400 30px/1 "Anton",Impact,sans-serif;color:var(--lab-inchiostro);letter-spacing:.01em;min-height:30px}
+.sp-croma{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:3px;align-items:end;height:78px}
+.sp-croma span{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px;font:400 9px/1 "Special Elite","Courier New",monospace;color:var(--lab-matita)}
+.sp-croma span i{display:block;width:100%;height:calc(6px + var(--v,0) * 50px);background:rgba(22,22,22,.16);border-top:2px solid transparent;transition:height .06s linear}
+.sp-croma span.is-on i{background:var(--lab-accento);border-top-color:#5a0a12}
+.sp-croma span.is-on em{color:var(--lab-inchiostro);font-style:normal;font-weight:700}
+.sp-croma em{font-style:normal}
+.sp-numeri{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.sp-numeri div{min-width:0}
+.sp-numeri b{display:block;font:400 19px/1 "Anton",Impact,sans-serif;color:var(--lab-inchiostro);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-numeri span{display:block;margin-top:3px;font:400 10px/1 "Special Elite","Courier New",monospace;color:var(--lab-matita);text-transform:lowercase}
+.lab-colonna--lato .lab-pannello{padding:8px 10px}
+
+@media (max-width:900px){
+  .sp-scena{min-height:300px}
+  .lab-colonna--lato{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+}
+@media (max-width:560px){
+  .lab-colonna--lato{grid-template-columns:minmax(0,1fr)}
+  .sp-lettura b{font-size:32px}
+  .sp-croma{height:64px}
+}

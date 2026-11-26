@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>Diretta OS · prova di una scena</title>
+<link rel="stylesheet" href="/pezzi.css">
+<style>
+  /* il fondo è magenta apposta: una scena a schermo intero non deve lasciarne vedere nemmeno un pixel */
+  html, body { background: #ff00ff; }
+  #tela { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; }
+  #tela > * { position: absolute; left: 0; top: 0; }
+</style>
+</head>
+<body>
+<div id="tela"></div>
+<script type="module">
+// La prova di una scena da sola, senza regia e senza toccare la diretta:
+//   /scene/prova.html?scena=dovevivo        (oppure azienda, surf)
+//   t=12        la scena parte come se fosse accesa da 12 secondi          fermo     il tempo della scena resta fermo a t
+//   ora=22:30   l'ora finta (ctx.ora())       data=2026-07-15             meteo=sole|luna|nuvolo|nuvole|nebbia|pioggia|neve|temporale
+//   gradi=4     vento=30                      spenta    parte spenta (per provare mostra(false) → mostra(true) da console: __prova.accendi())
+// È lo stesso contratto che usa /scene.js in onda: crea(ctx) → { el, mostra(su), giro(dt, t), aggiorna(stato), comando(v) }.
+import { ogniGiro } from '/giro.js'
+const Q = new URLSearchParams(location.search)
+const MODULI = { dovevivo: '/scene/dove/dove.js', azienda: '/scene/sito/sito.js', surf: '/scene/surf/surf.js' }
+const nome = Q.get('scena') ?? 'dovevivo'
+const t0 = +(Q.get('t') ?? 0), fermo = Q.has('fermo')
+let accesaDa = performance.now() - t0 * 1000
+const ora = () => {
+  const d = Q.get('data') ? new Date(`${Q.get('data')}T12:00:00`) : new Date()
+  if (Q.get('ora')) { const [h, m] = Q.get('ora').split(':').map(Number); d.setHours(h, m, 0, 0) }
+  return d
+}
+const ICONE = { sole: 'sereno', luna: 'sereno', nuvolo: 'poco nuvoloso', nuvole: 'coperto', nebbia: 'nebbia', pioggia: 'pioggia', neve: 'neve', temporale: 'temporale' }
+const icona = Q.get('meteo') ?? 'sole'
+const stato = { meteo: { icona, gradi: +(Q.get('gradi') ?? 9), testo: ICONE[icona] ?? 'sereno', min: 3, max: 11, vento: +(Q.get('vento') ?? 6) }, meteoProva: null }
+// i comandi tra le pagine (in onda passano dal server): qui un canale del browser, così due schede si seguono
+const canale = new BroadcastChannel(`diretta-scena-${nome}`)
+const ctx = {
+  nome,
+  prova: true,
+  tempo: () => (fermo ? t0 : (performance.now() - accesaDa) / 1000),
+  ora,
+  stato: () => stato,
+  manda: (v) => canale.postMessage(v),
+}
+const m = await import(MODULI[nome])
+const scena = m.crea(ctx)
+document.getElementById('tela').append(scena.el)
+canale.onmessage = (e) => scena.comando?.(e.data)
+scena.aggiorna?.(stato)
+let su = false
+const accendi = () => { if (su) return; su = true; if (!fermo) accesaDa = performance.now() - t0 * 1000; scena.mostra?.(true) }
+const spegni = () => { if (!su) return; su = false; scena.mostra?.(false) }
+if (!Q.has('spenta')) accendi()
+ogniGiro((dt, t) => { if (su) scena.giro?.(dt, t) })
+window.__prova = { scena, ctx, stato, accendi, spegni }
+</script>
+</body>
+</html>

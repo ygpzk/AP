@@ -1,138 +1,111 @@
-// La macchina del tempo, copiata dalla Wayback Machine di Internet Archive. Tre pagine,
-// tutte statiche e leggere (dal 3.11.2026 sera: «fai che gli altri vedano l'html leggero
-// con solo le foto e non che debba scaricare il repo intero ogni volta, un html semplice
-// leggibile con percorso completo e univoco»):
+// La macchina del tempo: i siti che ho fatto, com'erano a ogni giorno di lavoro. Tre pagine,
+// tutte statiche e leggere (dal 3.11.2026 sera: «un html semplice leggibile con percorso
+// completo e univoco»):
 //
-//   /tempo/                               l'archivio: i cinque siti, con l'ultima cattura
+//   /tempo/                               l'archivio: i siti, con l'ultima cattura
 //   /tempo/<dominio>/                     un sito: tutte le catture, mese per mese
-//   /tempo/<dominio>/<AAAA-MM-GG>/        una cattura: la barra e la foto
+//   /tempo/<dominio>/<AAAA-MM-GG>/        una cattura: la pagina di quel giorno e i suoi numeri
 //
-// La barra: il marchio, il selettore del sito al posto del campo dell'indirizzo, «salvata N
-// volte tra … e …», l'istogramma con una barra per giorno alta quanti commit (ogni barra è un
-// link alla sua cattura), le frecce con le date intorno alla cattura corrente; sotto, il
-// commit con le statistiche del giorno e i «momenti», già scritti nell'HTML. Le foto vengono
-// da Vercel (public/media/tempo/<id>/); la pagina vera di quel giorno, dal server di casa
-// (site.archivio), è solo un link: scarica il sito intero di allora, ed è per chi la vuole.
+// Dal 26.11.2026 (Alberto: «lo stile della macchina del tempo lo voglio identico a quello del
+// resto del sito») hanno la testata, i titoli, le schede e il piè di pagina di tutte le altre
+// pagine: la barra grigia in Arial copiata dalla Wayback Machine non c'è più. E le copie dei siti
+// di allora sono oscurate (tools/tempo/oscura-pagine.mjs): niente numeri, indirizzi, luoghi,
+// social, né link al server di casa.
 // Le versioni le ricostruisce tools/tempo/tempo.mjs (manifesti in src/data/tempo/).
 
 import { html, esc } from '../html.js'
-import { site } from '../../data/site.js'
 import { siti, aggiornato } from '../../data/tempo.js'
-import { istogramma, conteggio, chips, corta, lunga, foto, dominio, momentiSito, momentiGiorno, sitoPath, catturaPath, vivaUrl, conFoto, num } from './tempo-pezzi.js'
+import { breadcrumb, splitWords, sectionHead, textLink, icon } from '../components/ui.js'
+import { cover } from '../components/project.js'
+import { head } from './info.js'
+import { grafico, conteggio, chips, corta, lunga, settimanale, foto, dominio, sitoPath, catturaPath, conFoto, num, per, sicuro, piano, righello, fattiGiorno, listaCommit, griglia, fattiSito } from './tempo-pezzi.js'
 
 const ultima = (s) => [...s.versioni].reverse().find(conFoto) || s.versioni.at(-1)
 const mese = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })
-const repo = (s) => s.github.replace('https://github.com/', '')
 const commitTotali = (s) => (s.momenti?.commit || 0) + (s.momenti?.auto || 0)
+const NOMI = { ap: 'Alberto Pecchini', cascina: 'Cascina Fontana' }
+const nome = (s) => NOMI[s.id] || s.nome
 
-// il selettore: ogni sito porta alla sua cattura più recente
+// la copertina di un sito come nel portfolio: il portatile con la foto dell'ultima cattura
+const copertina = (s, v, lazy = true) =>
+  cover({ area: 'web', web: { domain: dominio(s.url), desktop: { src: foto(s.id, v.short), width: 640, height: 400, alt: `${dominio(s.url)} il ${lunga(v.data)}` } } }, { ratio: '16/10', lazy })
+
+// il selettore dei siti: ogni sito porta alla sua cattura più recente
 const selettore = (attuale) => html`
-  <div class="wb__url">
-    <label class="sr-only" for="wb-sito">Sito</label>
-    <span class="wb__select">
-      <select class="wb__input" id="wb-sito" data-tm-sito>
-        ${!attuale && '<option value="" selected disabled>Scegli un sito…</option>'}
-        ${siti.map((s) => `<option value="${catturaPath(s, ultima(s))}"${attuale?.id === s.id ? ' selected' : ''}>${esc(s.url.replace('https://', ''))}/ · ${s.versioni.length} catture</option>`)}
-      </select>
-    </span>
-    <a class="wb__go" href="${esc((attuale || siti[0]).url)}/" target="_blank" rel="noopener" title="Il sito com'è oggi">Oggi</a>
-  </div>
+  <label class="tm-select pill">
+    <span class="sr-only">Sito</span>
+    <select data-tm-sito>
+      ${!attuale && '<option value="" selected disabled>scegli un sito…</option>'}
+      ${siti.map((s) => `<option value="${catturaPath(s, ultima(s))}"${attuale?.id === s.id ? ' selected' : ''}>${esc(dominio(s.url))} · ${s.versioni.length} catture</option>`)}
+    </select>
+  </label>
 `
 
-const marchio = html`
-  <a class="wb__logo" href="/tempo/" aria-label="La macchina del tempo: tutti i siti">
-    <span class="wb__logo-top">ARCHIVIO DI ALBERTO</span>
-    <span class="wb__logo-big">Macchina del tempo</span>
-  </a>
-`
-
-// il credito di ogni pagina (CLAUDE.md): qui non c'è il piè di pagina del sito, la barra è il guscio
-const credito = `<a class="wb__credit" href="${esc(site.url)}" rel="author">Sito di ${esc(site.name)}</a>`
-
-const privacy = () => `<p class="wb__privacy">Ore e giorni in ora italiana, presi dai commit già pubblici su GitHub. Dei commit non si mostrano nomi né indirizzi email: degli autori si conta solo se c’era un assistente, e i commit automatici (le catture dei siti) non contano fra i momenti. Nelle pagine di allora non compaiono l’indirizzo di casa, i miei numeri e i profili social personali; restano i contatti pubblici degli enti e delle aziende, com’erano allora. Aggiornato il ${esc(lunga(aggiornato))}.</p>`
-
-function grafico(s, k) {
-  const isto = istogramma(s, k)
-  return html`
-    <div class="wb__graph">
-      <p class="wb__count">${conteggio(s)}</p>
-      <div class="wb__spark" data-tm-spark style="--n:${isto.n}" role="group" aria-label="Catture per giorno: una barra per giorno, alta quanti commit">${isto.barre}</div>
-      <div class="wb__months" aria-hidden="true" style="--n:${isto.n}">${isto.mesi}</div>
-      <div class="wb__tip" data-tm-tip hidden aria-hidden="true">
-        <img class="wb__tip-img" data-tm-tip-img alt="" width="160" height="100" decoding="async" data-no-srcset>
-        <span class="wb__tip-date" data-tm-tip-date></span>
-        <span class="wb__tip-n" data-tm-tip-n></span>
+// cosa non si vede, e perché: in fondo a ogni pagina, vero per tutte le copie
+const riservatezza = () => html`
+  <section class="section tm-privacy" data-theme="tint" aria-labelledby="tm-privacy-title">
+    <div class="container tm-privacy__grid">
+      <div>
+        <p class="label"><span class="sec-head__index">▮</span>Riservatezza</p>
+        <h2 class="h2" id="tm-privacy-title" data-reveal="words">${splitWords('Cosa qui non vedi.', { accent: ['vedi.'] })}</h2>
+      </div>
+      <div class="tm-privacy__text" data-reveal="up">
+        <p class="lead">Le pagine di allora sono copie fedeli, tranne dove c’era un dato personale: lì resta una barra.</p>
+        <ul class="tm-privacy__list">
+          <li>Numeri di telefono, email private, indirizzi, coordinate, il paese e la provincia sono coperti; le immagini che li mostravano sono un riquadro tratteggiato.</li>
+          <li>I collegamenti a telefono, WhatsApp, social, mappe e ai siti che non pubblico più restano testo, senza portare da nessuna parte.</li>
+          <li>Ore e giorni sono in ora italiana, presi dai commit. Degli autori si conta solo se c’era un assistente; nei messaggi i nomi delle persone sono coperti come il resto.</li>
+        </ul>
+        <p class="label tm-privacy__meta">Aggiornato il ${esc(lunga(aggiornato))} · ${textLink({ href: '/sicurezza/', label: 'Come proteggo i dati' })}</p>
       </div>
     </div>
-  `
-}
+  </section>
+`
 
-// ── /tempo/<dominio>/<AAAA-MM-GG>/ : una cattura ─────────────────────────────
+// ── /tempo/ : l'archivio ───────────────────────────────────────────────────
 
-export function tempoCatturaPage(s, k) {
-  const v = s.versioni[k]
-  const prev = s.versioni[k - 1]
-  const next = s.versioni[k + 1]
-  const nome = dominio(s.url)
+export function tempoPage() {
+  // i vecchi indirizzi (#v=<sha>, #s=<sito>&v=<sha>, fino al 3.11.2026 sera) portano alla
+  // pagina della loro cattura: sha corto → percorso
+  const vecchi = Object.fromEntries(siti.map((s) => [s.id, Object.fromEntries(s.versioni.map((v) => [v.short, catturaPath(s, v)]))]))
+  const catture = siti.reduce((n, s) => n + s.versioni.length, 0)
   return html`
-    <div class="wb" data-tempo data-no-ink>
-      <div class="wb__bar" role="region" aria-label="La macchina del tempo">
-        <div class="wb__row">
-          ${marchio}
-          ${selettore(s)}
-          ${grafico(s, k)}
-          <nav class="wb__nav" aria-label="Catture vicine">
-            <a class="wb__arrow wb__arrow--prev" href="${prev ? catturaPath(s, prev) : sitoPath(s)}" data-tm-prev aria-label="Cattura precedente"${prev ? '' : ' aria-disabled="true"'}>
-              <span class="wb__tri" aria-hidden="true">◀</span>
-              <span class="wb__arrow-date">${prev ? corta(prev.data) : '—'}</span>
-            </a>
-            <div class="wb__current">
-              <h1 class="wb__day">${corta(v.data)}</h1>
-              <span class="wb__time">${v.ora}:00</span>
-              <a class="wb__n" href="${sitoPath(s)}">cattura ${v.n} di ${s.versioni.length}</a>
-            </div>
-            <a class="wb__arrow wb__arrow--next" href="${next ? catturaPath(s, next) : sitoPath(s)}" data-tm-next aria-label="Cattura successiva"${next ? '' : ' aria-disabled="true"'}>
-              <span class="wb__arrow-date">${next ? corta(next.data) : '—'}</span>
-              <span class="wb__tri" aria-hidden="true">▶</span>
-            </a>
-          </nav>
-          <div class="wb__about">
-            <span class="wb__about-label">Questa cattura</span>
-            <a class="wb__commit" href="${esc(s.github)}/commit/${v.sha}" target="_blank" rel="noopener" title="${esc(v.msg)}"><code>${v.short}</code> <span>${esc(v.msg)}</span></a>
-            <span class="wb__chips">${chips(v)}</span>
-            <button class="wb__more" type="button" aria-expanded="false" aria-controls="wb-momenti" data-tm-more>Momenti <span aria-hidden="true">▾</span></button>
-            ${credito}
-          </div>
-        </div>
-        <div class="wb__drawer" id="wb-momenti" data-tm-drawer hidden>
-          <div class="wb__drawer-in">
-            <section class="wb__day-box">${momentiGiorno(v, s.giorni?.[v.data] || null, s)}</section>
-            <section class="wb__site-box">${momentiSito(s)}</section>
-          </div>
-          ${privacy()}
-        </div>
-      </div>
+    <div class="tm" data-tempo>
+      ${head({
+        crumbs: [{ label: 'Home', href: '/' }, { label: 'La macchina del tempo', href: '/tempo/' }],
+        index: '↺',
+        label: 'La macchina del tempo',
+        title: 'I miei siti, giorno per giorno.',
+        accent: ['giorno.'],
+        lead: 'Ogni giorno di lavoro è una versione, ricostruita dal codice di allora e fotografata, come nella Wayback Machine: la pagina di quel giorno, l’istogramma dei commit, le statistiche.',
+        meta: `${siti.length} siti · ${num(catture)} catture · ${num(siti.reduce((n, s) => n + commitTotali(s), 0))} commit`,
+      })}
 
-      <!-- l'istantanea non ha script, ma il sandbox deve lasciarli accesi: con gli script spenti il
-           browser ignora loading="lazy" e scaricava tutte le immagini subito (5,9 MB invece di 0,8) -->
-      <div class="wb__page${v.pagina ? ' wb__page--html' : ''}">
-        ${
-          v.pagina
-            ? html`<p class="wb__live">${esc(nome)} il ${esc(lunga(v.data))}${v.titolo ? ` · «${esc(v.titolo)}»` : ''} · l’HTML di quel giorno, ${num(v.pagina.kb)} KB, senza script · <a href="${catturaPath(s, v)}pagina/" target="_blank" rel="noopener">da sola ↗</a> · <a href="${esc(vivaUrl(site.archivio, s, v))}" target="_blank" rel="noopener" title="Dal server di casa di Alberto: il sito intero di quel giorno, può essere lento">il sito intero di allora ↗</a></p>
-                <iframe class="wb__frame" src="${catturaPath(s, v)}pagina/" title="${esc(nome)} il ${esc(lunga(v.data))}" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>`
-            : `<p class="wb__live">foto di ${esc(nome)} il ${esc(lunga(v.data))}${v.titolo ? ` · «${esc(v.titolo)}»` : ''} · <a href="${esc(vivaUrl(site.archivio, s, v))}" target="_blank" rel="noopener" title="Dal server di casa di Alberto: il sito intero di quel giorno, può essere lento">la pagina vera ↗</a></p>`
-        }
-        ${
-          v.pagina
-            ? ''
-            : conFoto(v)
-            ? html`<picture class="wb__pic">
-                <source media="(max-width: 600px)" srcset="${foto(s.id, v.short, 'm')}" width="${v.m.w}" height="${v.m.h}">
-                <img class="wb__shot" src="${foto(s.id, v.short, 'd')}" width="${v.d.w}" height="${v.d.h}" alt="${esc(nome)} il ${esc(lunga(v.data))}" fetchpriority="high" decoding="async" data-no-srcset>
-              </picture>`
-            : `<p class="wb__err">${v.errore ? `Questa cattura non si ricostruisce più: ${esc(v.errore)}.` : 'Questa cattura è ancora in ricostruzione: torna fra poco.'}</p>`
-        }
-      </div>
+      <section class="section tm-index" aria-label="I siti">
+        <div class="container">
+          <div class="pf__grid tm-index__grid" data-view="grid">
+            ${siti.map((s, i) => {
+              const u = ultima(s)
+              return html`
+                <article class="card" data-span="6" data-reveal="up" style="--d:${i * 70}ms">
+                  <a class="card__link" href="${catturaPath(s, u)}" data-cursor="Apri">
+                    <div class="card__media">${copertina(s, u, i > 1)}</div>
+                    <div class="card__body">
+                      <p class="card__meta label"><span class="card__code">${esc(dominio(s.url))}</span><span>${per(s.versioni.length, 'cattura', 'catture')}</span><span>${u.data.slice(0, 4)}</span></p>
+                      <h2 class="card__title"><span class="card__title-text">${esc(nome(s))}</span><span class="card__arrow" aria-hidden="true">${icon('arrowUpRight')}</span></h2>
+                      <p class="card__sub">Dal ${esc(lunga(s.versioni[0].data))} al ${esc(lunga(s.versioni.at(-1).data))}, ${per(commitTotali(s), 'commit', 'commit')}. L’ultima cattura è del ${esc(lunga(u.data))}.</p>
+                    </div>
+                  </a>
+                  <p class="card__foot label tm-index__links"><a class="uline" href="${sitoPath(s)}">tutte le catture</a><a class="uline" href="${catturaPath(s, s.versioni[0])}">la prima</a><a class="uline" href="${catturaPath(s, u)}">l’ultima</a></p>
+                </article>
+              `
+            })}
+          </div>
+        </div>
+      </section>
+
+      ${riservatezza()}
+      <script type="application/json" data-tm-vecchi>${JSON.stringify(vecchi).replace(/</g, '\\u003c')}</script>
     </div>
   `
 }
@@ -146,91 +119,144 @@ export function tempoSitoPage(s) {
     if (!mesi.length || mesi.at(-1).m !== m) mesi.push({ m, nome: mese(v.data), versioni: [] })
     mesi.at(-1).versioni.push(v)
   }
+  const d = dominio(s.url)
   return html`
-    <div class="wb" data-tempo data-no-ink>
-      <div class="wb__bar" role="region" aria-label="La macchina del tempo">
-        <div class="wb__row wb__row--sito">
-          ${marchio}
-          ${selettore(s)}
-          ${grafico(s, -1)}
-          <div class="wb__about">
-            <span class="wb__about-label">${esc(dominio(s.url))}</span>
-            <span>repository <a class="wb__commit" href="${esc(s.github)}" target="_blank" rel="noopener">${esc(repo(s))}</a></span>
-            ${credito}
+    <div class="tm" data-tempo>
+      ${head({
+        crumbs: [{ label: 'Home', href: '/' }, { label: 'La macchina del tempo', href: '/tempo/' }, { label: d, href: sitoPath(s) }],
+        index: '↺',
+        label: d,
+        title: `${nome(s)}, una versione al giorno.`,
+        accent: ['giorno.'],
+        lead: `${s.versioni.length} catture, una per giorno di lavoro, dal ${lunga(s.versioni[0].data)} al ${lunga(s.versioni.at(-1).data)}. Ogni barra dell’istogramma è un giorno: più è alta, più commit.`,
+        meta: `${num(commitTotali(s))} commit`,
+      })}
+
+      <section class="section tm-sito" aria-label="Le catture">
+        <div class="container">
+          <div class="tm-bar" data-reveal="up">
+            <p class="label tm-bar__count">${conteggio(s)}</p>
+            ${selettore(s)}
           </div>
+          <div data-reveal="up">${grafico(s, -1)}</div>
+          ${mesi.map(
+            (m) => html`
+              <section class="tm-mese" aria-label="${esc(m.nome)}">
+                <h2 class="tm-mese__title label"><span class="sec-head__index">${m.m.slice(5)}</span><span>${esc(m.nome)}</span><span class="tm-mese__n">${per(m.versioni.length, 'cattura', 'catture')}</span></h2>
+                <ol class="tm-shots">
+                  ${m.versioni.map(
+                    (v) => html`
+                      <li>
+                        <a class="tm-shot" href="${catturaPath(s, v)}">
+                          <span class="tm-shot__img">${conFoto(v) ? `<img src="${foto(s.id, v.short)}" width="640" height="400" alt="" loading="lazy" decoding="async" data-no-srcset>` : '<span class="tm-shot__none label">senza foto</span>'}</span>
+                          <span class="tm-shot__date">${esc(corta(v.data))}<span class="label">${v.ora}</span></span>
+                          <span class="tm-shot__n label">${per(v.commit, 'commit', 'commit')}${v.st?.piu || v.st?.meno ? ` · <b class="tm-plus">+${num(v.st.piu)}</b> <b class="tm-minus">−${num(v.st.meno)}</b>` : ''}</span>
+                          <span class="tm-shot__msg">${sicuro(v.msg)}</span>
+                        </a>
+                      </li>
+                    `,
+                  )}
+                </ol>
+              </section>
+            `,
+          )}
         </div>
-      </div>
-      <main class="wb__list">
-        <h1 class="wb__h1">${esc(dominio(s.url))} nella macchina del tempo</h1>
-        <p class="wb__muted">${s.versioni.length} catture, una per giorno di lavoro, dal ${esc(lunga(s.versioni[0].data))} al ${esc(lunga(s.versioni.at(-1).data))}. Ogni cattura ha il suo indirizzo: <code>/tempo/${esc(dominio(s.url))}/AAAA-MM-GG/</code>.</p>
-        ${mesi.map(
-          (m) => html`
-            <section class="wb__mese">
-              <h2 class="wb__h">${esc(m.nome)}</h2>
-              <ol class="wb__giorni">
-                ${m.versioni.map(
-                  (v) => html`
-                    <li>
-                      <a class="wb__giorno" href="${catturaPath(s, v)}">
-                        ${conFoto(v) ? `<img src="${foto(s.id, v.short, v.foto2 ? 't' : 'd')}" width="320" height="200" alt="" loading="lazy" decoding="async" data-no-srcset>` : '<span class="wb__giorno-vuoto">senza foto</span>'}
-                        <span class="wb__giorno-data">${esc(corta(v.data))} · ${v.ora}</span>
-                        <span class="wb__giorno-n">${num(v.commit)} commit${v.st?.piu || v.st?.meno ? ` · <b class="wb__plus">+${num(v.st.piu)}</b> <b class="wb__minus">−${num(v.st.meno)}</b>` : ''}</span>
-                        <span class="wb__giorno-msg">${esc(v.msg)}</span>
-                      </a>
-                    </li>
-                  `,
-                )}
-              </ol>
-            </section>
-          `,
-        )}
-        <details class="wb__mom">
-          <summary>Quando lavoravo su ${esc(dominio(s.url))}</summary>
-          ${momentiSito(s)}
-        </details>
-        ${privacy()}
-      </main>
+      </section>
+
+      ${momenti(s)}
+      ${riservatezza()}
     </div>
   `
 }
 
-// ── /tempo/ : l'archivio ───────────────────────────────────────────────────
-
-export function tempoPage() {
-  // i vecchi indirizzi (#v=<sha> per albertopecchini.it, #s=<sito>&v=<sha>, fino al 3.11.2026
-  // sera) portano alla pagina della loro cattura: sha corto → percorso
-  const vecchi = Object.fromEntries(siti.map((s) => [s.id, Object.fromEntries(s.versioni.map((v) => [v.short, catturaPath(s, v)]))]))
+// quando lavoravo: la griglia settimana × ora e i fatti, in una sezione scura
+function momenti(s) {
+  if (!s.momenti?.commit) return ''
   return html`
-    <div class="wb" data-tempo data-no-ink>
-      <div class="wb__bar" role="region" aria-label="La macchina del tempo">
-        <div class="wb__row wb__row--indice">
-          ${marchio}
-          ${selettore(null)}
-          <p class="wb__count">${siti.length} siti, ${num(siti.reduce((n, s) => n + s.versioni.length, 0))} catture, ${num(siti.reduce((n, s) => n + commitTotali(s), 0))} commit</p>
-          <div class="wb__about">${credito}</div>
+    <section class="section tm-work" data-theme="ink">
+      <div class="container tm-work__grid">
+        <div class="tm-work__side">
+          ${sectionHead({ index: '02', label: 'Quando lavoravo', title: `Tutto ${dominio(s.url)}, ora per ora.`, lead: 'Un cerchio per ogni ora della settimana, grande quanti commit ho fatto in quell’ora. In ora italiana.' })}
+        </div>
+        <div class="tm-work__body" data-reveal="up">
+          ${griglia(s.momenti)}
+          <ul class="tm-facts">${fattiSito(s).map((f) => `<li>${f}</li>`)}</ul>
         </div>
       </div>
-      <main class="wb__list">
-        <h1 class="wb__h1">La macchina del tempo</h1>
-        <p class="wb__muted">I siti che ho fatto, com’erano a ogni giorno di lavoro: ricostruiti dal codice di allora e fotografati, come nella Wayback Machine. Ogni cattura ha il suo indirizzo, <code>/tempo/&lt;sito&gt;/AAAA-MM-GG/</code>, con l’istogramma dei commit, le statistiche del giorno e la foto.</p>
-        <ul class="wb__siti">
-          ${siti.map((s) => {
-            const u = ultima(s)
-            return html`
-              <li class="wb__sito">
-                <a class="wb__sito-foto" href="${catturaPath(s, u)}" aria-label="${esc(dominio(s.url))}, l’ultima cattura (${esc(lunga(u.data))})">
-                  ${conFoto(u) ? `<img src="${foto(s.id, u.short, u.foto2 ? 't' : 'd')}" width="320" height="200" alt="" decoding="async" data-no-srcset>` : ''}
-                </a>
-                <h2 class="wb__h"><a href="${catturaPath(s, u)}">${esc(dominio(s.url))}</a></h2>
-                <p class="wb__muted">${s.versioni.length} catture dal ${esc(lunga(s.versioni[0].data))} al ${esc(lunga(s.versioni.at(-1).data))} · ${num(commitTotali(s))} commit su ${esc(repo(s))}</p>
-                <p class="wb__sito-link"><a href="${sitoPath(s)}">tutte le catture</a> · <a href="${catturaPath(s, s.versioni[0])}">la prima</a> · <a href="${catturaPath(s, u)}">l’ultima</a></p>
-              </li>
-            `
-          })}
-        </ul>
-        ${privacy()}
-      </main>
-      <script type="application/json" data-tm-vecchi>${JSON.stringify(vecchi).replace(/</g, '\\u003c')}</script>
+    </section>
+  `
+}
+
+// ── /tempo/<dominio>/<AAAA-MM-GG>/ : una cattura ─────────────────────────────
+
+export function tempoCatturaPage(s, k) {
+  const v = s.versioni[k]
+  const prev = s.versioni[k - 1]
+  const next = s.versioni[k + 1]
+  const d = dominio(s.url)
+  const commit = s.giorni?.[v.data] || null
+  const freccia = (w, verso) =>
+    w
+      ? `<a class="pill tm-nav__step" href="${catturaPath(s, w)}" data-tm-${verso} rel="${verso}" aria-label="Cattura ${verso === 'prev' ? 'precedente' : 'successiva'}, ${esc(lunga(w.data))}">${verso === 'prev' ? icon('arrowLeft') : ''}<span>${esc(corta(w.data))}</span>${verso === 'next' ? icon('arrow') : ''}</a>`
+      : `<span class="pill tm-nav__step is-off">${verso === 'prev' ? 'la prima' : 'l’ultima'}</span>`
+  return html`
+    <div class="tm" data-tempo>
+      <header class="phead tm-head">
+        <div class="container">
+          ${breadcrumb([{ label: 'Home', href: '/' }, { label: 'La macchina del tempo', href: '/tempo/' }, { label: d, href: sitoPath(s) }, { label: corta(v.data), href: catturaPath(s, v) }])}
+          <div class="phead__top label"><span><span class="sec-head__index">${String(v.n).padStart(2, '0')}</span>cattura ${v.n} di ${s.versioni.length}</span><span>${esc(settimanale(v.data))} · ${v.ora}</span></div>
+          <div class="tm-head__row">
+            <h1 class="tm-head__title">${splitWords(lunga(v.data), { accent: [v.data.slice(0, 4)] })}</h1>
+            <nav class="tm-nav" aria-label="Catture vicine">
+              ${freccia(prev, 'prev')}
+              ${selettore(s)}
+              ${freccia(next, 'next')}
+            </nav>
+          </div>
+          <div class="tm-head__about">
+            <p class="tm-head__msg"><code>${v.short}</code> ${sicuro(v.msg)}</p>
+            <ul class="tm-chips">${chips(v)}</ul>
+          </div>
+          ${grafico(s, k)}
+        </div>
+      </header>
+
+      <section class="tm-view" aria-label="${esc(d)} il ${esc(lunga(v.data))}">
+        <div class="container--wide">
+          <div class="tm-browser">
+            <div class="tm-browser__bar">
+              <span class="tm-browser__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="tm-browser__url label">${esc(d)}<span> · ${esc(corta(v.data))}</span></span>
+              ${v.pagina ? `<a class="tm-browser__open label" href="${catturaPath(s, v)}pagina/" target="_blank" rel="noopener">da sola${icon('arrowUpRight')}<span class="sr-only"> (si apre in una nuova scheda)</span></a>` : '<span></span>'}
+            </div>
+            ${
+              v.pagina
+                ? // la copia non ha script, ma il sandbox deve lasciarli accesi: con gli script spenti il
+                  // browser ignora loading="lazy" e scaricava tutte le immagini subito (5,9 MB invece di 0,8)
+                  `<iframe class="tm-browser__frame" src="${catturaPath(s, v)}pagina/" title="${esc(d)} il ${esc(lunga(v.data))}" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe>`
+                : `<p class="tm-browser__err">${v.errore ? `Questa cattura non si ricostruisce più: ${sicuro(v.errore)}.` : 'Questa cattura è ancora in ricostruzione: torna fra poco.'}</p>`
+            }
+          </div>
+          <p class="label tm-view__note">${v.pagina ? `l’html di quel giorno${v.titolo ? `, «${sicuro(v.titolo)}»` : ''}: ${num(v.pagina.kb)} KB, senza script, con i dati personali coperti` : 'nessuna copia di quel giorno'}</p>
+        </div>
+      </section>
+
+      <section class="section tm-day" aria-labelledby="tm-day-title">
+        <div class="container tm-day__grid">
+          <div class="tm-day__side">
+            <p class="label"><span class="sec-head__index">01</span>Quel giorno</p>
+            <h2 class="h2" id="tm-day-title" data-reveal="words">${splitWords(`${settimanale(v.data)} ${lunga(v.data)}`)}</h2>
+            <div class="tm-day__ruler" data-reveal="up">${righello(v, commit)}</div>
+            <ul class="tm-facts" data-reveal="up">${fattiGiorno(v).map((f) => `<li>${f}</li>`)}</ul>
+          </div>
+          <div class="tm-day__list" data-reveal="up">
+            ${listaCommit(commit)}
+          </div>
+        </div>
+      </section>
+
+      ${momenti(s)}
+      ${riservatezza()}
     </div>
   `
 }
@@ -248,7 +274,7 @@ export function tempoRotte() {
     ...s.versioni.map((v, k) => ({
       path: catturaPath(s, v),
       title: `${dominio(s.url)} il ${lunga(v.data)} — La macchina del tempo`,
-      description: `Com’era ${dominio(s.url)} il ${lunga(v.data)}: ${v.msg}`.slice(0, 300),
+      description: piano(`Com’era ${dominio(s.url)} il ${lunga(v.data)}: ${v.msg}`).slice(0, 300),
       render: () => tempoCatturaPage(s, k),
     })),
   ])

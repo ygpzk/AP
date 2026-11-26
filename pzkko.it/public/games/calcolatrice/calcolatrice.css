@@ -1,0 +1,163 @@
+/* LA CALCOLATRICE IN STILE DISCORD (20.11): il riquadro di calcolatrice.js. È vestita come il profilo di Discord col tema
+   Nitro: il velo (nero al 60 %, bianco all'80 % col tema chiaro) sopra la sfumatura #ccff00 → #9d00ff, gli stessi colori
+   che app.js calcola per la scheda del profilo (--p, --a, --ov, --text…, sul :root). Se qualcuno la apre dove quelle
+   variabili non ci sono, valgono i colori pzk scritti qui sotto. I tasti sono i bottoni di Discord (8 px di raggio, gg sans
+   500) coi colori pzk al posto del blu: le operazioni viola, l'uguale lime, AC rosso come i tasti «pericolo». */
+@font-face { font-family: "gg sans"; font-weight: 400; font-display: swap; src: url("/fonts/ggsans-400.woff2") format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 500; font-display: swap; src: url("/fonts/ggsans-500.woff2") format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 600; font-display: swap; src: url("/fonts/ggsans-600.woff2") format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 700; font-display: swap; src: url("/fonts/ggsans-700.woff2") format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 800; font-display: swap; src: url("/fonts/ggsans-800.woff2") format("woff2"); }
+
+dialog.ca {
+  --f: "gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --c-p: var(--p, #ccff00); --c-a: var(--a, #9d00ff);
+  --c-ov: var(--ov, rgba(0, 0, 0, .6));
+  --c-text: var(--text, #f2f3f5); --c-muted: var(--muted, #b5bac1);
+  --c-box: var(--box, rgba(0, 0, 0, .34)); --c-box2: var(--box-2, rgba(255, 255, 255, .08)); --c-box3: var(--box-3, rgba(255, 255, 255, .16));
+  --c-line: var(--line, rgba(255, 255, 255, .12));
+  --c-su-lime: #161c00; /* il testo sul lime */
+  --c-rosso: #da373c; --c-rosso-t: #fa777c; --c-verde: #23a55a; --c-fuoco: #00a8fc;
+  position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 12px; border: 0;
+  background: transparent; color: var(--c-text); display: grid; place-items: center; overflow: hidden;
+  font: 400 16px/1.375 var(--f); -webkit-font-smoothing: antialiased; }
+dialog.ca:not([open]) { display: none; }
+dialog.ca::backdrop { background: var(--scrim, rgba(0, 0, 0, .72)); animation: ca-velo .18s ease-out; }
+dialog.ca.chiude { opacity: 0; transition: opacity .13s; }
+dialog.ca.chiude::backdrop { opacity: 0; transition: opacity .13s; }
+dialog.ca * { box-sizing: border-box; }
+dialog.ca button { font-family: var(--f); }
+
+/* la scheda: il tema del profilo, sfumato dall'alto in basso come la scheda di Discord */
+.ca-box { position: relative; display: flex; flex-direction: column; width: min(100%, 400px); max-height: 100%; overflow: hidden auto; overscroll-behavior: contain;
+  border-radius: 12px; outline: 0; scrollbar-width: thin; scrollbar-color: var(--c-box) transparent;
+  background: linear-gradient(var(--c-ov), var(--c-ov)), linear-gradient(var(--c-p), var(--c-p) 56px, var(--c-a));
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .06), 0 24px 60px -12px rgba(0, 0, 0, .7);
+  animation: ca-entra .22s cubic-bezier(.2, .9, .3, 1.15); transition: width .26s cubic-bezier(.3, .8, .3, 1); }
+dialog.ca.sci .ca-box { width: min(100%, 720px); }
+@keyframes ca-velo { from { opacity: 0; } }
+@keyframes ca-entra { from { opacity: 0; transform: scale(.9); } }
+
+/* la testa: l'icona dell'app con l'anello, il nome, il tag APP come quello dei bot */
+.ca-testa { display: flex; align-items: center; gap: 12px; padding: 16px 16px 0; }
+.ca-av { flex: none; width: 52px; height: 52px; border-radius: 16px; box-shadow: 0 0 0 4px var(--ring, #526600); background: var(--ring, #526600); image-rendering: pixelated; }
+.ca-chi { flex: 1; min-width: 0; }
+.ca-chi h2 { display: flex; align-items: center; gap: 6px; margin: 0; font: 700 20px/1.2 var(--f); color: var(--c-text); }
+.ca-tag { display: inline-flex; align-items: center; gap: 2px; padding: 1px 5px 1px 3px; border-radius: 4px; background: var(--c-p); color: var(--c-su-lime); font: 600 10px/1.4 var(--f); letter-spacing: .02em; }
+.ca-tag svg { width: 12px; height: 12px; }
+.ca-chi p { margin: 1px 0 0; font-size: 13px; line-height: 1.3; color: var(--c-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ca-x { flex: none; align-self: flex-start; display: grid; place-items: center; width: 32px; height: 32px; margin: -4px -6px 0 0; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--c-muted); cursor: pointer; transition: color .15s, background .15s; }
+.ca-x:hover { color: var(--c-text); background: var(--c-box2); }
+
+/* le schede (come Info / Attività del profilo): la riga sotto quella scelta */
+.ca-schede { display: flex; gap: 22px; margin: 10px 16px 0; border-bottom: 1px solid var(--c-line); }
+.ca-scheda { position: relative; padding: 10px 0 9px; border: 0; background: none; color: var(--c-muted); font: 500 15px/1.2 var(--f); cursor: pointer; transition: color .15s; }
+.ca-scheda:hover, .ca-scheda[aria-selected=true] { color: var(--c-text); }
+.ca-scheda[aria-selected=true]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; border-radius: 2px 2px 0 0; background: currentColor; }
+.ca-n { margin-left: 5px; padding: 1px 6px; border-radius: 999px; background: var(--c-box2); font: 700 11px/1.5 var(--f); vertical-align: 1px; font-variant-numeric: tabular-nums; }
+.ca-n:empty { display: none; }
+
+.ca-corpo { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px 16px; }
+
+/* lo schermo: il campo di Discord, con l'etichetta in maiuscolo che diventa rossa con l'errore */
+.ca-schermo { position: relative; padding: 10px 12px 12px; border-radius: 8px; background: var(--c-box); }
+.ca-sopra { display: flex; align-items: center; gap: 8px; min-height: 20px; }
+.ca-eti { flex: 1; min-width: 0; font: 700 12px/1.3 var(--f); letter-spacing: .02em; text-transform: uppercase; color: var(--c-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ca-eti em { font-style: italic; font-weight: 500; text-transform: none; letter-spacing: 0; }
+.ca-schermo.ko .ca-eti { color: var(--c-rosso-t); }
+.ca-modo { flex: none; padding: 0 6px; border-radius: 4px; background: var(--c-box2); font: 700 11px/18px var(--f); letter-spacing: .04em; color: var(--c-muted); }
+.ca-modo[hidden] { display: none; }
+.ca-copia { position: relative; flex: none; display: grid; place-items: center; width: 28px; height: 28px; margin: -4px -6px -4px 0; padding: 0; border: 0; border-radius: 6px; background: none; color: var(--c-muted); cursor: pointer; transition: color .15s, background .15s; }
+.ca-copia:hover { color: var(--c-text); background: var(--c-box2); }
+.ca-copia:disabled { opacity: .35; cursor: default; background: none; }
+/* il fumetto di Discord: nero, e verde quando ha copiato */
+.ca-fumetto { position: absolute; right: -6px; bottom: calc(100% + 8px); z-index: 3; padding: 6px 10px; border-radius: 8px; background: #111214; color: #dbdee1; font: 500 14px/1.2 var(--f); white-space: nowrap; pointer-events: none; opacity: 0; transform: translateY(4px) scale(.96); transform-origin: 85% 100%; transition: opacity .1s, transform .1s; box-shadow: 0 8px 16px rgba(0, 0, 0, .24); }
+.ca-fumetto::after { content: ""; position: absolute; right: 15px; top: 100%; border: 5px solid transparent; border-top-color: #111214; }
+.ca-copia:hover .ca-fumetto, .ca-copia:focus-visible .ca-fumetto, .ca-fumetto.ok { opacity: 1; transform: none; }
+.ca-fumetto.ok { background: var(--c-verde); color: #fff; }
+.ca-fumetto.ok::after { border-top-color: var(--c-verde); }
+
+.ca-prima { min-height: 20px; margin-top: 4px; font-size: 15px; line-height: 20px; color: var(--c-muted); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: rtl; }
+.ca-prima bdi { direction: ltr; unicode-bidi: isolate; }
+.ca-riga { --ca-size: 44px; display: flex; align-items: baseline; min-height: 56px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; font: 600 calc(var(--ca-size) * var(--ca-k, 1))/56px var(--f); color: var(--c-text); font-variant-numeric: tabular-nums; letter-spacing: -.01em; white-space: nowrap; transition: font-size .12s; }
+.ca-riga::-webkit-scrollbar { display: none; }
+.ca-txt { display: inline-flex; align-items: baseline; margin-left: auto; padding-right: 2px; } /* (il margine e non justify-content: così quello che sborda si scorre) */
+.ca-riga.ris { font-weight: 700; cursor: copy; }
+.ca-riga .ans { align-self: center; margin: 0 .08em; padding: .1em .22em .06em; border-radius: .22em; background: color-mix(in srgb, var(--c-a) 30%, transparent); color: var(--c-text); font-size: .5em; line-height: 1.2; font-weight: 700; letter-spacing: .03em; } /* (nella riga a flex è un pezzo a sé: altezza sua, in mezzo) */
+.ca-riga .vuoto { color: var(--c-muted); opacity: .5; }
+.ca-cursore { display: inline-block; width: 2px; height: .82em; margin-left: 2px; align-self: center; background: var(--c-p); animation: ca-cursore 1.06s steps(1) infinite; }
+@keyframes ca-cursore { 50% { opacity: 0; } }
+.ca-poi { display: block; min-height: 22px; font: 500 17px/22px var(--f); color: var(--c-muted); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ca-schermo.scossa { animation: ca-scossa .36s; }
+@keyframes ca-scossa { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+
+/* gon / deg / rad: il selettore a pillole */
+.ca-modi { display: flex; align-items: center; gap: 8px; }
+.ca-modi[hidden] { display: none; }
+.ca-modi > span { font: 700 12px/1 var(--f); letter-spacing: .02em; text-transform: uppercase; color: var(--c-muted); }
+.ca-pillole { display: inline-flex; padding: 3px; border-radius: 8px; background: var(--c-box); }
+.ca-pillola { min-width: 52px; height: 26px; padding: 0 10px; border: 0; border-radius: 6px; background: none; color: var(--c-muted); font: 600 13px/1 var(--f); cursor: pointer; transition: background .15s, color .15s; }
+.ca-pillola:hover { color: var(--c-text); }
+.ca-pillola[aria-pressed=true] { background: var(--c-box3); color: var(--c-text); box-shadow: 0 1px 2px rgba(0, 0, 0, .2); }
+
+/* i tasti: i bottoni di Discord */
+.ca-tasti { display: grid; gap: 12px; }
+dialog.ca.sci .ca-tasti { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.ca-griglia { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; align-content: start; }
+.ca-griglia.fn { display: none; gap: 6px; }
+dialog.ca.sci .ca-griglia.fn { display: grid; }
+.ca-k { position: relative; display: grid; place-items: center; height: 52px; padding: 0 4px; border: 0; border-radius: 8px; background: var(--c-box2); color: var(--c-text); font: 500 22px/1 var(--f); font-variant-numeric: tabular-nums; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; transition: background .15s, transform .08s, filter .15s; }
+.ca-k:hover { background: var(--c-box3); }
+.ca-k:active, .ca-k.premuto { transform: translateY(1px); }
+.ca-k.premuto { filter: brightness(1.25); }
+.ca-k > span { display: block; line-height: 1; white-space: nowrap; }
+.ca-k svg { display: block; width: 24px; height: 24px; }
+.ca-k sup { font-size: .6em; line-height: 0; }
+.ca-k.fn { height: 42px; background: var(--c-box); font: 600 15px/1 var(--f); color: var(--c-text); }
+.ca-k.fn:hover { background: var(--c-box2); }
+.ca-k.op { background: var(--c-a); color: #fff; font-size: 26px; }
+.ca-k.op:hover { background: color-mix(in srgb, var(--c-a) 84%, #000); }
+.ca-k.uguale { background: var(--c-p); color: var(--c-su-lime); font-size: 28px; font-weight: 700; }
+.ca-k.uguale:hover { background: color-mix(in srgb, var(--c-p) 86%, #000); }
+.ca-k.ac { background: var(--c-rosso); color: #fff; font-size: 18px; font-weight: 600; }
+.ca-k.ac:hover { background: #a12828; }
+.ca-k:focus-visible, .ca-scheda:focus-visible, .ca-pillola:focus-visible, .ca-copia:focus-visible, .ca-x:focus-visible, .ca-st:focus-visible, .ca-svuota:focus-visible { outline: 2px solid var(--c-fuoco); outline-offset: 2px; }
+
+/* la cronologia: le righe come i messaggi, e «svuota» come i link rossi */
+.ca-storia { display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+.ca-storia[hidden], .ca-calc[hidden] { display: none; }
+.ca-st { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 2px 12px; width: 100%; padding: 10px 12px; border: 0; border-radius: 8px; background: var(--c-box); color: var(--c-text); text-align: left; cursor: pointer; transition: background .15s; }
+.ca-st:hover { background: var(--c-box2); }
+.ca-st span { min-width: 0; font-size: 14px; color: var(--c-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ca-st b { font: 700 18px/1.2 var(--f); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ca-vuota { margin: 0; padding: 36px 12px; border-radius: 8px; background: var(--c-box); color: var(--c-muted); text-align: center; font-size: 14px; }
+.ca-vuota b { display: block; margin-bottom: 4px; font-size: 16px; color: var(--c-text); }
+.ca-svuota { align-self: center; margin-top: 6px; padding: 2px 4px; border: 0; background: none; color: var(--c-rosso-t); font: 500 14px/1.3 var(--f); cursor: pointer; }
+.ca-svuota:hover { text-decoration: underline; }
+.ca-svuota[hidden] { display: none; }
+.ca-calc { display: flex; flex-direction: column; gap: 12px; }
+
+.ca-nota { margin: 0; padding: 0 16px 14px; font-size: 12px; line-height: 1.35; color: var(--c-muted); text-align: center; }
+.ca-nota kbd { padding: 0 4px; border-radius: 4px; background: var(--c-box); font: 600 11px/1.5 var(--f); }
+
+@media (max-width: 719px) {
+  dialog.ca.sci .ca-tasti { grid-template-columns: minmax(0, 1fr); }
+  dialog.ca.sci .ca-box { width: min(100%, 400px); }
+}
+@media (max-width: 420px) {
+  dialog.ca { padding: 0; place-items: end center; }
+  .ca-box { width: 100%; border-radius: 16px 16px 0 0; }
+  .ca-k { height: 54px; }
+  .ca-nota { display: none; }
+}
+@media (max-height: 640px) {
+  .ca-k { height: 44px; }
+  .ca-k.fn { height: 36px; }
+  .ca-riga { --ca-size: 36px; min-height: 46px; line-height: 46px; }
+  .ca-nota { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ca-box, dialog.ca::backdrop, .ca-schermo.scossa { animation: none; }
+  .ca-cursore { animation: none; }
+  .ca-box { transition: none; }
+}

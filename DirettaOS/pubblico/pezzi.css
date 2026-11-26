@@ -1,0 +1,385 @@
+/* Diretta OS: i pezzi in sovrimpressione. Tela fissa 1920 × 1080, sfondo trasparente, caratteri e colori di pzkko.it
+   (gg sans, ABC Ginto Nord, Pricedown, #ccff00 → #9d00ff). Stile sospeso: niente riquadri, ogni cosa galleggia con un
+   contorno scuro che la fa leggere sul muro bianco come sulla tv nera. Tutto grosso: finisce in una webcam dentro Discord. */
+@font-face { font-family: "gg sans"; font-weight: 400; src: url(/fonts/ggsans-400.woff2) format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 500; src: url(/fonts/ggsans-500.woff2) format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 600; src: url(/fonts/ggsans-600.woff2) format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 700; src: url(/fonts/ggsans-700.woff2) format("woff2"); }
+@font-face { font-family: "gg sans"; font-weight: 800; src: url(/fonts/ggsans-800.woff2) format("woff2"); }
+@font-face { font-family: "gg mono"; font-weight: 700; src: url(/fonts/ggmono-700.woff2) format("woff2"); }
+@font-face { font-family: "Ginto Nord"; font-weight: 800; src: url(/fonts/gintonord-800.woff2) format("woff2"); }
+@font-face { font-family: "Pricedown"; font-weight: 700; src: url(/fonts/dn-pricedown.woff2) format("woff2"); }
+@font-face { font-family: "Permanent Marker"; src: url(/fonts/permanent-marker.woff2) format("woff2"); }
+/* Per restare leggeri (giro.js, 60 fotogrammi al secondo): quello che si muove di continuo si muove con transform e
+   opacity, che la scheda video sposta senza ridisegnare; le ombre (filter: drop-shadow) stanno su chi sta fermo, dentro
+   a chi si muove, così si disegnano una volta sola. */
+
+:root {
+  --p: #ccff00; --a: #9d00ff; --verde: #2dff7a; --rosso: #ff3d4a; --scuro: #0b090e; --testo: #f6f4f8; --tenue: #e4dfea; --blurple: #5865f2;
+  --molla: cubic-bezier(.2, .9, .25, 1);
+  --c2: 2px 0 0 var(--scuro), -2px 0 0 var(--scuro), 0 2px 0 var(--scuro), 0 -2px 0 var(--scuro), 1.5px 1.5px 0 var(--scuro), -1.5px 1.5px 0 var(--scuro), 1.5px -1.5px 0 var(--scuro), -1.5px -1.5px 0 var(--scuro), 0 5px 12px rgba(0, 0, 0, .55);
+  --c3: 3px 0 0 var(--scuro), -3px 0 0 var(--scuro), 0 3px 0 var(--scuro), 0 -3px 0 var(--scuro), 2.2px 2.2px 0 var(--scuro), -2.2px 2.2px 0 var(--scuro), 2.2px -2.2px 0 var(--scuro), -2.2px -2.2px 0 var(--scuro), 0 6px 0 var(--scuro), 0 10px 18px rgba(0, 0, 0, .5);
+  --d2: drop-shadow(2px 0 0 var(--scuro)) drop-shadow(-2px 0 0 var(--scuro)) drop-shadow(0 2px 0 var(--scuro)) drop-shadow(0 -2px 0 var(--scuro)) drop-shadow(0 8px 12px rgba(0, 0, 0, .5));
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { width: 1920px; height: 1080px; overflow: hidden; background: transparent; }
+body { font-family: "gg sans", "Noto Sans", "Segoe UI", sans-serif; color: var(--testo); -webkit-font-smoothing: antialiased; }
+#scena { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: center / cover no-repeat; }
+/* lo strato dei pezzi appesi ai muri «dietro di me»: sta sotto a tutti gli altri pezzi (pubblico/pezzi.js). Non si buca
+   più con la sagoma del corpo: ogni pezzo si nasconde da solo quando il colore attorno cambia (occhio.mjs). */
+.strato-muri { position: absolute; inset: 0; width: 1920px; height: 1080px; pointer-events: none; }
+
+/* ogni pezzo: fuori sta il posto (si sposta morbido quando cambia la lente), poi l'aria (ondeggia), dentro l'entrata */
+/* will-change solo su chi è in onda: tanti pezzi fermi non devono tenere ognuno un livello della scheda video */
+.pezzo { position: absolute; left: 0; top: 0; transform-origin: 0 0; transition: transform .8s var(--molla); }
+.pezzo.su, .pezzo[data-trascina] { will-change: transform; }
+.pezzo[data-trascina] { transition: none; }
+.aria { animation: galleggia 6s ease-in-out infinite; }
+@keyframes galleggia { 50% { transform: translateY(-6px); } }
+.pezzo .dentro { opacity: 0; transform: translateY(22px) scale(.94); filter: blur(8px); transition: opacity .5s ease, transform .7s var(--molla), filter .5s ease; transform-origin: 50% 50%; pointer-events: none; }
+/* (--op e --reg: l'opacità e il filtro scelti in regia per quella sorgente, regola.js; la rotazione e lo specchio stanno
+   nelle proprietà «rotate» e «scale», che non toccano il transform dell'entrata) */
+.pezzo.su .dentro { opacity: var(--op, 1); transform: none; filter: var(--reg, none); }
+.pezzo[data-da=alto] .dentro { transform: translateY(-22px) scale(.94); }
+.pezzo[data-da=alto].su .dentro { transform: none; }
+.app { display: inline-block; padding: 1px 9px 2px; border-radius: 7px; background: var(--a); color: #fff; font: 800 17px/1.3 "gg sans"; letter-spacing: .04em; vertical-align: middle; text-shadow: none; box-shadow: 0 0 0 2px var(--scuro); }
+
+/* ── la cornice ── */
+.cornice { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity .7s ease, visibility 0s linear .8s; } /* (spenta esce dal disegno, come i pezzi) */
+.cornice.su { opacity: var(--op, 1); visibility: inherit; transition: opacity .7s ease, visibility 0s; }
+/* il bordo che gira: quattro tele sottili (pezzi.js le ridisegna, solo loro); l'alone dentro è fermo */
+.cornice canvas { position: absolute; display: block; }
+.cr-alone { position: absolute; inset: 0; box-shadow: inset 0 0 46px 6px color-mix(in srgb, var(--a) 55%, transparent), inset 0 0 14px 9px color-mix(in srgb, var(--p) 30%, transparent); pointer-events: none; }
+.cornice.gif .cr-alone { display: none; }
+
+/* ── Giugnoh ── */
+.nome { padding: 40px 70px 20px 10px; perspective: 700px; }
+.n-parola { display: inline-flex; font: 700 104px/1 "Pricedown", "Ginto Nord", sans-serif; letter-spacing: .01em; transform-origin: 50% 100%; white-space: nowrap; }
+/* il contorno è uno solo, disegnato dalla scheda video una volta: prima erano 9 ombre per lettera, rifatte a ogni
+   fotogramma insieme al colore. Lo stroke è centrato, paint-order lo tiene dietro al carattere (metà fuori, come prima). */
+.n-parola span { display: inline-block; transform-origin: 50% 80%; color: var(--p); -webkit-text-stroke: 10px var(--scuro); paint-order: stroke fill; text-shadow: 0 10px 18px rgba(0, 0, 0, .5); }
+#scena.gif .aria { animation: none; } /* (una classe, non :has(): :has() faceva ricontrollare tutta la scena a ogni cambio) */
+
+/* ── le spie: tre tondi sospesi; quello del microfono ha l'anello che segue la voce ── */
+.spie { display: flex; gap: 26px; padding: 14px; }
+.spia { position: relative; width: 84px; display: grid; justify-items: center; gap: 18px; }
+.tondo { position: relative; width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; background: #0d0b10; border: 4px solid #2b2532; box-shadow: 0 8px 18px rgba(0, 0, 0, .5); transition: background .4s, border-color .4s, box-shadow .15s, transform .1s; z-index: 1; }
+.tondo svg { width: 48px; height: 48px; fill: none; stroke: #5d5568; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: stroke .4s; }
+.tondo .pieno { fill: #5d5568; stroke: none; transition: fill .4s; }
+.tondo .sbarra { opacity: 0; stroke: var(--rosso); stroke-width: 3.2; transition: opacity .3s; }
+.et { font: 800 15px/1 "gg sans"; letter-spacing: .1em; color: #fff; text-shadow: var(--c2); }
+.spia.ok .tondo { background: color-mix(in srgb, var(--verde) 16%, #0d0b10); border-color: var(--verde); box-shadow: 0 0 10px color-mix(in srgb, var(--verde) 80%, transparent), 0 0 12px color-mix(in srgb, var(--verde) 40%, transparent) inset, 0 8px 18px rgba(0, 0, 0, .5); transform: scale(calc(1 + var(--voce, 0) * .09)); will-change: transform; }
+/* l'alone che cresce con la voce: disegnato una volta, poi la scheda video ne cambia solo grandezza e trasparenza */
+.tondo::before { content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 40px 14px color-mix(in srgb, var(--verde) 75%, transparent); opacity: 0; z-index: -1; pointer-events: none; will-change: transform, opacity; }
+.spia.ok .tondo::before { opacity: calc(var(--voce, 0) * 1.1); transform: scale(calc(.75 + var(--voce, 0) * .5)); }
+.spia.ok svg { stroke: var(--verde); } .spia.ok .pieno { fill: var(--verde); }
+.spia.no .tondo { background: color-mix(in srgb, var(--rosso) 22%, #0d0b10); border-color: var(--rosso); }
+/* (il lampeggio rosso: l'alone è disegnato una volta, lampeggia solo la sua trasparenza) */
+.tondo::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; box-shadow: 0 0 26px var(--rosso), 0 0 14px color-mix(in srgb, var(--rosso) 60%, transparent) inset; opacity: 0; z-index: -1; pointer-events: none; }
+.spia.no .tondo::after { animation: allarme 1.1s steps(1) infinite; }
+.spia.no svg { stroke: var(--rosso); } .spia.no .pieno { fill: var(--rosso); } .spia.no .sbarra { opacity: 1; }
+@keyframes allarme { 0%, 100% { opacity: 1; } 50% { opacity: .2; } }
+.livello { position: absolute; left: -16px; top: -16px; width: 116px; height: 116px; transform: rotate(-90deg); overflow: visible; z-index: 2; pointer-events: none; will-change: transform; }
+.livello circle { fill: none; stroke: var(--verde); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 289; stroke-dashoffset: var(--resto, 289); opacity: 0; transition: opacity .3s; }
+.livello .alone { stroke-width: 15; stroke-opacity: .28; } /* (il bagliore: un tratto largo e chiaro, non un filtro) */
+.spia.ok .livello circle { opacity: 1; }
+.onde { position: absolute; left: 0; top: 0; width: 84px; height: 84px; pointer-events: none; }
+.onde b { position: absolute; inset: 0; border-radius: 50%; border: 3px solid var(--verde); animation: onda .9s ease-out forwards; }
+@keyframes onda { from { transform: scale(1); opacity: .85; } to { transform: scale(calc(1.35 + var(--forza, .5) * .5)); opacity: 0; } }
+
+/* ── a letto fra, piccolino, attaccato al bordo destro ── */
+.pezzo[data-pezzo=conto] { width: 480px; }
+.conto { display: flex; justify-content: flex-end; align-items: center; gap: 10px; height: 54px; white-space: nowrap; font: 700 23px/1 "gg sans"; color: var(--tenue); text-shadow: var(--c2); }
+.conto svg { width: 26px; height: 26px; fill: var(--p); flex: none; filter: var(--d2); }
+.conto b { font: 700 34px/1 "gg mono", monospace; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -.02em; text-shadow: var(--c2); }
+.conto.tardi b { color: var(--rosso); }
+.conto.tardi svg { fill: var(--rosso); animation: batti 1s ease-in-out infinite; }
+@keyframes batti { 50% { transform: scale(1.25); } }
+
+/* ── il meteo: in grande, i gradi e la città sopra, il tempo sotto; i personaggi ci camminano sotto ── */
+.meteo { position: relative; width: 760px; height: 222px; }
+.m-cielo { position: absolute; inset: -6px 0 0; overflow: hidden; -webkit-mask: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); mask: linear-gradient(90deg, transparent, #000 9%, #000 91%, transparent); pointer-events: none; }
+.m-riga { position: absolute; left: 0; right: 0; top: 4px; height: 118px; display: flex; justify-content: center; align-items: center; gap: 18px; white-space: nowrap; z-index: 2; }
+.m-riga::before { content: ""; position: absolute; left: 8%; right: 8%; top: -8px; bottom: -10px; background: radial-gradient(closest-side, rgba(11, 9, 14, .6), transparent); z-index: -1; }
+.m-ico { position: relative; width: 96px; height: 96px; flex: none; }
+.m-ico > svg, .m-raggi, .m-raggi svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.m-ico svg { filter: var(--d2); }
+.meteo[data-tipo=sole] .m-raggi { animation: gira 14s linear infinite; }
+@keyframes gira { to { transform: rotate(360deg); } }
+.m-testi { display: grid; justify-items: start; gap: 8px; }
+.m-su { display: flex; align-items: baseline; gap: 16px; }
+.m-gradi { font: 800 70px/1 "Ginto Nord", "gg sans"; letter-spacing: -.02em; text-shadow: var(--c3); }
+.m-nome { font: 800 42px/1 "gg sans"; color: var(--p); text-shadow: var(--c3); }
+.m-testo { font: 700 31px/1 "gg sans"; color: #fff; text-shadow: var(--c2); }
+.m-suolo { position: absolute; left: 0; right: 0; bottom: 0; height: 96px; z-index: 3; }
+.m-suolo::after { content: ""; position: absolute; left: 4%; right: 4%; bottom: 4px; height: 3px; border-radius: 3px; background: linear-gradient(90deg, transparent, var(--p) 18%, var(--a) 82%, transparent); box-shadow: 0 0 10px color-mix(in srgb, var(--p) 60%, transparent); }
+.m-lampo { position: absolute; inset: -30px -40px; background: radial-gradient(closest-side, rgba(255, 255, 255, .95), rgba(204, 255, 0, .25) 60%, transparent); opacity: 0; pointer-events: none; z-index: 1; }
+.meteo.lampeggia .m-lampo { animation: lampo .6s ease-out; }
+@keyframes lampo { 0% { opacity: .95; } 20% { opacity: 0; } 35% { opacity: .7; } 100% { opacity: 0; } }
+
+/* i personaggi: gli adesivi degli animali, che camminano sulla riga */
+.ani { position: absolute; left: 0; bottom: 6px; width: 64px; height: 58px; display: flex; justify-content: center; align-items: flex-end; will-change: transform; }
+.ani img { height: 54px; width: auto; image-rendering: pixelated; transform-origin: 50% 100%; filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .45)); transition: opacity .6s; }
+.meteo[data-tipo=nebbia] .ani img { opacity: .5; }
+.ombrello { position: absolute; left: 50%; top: -30px; width: 38px; margin-left: -20px; display: none; transform-origin: 50% 90%; animation: ondeggia .5s ease-in-out infinite alternate; }
+.ani.bagnata .ombrello { display: block; }
+@keyframes ondeggia { from { transform: rotate(-7deg); } to { transform: rotate(7deg); } }
+.ani.trema img { animation: trema .12s steps(2) infinite; }
+@keyframes trema { 50% { translate: 1.5px 0; } }
+.zzz { position: absolute; right: -6px; top: -10px; display: none; font-style: normal; }
+.ani.dorme .zzz { display: block; }
+.ani.dorme img { filter: drop-shadow(0 3px 0 rgba(0, 0, 0, .45)) brightness(.85); }
+.zzz b { position: absolute; font: 800 16px/1 "gg sans"; color: #c9b8ff; text-shadow: var(--c2); opacity: 0; animation: zzz 2.4s ease-out infinite; }
+.zzz b:nth-child(2) { animation-delay: .8s; font-size: 19px; } .zzz b:nth-child(3) { animation-delay: 1.6s; font-size: 23px; }
+@keyframes zzz { 0% { opacity: 0; transform: translate(0, 0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(14px, -30px); } }
+/* il fumetto come un suggerimento di Discord */
+.fumetto { position: absolute; left: 50%; bottom: calc(100% + 10px); translate: -50% 0; padding: 6px 11px 7px; border-radius: 8px; background: #111214; color: #dbdee1; font: 600 21px/1.15 "gg sans"; white-space: nowrap; box-shadow: 0 8px 16px rgba(0, 0, 0, .45); opacity: 0; transform: scale(.6) translateY(8px); transform-origin: 50% 100%; transition: opacity .2s ease, transform .35s var(--molla); }
+.fumetto::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -6px; border: 6px solid transparent; border-top-color: #111214; }
+.fumetto.su { opacity: 1; transform: none; }
+.fumetto.sx, .fumetto.dx { bottom: 12px; translate: none; }
+.fumetto.sx { left: auto; right: calc(100% + 10px); transform-origin: 100% 50%; }
+.fumetto.dx { left: calc(100% + 10px); transform-origin: 0 50%; }
+.fumetto.sx::after, .fumetto.dx::after { top: 50%; margin: -6px 0 0; border-top-color: transparent; }
+.fumetto.sx::after { left: 100%; border-left-color: #111214; }
+.fumetto.dx::after { left: auto; right: 100%; border-right-color: #111214; }
+.fumetto.sx, .fumetto.dx { transform: scale(.6) translateX(0); }
+.fumetto.su { opacity: 1; transform: none; }
+/* il cielo */
+.goccia { position: absolute; top: -18px; width: 2px; height: 15px; border-radius: 2px; background: linear-gradient(transparent, #b3c0ff); animation: cade .7s linear infinite; }
+.meteo.ventoso .goccia { rotate: -18deg; }
+@keyframes cade { to { transform: translateY(232px); } }
+.fiocco { position: absolute; top: -10px; width: var(--grande); height: var(--grande); border-radius: 50%; background: #fff; box-shadow: 0 0 4px rgba(255, 255, 255, .8); animation: nevica 5s linear infinite; }
+@keyframes nevica { 25% { translate: 8px 0; } 75% { translate: -8px 0; } to { transform: translateY(224px); } }
+.stella { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #fff; box-shadow: 0 0 6px #e2b3ff; animation: brilla 2.6s ease-in-out infinite; }
+@keyframes brilla { 50% { opacity: .15; transform: scale(.5); } }
+.scintilla { position: absolute; width: 12px; height: 12px; background: var(--p); clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); animation: brilla 2.4s ease-in-out infinite; }
+.nuvola { position: absolute; left: 0; width: var(--grande); color: rgba(246, 244, 248, .8); animation: passa 40s linear infinite; }
+.nuvola.scura { color: rgba(110, 100, 128, .9); }
+.nuvola svg { width: 100%; display: block; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .3)); }
+@keyframes passa { from { transform: translateX(-160px); } to { transform: translateX(880px); } }
+.banco { position: absolute; left: -50%; width: 200%; height: 40px; margin-top: -7px; background: radial-gradient(50% 50% at 50% 50%, rgba(255, 255, 255, .42), transparent) 0 0 / 22% 100% repeat-x; animation: deriva 18s linear infinite; } /* (morbida di suo: niente sfocatura da ricalcolare mentre scorre) */
+@keyframes deriva { to { transform: translateX(25%); } }
+.foglia { position: absolute; left: -30px; width: 20px; animation: vola 3s linear infinite; }
+.foglia svg { width: 100%; display: block; }
+@keyframes vola { 0% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(420px, 22px) rotate(400deg); } 100% { transform: translate(840px, -6px) rotate(800deg); } }
+
+/* ── tastiera, mouse e controller: le foto vere, sospese ── */
+.tasti { position: relative; width: 620px; height: 252px; }
+.tasti > div { position: absolute; inset: 0; opacity: 0; transform: scale(.94); transition: opacity .4s ease, transform .5s var(--molla); }
+.tasti[data-fonte=tastiera] > .t-tast, .tasti[data-fonte=pad] > .t-pad { opacity: 1; transform: none; }
+.t-chips { display: flex; gap: 8px; height: 56px; align-items: center; }
+.t-chips span { padding: 0 15px; height: 46px; line-height: 42px; border-radius: 11px; background: var(--verde); color: #04140a; font: 800 26px/42px "gg sans"; white-space: nowrap; border: 2px solid var(--scuro); box-shadow: 0 4px 0 #0e6b33, 0 4px 0 2px var(--scuro), 0 10px 18px rgba(0, 0, 0, .45); animation: entra .15s ease-out; }
+@keyframes entra { from { transform: scale(.6); opacity: 0; } }
+.t-banco { display: flex; align-items: flex-end; gap: 18px; margin-top: 8px; }
+.t-g413 { width: 500px; flex: none; }
+.t-mouse { position: relative; width: 94px; flex: none; }
+.t-g413 img, .t-g502 img { filter: drop-shadow(0 12px 14px rgba(0, 0, 0, .55)); }
+.g502 [data-k].scorre { opacity: .9; fill: var(--p); }
+.t-rot { position: absolute; left: 0; right: 0; bottom: calc(100% - 6px); height: 40px; pointer-events: none; }
+.t-rot b { position: absolute; left: 50%; bottom: 0; margin-left: -14px; font: 800 30px/1 "gg sans"; color: var(--p); text-shadow: var(--c2); animation: rotella-su .45s ease-out forwards; }
+.t-rot b.giu { animation-name: rotella-giu; }
+@keyframes rotella-su { from { transform: translateY(8px); opacity: 1; } to { transform: translateY(-26px); opacity: 0; } }
+@keyframes rotella-giu { from { transform: translateY(-26px); opacity: 1; } to { transform: translateY(8px); opacity: 0; } }
+.tasti > .t-pad { display: grid; place-items: center; }
+.t-pad .dualsense { width: 440px; filter: drop-shadow(0 14px 16px rgba(0, 0, 0, .5)); }
+
+/* ── le pubblicità ── */
+.adv { position: relative; width: 540px; height: 152px; }
+/* prima esce quella vecchia, poi arriva la nuova: le scritte non si sovrappongono mai, nemmeno per un attimo */
+.a-giro { position: absolute; inset: 0 0 10px; display: flex; align-items: center; gap: 18px; transition: opacity .45s ease .28s, transform .6s var(--molla) .28s; }
+.a-giro.esce { opacity: 0; transform: translateX(-30px); transition: opacity .25s ease, transform .3s ease; }
+.a-giro.arriva { opacity: 0; transform: translateX(30px); transition: none; }
+.a-arte { position: relative; width: 120px; height: 138px; flex: none; display: grid; place-items: center; }
+.a-dondola { display: grid; place-items: center; animation: dondola 3.2s ease-in-out infinite; }
+.a-dondola > img { max-width: 116px; max-height: 116px; object-fit: contain; filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .55)); }
+/* i manifesti del muro: più alti, un po' storti, come attaccati */
+.a-arte.foglio { transform: rotate(var(--storto)); }
+.a-arte.foglio .a-dondola { animation-duration: 4.6s; }
+.a-arte.foglio .a-dondola > img { max-width: 120px; max-height: 138px; }
+/* i simbolini: tre emoji di pzkko che saltano fuori uno dopo l'altro e poi svolazzano attorno all'immagine */
+.a-sim { position: absolute; width: 42px; height: 42px; z-index: 2; animation: sim-entra .55s var(--molla) var(--d) both; }
+.a-sim b { display: block; width: 100%; height: 100%; animation: sim-vola 2.4s ease-in-out calc(var(--d) + .55s) infinite alternate; }
+.a-sim img { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .65)); }
+/* (tutti a sinistra del testo: a destra dell'immagine c'è la scritta, e lì non si va) */
+.a-sim.s0 { top: -16px; right: -6px; }
+.a-sim.s1 { bottom: -8px; left: -22px; }
+.a-sim.s1 b { animation-duration: 3s; }
+.a-sim.s2 { top: 6px; left: -24px; width: 34px; height: 34px; }
+.a-sim.s2 b { animation-duration: 2s; }
+@keyframes sim-entra { from { opacity: 0; transform: scale(0) rotate(-40deg); } to { opacity: 1; transform: none; } }
+@keyframes sim-vola { from { transform: translateY(2px) rotate(-10deg); } to { transform: translateY(-8px) rotate(10deg); } }
+.a-testi { flex: 1; min-width: 0; }
+.a-testa { display: flex; align-items: center; gap: 10px; font: 700 20px/1 "gg sans"; color: #fff; text-shadow: var(--c2); white-space: nowrap; }
+.app.meme { background: #eb459e; }
+.a-titolo { margin-top: 6px; font: 800 36px/1.05 "Ginto Nord", "gg sans"; background: linear-gradient(90deg, var(--g1, var(--p)) 30%, var(--g2, #f0b3ff)); -webkit-background-clip: text; background-clip: text; color: transparent; white-space: nowrap; filter: var(--d2); }
+.a-testo { margin-top: 6px; font: 700 23px/1.12 "gg sans"; color: #fff; text-shadow: var(--c2); }
+.a-testo b { color: var(--p); }
+.a-barra { position: absolute; left: 138px; right: 20px; bottom: 0; height: 5px; border-radius: 5px; background: rgba(255, 255, 255, .2); box-shadow: 0 0 0 2px var(--scuro); overflow: hidden; }
+/* (la barra si riempie con transform, che la scheda video fa da sola: con width si rifaceva l'impaginazione a ogni fotogramma) */
+.a-barra i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--p), var(--a)); transform: scaleX(0); transform-origin: 0 50%; }
+.a-barra i.va { animation: a-barra 9s linear infinite; } /* (un'animazione, non una transizione: così giro.js la porta a 60 al secondo; ricomincia a ogni scheda) */
+@keyframes a-barra { to { transform: none; } }
+
+/* ── Adigeo ── */
+.adigeo { position: relative; width: 340px; height: 74px; }
+.ad-testo { position: absolute; left: 0; top: 4px; font: 46px/1 "Permanent Marker", "gg sans", cursive; color: #fff; white-space: nowrap; text-shadow: var(--c3); transform: rotate(-4deg); transform-origin: 0 50%; }
+.ad-testo b { font-weight: 400; color: var(--p); }
+.ad-freccia { position: absolute; overflow: visible; pointer-events: none; }
+.ad-freccia g { animation: punta 1.2s ease-in-out infinite; }
+@keyframes punta { 50% { transform: translate(calc(var(--ux, 6) * 1px), calc(var(--uy, 2) * 1px)); } }
+.ad-freccia path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.ad-freccia .sotto { stroke: var(--scuro); stroke-width: 14; }
+.ad-freccia .sopra { stroke: var(--p); stroke-width: 7; }
+.ad-freccia.disegna path { animation: disegna 1s .3s var(--molla) backwards; }
+@keyframes disegna { from { stroke-dasharray: 1200; stroke-dashoffset: 1200; } to { stroke-dasharray: 1200; stroke-dashoffset: 0; } }
+@keyframes dondola { 50% { transform: translateY(-5px) rotate(-3deg); } }
+
+/* ── le Red Bull di oggi ── */
+.rb { position: relative; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.rb-n { font: 800 66px/1 "Ginto Nord", "gg sans"; color: var(--p); text-shadow: var(--c3); font-variant-numeric: tabular-nums; }
+.rb-t { display: grid; gap: 5px; }
+.rb-t span { font: 800 24px/1 "gg sans"; color: #fff; text-shadow: var(--c2); }
+.rb-t small { font: 700 17px/1 "gg sans"; color: var(--tenue); text-shadow: var(--c2); }
+.rb-piu { position: absolute; left: 6px; top: -10px; font: 800 30px/1 "Ginto Nord", "gg sans"; font-style: normal; color: var(--p); text-shadow: var(--c2); opacity: 0; }
+.rb.beve .rb-n { animation: pop .6s var(--molla); }
+.rb.beve .rb-piu { animation: sale 1.2s ease-out; }
+@keyframes pop { 30% { transform: scale(1.45) rotate(-8deg); } }
+@keyframes sale { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-50px); } }
+
+/* ── «torno subito»: la scritta grande al centro dello schermo, viva. Le lettere (e sopra, sotto, la riga che racconta)
+   le muove via/scritta.js una per una; le due tele sono la luce dietro e le cose che volano davanti. Sotto c'è la scena
+   che copre tutta la webcam; gli altri link, mentre sei via, sono spenti ── */
+.via { position: relative; width: 1560px; padding: 4px 0; text-align: center; --c5: 5px 0 0 var(--scuro), -5px 0 0 var(--scuro), 0 5px 0 var(--scuro), 0 -5px 0 var(--scuro), 3.6px 3.6px 0 var(--scuro), -3.6px 3.6px 0 var(--scuro), 3.6px -3.6px 0 var(--scuro), -3.6px -3.6px 0 var(--scuro), 0 9px 0 var(--scuro), 0 16px 24px rgba(0, 0, 0, .55); }
+/* (un'ombra morbida dietro, non un riquadro: la scritta si legge anche sul cielo chiaro) */
+.via::before { content: ""; position: absolute; inset: -150px -230px; z-index: -2; background: radial-gradient(closest-side, rgba(8, 6, 12, .52), rgba(8, 6, 12, .3) 55%, transparent); pointer-events: none; }
+.v-dietro, .v-davanti { position: absolute; pointer-events: none; }
+.v-dietro { z-index: -1; }
+.v-davanti { z-index: 1; }
+.v-testa { display: flex; align-items: center; justify-content: center; gap: 14px; font: 700 34px/1 "gg sans"; color: #fff; text-shadow: var(--c2); opacity: 0; }
+.v-testa b { font: 700 52px/1 "Pricedown"; color: var(--p); text-shadow: var(--c3); }
+.v-testa .app { font-size: 22px; padding: 2px 11px 3px; }
+.v-titolo { margin-top: 18px; font: 800 100px/1.04 "Ginto Nord", "gg sans"; letter-spacing: -.015em; text-wrap: balance; transform-origin: 50% 50%; }
+.v-p { display: inline-block; white-space: nowrap; }
+.v-l { display: inline-block; transform-origin: 50% 85%; color: var(--p); text-shadow: var(--c5); opacity: 0; will-change: transform; }
+.v-ora { height: 54px; margin-top: 22px; display: flex; align-items: center; justify-content: center; gap: 16px; font: 800 42px/1 "gg sans"; color: #fff; text-shadow: var(--c3); white-space: nowrap; opacity: 0; }
+.v-ora span { display: inline-block; }
+.v-ora i { flex: none; width: 16px; height: 16px; border-radius: 50%; background: var(--vc, var(--p)); box-shadow: 0 0 0 3px var(--scuro), 0 0 18px var(--vc, var(--p)); animation: v-batte 1.4s ease-in-out infinite; }
+@keyframes v-batte { 50% { transform: scale(.55); opacity: .55; } }
+.v-giu { display: flex; align-items: baseline; justify-content: center; gap: 14px; margin-top: 16px; font: 700 30px/1 "gg sans"; color: var(--tenue); text-shadow: var(--c2); opacity: 0; }
+.v-giu b { display: inline-block; font: 700 42px/1 "gg mono", monospace; color: var(--p); font-variant-numeric: tabular-nums; text-shadow: var(--c3); }
+/* entrano e escono le lettere, non la scatola: si spegne solo dopo che sono volate via */
+.pezzo:is([data-pezzo=legna], [data-pezzo=pipi], [data-pezzo=bere], [data-pezzo=mangiare], [data-pezzo=lattina], [data-pezzo=telefono], [data-pezzo=spacco], [data-pezzo=sistemo], [data-pezzo=riavvio]) .dentro { transform: none; filter: var(--reg, none); transition: opacity .3s ease .7s; }
+.pezzo.su:is([data-pezzo=legna], [data-pezzo=pipi], [data-pezzo=bere], [data-pezzo=mangiare], [data-pezzo=lattina], [data-pezzo=telefono], [data-pezzo=spacco], [data-pezzo=sistemo], [data-pezzo=riavvio]) .dentro { transition: opacity .15s ease; }
+
+/* ── chi segue (Giugnoh sopra la testa, il cartellino della puff): la posizione la muove lo script, niente transizione ── */
+.pezzo.segue { transition: none; }
+/* Spento, un pezzo esce dal disegno (visibility: hidden, un secondo e mezzo dopo, quando l'uscita è finita): prima i
+   pezzi spenti restavano trasparenti ma dipinti, e il browser componeva a ogni fotogramma anche i loro livelli (in
+   /o/tutto 366 livelli e 168 MB di texture, 300 dei quali di pezzi non in onda). Le misure restano quelle: visibility
+   non tocca l'impaginazione. Acceso torna subito (inherit: nell'anteprima dal vivo comanda .pezzo, che è nascosto). */
+.pezzo .aria { visibility: hidden; transition: opacity .6s ease, visibility 0s linear 1.5s; }
+.pezzo.su .aria, .pezzo[data-trascina] .aria { visibility: inherit; transition: opacity .6s ease, visibility 0s; }
+.pezzo.persa .aria { opacity: .5; } /* persa da un po': resta dov'era, più tenue */
+.pezzo.mai .aria, .pezzo.nascosto .aria { opacity: 0; visibility: hidden; transition: opacity .6s ease, visibility 0s linear .7s; } /* la puff non s'è mai vista (o sei via): niente cartellino, e niente livelli */
+/* coperto: l'occhio ha visto cambiare il colore attorno al pezzo (qualcuno o qualcosa gli è passato davanti). Sparisce
+   in fretta e torna appena l'anello è pulito; il box resta misurabile, così la pagina continua a dire all'occhio dov'è. */
+.pezzo.coperto .aria { opacity: 0; visibility: hidden; transition: opacity .18s ease, visibility 0s linear .18s; }
+
+/* ── la puff: gusto, batteria, pod. Niente azzurro: l'occhio la riconosce dal suo ── */
+.puff { position: relative; padding: 4px 6px; white-space: nowrap; }
+.pf-testa { display: flex; align-items: center; gap: 10px; }
+.pf-testa .app { background: #eb459e; }
+.pf-gusto { font: 800 30px/1.1 "Ginto Nord", "gg sans"; color: var(--p); text-shadow: var(--c2); }
+.pf-riga { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.pf-batt { position: relative; width: 52px; height: 24px; border: 3px solid #fff; border-radius: 6px; box-shadow: 0 0 0 2px var(--scuro), 0 4px 10px rgba(0, 0, 0, .5); padding: 2px; }
+.pf-batt::after { content: ""; position: absolute; right: -8px; top: 5px; width: 5px; height: 8px; border-radius: 0 3px 3px 0; background: #fff; box-shadow: 2px 0 0 var(--scuro); }
+.pf-batt i { display: block; height: 100%; border-radius: 2px; background: var(--verde); transition: width .6s var(--molla), background .4s; }
+.pf-batt[data-livello=giallo] i { background: #ffd23f; }
+.pf-batt[data-livello=rosso] i { background: var(--rosso); animation: allarme-batt 1s ease-in-out infinite; }
+@keyframes allarme-batt { 50% { opacity: .35; } }
+.pf-pct { font: 700 26px/1 "gg mono", monospace; color: #fff; text-shadow: var(--c2); font-variant-numeric: tabular-nums; }
+.pf-pod { display: flex; align-items: center; gap: 6px; }
+.pf-pod small { font: 800 18px/1 "gg sans"; color: var(--tenue); text-shadow: var(--c2); margin-right: 2px; }
+.pf-pod i { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; font: 800 16px/1 "gg sans"; font-style: normal; color: #fff; background: rgba(11, 9, 14, .55); border: 2px solid rgba(255, 255, 255, .5); text-shadow: none; }
+.pf-pod i.su { background: var(--p); color: var(--scuro); border-color: var(--scuro); box-shadow: 0 0 0 2px var(--p), 0 0 14px var(--p); transform: scale(1.12); }
+/* il codino che punta alla puff: dall'angolo in basso del cartellino verso la puff (si gira quando il cartellino sta
+   a sinistra o sotto) */
+.pf-coda { position: absolute; left: -16px; bottom: -14px; width: 28px; height: 4px; border-radius: 4px; background: #fff; box-shadow: 0 0 0 2px var(--scuro); transform: rotate(-38deg); transform-origin: 100% 50%; }
+.pezzo[data-lato=sx] .pf-coda { left: auto; right: -16px; transform: rotate(38deg); transform-origin: 0 50%; }
+.pezzo[data-su=false] .pf-coda { bottom: auto; top: -14px; transform: rotate(38deg); }
+.pezzo[data-lato=sx][data-su=false] .pf-coda { transform: rotate(-38deg); }
+
+/* ── i follower ── */
+.social { padding: 4px; }
+.social.vuoto { display: none; }
+.so-testa { font: 800 18px/1 "gg sans"; letter-spacing: .12em; text-transform: uppercase; color: var(--tenue); text-shadow: var(--c2); margin: 0 0 8px 4px; }
+.so-reti { display: grid; grid-template-columns: repeat(2, auto); gap: 8px 22px; justify-content: start; }
+.so { display: flex; align-items: center; gap: 10px; }
+.so-ico { width: 40px; height: 40px; flex: none; filter: drop-shadow(0 0 0 var(--scuro)) drop-shadow(2px 0 0 var(--scuro)) drop-shadow(-2px 0 0 var(--scuro)) drop-shadow(0 2px 0 var(--scuro)) drop-shadow(0 -2px 0 var(--scuro)) drop-shadow(0 6px 10px rgba(0, 0, 0, .5)); }
+.so-ico svg { width: 100%; height: 100%; display: block; }
+.so-n { display: flex; flex-direction: column; gap: 3px; }
+.so b { font: 800 34px/1 "Ginto Nord", "gg sans"; color: #fff; text-shadow: var(--c2); font-variant-numeric: tabular-nums; }
+.so small { font: 700 15px/1 "gg sans"; color: var(--tenue); text-shadow: var(--c2); }
+.so small:empty { display: none; }
+.so.sale b { animation: pop .7s var(--molla); color: var(--p); }
+
+/* ── le scene dei «torno subito» (via/): coprono tutta la webcam, sotto ai pezzi. Quelle a pixel si ingrandiscono
+   senza sfumare, il fuoco sì. L'oggetto trovato in cucina è l'immagine vera di pzkko, col suo nome sotto ── */
+.sfondo-via { position: absolute; inset: 0; overflow: hidden; background: #08060c; opacity: 0; visibility: hidden; transition: opacity .9s ease, visibility 0s linear 1s; pointer-events: none; } /* (quando non sei via non tiene uno schermo intero di livello) */
+.sfondo-via.su { opacity: 1; visibility: inherit; transition: opacity .9s ease, visibility 0s; }
+.sv-tela { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; image-rendering: pixelated; }
+.sv-tela.morbido { image-rendering: auto; }
+.sv-cosa { position: absolute; left: 0; top: 0; image-rendering: pixelated; filter: drop-shadow(0 0 0 var(--scuro)) drop-shadow(3px 0 0 var(--scuro)) drop-shadow(-3px 0 0 var(--scuro)) drop-shadow(0 3px 0 var(--scuro)) drop-shadow(0 -3px 0 var(--scuro)) drop-shadow(0 12px 16px rgba(0, 0, 0, .5)); opacity: 0; transition: opacity .3s ease; }
+.sv-cosa.su { opacity: 1; }
+.sv-nome { position: absolute; left: 0; top: 0; white-space: nowrap; font: 800 40px/1 "Ginto Nord", "gg sans"; color: var(--p); text-shadow: var(--c3); opacity: 0; scale: .6; transition: opacity .3s ease, scale .5s var(--molla); }
+.sv-nome.su { opacity: 1; scale: 1; }
+
+/* ── l'anteprima dal vivo della regia: la webcam sotto, i pezzi invisibili (sono già nell'immagine di Camo) ── */
+.vivo-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+.dal-vivo .vivo-foto { display: block; }
+.dal-vivo .pezzo, .dal-vivo .cornice, .dal-vivo .sfondo-via { visibility: hidden; }
+/* ── le scene (scene.js): sempre a schermo intero, sopra a tutto. Niente posto, niente ondeggiare, niente entrata che
+   le sposta: solo una dissolvenza. Accese prendono il mouse (la mappa si gira dal monitor della regia), e restano
+   disegnate anche nell'anteprima dal vivo. Sotto una scena gli altri pezzi non si vedono, quindi escono dal disegno;
+   restano sopra solo l'argomento e la fine del podcast. ── */
+.pezzo[data-scena] { transition: none; }
+.pezzo[data-scena] .aria { animation: none; }
+.pezzo[data-scena] .dentro { transform: none; filter: var(--reg, none); transition: opacity .6s ease; }
+.pezzo[data-scena].su .dentro { pointer-events: auto; }
+.dal-vivo .pezzo[data-scena].su { visibility: inherit; }
+.in-scena .pezzo:not([data-scena], [data-pezzo=argomento], [data-pezzo=fine]) .aria, .in-scena .cornice { opacity: 0; visibility: hidden; transition: opacity .4s ease, visibility 0s linear .5s; }
+.in-scena .pezzo:is([data-pezzo=argomento], [data-pezzo=fine]) { z-index: 9100 !important; }
+/* nell'anteprima dal vivo i pezzi non si vedono: fermi anche i loro movimenti, così la regia resta leggera */
+.dal-vivo .pezzo *, .dal-vivo .cornice * { animation-play-state: paused !important; }
+.dal-vivo .pezzo[data-trascina] { visibility: visible; opacity: .85; }
+
+@media (prefers-reduced-motion: reduce) { .aria, .spia.no .tondo::after { animation: none; } }
+
+/* i pezzi appesi ai muri (muri.js): niente molla (la prospettiva non deve rimbalzare oltre il muro), e niente
+   will-change, così il browser li ridisegna alla grandezza che hanno sul muro invece di ingrandirne una foto sfocata */
+.pezzo[data-muro] { transition: transform .6s cubic-bezier(.2, .8, .2, 1), filter .6s ease; will-change: auto; }
+.pezzo[data-muro][data-trascina] { transition: none; }
+/* la foto della stanza scattata dalla regia: per un attimo non si disegna niente */
+#scena.pulita * { visibility: hidden !important; }
+/* la bandiera (bandiera.js): appesa, non galleggia e non rimbalza; la tela è già disegnata con la luce della stanza */
+.pezzo[data-pezzo=bandiera] .aria { animation: none; }
+.pezzo[data-pezzo=bandiera] .dentro { transform: none; filter: var(--reg, none); transition: opacity .8s ease; }
+.bandiera canvas { display: block; }
+
+/* la zona cavi (cavi.js): una macchia scura e sfocata presa dalla foto della stanza. Sta ferma (non galleggia) e ha i
+   bordi morbidi, così non si vede il rettangolo; lei non si disegna sopra la webcam, la scurisce soltanto. */
+.pezzo[data-pezzo=cavi] .aria { animation: none; }
+.pezzo[data-pezzo=cavi] .dentro { transform: none; filter: var(--reg, none); transition: opacity .5s ease; }
+.cavi { width: 560px; height: 300px; }
+.cavi canvas { display: block; width: 100%; height: 100%; -webkit-mask-image: radial-gradient(ellipse 52% 50% at 50% 50%, #000 52%, rgba(0, 0, 0, .82) 68%, transparent 88%); mask-image: radial-gradient(ellipse 52% 50% at 50% 50%, #000 52%, rgba(0, 0, 0, .82) 68%, transparent 88%); }
+
+/* ── risparmio GPU (tasto in regia) ──
+   Si tolgono le cose che la scheda video deve comporre ogni fotogramma: ombre, filtri, bagliori e livelli. I testi
+   tengono il loro text-shadow/contorno (serve per leggerli sul muro bianco). Il giro scende a 30 fps da giro.js. */
+html.niente-gpu *, html.niente-gpu *::before, html.niente-gpu *::after {
+  filter: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  will-change: auto !important;
+  animation: none !important;
+}

@@ -1,0 +1,58 @@
+{
+  "key": "lezioni",
+  "cover": {
+    "w": 1280,
+    "h": 720
+  },
+  "video": {
+    "file": "loop.mp4",
+    "w": 960,
+    "h": 540,
+    "seconds": 7.6
+  },
+  "shots": [
+    {
+      "file": "01.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "Cosa fa, e accanto gli appunti come escono",
+      "en": "What it does, next to the notes it produces"
+    },
+    {
+      "file": "02.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "Come si usa, il file grezzo e i limiti, detti onestamente",
+      "en": "How to use it, the raw file and the limits, stated honestly"
+    },
+    {
+      "file": "03.webp",
+      "w": 1600,
+      "h": 900,
+      "it": "La barra sul bordo dello schermo, le formule e la privacy",
+      "en": "The bar on the screen edge, the formulas and privacy"
+    },
+    {
+      "file": "04.webp",
+      "w": 960,
+      "h": 1185,
+      "it": "Una pagina di appunti prodotta dallo strumento (lezione di esempio, inventata)",
+      "en": "A page of notes made by the tool (a made-up sample lecture)"
+    },
+    {
+      "file": "05.webp",
+      "w": 740,
+      "h": 1600,
+      "it": "La pagina sul telefono",
+      "en": "The page on the phone"
+    },
+    {
+      "file": "06.webp",
+      "w": 740,
+      "h": 1600,
+      "it": "Sul telefono: gli appunti e come si usa",
+      "en": "On the phone: the notes and how to use it"
+    }
+  ],
+  "notes": "La pagina vera dello strumento (pzkko/tools/lezioni/, ultima versione) servita in locale; lo strumento sul sito si chiamava «pzk$meeting». 05.webp è art/lezioni/appunti.webp così com’è: la pagina di appunti che lo strumento ha prodotto su una lezione inventata (non una lezione vera). Niente da sfocare. loop.mp4: la pagina che scorre."
+}

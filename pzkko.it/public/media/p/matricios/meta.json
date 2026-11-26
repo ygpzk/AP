@@ -1,0 +1,72 @@
+{
+ "key": "matricios",
+ "cover": {
+  "w": 1280,
+  "h": 720
+ },
+ "video": {
+  "file": "loop.mp4",
+  "w": 960,
+  "h": 540,
+  "seconds": 8.9
+ },
+ "shots": [
+  {
+   "file": "01.webp",
+   "w": 902,
+   "h": 720,
+   "it": "L’avvio: i controlli di sistema e l’accesso",
+   "en": "Boot: system checks and login"
+  },
+  {
+   "file": "02.webp",
+   "w": 902,
+   "h": 720,
+   "it": "Il menu principale",
+   "en": "The main menu"
+  },
+  {
+   "file": "03.webp",
+   "w": 902,
+   "h": 720,
+   "it": "Lezione 11: il prodotto righe per colonne",
+   "en": "Lesson 11: row-by-column multiplication"
+  },
+  {
+   "file": "04.webp",
+   "w": 902,
+   "h": 720,
+   "it": "Un esercizio risolto: risposta esatta, +10 XP",
+   "en": "A solved exercise: right answer, +10 XP"
+  },
+  {
+   "file": "05.webp",
+   "w": 902,
+   "h": 720,
+   "it": "I 100 esercizi nelle 10 sezioni",
+   "en": "The 100 exercises in 10 sections"
+  },
+  {
+   "file": "06.webp",
+   "w": 902,
+   "h": 720,
+   "it": "I progressi: XP, rango e sezioni completate",
+   "en": "Progress: XP, rank and completed sections"
+  },
+  {
+   "file": "07.webp",
+   "w": 902,
+   "h": 720,
+   "it": "Il terminale ambra",
+   "en": "The amber terminal"
+  },
+  {
+   "file": "08.webp",
+   "w": 902,
+   "h": 720,
+   "it": "Il terminale blu",
+   "en": "The blue terminal"
+  }
+ ],
+ "notes": "Catture vere del progetto in funzione."
+}

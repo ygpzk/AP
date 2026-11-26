@@ -1,0 +1,31 @@
+/* Diretta OS · la scritta da videosorveglianza sulla Vista esterna (sorveglianza.js).
+   Bianco con il contorno nero, maiuscolo, a spaziatura fissa: la sovrimpressione di una telecamera di sicurezza. Si legge
+   sul video chiaro e su quello scuro perché ha il suo contorno; il contorno è un text-shadow fermo, ridisegnato solo
+   quando cambia il testo (una volta al secondo, l'ora). */
+
+.dx-osd {
+  position: absolute; inset: 0; pointer-events: none;
+  color: #f7f7f2; font: 700 16px/1 "gg mono", Consolas, monospace; letter-spacing: .02em;
+  text-transform: uppercase; font-variant-numeric: tabular-nums; white-space: nowrap;
+  text-shadow: 1px 0 0 #000, -1px 0 0 #000, 0 1px 0 #000, 0 -1px 0 #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 0 0 7px rgba(0, 0, 0, .55);
+}
+.osd-ora { position: absolute; left: 16px; top: 15px; }
+.osd-rec { position: absolute; right: 16px; top: 15px; display: flex; align-items: center; gap: 7px; }
+.osd-rec i { width: 11px; height: 11px; border-radius: 50%; background: #ff2b2b; box-shadow: 0 0 0 1.5px #000, 0 0 9px rgba(255, 43, 43, .75); }
+.osd-cam { position: absolute; right: 16px; bottom: 15px; display: flex; gap: 10px; }
+.osd-cam b { font-weight: inherit; }
+
+/* il pallino lampeggia solo quando registra; senza segnale la scritta è ambra e lampeggia lei; senza video sta ferma */
+.dx-osd.spento .osd-rec i { visibility: hidden; }
+.dx:not([data-stato=live]) .osd-rec i { display: none; }
+.dx[data-stato=persa] .osd-rec { color: #ffc04d; }
+.dx[data-stato=persa] .dx-osd.spento .osd-rec b { visibility: hidden; }
+
+/* quello che la scritta sostituisce: «LIVE» diventa «● REC», la pillola dello stato la dice il REC; il cartellino della
+   luce (di esterna.css) scende in basso a sinistra, al posto della pillola, così l'ora ha l'angolo in alto */
+.dx.osd .dx-live, .dx.osd .dx-pillola { display: none; }
+.dx.osd .dx-luce { top: auto; bottom: 12px; max-width: calc(100% - 200px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .dx-osd.spento .osd-rec i, .dx[data-stato=persa] .dx-osd.spento .osd-rec b { visibility: visible; }
+}

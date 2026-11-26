@@ -1,0 +1,19 @@
+{
+  "porta": 2350,
+  "letto": "02:35",
+  "meteo": { "nome": "Mantova", "lat": 45.1564, "lon": 10.7914 },
+  "mic": "Yeti",
+  "cuffie": "Turtle Beach|Stealth|Cuffie|Headset",
+  "camo": "Camo",
+  "esterna": { "porta": 2371 },
+  "adv": [
+    { "titolo": "pzkko.it", "testo": "il mio profilo di Discord, ma è un sito", "arte": "/art/chat-pzk/pager.webp" },
+    { "titolo": "Casinò $pzk", "testo": "roulette, blackjack, mine: 1.000 $pzk gratis", "arte": "/art/chat-giochi/roulette.webp" },
+    { "titolo": "PZK Zero", "testo": "il cercapersone 3D che fa tutto", "arte": "/art/chat-pzk/zero.webp" },
+    { "titolo": "pzkmaps", "testo": "indovina in che stato siamo finiti", "arte": "/art/chat-roba/tucson.webp" },
+    { "titolo": "Chat col bot pzk", "testo": "scrivi /lavora e diventa ricco", "arte": "/art/chat-bot/bot-ricco.webp" },
+    { "titolo": "Parole e Trivia", "testo": "sei tentativi, zero scuse", "arte": "/art/chat-giochi/quiz.webp" },
+    { "titolo": "Angoli", "testo": "quanti gradi sono? a occhio", "arte": "/art/chat-giochi/gemma.webp" },
+    { "titolo": "Virtual", "testo": "le partite finte, i $pzk veri", "arte": "/art/chat-stati/trofeo.webp" }
+  ]
+}

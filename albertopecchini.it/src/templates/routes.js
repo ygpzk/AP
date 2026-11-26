@@ -212,21 +212,20 @@ const tutteLeRotte = [
   },
   {
     // La macchina del tempo (3.11.2026): tutte le versioni dei siti, una per giorno,
-    // ricostruite e fotografate da tools/tempo/tempo.mjs. Qui l'archivio dei cinque siti;
-    // sotto, una pagina statica per sito e una per cattura (/tempo/<dominio>/<AAAA-MM-GG>/).
+    // ricostruite e fotografate da tools/tempo/tempo.mjs. Qui l'archivio dei siti; sotto, una
+    // pagina statica per sito e una per cattura (/tempo/<dominio>/<AAAA-MM-GG>/).
+    // Dal 26.11.2026 con la testata, i caratteri e il piè di pagina di tutto il sito.
     path: '/tempo/',
     priority: 0.5,
     title: 'La macchina del tempo — i miei siti, giorno per giorno',
-    description: 'Tutte le versioni dei siti di Alberto Pecchini, una per giorno di lavoro, ricostruite dal codice e fotografate come nella Wayback Machine: l’istogramma dei commit, i numeri del giorno, le foto.',
+    description: 'Tutte le versioni dei siti di Alberto Pecchini, una per giorno di lavoro, ricostruite dal codice e fotografate: la pagina di quel giorno, l’istogramma dei commit, i numeri del giorno.',
     render: tempoPage,
     pageClass: 'page--tempo',
-    noFooter: true, // la barra è il guscio, come nella Wayback Machine
-    senzaFont: true, // la barra è in Arial: i font del sito precaricati erano 100 KB scaricati per niente
     jsonld: () => [crumbs({ label: 'La macchina del tempo', href: '/tempo/' })],
   },
   // le pagine dei siti e delle catture: fuori da sitemap e motori (le versioni vecchie dei siti
   // dei clienti non devono finire nelle ricerche al posto di quelli di oggi)
-  ...tempoRotte().map((r) => ({ ...r, pageClass: 'page--tempo', noFooter: true, senzaFont: true, noindex: true, sitemap: false })),
+  ...tempoRotte().map((r) => ({ ...r, pageClass: 'page--tempo', noindex: true, sitemap: false })),
   {
     // Strumento privato: non è nei menu, nel footer, nella sitemap né nei motori
     // di ricerca (noindex + X-Robots-Tag in vercel.json). Si raggiunge solo dal

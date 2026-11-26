@@ -1,0 +1,50 @@
+/* TAVOLOZZA: i cinque riquadri di colore, la prova di stampa, i comandi OKLCH. Ogni riquadro è un bottone che copia il
+   suo esadecimale. Claude Code: .tv-* è il disegno, i ganci sono data-copia, data-armonia, data-dalto, data-cromia. */
+
+.tv-comandi{padding:7px 12px}
+.tv-colore{width:46px;height:34px;padding:2px;border:1.5px solid var(--lab-filo);background:rgba(255,255,255,.4);cursor:pointer}
+.tv-hex{width:110px;padding:5px 7px;border:1.5px solid var(--lab-filo);background:rgba(255,255,255,.55);font:400 14px/1 "Special Elite","Courier New",monospace;color:var(--lab-inchiostro);text-transform:uppercase}
+.tv-swatches{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;min-height:0}
+.tv-sw{position:relative;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;min-height:150px;padding:10px 9px 9px;border:5px solid var(--pzk-foglietto,#fffdf6);border-bottom-width:7px;background:var(--c);color:var(--t);text-align:left;cursor:pointer;box-shadow:var(--pzk-ombra-foglietto);transform:rotate(-.8deg);transition:transform .15s cubic-bezier(.22,1,.36,1)}
+.tv-sw:nth-child(2n){transform:rotate(.9deg)}
+.tv-sw:nth-child(3n){transform:rotate(-.3deg)}
+@media (hover:hover){.tv-sw:hover{transform:rotate(0) translateY(-3px)}}
+.tv-sw .tv-num{position:absolute;left:8px;top:7px;font:400 10px/1 "Special Elite","Courier New",monospace;opacity:.65}
+.tv-sw b{font:400 19px/1 "Anton",Impact,sans-serif;letter-spacing:.03em}
+.tv-sw small{display:block;font:400 9px/1.2 "Special Elite","Courier New",monospace;opacity:.8;word-break:break-all}
+.tv-sw .tv-contr{display:block;margin-top:3px;font:400 9px/1.2 "Special Elite","Courier New",monospace;opacity:.75}
+.tv-sw .tv-contr em{font-style:normal;border:1px solid currentColor;padding:0 2px;font-size:8px}
+.tv-sw .tv-contr em.is-aa,.tv-sw .tv-contr em.is-aaa{background:rgba(255,255,255,.2)}
+.tv-prova{position:relative;flex:none;min-height:170px;padding:16px 18px;border:0;box-shadow:var(--pzk-ombra-foglietto);display:flex;flex-direction:column;justify-content:center;gap:6px}
+.tv-prova::before{content:"";position:absolute;top:-8px;left:50%;width:70px;height:18px;margin-left:-35px;background:var(--pzk-nastro);clip-path:var(--pzk-code);rotate:3deg;pointer-events:none}
+.tv-prova .tv-kicker{font:400 11px/1 "Special Elite","Courier New",monospace;letter-spacing:.12em;text-transform:uppercase}
+.tv-prova h3{margin:0;font:400 30px/1 "Anton",Impact,sans-serif;text-transform:lowercase}
+.tv-prova p{margin:0;max-width:52ch;font:400 13px/1.35 "Special Elite","Courier New",monospace}
+.tv-tasti{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px}
+.tv-tasti button{padding:5px 16px 6px;border:1.5px solid currentColor;font:400 14px/1 "Special Elite","Courier New",monospace;cursor:pointer;background:transparent}
+.tv-tasti span{font:400 11px/1 "Special Elite","Courier New",monospace;opacity:.8}
+.tv-armonie{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.tv-armonie .lab-tasto{padding:5px 4px}
+.tv-daltonismo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.tv-daltonismo .lab-tasto{padding:5px 4px;font-size:11px}
+.tv-riga{display:grid;grid-template-columns:48px minmax(0,1fr) 44px;align-items:center;gap:6px;margin-top:5px;font:400 11px/1 "Special Elite","Courier New",monospace;color:var(--lab-matita)}
+.tv-riga .lab-range{height:18px}
+.tv-riga .lab-valore{text-align:right;font-size:11px}
+.lab-colonna--lato .lab-pannello{padding:8px 10px}
+
+@media (max-width:1000px){
+  .tv-swatches{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:900px){
+  .tv-swatches{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .lab-colonna--lato{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+}
+@media (max-width:700px){
+  .tv-swatches{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tv-sw{min-height:120px}
+}
+@media (max-width:560px){
+  .lab-colonna--lato{grid-template-columns:minmax(0,1fr)}
+  .tv-sw b{font-size:17px}
+  .tv-prova h3{font-size:25px}
+}

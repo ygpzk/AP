@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="referrer" content="no-referrer">
+<title>Vista esterna · Diretta OS</title>
+<link rel="icon" href="/logo.svg">
+<link rel="stylesheet" href="/vista.css">
+</head>
+<body>
+
+<video id="video" playsinline muted autoplay aria-hidden="true"></video>
+
+<main class="vista" id="vista">
+  <div class="palco" id="palco">
+    <canvas id="schermo" width="960" height="540" role="img" aria-label="Anteprima della webcam">La webcam non è disponibile.</canvas>
+    <div class="griglia" id="griglia" hidden></div>
+
+    <div class="barra" id="barra" role="toolbar" aria-label="Comandi della webcam">
+      <span class="stato" id="stato" data-stato="attesa" title="Collegamento…"><i></i></span>
+      <span class="barra-sep" aria-hidden="true"></span>
+      <button class="tondo" id="b-cam" type="button" title="Scegli la webcam">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2.5"/><path d="M16 10l5-3v10l-5-3z"/></svg>
+      </button>
+      <button class="tondo" id="b-specchia" type="button" title="Specchia" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M8 7L4 12l4 5M16 7l4 5-4 5"/></svg>
+      </button>
+      <button class="tondo" id="b-griglia" type="button" title="Griglia" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>
+      </button>
+      <button class="tondo" id="b-grande" type="button" title="Schermo intero">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 15v5h-5M15 4h5v5M9 20H4v-5"/></svg>
+      </button>
+      <button class="tondo" id="b-regolazioni" type="button" title="Regolazioni" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2.2"/><circle cx="9" cy="17" r="2.2"/></svg>
+      </button>
+      <button class="tondo pericolo" id="b-stacca" type="button" title="Stacca la webcam">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v9"/><path d="M6.3 6.3a8 8 0 1 0 11.4 0"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <aside class="pannello" id="pannello" hidden aria-label="Regolazioni della webcam">
+    <header class="pannello-testa">
+      <span class="pannello-maniglia" aria-hidden="true"></span>
+      <button class="pannello-chiudi" id="pannello-chiudi" type="button" title="Chiudi le regolazioni">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </header>
+
+    <div class="pannello-corpo">
+      <section class="blocco blocco-cam" id="blocco-cam">
+        <label class="campo">
+          <span>Obiettivo</span>
+          <select id="cam" aria-label="Scegli la webcam"></select>
+        </label>
+        <button class="icona" id="cam-aggiorna" type="button" title="Cerca le webcam collegate">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg>
+        </button>
+      </section>
+
+      <section class="blocco">
+        <h2>Messa a fuoco</h2>
+        <div class="segmento tre" id="fuoco-modo" role="group" aria-label="Messa a fuoco">
+          <button type="button" data-fuoco="auto" aria-pressed="true" title="Automatica">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5h3M20 8V5h-3M4 16v3h3M20 16v3h-3"/><circle cx="12" cy="12" r="3.2"/></svg>
+          </button>
+          <button type="button" data-fuoco="continuo" aria-pressed="false" title="Continua">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5h3M20 8V5h-3M4 16v3h3M20 16v3h-3"/><circle cx="12" cy="12" r="3.2"/><path d="M12 3v2M12 19v2"/></svg>
+          </button>
+          <button type="button" data-fuoco="manuale" aria-pressed="false" title="Manuale">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5h3M20 8V5h-3M4 16v3h3M20 16v3h-3"/><path d="M9 12h6M12 9v6"/></svg>
+          </button>
+        </div>
+        <div class="valore" id="fuoco-riga" hidden>
+          <span>Distanza</span>
+          <output id="fuoco-val" for="fuoco">50 %</output>
+        </div>
+        <input type="range" id="fuoco" min="0" max="100" value="50" aria-label="Distanza di messa a fuoco" hidden>
+      </section>
+
+      <section class="blocco">
+        <h2>Sfondo</h2>
+        <div class="segmento quattro" id="sfondo" role="group" aria-label="Sfondo">
+          <button type="button" data-sfondo="nessuno" aria-pressed="true" title="Nessuno">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="12" cy="9.5" r="2.6"/><path d="M6.5 18c.8-2.8 2.9-4.6 5.5-4.6s4.7 1.8 5.5 4.6"/></svg>
+          </button>
+          <button type="button" data-sfondo="sfocato" aria-pressed="false" title="Sfocato">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="3.5" width="19" height="17" rx="3" stroke-dasharray="2.5 2.5"/><circle cx="12" cy="9.5" r="2.6"/><path d="M6.5 18c.8-2.8 2.9-4.6 5.5-4.6s4.7 1.8 5.5 4.6"/></svg>
+          </button>
+          <button type="button" data-sfondo="scuro" aria-pressed="false" title="Sfondo scuro">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M12 4h6a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3h-6" fill="currentColor" opacity=".28"/><circle cx="11" cy="9.5" r="2.3"/><path d="M6.5 18c.7-2.5 2.6-4.2 4.8-4.2 1.4 0 2.6.7 3.5 1.8"/></svg>
+          </button>
+          <button type="button" data-sfondo="nero" aria-pressed="false" title="Sfondo nero">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3" fill="currentColor" opacity=".3"/><circle cx="12" cy="9.5" r="2.6"/><path d="M6.5 18c.8-2.8 2.9-4.6 5.5-4.6s4.7 1.8 5.5 4.6"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <section class="blocco">
+        <div class="reg">
+          <div class="reg-testa">
+            <span>Riflettori</span>
+            <button class="sw" id="riflettori-on" type="button" role="switch" aria-checked="false" aria-label="Riflettori"><i></i></button>
+          </div>
+          <input type="range" id="riflettori" min="0" max="100" value="40" aria-label="Intensità dei riflettori" disabled>
+        </div>
+        <div class="reg">
+          <div class="reg-testa">
+            <span>Ritoccare</span>
+            <button class="sw" id="ritocco-on" type="button" role="switch" aria-checked="false" aria-label="Ritoccare"><i></i></button>
+          </div>
+          <input type="range" id="ritocco" min="0" max="100" value="35" aria-label="Intensità del ritocco" disabled>
+        </div>
+      </section>
+
+      <section class="blocco">
+        <label class="campo">
+          <span>Filtro</span>
+          <select id="filtro">
+            <option value="nessuno">Nessuno</option>
+            <option value="bn">Bianco e nero</option>
+            <option value="caldo">Caldo</option>
+            <option value="freddo">Freddo</option>
+            <option value="vintage">Vintage</option>
+            <option value="vivido">Vivido</option>
+            <option value="cinema">Cinema</option>
+            <option value="sogno">Sogno</option>
+            <option value="notte">Notte</option>
+          </select>
+        </label>
+        <label class="campo">
+          <span>Effetti</span>
+          <select id="effetto">
+            <option value="nessuno">Nessuno</option>
+            <option value="grana">Grana</option>
+            <option value="vignetta">Vignetta</option>
+            <option value="morbido">Morbido</option>
+            <option value="riflesso">Riflesso</option>
+            <option value="neon">Neon</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="blocco">
+        <h2>Inquadratura</h2>
+        <div class="segmento tre" id="inquadratura" role="group" aria-label="Inquadratura">
+          <button type="button" data-inquadratura="largo" aria-pressed="true" title="Campo largo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/><circle cx="12" cy="7.5" r="2.1"/><path d="M8.8 19v-2a3.2 3.2 0 0 1 6.4 0v2"/></svg>
+          </button>
+          <button type="button" data-inquadratura="medio" aria-pressed="false" title="Mezzo busto">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/><circle cx="12" cy="8" r="2.6"/><path d="M7.5 20v-3a4.5 4.5 0 0 1 9 0v3"/></svg>
+          </button>
+          <button type="button" data-inquadratura="stretto" aria-pressed="false" title="Primo piano">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V4h4M20 8V4h-4M4 16v4h4M20 16v4h-4"/><circle cx="12" cy="9" r="3.4"/><path d="M6 20v-1.5a6 6 0 0 1 12 0V20"/></svg>
+          </button>
+        </div>
+        <div class="valore">
+          <span>Zoom</span>
+          <output id="zoom-val" for="zoom">100 %</output>
+        </div>
+        <input type="range" id="zoom" min="100" max="300" step="1" value="100" aria-label="Zoom">
+        <label class="campo campo-riga">
+          <span>Formato</span>
+          <select id="formato">
+            <option value="16:9">16 : 9</option>
+            <option value="4:3">4 : 3</option>
+            <option value="1:1">1 : 1</option>
+            <option value="9:16">9 : 16</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="blocco">
+        <div class="azioni">
+          <button class="azione" id="b-torcia" type="button" title="Torcia" aria-pressed="false" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4.5 13.5H11L9.5 22 19 10h-6.5z"/></svg>
+          </button>
+          <button class="azione" id="b-ruota" type="button" title="Gira di 180 gradi" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 1-2.3-5.7"/><path d="M20 3v6h-6"/><path d="M9 9h6v6H9z"/></svg>
+          </button>
+          <button class="azione" id="b-scatta" type="button" title="Salva un fotogramma">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <section class="blocco">
+        <div class="blocco-testa">
+          <h2>Regolazioni</h2>
+          <div class="blocco-azioni">
+            <button class="icona" id="reg-reset" type="button" title="Ripristina i valori">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg>
+            </button>
+            <button class="icona" id="reg-chiudi" type="button" aria-expanded="true" title="Chiudi le regolazioni">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="reg-corpo">
+          <label class="campo campo-riga">
+            <span>Esposizione</span>
+            <select id="esposizione">
+              <option value="auto">Automatica</option>
+              <option value="manuale">Manuale</option>
+            </select>
+          </label>
+          <div class="valore">
+            <span>Velocità otturatore</span>
+            <output id="otturatore-val" for="otturatore">Automatica</output>
+          </div>
+          <input type="range" id="otturatore" min="0" max="100" value="50" aria-label="Velocità otturatore" disabled>
+          <div class="valore">
+            <span>ISO</span>
+            <output id="iso-val" for="iso">Automatica</output>
+          </div>
+          <input type="range" id="iso" min="100" max="3200" step="50" value="400" aria-label="ISO" disabled>
+
+          <label class="campo campo-riga">
+            <span>Bilanciamento del bianco</span>
+            <select id="wb">
+              <option value="auto">Automatico</option>
+              <option value="manuale">Manuale</option>
+            </select>
+          </label>
+          <div class="valore">
+            <span>Temperatura</span>
+            <output id="temperatura-val" for="temperatura">5.600 K</output>
+          </div>
+          <input type="range" id="temperatura" min="2000" max="10000" step="50" value="5600" aria-label="Temperatura del bianco" disabled>
+          <div class="valore">
+            <span>Tinta</span>
+            <output id="tinta-val" for="tinta">0</output>
+          </div>
+          <input type="range" id="tinta" min="-100" max="100" step="1" value="0" aria-label="Tinta del bianco" disabled>
+
+          <div class="reg">
+            <div class="reg-testa">
+              <span>Livello flash</span>
+              <div class="reg-destra">
+                <output id="flash-val" for="flash">0 %</output>
+                <button class="sw" id="flash-on" type="button" role="switch" aria-checked="false" aria-label="Livello flash"><i></i></button>
+              </div>
+            </div>
+            <input type="range" id="flash" min="0" max="100" value="30" aria-label="Livello flash" disabled>
+          </div>
+
+          <div class="reg">
+            <div class="reg-testa">
+              <span>Luminosità</span>
+              <div class="reg-destra">
+                <output id="luminosita-val" for="luminosita">0 %</output>
+                <button class="sw" id="luminosita-on" type="button" role="switch" aria-checked="true" aria-label="Luminosità"><i></i></button>
+              </div>
+            </div>
+            <input type="range" id="luminosita" min="-100" max="100" value="0" aria-label="Luminosità">
+          </div>
+
+          <div class="reg">
+            <div class="reg-testa">
+              <span>Tinta</span>
+              <div class="reg-destra">
+                <output id="tinta-colore-val" for="tinta-colore">0</output>
+                <button class="sw" id="tinta-on" type="button" role="switch" aria-checked="false" aria-label="Tinta colore"><i></i></button>
+              </div>
+            </div>
+            <input type="range" id="tinta-colore" min="-100" max="100" value="0" aria-label="Tinta colore" disabled>
+          </div>
+
+          <div class="reg">
+            <div class="reg-testa">
+              <span>Saturazione</span>
+              <div class="reg-destra">
+                <output id="saturazione-val" for="saturazione">0 %</output>
+                <button class="sw" id="saturazione-on" type="button" role="switch" aria-checked="true" aria-label="Saturazione"><i></i></button>
+              </div>
+            </div>
+            <input type="range" id="saturazione" min="-100" max="100" value="0" aria-label="Saturazione">
+          </div>
+
+          <div class="reg">
+            <div class="reg-testa">
+              <span>Vividezza</span>
+              <div class="reg-destra">
+                <output id="vividezza-val" for="vividezza">0 %</output>
+                <button class="sw" id="vividezza-on" type="button" role="switch" aria-checked="false" aria-label="Vividezza"><i></i></button>
+              </div>
+            </div>
+            <input type="range" id="vividezza" min="-100" max="100" value="0" aria-label="Vividezza" disabled>
+          </div>
+
+          <div class="reg">
+            <div class="reg-testa">
+              <span>Contrasto</span>
+              <div class="reg-destra">
+                <output id="contrasto-val" for="contrasto">0 %</output>
+                <button class="sw" id="contrasto-on" type="button" role="switch" aria-checked="true" aria-label="Contrasto"><i></i></button>
+              </div>
+            </div>
+            <input type="range" id="contrasto" min="-100" max="100" value="0" aria-label="Contrasto">
+          </div>
+
+          <div class="reg">
+            <div class="reg-testa">
+              <span>Gamma</span>
+              <div class="reg-destra">
+                <output id="gamma-val" for="gamma">1,0</output>
+                <button class="sw" id="gamma-on" type="button" role="switch" aria-checked="false" aria-label="Gamma"><i></i></button>
+              </div>
+            </div>
+            <input type="range" id="gamma" min="40" max="220" step="5" value="100" aria-label="Gamma" disabled>
+          </div>
+
+          <div class="reg">
+            <div class="reg-testa">
+              <span>Nitidezza</span>
+              <div class="reg-destra">
+                <output id="nitidezza-val" for="nitidezza">0 %</output>
+                <button class="sw" id="nitidezza-on" type="button" role="switch" aria-checked="false" aria-label="Nitidezza"><i></i></button>
+              </div>
+            </div>
+            <input type="range" id="nitidezza" min="0" max="100" value="0" aria-label="Nitidezza" disabled>
+          </div>
+        </div>
+      </section>
+
+      <section class="blocco">
+        <h2>Trasmissione</h2>
+        <label class="campo campo-riga">
+          <span>Fluidità</span>
+          <select id="fps">
+            <option value="30">30 fps</option>
+            <option value="25">25 fps</option>
+            <option value="24">24 fps</option>
+            <option value="20">20 fps</option>
+            <option value="15">15 fps</option>
+            <option value="10">10 fps</option>
+            <option value="5">5 fps</option>
+          </select>
+        </label>
+        <label class="campo campo-riga">
+          <span>Qualità</span>
+          <select id="qualita">
+            <option value="alta">Alta · 1280 × 720</option>
+            <option value="media">Media · 960 × 540</option>
+            <option value="bassa">Bassa · 640 × 360</option>
+          </select>
+        </label>
+        <div class="reg-testa">
+          <span>Schermo acceso</span>
+          <button class="sw" id="schermo-on" type="button" role="switch" aria-checked="true" aria-label="Mantieni lo schermo acceso"><i></i></button>
+        </div>
+      </section>
+    </div>
+  </aside>
+
+  <div class="velo" id="velo" hidden>
+    <div class="velo-carta">
+      <div class="velo-ico" aria-hidden="true">
+        <svg viewBox="0 0 64 64"><rect x="7" y="16" width="50" height="35" rx="9"/><circle cx="32" cy="33" r="12"/><path d="M23 16l3-5h12l3 5"/><path d="M12 52 52 12"/></svg>
+      </div>
+      <b id="velo-titolo">Webcam bloccata</b>
+      <span id="velo-dice">Consenti la fotocamera e riprova.</span>
+      <button class="pulsante" id="velo-azione" type="button">Riprova</button>
+    </div>
+  </div>
+</main>
+
+<script type="module" src="/vista.js"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+/* TRIVIA (19.11): gli argomenti come cartellini, la domanda col tempo che cala, le quattro risposte di carta e la pagella,
+   sul foglio dei giochi (../foglio.css). Giusta: verde a pennarello. Sbagliata: una riga rossa sopra. */
+
+.tv-corpo{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px;padding-top:2px}
+.tv-fondo{flex:none;display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
+.tv-schermo{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+
+/* la scelta dell'argomento */
+.tv-scelta h3,.tv-fine h3{margin:0;font:400 17px/1.1 var(--marker);color:var(--matita)}
+.tv-argomenti{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-content:start;overflow-y:auto;padding:4px 6px 6px 2px;scrollbar-width:thin}
+.tv-arg{display:flex;align-items:center;gap:7px;min-height:42px;padding:5px 9px;border:2px solid var(--nero);border-radius:3px;background:rgba(255,255,255,.4);font-size:14px;line-height:1.1;text-align:left;cursor:pointer;box-shadow:2px 2px 0 rgba(0,0,0,.16);transition:transform .15s cubic-bezier(.2,1.3,.4,1)}
+.tv-arg:nth-child(3n){transform:rotate(-.7deg)}
+.tv-arg:nth-child(4n+1){transform:rotate(.6deg)}
+.tv-arg .emo{height:22px;flex:none}
+.tv-arg[aria-pressed=true]{background:var(--giallo);transform:rotate(-1.5deg) scale(1.03)}
+.tv-arg.tutto{font:400 19px/1 var(--fa);text-transform:lowercase}
+@media (hover:hover){.tv-arg:hover{transform:translateY(-2px) rotate(-1deg)}}
+.tv-regole{margin:0;font-size:13px;line-height:1.35;color:var(--matita)}
+.tv-regole b{font:400 16px/1 var(--fa);color:var(--nero)}
+
+/* la domanda */
+.tv-su{display:flex;align-items:center;gap:12px;min-height:26px}
+.tv-conta{font:400 22px/1 var(--fa);white-space:nowrap}
+.tv-punti{display:flex;gap:5px}
+.tv-punti i{width:15px;height:15px;border:2px solid var(--nero);border-radius:50%;background:none}
+.tv-punti i.si{background:var(--verde);border-color:var(--verde)}
+.tv-punti i.no{background:var(--rosso);border-color:var(--rosso)}
+.tv-punti i.ora{background:var(--giallo)}
+.tv-diff{margin-left:auto;font:400 14px/1 var(--marker);color:var(--matita);white-space:nowrap}
+.tv-tempo{height:8px;border:2px solid var(--nero);border-radius:6px;overflow:hidden;background:rgba(255,255,255,.4)}
+.tv-tempo i{display:block;height:100%;width:100%;background:var(--rosso);transform-origin:0 50%}
+.tv-mezzo{flex:1;min-height:0;display:flex;gap:16px;align-items:center}
+.tv-q{flex:1;min-width:0;margin:0;font:400 27px/1.18 var(--fa);letter-spacing:.005em;overflow-wrap:anywhere}
+.tv-q.lunga{font-size:21px}
+.tv-foto{flex:none;width:250px;margin:0;transform:rotate(1.5deg)}
+.tv-foto img{display:block;width:100%;height:170px;object-fit:cover;border:6px solid #fff;box-shadow:0 3px 8px rgba(0,0,0,.4)}
+.tv-foto figcaption{margin-top:3px;font-size:10px;color:#5a544c;text-align:right}
+.tv-risposte{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
+.tv-r{position:relative;display:flex;align-items:center;gap:10px;min-height:54px;padding:6px 12px 6px 8px;border:2px solid var(--nero);border-radius:3px;background:rgba(255,255,255,.42);font-size:16px;line-height:1.15;text-align:left;cursor:pointer;box-shadow:3px 3px 0 rgba(0,0,0,.16);transition:transform .14s cubic-bezier(.2,1.3,.4,1),opacity .2s}
+.tv-r b{flex:none;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--nero);font:400 18px/1 var(--fa)}
+.fg .tv-r b{color:#fff}
+.tv-r:disabled{cursor:default}
+.tv-r.giusta{background:var(--verde);border-color:var(--verde);transform:rotate(-1deg) scale(1.02)}
+.fg .tv-r.giusta{color:#fff}
+.tv-r.giusta b{background:#fff}
+.fg .tv-r.giusta b{color:var(--verde)}
+.tv-r.sbagliata{opacity:.9}
+.tv-r.sbagliata::after{content:"";position:absolute;left:4%;right:4%;top:50%;height:4px;background:var(--rosso);transform:rotate(-2deg);border-radius:3px}
+.tv-r.spenta{opacity:.42}
+@media (hover:hover){.tv-r:not(:disabled):hover{transform:translateY(-2px) rotate(-.6deg)}}
+.tv-sotto{flex:none;display:flex;align-items:center;gap:14px;min-height:44px}
+.tv-nota{flex:1;min-width:0;margin:0;font-size:13px;line-height:1.3;color:var(--matita);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* la pagella */
+.tv-fine{align-items:center;justify-content:center;text-align:center;gap:8px}
+.tv-voto{margin:0;font:400 104px/.95 var(--fa);transform:rotate(-3deg)}
+.tv-voto small{font-size:40px}
+.tv-voto.perfetta{color:var(--verde)}
+.tv-conti{display:flex;gap:26px;margin:6px 0 10px;padding:0;list-style:none}
+.tv-conti li{font-size:13px;color:var(--matita)}
+.tv-conti b{display:block;font:400 28px/1 var(--fa);color:var(--nero)}
+.tv-fine .tv-azioni{display:flex;align-items:center;gap:20px}
+
+@media (max-width:840px),(max-height:640px){
+  .tv-argomenti{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tv-mezzo{flex-direction:column;align-items:stretch;justify-content:center;gap:10px;overflow-y:auto}
+  .tv-q{flex:none;font-size:22px}
+  .tv-q.lunga{font-size:18px}
+  .tv-foto{width:min(100%,300px);align-self:center}
+  .tv-foto img{height:150px}
+  .tv-risposte{grid-template-columns:1fr}
+  .tv-r{min-height:48px;font-size:15px}
+  .tv-voto{font-size:84px}
+  .tv-conti{gap:16px}
+  .tv-diff{display:none}
+}
+@media (prefers-reduced-motion:reduce){.tv-arg,.tv-r{transition:none}}

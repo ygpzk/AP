@@ -1,0 +1,192 @@
+/* «Chi sono», vivo (26.11.2026). pzkko: «fai questa zona stra animata e stra nel mio stile, animazione per cambio app,
+   switch e transizione in base all'utilizzo». La UX è di DeepSeek (design/chi-sono-ux-deepseek.md), il vestito è questo:
+   un foglio del muro col nastro agli angoli, la chiocciola che cambia mestiere con l'app in primo piano, la frase battuta
+   a macchina con l'evidenziatore, il nastro di carta della musica, l'etichetta dello stato. Lo muove chisono.js, che
+   carica anche questo file.
+   Sta in un file suo, fuori da src/site.css, apposta: il 26.11 tre sessioni lavoravano insieme sulla bacheca e una ha
+   riscritto site.css intero, cancellando questo blocco. I colori e i caratteri --pz-* vengono da site.css.
+   La zona ha un'altezza sua e dentro non c'è niente in flusso: quello che cambia non sposta la pagina. Le misure seguono
+   la pila dei fogli (.chi__pila è il container: è assoluta, quindi ha sempre una misura certa; su .chi, con la sola
+   min-height, Chrome dà cqh = 0 quando l'altezza della riga la decide lei). */
+.chi { --nastro: 76px; --fuori: 28px; --eroe-h: min(37cqh, 41cqw, 180px); --mx: 0; --my: 0; position: relative; isolation: isolate; min-width: 0; min-height: 324px; color: var(--pz-ink); color-scheme: light; }
+.chi__pila { position: absolute; inset: 12px 10px 14px; perspective: 900px; container: chi / size; }
+.chi__foglio { --hl: #ffd400; position: absolute; inset: 0; isolation: isolate; display: flex; flex-direction: column; align-items: flex-start; padding: 15px 18px 52px 20px; rotate: var(--r, -1deg); transform-origin: 50% 0;
+  transform: rotateX(calc(var(--my) * -2deg)) rotateY(calc(var(--mx) * 2.4deg)); transition: transform .5s cubic-bezier(.2, .8, .2, 1); }
+.chi__foglio::before { content: ""; position: absolute; inset: calc(var(--fuori) * -1); z-index: -1; pointer-events: none; border: 0 solid transparent;
+  border-image: url(/art/roulette/carta.webp) 300 fill / var(--nastro) stretch; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3)) drop-shadow(0 14px 16px rgba(0, 0, 0, .26)); }
+.chi__foglio[data-modo=chat] { --hl: #9db1ff; }
+.chi__foglio[data-modo=web] { --hl: #7fd4ff; }
+.chi__foglio[data-modo=crea] { --hl: #ff9aa8; }
+.chi__foglio[data-modo=disegno] { --hl: #ffb347; }
+.chi__foglio[data-modo=musica] { --hl: #7be495; }
+.chi__foglio[data-modo=file] { --hl: #ffc46b; }
+.chi__foglio[data-modo=gioco] { --hl: #e3a1ff; }
+.chi__foglio[data-modo=giro] { --hl: #9fe3c0; }
+.chi__foglio[data-modo=offline] { --hl: #d6d2c8; }
+.chi__foglio[data-stato=riposo], .chi__foglio[data-stato=giro], .chi__foglio[data-stato=offline] { --eroe-h: min(30cqh, 32cqw, 124px); }
+
+/* le scritte: l'etichetta a macchina, la voce a pennarello, la frase in Anton con la parola forte evidenziata */
+.chi__testa { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; min-height: 19px; max-width: 100%; }
+.chi__capo { font: 400 11px/1 var(--pz-mac); letter-spacing: .16em; text-transform: uppercase; color: var(--pz-matita); white-space: nowrap; }
+.chi__voce { display: inline-flex; align-items: center; gap: 6px; font: 400 17px/1 var(--pz-marker); color: var(--pz-rosso); rotate: -3deg; white-space: nowrap; }
+.chi__voce svg { width: 30px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.chi__frase { margin: 7px 0 0; max-width: 100%; font: 400 clamp(22px, 8cqw, 34px)/1 var(--pz-fa); text-transform: lowercase; letter-spacing: .005em; color: var(--pz-ink); }
+.chi__pre { display: block; white-space: pre-wrap; }
+.chi__chiave { display: block; width: fit-content; max-width: 100%; margin-top: 3px; font-size: min(17cqw, 62px, calc((100cqw - 44px) / (var(--n) * .47))); line-height: 1; white-space: nowrap; }
+.chi__hl { margin: 0 -.12em; padding: 0 .12em; background: linear-gradient(transparent 16%, color-mix(in srgb, var(--hl) 66%, transparent) 16% 92%, transparent 92%) 0 0 / 100% 100% no-repeat; }
+.chi__foglio[data-stato=riposo] .chi__frase { margin-top: 2px; }
+.chi__app { display: flex; align-items: center; gap: 10px; margin: 13px 0 0; max-width: calc(100% - var(--eroe-h) * var(--ar) - 2px); font: 400 14px/1.25 var(--pz-mac); color: var(--pz-testo); }
+.chi__app > span:last-child { min-width: 0; overflow-wrap: break-word; hyphens: auto; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.chi__icona { flex: 0 0 auto; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: #fffefa; box-shadow: 0 1px 1px rgba(0, 0, 0, .35), 0 6px 9px -3px rgba(0, 0, 0, .38); rotate: -7deg; }
+.chi__icona img { width: 40px; height: 40px; object-fit: contain; }
+.chi__icona b { font: 400 26px/1 var(--pz-fa); color: var(--pz-ink); }
+.chi__foglio[data-modo=altro] { --eroe-h: min(32cqh, 34cqw, 150px); }
+.chi__foglio[data-modo=altro] .chi__app { font-size: 16px; color: var(--pz-ink); }
+/* in pausa: la fila delle app aperte, appena accesa */
+.chi__fila { display: flex; gap: 9px; margin: 16px 0 0; max-width: calc(100% - var(--eroe-h) * var(--ar) - 2px); overflow: hidden; }
+.chi__fila img { flex: 0 0 auto; width: 26px; height: 26px; object-fit: contain; filter: grayscale(.85); opacity: .5; }
+.chi__bio { margin: 11px 0 0; max-width: calc(100% - var(--eroe-h) * var(--ar) - 4px); font: 400 13px/1.45 var(--pz-mac); color: var(--pz-testo); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+.chi__foglio[data-stato=riposo] .chi__bio { -webkit-line-clamp: 8; }
+
+/* la chiocciola: un adesivo vero del sito, attaccato storto in basso a destra */
+.chi__eroe { position: absolute; right: 14px; bottom: 50px; height: var(--eroe-h); aspect-ratio: var(--ar); rotate: 4deg; translate: calc(var(--mx) * 5px) calc(var(--my) * 4px); transition: translate .5s cubic-bezier(.2, .8, .2, 1); }
+.chi__adesivo { display: block; width: 100%; height: 100%; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .25)) drop-shadow(0 7px 8px rgba(0, 0, 0, .28)); animation: chi-respiro 4.6s ease-in-out infinite alternate; }
+.chi__adesivo.is-px { image-rendering: pixelated; }
+.chi__vivo { position: absolute; inset: 0; z-index: 1; pointer-events: none; transition: opacity 2.4s; }
+.chi__vivo i { font-style: normal; }
+@keyframes chi-respiro { to { transform: scale(1.03) rotate(-1.2deg); } }
+
+/* ── quello che si muove, modo per modo ── */
+/* codice: i segni che salgono dal portatile, il cursore dopo la parola */
+.chi__g { position: absolute; left: calc(-12% + var(--k) * 24%); top: -2%; font: 400 15px/1 var(--pz-mac); color: var(--pz-ink); opacity: 0; white-space: nowrap; animation: chi-sale 3.3s linear infinite; animation-delay: calc(var(--k) * -1.1s); }
+@keyframes chi-sale { 0% { opacity: 0; transform: translateY(10px) rotate(-8deg); } 15%, 70% { opacity: 1; } 100% { opacity: 0; transform: translateY(-34px) rotate(10deg); } }
+.chi__foglio[data-modo=codice] .chi__hl::after { content: ""; display: inline-block; width: .1em; height: .74em; margin-left: .1em; background: var(--pz-ink); vertical-align: -.02em; animation: chi-cursore 1s steps(1) infinite; }
+@keyframes chi-cursore { 50% { opacity: 0; } }
+/* chat: le nuvolette che scrivono */
+.chi__nuvola { position: absolute; left: -30%; top: 12%; display: flex; align-items: center; gap: 4px; padding: 8px 10px; background: #fffefa; border: 2.5px solid var(--pz-ink); border-radius: 16px 18px 18px 4px / 16px 16px 18px 6px; rotate: -6deg; animation: chi-pop 4.4s cubic-bezier(.3, 1.4, .5, 1) infinite; }
+.chi__nuvola i { width: 6px; height: 6px; border-radius: 50%; background: var(--pz-ink); animation: dcdot 1.2s infinite; }
+.chi__nuvola i:nth-child(2) { animation-delay: .15s; }
+.chi__nuvola i:nth-child(3) { animation-delay: .3s; }
+.chi__nuvola--due { left: auto; right: -5%; top: -24%; padding: 6px 8px; border-radius: 16px 16px 4px 18px / 16px 16px 6px 18px; rotate: 7deg; animation-delay: -2.2s; }
+@keyframes chi-pop { 0%, 8% { opacity: 0; scale: .4; } 16%, 80% { opacity: 1; scale: 1; } 92%, 100% { opacity: 0; scale: .9; } }
+/* registrare: la spia rossa e il mirino */
+.chi__rec { position: absolute; z-index: 2; left: -44%; bottom: 4%; display: inline-flex; align-items: center; gap: 5px; padding: 3px 7px 1px; border: 2px solid var(--pz-rosso); border-radius: 3px; background: rgba(255, 255, 255, .82); color: var(--pz-rosso); font: 400 12px/1.2 var(--pz-mac); letter-spacing: .14em; text-transform: uppercase; rotate: -8deg; }
+.chi__rec i { width: 8px; height: 8px; border-radius: 50%; background: var(--pz-rosso); animation: chi-cursore 1.4s steps(1) infinite; }
+.chi__mirino { position: absolute; inset: -7%; animation: chi-mirino 2.4s ease-in-out infinite alternate; }
+.chi__mirino i { position: absolute; width: 15px; height: 15px; border: 0 solid var(--pz-ink); }
+.chi__mirino i:nth-child(1) { left: 0; top: 0; border-width: 2.5px 0 0 2.5px; }
+.chi__mirino i:nth-child(2) { right: 0; top: 0; border-width: 2.5px 2.5px 0 0; }
+.chi__mirino i:nth-child(3) { left: 0; bottom: 0; border-width: 0 0 2.5px 2.5px; }
+.chi__mirino i:nth-child(4) { right: 0; bottom: 0; border-width: 0 2.5px 2.5px 0; }
+@keyframes chi-mirino { to { scale: 1.06; } }
+/* disegnare: la pennellata che si stende e si asciuga */
+.chi__pennellata { position: absolute; z-index: -1; left: -58%; bottom: -2%; width: 78%; height: 34%; overflow: visible; }
+.chi__pennellata path { fill: none; stroke: #ff8a1f; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 190; animation: chi-dipinge 3.8s ease-in-out infinite; }
+@keyframes chi-dipinge { 0% { stroke-dashoffset: 190; opacity: 1; } 45%, 78% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+/* ascoltare: le barre e le note */
+.chi__eq { position: absolute; left: -30%; bottom: 6%; display: flex; align-items: flex-end; gap: 4px; height: 36%; }
+.chi__eq i { width: 6px; height: 100%; border-radius: 3px; background: var(--pz-ink); transform-origin: 50% 100%; animation: chi-eq .9s ease-in-out infinite alternate; }
+.chi__eq i:nth-child(2) { animation-duration: .62s; animation-delay: -.3s; }
+.chi__eq i:nth-child(3) { animation-duration: 1.1s; animation-delay: -.7s; }
+.chi__eq i:nth-child(4) { animation-duration: .74s; animation-delay: -.1s; }
+.chi__eq i:nth-child(5) { animation-duration: .98s; animation-delay: -.5s; }
+@keyframes chi-eq { from { transform: scaleY(.16); } to { transform: scaleY(1); } }
+.chi__foglio[data-modo=musica] .chi__g { left: calc(-4% + var(--k) * 30%); top: -8%; font: 400 21px/1 var(--pz-marker); color: var(--pz-verde); }
+/* navigare: la chiocciola sulla tavola e l'onda a penna */
+.chi__onda { position: absolute; left: -42%; right: -8%; bottom: -9%; width: auto; height: 15px; }
+.chi__onda path { fill: none; stroke: var(--pz-penna); stroke-width: 3; stroke-linecap: round; vector-effect: non-scaling-stroke; animation: chi-onda 1.5s linear infinite; }
+@keyframes chi-onda { to { transform: translateX(-40px); } }
+.chi__foglio[data-modo=web] .chi__adesivo { animation: chi-surfa 2.4s ease-in-out infinite alternate; }
+@keyframes chi-surfa { from { transform: translateY(2px) rotate(-5deg); } to { transform: translateY(-5px) rotate(4deg); } }
+/* sistemare: i foglietti che passano da una pila all'altra */
+.chi__carte { position: absolute; left: -36%; bottom: 8%; width: 28%; aspect-ratio: 1 / 1.25; }
+.chi__carte i { position: absolute; inset: 0; background: repeating-linear-gradient(transparent 0 6px, rgba(27, 25, 22, .16) 6px 7px), #fffefa; box-shadow: 0 1px 2px rgba(0, 0, 0, .4); rotate: 9deg; animation: chi-mescola 3.6s cubic-bezier(.5, 0, .2, 1) infinite; }
+.chi__carte i:nth-child(1) { background-color: #ffe98a; rotate: -8deg; animation-delay: -2.4s; }
+.chi__carte i:nth-child(2) { background-color: #cfe6ff; rotate: 3deg; animation-delay: -1.2s; }
+@keyframes chi-mescola { 0%, 100% { transform: none; z-index: 1; } 30% { transform: translate(-58%, -12%) rotate(-12deg); z-index: 1; } 50% { transform: translate(-58%, -12%) rotate(-12deg); z-index: 3; } 80% { transform: none; z-index: 3; } }
+/* giocare: le stelle a pennarello */
+.chi__stella { position: absolute; left: calc(-20% + var(--k) * 44%); top: calc(-16% + var(--k) * var(--k) * 9%); font: 400 calc(17px + var(--k) * 4px)/1 var(--pz-marker); color: var(--pz-rosso); animation: chi-brilla 1.7s ease-in-out infinite; animation-delay: calc(var(--k) * -.55s); }
+@keyframes chi-brilla { 0%, 100% { opacity: .15; scale: .6; rotate: -20deg; } 50% { opacity: 1; scale: 1.15; rotate: 12deg; } }
+/* in ufficio, in pausa: il vapore del caffè */
+.chi__vapore { position: absolute; left: 12%; top: -46%; width: 62%; height: 50%; overflow: visible; }
+.chi__vapore path { fill: none; stroke: var(--pz-matita); stroke-width: 3.2; stroke-linecap: round; opacity: 0; animation: chi-vapore 3.2s ease-in-out infinite; }
+.chi__vapore path:nth-child(2) { animation-delay: -1.1s; }
+.chi__vapore path:nth-child(3) { animation-delay: -2.2s; }
+@keyframes chi-vapore { 0% { opacity: 0; transform: translateY(8px); } 35% { opacity: .75; } 100% { opacity: 0; transform: translateY(-12px); } }
+/* in giro: la strada tratteggiata che scorre sotto il fattorino */
+.chi__strada { position: absolute; left: -160%; right: -6%; bottom: -6%; width: auto; height: 10px; }
+.chi__strada path { fill: none; stroke: var(--pz-ink); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 11 13; vector-effect: non-scaling-stroke; animation: chi-strada 1.1s linear infinite; }
+@keyframes chi-strada { to { stroke-dashoffset: 24; } }
+.chi__foglio[data-modo=giro] .chi__adesivo { animation: chi-pedala .5s ease-in-out infinite alternate; }
+@keyframes chi-pedala { to { transform: translateY(-2.5px) rotate(-1.5deg); } }
+/* offline: dorme */
+.chi__foglio[data-modo=offline] .chi__g { left: calc(52% + var(--k) * 15%); top: calc(-4% - var(--k) * 15%); font: 400 calc(15px + var(--k) * 5px)/1 var(--pz-marker); color: var(--pz-matita); animation-duration: 4.8s; animation-delay: calc(var(--k) * -1.6s); }
+.chi__foglio[data-modo=offline] .chi__adesivo { filter: grayscale(1) opacity(.82) drop-shadow(0 6px 7px rgba(0, 0, 0, .22)); animation-duration: 7s; }
+.chi__foglio[data-modo=offline]::before { filter: saturate(.5) brightness(.96) drop-shadow(0 2px 2px rgba(0, 0, 0, .3)) drop-shadow(0 14px 16px rgba(0, 0, 0, .26)); }
+
+/* dopo otto minuti sulla stessa app, o da assente: il contorno si spegne e resta il respiro; non disturbare: tutto fermo */
+.chi[data-calma="1"] .chi__vivo, .chi[data-disc=idle] .chi__vivo { opacity: 0; }
+.chi[data-disc=dnd] .chi__vivo *, .chi[data-disc=dnd] .chi__adesivo, .chi[data-disc=dnd] .chi__hl::after { animation-play-state: paused; }
+.chi[data-disc=idle] .chi__adesivo { animation-duration: 8s; }
+
+/* ── il nastro di carta con la musica (l'unico collegamento vero della zona) ── */
+.chi__musica { position: absolute; z-index: 3; left: 0; bottom: 19px; display: flex; align-items: center; gap: 8px; max-width: calc(100% - 28px); min-height: 31px; padding: 5px 18px 3px 16px; color: var(--pz-ink); font: 400 14px/1.2 var(--pz-marker); text-decoration: none; rotate: -1.7deg; transform-origin: 0 50%; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .3)) drop-shadow(0 5px 6px rgba(0, 0, 0, .16)); transition: translate .2s cubic-bezier(.2, 1, .3, 1); }
+.chi__musica[hidden] { display: none; }
+.chi__musica::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(rgba(255, 255, 255, .4), rgba(255, 255, 255, 0) 40%, rgba(110, 90, 40, .2)), #e9d99b; clip-path: var(--pz-code); }
+.chi__musica::after { content: ""; position: absolute; inset: -7px 0; }
+.chi__nota { flex: 0 0 auto; color: var(--pz-verde); font-size: 17px; animation: chi-nota 1.1s ease-in-out infinite alternate; }
+@keyframes chi-nota { to { transform: translateY(-2px) rotate(-10deg); } }
+.chi__brano { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--pz-testo); }
+.chi__brano b { font: inherit; color: var(--pz-ink); }
+@media (hover: hover) { .chi__musica:hover { translate: 3px -1px; } .chi__musica:hover .chi__brano b { background: var(--pz-evidenzia); } }
+.chi__musica:focus-visible { outline: 3px solid var(--pz-giallo); outline-offset: 3px; }
+.chi__musica.is-entra { animation: chi-srotola .42s cubic-bezier(.2, .9, .3, 1) backwards; }
+.chi__musica.is-cambia .chi__brano { animation: chi-piano .2s backwards; }
+@keyframes chi-srotola { from { opacity: 0; clip-path: inset(0 100% 0 0); translate: -10px 0; } to { clip-path: inset(-20px -20px -20px 0); } }
+
+/* ── l'etichetta in rilievo: assente, non disturbare, offline ── */
+.chi__dymo { position: absolute; z-index: 4; top: 22px; right: 2px; padding: 6px 10px 4px; border-radius: 1.5px; background: linear-gradient(#2c2c2c, #111 34%, #1c1c1c); color: #f6f3ea; font: 400 11px/1 var(--pz-mac); letter-spacing: .2em; text-transform: uppercase; white-space: nowrap; rotate: 5deg; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18), 0 3px 6px rgba(0, 0, 0, .4); text-shadow: 0 1px 0 rgba(0, 0, 0, .7), 0 -1px 0 rgba(255, 255, 255, .22); animation: chi-schiaffo .34s cubic-bezier(.2, 1.2, .4, 1) backwards; }
+.chi__dymo[hidden] { display: none; }
+
+/* ── i passaggi (decisi dall'uso: chisono.js mette data-tr sul foglio che entra e su quello che esce) ──
+   nuova   = app mai vista in questa visita: il foglio vecchio si stacca, quello nuovo si attacca, la chiocciola arriva
+             di schiaffo, la frase si batte lettera per lettera, passa l'evidenziatore (mezzo secondo, più la scrittura)
+   ritorno = app già vista: i due fogli si scambiano di lato (280 ms), senza annuncio
+   luogo   = ufficio / in giro / offline: cambia tutto, il foglio nuovo dondola dal nastro (600 ms)
+   piano   = movimento ridotto o scheda nascosta: una dissolvenza da 150 ms */
+.chi__foglio.is-esce { pointer-events: none; }
+.chi__foglio[data-tr=nuova]:not(.is-esce) { animation: chi-attacca .5s cubic-bezier(.2, .9, .3, 1) backwards; }
+.chi__foglio[data-tr=nuova]:not(.is-esce) .chi__eroe, .chi__foglio[data-tr=luogo]:not(.is-esce) .chi__eroe { animation: chi-schiaffo .4s cubic-bezier(.2, 1.2, .4, 1) .16s backwards; }
+.chi__foglio[data-tr=nuova]:not(.is-esce) .chi__icona { animation: chi-schiaffo .34s cubic-bezier(.2, 1.2, .4, 1) .3s backwards; }
+.chi__foglio[data-tr=nuova]:not(.is-esce) .chi__voce { animation: chi-piano .2s .1s backwards; }
+.chi__foglio[data-tr=nuova]:not(.is-esce) .c { animation: chi-batte .01s steps(1) backwards; animation-delay: calc(.2s + var(--k) * 22ms); }
+.chi__foglio[data-tr=nuova]:not(.is-esce) .chi__hl { animation: chi-evidenzia .34s cubic-bezier(.3, .8, .3, 1) backwards; animation-delay: calc(.24s + var(--fine, 20) * 22ms); }
+.chi__foglio[data-tr=nuova]:not(.is-esce) .chi__vivo { animation: chi-piano .4s .6s backwards; }
+.chi__foglio.is-esce[data-tr=nuova] { transform-origin: 6% 0; animation: chi-strappa .4s cubic-bezier(.5, 0, .8, .4) forwards; }
+.chi__foglio[data-tr=ritorno]:not(.is-esce) { animation: chi-sfila .28s cubic-bezier(.2, .9, .3, 1) backwards; }
+.chi__foglio.is-esce[data-tr=ritorno] { animation: chi-sfila-via .24s cubic-bezier(.5, 0, .8, .4) forwards; }
+.chi__foglio[data-tr=luogo]:not(.is-esce) { animation: chi-dondola .6s cubic-bezier(.3, .7, .3, 1) backwards; }
+.chi__foglio.is-esce[data-tr=luogo] { transform-origin: 6% 0; animation: chi-strappa .32s cubic-bezier(.5, 0, .8, .4) forwards; }
+.chi__foglio[data-tr=piano]:not(.is-esce) { animation: chi-piano .15s backwards; }
+.chi__foglio.is-esce[data-tr=piano] { animation: chi-piano-via .15s forwards; }
+@keyframes chi-attacca { 0% { opacity: 0; transform: translateY(-24px) scale(1.09) rotate(-5deg); } 28% { opacity: 1; } 55% { transform: translateY(2px) scale(.99) rotate(.9deg); } }
+@keyframes chi-strappa { 30% { opacity: 1; transform: rotate(5deg); } 100% { opacity: 0; transform: translateY(54px) rotate(13deg); } }
+@keyframes chi-schiaffo { 0% { opacity: 0; transform: scale(1.7) rotate(14deg); } 60% { opacity: 1; transform: scale(.94) rotate(-2deg); } }
+@keyframes chi-batte { from { opacity: 0; } }
+@keyframes chi-evidenzia { from { background-size: 0% 100%; } }
+@keyframes chi-sfila { 0% { opacity: 0; transform: translateX(46px) rotate(3deg); } 30% { opacity: 1; } }
+@keyframes chi-sfila-via { to { opacity: 0; transform: translateX(-40px) rotate(-3deg) scale(.97); } }
+@keyframes chi-dondola { 0% { opacity: 0; transform: translateY(-12px) rotate(-9deg); } 30% { opacity: 1; transform: rotate(5deg); } 55% { transform: rotate(-2.6deg); } 78% { transform: rotate(1.1deg); } }
+@keyframes chi-piano { from { opacity: 0; } }
+@keyframes chi-piano-via { to { opacity: 0; } }
+
+@media (max-width: 679px) { .chi { min-height: 316px; } }
+/* movimento ridotto: niente giri, niente scrittura, niente foglio che segue il puntatore; resta la dissolvenza */
+@media (prefers-reduced-motion: reduce) {
+  .chi *, .chi *::before, .chi *::after { animation: none !important; transition: none !important; }
+  .chi__foglio { transform: none; }
+  .chi__eroe { translate: none; }
+  .chi__g, .chi__vapore, .chi__stella { display: none; }
+  .chi .chi__foglio[data-tr]:not(.is-esce) { animation: chi-piano .15s backwards !important; }
+  .chi .chi__foglio.is-esce { animation: chi-piano-via .15s forwards !important; }
+}

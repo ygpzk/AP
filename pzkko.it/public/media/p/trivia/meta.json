@@ -1,0 +1,52 @@
+{
+ "key": "trivia",
+ "cover": {
+  "w": 1280,
+  "h": 720
+ },
+ "shots": [
+  {
+   "file": "01.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "La scelta dell’argomento",
+   "en": "Choosing the topic"
+  },
+  {
+   "file": "02.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "Una domanda, col tempo che cala",
+   "en": "A question, with the timer running down"
+  },
+  {
+   "file": "03.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "Vero o falso: risposta giusta, pagata",
+   "en": "True or false: right answer, paid"
+  },
+  {
+   "file": "04.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "Una domanda con la foto",
+   "en": "A photo question"
+  },
+  {
+   "file": "05.webp",
+   "w": 1280,
+   "h": 720,
+   "it": "La pagella a fine partita",
+   "en": "The report card at the end"
+  },
+  {
+   "file": "06.webp",
+   "w": 390,
+   "h": 844,
+   "it": "Sul telefono",
+   "en": "On a phone"
+  }
+ ],
+ "notes": "Catture vere del gioco nuovo (19.11.2026) in funzione, contro la banca vera."
+}

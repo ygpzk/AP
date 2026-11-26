@@ -1,0 +1,26 @@
+/* PLOTTER: il foglio da disegno. Carta chiara dentro la cornice scura, i comandi in colonna, i colori come pastiglie.
+   Claude Code: .pl-* è il disegno, i ganci sono data-tela, data-algo, data-seme, data-densita, data-palette, data-svg. */
+
+.pl-scena{background:#dcd5c3;border:1.5px solid #2a2e26;min-height:380px}
+.pl-scena canvas{width:100%;height:100%}
+.pl-algo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.pl-algo .lab-tasto{padding:6px 4px}
+.pl-seme{display:flex;gap:6px;align-items:center}
+.pl-input{width:100%;min-width:0;padding:5px 7px;border:1.5px solid var(--lab-filo);background:rgba(255,255,255,.55);font:400 15px/1 "Special Elite","Courier New",monospace;color:var(--lab-inchiostro)}
+.pl-dens{display:grid;grid-template-columns:minmax(0,1fr) 44px;align-items:center;gap:7px}
+.pl-dens .lab-range{height:18px}
+.pl-dens .lab-valore{text-align:right;font-size:11px}
+.pl-palette{display:flex;gap:7px}
+.pl-pal{display:flex;flex:1;gap:2px;padding:3px;border:1.5px solid var(--lab-filo);background:rgba(255,255,255,.4);cursor:pointer}
+.pl-pal[aria-pressed="true"]{border-color:var(--lab-inchiostro);box-shadow:inset 0 0 0 1px var(--lab-inchiostro)}
+.pl-pal i{display:block;flex:1;height:18px}
+.lab-colonna--lato .lab-pannello{padding:8px 10px}
+
+@media (max-width:900px){
+  .pl-scena{min-height:320px}
+  .lab-colonna--lato{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;overflow:visible}
+}
+@media (max-width:560px){
+  .lab-colonna--lato{grid-template-columns:minmax(0,1fr)}
+  .pl-scena{min-height:270px}
+}

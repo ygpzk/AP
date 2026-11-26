@@ -1,0 +1,14 @@
+# Le dipendenze di Lezioni OS, provate il 24.11.2026 con Python 3.12 su Windows 10 e una RTX 3060 Ti.
+# Le installa installa.ps1 (con uv) in %LOCALAPPDATA%\Lezioni\venv.
+faster-whisper==1.2.1
+ctranslate2==4.8.3
+PyAudioWPatch==0.2.12.9
+mss==10.2.0
+numpy>=2.2,<3
+pillow>=11
+opencv-python-headless>=4.10
+matplotlib>=3.9
+markdown-it-py>=3,<5
+mdit-py-plugins>=0.4,<0.7
+# Parakeet e Silero VAD (ONNX), e ONNX Runtime per i modelli della lavagna
+onnx-asr[hub]>=0.12,<1

@@ -1,44 +1,71 @@
 # AP
 
-Repository di **albertopecchini.it**, il portfolio di Alberto Pecchini: diplomato geometra, web designer e graphic designer a Rivalta sul Mincio (MN).
+I siti e i programmi di Alberto Pecchini, in un repository solo. Ogni cartella ha il suo
+README (o il suo `LEGGIMI.txt`).
 
 ```
 AP/
-├─ albertopecchini.it/   il sito: sorgenti, contenuti, build (vedi il suo README)
-├─ package.json          scorciatoie per lanciare i comandi dalla radice, senza `cd`
-├─ esperimenti/          prove grafiche fuori dal sito (il preventivo Allianz per i mirtilli)
-├─ .github/workflows/    catture.yml: rifà le catture dei siti del portfolio quando cambiano
-└─ .vscode/              F5 in VS Code avvia il server di sviluppo e apre Edge sul sito
+├─ albertopecchini.it/   il portfolio: sito statico generato da dati e template (Vite)
+├─ pzkko.it/             il profilo Discord dal vivo, con la chat, i tavoli, le app e gli esperimenti
+├─ DirettaOS/            la regia della diretta: camere, scene, installer
+├─ LezioniOS/            registra, trascrive e impagina le lezioni
+├─ PostaOS/              la posta
+├─ PuliziaOS/            la pulizia dei registri
+├─ MatriciOS/            le matrici
+├─ esperimenti/          prove grafiche fuori dai siti (il preventivo Allianz per i mirtilli)
+├─ package.json          scorciatoie per i comandi del portfolio dalla radice
+├─ .github/workflows/    build.yml: il portfolio a ogni push; catture.yml: le catture dei siti ogni ora
+└─ .vscode/              F5 in VS Code avvia il portfolio e apre Edge
 ```
 
-
 ## Avvio
+
+### Portfolio
 
 ```bash
 cd albertopecchini.it
 npm install
 npm run dev       # http://localhost:5173
 npm run build     # genera albertopecchini.it/dist/
+npm run check     # controllo di riservatezza su dist/
 ```
 
-Richiede Node 20.19 o superiore. Dopo l’installazione gli stessi comandi funzionano anche
-dalla radice (`npm run dev`, `npm run build`, `npm run email`): il `package.json` qui sopra
-li inoltra alla cartella del sito.
+Richiede Node 20.19 o superiore. Gli stessi comandi (`npm run dev`, `npm run build`,
+`npm run email`) funzionano anche dalla radice: il `package.json` qui sopra li inoltra alla
+cartella del sito, che è spiegato per intero in
+[albertopecchini.it/README.md](albertopecchini.it/README.md).
 
-## Com’è fatto, in due righe
+### pzkko.it
 
-Sito statico senza framework: i contenuti stanno in `albertopecchini.it/src/data/`, i template in `src/templates/` restituiscono HTML, un plugin Vite scrive le pagine in `dist/` insieme a sitemap, robots e alle tavole SVG generate che fanno da segnaposto alle immagini. Nella stessa cartella vivono la funzione serverless del modulo contatti (`api/`) e il generatore di email (`tools/email-generator/`). Tutto il resto, dall’aggiunta di un progetto alla pubblicazione, è spiegato in [albertopecchini.it/README.md](albertopecchini.it/README.md).
+```bash
+cd pzkko.it
+npm install
+npm run serve     # http://localhost:5080, con le funzioni di api/
+npm run build     # controllo di sicurezza (CSP, segreti) + CSS
+npm run check     # solo il controllo di sicurezza
+```
 
-Il portfolio pubblica **solo i lavori reali**: i progetti dimostrativi restano nei dati ma
-non vanno online, e l’area Grafica è nascosta finché non c’è un lavoro vero da mostrare.
-Si riaccende tutto con due interruttori in `src/data/projects.js` — spiegati nel README del sito.
+Tutto il resto — le schede, le app, gli esperimenti, i raccoglitori di Instagram e TikTok —
+è in [pzkko.it/README.md](pzkko.it/README.md).
 
 ## Pubblicazione
 
-Il progetto Vercel `albertopecchini.it` è collegato a questo repository con *Root Directory* `albertopecchini.it`: ogni push su `main` va in produzione. Il sito è online su <https://www.albertopecchini.it>.
+Due progetti Vercel, tutti e due in produzione da `main`:
 
-Su `main` scrive anche GitHub Actions: ogni ora il workflow **Catture dei siti** controlla Rivalta, Cascina Fontana, Dario Donelli e questo sito e, se uno è cambiato, fa un commit con le catture nuove (vedi [albertopecchini.it/tools/catture](albertopecchini.it/tools/catture/README.md)). Prima di un push: `git pull --rebase`.
+| Progetto | Root Directory | Sito |
+|---|---|---|
+| `albertopecchini.it` | `albertopecchini.it` | <https://www.albertopecchini.it> |
+| `pzkko.it` | `pzkko.it` | <https://pzkko.it> |
+
+Ogni push su `main` produce un deploy di produzione; gli altri rami sono anteprime. Su `main`
+scrive anche GitHub Actions: **build.yml** costruisce il portfolio a ogni push, **catture.yml**
+ogni ora controlla Rivalta, Cascina Fontana, Dario Donelli, questo sito e pzkko.it e, se uno è
+cambiato, fa un commit con le catture nuove (vedi
+[albertopecchini.it/tools/catture](albertopecchini.it/tools/catture/README.md)). Prima di un
+push conviene un `git pull --rebase`.
 
 ## Storia
 
-Fino a settembre 2026 il repository ospitava il sito precedente (React); è stato azzerato e ricostruito da capo come sito statico. La storia dei commit è conservata.
+Fino a settembre 2026 il repository ospitava il sito precedente (React); il portfolio è stato
+azzerato e ricostruito da capo come sito statico. La storia dei commit è conservata, insieme a
+quella di pzkko.it e degli altri programmi.

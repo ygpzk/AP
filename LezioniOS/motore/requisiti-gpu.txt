@@ -1,0 +1,6 @@
+# Solo con una scheda video NVIDIA: cuBLAS e cuDNN per ctranslate2 4.8 (CUDA 12, cuDNN 9), e ONNX Runtime per GPU
+# nella versione fatta per le stesse librerie (la 1.25: dalla 1.28 vuole CUDA 13 e se le riscaricherebbe tutte).
+# Circa 2 GB; senza, Whisper gira sulla CPU con il modello small e i modelli ONNX sulla CPU.
+nvidia-cublas-cu12>=12.4,<13
+nvidia-cudnn-cu12>=9,<10
+onnxruntime-gpu[cuda,cudnn]==1.25.1
