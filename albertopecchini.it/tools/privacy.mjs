@@ -58,8 +58,14 @@ export function trova(dist) {
     for (const n of readdirSync(dir)) {
       const p = join(dir, n)
       const s = statSync(p)
-      if (s.isDirectory()) giro(p)
-      else if (TESTO.has(extname(n).toLowerCase()) && s.size < 20 << 20) {
+      if (s.isDirectory()) {
+        // /tempo/ è l'archivio: le pagine di allora (anche degli altri siti) sono
+        // congelate e possono contenere i dati che oggi il sito non pubblica.
+        // Non si possono correggere e non vanno controllate (come il vecchio
+        // strumento «controllo», che le saltava).
+        if (relative(dist, p).split(/[\\/]/)[0] === 'tempo') continue
+        giro(p)
+      } else if (TESTO.has(extname(n).toLowerCase()) && s.size < 20 << 20) {
         readFileSync(p, 'utf8').split('\n').forEach((r, i) => {
           for (const [tipo, re] of REGOLE) {
             const m = r.match(re)
