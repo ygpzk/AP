@@ -49,7 +49,7 @@ const marchio = html`
 // il credito di ogni pagina (CLAUDE.md): qui non c'è il piè di pagina del sito, la barra è il guscio
 const credito = `<a class="wb__credit" href="${esc(site.url)}" rel="author">Sito di ${esc(site.name)}</a>`
 
-const privacy = () => `<p class="wb__privacy">Ore e giorni in ora italiana, presi dai commit già pubblici su GitHub. Niente nomi né indirizzi email: degli autori si conta solo se c’era un assistente, e i commit automatici (le catture dei siti) non contano fra i momenti. Nelle pagine di allora l’indirizzo di casa e i numeri che non uso più non compaiono. Aggiornato il ${esc(lunga(aggiornato))}.</p>`
+const privacy = () => `<p class="wb__privacy">Ore e giorni in ora italiana, presi dai commit già pubblici su GitHub. Dei commit non si mostrano nomi né indirizzi email: degli autori si conta solo se c’era un assistente, e i commit automatici (le catture dei siti) non contano fra i momenti. Nelle pagine di allora non compaiono l’indirizzo di casa, i miei numeri e i profili social personali; restano i contatti pubblici degli enti e delle aziende, com’erano allora. Aggiornato il ${esc(lunga(aggiornato))}.</p>`
 
 function grafico(s, k) {
   const isto = istogramma(s, k)

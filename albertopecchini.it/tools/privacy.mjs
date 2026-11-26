@@ -9,6 +9,8 @@
 //                      indirizzi  la via, il CAP, le coordinate, i link alle mappe
 //                      luoghi     il paese, la provincia, i dintorni
 //                    e se trova qualcosa la build si ferma: su Vercel resta online la versione di prima.
+//                    /tempo/ ha un controllo suo (trovaTempo): nelle pagine di allora restano i nomi
+//                    dei paesi e i contatti pubblici di enti e aziende, ma non i dati personali.
 // Aggiungere qui ogni cosa nuova da non pubblicare.
 //
 //   node tools/privacy.mjs [dist] [--tutto]     il controllo a mano, con file e riga
@@ -42,6 +44,30 @@ export const REGOLE = [
   ['luoghi', /rivalta|mincio|mantova|mantovan|\(MN\)|rodigo|goito|curtatone|castellucchio|porto mantovano/i],
 ]
 
+// La macchina del tempo: le pagine di allora sono congelate, ma prima di pubblicarle sono ripulite
+// (privato.mjs, nel deposito): restano i nomi dei paesi e i contatti pubblici di enti e aziende.
+// Qui si controlla che non sia tornato dentro un dato personale. I contatti pubblici che restano
+// sono in queste due liste; un contatto nuovo fa fermare la build e si decide se aggiungerlo.
+const EMAIL_TEMPO = new Set([
+  'pzkko@yahoo.com',
+  'info@prolocorivalta.mn.it',
+  'cascinafontana@pec.it',
+  'segreteria@comune.rodigo.mn.it',
+  'info@cascinafontana.xyz',
+  'nome@email.it',
+  'la-tua-email@dominio.it',
+  'tua@email.it',
+  'tua.email@esempio.it',
+])
+const TELEFONI_TEMPO = new Set([
+  '3398995680', '393398995680', // Pro Loco Rivalta
+  '3510220302', '393510220302', // Rivalta Green Village
+  '0000000000', '39000000000', // segnaposto
+])
+const SOCIAL_TEMPO = /@albertoxpecchini|yungpzkko|(?:instagram|tiktok|threads|x|twitter|linkedin|github|facebook)\.com\/(?:@|in\/)?(?:albertoxpecchini|ygpzk)/gi
+const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g
+const TEL_LINK = /(?:wa\.me\/|tel:)(\+?\d[\d\s.-]*)/gi
+
 export async function ripulisci(dist) {
   for (const v of VIA) {
     if (v.endsWith('*')) {
@@ -59,10 +85,8 @@ export function trova(dist) {
       const p = join(dir, n)
       const s = statSync(p)
       if (s.isDirectory()) {
-        // /tempo/ è l'archivio: le pagine di allora (anche degli altri siti) sono
-        // congelate e possono contenere i dati che oggi il sito non pubblica.
-        // Non si possono correggere e non vanno controllate (come il vecchio
-        // strumento «controllo», che le saltava).
+        // /tempo/ è l'archivio: le pagine di allora hanno un controllo a parte
+        // (trovaTempo), perché lì i nomi dei paesi e i contatti pubblici restano.
         if (relative(dist, p).split(/[\\/]/)[0] === 'tempo') continue
         giro(p)
       } else if (TESTO.has(extname(n).toLowerCase()) && s.size < 20 << 20) {
@@ -79,9 +103,50 @@ export function trova(dist) {
   return trovati
 }
 
+// /tempo/: solo le pagine di allora (le cartelle «pagina»), non le pagine della macchina del tempo
+// che hanno i link ai commit su GitHub e al server di casa. Qui i luoghi restano; si cercano email,
+// telefoni e profili social personali. L'indirizzo di casa lo toglie già privato.mjs, nel deposito.
+export function trovaTempo(dist) {
+  const trovati = []
+  const base = join(dist, 'tempo')
+  if (!existsSync(base)) return trovati
+
+  const file = (p) => {
+    const rel = relative(dist, p).replace(/\\/g, '/')
+    readFileSync(p, 'utf8').split('\n').forEach((r, i) => {
+      const aggiungi = (tipo, pezzo) => trovati.push({ tipo, file: rel, riga: i + 1, pezzo: pezzo.slice(0, 140) })
+      for (const m of r.matchAll(SOCIAL_TEMPO)) aggiungi('tempo/social', m[0])
+      for (const m of r.matchAll(EMAIL)) if (!EMAIL_TEMPO.has(m[0].toLowerCase())) aggiungi('tempo/email', m[0])
+      for (const m of r.matchAll(TEL_LINK)) {
+        const numero = m[1].replace(/\D/g, '')
+        if (!TELEFONI_TEMPO.has(numero)) aggiungi('tempo/numeri', m[0])
+      }
+    })
+  }
+
+  // le pagine di allora stanno in tempo/<sito>/<giorno>/pagina/
+  const pagina = (dir) => {
+    for (const n of readdirSync(dir)) {
+      const p = join(dir, n)
+      const s = statSync(p)
+      if (s.isDirectory()) pagina(p)
+      else if (TESTO.has(extname(n).toLowerCase()) && s.size < 20 << 20) file(p)
+    }
+  }
+  const giro = (dir) => {
+    for (const n of readdirSync(dir)) {
+      const p = join(dir, n)
+      const s = statSync(p)
+      if (s.isDirectory()) (n === 'pagina' ? pagina : giro)(p)
+    }
+  }
+  giro(base)
+  return trovati
+}
+
 export function controlla(dist, { tutto = false } = {}) {
-  const trovati = trova(dist)
-  if (!trovati.length) { console.log(`privacy: ${relative(process.cwd(), dist) || dist}/ pulita (niente social, numeri, indirizzi, luoghi)`); return true }
+  const trovati = [...trova(dist), ...trovaTempo(dist)]
+  if (!trovati.length) { console.log(`privacy: ${relative(process.cwd(), dist) || dist}/ pulita (niente social, numeri, indirizzi, luoghi; tempo: niente dati personali nelle pagine di allora)`); return true }
   const perTipo = {}
   for (const t of trovati) (perTipo[t.tipo] ||= []).push(t)
   for (const [tipo, l] of Object.entries(perTipo)) {
