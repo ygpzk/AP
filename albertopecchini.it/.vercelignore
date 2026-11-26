@@ -1,0 +1,11 @@
+# Cose che non servono alla build su Vercel: il sito si genera da src/, public/
+# e dagli strumenti richiamati dalla build. Le cartelle di lavoro e le
+# dipendenze degli strumenti restano sul computer.
+node_modules
+dist
+.env.local
+.vercel
+tools/*/node_modules
+tools/*/lavoro
+tools/*/__pycache__
+tools/catture/stato.json

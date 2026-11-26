@@ -1,0 +1,37 @@
+{
+  "name": "albertopecchini.it",
+  "version": "1.0.0",
+  "description": "Portfolio di Alberto Pecchini — diplomato geometra, web designer, graphic designer. Sito statico generato da dati e template con Vite.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "online": "node tools/online.mjs",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "node tools/privacy.mjs dist",
+    "onion": "node tools/onion/pubblica.mjs",
+    "email": "node tools/email-generator/cli.js",
+    "email:new": "node tools/email-generator/cli.js new",
+    "email:list": "node tools/email-generator/cli.js list",
+    "email:profiles": "node tools/email-generator/cli.js profiles",
+    "email:theme": "node tools/email-generator/cli.js theme"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "devDependencies": {
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource-variable/cascadia-code": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/instrument-serif": "^5.3.0",
+    "exifr": "^7.1.3",
+    "sharp": "^0.35.5",
+    "vite": "^8.3.0"
+  },
+  "dependencies": {
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
+    "@fontsource-variable/hanken-grotesk": "^5.3.0"
+  }
+}
