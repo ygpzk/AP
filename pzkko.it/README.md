@@ -185,6 +185,125 @@ Il raccoglitore pubblica i dati solo quando su `origin` c'è già il
 `guard.mjs` con l'eccezione per `public/media/tt/`: prima, un push farebbe
 fallire la build su Vercel (anche quella di Instagram).
 
+## Lo Studio (26.11.2026)
+
+La scheda **Studio** sta in fondo alle schede e raccoglie dieci cose nuove,
+tutte vere: nessun mockup, nessun video. I motori sono in
+`public/assets/studio/`, il guscio in `index.js`, un esperimento per file in
+`esperimenti/`, il foglio in `studio.css` (caricato solo aprendo la scheda). Le
+schede si montano solo quando si avvicinano allo schermo e si fermano quando
+non si vedono.
+
+**Non è `/frontiera/`.** Il 26.11 sono nati tre giri diversi: lo Studio
+(questa scheda, coi dati dal vivo del profilo), la **Frontiera** a
+`/frontiera/` (WebGL, crittografia, fotocamera, voce, file locali, IA, WebXR) e
+le dieci app in-profile (Synth, Batteria, Theremin, Spettro, Specchio, Sabbia,
+Plotter, Livella, Dettatura, Tavolozza). Hanno nomi, indirizzi e motori
+separati: non vanno fusi.
+
+- **Adesso, sempre**: la scheda Adesso in Document Picture-in-Picture
+  (Chrome/Edge 116+), con stato, brano, barra e app aperte; se il browser non
+  la sa fare, resta il tasto per la scheda Attività.
+- **Quadro vivo**: i cinque colori veri della copertina diventano un quadro
+  Canvas 2D che respira.
+- **Diario di bordo**: IndexedDB, solo nel browser; stato, brano, app, luogo,
+  gioco e stato personale, con export JSON e svuotamento a doppio clic.
+- **Radio pzk**: Web Audio, una traduzione in 8 bit del brano (o dello stato),
+  con Media Session e analizzatore per le barre; parte solo su clic.
+- **Cartolina viva**: SVG 1200 × 630 con avatar, stato, luogo e brano; PNG
+  rasterizzato nel browser, download o Web Share.
+- **Costellazione**: tutti i progetti in Canvas (oggi 32), un filo per ogni
+  tecnologia in comune; trascinamento, tastiera, clic per aprire.
+- **La stanza**: SVG che si accende con i dati veri (lampada = online, casse =
+  Spotify, schermo = app, finestra = ora di Roma).
+- **Orologio solare**: alba, tramonto, mezzogiorno e altezza del sole sopra
+  Mantova, calcolati (NOAA) e ridisegnati ogni minuto.
+- **Meteo vivo**: `/api/meteo/` (Open-Meteo, cache dieci minuti) con
+  temperatura, vento, pioggia 12 h e un disegno per famiglia di tempo.
+- **Clip viva**: sei secondi di canvas registrati con MediaRecorder, pronti da
+  scaricare o condividere.
+
+`/studio` e `/studio/` rimandano a `/#studio` (come `/community`); la scheda
+non è mai una pagina a sé.
+
+Il lato dati e la UX sono di DeepSeek (OpenCode); la grafica è di Claude Code.
+Il brief è `design/studio-ux-deepseek.md`. Lo Studio non manda niente a
+nessuno: la presenza arriva da Lanyard, la musica e le app dalla vetrina, il
+meteo dal ponte `/api/meteo/`; il diario e la clip restano nel browser.
+
+Per il PiP e la condivisione, `vercel.json` apre
+`Permissions-Policy: picture-in-picture=(self)` e `web-share=(self)`. La CSP non
+è cambiata: nessun servizio nuovo, nessuna origine in più.
+
+## La Frontiera (26.11.2026)
+
+Il secondo giro del laboratorio, in una pagina sua: **`/frontiera/`**. Dieci
+tecnologie nuove, tutte vere, con i motori in `public/frontiera/esperimenti/` e
+il guscio in `public/frontiera/shell.js`. In fondo alla scheda **Studio** c'è il
+ponte `.lab__frontiera`; il collegamento apre la pagina in una scheda nuova,
+così fotocamera, microfono, MIDI e WebXR non hanno i limiti dell'iframe.
+
+- **Muro liquido**: WebGL2 con due texture ping-pong e shader; Canvas 2D di
+  riserva. Inchiostro neon che si disegna col puntatore.
+- **Battito**: Web Audio, sedici passi, convolver, oscilloscopio, tastiera e
+  Web MIDI.
+- **Due schede**: Pong fra due schede dello stesso browser con
+  BroadcastChannel; se resta sola, il muro gioca da solo.
+- **Busta**: AES-GCM in Web Crypto, chiave nel frammento del link o password
+  PBKDF2; il messaggio non passa da un server.
+- **Occhio**: BarcodeDetector e fotocamera, con il codice a mano e la foto come
+  riserva; nessuna immagine esce dal dispositivo.
+- **Parla col muro**: Web Speech per capire e rispondere, Canvas 2D per il muro;
+  c'è sempre la riga di testo.
+- **Zaino**: OPFS, file trascinati che restano nel browser; quota, download,
+  rimozione e `persist()`.
+- **Boomerang**: tre secondi di webcam con la cornice pzk, `captureStream` +
+  MediaRecorder, loop e download.
+- **Poeta**: la Prompt API locale di Chrome se c'è, altrimenti una catena di
+  Markov scritta a mano; nessuna rete.
+- **AR**: WebXR `immersive-ar` con hit-test e WebGL2; un tocco attacca un
+  adesivo pzk; su desktop resta il ripiego 3D.
+
+La fotocamera e il microfono partono solo dopo un gesto e si spengono alla
+chiusura; il riconoscimento vocale di Chrome può usare il servizio del browser
+(la nota lo dice). La Clip e il Boomerang restano Blob locali; la Busta non
+manda il frammento a nessuno. I motori e la UX sono di DeepSeek (OpenCode), la
+grafica di Claude Code: il brief è `design/frontiera-ux-deepseek.md`, il
+messaggio di consegna `design/MESSAGGIO-OPENCODE-LAB.md`. Per le prove:
+`npm run check`, `npm run build`, `npm run serve` e `/frontiera/`.
+
+## Le dieci app in-profile (26.11.2026)
+
+Il terzo giro, quello che si apre **dentro il profilo** con `qui:<chiave>` (i tavoli, il cercapersone e le app
+singole sono un'altra cosa). Motori e UX di DeepSeek (OpenCode), grafica di Claude Code; il brief è
+`design/games-lab-ux-deepseek.md`, la consegna `design/MESSAGGIO-OPENCODE-GAMES.md`.
+
+- **Synth**: Web Audio e Web MIDI. Due oscillatori per nota, ADSR, filtro risonante, arpeggiatore, oscilloscopio,
+  piano sullo schermo e tastiera MIDI vera.
+- **Batteria**: sedici passi, sei pezzi sintetizzati e swing, con il tempo sull'orologio dell'AudioContext
+  (look-ahead di 120 ms) invece che su `setInterval`.
+- **Theremin**: puntatore o inclinazione del telefono (DeviceOrientation), cinque scale, riverbero generato al volo.
+- **Spettro**: microfono, FFT 4096, spettro logaritmico, forma d'onda, nota con i centesimi e accordo probabile.
+- **Specchio**: webcam con sei effetti in un frammento GLSL (WebGL 1), foto negli appunti o in PNG.
+- **Sabbia**: automa cellulare 180 × 110 con sabbia, acqua, pietra, olio, fuoco e fumo.
+- **Plotter**: disegni generativi in un Web Worker, quattro algoritmi, stesso seme stesso disegno, SVG da salvare.
+- **Livella**: bolla, bussola e vibrazione con i sensori del telefono; sul computer si prova col mouse.
+- **Dettatura**: Web Speech in cinque lingue, punteggiatura a voce, copia e rilettura con SpeechSynthesis.
+- **Tavolozza**: armonie in OKLCH, contrasto WCAG AA/AAA, simulazione di protanopia, deuteranopia e tritanopia.
+
+Stanno in `public/games/<chiave>/` (motore + foglio) col guscio comune in `public/games/lab/` (`lab.js`,
+`lab.css`, `audio.js`) e il foglio col nastro dei tavoli (`games/foglio.css`). La finestra si distrugge alla
+chiusura e si ricostruisce alla riapertura; le preferenze restano in `localStorage` e microfono, camera, audio e
+worker si spengono con `alChiudere`. Le impostazioni sono in `public/assets/config.js` (`nuovo: '2026-11-26'`),
+i testi in `public/assets/i18n/it.js` e `en.js`, e le dieci app entrano da sole in «da provare» (la tessera ora
+ha 26 buchi).
+
+Per far funzionare microfono, camera, MIDI e sensori **solo per il sito**, `vercel.json` (e `scripts/dev.mjs`)
+aprono `Permissions-Policy: camera=(self), microphone=(self), midi=(self), accelerometer=(self),
+gyroscope=(self), magnetometer=(self)`; le altre origini restano fuori. La CSP non è cambiata. L'audio e il video
+non escono dal browser: le uniche eccezioni sono il riconoscimento vocale di Chrome/Edge (che può usare il
+servizio del browser, e la scheda lo dice) e la fotografia copiata negli appunti.
+
 ## I progetti veri dentro il sito (18.11)
 
 Il muro, il cercapersone e i tavoli sono quelli veri, col codice dell’ultimo commit
