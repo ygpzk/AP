@@ -8,7 +8,7 @@
 //                                così il brano cambia nel browser appena Spotify cambia, senza aspettare il CDN.
 // Se il pc non scrive da 3 minuti (spento, o il ponte giù): niente app, niente musica, «in giro per il mondo».
 import { createHmac } from 'node:crypto'
-import { archivioServer, ipDi, serverGiu, serverOpzioni, troppeRichieste } from './_server.mjs'
+import { archivioServer, ipDi, origineAmmessa, serverGiu, serverOpzioni, troppeRichieste } from './_server.mjs'
 
 const FILE = 'pzkko/vetrina.json', FILE_IMG = 'pzkko/vetrina-immagini.json'
 const FRESCO = 3 * 60_000, VITA_BIGLIETTO = 10 * 60_000
@@ -46,6 +46,9 @@ export default async function handler(req, res) {
     res.end(req.method === 'HEAD' ? undefined : JSON.stringify(corpo))
   }
   if (req.method !== 'GET' && req.method !== 'HEAD') { res.setHeader('Allow', 'GET, HEAD'); return manda(405, { ok: false, errore: 'solo GET' }) }
+  // (26.11: la vetrina è nata dopo la patch: anche lei accetta solo lo stesso sito,
+  // come gli altri ponti; una pagina di fuori non deve poter chiedere il biglietto)
+  if (!origineAmmessa(req)) return manda(403, { ok: false, errore: 'origine non ammessa' })
   if (troppeRichieste(`vetrina:${ipDi(req)}`, 240)) return manda(429, { ok: false, errore: 'troppe richieste: aspetta un momento' })
   let q
   try { q = new URL(req.url || '/', 'http://x').searchParams } catch { return manda(400, { ok: false, errore: 'richiesta sbagliata' }) }

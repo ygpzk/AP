@@ -28,7 +28,10 @@ if (csp !== cspAttesa()) errori.push('vercel.json: la Content-Security-Policy no
 // Instagram. I nomi possono stare solo nei posti che li mostrano davvero (la
 // configurazione, la scheda e i dati scaricati); il dominio personale e ogni
 // altro nome restano vietati.
-const ECCEZIONE_SOCIAL = /^(?:public\/assets\/(?:ig|config)\.js|public\/media\/ig\/)/i
+// (26.11: anche i dati della scheda TikTok, public/media/tt/. La scheda tt.js non
+// scrive nessun nome: legge l'account dai dati, e il nome del profilo, se contiene
+// il nome personale, il raccoglitore non lo scrive.)
+const ECCEZIONE_SOCIAL = /^(?:public\/assets\/(?:ig|config)\.js|public\/media\/(?:ig|tt)\/)/i
 const NOMI_SOCIAL = [
   decodifica('YWxiZXJ0b3hwZWNjaGluaQ=='), // Instagram, TikTok, Pinterest, SoundCloud
   decodifica('YWxiZXJ0b3BlY2NoaW5p'),      // Telegram
@@ -39,6 +42,13 @@ const VIETATI = [
   [new RegExp(DOMINIO.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), 'dominio vietato'],
   ...NOMI.map((n) => [new RegExp(n, 'i'), 'nome o account personale']),
   [/C:[\\/]+Users[\\/]+[A-Za-z0-9._-]+/i, 'percorso del computer'],
+  // (26.11: le cose nuove non devono portarsi dietro la rete di casa: l'IP
+  // privato scritto in una pagina dice com'è fatta la LAN, e non serve a chi legge)
+  [/\b192\.168\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\b/, 'indirizzo di rete privato'],
+  [/\b10\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\b/, 'indirizzo di rete privato'],
+  [/\b172\.(?:1[6-9]|2\d|3[01])\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\b/, 'indirizzo di rete privato'],
+  [/\b100\.(?:6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\b/, 'indirizzo Tailscale'],
+  [/\b[\w.+-]+@[\w-]+(?:\.[\w-]+)*\.[a-z]{2,}\b/i, 'indirizzo email'],
   [/-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/, 'chiave privata'],
   [/\bAKIA[0-9A-Z]{16}\b/, 'chiave AWS'],
   [/\bgh[pousr]_[A-Za-z0-9]{30,}\b/, 'token GitHub'],
