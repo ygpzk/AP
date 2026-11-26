@@ -32,6 +32,7 @@ export const crediti = {
         <li><strong>Il ritratto</strong> in home e nel saluto è un mio selfie allo specchio, in bianco e nero, lo stesso della pagina Studio. Il fondo è stato tolto con il modello <strong>remove-background</strong> di Bria, su Replicate; il volto è quello della fotografia, non ritoccato.</li>
         <li><strong>La figura scontornata</strong> della pagina Studio è una mia fotografia, scontornata con l’intelligenza artificiale su Replicate.</li>
         <li><strong>Le fotografie del Museo dei Mestieri del Fiume</strong> sono state scattate durante l’uscita didattica del 15 novembre 2025. Le due fotografie d’epoca riprendono materiale esposto nel museo. Chi compare nelle immagini ha dato l’autorizzazione, e le fotografie in cui si riconoscono insegnanti o guida sono state escluse o ritagliate.</li>
+        <li><strong>Le fotografie delle passioni</strong>, in <a href="/studio/#passioni">Studio</a>, vengono dai miei archivi personali: Dublino, il poligono, la cascina, la Sardegna. Non sono immagini generate.</li>
       </ul>`,
     },
     {

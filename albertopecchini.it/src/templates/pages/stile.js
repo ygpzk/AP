@@ -51,7 +51,7 @@ const board = (b, content) => html`
 // anthropic.com per uno): testata sottile, tutto centrato, il nome com'era ma
 // più piccolo, il titolo in Fraunces, le pillole, il terminale.
 function heroBoard(b) {
-  const rows = [['casa', 'rilievo, CAD, 3D'], ['sito', 'scritto a mano'], ['marchio', 'disegnato su griglia'], ['computer', 'virus, backup, Wi-Fi']]
+  const rows = [['casa', 'rilievi e disegni'], ['sito', 'scritto a mano'], ['marchio', 'disegnato a mano'], ['computer', 'virus, backup, stampanti']]
   return board(
     b,
     html`
@@ -68,8 +68,8 @@ function heroBoard(b) {
           <div class="bd-hero__pills" data-bd="up"><span class="pill"><span class="dot dot--live" aria-hidden="true"></span>${esc(site.availability.label)}</span></div>
           <p class="bd-hero__name" aria-hidden="true"><span>${esc(site.firstName)}</span> <span>${esc(site.lastName)}</span></p>
           <p class="sr-only">${esc(site.name)}</p>
-          <p class="bd-hero__title" data-bd="up" style="--d:120ms">Casa, sito, marchio. Un solo ${em('referente.')}</p>
-          <p class="bd-hero__lead" data-bd="up" style="--d:220ms">Diplomato geometra: rilevo e disegno edifici, scrivo siti web a mano, costruisco marchi. Lo stesso metodo, la stessa cura.</p>
+          <p class="bd-hero__title" data-bd="up" style="--d:120ms">Case, siti e marchi. Li seguo ${em('io.')}</p>
+          <p class="bd-hero__lead" data-bd="up" style="--d:220ms">Sono diplomato geometra. Faccio rilievi e disegno edifici, scrivo siti web senza temi pronti, disegno loghi. Il lavoro lo faccio io, dall’inizio alla fine.</p>
           <div class="bd-hero__actions" data-bd="up" style="--d:320ms">${button({ href: cta.href, label: cta.label, size: 'lg' })}${button({ href: '/portfolio/', label: 'Guarda i lavori', variant: 'ghost', size: 'lg' })}</div>
           <p class="bd-hero__copy" data-bd="fade" style="--d:420ms">Premi <kbd>C</kbd> per copiare la mia email</p>
           <div class="bd-term" data-bd="up" style="--d:520ms" aria-hidden="true">
@@ -328,7 +328,7 @@ function componentiBoard(b) {
                 ${rows.map(
                   (p, i) => html`
                     <li class="bd-row${i === 0 ? ' is-hover' : ''}" data-demo-row>
-                      <a class="bd-row__link" href="/portfolio/${p.slug}/"><span class="bd-row__n label">${pad(i + 1, 3)}</span><span class="bd-row__title">${esc(p.title)}</span><span class="bd-row__year label">${p.year}</span><span class="bd-row__type label">${esc(p.types.slice(0, 2).join(' · '))} · ${esc(allAreas[p.area].short)}</span></a>
+                      <a class="bd-row__link" href="/portfolio/${p.slug}/"><span class="bd-row__n label">${pad(i + 1, 3)}</span><span class="bd-row__title">${esc(p.title)}</span><span class="bd-row__year label">${p.year}</span><span class="bd-row__type label">${esc(p.types.slice(0, 2).join(', '))}, ${esc(allAreas[p.area].short)}</span></a>
                     </li>
                   `,
                 )}

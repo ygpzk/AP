@@ -5,7 +5,7 @@ import { COORDS } from '../layout.js'
 
 const field = ({ id, label, type = 'text', required = false, autocomplete, hint, inputmode, pattern, placeholder }) => html`
   <div class="field" data-field>
-    <label class="field__label label" for="${id}">${esc(label)}${required ? '<span class="field__req" aria-hidden="true"> *</span>' : '<span class="field__opt"> · facoltativo</span>'}</label>
+    <label class="field__label label" for="${id}">${esc(label)}${required ? '<span class="field__req" aria-hidden="true"> *</span>' : '<span class="field__opt"> (facoltativo)</span>'}</label>
     <input class="field__input" id="${id}" name="${id}" type="${type}"${required ? ' required aria-required="true"' : ''}${autocomplete ? ` autocomplete="${autocomplete}"` : ''}${inputmode ? ` inputmode="${inputmode}"` : ''}${pattern ? ` pattern="${pattern}"` : ''}${placeholder ? ` placeholder="${esc(placeholder)}"` : ''} aria-describedby="${id}-error${hint ? ` ${id}-hint` : ''}">
     ${hint && `<p class="field__hint" id="${id}-hint">${esc(hint)}</p>`}
     <p class="field__error" id="${id}-error" role="alert" hidden></p>
@@ -14,7 +14,7 @@ const field = ({ id, label, type = 'text', required = false, autocomplete, hint,
 
 const selectField = ({ id, label, options, required = false, placeholder }) => html`
   <div class="field" data-field>
-    <label class="field__label label" for="${id}">${esc(label)}${required ? '<span class="field__req" aria-hidden="true"> *</span>' : '<span class="field__opt"> · facoltativo</span>'}</label>
+    <label class="field__label label" for="${id}">${esc(label)}${required ? '<span class="field__req" aria-hidden="true"> *</span>' : '<span class="field__opt"> (facoltativo)</span>'}</label>
     <div class="field__select">
       <select class="field__input" id="${id}" name="${id}"${required ? ' required aria-required="true"' : ''} aria-describedby="${id}-error">
         <option value="">${esc(placeholder)}</option>
@@ -82,10 +82,10 @@ export function contattiPage() {
           <div class="cnt__intro">
             <p class="label" data-reveal="fade"><span class="sec-head__index">05</span>Contatti</p>
             <div class="cnt__head">
-              <h1 class="cnt__title" data-reveal="words">${splitWords('Parliamo del progetto.', { accent: ['progetto.'] })}</h1>
+              <h1 class="cnt__title" data-reveal="words">${splitWords('Scrivimi cosa ti serve.', { accent: ['serve.'] })}</h1>
               ${figurina('contatti', { className: 'cnt__fig', lazy: false })}
             </div>
-            <p class="lead" data-reveal="up">Due righe bastano: cosa ti serve ed entro quando. ${esc(site.contact.reply)}</p>
+            <p class="lead" data-reveal="up">Bastano due righe: cosa devi fare e per quando. ${esc(site.contact.reply)}</p>
 
             <p class="cnt__avail label" data-reveal="up"><span class="dot${site.availability.open ? ' dot--live' : ''}"></span>${esc(site.availability.label)}${site.availability.from ? ` — da ${esc(site.availability.from)}` : ''}</p>
 
@@ -108,7 +108,7 @@ export function contattiPage() {
                 <div class="field field--full" data-field>
                   <label class="field__label label" for="messaggio">Messaggio<span class="field__req" aria-hidden="true"> *</span></label>
                   <textarea class="field__input field__input--area" id="messaggio" name="messaggio" rows="6" required aria-required="true" minlength="20" maxlength="2000" aria-describedby="messaggio-error messaggio-hint"></textarea>
-                  <p class="field__hint" id="messaggio-hint"><span>Cosa ti serve, dove si trova l’immobile o l’attività, entro quando.</span><span class="label" data-form-counter>0 / 2000</span></p>
+                  <p class="field__hint" id="messaggio-hint"><span>Cosa ti serve, dov’è l’immobile o l’attività, per quando.</span><span class="label" data-form-counter>0 / 2000</span></p>
                   <p class="field__error" id="messaggio-error" role="alert" hidden></p>
                 </div>
                 <div class="hp" aria-hidden="true"><label for="sito">Lascia vuoto questo campo</label><input id="sito" name="sito" type="text" tabindex="-1" autocomplete="off"></div>
@@ -136,7 +136,7 @@ export function contattiPage() {
 
               <div class="form__done" data-form-done hidden tabindex="-1">
                 <span class="form__done-icon" aria-hidden="true">${icon('check')}</span>
-                <h2 class="h3">Richiesta pronta.</h2>
+                <h2 class="h3">Messaggio inviato.</h2>
                 <p data-form-done-text>Ti rispondo entro un giorno lavorativo.</p>
                 ${button({ label: 'Scrivi un altro messaggio', variant: 'ghost', iconName: 'plus', attrs: { 'data-form-again': true } })}
               </div>

@@ -7,12 +7,12 @@
 //  cambia un colore o una misura, va aggiornata anche la voce corrispondente.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const canvasTitle = 'Alberto Pecchini — sistema visivo'
+export const canvasTitle = 'Alberto Pecchini, sistema visivo'
 
 // Tavole sul piano: chiave, indice, titolo, posizione e misura in px.
 // 80 px tra una tavola e l'altra; il titolo del piano sta 330 px sopra.
 export const boards = [
-  { key: 'home', index: '00', title: 'Home · hero a 1440 px', short: 'Home', x: 0, y: 0, w: 1440, h: 900 },
+  { key: 'home', index: '00', title: 'Home, apertura a 1440 px', short: 'Home', x: 0, y: 0, w: 1440, h: 900 },
   { key: 'colore', index: '01', title: 'Colore', short: 'Colore', x: 1520, y: 0, w: 1440, h: 1640 },
   { key: 'tipografia', index: '02', title: 'Tipografia', short: 'Tipografia', x: 3040, y: 0, w: 1440, h: 1880 },
   { key: 'forma', index: '03', title: 'Forma e movimento', short: 'Forma', x: 4560, y: 0, w: 1440, h: 1440 },
@@ -40,7 +40,7 @@ export const palette = [
 export const themes = [
   {
     key: 'paper',
-    title: 'Tema carta · predefinito',
+    title: 'Tema carta, predefinito',
     attr: 'data-theme="paper"',
     contrast: 'Contrasto 4,8:1',
     accent: 'var(--c-minio)',
@@ -56,7 +56,7 @@ export const themes = [
   },
   {
     key: 'ink',
-    title: 'Tema inchiostro · sezioni',
+    title: 'Tema inchiostro, sezioni',
     attr: 'data-theme="ink"',
     contrast: 'Contrasto 6,6:1',
     accent: 'var(--c-minio-bright)',
@@ -74,7 +74,7 @@ export const themes = [
 
 export const colorNotes = {
   foot: 'Sopra il blu #007ACC si scrive in bianco (4,5:1, AA); sopra il blu acceso del tema scuro in inchiostro. L’unico altro colore è il verde #2F9E5B del punto «disponibile per nuovi incarichi».',
-  status: '#2F9E5B · solo stato',
+  status: '#2F9E5B, solo per lo stato',
 }
 
 // ── 02 · Tipografia ──────────────────────────────────────────────────────────
@@ -113,14 +113,14 @@ export const widths = [
 
 // Scala fluida: valore a 1440 px e intervallo minimo → massimo.
 export const scale = [
-  { token: '--fs-display', meta: '100 px · 44 → 112 · Fraunces 330', sample: 'Casa, sito, marchio.', style: 'display' },
+  { token: '--fs-display', meta: '100 px · 44 → 112 · Fraunces 330', sample: 'Case, siti e marchi.', style: 'display' },
   { token: '--fs-h1', meta: '74 px · 40 → 80 · Fraunces 340', sample: 'Ultimi lavori.', style: 'h1' },
-  { token: '--fs-h2', meta: '53 px · 30 → 56 · Fraunces 380', sample: 'Parliamo del tuo prossimo progetto.', accent: 'prossimo', style: 'h2' },
-  { token: '--fs-h3', meta: '32 px · 22 → 30 · Hanken 520', sample: 'Quattro aree, un interlocutore', style: 'h3' },
-  { token: '--fs-h4', meta: '22 px · 18 → 22', sample: 'Mobile progettato a parte, non ridotto', style: 'h4' },
-  { token: '--fs-lead', meta: '24 px · 18 → 24', sample: 'Rilevo un edificio al millimetro, scrivo l’interfaccia che lo racconta, disegno il marchio di chi lo abita.', style: 'lead' },
-  { token: '--fs-body', meta: '17 px · interlinea 1,6', sample: 'Struttura prima dell’estetica, contenuti veri prima dei layout, prestazioni misurate. Scrivo il codice a mano: niente temi, niente page builder.', style: 'body' },
-  { token: '--fs-small', meta: '15 px', sample: 'Raccontami il progetto in due righe. Rispondo entro un giorno lavorativo.', style: 'small' },
+  { token: '--fs-h2', meta: '53 px · 30 → 56 · Fraunces 380', sample: 'Scrivimi, rispondo io.', accent: 'io', style: 'h2' },
+  { token: '--fs-h3', meta: '32 px · 22 → 30 · Hanken 520', sample: 'Quattro aree di lavoro', style: 'h3' },
+  { token: '--fs-h4', meta: '22 px · 18 → 22', sample: 'Il telefono non è il desktop rimpicciolito', style: 'h4' },
+  { token: '--fs-lead', meta: '24 px · 18 → 24', sample: 'Sono diplomato geometra. Faccio rilievi e disegno edifici, scrivo siti web senza temi pronti, disegno loghi.', style: 'lead' },
+  { token: '--fs-body', meta: '17 px · interlinea 1,6', sample: 'Li ho progettati e scritti io, dal primo schizzo alla pubblicazione. Niente temi pronti e niente page builder: prima decidiamo cosa deve dire il sito, poi viene il resto.', style: 'body' },
+  { token: '--fs-small', meta: '15 px', sample: 'Due righe bastano: cosa ti serve e per quando. Rispondo entro un giorno lavorativo.', style: 'small' },
   { token: '--fs-label', meta: '13 px · Geist Mono', sample: 'Aggiornati al novembre 2026', style: 'label' },
 ]
 
