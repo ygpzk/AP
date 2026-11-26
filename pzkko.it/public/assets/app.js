@@ -87,7 +87,8 @@ let lang = detectLang()
 // le lingue oltre a italiano e inglese arrivano solo adesso, e solo quella scelta
 if (!I18N[lang]) await caricaLingua(lang).catch(() => {})
 if (!I18N[lang]) lang = 'en'
-let theme = store.get(THEME_KEY) === 'dark' ? 'dark' : 'light'
+// (26.11) chiaro di giorno e scuro di notte, al sole di Mantova: lo decide assets/tema.js, nell'<head>
+let theme = window.pzkkoTema?.adesso() || (store.get(THEME_KEY) === 'dark' ? 'dark' : 'light')
 const profile = structuredClone(CONFIG.profile)
 // (26.11) le voci che config.js tiene ferme: non le cambia né Lanyard né il profilo pubblico
 const fisso = (k) => Array.isArray(profile.fisso) && profile.fisso.includes(k)
@@ -1098,7 +1099,9 @@ const setLang = async (v) => {
   applyLang()
   loadCollectibles()
 }
-const toggleTheme = () => { theme = theme === 'dark' ? 'light' : 'dark'; store.set(THEME_KEY, theme); swap(applyTheme) }
+// a mano vale fino al prossimo cambio del sole (alba o tramonto), poi torna l'automatico
+const toggleTheme = () => { theme = theme === 'dark' ? 'light' : 'dark'; if (window.pzkkoTema) window.pzkkoTema.scegli(theme); else store.set(THEME_KEY, theme); swap(applyTheme) }
+window.pzkkoTema?.segui((t) => { theme = t; swap(applyTheme) })
 $('#lang-btn').addEventListener('click', (e) => showMenu(e.currentTarget, LANGS.map((l) => `<button role="menuitem" tabindex="-1" data-v="${l.code}"><img src="${flag(l.flag)}" alt="" width="20" height="15">${esc(l.name)}${l.code === lang ? `<span class="check">${I.check}</span>` : ''}</button>`).join(''), setLang))
 $('#more-btn').addEventListener('click', (e) => showMenu(e.currentTarget, `
   <button role="menuitem" tabindex="-1" data-v="user">${I.copy}${esc(ui().copyUser)}</button>
