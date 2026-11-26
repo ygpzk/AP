@@ -42,7 +42,7 @@ ${noindex ? '<meta name="robots" content="noindex, follow">' : `<link rel="canon
 <meta property="og:locale" content="${site.locale}">
 <meta property="og:title" content="${esc(fullTitle)}">
 <meta property="og:description" content="${esc(description)}">
-<meta property="og:url" content="${esc(url)}">
+${route.is404 ? '' : `<meta property="og:url" content="${esc(url)}">`}
 <meta property="og:image" content="${esc(abs(ogImage))}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -57,6 +57,8 @@ ${noindex ? '<meta name="robots" content="noindex, follow">' : `<link rel="canon
 <link rel="manifest" href="/site.webmanifest">
 ${!route.senzaFont && assets.preloadFonts.map((f) => `<link rel="preload" href="${f}" as="font" type="font/woff2" crossorigin>`)}
 ${assets.styles.map((s) => `<link rel="stylesheet" href="${s}">`)}
+<!-- CSP con impronta: se cambi questo script, aggiorna lo sha256 in vercel.json
+     (script-src). La pagina /live/euro/ ha la sua, sempre lì. -->
 <script>
 (function(d){var c=d.documentElement.classList;c.remove('no-js');c.add('js');
 try{if(sessionStorage.getItem('ap:nav')==='1'&&!matchMedia('(prefers-reduced-motion: reduce)').matches){c.add('is-entering','nav-in')}sessionStorage.removeItem('ap:nav')}catch(e){}
@@ -193,6 +195,7 @@ function footer({ route, compact = false }) {
   const label = compact ? closing.labelCompact : closing.label
   const availability = `${site.availability.label}${site.availability.from ? ` — da ${site.availability.from}` : ''}`
   const notes = [
+    { label: 'Sicurezza', href: '/sicurezza/' },
     { label: 'Privacy', href: '/privacy/' },
     { label: 'Cookie', href: '/cookie/' },
     { label: 'Crediti immagini', href: '/crediti/' },
@@ -228,7 +231,7 @@ function footer({ route, compact = false }) {
             <p class="foot-col__head label">Contatti</p>
             <ul class="foot-col__list">
               <li><a class="foot-link" href="${mail}">${esc(site.contact.email)}</a></li>
-              <li class="foot-col__note">${esc(site.contact.hours)} · ${esc(site.contact.reply)}</li>
+              <li class="foot-col__note">${esc(site.contact.hours)}. ${esc(site.contact.reply)}</li>
               <li class="foot-col__note">${esc(site.location.area)}</li>
             </ul>
           </div>
@@ -250,15 +253,16 @@ function footer({ route, compact = false }) {
           ${mascot('tartaruga', { className: 'foot-sign__guard foot-sign__guard--r' })}
           ${puppet('gazza', { className: 'foot-sign__guard foot-sign__pup foot-sign__pup--gazza' })}
           <p class="foot-sign__name">${esc(site.name)}</p>
-          <p class="foot-sign__tag">${esc(site.title)} · ${esc(site.tagline)}</p>
+          <p class="foot-sign__tag">${esc(site.title)}</p>
         </div>
 
         <div class="foot-legal" data-reveal="fade">
-          <p class="foot-legal__id label">© ${year} ${esc(site.name)} · ${esc(legal)}</p>
-          <p class="foot-legal__credit label"><a class="uline" href="${esc(site.url)}" rel="author">Sito di ${esc(site.name)}</a> · ${esc(site.edition)}</p>
-          <!-- Distintivo FrogDR col Domain Rating del dominio: è l'unica immagine
-               caricata da un server esterno (vedi «Risorse di terze parti» in /cookie/). -->
-          <a class="foot-legal__badge" href="https://frogdr.com/albertopecchini.it?utm_source=albertopecchini.it" target="_blank" rel="noopener"><img src="https://frogdr.com/albertopecchini.it/badge-dark-tiny.svg?round=1" alt="Domain Rating di albertopecchini.it misurato da FrogDR" width="224" height="20" loading="lazy" decoding="async"><span class="sr-only"> (nuova scheda)</span></a>
+          <p class="foot-legal__id label">© ${year} ${esc(site.name)}. ${esc(legal)}</p>
+          <p class="foot-legal__credit label"><a class="uline" href="${esc(site.url)}" rel="author">Sito di ${esc(site.name)}</a>. ${esc(site.edition)}</p>
+          <!-- 25.11.2026: il distintivo FrogDR non è più un'immagine caricata dai
+               loro server. Resta il collegamento, che parte solo se lo apri: così
+               aprire una pagina non fa richieste a nessun altro dominio. -->
+          <a class="foot-legal__dr label" href="https://frogdr.com/albertopecchini.it?utm_source=albertopecchini.it" target="_blank" rel="noopener">Domain Rating di FrogDR<span class="sr-only"> (si apre in una nuova scheda)</span></a>
           <a class="foot-top link" href="#main" data-top><span class="link__label">Torna su</span>${icon('arrowUp')}</a>
         </div>
 

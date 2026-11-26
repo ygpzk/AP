@@ -16,7 +16,8 @@ import { versioni } from '../../data/tempo.js'
 import { COORDS } from '../layout.js'
 
 // I siti mostrati nel carosello: prima quelli in evidenza, poi gli altri.
-const webSites = () => [...byArea('web')].filter((p) => p.web).sort((a, b) => Number(b.featured) - Number(a.featured))
+// (25.11.2026) i siti chiusi (web.chiuso, Better Call Pekko) restano nel portfolio ma non in vetrina: qui si contano i siti online
+const webSites = () => [...byArea('web')].filter((p) => p.web && !p.web.chiuso).sort((a, b) => Number(b.featured) - Number(a.featured))
 
 const NUMBERS = ['Zero', 'Un', 'Due', 'Tre', 'Quattro', 'Cinque', 'Sei', 'Sette', 'Otto', 'Nove', 'Dieci']
 const sitesPhrase = (n) => (n === 1 ? 'Un sito' : `${NUMBERS[n] || n} siti`)
@@ -30,27 +31,27 @@ const heroCommands = () => {
   return [
     {
       key: 'tutto',
-      rows: [['casa', 'rilievo, CAD, 3D'], ['sito', 'scritto a mano'], ['marchio', 'disegnato su griglia'], ['computer', 'virus, backup, Wi-Fi']],
+      rows: [['casa', 'rilievi e disegni'], ['sito', 'scritto a mano'], ['marchio', 'disegnato a mano'], ['computer', 'virus, backup, stampanti']],
       link: { href: '/servizi/', label: 'tutti i servizi' },
     },
     {
       key: 'casa',
-      rows: [['rilievo', 'al millimetro'], ['disegni', 'DWG e PDF in scala'], ['modello 3D', 'viste e assonometrie'], ['sorgenti', 'sempre consegnati']],
+      rows: [['rilievo', 'di quello che c’è'], ['disegni', 'DWG e PDF in scala'], ['modello 3D', 'per capirsi'], ['sorgenti', 'te li lascio']],
       link: { href: '/portfolio/tecnico/', label: 'i progetti tecnici' },
     },
     {
       key: 'sito',
-      rows: [['online adesso', sitesPhrase(online).toLowerCase()], ['codice', 'scritto a mano'], ['telefono', 'progettato a parte'], ['dominio', 'intestato a te']],
+      rows: [['online adesso', sitesPhrase(online).toLowerCase()], ['codice', 'scritto da me'], ['telefono', 'pensato prima'], ['dominio', 'a nome tuo']],
       link: { href: '#siti', label: 'apri i siti' },
     },
     {
       key: 'marchio',
-      rows: [['logo', 'disegnato su griglia'], ['versioni', 'positivo e negativo'], ['file', 'vettoriali'], ['stampa', 'PDF per la tipografia']],
+      rows: [['logo', 'disegnato su griglia'], ['versioni', 'positivo e negativo'], ['file', 'vettoriali'], ['stampa', 'PDF pronti']],
       link: { href: '/servizi/#grafica', label: 'i servizi grafici' },
     },
     {
       key: 'pc',
-      rows: [['virus', 'tolti, e non tornano'], ['dati', 'copiati prima di tutto'], ['Windows', 'installato e aggiornato'], ['stampante', 'che stampa']],
+      rows: [['virus', 'via, e restano via'], ['dati', 'copiati prima'], ['Windows', 'installato e aggiornato'], ['stampante', 'che stampa davvero']],
       link: { href: '/servizi/informatica/', label: 'l’assistenza informatica' },
     },
   ]
@@ -117,8 +118,8 @@ function hero() {
         <!-- il nome gigante com'era (Archivo stretto, il cognome in contorno che
              l'aragosta riempie d'inchiostro: client/ink.js), più piccolo di prima -->
         <p class="hero__name" aria-hidden="true"><span class="hero__word"><span>${esc(site.firstName)}</span></span> <span class="hero__word hero__word--2"><span data-ink-word>${esc(site.lastName)}</span></span></p>
-        <h1 class="hero__title" id="hero-title" data-reveal="words" style="--d:140ms"><span class="sr-only">${esc(site.name)} — ${site.roles.map((r) => esc(r.label)).join(', ')}. </span>${splitWords('Casa, sito, marchio. Un solo referente.', { accent: ['referente.'] })}</h1>
-        <p class="hero__lead" data-reveal="up" style="--d:460ms">Diplomato geometra: rilevo e disegno edifici, scrivo siti web a mano, costruisco marchi. Lo stesso metodo, la stessa cura.</p>
+        <h1 class="hero__title" id="hero-title" data-reveal="words" style="--d:140ms"><span class="sr-only">${esc(site.name)} — ${site.roles.map((r) => esc(r.label)).join(', ')}. </span>${splitWords('Case, siti e marchi. Li seguo io.', { accent: ['io.'] })}</h1>
+        <p class="hero__lead" data-reveal="up" style="--d:460ms">Sono diplomato geometra. Faccio rilievi e disegno edifici, scrivo siti web senza temi pronti, disegno loghi. Il lavoro lo faccio io, dall’inizio alla fine.</p>
         <div class="hero__actions" data-reveal="up" style="--d:540ms">
           ${button({ href: cta.href, label: cta.label, size: 'lg', magnetic: true })}
           ${button({ href: '/portfolio/', label: 'Guarda i lavori', variant: 'ghost', size: 'lg' })}
@@ -141,10 +142,10 @@ function mission() {
   return html`
     <section class="section mission" id="idea" data-section="Idea">
       <div class="container mission__grid">
-        <p class="label mission__label" data-reveal="fade"><span class="sec-head__index">01</span>L’idea</p>
+        <p class="label mission__label" data-reveal="fade"><span class="sec-head__index">01</span>In breve</p>
         <div class="mission__body">
           <p class="mission__text" data-reveal="words">
-            ${splitWords('Rilevo un edificio al millimetro, scrivo l’interfaccia che lo racconta, disegno il marchio di chi lo abita. Tre mestieri, un solo metodo: misurare, ordinare, rendere leggibile.', { accent: ['misurare,', 'ordinare,', 'leggibile.'] })}
+            ${splitWords('Mi chiamano per un rilievo, per un sito o per un marchio. A volte per tutte e tre le cose nello stesso lavoro. Il modo di procedere però è sempre quello: capire il problema, fare le cose con ordine e consegnarle in modo che si possano usare.', { accent: ['usare.'] })}
           </p>
           <div data-reveal="up">${textLink({ href: '/studio/', label: 'Chi sono' })}</div>
         </div>
@@ -163,7 +164,7 @@ function aree() {
   return html`
     <section class="section aree" id="aree" data-section="Aree">
       <div class="container">
-        ${sectionHead({ index: '02', label: 'Quattro aree', title: 'Un solo interlocutore, dallo stato di fatto alla messa online.', meta: `${total} servizi`, link: { href: '/servizi/', label: 'Tutti i servizi' } })}
+        ${sectionHead({ index: '02', label: 'Cosa faccio', title: 'Quattro aree di lavoro, spesso nello stesso progetto.', meta: `${total} servizi`, link: { href: '/servizi/', label: 'Tutti i servizi' } })}
         <ul class="aree__grid" data-spot-group>
           ${serviceAreas.map((a, i) => {
             const count = AREA_COUNT[a.key]?.() || 0
@@ -174,7 +175,7 @@ function aree() {
                   <p class="acard__top label"><span>${a.letter} — ${esc(a.title)}</span>${count ? `<span>${String(count).padStart(2, '0')} progetti</span>` : ''}</p>
                   ${figurina(AREA_FIG[a.key] || figName(a.key, a.services[0].title), { className: 'acard__fig' })}
                   <h3 class="acard__title h3">${esc(a.lead)}</h3>
-                  <p class="acard__list">${(a.footer || a.services.slice(0, 3).map((s) => s.title)).map((t) => esc(t)).join(' · ')}</p>
+                  <p class="acard__list">${(a.footer || a.services.slice(0, 3).map((s) => s.title)).map((t) => esc(t)).join(', ')}</p>
                   <span class="link acard__more"><span class="link__label">${count ? 'I progetti' : 'Il servizio'}</span>${icon('arrow')}</span>
                 </a>
               </li>
@@ -199,10 +200,10 @@ function selected() {
       <div class="container wsel__head">
         <div class="wsel__copy">
           <p class="label" data-reveal="fade"><span class="sec-head__index">03</span>Siti web</p>
-          <h2 class="h2 wsel__title" id="sel-title" data-reveal="words">${splitWords(`${sitesPhrase(list.length)}${allOnline ? ', tutti online.' : '.'}`, { accent: ['online.'] })}</h2>
+          <h2 class="h2 wsel__title" id="sel-title" data-reveal="words">${splitWords(`${sitesPhrase(list.length)}, ${allOnline ? 'online adesso.' : 'non tutti online.'}`, { accent: ['adesso.'] })}</h2>
         </div>
         <div class="wsel__aside">
-          <p class="wsel__lead lead" data-reveal="up">Progettati e scritti a mano, dal primo schizzo alla messa online. Niente temi, niente page builder: struttura prima dell’estetica, contenuti veri prima dei layout, prestazioni misurate.</p>
+          <p class="wsel__lead lead" data-reveal="up">Li ho progettati e scritti io, dal primo schizzo alla pubblicazione. Niente temi pronti e niente page builder: prima decidiamo cosa deve dire il sito, poi viene il resto. Le prestazioni le misuro con Lighthouse prima di dire che vanno bene.</p>
           <div class="wsel__tools" data-reveal="up" style="--d:80ms">
             ${button({ href: '/portfolio/web/', label: 'I progetti web', variant: 'dark' })}
             ${button({ href: '/servizi/#digitale', label: 'I servizi web', variant: 'ghost' })}
@@ -274,7 +275,6 @@ function strip() {
 // Quattro foto prese lungo la strada (la prima, due in mezzo, l'ultima) e il link.
 
 function tempo() {
-  return '' // 12.11.2026: la macchina del tempo non è più online (dentro ci sono numero e luoghi)
   const conFoto = versioni.filter((v) => v.d)
   if (!conFoto.length) return ''
   const prime = conFoto[0]
@@ -285,9 +285,9 @@ function tempo() {
     <section class="section tmz" id="tempo" data-theme="tint" data-section="Tempo" aria-labelledby="tmz-title">
       <div class="container tmz__grid">
         <div class="tmz__copy">
-          <p class="label" data-reveal="fade"><span class="sec-head__index">↺</span>Novità · la macchina del tempo</p>
-          <h2 class="h2 tmz__title" id="tmz-title" data-reveal="words">${splitWords(`Ho cambiato idea ${versioni.length} volte. Le ho tenute tutte.`, { accent: ['tenute', 'tutte.'] })}</h2>
-          <p class="lead tmz__lead" data-reveal="up">Dal ${data(prime.data)} ogni giorno di lavoro è una versione di questo sito, ricostruita dal codice di allora: Figma Make, Bootstrap Italia, il neroverde del Sassuolo, il viola, i giochi, i burattini… fino a questa. Una copia della Wayback Machine, con l’istogramma dei miei commit.</p>
+          <p class="label" data-reveal="fade"><span class="sec-head__index">↺</span>Novità, la macchina del tempo</p>
+          <h2 class="h2 tmz__title" id="tmz-title" data-reveal="words">${splitWords(`Ho rifatto questo sito ${versioni.length} volte. Le ho tenute tutte.`, { accent: ['tenute', 'tutte.'] })}</h2>
+          <p class="lead tmz__lead" data-reveal="up">Dal ${data(prime.data)} ogni giorno di lavoro è una versione di questo sito, ricostruita dal codice di allora: Figma Make, Bootstrap Italia, il neroverde del Sassuolo, il viola, i giochi, i burattini… fino a questa. È una copia della Wayback Machine, con l’istogramma dei miei commit.</p>
           <div class="tmz__actions" data-reveal="up" style="--d:80ms">
             ${button({ href: '/tempo/', label: 'Torna indietro nel tempo', variant: 'dark' })}
             <span class="label">${conFoto.length === versioni.length ? `${versioni.length} versioni` : `${conFoto.length} versioni pronte su ${versioni.length}`} · dal ${data(prime.data)} al ${data(ultime.data)}</span>
@@ -324,8 +324,8 @@ function banner() {
           <div class="banner__shade" aria-hidden="true"></div>
           <div class="banner__body">
             <p class="label banner__label" data-reveal="fade">Web design e sviluppo</p>
-            <h2 class="banner__title" data-reveal="words">${splitWords('Anche un sito si progetta in scala.', { accent: ['scala.'] })}</h2>
-            <p class="banner__lead" data-reveal="up">Mobile progettato a parte, HTML semantico accessibile da tastiera, dominio e sorgenti intestati a te.</p>
+            <h2 class="banner__title" data-reveal="words">${splitWords('Anche un sito ha le sue quote.', { accent: ['quote.'] })}</h2>
+            <p class="banner__lead" data-reveal="up">Il telefono lo progetto a parte, l’HTML lo scrivo a mano, dominio e file restano tuoi.</p>
             <div data-reveal="up" style="--d:80ms">${button({ href: '/servizi/#digitale', label: 'Come lavoro sul web', variant: 'light' })}</div>
           </div>
         </div>
@@ -337,16 +337,16 @@ function banner() {
 // ── 04 · Le tre convinzioni ──────────────────────────────────────────────────
 
 const CONVICTIONS = [
-  { title: 'Misurare', text: 'Prima di disegnare si misura: un rilievo al millimetro, un contenuto letto davvero, un marchio provato in piccolo. Si progetta bene solo ciò che si è misurato bene.' },
-  { title: 'Ordinare', text: 'Layer, griglie, cartelle, nomi. Quello che è in ordine si trova, si aggiorna e si consegna: a chi costruisce, a chi stampa, a chi verrà dopo di me.' },
-  { title: 'Rendere leggibile', text: 'Una tavola, una pagina, un logo devono capirsi al primo sguardo, da chi li usa e da chi li paga. Meno effetti, più regole; e le regole scritte.' },
+  { title: 'Prima guardo, poi disegno', text: 'Un rilievo, un sito, un logo: prima di aprire AutoCAD o l’editor guardo com’è la situazione. Se salto questo passaggio, sbaglio.' },
+  { title: 'Le cose in ordine si trovano', text: 'Layer con un nome, cartelle che si capiscono, file versionati. Non è pignoleria: se devo riaprire un lavoro dopo un anno, devo ritrovarlo.' },
+  { title: 'Deve capirlo anche chi non è del mestiere', text: 'Una tavola, una pagina, un logo: se il committente deve chiedere spiegazioni, ho sbagliato qualcosa.' },
 ]
 
 function convictions() {
   return html`
     <section class="section conv" id="convinzioni" data-theme="tint" data-section="Convinzioni">
       <div class="container">
-        ${sectionHead({ index: '04', label: 'Convinzioni', title: 'Tre regole, per un rilievo come per un sito.', link: { href: '/metodo/', label: 'Il metodo nel dettaglio' } })}
+        ${sectionHead({ index: '04', label: 'Come lavoro', title: 'Tre cose che faccio sempre.', link: { href: '/metodo/', label: 'Il metodo nel dettaglio' } })}
         <ol class="conv__grid">
           ${CONVICTIONS.map(
             (c, i) => html`
@@ -369,7 +369,7 @@ function method() {
   return html`
     <section class="section mth" id="metodo" data-section="Metodo">
       <div class="container">
-        ${sectionHead({ index: '05', label: 'Metodo di lavoro', title: 'Sette fasi, sempre le stesse.', lead: 'Dal primo incontro all’assistenza dopo la consegna: sai sempre a che punto siamo e cosa succede dopo.', link: { href: '/metodo/', label: 'Il metodo nel dettaglio' } })}
+        ${sectionHead({ index: '05', label: 'Metodo di lavoro', title: 'Come lavoro, passo per passo.', lead: 'Dal primo incontro alla consegna. Sai cosa succede e quando, senza sorprese.', link: { href: '/metodo/', label: 'Il metodo nel dettaglio' } })}
         <div class="mth__scroll" role="region" aria-label="Le sette fasi del metodo" data-scroll-region data-reveal="fade">
           <ol class="mth__track">
             ${steps.map(
@@ -403,7 +403,7 @@ function numbers() {
     <section class="section nums" data-theme="ink" data-section="Numeri" aria-labelledby="nums-title">
       <div class="container">
         <div class="nums__head">
-          <p class="label"><span class="sec-head__index">06</span>Numeri e dati</p>
+          <p class="label"><span class="sec-head__index">06</span>Numeri</p>
           <h2 class="sr-only" id="nums-title">Numeri dello studio</h2>
           <p class="label nums__note">Aggiornati al ${new Date().toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}</p>
         </div>
@@ -422,14 +422,17 @@ function studio() {
         <div class="std__photo">${media(photos.portrait, { ratio: '4/5', parallax: true })}</div>
         <div class="std__copy">
           <p class="label" data-reveal="fade"><span class="sec-head__index">07</span>Studio</p>
-          <h2 class="h2 std__title" data-reveal="words">${splitWords(bio.headline, { accent: ['codice,', 'sezione.'] })}</h2>
+          <h2 class="h2 std__title" data-reveal="words">${splitWords(bio.headline, { accent: ['giorno.'] })}</h2>
           <p class="lead" data-reveal="up">${esc(bio.paragraphs[2])}</p>
           <dl class="std__facts" data-reveal="up">
             ${facts.slice(0, 4).map((f) => `<div><dt class="label">${esc(f.label)}</dt><dd>${esc(f.value)}</dd></div>`)}
           </dl>
           <div class="std__sign" data-reveal="up">
             ${signature()}
-            ${button({ href: '/studio/', label: 'Chi sono', variant: 'ghost' })}
+            <div class="std__links">
+              ${button({ href: '/studio/', label: 'Chi sono', variant: 'ghost' })}
+              ${textLink({ href: '/studio/#passioni', label: 'Le mie passioni' })}
+            </div>
           </div>
         </div>
       </div>

@@ -51,10 +51,10 @@ export function portfolioPage() {
       crumbs: [{ label: 'Home', href: '/' }, { label: 'Portfolio', href: '/portfolio/' }],
       index: '01',
       label: 'Portfolio',
-      title: 'Tutto il lavoro, in un indice.',
-      accent: ['indice.'],
-      lead: 'Rilievi, pratiche e modelli. Siti web. Marchi e stampati. Filtra per categoria, anno, settore, tecnologia o tipologia: ogni progetto apre il proprio case study.',
-      meta: `${count(projects.length)} progetti · ${years().at(-1)} — ${years()[0]}`,
+      title: 'I lavori, tutti insieme.',
+      accent: ['insieme.'],
+      lead: 'Rilievi, pratiche e modelli. Siti web. Loghi e stampati. Filtra per categoria, anno, settore, tecnologia o tipologia: ogni progetto ha la sua scheda.',
+      meta: `${count(projects.length)} progetti, ${years().length === 1 ? `tutti del ${years()[0]}` : `${years().at(-1)} — ${years()[0]}`}`,
     })}
 
     <section class="pf" data-filters aria-label="Progetti">
@@ -94,7 +94,7 @@ export function portfolioPage() {
 
         <div class="pf__empty" data-filter-empty hidden>
           <p class="h3">Nessun progetto con questa combinazione.</p>
-          <p>Prova a togliere un filtro: il portfolio cresce un progetto alla volta.</p>
+          <p>Togli un filtro: il portfolio cresce un progetto alla volta.</p>
           ${button({ label: 'Azzera i filtri', variant: 'ghost', iconName: 'close', attrs: { 'data-filter-reset': true } })}
         </div>
 
@@ -135,10 +135,10 @@ export function tecnicoPage() {
       crumbs: [{ label: 'Home', href: '/' }, { label: 'Portfolio', href: '/portfolio/' }, { label: 'Tecnico', href: '/portfolio/tecnico/' }],
       index: 'A',
       label: 'Progetti tecnici',
-      title: 'Misurato, disegnato, depositato.',
-      accent: ['depositato.'],
-      lead: 'Rilievi, progetti, pratiche edilizie e catastali, modelli 3D e BIM, cantieri. Ogni scheda riporta committente, luogo, strumenti e risultato: come un cartiglio.',
-      meta: `${count(list.length)} progetti · ${count(allTypes.length)} tipologie`,
+      title: 'Rilievi, disegni e pratiche.',
+      accent: ['pratiche.'],
+      lead: 'Rilievi, progetti, pratiche edilizie e catastali, modelli 3D e BIM, cantieri. Ogni scheda riporta committente, strumenti e risultato, come un cartiglio.',
+      meta: `${count(list.length)} progetti, ${count(allTypes.length)} tipologie`,
     })}
 
     <section class="tec" data-filters>
@@ -157,7 +157,7 @@ export function tecnicoPage() {
             (p, i) => html`
               <article class="tsheet"${filterAttrs(p)}${i % 2 ? ' data-flip' : ''}>
                 <div class="tsheet__media">
-                  <a href="${projectHref(p)}" data-cursor="Apri" aria-label="${esc(p.title)} — apri il case study" tabindex="-1">
+                  <a href="${projectHref(p)}" data-cursor="Apri" aria-label="${esc(p.title)}, apri la scheda del progetto" tabindex="-1">
                     ${media(p.cover, { ratio: '4/3', caption: null, lazy: i > 0 })}
                   </a>
                 </div>
@@ -167,7 +167,7 @@ export function tecnicoPage() {
                   <p class="tsheet__sum">${esc(p.summary)}</p>
                   ${dataSheet(p, { compact: true })}
                   <p class="tsheet__result"><span class="label">Risultato</span>${esc(p.result)}</p>
-                  ${textLink({ href: projectHref(p), label: 'Apri il case study' })}
+                  ${textLink({ href: projectHref(p), label: 'Apri la scheda' })}
                 </div>
               </article>
             `,
@@ -183,8 +183,8 @@ export function tecnicoPage() {
             <div class="container cmp-sec__grid">
               <div class="cmp-sec__copy">
                 <p class="label"><span class="sec-head__index">±</span>Prima / dopo</p>
-                <h2 class="h2" data-reveal="words">${splitWords('Lo stesso fronte, due stati.', { accent: ['due', 'stati.'] })}</h2>
-                <p class="lead" data-reveal="up">Trascina il cursore per confrontare lo stato di fatto con il progetto di recupero. Stessa geometria, stesse quote: cambia solo ciò che l’intervento ha toccato.</p>
+                <h2 class="h2" data-reveal="words">${splitWords('Lo stesso fronte, prima e dopo.', { accent: ['dopo.'] })}</h2>
+                <p class="lead" data-reveal="up">Trascina il cursore per confrontare lo stato di fatto con il progetto di recupero. Stessa geometria, stesse quote: cambia solo quello che l’intervento ha toccato.</p>
                 ${textLink({ href: projectHref(showcase), label: 'Il progetto completo' })}
               </div>
               ${compare(showcase.compare)}
@@ -228,10 +228,10 @@ export function webPage() {
         crumbs: [{ label: 'Home', href: '/' }, { label: 'Portfolio', href: '/portfolio/' }, { label: 'Web', href: '/portfolio/web/' }],
         index: 'B',
         label: 'Progetti web',
-        title: 'Siti che si caricano, si leggono, si aggiornano.',
-        accent: ['aggiornano.'],
-        lead: 'Ogni progetto parte da un problema concreto e finisce online: qui trovi obiettivo, soluzione, tecnologie e — quando il sito è pubblico — il link per provarlo.',
-        meta: `${count(list.length)} progetti · ${count(list.filter((p) => p.web?.url).length)} online`,
+        title: 'Siti fatti a mano, online.',
+        accent: ['online.'],
+        lead: 'Ogni progetto parte da un problema concreto e finisce online: qui trovi obiettivo, soluzione, tecnologie e, quando il sito è pubblico, il link per provarlo.',
+        meta: `${count(list.length)} progetti, ${count(list.filter((p) => p.web?.url).length)} online`,
         fig: 'computer-codice',
       })}
 
@@ -248,13 +248,13 @@ export function webPage() {
                   <dl class="wproj__facts">
                     <div><dt class="label">Cliente</dt><dd>${esc(p.client)}</dd></div>
                     <div><dt class="label">Settore</dt><dd>${esc(p.sector)}</dd></div>
-                    <div class="wproj__wide"><dt class="label">Obiettivo</dt><dd>${esc(p.goal)}</dd></div>
-                    <div class="wproj__wide"><dt class="label">Soluzione</dt><dd>${esc(p.strategy)}</dd></div>
+                    <div class="wproj__wide"><dt class="label">Cosa serviva</dt><dd>${esc(p.goal)}</dd></div>
+                    <div class="wproj__wide"><dt class="label">Come l’ho fatto</dt><dd>${esc(p.strategy)}</dd></div>
                   </dl>
                   ${tagList(p.technologies)}
                   <div class="wproj__actions">
-                    ${button({ href: projectHref(p), label: 'Case study', variant: 'light' })}
-                    ${p.web.url ? button({ href: p.web.url, label: 'Visita il sito', variant: 'ghost', iconName: 'arrowUpRight', external: true }) : `<span class="label wproj__offline">Sito dimostrativo · non online</span>`}
+                    ${button({ href: projectHref(p), label: 'La scheda', variant: 'light' })}
+                    ${p.web.url ? button({ href: p.web.url, label: 'Visita il sito', variant: 'ghost', iconName: 'arrowUpRight', external: true }) : `<span class="label wproj__offline">${p.web.chiuso ? `Chiuso il ${esc(p.web.chiuso)} · in archivio` : 'Sito dimostrativo · non online'}</span>`}
                   </div>
                 </div>
               </div>
@@ -294,10 +294,10 @@ export function graficaPage() {
       crumbs: [{ label: 'Home', href: '/' }, { label: 'Portfolio', href: '/portfolio/' }, { label: 'Grafica', href: '/portfolio/grafica/' }],
       index: 'C',
       label: 'Progetti grafici',
-      title: 'Marchi costruiti, non decorati.',
-      accent: ['costruiti,'],
+      title: 'Loghi e stampati.',
+      accent: ['stampati.'],
       lead: 'Identità visive, restyling, manifesti, packaging, segnaletica, modelli. Ogni marchio ha una griglia dichiarata, ogni sistema un manuale breve.',
-      meta: `${count(list.length)} progetti · ${count(allTypes.length)} tipologie`,
+      meta: `${count(list.length)} progetti, ${count(allTypes.length)} tipologie`,
     })}
 
     <section class="gra">
@@ -318,11 +318,11 @@ export function graficaPage() {
                   <p class="gproj__sub serif-i">${esc(p.subtitle)}</p>
                 </div>
               </header>
-              <a class="gproj__cover" href="${projectHref(p)}" data-cursor="Apri" aria-label="${esc(p.title)} — apri il case study" tabindex="-1">${media(first, { ratio: '16/10', caption: null, parallax: true, lazy: i > 0 })}</a>
+              <a class="gproj__cover" href="${projectHref(p)}" data-cursor="Apri" aria-label="${esc(p.title)}, apri la scheda del progetto" tabindex="-1">${media(first, { ratio: '16/10', caption: null, parallax: true, lazy: i > 0 })}</a>
               <div class="gproj__text">
                 <p class="lead">${esc(p.summary)}</p>
                 ${tagList(p.types, { max: 6 })}
-                ${textLink({ href: projectHref(p), label: 'Apri il case study' })}
+                ${textLink({ href: projectHref(p), label: 'Apri la scheda' })}
               </div>
               <div class="gproj__system">
                 ${brand ? html`<div class="gproj__block"><p class="label">Palette</p>${swatches(brand.palette)}</div>` : ''}

@@ -5,7 +5,9 @@ import { site } from '../../data/site.js'
 import { serviceAreas, bundles, faq } from '../../data/services.js'
 import { methodIntro, steps, principles } from '../../data/method.js'
 import { bio, photos, facts, timeline, approach, values, tools, profile } from '../../data/studio.js'
+import { passioni } from '../../data/passioni.js'
 import { faqPersonali } from '../../data/tempo-libero.js'
+import { bcp } from '../../data/bcp.js'
 import { stack } from '../../data/stack.js'
 import { button, textLink, media, tagList, icon, splitWords, breadcrumb, sectionHead, monogram, figurina, figName, deviceMockup } from '../components/ui.js'
 import { signature } from './home.js'
@@ -30,10 +32,10 @@ export function serviziPage() {
       crumbs: [{ label: 'Home', href: '/' }, { label: 'Servizi', href: '/servizi/' }],
       index: '02',
       label: 'Servizi',
-      title: 'Cosa posso fare, e cosa ricevi.',
-      accent: ['ricevi.'],
-      lead: 'Quattro macroaree, dal rilievo al computer che non parte. Per ogni servizio trovi una descrizione breve e l’elenco di ciò che ti viene consegnato: così confronti i preventivi sulle stesse voci.',
-      meta: `${String(total).padStart(2, '0')} servizi · ${serviceAreas.length} aree`,
+      title: 'Cosa faccio e cosa ti arriva.',
+      accent: ['arriva.'],
+      lead: 'Quattro aree di lavoro. Per ogni servizio ho scritto cosa faccio e cosa consegno, così sai cosa stai pagando e puoi confrontare i preventivi sulle stesse voci.',
+      meta: `${String(total).padStart(2, '0')} servizi in ${serviceAreas.length} aree`,
     })}
 
     <nav class="anchors" aria-label="Aree di servizio">
@@ -54,6 +56,7 @@ export function serviziPage() {
                 <p class="sarea__intro">${esc(a.intro)}</p>
                 ${media(a.art, { ratio: '4/3', caption: null, className: 'sarea__art' })}
                 ${a.portfolio ? textLink({ href: a.portfolio, label: `Progetti: ${a.title.toLowerCase()}` }) : a.page ? textLink(a.page) : ''}
+                ${a.key === 'informatica' ? textLink({ href: '/sicurezza/', label: 'Sicurezza: phishing, attacchi e recupero dati' }) : ''}
               </div>
             </div>
             <ol class="sarea__list">
@@ -76,7 +79,7 @@ export function serviziPage() {
 
     <section class="section bund">
       <div class="container">
-        ${sectionHead({ index: serviceAreas.map((a) => a.letter).join('+'), label: 'Lavori trasversali', title: 'Quando le aree si sommano', lead: 'Il motivo per cui questi mestieri stanno nello stesso studio: certi problemi si risolvono meglio senza passare il lavoro di mano.' })}
+        ${sectionHead({ index: serviceAreas.map((a) => a.letter).join('+'), label: 'Lavori trasversali', title: 'Quando le aree si sommano', lead: 'Certe cose conviene farle insieme: un immobile da vendere, un marchio che diventa un sito, un cantiere da seguire online. Così il lavoro non si passa di mano.' })}
         <ul class="bund__grid">
           ${bundles.map(
             (b, i) => html`
@@ -163,7 +166,7 @@ export function metodoPage() {
       title: methodIntro.title + '.',
       accent: ['stesse.'],
       lead: methodIntro.lead,
-      meta: '07 fasi · 400 gon',
+      meta: '07 fasi, 400 gon',
     })}
 
     <section class="mtd" data-method>
@@ -200,7 +203,7 @@ export function metodoPage() {
 
     <section class="section prin" data-theme="ink">
       <div class="container">
-        ${sectionHead({ index: '∑', label: 'Regole fisse', title: 'Quattro cose che non cambiano mai' })}
+        ${sectionHead({ index: '∑', label: 'Regole fisse', title: 'Quattro cose che non cambiano' })}
         <ul class="prin__grid">
           ${principles.map((p, i) => `<li data-reveal="up" style="--d:${i * 50}ms"><span class="label">0${i + 1}</span><h3 class="h3">${esc(p.title)}</h3><p>${esc(p.text)}</p></li>`)}
         </ul>
@@ -218,8 +221,8 @@ export function studioPage() {
         ${breadcrumb([{ label: 'Home', href: '/' }, { label: 'Studio', href: '/studio/' }])}
         <div class="shero__grid">
           <div class="shero__copy">
-            <p class="label" data-reveal="fade"><span class="sec-head__index">03</span>Studio · Chi sono</p>
-            <h1 class="shero__title" data-reveal="words">${splitWords(bio.headline, { accent: ['codice,', 'sezione.'] })}</h1>
+            <p class="label" data-reveal="fade"><span class="sec-head__index">03</span>Studio</p>
+            <h1 class="shero__title" data-reveal="words">${splitWords(bio.headline, { accent: ['giorno.'] })}</h1>
           </div>
           <dl class="shero__facts" data-reveal="up">
             ${facts.map((f) => `<div><dt class="label">${esc(f.label)}</dt><dd>${esc(f.value)}</dd></div>`)}
@@ -254,7 +257,7 @@ export function studioPage() {
 
     <section class="section sapp" data-theme="tint">
       <div class="container">
-        ${sectionHead({ index: 'A', label: 'Approccio al lavoro', title: 'Tre abitudini, prima che tre principi' })}
+        ${sectionHead({ index: 'A', label: 'Approccio al lavoro', title: 'Come lavoro' })}
         <ol class="sapp__grid">
           ${approach.map((a, i) => `<li data-reveal="up" style="--d:${i * 55}ms"><span class="sapp__n">${a.n}</span><h3 class="h3">${esc(a.title)}</h3><p>${esc(a.text)}</p></li>`)}
         </ol>
@@ -280,7 +283,7 @@ export function studioPage() {
 
     <section class="section sval">
       <div class="container">
-        ${sectionHead({ index: 'C', label: 'Valori', title: 'Quello su cui non tratto' })}
+        ${sectionHead({ index: 'C', label: 'Valori', title: 'Cose che non cambio' })}
         <ul class="sval__grid">
           ${values.map((v, i) => `<li data-reveal="up" style="--d:${i * 45}ms"><span class="label">0${i + 1}</span><h3 class="h3">${esc(v.title)}</h3><p>${esc(v.text)}</p></li>`)}
         </ul>
@@ -296,6 +299,10 @@ export function studioPage() {
         ${stackRow()}
       </div>
     </section>
+
+    ${passioniSection()}
+
+    ${bcpSection()}
 
     ${domandePersonali()}
   `
@@ -317,8 +324,8 @@ function stackRow() {
     <div class="stack">
       <div class="stack__head" data-reveal="up">
         <p class="label stack__eyebrow">Questo sito</p>
-        <h3 class="stack__title h3">Con cosa gira, dal codice alla pubblicazione</h3>
-        <p class="stack__note">Gli strumenti che lo fanno funzionare davvero, uno per uno. Passa sopra un’icona, o toccala, per sapere cosa fa.</p>
+        <h3 class="stack__title h3">Come è fatto, dal codice alla pubblicazione</h3>
+        <p class="stack__note">Gli strumenti che lo fanno funzionare, uno per uno. Passa sopra un’icona, o toccala, per sapere a cosa serve.</p>
       </div>
       <ul class="stack__row" data-jelly>
         ${stack.map(
@@ -326,6 +333,116 @@ function stackRow() {
         )}
       </ul>
     </div>
+  `
+}
+
+// ── /studio/: le mie passioni ────────────────────────────────────────────────
+// Sei cose che non stanno nel portfolio, dalla presentazione dell'esame di
+// Stato del giugno 2026 (src/data/passioni.js). Le foto sono ritagliate in
+// public/media/passioni/ e il build ne fa le versioni responsive.
+
+function passioniSection() {
+  return html`
+    <section class="section spass" id="passioni" data-theme="tint">
+      <div class="container">
+        ${sectionHead({
+          index: 'E',
+          label: passioni.label,
+          titleHtml: splitWords(passioni.title, { accent: ['passioni'] }),
+          lead: passioni.lead,
+        })}
+        <div class="spass__grid">
+          ${passioni.items.map(
+            (p, i) => html`
+              <article class="spass__item spass__item--${p.span}" data-reveal="up" style="--d:${(i % 3) * 60}ms">
+                <figure class="spass__media">
+                  <span class="spass__shot" style="--ratio:${p.ratio}">
+                    <img src="${p.image.src}" width="${p.image.width}" height="${p.image.height}" alt="${esc(p.image.alt)}" loading="lazy" decoding="async" sizes="${p.span === 'wide' ? '(min-width: 900px) 58vw, 100vw' : '(min-width: 900px) 40vw, 100vw'}">
+                  </span>
+                  <figcaption class="label">${esc(p.image.caption)}</figcaption>
+                </figure>
+                <div class="spass__body">
+                  <p class="label spass__meta"><span>${p.n}</span>${esc(p.kicker)}</p>
+                  <h3 class="h3">${esc(p.title)}</h3>
+                  <p>${esc(p.text)}</p>
+                  <p class="label spass__detail">${esc(p.detail)}</p>
+                </div>
+              </article>
+            `,
+          )}
+        </div>
+      </div>
+    </section>
+  `
+}
+
+// ── /studio/: fuori orario, il fascicolo di Better Call Pekko ────────────────
+// BCP non è più online: la sezione è un reperto chiuso, senza link in uscita.
+// Testi e legenda in src/data/bcp.js. Compare solo qui, in fondo a /studio/.
+
+function bcpSection() {
+  return html`
+    <section class="section sbcp" data-theme="ink" id="fuori-orario">
+      <div class="container">
+        ${sectionHead({ index: 'E/01', label: 'Un caso a parte', title: bcp.title, meta: bcp.meta })}
+        <div class="sbcp__folder" data-reveal="up">
+          <p class="sbcp__tab"><span>E/01</span> fascicolo chiuso</p>
+          <div class="sbcp__layout">
+            <aside class="sbcp__aside">
+              <figure class="sbcp__cover">
+                <div class="sbcp__rail" aria-hidden="true">BCP · E/01 · ARCHIVIO</div>
+                <div class="sbcp__poster">
+                  <p class="sbcp__kicker">IN COMPUTER TROUBLE?</p>
+                  <p class="sbcp__call">Better Call</p>
+                  <p class="sbcp__mark">PEKKO</p>
+                  <p class="sbcp__role">I’M THE COMPUTER GUY</p>
+                  <p class="sbcp__motto">${esc(bcp.motto)}</p>
+                  <p class="sbcp__url">WWW.BETTERCALLPEKKO.IT</p>
+                </div>
+                <p class="sbcp__stamp" aria-hidden="true"><span>ARCHIVIATO</span><span>13.11.2026</span></p>
+                <span class="sbcp__barcode" aria-hidden="true"></span>
+                <figcaption class="sbcp__cap">Copertina ricostruita · nessun link</figcaption>
+              </figure>
+              <dl class="sbcp__facts">
+                ${bcp.scheda.map((f) => `<div><dt class="label">${esc(f.label)}</dt><dd>${esc(f.value)}</dd></div>`)}
+              </dl>
+            </aside>
+            <div class="sbcp__main">
+              <div class="sbcp__intro">
+                <p class="lead" data-reveal="up">${esc(bcp.lead)}</p>
+                ${bcp.storia.map((p) => `<p data-reveal="up">${esc(p)}</p>`)}
+                <p class="sbcp__closed" data-reveal="up"><span class="label">Accesso</span>Nessun link al sito: non è più online, questa pagina è tutto quello che ne resta.</p>
+                <div class="sbcp__actions" data-reveal="up">${textLink({ href: '/servizi/informatica/', label: 'La versione seria: Informatica' })}</div>
+              </div>
+            </div>
+          </div>
+          <div class="sbcp__legend">
+            <div class="sbcp__legend-head" data-reveal="fade">
+              <h3 class="label">Legenda dei riferimenti</h3>
+              <p class="label">${bcp.legenda.length} voci</p>
+            </div>
+            <ol class="sbcp__rows">
+              ${bcp.legenda.map(
+                (r, i) => html`
+                  <li class="sbcp__row" data-reveal="up">
+                    <span class="sbcp__n">${String(i + 1).padStart(2, '0')}</span>
+                    <p class="sbcp__site">${esc(r.sito)}</p>
+                    <p class="sbcp__ref">${esc(r.richiama)}</p>
+                    <p class="sbcp__where">${esc(r.dove)}</p>
+                  </li>
+                `,
+              )}
+            </ol>
+          </div>
+          <p class="sbcp__note" data-reveal="up">${esc(bcp.nota)}</p>
+          <footer class="sbcp__colophon">
+            <span>BCP · foglio E/01</span>
+            <span>${bcp.legenda.length} voci · 0 link al sito</span>
+            <span>archiviato il 13.11.2026</span>
+          </footer>
+        </div>
+      </div>
+    </section>
   `
 }
 
@@ -377,9 +494,9 @@ export function profiloPage() {
         ${breadcrumb([{ label: 'Home', href: '/' }, { label: 'Studio', href: '/studio/' }, { label: 'Curriculum', href: '/cv/' }])}
         <header class="cv__head">
           <div>
-            <p class="label">Curriculum vitae · agg. ${new Date().toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}</p>
+            <p class="label">Curriculum, aggiornato a ${new Date().toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })}</p>
             <h1 class="cv__name">${esc(site.name)}</h1>
-            <p class="cv__role">${site.roles.map((r) => esc(r.label)).join(' · ')}</p>
+            <p class="cv__role">${site.roles.map((r) => esc(r.label)).join(', ')}</p>
           </div>
           <div class="cv__contact">
             <p><a href="mailto:${site.contact.email}">${esc(site.contact.email)}</a></p>

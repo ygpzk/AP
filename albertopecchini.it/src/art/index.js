@@ -15,6 +15,7 @@ import { identity } from './identity.js'
 import { sitespec } from './sitespec.js'
 import { webpage } from './web.js'
 import { portrait, areamap } from './misc.js'
+import { sicurezza } from './sicurezza.js'
 
 const REGISTRY = {
   floorplan,
@@ -45,6 +46,7 @@ const REGISTRY = {
   webpage,
   portrait,
   areamap,
+  sicurezza,
 }
 
 /** Registra nuovi generatori (usato dagli altri moduli di src/art). */

@@ -9,6 +9,7 @@
     "online": "node tools/online.mjs",
     "build": "vite build",
     "preview": "vite preview",
+    "check": "node tools/privacy.mjs dist",
     "onion": "node tools/onion/pubblica.mjs",
     "email": "node tools/email-generator/cli.js",
     "email:new": "node tools/email-generator/cli.js new",
@@ -17,7 +18,7 @@
     "email:theme": "node tools/email-generator/cli.js theme"
   },
   "engines": {
-    "node": ">=20.19"
+    "node": ">=20.19.0"
   },
   "devDependencies": {
     "@fontsource-variable/archivo": "^5.3.0",

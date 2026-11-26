@@ -21,15 +21,15 @@ export const site = {
   monogram: 'AP',
   title: 'Diplomato geometra',
   roles: [
-    { key: 'tecnico', label: 'Disegno tecnico e rilievo', note: 'Rilievo · CAD · 3D' },
-    { key: 'web', label: 'Web Designer & Developer', note: 'UI · Frontend' },
-    { key: 'grafica', label: 'Graphic Designer', note: 'Brand · Editoria' },
+    { key: 'tecnico', label: 'Rilievo e disegno tecnico', note: 'rilievi, CAD, 3D' },
+    { key: 'web', label: 'Siti web', note: 'progettazione e sviluppo' },
+    { key: 'grafica', label: 'Grafica', note: 'loghi e stampati' },
   ],
-  claim: 'Progetto spazi, strumenti e identità digitali.',
-  // Riga sotto il nome nel footer: gli ambiti, in breve.
-  tagline: 'Disegno tecnico · Web · Grafica · Informatica',
+  claim: 'Disegno, scrivo e sistemo.',
+  // Riga sotto il nome nel footer: che cosa faccio, detto come lo direi a voce.
+  tagline: 'Case, siti e marchi. E computer, quando serve.',
   description:
-    'Alberto Pecchini, diplomato geometra, web designer e graphic designer. Rilievi, CAD e modellazione 3D, siti web su misura, identità visive e assistenza informatica: un solo interlocutore, dallo stato di fatto alla messa online.',
+    'Alberto Pecchini, diplomato geometra. Faccio rilievi e disegno edifici, scrivo siti web senza temi pronti, disegno loghi e, quando serve, sistemo computer. Seguo io il lavoro, dal sopralluogo alla pubblicazione.',
   activeSince: 2023,
   edition: 'Portfolio 2026 — Ed. 01',
 
@@ -67,7 +67,7 @@ export const site = {
   // è immediata, altrimenti il footer annuncia una data già passata o futura.
   availability: {
     open: true,
-    label: 'Disponibile per nuovi incarichi',
+    label: 'Posso prendere nuovi lavori',
     from: '',
   },
 
@@ -83,14 +83,14 @@ export const site = {
     turnstileSiteKey: '',
     subject: 'Richiesta dal sito — ',
     projectTypes: [
-      'Rilievo o restituzione grafica',
+      'Rilievo o disegno',
       'Pratica edilizia o catastale',
-      'Modellazione 3D, BIM o rendering',
+      'Modello 3D o rendering',
       'Sito web o landing page',
-      'Logo e identità visiva',
-      'Grafica e materiale stampato',
+      'Logo o identità visiva',
+      'Grafica e stampa',
       'Assistenza informatica',
-      'Un progetto che unisce più ambiti',
+      'Più cose insieme',
       'Altro',
     ],
     budgets: ['Da definire insieme', 'Fino a 1.000 €', '1.000 — 3.000 €', '3.000 — 6.000 €', 'Oltre 6.000 €'],
@@ -115,13 +115,13 @@ export const nav = [
     // Le voci d'area seguono le aree pubblicate: un'area nascosta
     // (`hidden` in src/data/projects.js) sparisce da sola anche dai menù.
     children: [
-      { label: 'Tutti i progetti', href: '/portfolio/', note: 'Indice completo con filtri' },
+      { label: 'Tutti i progetti', href: '/portfolio/', note: 'Tutti, con i filtri' },
       ...[
-        { key: 'tecnico', label: 'Progetti tecnici', href: '/portfolio/tecnico/', note: 'Rilievi, CAD, 3D, pratiche' },
-        { key: 'web', label: 'Progetti web', href: '/portfolio/web/', note: 'Siti, landing, interfacce' },
-        { key: 'grafica', label: 'Progetti grafici', href: '/portfolio/grafica/', note: 'Brand, stampa, editoria' },
+        { key: 'tecnico', label: 'Progetti tecnici', href: '/portfolio/tecnico/', note: 'Rilievi, CAD, pratiche' },
+        { key: 'web', label: 'Progetti web', href: '/portfolio/web/', note: 'Siti e interfacce' },
+        { key: 'grafica', label: 'Progetti grafici', href: '/portfolio/grafica/', note: 'Loghi e stampati' },
       ].filter((c) => areas[c.key]),
-      ...(showSheets ? [{ label: 'Tavole', href: '/portfolio/tavole/', note: 'I disegni da ingrandire e scaricare' }] : []),
+      ...(showSheets ? [{ label: 'Tavole', href: '/portfolio/tavole/', note: 'I disegni, da ingrandire' }] : []),
     ],
   },
   { label: 'Servizi', href: '/servizi/' },
@@ -130,27 +130,27 @@ export const nav = [
   { label: 'Contatti', href: '/contatti/' },
 ]
 
-export const cta = { label: 'Parliamo del progetto', href: '/contatti/' }
+export const cta = { label: 'Parliamone', href: '/contatti/' }
 
 // Chiusura di ogni pagina (footer): titolo a tutta larghezza, invito, nota.
 // `accent` indica le parole del titolo composte in corsivo graziato.
 export const closing = {
-  title: 'Parliamo del tuo prossimo progetto.',
-  accent: ['prossimo'],
-  label: 'Inizia una conversazione',
+  title: 'Scrivimi, rispondo io.',
+  accent: ['io.'],
+  label: 'Scrivimi due righe',
   // Nelle pagine che sono già la chiamata all'azione (contatti, note legali,
   // 404) l'invito rimanda alla posta invece che a sé stesso.
-  labelCompact: 'Scrivimi una email',
-  note: `Raccontami il progetto in due righe. ${site.contact.reply}`,
+  labelCompact: 'Mandami una email',
+  note: `Due righe bastano: cosa ti serve e per quando. ${site.contact.reply}`,
 }
 
 // Numeri della sezione statistiche. `projects` e `sites` vengono calcolati dal
 // portfolio se lasciati a `null`; gli altri valori sono da confermare.
 export const stats = [
   { key: 'projects', value: null, suffix: '+', label: 'Progetti', note: 'tra tecnico, web e grafica' },
-  { key: 'clients', value: 12, suffix: '', label: 'Clienti', note: 'privati, aziende, enti' },
-  { key: 'sites', value: null, suffix: '', label: 'Siti online', note: 'progettati e sviluppati' },
-  { key: 'years', value: null, suffix: '', label: 'Anni di attività', note: 'dal primo ufficio tecnico' },
+  { key: 'clients', value: 12, suffix: '', label: 'Clienti', note: 'privati, aziende e qualche ente' },
+  { key: 'sites', value: null, suffix: '', label: 'Siti online', note: 'fatti da zero, ancora su' },
+  { key: 'years', value: null, suffix: '', label: 'Anni di attività', note: 'dal primo tirocinio in ufficio tecnico' },
 ]
 
 // Percorsi (dot-path) che contengono ancora valori segnaposto.

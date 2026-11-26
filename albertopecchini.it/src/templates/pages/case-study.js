@@ -8,14 +8,14 @@ import { compare, swatches, specimens } from './portfolio.js'
 import { sheetViewer } from '../components/viewer.js'
 
 const SECTIONS = [
-  ['overview', 'Overview'],
-  ['obiettivo', 'Obiettivo'],
-  ['problema', 'Problema'],
-  ['strategia', 'Strategia'],
-  ['sviluppo', 'Sviluppo'],
-  ['risultato', 'Risultato'],
-  ['galleria', 'Galleria'],
-  ['tecnologie', 'Tecnologie'],
+  ['overview', 'Il lavoro'],
+  ['obiettivo', 'Cosa serviva'],
+  ['problema', 'Il problema'],
+  ['strategia', 'Come l’ho affrontato'],
+  ['sviluppo', 'Cosa ho fatto'],
+  ['risultato', 'Com’è andata'],
+  ['galleria', 'Immagini'],
+  ['tecnologie', 'Strumenti'],
   ['dati', 'Dati progetto'],
 ]
 
@@ -87,7 +87,7 @@ function iphoneSection(p) {
       </figure>
       <div class="cs-iphone__copy">
         <p class="cs-lead" data-reveal="up">${esc(p.iphone.lead)}</p>
-        <p class="label cs-gallery__hint cs-iphone__hint" data-reveal="up">${icon('arrowDown')} Passa sopra lo schermo o raggiungilo con Tab: la pagina scorre fino in fondo · sul telefono tocca per avviare, ritocca per tornare in cima</p>
+        <p class="label cs-gallery__hint cs-iphone__hint" data-reveal="up">${icon('arrowDown')} Passa sopra lo schermo o raggiungilo con Tab: la pagina scorre fino in fondo. Sul telefono tocca per avviare, ritocca per tornare in cima</p>
       </div>
     </div>
   `
@@ -129,8 +129,8 @@ function toolsSection(p) {
             <h3 class="cs-step__title h4">${esc(s.name)}</h3>
             <p>${esc(s.text)}</p>
             <div class="cs-tool__links">
-              ${button({ href: s.download.href, label: s.download.label, variant: 'ghost', iconName: 'download', attrs: { download: s.download.name } })}
-              ${s.download.meta ? `<span class="label">${esc(s.download.meta)}</span>` : ''}
+              ${s.download ? button({ href: s.download.href, label: s.download.label, variant: 'ghost', iconName: 'download', attrs: { download: s.download.name } }) : ''}
+              ${s.download?.meta ? `<span class="label">${esc(s.download.meta)}</span>` : ''}
               ${s.page ? textLink({ href: s.page.href, label: s.page.label, iconName: 'arrowUpRight', external: true }) : ''}
             </div>
           </li>
@@ -164,7 +164,7 @@ export function caseStudyPage(p) {
         <div class="container">
           ${breadcrumb([{ label: 'Home', href: '/' }, { label: 'Portfolio', href: '/portfolio/' }, { label: area.short, href: area.href }, { label: p.title, href: projectHref(p) }])}
           <div class="cs-hero__top label" data-reveal="fade">
-            <span>${esc(p.code)}</span><span>Case study</span><span>${esc(p.period || p.year)}</span>
+            <span>${esc(p.code)}</span><span>Scheda progetto</span><span>${esc(p.period || p.year)}</span>
           </div>
           <h1 class="cs-hero__title" data-reveal="words">${splitWords(p.title)}</h1>
           <p class="cs-hero__sub" data-reveal="up"><span class="serif-i">${esc(p.subtitle)}</span>${sampleMark(p)}</p>
@@ -179,7 +179,7 @@ export function caseStudyPage(p) {
         </div>
       </header>
 
-      <nav class="cs-nav" aria-label="Sezioni del case study" data-spy-nav>
+      <nav class="cs-nav" aria-label="Sezioni del progetto" data-spy-nav>
         <ol>
           ${list.map(([id, label], i) => `<li><a href="#${id}" data-tooltip="${esc(label)}"><span class="label">${String(i + 1).padStart(2, '0')}</span><span class="sr-only"> ${esc(label)}</span></a></li>`)}
         </ol>
@@ -191,10 +191,11 @@ export function caseStudyPage(p) {
           <p class="cs-lead" data-reveal="up">${esc(p.description)}</p>
           <p data-reveal="up">${esc(p.summary)}</p>
           <div class="cs-services" data-reveal="up">
-            <p class="label">Servizi forniti</p>
+            <p class="label">Cosa ho curato</p>
             <ul class="cs-list">${p.services.map((s, i) => `<li><span class="label">${String(i + 1).padStart(2, '0')}</span>${esc(s)}</li>`)}</ul>
           </div>
           ${isWeb && p.web.url ? `<div data-reveal="up">${button({ href: p.web.url, label: p.web.name ? 'Visita il sito' : `Visita ${p.web.domain}`, variant: 'ghost', iconName: 'arrowUpRight', external: true })}</div>` : ''}
+          ${isWeb && !p.web.url && p.web.chiuso ? `<p class="label" data-reveal="up">${esc(p.web.domain)} · chiuso il ${esc(p.web.chiuso)} · in archivio</p>` : ''}
         `,
       )}
       ${section('obiettivo', `<p class="cs-big" data-reveal="up">${esc(p.goal)}</p>`)}
@@ -245,7 +246,7 @@ export function caseStudyPage(p) {
           <div class="cs-gallery cs-gallery--${p.area}">
             ${p.images.map((im, i) => media(im, { zoom: true, group: p.slug, index: i, ratio: isWeb ? (i === 0 ? '16/10' : i === 1 ? '3/4' : '9/16') : undefined }))}
           </div>
-          <p class="label cs-gallery__hint">${icon('expand')}<span>${p.images.some((im) => im.ai) ? 'Illustrazioni generate con l’intelligenza artificiale (<a href="/crediti/">crediti</a>) · ' : ''}Seleziona un’immagine per aprirla a tutto schermo · frecce per scorrere · Esc per chiudere</span></p>
+          <p class="label cs-gallery__hint">${icon('expand')}<span>${p.images.some((im) => im.ai) ? 'Illustrazioni generate con l’intelligenza artificiale (<a href="/crediti/">crediti</a>). ' : ''}Clicca un’immagine per aprirla a tutto schermo, frecce per scorrere, Esc per chiudere</span></p>
         `,
         'cs-sec--wide',
       )}

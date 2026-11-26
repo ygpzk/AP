@@ -19,6 +19,8 @@ import { emailPage } from './pages/email.js'
 import { wrapped5btPage } from './pages/wrapped5bt.js'
 import { informaticaPage, informaticaLd } from './pages/informatica.js'
 import { informatica } from '../data/informatica.js'
+import { sicurezzaPage, sicurezzaLd } from './pages/sicurezza.js'
+import { sicurezza } from '../data/sicurezza.js'
 import { unimore, materiaPath, bloccoPath, esercizioPath } from '../data/unimore.js'
 import { unimorePage, materiaPage, bloccoPage, esercizioPage } from './pages/unimore.js'
 import { tempoLiberoTodo } from '../data/tempo-libero.js'
@@ -40,7 +42,7 @@ const tutteLeRotte = [
   {
     path: '/',
     priority: 1,
-    title: `${site.name} — Disegno tecnico, Web Design e Grafica`,
+    title: `${site.name} — Rilievi, siti web e grafica`,
     description: site.description,
     render: homePage,
     jsonld: () => [websiteLd(), personLd(), serviceLd()],
@@ -48,24 +50,24 @@ const tutteLeRotte = [
   {
     path: '/portfolio/',
     priority: 0.9,
-    title: 'Portfolio — progetti tecnici, web e grafici',
-    description: `${projects.length} progetti tra rilievi, pratiche, modelli 3D, siti web e identità visive. Filtra per categoria, anno, settore, tecnologia e tipologia.`,
+    title: 'Portfolio — i lavori',
+    description: `${projects.length} progetti tra rilievi, pratiche, modelli 3D, siti web e identità visive. Puoi filtrarli per categoria, anno, settore, tecnologia e tipologia.`,
     render: portfolioPage,
     jsonld: () => [crumbs({ label: 'Portfolio', href: '/portfolio/' })],
   },
   {
     path: '/portfolio/tecnico/',
     priority: 0.8,
-    title: 'Progetti tecnici — rilievi, CAD, BIM, catasto, pratiche edilizie',
-    description: 'Rilievi con laser scanner e drone, progetti di recupero, pratiche edilizie e catastali, modelli 3D e BIM, cantieri: schede complete di dati, strumenti e risultati.',
+    title: 'Progetti tecnici — rilievi, CAD, pratiche edilizie',
+    description: 'Rilievi, progetti, pratiche edilizie e catastali, modelli 3D e BIM, cantieri. Ogni scheda riporta committente, strumenti e risultato.',
     render: tecnicoPage,
     jsonld: () => [crumbs({ label: 'Portfolio', href: '/portfolio/' }, { label: 'Tecnico', href: '/portfolio/tecnico/' })],
   },
   {
     path: '/portfolio/web/',
     priority: 0.8,
-    title: 'Progetti web — siti, landing page, interfacce',
-    description: 'Siti web progettati e sviluppati a mano: obiettivo, problema, soluzione, tecnologie e risultati, con mockup desktop, tablet e smartphone.',
+    title: 'Progetti web — siti e interfacce',
+    description: 'Siti web progettati e sviluppati da me: cosa serviva, come l’ho fatto, con quali strumenti e com’è andata. Con le schermate su computer, tablet e telefono.',
     render: webPage,
     headerTheme: 'ink',
     jsonld: () => [crumbs({ label: 'Portfolio', href: '/portfolio/' }, { label: 'Web', href: '/portfolio/web/' })],
@@ -78,8 +80,8 @@ const tutteLeRotte = [
         {
           path: '/portfolio/grafica/',
           priority: 0.8,
-          title: 'Progetti grafici — logo, brand identity, stampa, segnaletica',
-          description: 'Marchi costruiti su griglia, restyling, immagine coordinata, manifesti, packaging, pittogrammi e modelli: il graphic design con il rigore di una tavola tecnica.',
+          title: 'Progetti grafici — loghi e stampati',
+          description: 'Loghi costruiti sulla griglia, restyling, immagine coordinata, manifesti, packaging e modelli. Il graphic design fatto con il rigore di una tavola tecnica.',
           render: graficaPage,
           jsonld: () => [crumbs({ label: 'Portfolio', href: '/portfolio/' }, { label: 'Grafica', href: '/portfolio/grafica/' })],
         },
@@ -92,7 +94,7 @@ const tutteLeRotte = [
         {
           path: '/portfolio/tavole/',
           priority: 0.7,
-          title: 'Tavole — il visualizzatore dei disegni',
+          title: 'Tavole — i disegni da vicino',
           description: `${sheetCount()} tavole dei miei progetti tecnici, dal DWG allo schermo: progetto stradale, esame di Stato, layout di cantiere. Ingrandisci, spostati sul foglio, scarica il PDF.`,
           render: tavolePage,
           pageClass: 'page--tavole',
@@ -113,8 +115,8 @@ const tutteLeRotte = [
   {
     path: '/servizi/',
     priority: 0.9,
-    title: 'Servizi — tecnico, digitale, grafica, informatica',
-    description: 'Progettazione, rilievi, CAD, catasto, pratiche, 3D, BIM e rendering; siti web, UI/UX e frontend; logo, branding e stampati; assistenza informatica. Per ogni servizio, cosa viene consegnato.',
+    title: 'Servizi — tecnico, web, grafica e informatica',
+    description: 'Rilievi, CAD, catasto, pratiche edilizie, 3D e BIM; siti web e frontend; loghi, branding e stampati; assistenza informatica. Per ogni servizio, cosa faccio e cosa consegno.',
     render: serviziPage,
     jsonld: () => [crumbs({ label: 'Servizi', href: '/servizi/' }), serviceLd()],
   },
@@ -129,10 +131,21 @@ const tutteLeRotte = [
     jsonld: () => [crumbs({ label: 'Servizi', href: '/servizi/' }, { label: 'Informatica', href: informatica.path }), ...informaticaLd()],
   },
   {
+    // Come opero online: le tre copertine «Tutto protetto», quello che è già
+    // acceso sul sito e i limiti. Sta sotto Servizi, ma si raggiunge anche dal
+    // piè di pagina e dalla pagina Informatica.
+    path: sicurezza.path,
+    priority: 0.7,
+    title: sicurezza.title,
+    description: sicurezza.description,
+    render: sicurezzaPage,
+    jsonld: () => [crumbs({ label: 'Sicurezza', href: sicurezza.path }), ...sicurezzaLd()],
+  },
+  {
     path: '/studio/',
     priority: 0.8,
-    title: 'Studio — chi sono, approccio, percorso',
-    description: 'Alberto Pecchini: formazione tecnica, tre anni in un ufficio di strutture in legno, siti web e identità visive. Approccio, valori, timeline e strumenti di lavoro.',
+    title: 'Studio — chi sono e come lavoro',
+    description: 'Alberto Pecchini: formazione tecnica, tre anni in un ufficio di strutture in legno, siti web e grafica. Come lavoro, cosa ho fatto e con quali strumenti.',
     render: studioPage,
     jsonld: () => [crumbs({ label: 'Studio', href: '/studio/' }), personLd()],
   },
@@ -142,7 +155,7 @@ const tutteLeRotte = [
     path: '/cv/',
     priority: 0.5,
     title: 'Curriculum vitae',
-    description: 'Curriculum di Alberto Pecchini: formazione, esperienze, competenze tecniche, web e grafiche. Versione stampabile: /cv/?print apre subito la stampa.',
+    description: 'Curriculum di Alberto Pecchini: formazione, esperienze, competenze tecniche, web e grafiche. La versione stampabile si apre da /cv/?print.',
     render: profiloPage,
     jsonld: () => [crumbs({ label: 'Studio', href: '/studio/' }, { label: 'Curriculum', href: '/cv/' })],
   },
@@ -159,16 +172,16 @@ const tutteLeRotte = [
   {
     path: '/metodo/',
     priority: 0.7,
-    title: 'Metodo di lavoro — sette fasi dall’ascolto all’assistenza',
-    description: 'Ascolto, analisi, progettazione, sviluppo, revisione, consegna, assistenza: come si svolge un incarico, cosa ricevi a ogni fase e in quanto tempo.',
+    title: 'Metodo — come lavoro, passo per passo',
+    description: 'Ascolto, analisi, progettazione, sviluppo, revisione, consegna, assistenza: cosa succede in ogni fase, cosa ricevi e in quanto tempo.',
     render: metodoPage,
     jsonld: () => [crumbs({ label: 'Metodo', href: '/metodo/' })],
   },
   {
     path: '/contatti/',
     priority: 0.9,
-    title: 'Contatti — parliamo del progetto',
-    description: 'Scrivimi per un rilievo, una pratica, un sito web o un’identità visiva. Risposta entro un giorno lavorativo.',
+    title: 'Contatti — scrivimi cosa ti serve',
+    description: 'Scrivimi per un rilievo, una pratica, un sito web, un logo o un computer da sistemare. Rispondo entro un giorno lavorativo.',
     render: contattiPage,
     hideCta: true, // la pagina è già la chiamata all'azione: niente CTA che rimanda a sé stessa
     // Turnstile serve solo qui: lo script non viene caricato sulle altre pagine.
@@ -178,8 +191,8 @@ const tutteLeRotte = [
   {
     path: '/stile/',
     priority: 0.4,
-    title: 'Stile — il sistema visivo del sito',
-    description: 'Colore, tipografia, forma, movimento, componenti e mascotte del sito di Alberto Pecchini in sei tavole su un piano navigabile: ingrandisci e spostati come su un tavolo da disegno.',
+    title: 'Stile — come è fatto questo sito',
+    description: 'Colore, tipografia, forma, movimento, componenti e mascotte del sito di Alberto Pecchini, in sei tavole su un piano navigabile: ingrandisci e spostati come su un tavolo da disegno.',
     render: stilePage,
     pageClass: 'page--stile',
     noFooter: true, // la pagina è il piano a tutto schermo: niente chiusura sotto
@@ -190,8 +203,8 @@ const tutteLeRotte = [
     // tavola del piano navigabile: lo stesso foglio di /stile/, una tavola sola.
     path: '/aragosta/',
     priority: 0.3,
-    title: 'L’aragosta e l’inchiostro — la tavola',
-    description: 'L’hero della home di Alberto Pecchini com’era fino al 2 novembre 2026, su un foglio da disegno navigabile: il nome a tutta larghezza e l’aragosta di fiume che lo riempie d’inchiostro.',
+    title: 'L’aragosta e l’inchiostro',
+    description: 'L’apertura della home di Alberto Pecchini com’era fino al 2 novembre 2026, su un foglio da disegno navigabile: il nome a tutta larghezza e l’aragosta di fiume che lo riempie d’inchiostro.',
     render: aragostaPage,
     pageClass: 'page--stile',
     noFooter: true,
@@ -203,8 +216,8 @@ const tutteLeRotte = [
     // sotto, una pagina statica per sito e una per cattura (/tempo/<dominio>/<AAAA-MM-GG>/).
     path: '/tempo/',
     priority: 0.5,
-    title: 'La macchina del tempo — i miei siti giorno per giorno',
-    description: 'Tutte le versioni dei siti di Alberto Pecchini, una per giorno di lavoro, ricostruite dal codice e fotografate, come nella Wayback Machine: l’istogramma dei commit, le statistiche del giorno, le foto.',
+    title: 'La macchina del tempo — i miei siti, giorno per giorno',
+    description: 'Tutte le versioni dei siti di Alberto Pecchini, una per giorno di lavoro, ricostruite dal codice e fotografate come nella Wayback Machine: l’istogramma dei commit, i numeri del giorno, le foto.',
     render: tempoPage,
     pageClass: 'page--tempo',
     noFooter: true, // la barra è il guscio, come nella Wayback Machine
@@ -248,15 +261,15 @@ const tutteLeRotte = [
       ...b.esercizi.map((e) => ({ path: esercizioPath(m, b, e), title: `${e.title} · ${b.title} — ${m.title}`, description: b.lead, render: () => esercizioPage(m, b, e), noindex: true, sitemap: false, hideCta: true })),
     ]),
   ]),
-  { path: '/privacy/', priority: 0.2, title: 'Informativa sulla privacy', description: 'Come vengono trattati i dati personali di chi visita il sito o invia una richiesta.', render: privacyPage, hideCta: true },
-  { path: '/cookie/', priority: 0.2, title: 'Cookie policy', description: 'Il sito non usa cookie di profilazione: ecco cosa viene salvato nel browser e perché.', render: cookiePage, hideCta: true },
-  { path: '/crediti/', priority: 0.2, title: 'Crediti e fonti delle immagini', description: 'Da dove vengono le immagini del sito: disegni e foto originali, illustrazioni generate con gpt-image-2, mockup della Figma Community.', render: creditiPage, hideCta: true },
+  { path: '/privacy/', priority: 0.2, title: 'Informativa sulla privacy', description: 'Come tratto i dati di chi visita il sito o mi manda una richiesta.', render: privacyPage, hideCta: true },
+  { path: '/cookie/', priority: 0.2, title: 'Cookie policy', description: 'Questo sito non usa cookie di profilazione. Ecco cosa salva nel browser e perché.', render: cookiePage, hideCta: true },
+  { path: '/crediti/', priority: 0.2, title: 'Crediti e fonti delle immagini', description: 'Da dove vengono le immagini: disegni e foto miei, illustrazioni generate con gpt-image-2, mockup della Figma Community.', render: creditiPage, hideCta: true },
   {
     path: '/404/',
     file: '404.html',
     is404: true,
-    title: 'Punto non trovato (404)',
-    description: 'La pagina cercata non esiste o è stata spostata: torna alla home o apri il portfolio di Alberto Pecchini.',
+    title: 'Pagina non trovata (404)',
+    description: 'La pagina che cercavi non c’è o è stata spostata. Torna alla home o apri il portfolio di Alberto Pecchini.',
     render: notFoundPage,
     headerTheme: 'ink',
     noindex: true,
@@ -266,7 +279,7 @@ const tutteLeRotte = [
 
 // 12.11.2026 (Alberto: «togli social, numeri, indirizzi e luoghi»): fuori dal sito la macchina del
 // tempo (le copie dei siti vecchi hanno numero, WhatsApp, Instagram e il paese). I file restano nel repository.
-export const FUORI = (p) => p === '/tempo/' || p.startsWith('/tempo/')
+export const FUORI = () => false // la macchina del tempo è di nuovo online (riabilitata il 14.11.2026)
 export const routes = tutteLeRotte.filter((r) => !FUORI(r.path))
 
 /** Le rotte del sito. */

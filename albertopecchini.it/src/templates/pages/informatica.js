@@ -7,7 +7,7 @@ import { site } from '../../data/site.js'
 import { serviceAreas } from '../../data/services.js'
 import { informatica as it } from '../../data/informatica.js'
 import { abs } from '../layout.js'
-import { button, media, sectionHead, splitWords, icon, figurina, figName } from '../components/ui.js'
+import { button, textLink, media, sectionHead, splitWords, icon, figurina, figName } from '../components/ui.js'
 import { head } from './info.js'
 
 const area = serviceAreas.find((a) => a.key === 'informatica')
@@ -43,7 +43,7 @@ export function informaticaPage() {
       title: it.head.title,
       accent: it.head.accent,
       lead: it.head.lead,
-      meta: `${String(area.services.length).padStart(2, '0')} servizi · Windows XP → 11`,
+      meta: `${String(area.services.length).padStart(2, '0')} servizi, da Windows XP a 11`,
     })}
 
     <section class="itc">
@@ -52,6 +52,7 @@ export function informaticaPage() {
         <dl class="itc__facts">
           ${facts.map((f, i) => `<div data-reveal="up" style="--d:${i * 45}ms"><dt class="label">${esc(f.label)}</dt><dd>${esc(f.value)}</dd></div>`)}
         </dl>
+        <p class="itc__note" data-reveal="up">${textLink({ href: '/sicurezza/', label: 'Sicurezza: phishing, attacchi e recupero dati' })}</p>
       </div>
     </section>
 
@@ -94,7 +95,7 @@ export function informaticaPage() {
 
     <section class="section itv" id="versioni" data-theme="ink">
       <div class="container">
-        ${sectionHead({ index: 'V', label: 'Versioni', title: 'Windows e Office, dal vecchio al nuovo', lead: 'Installo, riparo e configuro tutte queste versioni. Per ognuna, quello che conviene sapere prima.' })}
+        ${sectionHead({ index: 'V', label: 'Versioni', title: 'Le versioni che installo', lead: 'Installo, riparo e configuro tutte queste. Per ognuna, quello che conviene sapere prima.' })}
         <div class="itv__grid">
           ${versions('Windows', 'informatica-windows', it.windows)}
           ${versions('Office', 'informatica-microsoft-office', it.office)}
@@ -108,7 +109,7 @@ export function informaticaPage() {
         <div class="itg__box" data-reveal="up">
           <p class="itg__price" aria-hidden="true"><span class="itg__zero">0</span><span class="itg__cur">€</span></p>
           <div class="itg__body">
-            <p class="label">${esc(it.gift.label)} · sopra i 50 €</p>
+            <p class="label">${esc(it.gift.label)}, sopra i 50 €</p>
             <h2 class="h2" id="itg-title">${esc(it.gift.title)}</h2>
             <p>${esc(it.gift.text)}</p>
             <p class="itg__note">${esc(it.gift.note)}</p>
@@ -119,7 +120,7 @@ export function informaticaPage() {
 
     <section class="section its" data-theme="tint">
       <div class="container">
-        ${sectionHead({ index: '→', label: 'Come si svolge', title: 'Cinque passaggi, nessuna sorpresa' })}
+        ${sectionHead({ index: '→', label: 'Come si svolge', title: 'Come si svolge un intervento' })}
         <ol class="its__grid">
           ${it.steps.map((s, i) => `<li data-reveal="up" style="--d:${i * 50}ms"><span class="its__n">0${i + 1}</span><h3 class="h4">${esc(s.title)}</h3><p>${esc(s.text)}</p></li>`)}
         </ol>
@@ -128,7 +129,7 @@ export function informaticaPage() {
 
     <section class="section prin">
       <div class="container">
-        ${sectionHead({ index: '∑', label: 'Regole fisse', title: 'Quello che vale per ogni computer' })}
+        ${sectionHead({ index: '∑', label: 'Regole fisse', title: 'Quattro regole che tengo sempre' })}
         <ul class="prin__grid">
           ${it.rules.map((p, i) => `<li data-reveal="up" style="--d:${i * 50}ms"><span class="label">0${i + 1}</span><h3 class="h3">${esc(p.title)}</h3><p>${esc(p.text)}</p></li>`)}
         </ul>

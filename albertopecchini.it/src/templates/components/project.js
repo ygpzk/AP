@@ -37,10 +37,10 @@ export function projectCard(p, { span = 6, lazy = true, headingLevel = 3, previe
       <a class="card__link" href="${projectHref(p)}" data-cursor="Apri">
         <div class="card__media">${cover(p, { ratio: span >= 7 ? '16/10' : '4/3', lazy })}</div>
         <div class="card__body">
-          <p class="card__meta label"><span class="card__code">${esc(p.code)}</span><span>${esc(p.categories.map(catLabel).join(' · '))}</span><span>${p.year}</span></p>
+          <p class="card__meta label"><span class="card__code">${esc(p.code)}</span><span>${esc(p.categories.map(catLabel).join(', '))}</span><span>${p.year}</span></p>
           <${H} class="card__title"><span class="card__title-text">${esc(p.title)}</span><span class="card__arrow" aria-hidden="true">${icon('arrowUpRight')}</span></${H}>
           <p class="card__sub">${esc(p.subtitle)}</p>
-          <p class="card__foot label"><span>${esc(p.types.slice(0, 2).join(' · '))}</span></p>
+          <p class="card__foot label"><span>${esc(p.types.slice(0, 2).join(', '))}</span></p>
         </div>
       </a>
       ${sampleMark(p)}
@@ -65,7 +65,7 @@ export function siteCard(p, i) {
           <p class="label wcard__meta"><span class="wcard__n">${String(i + 1).padStart(2, '0')}</span><span class="wcard__domain">${w.url ? '<span class="dot dot--live" aria-hidden="true"></span>' : ''}${esc(w.name || w.domain)}</span><span>${p.year}</span></p>
           <h3 class="wcard__title h3"><span>${esc(p.title)}</span><span class="wcard__arrow" aria-hidden="true">${icon('arrowUpRight')}</span></h3>
           <p class="wcard__sub">${esc(p.subtitle)}</p>
-          <p class="label wcard__foot">${esc(p.client)} · ${esc(p.types.slice(0, 2).join(' · '))}</p>
+          <p class="label wcard__foot">${esc(p.client)}, ${esc(p.types.slice(0, 2).join(', '))}</p>
         </div>
       </a>
       ${sampleMark(p)}
@@ -88,7 +88,7 @@ export function indexRow(p, i) {
       <a class="irow__link" href="${projectHref(p)}" data-preview="${pv.src}" data-preview-ratio="${pv.ratio}">
         <span class="irow__n label">${String(i + 1).padStart(3, '0')}</span>
         <span class="irow__title">${esc(p.title)}</span>
-        <span class="irow__type label">${esc(p.types.slice(0, 2).join(' · '))}</span>
+        <span class="irow__type label">${esc(p.types.slice(0, 2).join(', '))}</span>
         <span class="irow__area label">${esc(allAreas[p.area].short)}</span>
         <span class="irow__year label">${p.year}</span>
         <span class="irow__arrow" aria-hidden="true">${icon('arrowUpRight')}</span>

@@ -519,7 +519,7 @@ export const allProjects = [
     slug: TETTOIE,
     code: 'AP-24-001',
     title: 'Tettoie in legno lamellare',
-    subtitle: 'Modellazione 3D in ufficio tecnico, reparto legno',
+    subtitle: 'Tre anni in un ufficio tecnico che costruisce in legno',
     area: 'tecnico',
     categories: ['tecnico', '3d', 'cad'],
     types: ['Modellazione 3D', 'CAD', 'Strutture in legno'],
@@ -530,20 +530,20 @@ export const allProjects = [
     period: '2023 — 2026',
     services: ['Modellazione 3D', 'Supporto ai preventivi', 'Archiviazione tecnica'],
     technologies: ['AutoCAD 3D', 'cadwork', 'Excel'],
-    summary: 'Tre sessioni in un ufficio tecnico che progetta strutture in lamellare e X-LAM: modelli 3D di tettoie, preventivi seguiti dal vivo, archivio ordinato.',
+    summary: 'I miei tre PCTO nel reparto legno di Caem Group: ho modellato tettoie in lamellare e X-LAM, seguito i preventivi e rimesso in ordine l’archivio tecnico.',
     description:
-      'Il mio primo lavoro vero su commesse reali. In tre anni di PCTO ho affiancato i tecnici del reparto legno: dal magazzino, dove travi e travetti si toccano con mano, al modello tridimensionale che diventa distinta di taglio.',
-    goal: 'Imparare il flusso completo di un ufficio tecnico — dal disegno al preventivo alla documentazione — e rendermi utile modellando le strutture più semplici in autonomia.',
+      'Il primo posto dove ho visto un progetto diventare un pezzo di legno. In tre anni di PCTO ho affiancato i tecnici del reparto legno: magazzino, modelli 3D, preventivi e distinte di taglio.',
+    goal: 'Imparare come funziona un ufficio tecnico, dal disegno al preventivo alla documentazione, e intanto rendermi utile modellando le strutture più semplici da solo.',
     problem:
       'Una tettoia sembra banale finché non bisogna far tornare pendenza, interassi, sezioni commerciali e nodi. Ogni incongruenza del modello si paga in officina, dove il legno viene tagliato una volta sola.',
     strategy:
-      'Modellare per solidi con le sezioni reali del lamellare, partire sempre dai fili fissi del cliente e verificare il modello sulle viste quotate prima di passarlo ai tecnici che lo importavano in cadwork.',
+      'Modellavo per solidi, con le sezioni vere del lamellare. Partivo sempre dai fili fissi del cliente e controllavo il modello sulle viste quotate prima di passarlo ai tecnici, che lo importavano in cadwork.',
     development: [
-      { title: 'Prima sessione', text: 'Affiancamento, prime modellazioni in AutoCAD e visite al magazzino per conoscere travi, travetti e lavorazioni.' },
-      { title: 'Seconda sessione', text: 'Maggiore autonomia nel disegno 3D delle tettoie e supporto quotidiano all’ufficio tecnico.' },
-      { title: 'Terza sessione', text: 'Flusso completo: modello 3D, stesura dei preventivi seguita in diretta con il cliente, archiviazione della documentazione.' },
+      { title: 'Prima sessione', text: 'Prime settimane: affiancamento, modellazioni in AutoCAD e visite al magazzino per capire travi, travetti e lavorazioni.' },
+      { title: 'Seconda sessione', text: 'Più autonomia nel disegno 3D delle tettoie e supporto quotidiano all’ufficio tecnico.' },
+      { title: 'Terza sessione', text: 'Il giro completo: modello 3D, preventivi seguiti in diretta con il cliente, archiviazione della documentazione.' },
     ],
-    result: 'Un metodo di lavoro: modelli puliti, nomi di file che si capiscono, documenti che si ritrovano. È la base di tutto quello che faccio oggi, anche quando il progetto è un sito.',
+    result: 'Qui ho imparato a tenere in ordine un lavoro: modelli puliti, nomi di file che si capiscono, documenti che si ritrovano. Vale ancora adesso, anche quando il progetto è un sito.',
     metrics: [
       { value: '3', label: 'Sessioni di tirocinio' },
       { value: '72 — 80 h', label: 'Per sessione' },
@@ -562,7 +562,7 @@ export const allProjects = [
     slug: STRADA,
     code: 'AP-26-T01',
     title: 'Una strada tra due punti',
-    subtitle: 'Dal tracciolino ai metri cubi di scavo, su una carta a curve di livello',
+    subtitle: 'Dal tracciolino ai metri cubi di scavo',
     area: 'tecnico',
     categories: ['tecnico', 'cad'],
     types: ['Progetto stradale', 'Topografia', 'Planimetrie', 'Profili', 'Sezioni', 'Computo'],
@@ -572,21 +572,21 @@ export const allProjects = [
     year: 2026,
     services: ['Tracciolini a pendenza costante', 'Poligonale d’asse e curve circolari', 'Picchettamento', 'Profilo longitudinale e livellette', 'Sezioni trasversali', 'Calcolo dei movimenti di terra'],
     technologies: ['AutoCAD LT', 'Excel'],
-    summary: 'Una strada di 934 m tra due punti di una carta a curve di livello: due tracciolini al 5,3%, quattro curve di raggio 80 m, 28 picchetti, profilo, sezioni e il calcolo dei 23.447 m³ di scavo.',
+    summary: 'Una strada di 934 m tra due punti di una carta a curve di livello: due tracciolini al 5,3%, quattro curve da 80 m, 28 picchetti, profilo, sezioni e 23.447 m³ di scavo.',
     description:
-      'Un progetto stradale completo, dal primo tracciato sulla carta al conto della terra da muovere: collegare la partenza, a quota 300 m, con l’arrivo, a quota 286 m, su una carta con le curve di livello ogni 2 m e un corso d’acqua nel fondovalle.',
+      'Un progetto stradale completo: collegare la partenza a quota 300 con l’arrivo a quota 286, su una carta con curve di livello ogni 2 metri e un corso d’acqua nel fondovalle. Dal primo tracciato al conto della terra da muovere.',
     goal: 'Tracciare una strada che scenda nel fondovalle e risalga dall’altra parte con pendenze regolari, e arrivare a sapere quanta terra scavare e quanta riportare.',
     problem:
-      'Tra partenza e arrivo ci sono 31 metri da scendere e 17 da risalire, con il fondovalle a quota 269 e il corso d’acqua da attraversare. La linea più breve è impraticabile: la strada deve seguire il terreno, e ogni scelta in pianta cambia il profilo, le sezioni e i volumi.',
+      'Tra partenza e arrivo ci sono 31 metri da scendere e 17 da risalire, con il fondovalle a 269 e il corso d’acqua da attraversare. La linea più breve non si può fare: la strada deve seguire il terreno, e ogni scelta in pianta cambia profilo, sezioni e volumi.',
     strategy:
-      'Ho seguito il metodo in ordine. Prima i tracciolini, spezzate a pendenza costante del 5,3% costruite con il compasso aperto a 37,74 m tra una curva di livello e l’altra; poi le poligonali d’asse che li regolarizzano, le curve, i picchetti, e solo alla fine profilo, sezioni e volumi. Ho confrontato due ipotesi e ho sviluppato la seconda.',
+      'Ho seguito il metodo in ordine. Prima i tracciolini, spezzate a pendenza costante del 5,3% con il compasso aperto a 37,74 m tra una curva di livello e l’altra. Poi le poligonali d’asse, le curve, i picchetti, e alla fine profilo, sezioni e volumi. Ho confrontato due ipotesi e ho sviluppato la seconda.',
     development: [
       { title: 'Tracciato', text: 'Due tracciolini da un estremo all’altro e due poligonali d’asse, una a quattro vertici di 968 m e una a due vertici di 892 m. Quella definitiva segue il secondo tracciolino con quattro vertici.' },
       { title: 'Curve', text: 'Quattro curve circolari di raggio 80 m, con deviazioni di 67,1°, 67,6°, 67,0° e 10,3°: 296 m di archi sui 934 m dell’asse, picchettato in 28 punti dalla partenza all’arrivo.' },
       { title: 'Profilo', text: 'Altezze esagerate dieci volte e tre livellette: −6,52% per 475,75 m fino al fondovalle, un tratto in piano di 76,16 m e +4,45% per 382,06 m fino a B. Lo scavo più profondo, 5,22 m, è al picchetto 26.' },
       { title: 'Volumi', text: '28 sezioni con piattaforma di 10 m, aree di sterro e riporto misurate in AutoCAD e un foglio Excel che calcola i volumi con le sezioni ragguagliate: 23.447 m³ di scavo e 569 m³ di riporto.' },
     ],
-    result: 'Otto tavole e un foglio di calcolo che si tengono insieme: la strada scende e risale lungo 934 m e il bilancio delle terre chiude con 22.878 m³ di scavo in eccesso, da portare via.',
+    result: 'Otto tavole e un foglio di calcolo che si tengono insieme: la strada scende e risale per 934 m, e il bilancio delle terre chiude con 22.878 m³ di scavo in più, da portare via.',
     metrics: [
       { value: '934 m', label: 'Lunghezza dell’asse' },
       { value: '28', label: 'Picchetti e sezioni' },
@@ -672,7 +672,7 @@ export const allProjects = [
       { title: 'Layout', text: 'L’autogru con il suo raggio d’azione; la baracca A per l’ufficio di cantiere e la direzione lavori, con WC e pronto soccorso; la baracca B per l’impresa e la guardiola; depositi, postazioni per malta e ferro, parcheggio e percorso dei mezzi.' },
       { title: 'Edificio', text: 'Le piante del piano terra e del piano primo: magazzino con portico, uffici e servizi, cucina, lavanderia, due camere e un bagno.' },
     ],
-    result: 'Quattro tavole A3 in cui il cantiere si capisce prima ancora di leggere la legenda: un accesso per i mezzi e uno per le persone, un posto per ogni materiale e la gru al centro del lavoro.',
+    result: 'Quattro tavole A3. Il cantiere si capisce anche senza leggere la legenda: un accesso per i mezzi, uno per le persone, un posto per ogni materiale e la gru al centro.',
     metrics: [
       { value: '24', label: 'Voci di legenda' },
       { value: '2', label: 'Accessi, carrabile e pedonale' },
@@ -1007,20 +1007,20 @@ export const allProjects = [
     year: 2026,
     services: ['Architettura dei contenuti', 'Testi', 'Fotografia', 'Web design', 'Sviluppo frontend'],
     technologies: ['Vite', 'HTML', 'CSS', 'JavaScript', 'AVIF/WebP', 'Vercel'],
-    summary: 'Il sito dell’azienda agricola della mia famiglia: cinque pagine in HTML, CSS e JavaScript vanilla, nove fotografie scattate da me e nessun servizio di terzi.',
+    summary: 'Il sito dell’azienda agricola di famiglia: cinque pagine in HTML, CSS e JavaScript, nove foto scattate da me e nessun servizio di terzi.',
     description:
       'Cascina Fontana è l’azienda agricola della mia famiglia, avviata nel 2007. Porta il latte alla filiera del Grana Padano DOP, coltiva mais, frumento ed erba medica su sessantatré biolche e vende fieno, legna da ardere e fiori direttamente in cascina, su appuntamento.',
     goal: 'Far sapere a chi cerca fieno, legna o fiori in zona cosa produce la cascina e in quale mese, e portarlo a una telefonata.',
     problem:
-      'Un’azienda senza punto vendita né orari fissi, che non vuole pubblicare l’indirizzo perché la cascina è anche casa. La versione precedente, un’applicazione React in quattro lingue con il tema a sensore orario, pesava più di quanto servisse a cinque pagine e raccontava origini che nessun documento conferma.',
+      'Un’azienda senza punto vendita e senza orari fissi, che non vuole pubblicare l’indirizzo perché la cascina è anche casa. La versione precedente, un’app React in quattro lingue con il tema che cambiava con le ore, pesava più di quanto servisse a cinque pagine e raccontava origini che nessun documento conferma.',
     strategy:
-      'Ho tenuto solo ciò che è documentato e ho fatto della telefonata l’unica azione del sito: un numero, una PEC, nessuna mappa e nessun modulo. Ogni prodotto ha il suo calendario dei dodici mesi, così la stagione si legge prima di chiamare. Sotto ci sono cinque file HTML veri, senza framework né dipendenze a runtime.',
+      'Ho tenuto solo le cose documentate. L’unica azione del sito è la telefonata: un numero, una PEC, nessuna mappa e nessun modulo. Ogni prodotto ha il calendario dei dodici mesi, così la stagione si legge prima di chiamare. Sotto ci sono cinque file HTML, senza framework e senza dipendenze a runtime.',
     development: [
       { title: 'Contenuti', text: 'Con mio padre ho riscritto la storia a partire dal 2007, senza secoli né leggende, e ho riunito le novità nella pagina Prodotti: sei schede con stagionalità, disponibilità e calendario dei mesi.' },
       { title: 'Immagini', text: 'Ho fotografato la cascina e ogni foto esce in quattro larghezze AVIF e WebP, con srcset calcolati sullo spazio che occupa. Il video dell’hero, montato con le stesse foto, parte solo su schermi grandi, con una rete veloce e senza riduzione del movimento.' },
       { title: 'Codice', text: 'Vite con HTML, CSS e JavaScript vanilla: testata e piè di pagina in partial inseriti in build, design token in un file solo, caratteri serviti dal sito. Nessun cookie e nessuna richiesta a server di terzi.' },
     ],
-    result: 'La versione attuale è online su cascinafontana.xyz da settembre 2026: cinque pagine leggere che dicono cosa c’è in cascina e quando, e i vecchi indirizzi portano ancora alla pagina giusta.',
+    result: 'La versione attuale è online su cascinafontana.xyz da settembre 2026: cinque pagine leggere che dicono cosa c’è in cascina e quando. I vecchi indirizzi portano ancora alla pagina giusta.',
     metrics: [
       { value: '0', label: 'Dipendenze a runtime' },
       { value: '0', label: 'Cookie e servizi terzi' },
@@ -1060,19 +1060,19 @@ export const allProjects = [
     year: 2026,
     services: ['Identità visiva', 'Web design', 'Sviluppo frontend', 'Illustrazioni tecniche generate', 'SEO tecnica'],
     technologies: ['Vite', 'JavaScript', 'CSS', 'SVG', 'HTML statico'],
-    summary: 'Un portfolio statico senza framework: pagine generate dai dati, tavole tecniche disegnate dal codice, nessun tracciamento.',
+    summary: 'Un portfolio statico senza framework: le pagine nascono dai dati, le tavole tecniche sono disegnate dal codice, niente tracciamento.',
     description:
-      'Volevo un sito che mostrasse le tre cose che faccio usando tutte e tre: la precisione del disegno tecnico, il mestiere del frontend e la cura della grafica.',
+      'Volevo un sito che mostrasse tutte e tre le cose che faccio, senza sembrare tre siti incollati insieme.',
     goal: 'Presentare lavori tecnici, web e grafici con un linguaggio unico, veloce da caricare e facile da aggiornare: aggiungere un progetto deve voler dire scrivere dei dati, non del markup.',
-    problem: 'Tre mestieri in un sito rischiano di sembrare tre siti. E un portfolio tecnico, senza fotografie patinate, rischia di sembrare vuoto.',
+    problem: 'Il rischio era fare tre siti in uno. E un portfolio tecnico, senza fotografie patinate, può sembrare vuoto.',
     strategy:
-      'Prendere in prestito il linguaggio delle tavole: squadrature, cartigli, quote, codici progetto. Le illustrazioni — piante, sezioni, nuvole di punti — sono SVG generati in fase di build dallo stesso codice che impagina il sito.',
+      'Ho preso il linguaggio delle tavole: squadrature, cartigli, quote, codici progetto. Le illustrazioni (piante, sezioni, nuvole di punti) sono SVG che il codice genera durante la build, lo stesso che impagina il sito.',
     development: [
       { title: 'Sistema', text: 'Token di design per colori, tipografia, spazi e movimento; tre famiglie di caratteri ospitate localmente.' },
       { title: 'Generatore', text: 'Un plugin Vite trasforma dati e template in pagine HTML statiche, sitemap e dati strutturati.' },
       { title: 'Interazioni', text: 'Filtri reali, lightbox, confronto prima/dopo, transizioni di pagina: JavaScript scritto a mano, senza librerie.' },
     ],
-    result: 'Pagine statiche leggere, accessibili da tastiera, senza cookie di profilazione. E un portfolio che si aggiorna modificando un solo file.',
+    result: 'Pagine statiche leggere, usabili da tastiera, senza cookie di profilazione. Per aggiungere un progetto basta modificare un file.',
     metrics: [
       { value: '0', label: 'Framework a runtime' },
       { value: '0', label: 'Cookie di tracciamento' },
@@ -1089,13 +1089,13 @@ export const allProjects = [
       tablet: shot('ap-tablet.webp', 720, 1036, 'Home page di Alberto Pecchini su tablet'),
       mobile: shot('ap-mobile.webp', 600, 1298, 'Home page di Alberto Pecchini su smartphone'),
       mobileTall: shot('ap-mobile-tall.webp', 600, 4000, 'Home page di Alberto Pecchini su smartphone, pagina intera'),
-      palette: ['#F3F1EC', '#EAE7E0', '#10110F', '#5A5B55', '#E5481F'],
+      palette: ['#F8F6F0', '#F1EDE1', '#0A0A0A', '#525252', '#007ACC'], // i token di src/styles/tokens.css (dal 3.11.2026 il blu al posto del minio)
     },
     // La home intera su iPhone 18 Pro, in una sezione tutta sua: strisce della
     // stessa cattura (402 px @2x), una sotto l'altra. Vedi il README, «iPhone 18 Pro».
     iphone: {
-      lead: 'La home di Alberto Pecchini su iPhone, pagina intera: dal saluto con la pianta del piano terra fino al piè di pagina, sotto l’isola dinamica e la barra di Safari.',
-      pages: strisce('ap-iphone', 'Home page di Alberto Pecchini su iPhone, pagina intera: saluto e nome, pianta del piano terra, siti web, discipline, servizi, numeri, metodo, studio, indice dei progetti e piè di pagina'),
+      lead: 'La home di Alberto Pecchini su iPhone, pagina intera: dal nome con il terminale alberto.sh fino al piè di pagina, sotto l’isola dinamica e la barra di Safari.',
+      pages: strisce('ap-iphone', 'Home page di Alberto Pecchini su iPhone, pagina intera: nome e terminale alberto.sh, l’idea, le quattro aree, i siti online, metodo, numeri, studio, ultimi lavori e piè di pagina'),
     },
     cover: shot('ap-desktop.webp', 1200, 750, 'Home page di Alberto Pecchini'),
     images: [
@@ -1110,54 +1110,206 @@ export const allProjects = [
     slug: 'dario-donelli',
     code: 'AP-26-W04',
     title: 'Ing. Dario Donelli',
-    subtitle: 'Un sito composto come la targa dello studio',
+    subtitle: 'L’archivio di uno studio tecnico, composto come la sua targa',
     area: 'web',
     categories: ['web'],
-    types: ['Sito web', 'UI/UX', 'Identità visiva', 'Sviluppo frontend'],
+    types: ['Sito web', 'Archivio dei lavori', 'UI/UX', 'Identità visiva', 'Sviluppo frontend'],
     client: 'Ing. Dario Donelli',
     sector: 'Ingegneria e progettazione edilizia',
     location: 'Rivalta sul Mincio, Rodigo (MN)',
     year: 2026,
-    services: ['Architettura dei contenuti', 'Web design', 'Sviluppo frontend', 'Cartografia', 'Dominio e pubblicazione'],
-    technologies: ['React', 'Vite', 'CSS scroll-driven', 'SVG', 'OpenStreetMap', 'Vercel'],
+    // 10.11.2026: da pagina singola ad archivio dei lavori (repository dariodonelli-, commit bde6a5b)
+    // 24.11.2026: revisione dello studio (b08d782, e3cf5c5): dominio dariodonelli.com, tre categorie,
+    // L’incarico e BIM, scorrimento nativo senza Lenis, solo bianco, nero e grigi neutri
+    services: ['Architettura dei contenuti', 'Web design', 'Sviluppo frontend', 'Schede dei lavori', 'Oscuramento dei dati personali', 'Dominio e pubblicazione'],
+    technologies: ['React', 'Vite', 'Prerender', 'PDF.js', 'Vercel'],
     summary:
-      'Il sito dello studio tecnico dell’Ing. Dario Donelli: una pagina sola in bianco e nero, costruita sulla targa dello studio, con una carta del territorio disegnata a mano.',
+      'Il sito dello studio tecnico dell’Ing. Dario Donelli, in bianco e nero come la targa dello studio: undici lavori in apertura e l’archivio di tutti i 34 lavori dal 2010 al 2023, ognuno con la sua pagina, le tavole originali e le fotografie.',
     description:
       'Dario Donelli è ingegnere edile-architetto, iscritto all’Ordine dal 2010. Segue di persona ogni incarico, dal progetto alle strutture fino alla chiusura del cantiere, per privati e opere civili in provincia.',
     goal: 'Far capire in pochi secondi, a chi deve costruire, ristrutturare o mettere in sicurezza un edificio, chi è lo studio, cosa fa e come contattarlo.',
     problem:
-      'Uno studio di una persona sola, senza un archivio di lavori fotografati né numeri da esibire. Il rischio era un sito generico, uguale a quello di qualsiasi studio tecnico, o riempito di referenze non verificabili.',
+      'Uno studio di una persona sola, con sedici anni di lavori sparsi in cartelle di tavole e fotografie. Il rischio era un sito generico, uguale a quello di qualsiasi studio tecnico, o riempito di referenze non verificabili; e le tavole vere, con i cartigli pieni di indirizzi, codici fiscali e firme, non si potevano pubblicare così com’erano.',
     strategy:
-      'Ho preso come riferimento la targa sull’ingresso dello studio: incisione nera su metallo chiaro, filetti sottili, nessun colore. Da lì vengono il bianco e nero, il nome in maiuscolo e la «D» del logo che torna come punto elenco, marcatore e cursore. Al posto delle referenze ho messo dati verificabili: l’iscrizione all’albo, la sede, il territorio su una carta.',
+      'Ho preso come riferimento la targa sull’ingresso dello studio: incisione nera su metallo chiaro, filetti sottili, nessun colore. Da lì vengono il bianco e nero e il nome in maiuscolo. Al posto delle referenze ci sono i lavori veri: dall’elenco consegnato dallo studio e dai cartigli delle tavole, 34 schede con anno, categoria, committente e prestazione, senza un dato che i materiali non contengano.',
     development: [
-      { title: 'Targa', text: 'L’apertura è alta tre schermi: mentre si scorre, il nome atterra in alto, entra la targa e il manifesto compare riga per riga. È tutto CSS legato allo scorrimento, senza librerie; su telefono o con il movimento ridotto diventa un’apertura statica con gli stessi elementi.' },
-      { title: 'Carta', text: 'Ho disegnato in SVG una carta del territorio, con la proiezione corretta alla latitudine dello studio: i comuni, i fiumi, i laghi, i raggi da 5 a 20 km, scala grafica e rosa dei venti. Accanto, la fotografia della sede con tre punti che raccontano l’ingresso.' },
-      { title: 'Dati', text: 'Testi, recapiti, credenziali d’albo e dati societari stanno in un unico file, separati dall’impaginazione. La mappa di dettaglio usa OpenStreetMap al posto di Google: nessuna chiave, nessun cookie di profilazione, nessun banner.' },
+      { title: 'Apertura', text: 'La prima schermata dice l’essenziale: il nome, il marchio, le due righe della targa e un carosello di undici lavori, da sfogliare con le frecce, con il mouse sull’immagine o con il dito; telefono, email e indirizzo stanno nel menu a tutto schermo. I lavori in apertura non li sceglie il gusto ma un punteggio: numero di fotografie, anno, presenza del prima e dopo.' },
+      { title: 'Archivio', text: 'I 34 lavori stanno nelle tre categorie dell’elenco dello studio (Strutture, Edilizia, Agricoltura), con un filtro che resta nell’indirizzo. Ogni lavoro ha una pagina sua, già pronta sul server: la scheda, il racconto e il visualizzatore, con le tavole PDF originali che si ingrandiscono restando nitide e una striscia di miniature per passare da una tavola o da una foto all’altra; tornando indietro si ritrova la riga da cui si era partiti.' },
+      { title: 'Riservatezza', text: 'Ogni cartiglio è stato misurato a mano: indirizzi, codici fiscali, partite IVA, telefoni, dati catastali, timbri e firme sono sfumati dentro il PDF, non solo coperti sullo schermo. Dalle fotografie sono spariti targhe, numeri civici e volti, e con loro i metadati del telefono. Dei committenti privati resta il cognome.' },
     ],
     result:
-      'Il sito è online su Vercel e sta passando al dominio dariodonelli.com: una pagina sola, senza cookie di profilazione, con circa 90 kB di codice compresso oltre alle fotografie.',
+      'Il sito è online sul suo dominio, dariodonelli.com: una pagina principale e 34 schede dei lavori, generate in anticipo, con le tavole originali al posto delle fotografie dei fogli. La sezione BIM è dichiarata in preparazione, senza promettere ciò che lo studio non fa ancora.',
     metrics: [
-      { value: '22', label: 'Località sulla carta' },
-      { value: '0', label: 'Cookie di profilazione' },
-      { value: '90 kB', label: 'Codice compresso' },
+      { value: '34', label: 'Lavori in archivio' },
+      { value: '3', label: 'Categorie' },
+      { value: '11', label: 'Lavori in apertura' },
     ],
     web: {
-      url: 'https://dariodonelli.vercel.app',
-      domain: 'dariodonelli.vercel.app',
-      desktop: shot('dd-desktop.webp', 1200, 750, 'Home page di dariodonelli.vercel.app su desktop'),
-      desktopTall: shot('dd-desktop-tall.webp', 1200, 2833, 'Home page di dariodonelli.vercel.app, pagina intera'),
-      tablet: shot('dd-tablet.webp', 720, 1036, 'Home page di dariodonelli.vercel.app su tablet'),
-      mobile: shot('dd-mobile.webp', 600, 1298, 'Home page di dariodonelli.vercel.app su smartphone'),
-      mobileTall: shot('dd-mobile-tall.webp', 600, 4000, 'Home page di dariodonelli.vercel.app su smartphone, pagina intera'),
-      palette: ['#F6F6F4', '#000000', '#4A4A4A', '#FFFFFF', '#EBEBE8'],
+      // 24.11.2026: dal provvisorio dariodonelli.vercel.app al dominio dello studio (l'apice fa 308 verso il www)
+      url: 'https://www.dariodonelli.com',
+      domain: 'dariodonelli.com',
+      desktop: shot('dd-desktop.webp', 1200, 750, 'Home page di dariodonelli.com su desktop'),
+      desktopTall: shot('dd-desktop-tall.webp', 1200, 2833, 'Home page di dariodonelli.com, pagina intera'),
+      tablet: shot('dd-tablet.webp', 720, 1036, 'Home page di dariodonelli.com su tablet'),
+      mobile: shot('dd-mobile.webp', 600, 1298, 'Home page di dariodonelli.com su smartphone'),
+      mobileTall: shot('dd-mobile-tall.webp', 600, 4000, 'Home page di dariodonelli.com su smartphone, pagina intera'),
+      palette: ['#FFFFFF', '#000000', '#666666', '#F6F6F6', '#E2E2E2'], // i token di src/index.css del sito (24.11.2026: solo bianco, nero e grigi)
     },
-    cover: shot('dd-desktop.webp', 1200, 750, 'Home page di dariodonelli.vercel.app'),
+    cover: shot('dd-desktop.webp', 1200, 750, 'Home page di dariodonelli.com'),
     images: [
-      shot('dd-desktop.webp', 1200, 750, 'Home page di dariodonelli.vercel.app su desktop', 'Home — desktop 1440 px'),
-      shot('dd-tablet.webp', 720, 1036, 'Home page di dariodonelli.vercel.app su tablet', 'Home — tablet 820 px'),
-      shot('dd-mobile.webp', 600, 1298, 'Home page di dariodonelli.vercel.app su smartphone', 'Home — smartphone 390 px'),
+      shot('dd-desktop.webp', 1200, 750, 'Home page di dariodonelli.com su desktop', 'Home — desktop 1440 px'),
+      shot('dd-tablet.webp', 720, 1036, 'Home page di dariodonelli.com su tablet', 'Home — tablet 820 px'),
+      shot('dd-mobile.webp', 600, 1298, 'Home page di dariodonelli.com su smartphone', 'Home — smartphone 390 px'),
     ],
     featured: true,
+    sample: false,
+  },
+  {
+    // 25.11.2026: torna nel portfolio (era uscita il 13.11 con «via pzkko dal repository»), riscritta da capo: dal
+    // 17.11 pzkko.it non è più il muro di volantini ma il profilo di Discord (cartella pzkko.it/ del repository AP).
+    // Il dominio col trattino, come albertopecchini-it.
+    slug: 'pzkko-it',
+    code: 'AP-26-W05',
+    title: 'pzkko',
+    subtitle: 'Il mio profilo di Discord, diventato una sala giochi',
+    area: 'web',
+    categories: ['web'],
+    types: ['Sito web', 'Direzione artistica', 'Sviluppo frontend', 'Giochi nel browser'],
+    client: 'Progetto personale',
+    sector: 'Giochi, programmi e community',
+    location: 'Online',
+    year: 2026,
+    services: ['Direzione artistica', 'UI/UX', 'Sviluppo frontend', 'Giochi in 3D', 'Server e API', 'Sicurezza web'],
+    technologies: ['HTML', 'CSS', 'JavaScript', 'Tailwind CSS', 'three.js', 'Node.js', 'Lanyard', 'Vercel'],
+    summary:
+      'Il sito delle cose che faccio per divertimento, vestito come il mio profilo di Discord e aggiornato dal vivo: 22 progetti che si aprono dentro la pagina, una chat con 53 comandi e una banca di monete finte che gira sul mio computer.',
+    description:
+      'pzkko è il nome che uso in rete, da «Pekko», il mio soprannome. pzkko.it raccoglie i giochini, i programmi che mi sono serviti e le prove con Claude Code: tutto quello che sul sito dello studio non starebbe. Dal 17 novembre 2026 non è più un muro di volantini ma il mio profilo di Discord, rifatto pezzo per pezzo e collegato a quello vero.',
+    goal: 'Un indirizzo solo per provare le mie cose senza scaricare niente: aprire un gioco o un programma in due clic, sul computer come sul telefono, e ritrovare monete e progressi dappertutto.',
+    problem:
+      'In un mese i progetti erano diventati più di venti, sparsi fra il muro, un cercapersone in 3D e pagine a parte: per arrivare a un gioco bisognava sapere dove cercarlo. E un sito con conti, monete e chat doveva essere sicuro come uno vero, senza password da custodire.',
+    strategy:
+      'Ho preso la pagina che i miei amici aprono tutti i giorni, il profilo di Discord, e l’ho rifatta con i suoi pezzi veri: i caratteri gg sans e gg mono, la cornice «Crystals», l’effetto «Dreamy», il tema dal verde lime al viola calcolato come lo calcola il client. Avatar, stato, banner e musica arrivano dal vivo; a sinistra la scheda, a destra Bacheca, Community, Progetti, Chat, Attività e Social. Quello che si apre sopra, invece, è un foglio del vecchio muro: carta col nastro, titoli in Anton, la voce in Permanent Marker.',
+    development: [
+      { title: 'Progetti', text: '22 progetti in tre famiglie, giochi, siti e programmi, ognuno con la sua scheda, le catture vere e un filmato che parte al passaggio del mouse. Girano tutti dentro la pagina: il cercapersone PZK Zero in 3D, i tavoli del casinò, Parole, Trivia, Angoli, pzkmaps, la calcolatrice e il compilatore C. Una tessera timbra le app provate e un volantino propone la prossima.' },
+      { title: 'Chat e banca', text: 'La scheda Chat è un canale di Discord col bot pzk: 53 comandi, gli stessi soldi e lo stesso zaino del cercapersone e dei tavoli. Il conto si apre con l’email e un codice di sei cifre, senza password né PIN; monete e partite stanno su un server che gira sul mio computer, raggiunto da funzioni di Vercel firmate. A computer spento si gioca coi 1.000 $pzk della sessione.' },
+      { title: 'Dal vivo', text: 'Lo stato di Discord arriva da Lanyard; dal computer arrivano Spotify e le app aperte, su un canale diretto che non aspetta la cache. In bacheca i profili social, con storie ed evidenze, sono HTML del sito e non un riquadro incorniciato; la scheda Community mostra i numeri pubblici di due server. I testi sono in nove lingue, e sette si scaricano solo se le scegli.' },
+    ],
+    // La foto vera da cui era nato il muro, la prima home (7.10–13.11.2026), con la sua Live Photo; il muro oggi è
+    // il progetto «Il Muro», a pzkko.it/serranda/.
+    funFact: {
+      lead: 'Prima del profilo, pzkko.it era un muro che esiste davvero: la saracinesca di un ingresso della Coin in via Rizzoli, a Bologna, a un centinaio di metri dalle Due Torri, fotografata domenica 22 settembre 2024 alle 12:28, la prima volta che ci andavo.',
+      text: 'Lamiera grigia, graffiti, più di venti volantini e sopra l’insegna con le lettere a scatola. Dal 7 ottobre al 13 novembre 2026 la home è stata quella saracinesca ridisegnata: un volantino per ogni sito, i tagliandi da strappare, l’insegna al neon che si accendeva al tramonto. Il muro non è sparito: è diventato uno dei progetti, «Il Muro», e la sua carta col nastro veste tutti i popup del sito nuovo.',
+      photo: {
+        src: '/media/web/pzk-bologna.webp',
+        small: '/media/web/pzk-bologna-m.webp',
+        live: '/media/web/pzk-bologna.mp4',
+        w: 1080,
+        h: 1440,
+        alt: 'La saracinesca di un ingresso della Coin in via Rizzoli a Bologna: lamiera grigia coperta di graffiti e di volantini, sopra l’insegna «coin» con le lettere a scatola.',
+      },
+      caption: 'Bologna, via Rizzoli · 22.09.2024, 12:28 · iPhone 16 Pro, Live Photo',
+      link: { href: 'https://pzkko.it/serranda/', label: 'Il muro su pzkko.it' },
+    },
+    // I programmi che faccio per me e regalo: le loro pagine stanno su pzkko.it
+    tools: {
+      lead: 'Fra i progetti ci sono anche i programmi che ho fatto per me e che regalo.',
+      items: [
+        {
+          name: 'pzk$meeting',
+          text: 'Mentre la lezione va su Teams registra audio e schermo, trascrive la voce con Whisper in sincrono con la lavagna e legge le formule; a lezione finita impagina gli appunti per argomento in un PDF. Gratis, per Windows, tutto sul computer.',
+          download: { href: 'https://pzkko.it/tools/lezioni/lezioni.zip', name: 'pzk$meeting.zip', label: 'Scarica pzk$meeting.zip', meta: 'zip · 0,9 MB · Windows' },
+          page: { href: 'https://pzkko.it/tools/lezioni/', label: 'La pagina su pzkko.it' },
+        },
+        {
+          name: 'Diretta OS',
+          text: 'La regia delle sovrimpressioni per le dirette: sopra la webcam una tela trasparente con cornice, nome che segue la testa, meteo, scene «torno subito» e pezzi da appendere ai muri in prospettiva, comandata da un pannello solo. Il nuovo installatore è in preparazione; la guida è online.',
+          page: { href: 'https://pzkko.it/direttaos/', label: 'La guida su pzkko.it' },
+        },
+      ],
+    },
+    result:
+      'pzkko.it è online dal 7 ottobre 2026 e nella forma di oggi dal 17 novembre: HTML, CSS e JavaScript scritti a mano, Tailwind per lo stile, nessun framework. Ogni script in linea passa la Content-Security-Policy solo con la sua impronta, e la build si ferma se nei file pubblici finiscono un segreto, una chiave o un percorso del computer.',
+    metrics: [
+      { value: '22', label: 'Progetti che girano nella pagina' },
+      { value: '53', label: 'Comandi del bot in chat' },
+      { value: '0', label: 'Password da ricordare' },
+    ],
+    web: {
+      // senza www: www.pzkko.it rimanda all'apice, una sola origine (vercel.json di pzkko.it)
+      url: 'https://pzkko.it',
+      domain: 'pzkko.it',
+      // niente pagine intere: vedi 'pzkko-it' in tools/catture/siti.js
+      desktop: shot('pzk-desktop.webp', 1200, 750, 'Home page di pzkko.it su desktop: la scheda del profilo di Discord a sinistra, la bacheca a destra'),
+      tablet: shot('pzk-tablet.webp', 720, 1036, 'Home page di pzkko.it su tablet'),
+      mobile: shot('pzk-mobile.webp', 600, 1298, 'Home page di pzkko.it su smartphone'),
+      palette: ['#CCFF00', '#9D00FF', '#4F0080', '#EFE9F4', '#2E3035'], // i token di src/site.css di pzkko.it (25.11.2026)
+    },
+    cover: shot('pzk-desktop.webp', 1200, 750, 'Home page di pzkko.it'),
+    // La home è già nei dispositivi in apertura: la galleria mostra i progetti, la chat e un progetto aperto.
+    images: [
+      shot('pzk-progetti-desktop.webp', 1200, 750, 'La scheda Progetti di pzkko.it: i filtri per giochi, siti e programmi e le schede di PZK Zero, del Casinò $pzk, del Muro e di Synesthesia', 'Progetti — desktop 1440 px'),
+      shot('pzk-chat-tablet.webp', 720, 960, 'La scheda Chat di pzkko.it: il canale #pzk-bot con i tavoli in alto, il messaggio di benvenuto del bot e i comandi rapidi', 'Chat — tablet 820 px'),
+      shot('pzk-casino-mobile.webp', 600, 1298, 'La scheda del Casinò $pzk aperta su smartphone: un foglio col nastro, la galleria della roulette e i tasti dei giochi', 'Casinò $pzk — smartphone 390 px'),
+    ],
+    featured: false,
+    sample: false,
+  },
+  {
+    // 25.11.2026: la parodia, chiusa il 13.11.2026 («via Better Call Pekko dal repository»; codice, immagini e
+    // database in archivio su D:). Senza web.url: il sito non c'è più, e web.chiuso lo dice al posto di «Visita».
+    // Le catture vengono dall'ultima versione (4aecaf9) servita in locale con SITE=bcp e i dati di prova;
+    // numero e paese, rimasti stampati dentro qualche banner, sono sfumati.
+    slug: 'bettercallpekko-it',
+    code: 'AP-26-W06',
+    title: 'Better Call Pekko',
+    subtitle: 'L’assistenza informatica, come se fosse il 2008',
+    area: 'web',
+    categories: ['web', 'grafica'],
+    types: ['Sito web', 'Parodia', 'Direzione artistica', 'Sviluppo frontend'],
+    client: 'Progetto personale',
+    sector: 'Assistenza informatica, per ridere',
+    location: 'Online',
+    year: 2026,
+    services: ['Concept e testi', 'Direzione artistica', 'Banner animati', 'Sviluppo frontend', 'Database e API'],
+    technologies: ['HTML', 'CSS', 'JavaScript', 'Vite', 'GIF', 'Claude Design', 'Vercel'],
+    summary:
+      'La parodia di un sito americano di assistenza informatica di fine anni Duemila, in inglese da forum: popup, GIF, Impact in 3D e Pekko in giacca gialla alla maniera di Saul Goodman. Ma contatore, forum, guestbook e like erano veri. Online su bettercallpekko.it dal 28 settembre al 13 novembre 2026.',
+    description:
+      'Better Call Pekko è il mio lato «tecnico del computer», raccontato come lo racconterebbe l’avvocato più famoso della TV: virus, stampanti che non stampano, foto doppie, Windows da reinstallare. Il sito serio dice le stesse cose in italiano e in ordine; questo le grida in maiuscolo, con un computer che esplode sullo sfondo.',
+    goal: 'Far ridere chi lo apre e intanto fargli sapere che sistemo computer e faccio siti, con servizi, prezzi e i miei siti veri dentro la pagina.',
+    problem:
+      'Un sito che imita il 2008 rischia di essere soltanto brutto. Doveva sembrare fatto in un pomeriggio del 2006 ed essere fatto bene: leggibile, veloce, e con dentro cose che funzionano davvero.',
+    strategy:
+      'Ho rifatto i siti dei negozi di computer americani di quegli anni: pagina larga 960 pixel, menu a bottoni, il popup «WAIT!!!» all’arrivo, colonne di pubblicità finte, contavisite e webring. I testi sono in inglese da forum, in minuscolo, con «u» e «4» al posto delle parole; i titoli in Impact. Anche sul telefono la pagina si vede intera e rimpicciolita, come un sito di allora sul primo iPhone.',
+    development: [
+      { title: 'Pubblicità', text: 'Ogni banner, dalla testata alle e-card, è disegnato in vettoriale con caratteri veri, in codice o con Claude Design, e poi cotto in GIF e JPEG come allora. Le foto di Pekko negli abiti sgargianti vengono da una sola fototessera e dall’IA, ritagliate a mano; le aziende inventate, dall’assicurazione delle tartarughe al fish & chips della RAM, riempiono le colonne.' },
+      { title: 'Cose vere', text: 'Contavisite, persone online, like, sondaggio, record del gioco «Punch the virus», forum, guestbook, shoutbox ed e-card da mandare agli amici scrivevano in un database vero, con un campo trappola contro lo spam e niente link nei messaggi. La webcam dell’ufficio usa quella di chi guarda, coi filtri del 2009, e l’immagine non lascia il computer.' },
+      { title: 'Siti veri', text: 'In mezzo alla parodia c’è «Pekko makes websites»: i miei siti veri dentro un browser finto, «Pekko Explorer 6», con le catture aggiornate e i numeri presi dalle schede di questo portfolio. Il codice Konami, ↑ ↑ ↓ ↓ ← → ← → B A, fa ballare Pekko.' },
+    ],
+    result:
+      'Better Call Pekko usciva dallo stesso codice di questo sito, con una variabile di build e un progetto Vercel a parte. Il 13 novembre 2026 l’ho chiuso: codice, immagini e database stanno in archivio. Le catture qui sono dell’ultima versione, rifatta in locale coi dati di prova; il numero e il paese, rimasti stampati dentro qualche banner, sono sfumati.',
+    metrics: [
+      { value: '960', label: 'Pixel di larghezza, come nel 2008' },
+      { value: '160', label: 'Immagini, banner e GIF' },
+      { value: '9', label: 'Funzioni vere dietro la parodia' },
+    ],
+    web: {
+      domain: 'bettercallpekko.it',
+      // il sito non è più online: al posto di «Visita il sito» (src/templates/pages/portfolio.js, case-study.js)
+      chiuso: '13 novembre 2026',
+      desktop: shot('bcp-desktop.webp', 1200, 750, 'Home page di Better Call Pekko su desktop: la testata con l’esplosione e Pekko in giacca gialla, il menu a bottoni, le colonne di pubblicità finte'),
+      tablet: shot('bcp-tablet.webp', 720, 1036, 'Home page di Better Call Pekko su tablet, larga 960 pixel e rimpicciolita'),
+      mobile: shot('bcp-mobile.webp', 600, 1298, 'Home page di Better Call Pekko su smartphone, intera e rimpicciolita come un sito del 2008'),
+      palette: ['#EAE41F', '#E21212', '#FFE600', '#0D2560', '#7A0000'], // i colori del foglio di stile della pagina (4aecaf9)
+    },
+    cover: shot('bcp-desktop.webp', 1200, 750, 'Home page di Better Call Pekko'),
+    images: [
+      shot('bcp-popup-desktop.webp', 1200, 750, 'Better Call Pekko all’arrivo: la finestra «WAIT!!!» con Pekko che indica, i tasti «YES, HELP ME!» e «CALL NOW»', 'Il popup all’arrivo — desktop 1440 px'),
+      shot('bcp-guestbook-tablet.webp', 720, 960, 'La sezione Testimonials di Better Call Pekko: il guestbook, il sondaggio, il gioco «Punch the virus» e le pubblicità finte', 'Testimonials — tablet 820 px'),
+      shot('bcp-webcam-mobile.webp', 600, 1298, 'La webcam dell’ufficio con la shoutbox, il forum, l’angolo dei cellulari e i coupon di Better Call Pekko su smartphone', 'Webcam, forum e coupon — smartphone 390 px'),
+    ],
+    featured: false,
     sample: false,
   },
   {

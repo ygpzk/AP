@@ -28,7 +28,7 @@ const KINDS = {
     kind: 'scuola',
     kindLabel: 'Scuola',
     webmail: 'gmail',
-    intro: 'Sono Alberto Pecchini, studente al primo anno di Costruzioni e gestione del territorio (L-P01) all’Università di Modena e Reggio Emilia, matricola 223824.',
+    intro: 'Sono Alberto Pecchini, studente al primo anno di Costruzioni e gestione del territorio (L-P01) all’Università di Modena e Reggio Emilia, matricola 223824, iscritto anche all’Università di San Marino per il doppio titolo.',
     tips: [
       'Nell’oggetto metti corso e matricola: «… — L-P01, matricola 223824». La segreteria smista a colpo d’occhio.',
       'Ai docenti si dà del Lei; ai colleghi del voi, con gli indirizzi in Ccn e senza «a presto».',
@@ -169,10 +169,26 @@ export const contacts = [
     salutation: 'Spett.le Segreteria Studenti',
   },
   {
+    id: 'segreteria-unirsm',
+    name: 'Segreteria Studenti UNIRSM',
+    email: 'segreteriastudenti@unirsm.sm',
+    role: 'Segreteria studenti UNIRSM · doppio titolo UNIMORE–UNIRSM',
+    group: 'universita',
+    salutation: 'Gentile Segreteria studenti',
+  },
+  {
     id: 'me-unimore',
     name: 'Alberto Pecchini — ateneo',
     email: '398893@studenti.unimore.it',
     role: 'Il mio indirizzo di ateneo: in Ccn per tenere copia',
+    group: 'me',
+  },
+  // 11.11.2026: l'indirizzo del piano di studi UNIRSM
+  {
+    id: 'me-unirsm',
+    name: 'Alberto Pecchini — UNIRSM',
+    email: 'a.pecchini1@studio.unirsm.sm',
+    role: 'Il mio indirizzo UNIRSM, per il doppio titolo',
     group: 'me',
   },
   {
