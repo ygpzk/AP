@@ -89,6 +89,8 @@ if (!I18N[lang]) await caricaLingua(lang).catch(() => {})
 if (!I18N[lang]) lang = 'en'
 let theme = store.get(THEME_KEY) === 'dark' ? 'dark' : 'light'
 const profile = structuredClone(CONFIG.profile)
+// (26.11) le voci che config.js tiene ferme: non le cambia né Lanyard né il profilo pubblico
+const fisso = (k) => Array.isArray(profile.fisso) && profile.fisso.includes(k)
 const collectibles = structuredClone(COLLECTIBLES)
 let presence = null, presenceAt = 0
 const t = () => I18N[lang]
@@ -210,6 +212,16 @@ function setImg(el, key, url) {
 function renderBanner() {
   const h = profile.banner, banner = $('#banner'), amb = $('#ambient')
   banner.parentElement.style.background = profile.bannerColor || '#110f10'
+  // il banner fermo è un file del sito
+  if (fisso('banner') && profile.bannerSrc) {
+    banner.hidden = false
+    if (shown.bannerHash === profile.bannerSrc) return
+    shown.bannerHash = profile.bannerSrc
+    banner.src = profile.bannerSrc
+    amb.onload = () => amb.classList.add('is-on')
+    amb.src = profile.bannerSrc.replace(/\.webp$/, '-300.webp')
+    return
+  }
   if (!h || !/^[a-z0-9_]+$/i.test(h)) { banner.hidden = true; amb.classList.remove('is-on'); shown.bannerHash = null; return }
   banner.hidden = false
   if (shown.bannerHash === h) return
@@ -231,10 +243,12 @@ function renderAvatar() {
   const u = presence?.discord_user
   const av = u?.avatar ?? profile.avatar
   const ok = av && /^[a-z0-9_]+$/i.test(av)
-  const url = ok ? `${CDN}/avatars/${ID}/${av}.webp?size=256${av.startsWith('a_') && heavy ? '&animated=true' : ''}` : '/me.png'
+  const mio = fisso('avatar') && profile.avatarSrc // la foto ferma è un file del sito
+  const url = mio || (ok ? `${CDN}/avatars/${ID}/${av}.webp?size=256${av.startsWith('a_') && heavy ? '&animated=true' : ''}` : '/me.png')
   setImg($('#avatar'), 'avatar', url)
-  if (u && ok) setFavicon(`${CDN}/avatars/${ID}/${av}.png?size=64`)
-  const deco = u ? u.avatar_decoration_data?.asset : profile.decoration
+  if (mio) setFavicon(mio.replace(/\.webp$/, '-64.png'))
+  else if (u && ok) setFavicon(`${CDN}/avatars/${ID}/${av}.png?size=64`)
+  const deco = u && !fisso('decoration') ? u.avatar_decoration_data?.asset : profile.decoration
   const el = $('#deco')
   if (!deco || !/^[a-z0-9_]+$/i.test(deco)) { el.hidden = true; shown.deco = null; return }
   if (shown.deco === deco) return
@@ -315,6 +329,9 @@ function renderCard() {
   } else bubble.hidden = true
   // nome utente, tag del server, badge
   $('#uname').textContent = p.username
+  // i pronomi: solo quelli scritti in config.js
+  const pr = $('#pron')
+  if (pr) { pr.textContent = p.pronouns || ''; pr.hidden = !p.pronouns }
   const g = u?.primary_guild?.identity_enabled ? { tag: u.primary_guild.tag, id: u.primary_guild.identity_guild_id, badge: u.primary_guild.badge } : (u ? null : p.guild)
   const gt = $('#gtag')
   if (g?.tag) { gt.innerHTML = `${g.badge && /^[a-z0-9_]+$/i.test(g.badge) && /^\d+$/.test(g.id) ? `<img src="${CDN}/clan-badges/${g.id}/${g.badge}.png?size=32" alt="">` : ''}${esc(g.tag)}`; gt.hidden = false } else gt.hidden = true
@@ -736,7 +753,7 @@ function renderProjects() {
 function renderCollection() {
   const u = ui(), rows = []
   const eff = collectibles[profile.effectSku], frame = collectibles[profile.frameSku], deco = collectibles[profile.decorationSku]
-  const decoAsset = presence?.discord_user ? presence.discord_user.avatar_decoration_data?.asset : profile.decoration
+  const decoAsset = presence?.discord_user && !fisso('decoration') ? presence.discord_user.avatar_decoration_data?.asset : profile.decoration
   if (profile.effectSku && eff) rows.push([eff.thumb?.startsWith(`${CDN}/`) ? `<img src="${esc(eff.thumb)}" alt="" loading="lazy">` : '', eff.name, u.colEffect, ''])
   const front = frame?.layers?.find((l) => l.order === 'front')
   if (profile.frameSku && frame && front) rows.push([`<img src="${CDN}/media/v1/collectibles-shop/${profile.frameSku}/${front.id}/static?format=webp" alt="" loading="lazy" style="object-fit:cover;object-position:50% 12%;scale:1.6">`, frame.name, u.colFrame, ''])
@@ -1246,18 +1263,20 @@ async function loadProfile() {
     if (!r.ok) return
     const d = await r.json()
     const u = d.user || {}, up = d.user_profile || {}
-    if (Array.isArray(up.theme_colors) && up.theme_colors.length === 2) profile.theme = up.theme_colors.map((c) => '#' + Number(c).toString(16).padStart(6, '0'))
-    if ('banner' in u) profile.banner = u.banner
-    if (/^#[0-9a-f]{6}$/i.test(u.banner_color || '')) profile.bannerColor = u.banner_color
+    if (!fisso('theme') && Array.isArray(up.theme_colors) && up.theme_colors.length === 2) profile.theme = up.theme_colors.map((c) => '#' + Number(c).toString(16).padStart(6, '0'))
+    if (!fisso('banner')) {
+      if ('banner' in u) profile.banner = u.banner
+      if (/^#[0-9a-f]{6}$/i.test(u.banner_color || '')) profile.bannerColor = u.banner_color
+    }
     // (la bio e i collegamenti restano quelli di pzkko: il profilo dal vivo può
     // cambiare, ma non porta qui il nome o gli account personali)
     if (u.display_name_styles) profile.nameStyle = u.display_name_styles
     if (Array.isArray(d.badges)) profile.badges = d.badges.map((b) => ({ id: b.id, icon: b.icon, description: b.description, link: b.link }))
     // gli oggetti da collezione: l'effetto, la cornice (tipo 3) e la decorazione
     const sku = (v) => (/^\d+$/.test(String(v ?? '')) ? String(v) : null)
-    if ('profile_effect' in up) profile.effectSku = sku(up.profile_effect?.sku_id)
+    if ('profile_effect' in up && !fisso('effect')) profile.effectSku = sku(up.profile_effect?.sku_id)
     if (Array.isArray(up.collectibles)) profile.frameSku = sku(up.collectibles.find((c) => c.type === 3)?.sku_id)
-    if ('avatar_decoration_data' in u) profile.decorationSku = sku(u.avatar_decoration_data?.sku_id)
+    if ('avatar_decoration_data' in u && !fisso('decoration')) profile.decorationSku = sku(u.avatar_decoration_data?.sku_id)
     applyTheme()
     renderCard()
     if (activeTab === 'social') renderSocial()

@@ -2,8 +2,8 @@
 
 Il profilo per svago di pzkko, fatto come il suo profilo di Discord e
 con i pezzi veri di Discord: i caratteri (gg sans, gg mono, ABC Ginto Nord e
-Pricedown per il nome), la cornice «Crystals (Peridot)», l’effetto «Dreamy (Green)»,
-il tema `#ccff00 → #9d00ff` calcolato come lo calcola il client (velo bianco
+Pricedown per il nome), la cornice «Crystals (Peridot)», l’effetto «Boost Relic»,
+il tema `#ffd21a → #d81e1e` calcolato come lo calcola il client (velo bianco
 all’80 % col tema chiaro, nero al 60 % con quello scuro, tinta del testo, sfondo
 del pannello), banner, avatar con la decorazione, stato, stato personalizzato,
 tag NODE, badge e collezione, tutto dal vivo. La bio e i collegamenti restano
@@ -19,12 +19,24 @@ altro sito personale.
 - **Profilo pubblico** (`dcdn.dstn.to/profile/<id>`): banner, colori del tema,
   badge e gli SKU di effetto, cornice e decorazione; si ricarica ogni 10 minuti.
   Bio e collegamenti non vengono presi dal profilo dal vivo. Il campo dei pronomi
-  non viene mai letto né mostrato.
+  di Discord non viene mai letto: accanto al nome utente compare solo il valore
+  scritto a mano in `config.js` (`profile.pronouns`).
 - **Discord** (`discord.com/api/v9/collectibles-products/<sku>`, senza accesso):
   nome, immagini e misure di effetto e cornice; in memoria nel browser per un
   giorno. Le immagini arrivano da `cdn.discordapp.com`. Se cambi cornice, effetto,
   carattere del nome o tema su Discord, il sito li segue da solo.
 - Se un servizio non risponde valgono i valori di riserva in `config.js`.
+- **Il profilo «segnaletica» (26.11.2026).** Foto col cartello della lumaca,
+  banner «lavori in corso», tema giallo → rosso, decorazione «Questionable»,
+  effetto «Boost Relic», pronomi e bio nuovi. Su Discord questo profilo sta nel
+  profilo del server SOLLARY, e Lanyard e `dcdn.dstn.to` danno solo il profilo
+  principale: per questo le voci elencate in `profile.fisso` di `config.js`
+  (`avatar`, `banner`, `theme`, `decoration`, `effect`) non si prendono dal
+  vivo ma da `config.js`, e foto e banner sono file del sito
+  (`public/media/profilo/`; il banner è la versione 2040 × 768 fatta per la
+  scheda, col titolo a sinistra perché a destra ci sono i tasti). Stato, stato
+  personalizzato, tag, badge, cornice e stile del nome restano dal vivo. Quando
+  il profilo principale di Discord diventa questo, basta svuotare `fisso`.
 
 Non ci sono altri servizi esterni: caratteri, icone dei marchi e bandiere stanno
 nel sito.

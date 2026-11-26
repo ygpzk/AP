@@ -1,6 +1,6 @@
 /* pzkko.it: il profilo di Discord di pzkko, con i suoi caratteri (gg sans, gg mono,
    ABC Ginto Nord e quelli dei nomi), la sua cornice e il suo effetto veri, e il tema
-   del profilo (#ccff00 → #9d00ff) calcolato come lo calcola Discord. */
+   del profilo (dal 26.11 #ffd21a → #d81e1e) calcolato come lo calcola Discord. */
 @import "tailwindcss" source(none);
 @source "../public/index.html";
 @source "../public/404.html";
@@ -41,12 +41,12 @@
 
 :root {
   /* il tema del profilo: lo riscrive app.js coi colori veri */
-  --p: #ccff00;
-  --a: #9d00ff;
-  --tint: #4f0080;
-  --modal-bg: #dccfe6;
-  --ring: #f5ffcc;
-  --btn: #79966f;
+  --p: #ffd21a;
+  --a: #d81e1e;
+  --tint: #4d3d00;
+  --modal-bg: #eddbc9;
+  --ring: #fff6d1;
+  --btn: #918659;
   /* la cornice del profilo: larghezza interna e sbordi del disegno originale */
   --finner: 1200;
   --fot: 304;
@@ -202,6 +202,8 @@ button { font: inherit; color: inherit; }
 .uname { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-top: 6px; font-size: 14px; color: var(--text); }
 .gtag { display: inline-flex; align-items: center; gap: 4px; padding: 1px 6px 1px 4px; border-radius: 6px; background: var(--pill); border: 1px solid var(--pill-line); font-weight: 600; font-size: 12px; color: var(--text); }
 .gtag img { width: 14px; height: 14px; }
+/* i pronomi, come su Discord: «pzkko • passo/carrabile» */
+.pron::before { content: "•"; margin-right: 6px; }
 .badges { display: inline-flex; flex-wrap: wrap; gap: 2px; margin-top: 10px; padding: 2px; border-radius: 8px; background: var(--pill); border: 1px solid var(--pill-line); }
 .badges a, .badges span { display: inline-flex; padding: 2px; border-radius: 6px; transition: background .12s, transform .12s; }
 .badges a:hover, .badges span:hover { background: var(--box-2); transform: translateY(-1px); }

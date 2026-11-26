@@ -7,24 +7,35 @@ export const CONFIG = {
   // (vetrina.js), cioè dal suo Spotify.
   discordId: '459791358899519498',
 
-  // Il profilo pubblico (banner, tema, bio, badge, collegamenti, effetto e cornice)
-  // arriva da dcdn.dstn.to; se non risponde si usano i valori qui sotto, presi il 18.11.2026.
+  // Il profilo pubblico (banner, tema, badge, collegamenti, effetto e cornice)
+  // arriva da dcdn.dstn.to; se non risponde si usano i valori qui sotto.
   profileApi: 'https://dcdn.dstn.to/profile/',
   profile: {
     username: 'pzkko',
     displayName: 'pzkko',
+    // (26.11) Il profilo «segnaletica»: cartello con la lumaca, banner «lavori in corso», tema
+    // giallo → rosso, decorazione «Questionable», effetto «Boost Relic». Su Discord sta nel profilo
+    // del server SOLLARY, e Lanyard e dcdn danno solo il profilo principale, rimasto quello di prima:
+    // perciò le voci elencate in `fisso` non si prendono dal vivo ma da qui (foto e banner sono file
+    // del sito, in /media/profilo/). Quando il profilo principale di Discord diventa questo, basta
+    // svuotare `fisso` e il sito torna a seguirlo da solo.
+    fisso: ['avatar', 'banner', 'theme', 'decoration', 'effect'],
+    avatarSrc: '/media/profilo/avatar.webp',
+    bannerSrc: '/media/profilo/banner.webp',
+    // i pronomi: solo questo valore scritto a mano; il campo di Discord non viene mai letto
+    pronouns: 'passo/carrabile',
     avatar: 'd4c872e1182f1e7ed9ef6d54cf17666b',
     banner: 'a_ec2559d3be64aa2b509c96f456b28d19',
-    bannerColor: '#110f10',
-    theme: ['#ccff00', '#9d00ff'],
-    bio: 'pzkko. small games, little tools, too many side projects. hand-written code, no frameworks. building with claude code daily: custom skills, experiments and things that were supposed to take an afternoon.',
-    decoration: 'a_820da11285b1a68ad94c18fd9dcf8ca8',
+    bannerColor: '#ffd21a',
+    theme: ['#ffd21a', '#d81e1e'],
+    bio: 'geometra prestato ai siti web. studio costruzioni e gestione del territorio tra italia e san marino. codice scritto a mano, cantieri sempre aperti.\n🚧 🚧 🚧',
+    decoration: 'a_68257352645ca6367a8594a91dd2f790',
     // lo stile del nome: carattere 17 (Pricedown), effetto 1 (tinta unita)
     nameStyle: { font_id: 17, effect_id: 1, colors: [] },
     // gli oggetti da collezione (SKU di Discord): effetto del profilo, cornice, decorazione
-    effectSku: '1341506443978735616',
+    effectSku: '1139323098370424932',
     frameSku: '1509183144786657413',
-    decorationSku: '1466993897333985337',
+    decorationSku: '1357589632623317114',
     guild: { tag: 'NODE', id: '425824580918181889', badge: 'de1a71e54518bf5b4b1e271f823093a0' },
     badges: [
       { id: 'premium', icon: '7294f50817c5fe9fd98631d230ac2e5d', description: 'Subscriber since 11/11/26', link: 'https://discord.com/settings/premium' },
@@ -49,9 +60,21 @@ export const CONFIG = {
 }
 
 // Gli oggetti da collezione come li dà Discord, di riserva se la sua API non risponde
-// (presi il 18.11.2026). La cornice ha due livelli, dietro e davanti alla scheda.
+// (presi il 18.11.2026; i due del profilo «segnaletica» il 26.11). La cornice ha due livelli,
+// dietro e davanti alla scheda.
 const CDN = 'https://cdn.discordapp.com'
 export const COLLECTIBLES = {
+  '1139323098370424932': {
+    name: 'Boost Relic', type: 1,
+    thumb: `${CDN}/assets/content/5699f6cc98b986d671478ca70c5942b8d7fa22f41d366f7d60cccea92ef91b4f`,
+    still: `${CDN}/assets/content/82d5a5f80689b49b2358860a2d96b9176acb4dd206886f4420d24d97a476e9b9`,
+    width: 450, height: 880,
+    layers: [
+      { src: `${CDN}/assets/content/8bd2234206e32420299b813c5a7d174970226c600f71334021463cf56cfac278`, loop: false, duration: 2880, start: 0, loopDelay: 0 },
+      { src: `${CDN}/assets/content/9d52596d0562415b21f32b1d3845f97942700ae72604a7e7c942646894885789`, loop: true, duration: 2880, start: 5760, loopDelay: 5760 },
+    ],
+  },
+  '1357589632623317114': { name: 'Questionable', type: 0 },
   '1341506443978735616': {
     name: 'Dreamy (Green)', type: 1,
     thumb: `${CDN}/assets/content/ca21f227ee69461169d762514ab0a6406d03274e4c01e970b8de7a491f19e9f1`,
