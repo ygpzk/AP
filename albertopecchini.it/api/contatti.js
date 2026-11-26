@@ -246,6 +246,19 @@ export default async function handler(req, res) {
     return json(res, 405, { ok: false, error: 'Metodo non consentito.' })
   }
 
+  // Solo il modulo di questo sito. `Sec-Fetch-Site` lo dicono i browser;
+  // `Origin` è la seconda rete. Se un client vecchio non manda né l'uno né
+  // l'altro restano trappola, tempo minimo, Turnstile e limite per IP.
+  const secFetch = String(req.headers['sec-fetch-site'] || '')
+  if (secFetch && secFetch !== 'same-origin' && secFetch !== 'same-site') {
+    return json(res, 403, { ok: false, error: 'Richiesta non consentita.' })
+  }
+  const origin = String(req.headers.origin || '')
+  const originiAmmesse = new Set(['https://www.albertopecchini.it', 'https://albertopecchini.it', 'http://localhost:5173', 'http://localhost:4173'])
+  if (origin && !originiAmmesse.has(origin)) {
+    return json(res, 403, { ok: false, error: 'Richiesta non consentita.' })
+  }
+
   const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'ip sconosciuto'
 
   let body

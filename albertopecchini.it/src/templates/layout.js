@@ -193,6 +193,7 @@ function footer({ route, compact = false }) {
   const label = compact ? closing.labelCompact : closing.label
   const availability = `${site.availability.label}${site.availability.from ? ` — da ${site.availability.from}` : ''}`
   const notes = [
+    { label: 'Sicurezza', href: '/sicurezza/' },
     { label: 'Privacy', href: '/privacy/' },
     { label: 'Cookie', href: '/cookie/' },
     { label: 'Crediti immagini', href: '/crediti/' },

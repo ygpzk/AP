@@ -217,6 +217,10 @@
   margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
 }
 
+.itc__note {
+  margin-top: 1.25rem;
+}
+
 .itc__facts {
   display: grid;
   column-gap: var(--col-gap);
@@ -2580,4 +2584,208 @@
   font-weight: 300;
   font-variation-settings: 'opsz' 144;
   letter-spacing: -0.03em;
+}
+
+/* ── Sicurezza (/sicurezza/) ───────────────────────────────────────────────── */
+
+.sec-cover {
+  padding-top: clamp(2.5rem, 5vw, 4.5rem);
+  border-top: 1px solid var(--line-strong);
+}
+
+.sec-cover__intro {
+  display: grid;
+  gap: 1rem;
+  max-width: 58rem;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+}
+
+.sec-cover__intro .lead {
+  max-width: 62ch;
+}
+
+.sec-cover__grid {
+  display: grid;
+  gap: clamp(2.75rem, 6vw, 5rem);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sec-cover__card {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: center;
+}
+
+.sec-cover__art {
+  margin: 0;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-2);
+  overflow: hidden;
+  box-shadow: 0 1.5rem 3rem -2rem rgb(0 0 0 / 0.28);
+}
+
+.sec-cover__body {
+  display: grid;
+  gap: 0.65rem;
+  align-content: start;
+}
+
+.sec-cover__body > .label {
+  color: var(--muted);
+}
+
+.sec-cover__body > .label span {
+  margin-right: 0.55rem;
+  color: var(--accent-text);
+}
+
+.sec-cover__body p:not(.label) {
+  color: var(--muted);
+  font-size: var(--fs-small);
+  line-height: 1.55;
+}
+
+.sec-cover__points {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.15rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: var(--fs-small);
+  line-height: 1.45;
+}
+
+.sec-cover__points li {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.sec-cover__points li::before {
+  content: '';
+  flex: none;
+  width: 5px;
+  height: 5px;
+  margin-top: 0.55em;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+@media (min-width: 900px) {
+  .sec-cover__card {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  }
+
+  /* le tavole si alternano: una a sinistra, una a destra, sempre nella colonna larga */
+  .sec-cover__card:nth-child(even) {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+
+  .sec-cover__card:nth-child(even) .sec-cover__art {
+    order: 2;
+  }
+
+  .sec-cover__card:nth-child(even) .sec-cover__body {
+    order: 1;
+  }
+}
+
+/* quello che è già acceso: elenco numerato, non cards */
+
+.sec-applied__grid {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+}
+
+.sec-applied__side {
+  align-self: start;
+}
+
+/* nella colonna stretta il titolo e il testo stanno uno sotto l'altro:
+   il sec-head normale li mette affiancati e la colonna diventa illeggibile */
+.sec-applied .sec-head {
+  margin-bottom: 0;
+}
+
+.sec-applied .sec-head__body {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.sec-applied .sec-head__side {
+  padding-left: 0;
+}
+
+.sec-applied__list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sec-applied__list li {
+  display: grid;
+  grid-template-columns: 2.1rem minmax(0, 1fr);
+  gap: 0.9rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--line);
+}
+
+.sec-applied__list li:last-child {
+  border-bottom: 1px solid var(--line);
+}
+
+.sec-applied__list > li > .label {
+  padding-top: 0.2rem;
+  color: var(--accent);
+}
+
+.sec-applied__list p {
+  margin-top: 0.3rem;
+  color: var(--muted);
+  font-size: var(--fs-small);
+  line-height: 1.55;
+}
+
+@media (min-width: 1024px) {
+  .sec-applied__grid {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  }
+}
+
+/* i limiti: quattro colonne, come le regole fisse */
+
+.sec-limits__grid {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  margin: clamp(2rem, 4vw, 3rem) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sec-limits__grid li {
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line-strong);
+}
+
+.sec-limits__grid p {
+  margin-top: 0.55rem;
+  color: var(--muted);
+  font-size: var(--fs-small);
+  line-height: 1.55;
+}
+
+@media (min-width: 760px) {
+  .sec-limits__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .sec-limits__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
