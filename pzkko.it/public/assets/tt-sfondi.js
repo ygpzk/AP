@@ -9,8 +9,8 @@
 // qualche fetta scivola di lato): il glitch, raro apposta.
 //
 // L'ordine si rimescola ogni giorno con un seme fatto dalla data (stesso giorno,
-// stesso ordine per tutti). Il disco nella colonna di destra passa alla scena
-// dopo, che resta fino al prossimo cambio di fascia.
+// stesso ordine per tutti). Il dado nella colonna dei profili (lo stesso della
+// scheda Instagram) pesca una scena a caso, che resta fino al cambio di fascia.
 //
 // Leggeri: una tela a metà risoluzione, 24 fotogrammi al secondo, ferma quando
 // la scheda non si vede o la pagina è in secondo piano; con «movimento ridotto»
@@ -123,7 +123,9 @@ function nota(ctx, x, y, s, rot, doppia) {
 }
 
 // ogni scena: avvia(g) prepara e restituisce il fotogramma (t, dt) in secondi.
-// Le scene stanno sulla destra e in basso: a sinistra c'è il testo della scheda.
+// Le scene occupano tutta la tela, come gli sfondi di Instagram: a sinistra il
+// velo copre il testo, a destra le tessere coprono il resto, e quello che si
+// vede davvero è la fascia in mezzo. Lì stanno i centri (disco, otto, tunnel).
 export const TEMI = [
   { id: 'eq', it: 'Equalizzatore', en: 'Equalizer', avvia(g) {
     const n = Math.max(12, Math.round(g.w / 7))
@@ -133,14 +135,14 @@ export const TEMI = [
       const b = battito(t)
       const passo = g.w / n
       for (const o of barre) {
-        const verso = 0.35 + 0.65 * (o.x / n)
-        const obiettivo = g.h * (0.06 + 0.5 * verso * (0.5 + 0.5 * Math.sin(t * o.k + o.f)) ** 2 * (0.62 + 0.38 * b))
+        const verso = 0.55 + 0.45 * Math.sin((o.x / n) * Math.PI)
+        const obiettivo = g.h * (0.06 + 0.55 * verso * (0.5 + 0.5 * Math.sin(t * o.k + o.f)) ** 2 * (0.62 + 0.38 * b))
         o.v += (obiettivo - o.v) * Math.min(1, dt * 14)
         o.cima = Math.max(o.v, o.cima - dt * g.h * 0.22)
         const x = o.x * passo + 1
         const lw = Math.max(2, passo - 2.5)
-        g.rett(x, g.h - o.v, lw, o.v + 2, 1.5, { riempi: 0.1 + 0.2 * verso })
-        g.rett(x, g.h - o.cima - 4, lw, 1.6, 0.8, { riempi: 0.45 * verso })
+        g.rett(x, g.h - o.v, lw, o.v + 2, 1.5, { riempi: 0.12 + 0.18 * verso })
+        g.rett(x, g.h - o.cima - 4, lw, 1.6, 0.8, { riempi: 0.5 * verso })
       }
     }
   } },
@@ -154,7 +156,7 @@ export const TEMI = [
         const p = []
         for (let x = 0; x <= g.w; x += 2) {
           const inv = Math.sin((x / g.w) * Math.PI) ** 0.6
-          const amp = g.h * 0.13 * inv * (0.45 + 0.75 * b) * (0.3 + 0.7 * (x / g.w))
+          const amp = g.h * 0.12 * inv * (0.45 + 0.75 * b)
           const y = g.h * c.y + amp * (Math.sin(x * c.k + t * c.v * 3) * 0.6 + Math.sin(x * c.k * 2.7 - t * c.v * 4.1) * 0.4)
           p.push([x, y])
         }
@@ -168,7 +170,7 @@ export const TEMI = [
   // il feed «Per te»: le schermate salgono una alla volta, a scatto
   { id: 'feed', it: 'Per te', en: 'For You', avvia(g) {
     const H = g.h * 0.62, W = H * 9 / 16, gap = H * 0.12
-    const colonne = Array.from({ length: Math.ceil((g.w * 0.62) / (W + gap)) + 1 }, (_, i) => ({ x: g.w - (i + 1) * (W + gap) + gap * 0.5, sfasa: i * 0.37, righe: Array.from({ length: 6 }, () => tra(0.3, 0.85)) }))
+    const colonne = Array.from({ length: Math.ceil(g.w / (W + gap)) + 1 }, (_, i) => ({ x: i * (W + gap) + gap * 0.5, sfasa: i * 0.37, righe: Array.from({ length: 6 }, () => tra(0.3, 0.85)) }))
     const giro = 2.6
     return (t) => {
       g.pulisci()
@@ -180,7 +182,7 @@ export const TEMI = [
         for (let j = -1; j < Math.ceil(g.h / (H + gap)) + 1; j++) {
           const y = j * (H + gap) - off + gap
           const vicino = 1 - Math.min(1, Math.abs(y + H / 2 - g.h / 2) / g.h)
-          g.rett(c.x, y, W, H, W * 0.09, { a: 0.26 + 0.28 * vicino, riempi: 0.035, spessore: 1.2 })
+          g.rett(c.x, y, W, H, W * 0.09, { a: 0.22 + 0.26 * vicino, riempi: 0.035, spessore: 1.2 })
           const r = c.righe[(j + k + 60) % 6]
           g.rett(c.x + W * 0.1, y + H * 0.8, W * 0.62 * r, 2, 1, { riempi: 0.32 * vicino })
           g.rett(c.x + W * 0.1, y + H * 0.87, W * 0.4 * r, 2, 1, { riempi: 0.22 * vicino })
@@ -191,23 +193,23 @@ export const TEMI = [
     }
   } },
 
-  // i cuori di una diretta: salgono dall'angolo in basso a destra
+  // i cuori di una diretta: salgono dal fondo, a ondate sul battito
   { id: 'cuori', it: 'Cuori', en: 'Hearts', avvia(g) {
     const cuori = []
     let ultimo = -1
-    const nasci = (n) => { for (let i = 0; i < n; i++) cuori.push({ x: g.w * tra(0.8, 0.92), y: g.h + 6, v: tra(14, 26), f: R() * TAU, s: tra(5.5, 10), vita: 0, fine: tra(3.5, 6) }) }
-    for (let i = 0; i < 14; i++) { nasci(1); const c = cuori.at(-1); c.vita = R() * c.fine; c.y -= c.vita * c.v }
+    const nasci = (n) => { for (let i = 0; i < n; i++) cuori.push({ x: g.w * tra(0.06, 0.96), y: g.h + 6, v: tra(14, 26), f: R() * TAU, s: tra(5.5, 10), vita: 0, fine: tra(3.5, 6) }) }
+    for (let i = 0; i < 30; i++) { nasci(1); const c = cuori.at(-1); c.vita = R() * c.fine; c.y -= c.vita * c.v }
     return (t, dt) => {
       g.pulisci()
       const k = colpo(t)
-      if (k !== ultimo) { ultimo = k; nasci(1 + (R() < 0.35 ? 2 : 0)) }
+      if (k !== ultimo) { ultimo = k; nasci(2 + (R() < 0.35 ? 2 : 0)) }
       for (let i = cuori.length - 1; i >= 0; i--) {
         const c = cuori[i]
         c.vita += dt
         c.y -= c.v * dt
         if (c.vita > c.fine || c.y < -10) { cuori.splice(i, 1); continue }
         const p = c.vita / c.fine
-        const x = c.x - p * g.w * 0.22 + Math.sin(c.vita * 2.2 + c.f) * 7
+        const x = c.x - p * g.w * 0.06 + Math.sin(c.vita * 2.2 + c.f) * 7
         const s = c.s * (0.5 + Math.min(1, c.vita * 3) * 0.7)
         cuore(g.ctx, x, c.y, s, Math.sin(c.vita * 1.7 + c.f) * 0.25)
         g.ctx.fillStyle = g.ink(0.62 * (1 - p) ** 0.7)
@@ -217,7 +219,7 @@ export const TEMI = [
   } },
 
   { id: 'note', it: 'Note', en: 'Notes', avvia(g) {
-    const note = Array.from({ length: Math.round(g.w / 22) }, () => ({ x: R() * g.w, y: R() * g.h, v: tra(6, 14), f: R() * TAU, s: tra(4, 7.5), d: R() < 0.35 }))
+    const note = Array.from({ length: Math.round(g.w / 16) }, () => ({ x: R() * g.w, y: R() * g.h, v: tra(6, 14), f: R() * TAU, s: tra(4, 7.5), d: R() < 0.35 }))
     return (t, dt) => {
       g.pulisci()
       const b = battito(t)
@@ -225,17 +227,16 @@ export const TEMI = [
         o.x += o.v * dt
         if (o.x > g.w + 12) { o.x = -12; o.y = R() * g.h }
         const y = o.y + Math.sin(t * 0.9 + o.f) * 6
-        const verso = 0.3 + 0.7 * (o.x / g.w)
-        g.ctx.fillStyle = g.ink(0.42 * verso)
-        g.ctx.strokeStyle = g.ink(0.42 * verso)
+        g.ctx.fillStyle = g.ink(0.4)
+        g.ctx.strokeStyle = g.ink(0.4)
         nota(g.ctx, o.x, y, o.s * (1 + b * 0.12), Math.sin(t + o.f) * 0.2, o.d)
       }
     }
   } },
 
-  // il disco del suono, quello che gira in basso a destra in ogni video
+  // il disco del suono, quello che gira in basso a destra in ogni video (qui al centro)
   { id: 'vinile', it: 'Vinile', en: 'Vinyl', avvia(g) {
-    const cx = g.w * 0.8, cy = g.h * 0.56, r = Math.min(g.h * 0.62, g.w * 0.32)
+    const cx = g.w * 0.5, cy = g.h * 0.54, r = Math.min(g.h * 0.72, g.w * 0.3)
     return (t) => {
       g.pulisci()
       const a = t * TAU * 0.55
@@ -270,41 +271,56 @@ export const TEMI = [
         g.rett(x, y, tra(8, 60), 1, 0, { riempi: tra(0.08, 0.3) })
       }
       g.rett(0, by, g.w, 9, 0, { riempi: 0.05 })
-      // la scritta del videoregistratore, grande e leggera come una trama, lontana dal testo vero
-      const px = Math.max(12, Math.round(g.h * 0.15))
+      // la scritta del videoregistratore, piccola, nella fascia libera in mezzo
+      const px = Math.max(7, Math.round(g.h * 0.05))
       const s = Math.floor(t)
       const ora = `${Math.floor(s / 3600)}:${String(Math.floor(s / 60) % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
-      g.testo('▶ PLAY', g.w - 46, g.h * 0.46, px, Math.floor(t * 1.2) % 2 ? 0.26 : 0.14, 'right')
-      g.testo(ora, g.w - 46, g.h * 0.46 + px * 1.05, px * 0.6, 0.18, 'right')
+      g.testo('▶ PLAY', g.w * 0.5, g.h * 0.5, px, Math.floor(t * 1.2) % 2 ? 0.5 : 0.28, 'center')
+      g.testo(`SP ${ora}`, g.w * 0.5, g.h * 0.5 + px * 1.4, px * 0.8, 0.32, 'center')
     }
   } },
 
-  // le visualizzazioni che girano, come un contachilometri (in basso a destra, sotto i numeri veri)
+  // le visualizzazioni che girano: colonne di cifre come un contachilometri, su tutta la tela
   { id: 'contatore', it: 'Contatore', en: 'Counter', avvia(g) {
-    const px = Math.max(10, Math.round(g.h * 0.1))
-    const n = Math.max(3, Math.min(7, Math.floor((g.w * 0.34) / (px * 0.95))))
-    const cy = g.h * 0.74
-    const col = Array.from({ length: n }, (_, i) => ({ v: (i + 1) ** 1.25 * 0.18, o: R() * 10 }))
+    const px = Math.max(9, Math.round(g.h * 0.085))
+    const passoX = px * 1.25, passoY = px * 1.3
+    // le dieci cifre, disegnate una volta
+    const cifre = document.createElement('canvas')
+    cifre.width = px * 10
+    cifre.height = Math.ceil(px * 1.3)
+    const cc = cifre.getContext('2d')
+    cc.font = `700 ${px}px "gg mono", Consolas, monospace`
+    cc.textAlign = 'center'
+    cc.textBaseline = 'middle'
+    cc.fillStyle = '#fff'
+    for (let d = 0; d < 10; d++) cc.fillText(String(d), px * d + px / 2, cifre.height / 2)
+    const n = Math.ceil(g.w / passoX) + 1
+    const righe = Math.ceil(g.h / passoY / 2) + 1
+    const col = Array.from({ length: n }, () => ({ v: tra(0.12, 0.8), o: R() * 10 }))
     return (t) => {
       g.pulisci()
+      const ctx = g.ctx
       col.forEach((c, i) => {
-        const x = g.w - 40 - (i + 0.5) * px * 0.95
+        const x = i * passoX + passoX / 2 - px / 2
         const pos = (c.o + t * c.v) % 10
         const base = Math.floor(pos), f = pos - base
-        const e = f < 0.75 ? 0 : (f - 0.75) / 0.25
-        for (let k = -2; k <= 2; k++) {
-          const y = cy + (k - e) * px * 1.25
-          const vicino = 1 - Math.min(1, Math.abs(y - cy) / (px * 2.6))
-          g.testo(String((base + k + 100) % 10), x, y, px, 0.42 * vicino ** 1.4, 'center')
+        const e = f < 0.7 ? 0 : 1 - (1 - (f - 0.7) / 0.3) ** 3
+        for (let k = -righe; k <= righe; k++) {
+          const y = g.h / 2 + (k - e) * passoY - cifre.height / 2
+          const vicino = 1 - Math.min(1, Math.abs(y + cifre.height / 2 - g.h / 2) / (g.h / 2))
+          ctx.globalAlpha = 0.08 + 0.3 * vicino ** 2
+          ctx.drawImage(cifre, px * ((base + k + 100) % 10), 0, px, cifre.height, x, y, px, cifre.height)
         }
       })
-      g.rett(g.w - 40 - n * px * 0.95 - px * 0.15, cy - px * 0.72, n * px * 0.95 + px * 0.3, px * 1.44, px * 0.2, { a: 0.28 })
+      ctx.globalAlpha = 1
+      // la riga di lettura, come la finestrella del contachilometri
+      g.rett(0, g.h / 2 - passoY / 2, g.w, passoY, 0, { riempi: 0.05 })
     }
   } },
 
   // le casse: a ogni colpo un'onda parte da un punto
   { id: 'cerchi', it: 'Casse', en: 'Speakers', avvia(g) {
-    const fonti = [[0.66, 0.35], [0.86, 0.7], [0.94, 0.2], [0.55, 0.85]].map(([x, y]) => [x * g.w, y * g.h])
+    const fonti = [[0.5, 0.36], [0.16, 0.86], [0.9, 0.14], [0.62, 0.9], [0.3, 0.12], [0.84, 0.66]].map(([x, y]) => [x * g.w, y * g.h])
     const onde = []
     let ultimo = -1
     return (t, dt) => {
@@ -336,7 +352,7 @@ export const TEMI = [
     return (t) => {
       g.pulisci()
       const v = t * 18
-      const testa = g.w * 0.72
+      const testa = g.w * 0.5
       for (let x = (-v % 12 + 12) % 12; x < g.w; x += 12) g.rett(x, base - 9, 1, (Math.round((x + v) / 12) % 5) ? 3 : 6, 0, { riempi: 0.3 })
       for (const c of clip) {
         const x = ((c.x - v) % lungo + lungo) % lungo - 40
@@ -357,7 +373,7 @@ export const TEMI = [
 
   // il video che ricomincia: un otto che si disegna e si cancella
   { id: 'loop', it: 'In loop', en: 'Loop', avvia(g) {
-    const cx = g.w * 0.74, cy = g.h * 0.52, A = Math.min(g.w * 0.22, g.h * 0.7), B = g.h * 0.32
+    const cx = g.w * 0.5, cy = g.h * 0.52, A = Math.min(g.w * 0.3, g.h * 0.9), B = g.h * 0.36
     return (t) => {
       g.sbiadisci(0.08)
       const d = t * 0.12
@@ -375,7 +391,7 @@ export const TEMI = [
 
   // lo schermo dentro lo schermo: cornici 9:16 che vengono incontro
   { id: 'tunnel', it: 'Tunnel', en: 'Tunnel', avvia(g) {
-    const cx = g.w * 0.76, cy = g.h * 0.5
+    const cx = g.w * 0.5, cy = g.h * 0.5
     const n = 9
     return (t) => {
       g.pulisci()
@@ -407,7 +423,7 @@ const temaDellaFascia = (d = new Date()) => ordineDelGiorno(d)[fascia(d) % TEMI.
 
 export function accendi(dentro, { quandoCambia, tema: fisso } = {}) {
   const canvas = document.createElement('canvas')
-  canvas.className = 'ttc__bg'
+  canvas.className = 'igc__bg'
   canvas.setAttribute('aria-hidden', 'true')
   const scena = document.createElement('canvas')
   const ciano = document.createElement('canvas')
@@ -549,12 +565,14 @@ export function accendi(dentro, { quandoCambia, tema: fisso } = {}) {
   return {
     sposta,
     get tema() { return tema },
-    get stato() { return { fascia: quale, scelto, chiaro: g.chiaro, ore: ORE } },
+    // come gli sfondi di Instagram (ig-sfondi.js): l'ora d'inizio della fascia e se è stato pescato col dado
+    get stato() { return { ora: quale * ORE, aCaso: scelto, chiaro: g.chiaro } },
     nome(lang) { return tema[lang] || tema.en },
-    // il disco: la scena dopo, nell'ordine di oggi
-    prossimo() {
-      const lista = ordineDelGiorno()
-      metti(lista[(lista.indexOf(tema) + 1) % lista.length], { scelto: true })
+    // il dado nella colonna dei profili: una scena a caso, fino al cambio di fascia
+    aCaso() {
+      let n
+      do { n = TEMI[(R() * TEMI.length) | 0] } while (n === tema)
+      metti(n, { scelto: true })
     },
     spegni,
   }

@@ -118,20 +118,26 @@ ogni altro nome restano vietati.
 
 ## TikTok in bacheca (26.11.2026)
 
-Sotto la scheda Instagram c'è la sua sorella TikTok (`#tt-card`), con la stessa
-regola: HTML e CSS del sito, dati statici in `public/media/tt/index.json`, media
-in `public/media/tt/`, nessuna chiamata a TikTok dal browser e nessun account
-chiesto a chi guarda.
+Sotto la scheda Instagram c'è la scheda TikTok (`#tt-card`): **la stessa
+dashboard**, con i colori di TikTok. Stessa regola: HTML e CSS del sito, dati
+statici in `public/media/tt/index.json`, media in `public/media/tt/`, nessuna
+chiamata a TikTok dal browser e nessun account chiesto a chi guarda.
 
-- `public/assets/tt.js`: la scheda (numeri sdoppiati ciano e rosso, colonna
-  delle azioni a destra, fila dei video 3:4, storie di oggi) e gli stati.
+- `public/assets/scheda-social.js`: il motore comune delle due schede (colonna
+  dei profili, follower in Ginto Nord col gradiente, tessere 9:16 che si
+  sfogliano, visualizzatore a tutto schermo, stati). Era il codice di `ig.js`:
+  dal 26.11 sta qui, così Instagram e TikTok non possono divergere.
+- `public/assets/ig.js` e `public/assets/tt.js`: le due configurazioni (testi,
+  mazzi, numeri, sfondi). Le tessere TikTok sono «Video» (i video, i due virali
+  «solo qui» davanti), «Repost» (tutti, con l'autore nel visualizzatore) e,
+  quando ci sono, le storie di oggi.
 - `public/assets/tt-sfondi.js`: dodici scene vive, una ogni due ore, disegnate
   con un solo inchiostro e stampate due volte (ciano a sinistra, rosso a destra),
-  a tempo sullo stesso battito. Il disco in fondo alla colonna passa alla scena
-  dopo. Non sono i pixel della scheda Instagram.
-- `src/site.css`: le regole `.ttc*`.
-- `design/tiktok-bacheca.md`: il brief per chi rifinisce l'esperienza (il
-  visualizzatore, l'anteprima al passaggio, la tastiera).
+  a tempo sullo stesso battito. Il dado nella colonna ne pesca una a caso, come
+  su Instagram. Non sono i pixel della scheda Instagram.
+- `src/site.css`: le regole `.igc*` / `.igv*` di Instagram valgono per tutte e
+  due; `.igc--tt` cambia solo colori, luci e il quadratino del marchio.
+- `design/tiktok-bacheca.md`: il brief della scheda TikTok.
 
 Il raccoglitore gira sul pc, fuori dal repository
 (`%USERPROFILE%\Collegamenti\TikTok\raccogli.py`). TikTok non mostra un profilo
@@ -341,9 +347,9 @@ Vercel esegue `npm run build` e pubblica `public/` (vedi `vercel.json`).
 - **Niente collegamenti all’identità personale, tranne i profili scelti.**
   La build cerca il dominio e i nomi/account personali in `public/`, `api/`,
   `scripts/`, `vercel.json` e `README.md`, e si ferma se ricompaiono. Le uniche
-  eccezioni sono i profili di `PERSONAL_SOCIALS` e la scheda Instagram (24.11),
-  ammessi solo in `public/assets/config.js`, `ig.js` e nei dati di
-  `/media/ig/`; il dominio personale resta vietato. `npm run check` cerca anche
+  eccezioni sono i profili di `PERSONAL_SOCIALS` e le schede Instagram (24.11) e
+  TikTok (26.11), ammessi solo in `public/assets/config.js`, `ig.js` e nei dati
+  di `/media/ig/` e `/media/tt/`; il dominio personale resta vietato. `npm run check` cerca anche
   percorsi del computer, indirizzi di rete privati (LAN e Tailscale), chiavi
   private e token.
 - **Prestazioni.** Italiano e inglese arrivano subito; le altre sette lingue

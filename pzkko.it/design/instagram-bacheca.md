@@ -11,10 +11,19 @@ iframe e non è uno screenshot: è HTML/CSS del sito, con i dati statici scritti
 dal raccoglitore sul pc. Funziona senza account, senza cookie e senza chiamare
 Instagram dal browser.
 
+**Dal 26.11 il codice è in comune con la scheda TikTok** (che è la stessa
+dashboard con altri colori, vedi `design/tiktok-bacheca.md`): il motore sta in
+`public/assets/scheda-social.js` e `ig.js` è solo la configurazione di
+Instagram. Una modifica al motore cambia tutte e due le schede: provale
+entrambe.
+
 File:
 
-- `public/assets/ig.js` — dati, scheda, visualizzatore. Esporta `monta(root,
-  { lang })` e `apri(account, items, titolo, lang, partenza)`.
+- `public/assets/scheda-social.js` — il motore: dati, scheda, visualizzatore
+  (`crea(config)` → `{ monta, apri, stato }`).
+- `public/assets/ig.js` — la configurazione di Instagram (testi, mazzi, numeri,
+  sfondi). Esporta `monta(root, { lang })` e `apri(account, items, titolo,
+  lang, partenza)`.
 - `public/assets/ig-sfondi.js` — gli sfondi vivi del palco: 24 temi in pixel,
   uno per ora (vedi «Sfondi vivi»). Caricato dopo la scheda.
 - `src/site.css` — regole `.igc*` (scheda) e `.igv*` (visualizzatore), in fondo.
@@ -220,7 +229,8 @@ ultimi sette giorni.
 
 Attenzioni per chi ci rimette mano:
 
-- Il profilo scelto sta nella variabile `scelto` di `ig.js`, **non** in un
+- Il profilo scelto sta nella variabile `scelto` dentro `crea()` di
+  `scheda-social.js` (una per scheda), **non** in un
   `data-ig-acc` sul nodo della scheda: quel nodo contiene i pulsanti dei
   profili e un `closest('[data-ig-acc]')` lo scambierebbe per uno di loro
   (era il motivo per cui, dopo un cambio profilo, le tessere non si aprivano).
