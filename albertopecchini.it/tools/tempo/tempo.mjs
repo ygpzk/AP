@@ -880,7 +880,8 @@ async function fotografa(s, v, base, lavoro) {
     return { w: meta.info.width, h: H, titolo }
   }
   try {
-    const d = await scatta(1280, 800, 1, 960, `${v.short}-d.webp`, true)
+    // niente anteprima -t da qui: la fa oscura-pagine.mjs dalla copia oscurata (26.11.2026)
+    const d = await scatta(1280, 800, 1, 960, `${v.short}-d.webp`, false)
     const m = await scatta(390, 844, 2, 390, `${v.short}-m.webp`, false)
     return { d: { w: d.w, h: d.h }, m: { w: m.w, h: m.h }, titolo: d.titolo || m.titolo }
   } finally {

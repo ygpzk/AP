@@ -275,7 +275,9 @@ function strip() {
 // Quattro foto prese lungo la strada (la prima, due in mezzo, l'ultima) e il link.
 
 function tempo() {
-  const conFoto = versioni.filter((v) => v.d)
+  // dal 26.11.2026 le foto sono la cima della copia già oscurata (-v.webp, tools/tempo/oscura-pagine.mjs):
+  // le foto intere di prima mostravano il paese, le coordinate e il numero
+  const conFoto = versioni.filter((v) => v.pagina)
   if (!conFoto.length) return ''
   const prime = conFoto[0]
   const ultime = conFoto.at(-1)
@@ -287,7 +289,7 @@ function tempo() {
         <div class="tmz__copy">
           <p class="label" data-reveal="fade"><span class="sec-head__index">↺</span>Novità, la macchina del tempo</p>
           <h2 class="h2 tmz__title" id="tmz-title" data-reveal="words">${splitWords(`Ho rifatto questo sito ${versioni.length} volte. Le ho tenute tutte.`, { accent: ['tenute', 'tutte.'] })}</h2>
-          <p class="lead tmz__lead" data-reveal="up">Dal ${data(prime.data)} ogni giorno di lavoro è una versione di questo sito, ricostruita dal codice di allora: Figma Make, Bootstrap Italia, il neroverde del Sassuolo, il viola, i giochi, i burattini… fino a questa. È una copia della Wayback Machine, con l’istogramma dei miei commit.</p>
+          <p class="lead tmz__lead" data-reveal="up">Dal ${data(prime.data)} ogni giorno di lavoro è una versione di questo sito, ricostruita dal codice di allora: Figma Make, Bootstrap Italia, il neroverde del Sassuolo, il viola, i giochi, i burattini… fino a questa. Come la Wayback Machine, ma con l’istogramma dei miei commit.</p>
           <div class="tmz__actions" data-reveal="up" style="--d:80ms">
             ${button({ href: '/tempo/', label: 'Torna indietro nel tempo', variant: 'dark' })}
             <span class="label">${conFoto.length === versioni.length ? `${versioni.length} versioni` : `${conFoto.length} versioni pronte su ${versioni.length}`} · dal ${data(prime.data)} al ${data(ultime.data)}</span>
@@ -298,7 +300,7 @@ function tempo() {
             (v, k) => html`
               <li class="tmz__frame" style="--i:${k}">
                 <a href="/tempo/albertopecchini.it/${v.data}/" aria-label="Il sito il ${data(v.data)}">
-                  <span class="tmz__shot"><img src="/media/tempo/ap/${v.short}-d.webp" width="960" height="${v.d.h}" alt="" loading="lazy" decoding="async" data-no-srcset></span>
+                  <span class="tmz__shot"><img src="/media/tempo/ap/${v.short}-v.webp" width="480" height="640" alt="" loading="lazy" decoding="async" data-no-srcset></span>
                   <span class="label tmz__date">${data(v.data)}</span>
                 </a>
               </li>

@@ -9,8 +9,9 @@
 //                      indirizzi  la via, il CAP, le coordinate, i link alle mappe
 //                      luoghi     il paese, la provincia, i dintorni
 //                    e se trova qualcosa la build si ferma: su Vercel resta online la versione di prima.
-//                    /tempo/ ha un controllo suo (trovaTempo): nelle pagine di allora restano i nomi
-//                    dei paesi e i contatti pubblici di enti e aziende, ma non i dati personali.
+//                    Anche /tempo/: dal 26.11.2026 le pagine di allora sono oscurate
+//                    (tools/tempo/oscura-pagine.mjs) e valgono le stesse regole del resto del sito;
+//                    trovaTempo in più cerca email e telefoni che non conosce.
 // Aggiungere qui ogni cosa nuova da non pubblicare.
 //
 //   node tools/privacy.mjs [dist] [--tutto]     il controllo a mano, con file e riga
@@ -18,7 +19,7 @@
 // I pezzi da cercare sono scritti in modo da non contenere i dati per intero.
 
 import { readdirSync, readFileSync, statSync, rmSync, existsSync } from 'node:fs'
-import { join, relative, extname, resolve } from 'node:path'
+import { join, relative, extname, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 // file e cartelle di dist/ (cioè di public/) da non pubblicare
@@ -31,7 +32,17 @@ export const VIA = [
   'media/web/rivalta-*', // il sito del paese: progetto nascosto
   'media/studio/fototessera*', // la fototessera: dal 12.11.2026 il ritratto è il selfie in bianco e nero
   'media/studio/curioso-*', // la foto a colori con l'iPhone bianco, sostituita dallo stesso selfie
+  // la macchina del tempo (26.11.2026): Rivalta è un progetto nascosto e il suo nome è il paese
+  'tempo/rivaltasulmincio.it',
+  'media/tempo/rivalta',
+  // le foto intere delle catture, fatte prima dell'oscuramento (paese, coordinate, numero): al loro
+  // posto -t e -v, rifatte dalle copie oscurate (tools/tempo/oscura-pagine.mjs)
+  'media/tempo/*/*-d.webp',
+  'media/tempo/*/*-m.webp',
 ]
+
+// un percorso di VIA come espressione: * vale un pezzo di nome; senza *, anche tutto ciò che sta dentro
+const comeRe = (v) => new RegExp(`^${v.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*')}(?:/.*)?$`)
 
 const TESTO = new Set(['.html', '.js', '.mjs', '.json', '.xml', '.txt', '.webmanifest', '.css', '.svg', '.md', '.vcf', '.ics'])
 
@@ -44,10 +55,10 @@ export const REGOLE = [
   ['luoghi', /rivalta|mincio|mantova|mantovan|\(MN\)|rodigo|goito|curtatone|castellucchio|porto mantovano/i],
 ]
 
-// La macchina del tempo: le pagine di allora sono congelate, ma prima di pubblicarle sono ripulite
-// (privato.mjs, nel deposito): restano i nomi dei paesi e i contatti pubblici di enti e aziende.
-// Qui si controlla che non sia tornato dentro un dato personale. I contatti pubblici che restano
-// sono in queste due liste; un contatto nuovo fa fermare la build e si decide se aggiungerlo.
+// La macchina del tempo: le pagine di allora sono congelate, ripulite nel deposito (privato.mjs) e
+// poi oscurate (tools/tempo/oscura-pagine.mjs, 26.11.2026: anche i luoghi e i contatti di enti e
+// aziende, che dicevano il paese). Queste due liste sono i contatti che trovaTempo lascia passare;
+// un contatto nuovo fa fermare la build e si decide se aggiungerlo.
 const EMAIL_TEMPO = new Set([
   'pzkko@yahoo.com',
   'info@prolocorivalta.mn.it',
@@ -69,12 +80,32 @@ const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g
 const TEL_LINK = /(?:wa\.me\/|tel:)(\+?\d[\d\s.-]*)/gi
 
 export async function ripulisci(dist) {
-  for (const v of VIA) {
-    if (v.endsWith('*')) {
-      const [dir, pre] = [v.slice(0, v.lastIndexOf('/')), v.slice(v.lastIndexOf('/') + 1, -1)]
-      const d = join(dist, dir)
-      if (existsSync(d)) for (const n of readdirSync(d)) if (n.startsWith(pre)) rmSync(join(d, n), { recursive: true, force: true })
-    } else rmSync(join(dist, v), { recursive: true, force: true })
+  const regole = VIA.map(comeRe)
+  const giro = (dir) => {
+    for (const n of readdirSync(dir)) {
+      const p = join(dir, n)
+      const rel = relative(dist, p).split(sep).join('/')
+      if (regole.some((re) => re.test(rel))) rmSync(p, { recursive: true, force: true })
+      else if (statSync(p).isDirectory()) giro(p)
+    }
+  }
+  if (existsSync(dist)) giro(dist)
+
+  // le risorse delle copie della macchina del tempo che nessuna copia usa più: le immagini tolte
+  // dall'oscuramento (tools/tempo/immagini-tolte.json) restano nel repository, online no
+  const risorse = join(dist, 'media/tempo/risorse')
+  const tempo = join(dist, 'tempo')
+  if (existsSync(risorse) && existsSync(tempo)) {
+    const usate = new Set()
+    const leggi = (dir) => {
+      for (const n of readdirSync(dir)) {
+        const p = join(dir, n)
+        if (statSync(p).isDirectory()) leggi(p)
+        else if (n.endsWith('.html')) for (const m of readFileSync(p, 'utf8').matchAll(/\/media\/tempo\/risorse\/([\w.-]+)/g)) usate.add(m[1])
+      }
+    }
+    leggi(tempo)
+    for (const n of readdirSync(risorse)) if (!usate.has(n)) rmSync(join(risorse, n), { force: true })
   }
 }
 
@@ -84,12 +115,9 @@ export function trova(dist) {
     for (const n of readdirSync(dir)) {
       const p = join(dir, n)
       const s = statSync(p)
-      if (s.isDirectory()) {
-        // /tempo/ è l'archivio: le pagine di allora hanno un controllo a parte
-        // (trovaTempo), perché lì i nomi dei paesi e i contatti pubblici restano.
-        if (relative(dist, p).split(/[\\/]/)[0] === 'tempo') continue
-        giro(p)
-      } else if (TESTO.has(extname(n).toLowerCase()) && s.size < 20 << 20) {
+      // anche /tempo/, come tutto il resto: le pagine di allora sono oscurate
+      if (s.isDirectory()) giro(p)
+      else if (TESTO.has(extname(n).toLowerCase()) && s.size < 20 << 20) {
         readFileSync(p, 'utf8').split('\n').forEach((r, i) => {
           for (const [tipo, re] of REGOLE) {
             const m = r.match(re)
@@ -103,9 +131,8 @@ export function trova(dist) {
   return trovati
 }
 
-// /tempo/: solo le pagine di allora (le cartelle «pagina»), non le pagine della macchina del tempo
-// che hanno i link ai commit su GitHub e al server di casa. Qui i luoghi restano; si cercano email,
-// telefoni e profili social personali. L'indirizzo di casa lo toglie già privato.mjs, nel deposito.
+// /tempo/, in più: nelle pagine di allora (le cartelle «pagina») ogni email e ogni telefono che non
+// è nelle due liste ferma la build. Dopo l'oscuramento (26.11.2026) resta solo l'email pubblica.
 export function trovaTempo(dist) {
   const trovati = []
   const base = join(dist, 'tempo')

@@ -1,0 +1,509 @@
+{
+ "$comment": "Immagini delle copie di allora (public/media/tempo/risorse/) che la macchina del tempo non mostra: oscura-pagine.mjs le sostituisce con un riquadro tratteggiato e la build non le pubblica. Scelte il 26.11.2026 guardandole tutte e leggendole con l’OCR di Windows.",
+ "immagini": [
+  {
+   "file": "025b70c9b8141a87.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "043a67c61c1804a1.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "06e0decfa537086f.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "087a27e029490de8.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "0914de2ff8195f03.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "09c8c73f27729325.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "0a3c8dfd67bb1ff8.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "0bf279b6bca15c2b.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "10317557ff115bc6.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "109629a5079038bd.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "12d0154a73f167b6.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "1756f96f465034ae.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "203939aece514e3e.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "24c9779d6ccdc0f5.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "26a8cdf4ab3fdc4d.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "28a24c48939c389b.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "29af5f99fb0405ad.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "2bcae82315238a77.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "2bcbb6882d8b3843.webp",
+   "motivo": "coordinate nella testata"
+  },
+  {
+   "file": "2c8215e4775804ed.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "305f21e7fc6d7a13.webp",
+   "motivo": "ritratto tolto dal sito il 12.11.2026"
+  },
+  {
+   "file": "33c9f1017a2ffd65.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "340c9c1b4cb3dcd3.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "361d1363cca8656f.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "398bbb2a03f353dd.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "3d221328220d4cf4.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "41b8464fc3680f65.webp",
+   "motivo": "ritratto tolto dal sito il 12.11.2026"
+  },
+  {
+   "file": "41c1fba985af3120.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "420072c89d9a8449.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "426e6a909a830557.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "4788b33b4e723b99.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "483fe248a5bd5d62.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "485600ad51bd2fab.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "49124220607b2373.webp",
+   "motivo": "coordinate nella testata"
+  },
+  {
+   "file": "494bac8de0103ebf.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "4aa86df80cc6194f.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "4b5f0df821cd03ff.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "4bb01aabf66ccd94.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "4c13a22f507593d7.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "4d7266a6a822cfeb.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "5028257152c1969d.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "52059f5e3834640e.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "52acba7aeb395f4f.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "53fe3e36c816c191.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "551ead43de966169.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "56ed1567fb323c9a.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "57ae453f2ae9328d.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "6218f64866d4466b.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "62a3815955715d46.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "64a9363241ed5d51.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "673aae4ca5b4caae.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "68ab76b76d9d4b22.avif",
+   "motivo": "la casa, con la targa della moto"
+  },
+  {
+   "file": "6b5bb9aef45fad47.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "6cda986fd216b7e2.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "6e87e0cde2dd4832.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "70987c8dbba4860f.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "76d9b5c1f3958484.webp",
+   "motivo": "link a GitHub"
+  },
+  {
+   "file": "77765b092078f4fe.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "792dc93951ac1af8.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "7994880cbea3c479.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "7bf9f8778ecd4244.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "8238211323e743b7.webp",
+   "motivo": "ritratto tolto dal sito il 12.11.2026"
+  },
+  {
+   "file": "82521f3a2262a294.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "825d2554fb488892.webp",
+   "motivo": "mappa con il segnaposto"
+  },
+  {
+   "file": "84feefb953b5b8f6.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "88295e1865743fec.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "8b31bb548a36c8dd.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "8e67df86777cf1f3.avif",
+   "motivo": "la casa, con la targa della moto"
+  },
+  {
+   "file": "8e6cd10b19fae296.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "8f6823f6dfcf1369.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "91c97ab2f98a767d.webp",
+   "motivo": "coordinate nella testata"
+  },
+  {
+   "file": "939c26598c3610f3.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "95b3927f9ef2e6b3.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "9671cfeaa9026670.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "9a5006d3b79871da.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "9c6095e80a42feae.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "9ca70790029db3f6.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "9db9dd589fde34ec.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "9f0c8554c8fde0cc.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "9fa3d5b462b217ca.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "a125d98291306f92.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "a153f6cb1c9755e5.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "a20bb6be4d931e6f.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "a470725627a63913.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "a68e3cc7108dfbe2.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "a9a2e362babeca7e.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "aaf92cc94198343b.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "ac6ed370bea3802f.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "b3064828fb26426d.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "b3aa1286efbc9bcf.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "b5c8fa50f842418a.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "b7837b3b31f7dcc4.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "bbac663dff694b46.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "bc980afdd0732bff.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "bd4c8027d82ea431.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "bdc4bcf7cea02fc4.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "c2ccf7a3a8885ddd.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "c4594a0432d0e737.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "c54cdf4c45126c90.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "c6c984a579d17041.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "c77550f38ac48c91.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "c87c9ff2fcf235f0.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "d121308e060c6554.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "d15d202d98efd070.webp",
+   "motivo": "link a GitHub"
+  },
+  {
+   "file": "d20627b80b28d64b.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "d529b4b9dd81494e.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "d8b506240190ac1a.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "d91287fd005324c9.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "daca00ee5c72ce29.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "dbbae879f01dcd78.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "dbdd5d19c6300e60.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "dc0be1403fb96e89.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "dcfa740915977f17.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "e027b15315cf718a.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "e0f3ecbf1d2f6092.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "e1a73e50c7d88eef.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "e2a8210513aa110a.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "e609f13da3782e9a.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "e8cc4867e09aa5d2.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "e95b1d1be824f6dd.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "f497508e85174eb6.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "f687068f25d9ac7b.webp",
+   "motivo": "testo con luoghi o indirizzi (OCR)"
+  },
+  {
+   "file": "f91e492e258548a1.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "f95f4f97c06123f1.webp",
+   "motivo": "schermata di un sito"
+  },
+  {
+   "file": "fd2c2bf7b267452b.webp",
+   "motivo": "ritratto tolto dal sito il 12.11.2026"
+  },
+  {
+   "file": "ffbf648a31ececa5.webp",
+   "motivo": "schermata di un sito"
+  }
+ ]
+}

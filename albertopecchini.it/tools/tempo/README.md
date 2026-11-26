@@ -1,8 +1,10 @@
 # La macchina del tempo
 
-La pagina `/tempo/` è una copia della Wayback Machine: la barra in cima con l'istogramma
-dei commit per giorno e le frecce fra una cattura e l'altra, sotto il sito com'era quel
-giorno. Dal 3 novembre 2026 i siti sono cinque, scelti col selettore nella barra (al posto
+La pagina `/tempo/` fa come la Wayback Machine: per ogni giorno di lavoro il sito com'era,
+con l'istogramma dei commit per giorno e le frecce fra una cattura e l'altra. Dal 26.11.2026
+ha lo stile del resto del sito (testata, titoli, schede, piè di pagina) e le copie di allora
+sono oscurate (vedi «La riservatezza»); online vanno albertopecchini.it e Cascina Fontana,
+Rivalta no (progetto nascosto, e il nome è il paese). Dal 3 novembre 2026 i siti sono cinque, scelti col selettore nella barra (al posto
 del campo dell'indirizzo), ognuno col suo repository:
 
 | id | sito | repository | ramo / linea | dal |
@@ -47,13 +49,33 @@ Statiche e leggere, una per cattura (dal 3.11.2026 sera, quando a Gabry non cari
 l'iframe scaricava dal server di casa il sito intero di quel giorno). Le genera la build del
 sito da `src/templates/pages/tempo.js` (rotte in `tempoRotte()`):
 
-- `/tempo/`: l'archivio, i cinque siti con l'ultima cattura;
+- `/tempo/`: l'archivio, i siti con l'ultima cattura;
 - `/tempo/<dominio>/`: tutte le catture di un sito, mese per mese, con le anteprime;
-- `/tempo/<dominio>/<AAAA-MM-GG>/`: una cattura. La barra (istogramma di link veri, frecce,
-  statistiche, «Momenti» già scritti nell'HTML coi commit del giorno dal manifesto) e, sotto,
-  l'istantanea di quel giorno in un iframe senza script. Il sito intero dal server di casa è
-  solo un link;
+- `/tempo/<dominio>/<AAAA-MM-GG>/`: una cattura. La testata (data, frecce, selettore, commit,
+  statistiche, istogramma di link veri), l'istantanea di quel giorno in una finestra del browser
+  (iframe senza script), poi «Quel giorno» coi commit e «Quando lavoravo». Niente link a GitHub
+  né al server di casa;
 - `/tempo/<dominio>/<AAAA-MM-GG>/pagina/`: l'istantanea da sola.
+
+## La riservatezza
+
+Le istantanee nascono come i siti erano allora: numero di telefono, social, il paese, le
+coordinate, i link al server di casa. `oscura-pagine.mjs` le apre nel browser e toglie quello che
+dicono le regole di `src/data/oscura.js` (le stesse dei messaggi dei commit nelle pagine): nel
+testo una barra, negli attributi ▮▮▮, i link a telefono, social, mappe e server di casa diventano
+testo, le immagini di `immagini-tolte.json` (schermate col paese, la mappa, la casa, i vecchi
+ritratti: scelte guardandole tutte e con l'OCR di Windows) un riquadro tratteggiato. Poi rifà da
+lì le foto `-t` (640 × 400) e `-v` (480 × 640, la home). È l'ultimo passo del giro; la build
+(`tools/privacy.mjs`) controlla anche `/tempo/` e si ferma se resta qualcosa, e non pubblica le
+foto intere `-d`/`-m` né le risorse che nessuna copia usa più.
+
+```sh
+node tools/tempo/oscura-pagine.mjs                  # tutte le copie, poi le foto
+node tools/tempo/oscura-pagine.mjs --solo=2026-11-03 --sito=ap
+```
+
+Un'immagine nuova con un dato dentro non la vede nessun controllo automatico sul testo: dopo un
+giro, guardare le risorse nuove e aggiungerle a `immagini-tolte.json`.
 
 ## Le istantanee
 
@@ -76,7 +98,8 @@ disegnato in un solo `index.html`:
   harfbuzz in WebAssembly, in `tools/tempo/package.json`: `npm ci` lì dentro);
 - mappe, video, tele WebGL e iframe diventano la loro foto (ritagliata sulla finestra: quella
   «oltre la finestra» di una tela WebGL usciva nera);
-- i link alle altre pagine del sito portano alla versione intera sul server di casa.
+- i link alle altre pagine del sito portavano alla versione intera sul server di casa: li spegne
+  `oscura-pagine.mjs`.
 
 Immagini e font stanno una volta sola in `public/media/tempo/risorse/<hash>` (condivisi fra le
 catture, e quindi nella cache del browser da una all'altra); sotto i 2 KB dentro l'HTML.
@@ -180,9 +203,9 @@ Dal deposito, servito da un `server.mjs` acceso apposta, con ogni richiesta fuor
 pigre e animazioni all'ingresso), le immagini pigre si caricano subito, si aspetta che siano
 tutte arrivate, poi animazioni e transizioni vanno al loro stato finale e spariscono i
 pannelli che coprirebbero (cookie, modali, chat). Tre foto in `public/media/tempo/<id>/`:
-`<sha>-d.webp` (1280 px → 960, a tutta altezza fino a 6000), `-m.webp` (390 px a
-risoluzione doppia → 390) e `-t.webp` (il primo schermo, 320 px: l'anteprima sopra
-l'istogramma).
+`<sha>-d.webp` (1280 px → 960, a tutta altezza fino a 6000) e `-m.webp` (390 px a
+risoluzione doppia → 390): restano nel repository ma non vanno online, perché mostrano i dati
+di allora. Le foto pubblicate (`-t`, `-v`) le fa `oscura-pagine.mjs` dalle copie oscurate.
 
 ## Le statistiche e i momenti
 

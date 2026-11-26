@@ -81,8 +81,8 @@ export const SITI = [
   },
 ]
 
-// l'archivio pubblico sul server di casa, come site.archivio in src/data/site.js: i link delle
-// istantanee alle altre pagine di quel giorno portano lì
+// l'archivio sul server di casa: istantanea.mjs ci fa puntare i link alle altre pagine di quel
+// giorno, e oscura-pagine.mjs li spegne (26.11.2026: il sito non pubblica il server di casa)
 export const ARCHIVIO = 'https://desktop-inpvhr2.tail6c90b3.ts.net/tempo'
 // dove va l'istantanea di una cattura: /tempo/<dominio>/<AAAA-MM-GG>/pagina/
 export const dominio = (s) => s.url.replace(/^https?:\/\/(www\.)?/, '')
