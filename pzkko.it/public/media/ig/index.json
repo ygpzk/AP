@@ -1,6 +1,6 @@
 {
   "v": 1,
-  "updated": "2026-11-25T21:41:44+00:00",
+  "updated": "2026-11-26T12:40:09+00:00",
   "accounts": [
     {
       "username": "albertoxpecchini",
@@ -8,7 +8,6 @@
       "private": true,
       "name": "αp🕯️",
       "bio": [
-        "giugnoh",
         "unirsm"
       ],
       "stats": {
@@ -380,23 +379,21 @@
           ]
         }
       ],
-      "synced": "2026-11-25T13:40:42+00:00",
+      "synced": "2026-11-26T12:39:44+00:00",
       "stories": []
     },
     {
       "username": "pzkko",
       "url": "https://www.instagram.com/pzkko/",
       "private": true,
-      "name": "albi",
-      "bio": [
-        "@albertoxpecchini"
-      ],
+      "name": "pekko",
+      "bio": [],
       "stats": {
         "followers": 185,
         "following": 138,
         "posts": 0
       },
-      "avatar": "pzkko/avatar-81255111d546.webp",
+      "avatar": "pzkko/avatar-07dab7ab497a.webp",
       "history": [
         {
           "t": "2026-11-24T21:17:43+00:00",
@@ -408,7 +405,7 @@
           "id": "17975493957034176",
           "title": "where?",
           "count": 35,
-          "cover": "pzkko/highlights/17975493957034176/cover-9055ba6c722f.webp",
+          "cover": "pzkko/highlights/17975493957034176/cover-86d874249aa4.webp",
           "items": [
             {
               "id": "3416289005261233131",
@@ -694,9 +691,9 @@
         },
         {
           "id": "18139276894727183",
-          "title": "𓂀",
+          "title": "ah.",
           "count": 39,
-          "cover": "pzkko/highlights/18139276894727183/cover-a960ba94c898.webp",
+          "cover": "pzkko/highlights/18139276894727183/cover-05ca4561c9f7.webp",
           "items": [
             {
               "id": "3261340742004167835",
@@ -1023,7 +1020,7 @@
           ]
         }
       ],
-      "synced": "2026-11-25T21:41:44+00:00",
+      "synced": "2026-11-26T12:40:09+00:00",
       "stories": [
         {
           "id": "4038460524071681681",
@@ -1032,6 +1029,14 @@
           "w": 1206,
           "h": 2144,
           "at": "2026-11-25T21:27:11+00:00"
+        },
+        {
+          "id": "4038601552226513124",
+          "type": "photo",
+          "src": "pzkko/stories/4038601552226513124.webp",
+          "w": 1206,
+          "h": 2144,
+          "at": "2026-11-26T02:07:22+00:00"
         }
       ]
     }
