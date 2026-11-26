@@ -1267,6 +1267,228 @@ span.igc__srv { cursor: default; }
   .igv__bg, .igv__panel { animation: none; }
 }
 
+/* ── TikTok in bacheca (26.11) ─────────────────────────────────────────────
+   La sorella della scheda Instagram, non la gemella. Stessa famiglia (occhielli
+   in gg mono, numeri in Ginto Nord, il palco con lo sfondo vivo e il velo), ma
+   vestita da TikTok: i numeri sdoppiati ciano e rosso come il marchio, la colonna
+   delle azioni a DESTRA come sopra ogni video (l'avatar col «+», i conteggi, il
+   disco del suono che gira e cambia lo sfondo), i video in fila 3:4 come la
+   griglia del profilo, dritti e non storti come le carte di Instagram. Il tasto
+   rosso ha l'ombra piena in ciano: il tasto storto del muro, in versione TikTok.
+   Due vesti: carta fredda col tema chiaro, nero col tema scuro (--tt-c inchiostro,
+   --tt-b fondo, come --ig-c/--ig-b). Ciano e rosso solo su: numeri, marchio,
+   tasto, anello delle storie, «fissato», bordo delle tessere al passaggio. */
+.ttc { container-type: inline-size; min-width: 0; padding: 0; border-radius: 16px; }
+.ttc__in {
+  --tt-c: 14, 19, 22;
+  --tt-b: 243, 247, 247;
+  --tt-ciano: #00a3ab;
+  --tt-rosso: #e5214c;
+  --tt-ink: rgb(var(--tt-b));
+  --tt-t: rgb(var(--tt-c));
+  --tt-m: rgba(var(--tt-c), .72);
+  --tt-f: rgba(var(--tt-c), .56);
+  --tt-l: rgba(var(--tt-c), .1);
+  --tt-su: #14874a;
+  --tt-giu: #d32f45;
+  --tt-nota: #a35f00;
+  --tt-punto: color-mix(in srgb, var(--p) 58%, #1d3800);
+  --tt-a1: .1;
+  --tt-a2: .12;
+  position: relative; isolation: isolate; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1fr) 76px; min-height: 360px; border-radius: 16px; color: var(--tt-t); color-scheme: light; outline: 1px solid rgba(var(--tt-c), .09); outline-offset: -1px;
+  background: radial-gradient(55% 70% at 100% 0%, rgba(37, 244, 238, var(--tt-a1)), transparent 70%), radial-gradient(60% 80% at 0% 110%, rgba(254, 44, 85, var(--tt-a2)), transparent 72%), var(--tt-ink);
+}
+[data-theme=dark] .ttc__in { --tt-c: 255, 255, 255; --tt-b: 7, 8, 10; --tt-ciano: #25f4ee; --tt-rosso: #fe2c55; --tt-m: rgba(var(--tt-c), .7); --tt-f: rgba(var(--tt-c), .5); --tt-su: #3ddc84; --tt-giu: #ff6b7a; --tt-nota: #ffb84d; --tt-punto: var(--p); --tt-a1: .13; --tt-a2: .2; color-scheme: dark; }
+.ttc__in :focus-visible { outline: 2px solid var(--tt-t); outline-offset: 2px; }
+/* lo sfondo vivo (tt-sfondi.js): tela a metà risoluzione, liscia (non a pixel come Instagram), con un velo che lascia libera la destra */
+.ttc__bg { position: absolute; inset: 0; z-index: -1; display: block; width: 100%; height: 100%; pointer-events: none; transition: opacity .24s; }
+.ttc__in::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgba(var(--tt-b), .86), rgba(var(--tt-b), .64) 40%, rgba(var(--tt-b), .14) 80%, rgba(var(--tt-b), .42)); pointer-events: none; }
+
+.ttc__main { position: relative; z-index: 1; display: flex; flex-direction: column; min-width: 0; padding: 15px 8px 13px 20px; }
+.ttc__main > * { animation: ttin .3s cubic-bezier(.2, .8, .2, 1) backwards; }
+.ttc__main > :nth-child(3) { animation-delay: 50ms; }
+.ttc__main > :nth-child(n+4) { animation-delay: 90ms; }
+@keyframes ttin { from { opacity: 0; translate: -6px 0; } }
+.ttc__main--solo { align-items: flex-start; gap: 16px; padding-right: 20px; }
+.ttc__kick { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; font: 700 10px/1 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; }
+.ttc__kick-a { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.ttc__kick-a i { flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%; background: var(--tt-punto); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tt-punto) 22%, transparent); }
+.ttc__priv { display: inline-flex; align-items: center; gap: 5px; margin-left: 2px; padding: 4px 7px; border-radius: 6px; background: rgba(var(--tt-c), .1); color: var(--tt-m); letter-spacing: .08em; white-space: nowrap; }
+.ttc__kick-b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--tt-f); }
+
+.ttc__me { display: grid; justify-items: start; gap: 3px; min-width: 0; margin-top: 16px; }
+.ttc__name { display: inline-flex; align-items: center; gap: 7px; max-width: 100%; font-size: 22px; font-weight: 800; line-height: 1.1; overflow-wrap: anywhere; }
+.ttc__ok { flex: 0 0 auto; display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; background: #20d5ec; color: #fff; }
+.ttc__user { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--tt-m); font: 400 12.5px/1.3 var(--font-mono); text-decoration: none; }
+.ttc__user:hover { color: var(--tt-t); text-decoration: underline; }
+.ttc__name--at { color: var(--tt-t); text-decoration: none; }
+.ttc__name--at:hover span { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.ttc__bio { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; margin-top: 6px; color: var(--tt-m); font-size: 13px; line-height: 1.4; overflow-wrap: anywhere; }
+
+/* i numeri: inchiostro sopra, ciano e rosso sotto, un filo spostati (il marchio di TikTok) */
+.ttc__nums { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px clamp(24px, 5.5cqw, 52px); margin-top: 20px; }
+.ttc__big { min-width: 0; }
+.ttc__num { position: relative; z-index: 0; width: fit-content; padding: 2px .07em 0; font: 800 clamp(42px, 9cqw, 80px)/.92 var(--font-headline); letter-spacing: -.045em; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--tt-t); }
+.ttc__num::before, .ttc__num::after { content: attr(data-n); position: absolute; inset: 0; z-index: -1; padding: inherit; pointer-events: none; }
+.ttc__num::before { color: var(--tt-ciano); translate: -.032em -.012em; }
+.ttc__num::after { color: var(--tt-rosso); translate: .032em .012em; }
+[data-theme=dark] .ttc__num::after { mix-blend-mode: screen; }
+.ttc__num[data-len="7"], .ttc__num[data-len="8"], .ttc__num[data-len="9"] { font-size: clamp(36px, 7.4cqw, 64px); }
+.ttc__numl { display: flex; align-items: center; flex-wrap: wrap; gap: 7px 12px; margin-top: 9px; padding-left: .2em; font: 700 11px/1 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; }
+.ttc__trend { display: inline-flex; align-items: center; gap: 6px; color: var(--tt-m); font: 500 11.5px/1 var(--font-sans); letter-spacing: 0; text-transform: none; }
+.ttc__trend svg { display: block; overflow: visible; }
+.ttc__trend b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.ttc__trend.is-up b, .ttc__trend.is-up svg { color: var(--tt-su); }
+.ttc__trend.is-down b, .ttc__trend.is-down svg { color: var(--tt-giu); }
+
+/* il tasto rosso, un filo storto, con l'ombra piena in ciano */
+.ttc__go { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; min-height: 38px; margin-top: 18px; padding: 0 14px; border-radius: 6px; background: var(--tt-rosso); color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; white-space: nowrap; rotate: -1.5deg; box-shadow: 3px 3px 0 var(--tt-ciano); transition: translate .16s cubic-bezier(.2, .8, .2, 1), box-shadow .16s cubic-bezier(.2, .8, .2, 1); }
+.ttc__go:hover { translate: -1px -1px; box-shadow: 4px 4px 0 var(--tt-ciano); }
+.ttc__go:active { translate: 2px 2px; box-shadow: 1px 1px 0 var(--tt-ciano); }
+.ttc__go svg:last-child { opacity: .8; }
+
+/* la fila dei video: tessere 3:4 dritte come la griglia del profilo */
+.ttc__reel { display: flex; flex-direction: column; min-width: 0; margin-top: 22px; }
+.ttc__reel-head { display: flex; align-items: center; gap: 10px; color: var(--tt-f); font: 700 10px/1 var(--font-mono); letter-spacing: .13em; text-transform: uppercase; }
+.ttc__reel-head::after { content: ""; flex: 1 1 auto; height: 1px; background: var(--tt-l); order: 1; }
+.ttc__reel-head span:last-child { order: 2; color: var(--tt-t); }
+.ttc__strip { display: flex; gap: 8px; margin: 0 -8px; padding: 12px 8px 10px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; -webkit-mask: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
+.ttc__strip::-webkit-scrollbar { display: none; }
+.ttc__clip { position: relative; flex: 0 0 clamp(100px, 15.5cqw, 132px); aspect-ratio: 3 / 4; border-radius: 6px; color: #fff; text-decoration: none; scroll-snap-align: start; -webkit-tap-highlight-color: transparent; transition: translate .2s cubic-bezier(.2, .8, .2, 1), box-shadow .2s cubic-bezier(.2, .8, .2, 1); animation: ttclip .34s cubic-bezier(.2, .8, .2, 1) backwards; }
+.ttc__clip:nth-child(2) { animation-delay: 40ms; }
+.ttc__clip:nth-child(3) { animation-delay: 80ms; }
+.ttc__clip:nth-child(n+4) { animation-delay: 120ms; }
+@keyframes ttclip { from { opacity: 0; translate: 0 10px; } }
+.ttc__clip:focus-visible, .ttc__clip.is-sopra { translate: 0 -3px; box-shadow: -3px 0 0 var(--tt-ciano), 3px 0 0 var(--tt-rosso); outline-offset: 4px; }
+.ttc__face { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; background: #15171a; }
+.ttc__face::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(180deg, rgba(0, 0, 0, .38), transparent 26%), linear-gradient(0deg, rgba(0, 0, 0, .72), transparent 40%); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); pointer-events: none; }
+.ttc__face > img, .ttc__prev > * { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; }
+.ttc__prev { position: absolute; inset: 0; }
+.ttc__vuota { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255, 255, 255, .4); }
+.ttc__views { position: absolute; z-index: 2; left: 8px; bottom: 7px; display: inline-flex; align-items: center; gap: 4px; font: 700 13px/1 var(--font-sans); font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0, 0, 0, .6); }
+.ttc__dur { position: absolute; z-index: 2; top: 7px; right: 7px; display: inline-flex; align-items: center; gap: 4px; padding: 3px 5px; border-radius: 4px; background: rgba(0, 0, 0, .55); font: 700 10px/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.ttc__dur:empty { display: none; }
+/* «fissato»: l'etichetta rossa di TikTok, un po' storta come un'etichetta attaccata a mano */
+.ttc__pin { position: absolute; z-index: 2; top: 7px; left: 6px; padding: 4px 6px 3px; border-radius: 3px; background: var(--tt-rosso); color: #fff; font: 700 9.5px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; rotate: -4deg; box-shadow: 0 2px 6px rgba(0, 0, 0, .3); }
+/* la tessera delle storie di oggi: l'anello ciano→rosso che gira */
+.ttc__clip--storia { margin: 3px; }
+.ttc__clip--storia::before { content: ""; position: absolute; inset: -4px; z-index: 0; padding: 2.5px; border-radius: 9px; background: conic-gradient(from var(--tt-giro, 0deg), var(--tt-ciano), var(--tt-rosso), var(--tt-ciano)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); animation: ttanello 4s linear infinite; pointer-events: none; }
+@property --tt-giro { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes ttanello { to { --tt-giro: 360deg; } }
+.ttc__segs { position: absolute; z-index: 2; top: 7px; left: 7px; right: 7px; display: flex; gap: 2px; }
+.ttc__segs i { flex: 1 1 0; height: 2.5px; border-radius: 2px; background: rgba(255, 255, 255, .55); }
+.ttc__cap { position: absolute; z-index: 2; left: 8px; right: 8px; bottom: 8px; display: grid; gap: 4px; }
+.ttc__cap b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 800 13px/1.15 var(--font-headline); letter-spacing: -.01em; }
+.ttc__cap span { color: rgba(255, 255, 255, .75); font: 700 9.5px/1.2 var(--font-mono); letter-spacing: .07em; text-transform: uppercase; }
+/* «solo qui»: i video che su TikTok non sono pubblici e si guardano solo sul sito (etichetta ciano, l'altra metà del marchio) */
+.ttc__pin--qui { background: var(--tt-ciano); color: #04191a; rotate: 3deg; }
+/* sulle schede strette l'etichetta e la durata in alto si toccherebbero: con un'etichetta la durata non si mostra */
+@container (max-width: 640px) { .ttc__pin ~ .ttc__dur { display: none; } }
+/* i repost: la stessa tessera in piccolo, con l'autore sotto come una didascalia */
+.ttc__reel--rep { margin-top: 10px; }
+.ttc__reel-head > span:first-child { display: inline-flex; align-items: center; gap: 7px; }
+.ttc__strip--rep { gap: 7px; padding-top: 10px; }
+.ttc__rep { flex: 0 0 clamp(78px, 11.5cqw, 94px); display: flex; flex-direction: column; gap: 6px; min-width: 0; color: var(--tt-m); text-decoration: none; scroll-snap-align: start; -webkit-tap-highlight-color: transparent; }
+.ttc__clip--rep { flex: none; width: 100%; border-radius: 5px; animation: none; }
+.ttc__clip--rep .ttc__views { left: 6px; bottom: 5px; gap: 3px; font-size: 11px; }
+.ttc__clip--rep .ttc__dur { top: 5px; right: 5px; padding: 2px 4px; font-size: 9px; }
+.ttc__rep-chi { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 10.5px/1.2 var(--font-mono); }
+.ttc__rep:focus-visible { outline: none; }
+.ttc__rep:focus-visible .ttc__clip--rep { outline: 2px solid var(--tt-t); outline-offset: 3px; translate: 0 -3px; box-shadow: -3px 0 0 var(--tt-ciano), 3px 0 0 var(--tt-rosso); }
+.ttc__rep:hover .ttc__rep-chi { color: var(--tt-t); }
+.ttc__niente { display: flex; align-items: center; gap: 12px; margin: 12px 0 0; padding: 12px 14px; border: 1.5px dashed rgba(var(--tt-c), .2); border-radius: 10px; color: var(--tt-m); font-size: 13px; line-height: 1.4; }
+.ttc__niente::before { content: ""; flex: 0 0 auto; width: 18px; height: 24px; border: 1.5px solid rgba(var(--tt-c), .3); border-radius: 4px; box-shadow: -2px 0 0 color-mix(in srgb, var(--tt-ciano) 60%, transparent), 2px 0 0 color-mix(in srgb, var(--tt-rosso) 60%, transparent); }
+.ttc__vuoto { margin: 0; color: var(--tt-m); font-size: 14px; }
+
+.ttc__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 14px; margin-top: auto; padding-top: 11px; border-top: 1px solid var(--tt-l); color: var(--tt-f); font-size: 11px; line-height: 1.4; }
+.ttc__reel + .ttc__foot { margin-top: 14px; }
+.ttc__meta { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 0 6px; font-variant-numeric: tabular-nums; }
+.ttc__meta i { flex: 0 0 auto; width: 6px; height: 6px; border-radius: 50%; background: var(--tt-su); }
+.ttc__stale { color: var(--tt-nota); }
+
+/* la colonna delle azioni, a destra come sopra ogni video */
+.ttc__side { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 16px 0 14px; }
+.ttc__side::before { content: ""; position: absolute; inset: 10px 8px; z-index: -1; border-radius: 999px; background: rgba(var(--tt-b), .5); box-shadow: inset 0 0 0 1px var(--tt-l); }
+.ttc__me-ava { position: relative; display: block; width: 50px; height: 50px; margin-bottom: 6px; border-radius: 50%; text-decoration: none; }
+.ttc__me-img { display: block; width: 100%; height: 100%; overflow: hidden; border-radius: 50%; box-shadow: 0 0 0 2px var(--tt-t); background: rgba(var(--tt-c), .1); }
+.ttc__me-img img, .ttc__me-img .ttc__fallback { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ttc__plus { position: absolute; left: 50%; bottom: -9px; display: grid; place-items: center; width: 20px; height: 20px; margin-left: -10px; border-radius: 50%; background: var(--tt-rosso); color: #fff; transition: scale .16s; }
+.ttc__me-ava:hover .ttc__plus { scale: 1.15; }
+.ttc__act { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--tt-t); text-decoration: none; }
+.ttc__act-i { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 50%; background: rgba(var(--tt-c), .08); }
+.ttc__act-i svg { width: 24px; height: 24px; }
+.ttc__act b { font: 700 12px/1 var(--font-sans); font-variant-numeric: tabular-nums; white-space: nowrap; }
+a.ttc__act:hover .ttc__act-i { background: rgba(var(--tt-c), .16); }
+.ttc__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* il disco del suono: gira piano, e un giro in più quando cambia lo sfondo */
+.ttc__disco { position: relative; display: grid; place-items: center; width: 46px; height: 46px; margin-top: auto; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.ttc__disco-v { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle, transparent 11px, #1c1d21 11.5px, #2b2c31 13px, #18191c 14px, #2a2b30 16px, #16171a 17px, #26272c 19px, #121315 20px, #1d1e22 23px); box-shadow: 0 0 0 1px rgba(255, 255, 255, .06), 0 6px 14px -6px rgba(0, 0, 0, .6); animation: ttdisco 5.4s linear infinite; }
+.ttc__disco-in { display: block; width: 22px; height: 22px; overflow: hidden; border-radius: 50%; }
+.ttc__disco-in img, .ttc__disco-in .ttc__fallback { display: block; width: 100%; height: 100%; object-fit: cover; font-size: 10px; }
+.ttc__disco.is-gira .ttc__disco-v { animation: ttdisco .5s cubic-bezier(.3, .8, .3, 1), ttdisco 5.4s .5s linear infinite; }
+@keyframes ttdisco { to { rotate: 360deg; } }
+.ttc__disco::after { content: attr(data-tip); position: absolute; right: calc(100% + 12px); top: 50%; padding: 8px 10px; border-radius: 7px; background: #000; color: #fff; font: 600 13px/1 var(--font-sans); white-space: nowrap; box-shadow: 0 8px 22px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .12); opacity: 0; translate: 4px -50%; pointer-events: none; transition: opacity .12s, translate .12s; }
+.ttc__disco:hover::after, .ttc__disco:focus-visible::after { opacity: 1; translate: 0 -50%; }
+.ttc__disco:focus-visible { outline: 2px solid var(--tt-t); outline-offset: 3px; }
+.ttc__fallback { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, var(--tt-ciano), var(--tt-rosso)); color: #fff; font-weight: 800; font-size: 20px; }
+
+/* il marchio sdoppiato, nello stato vuoto */
+.ttc__logo { position: relative; display: block; width: var(--s); height: var(--s); color: var(--tt-t); }
+.ttc__logo i { position: absolute; inset: 0; display: block; }
+.ttc__logo i:nth-child(1) { color: var(--tt-ciano); translate: -2px -1.5px; }
+.ttc__logo i:nth-child(2) { color: var(--tt-rosso); translate: 2px 1.5px; }
+[data-theme=dark] .ttc__logo i:nth-child(2) { mix-blend-mode: screen; }
+
+/* in attesa dei dati: stessa sagoma, così la bacheca non salta */
+.ttc__in--attesa .ttc__main { gap: 18px; }
+.ttc__osso { display: block; border-radius: 10px; background: linear-gradient(90deg, rgba(var(--tt-c), .06), rgba(var(--tt-c), .13), rgba(var(--tt-c), .06)); background-size: 200% 100%; animation: ttshimmer 1.6s linear infinite; }
+.ttc__osso--a { width: 30%; height: 10px; }
+.ttc__osso--b { width: min(100%, 220px); height: 44px; }
+.ttc__osso--c { width: min(100%, 420px); height: 84px; }
+.ttc__osso--d { width: 100%; flex: 1 1 auto; min-height: 120px; }
+.ttc__osso--ava { width: 50px; height: 50px; border-radius: 50%; }
+.ttc__osso--act { width: 42px; height: 42px; border-radius: 50%; }
+@keyframes ttshimmer { to { background-position: -200% 0; } }
+
+@media (hover: hover) {
+  .ttc__strip { scrollbar-width: thin; scrollbar-color: rgba(var(--tt-c), .28) transparent; }
+  .ttc__strip::-webkit-scrollbar { display: block; height: 6px; }
+  .ttc__strip::-webkit-scrollbar-thumb { border-radius: 6px; background: rgba(var(--tt-c), .28); }
+  .ttc__clip:hover, .ttc__rep:hover .ttc__clip--rep { translate: 0 -3px; box-shadow: -3px 0 0 var(--tt-ciano), 3px 0 0 var(--tt-rosso); }
+}
+@media (hover: none) {
+  .ttc__disco::after { display: none; }
+}
+@container (max-width: 640px) {
+  .ttc__in { grid-template-columns: minmax(0, 1fr) 60px; min-height: 0; }
+  .ttc__in::after { background: linear-gradient(90deg, rgba(var(--tt-b), .78), rgba(var(--tt-b), .5) 70%, rgba(var(--tt-b), .4)); }
+  .ttc__main { padding: 14px 4px 12px 14px; }
+  .ttc__kick-b { display: none; }
+  .ttc__me { margin-top: 12px; }
+  .ttc__name { font-size: 19px; }
+  .ttc__nums { margin-top: 14px; gap: 12px 22px; }
+  .ttc__num { font-size: min(64px, 15.5cqw); }
+  .ttc__num[data-len="7"], .ttc__num[data-len="8"], .ttc__num[data-len="9"] { font-size: min(52px, 12.6cqw); }
+  .ttc__clip { flex-basis: clamp(88px, 27cqw, 116px); }
+  .ttc__side { gap: 11px; padding-top: 12px; }
+  .ttc__side::before { inset: 6px 6px; }
+  .ttc__me-ava { width: 42px; height: 42px; }
+  .ttc__act-i { width: 36px; height: 36px; }
+  .ttc__act-i svg { width: 21px; height: 21px; }
+  .ttc__act b { font-size: 11px; }
+  .ttc__disco { width: 40px; height: 40px; }
+  .ttc__disco-v { background: radial-gradient(circle, transparent 9.5px, #1c1d21 10px, #2b2c31 11.5px, #18191c 12.5px, #2a2b30 14px, #16171a 15px, #26272c 17px, #121315 18px, #1d1e22 20px); }
+  .ttc__disco-in { width: 19px; height: 19px; }
+}
+@container (max-width: 360px) {
+  .ttc__act--go { display: none; }
+  .ttc__foot { font-size: 10.5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ttc__main > *, .ttc__clip, .ttc__disco-v, .ttc__disco.is-gira .ttc__disco-v, .ttc__clip--storia::before, .ttc__osso { animation: none; }
+  .ttc__clip, .ttc__go, .ttc__bg, .ttc__plus, .ttc__disco::after { transition: none; }
+}
+
 /* ─── la vetrina (25.11): dove è pzkko e le app aperte sul suo pc, nel riquadro «adesso» ─── */
 .luogo { display: inline-flex; align-items: center; gap: 5px; font-weight: 500; color: var(--muted); }
 .luogo::before { content: "·"; margin-right: 3px; }

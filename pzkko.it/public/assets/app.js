@@ -698,6 +698,7 @@ function renderBoard() {
     </article>
     <section class="annunci span2 rise" style="--i:1" id="annunci" aria-label="${esc(spot().titolo)}">${annunciHtml()}</section>
     <section class="span2 rise" style="--i:2" id="ig-card" aria-label="Instagram"></section>
+    <section class="span2 rise" style="--i:3" id="tt-card" aria-label="TikTok"></section>
     <div class="widget rise" style="--i:1" id="now-widget">${nowWidget()}</div>
     <div class="widget rise" style="--i:2"><div class="widget__h"><span>${esc(u.aboutTitle)}</span></div><p>${esc(u.aboutText)}</p></div>
     <div class="widget span2 rise" style="--i:3">
@@ -710,6 +711,8 @@ function renderBoard() {
   wireMedia(root)
   const ig = $('#ig-card', root)
   if (ig) import('./ig.js').then((m) => m.monta(ig, { lang })).catch((e) => console.error(e))
+  const tt = $('#tt-card', root)
+  if (tt) import('./tt.js').then((m) => m.monta(tt, { lang })).catch((e) => console.error(e))
 }
 function projectCard(p, i, s = provate()) {
   const u = ui(), tx = t().projects[p.key]
