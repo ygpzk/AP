@@ -182,16 +182,59 @@ export const PROJECTS = [
     play: [['Cucina', 'qui:app:cucina']] },
   { key: 'rapina', title: 'Rapina', kind: 'game', art: ['#da373c', '#2a0507', 'Vampyre', 'lamiera'], tags: [['JavaScript', 'javascript'], ['LCD 8-bit', '#ff8a1a'], ['Multigiocatore', '#da373c']],
     play: [['Rapina', 'qui:app:rapina']] },
+  // IL LABORATORIO (26.11): dieci strumenti nuovi che usano il browser fino in fondo (Web Audio, WebGL, Web MIDI,
+  // Web Speech, Web Worker, sensori, OKLCH). Il motore e il foglio comune stanno in games/lab/; il brief per il disegno
+  // è design/laboratorio-10-app.md. Le impostazioni restano nel browser; microfono e camera si spengono alla chiusura.
+  { key: 'synth', title: 'Synth', kind: 'tool', nuovo: '2026-11-26', art: ['#ccff00', '#10120f', 'Mainframe', 'righe'], tags: [['Web Audio', '#ccff00'], ['Web MIDI', '#9d00ff'], ['JavaScript', 'javascript']],
+    play: [['Synth', 'qui:synth']] },
+  { key: 'batteria', title: 'Batteria', kind: 'game', nuovo: '2026-11-26', art: ['#e8501c', '#1b0d06', 'Headbang', 'tessere'], tags: [['Web Audio', '#ccff00'], ['Sequencer', '#e8501c'], ['JavaScript', 'javascript']],
+    play: [['Batteria', 'qui:batteria']] },
+  { key: 'theremin', title: 'Theremin', kind: 'game', nuovo: '2026-11-26', art: ['#ccff00', '#10120f', 'Modern', 'punti'], tags: [['Web Audio', '#ccff00'], ['Sensori', '#1f9d55'], ['JavaScript', 'javascript']],
+    play: [['Theremin', 'qui:theremin']] },
+  { key: 'spettro', title: 'Spettro', kind: 'tool', nuovo: '2026-11-26', art: ['#ccff00', '#0d100c', '8Bit', 'barre'], tags: [['Microfono', '#23864a'], ['FFT', '#ccff00'], ['Canvas', '#e8b800']],
+    play: [['Spettro', 'qui:spettro']] },
+  { key: 'specchio', title: 'Specchio', kind: 'tool', nuovo: '2026-11-26', art: ['#1f6feb', '#0b0d0a', 'Mainframe', 'griglia'], tags: [['WebGL', '#1f6feb'], ['Shader', '#9d00ff'], ['Webcam', '#da373c']],
+    play: [['Specchio', 'qui:specchio']] },
+  { key: 'sabbia', title: 'Sabbia', kind: 'game', nuovo: '2026-11-26', art: ['#d9b36c', '#0b0d0a', 'Jellybean', 'punti'], tags: [['Canvas', '#e8b800'], ['Automi cellulari', '#d9b36c'], ['Typed arrays', '#3fb950']],
+    play: [['Sabbia', 'qui:sabbia']] },
+  { key: 'plotter', title: 'Plotter', kind: 'tool', nuovo: '2026-11-26', art: ['#f4efe1', '#161616', 'Journal', 'righe'], tags: [['Web Worker', '#1446a0'], ['SVG', '#c98a00'], ['Generativo', '#b3121f']],
+    play: [['Plotter', 'qui:plotter']] },
+  { key: 'livella', title: 'Livella', kind: 'tool', nuovo: '2026-11-26', art: ['#8d7a4f', '#e8dfc7', 'Sakura', 'punti'], tags: [['DeviceOrientation', '#23864a'], ['Sensori', '#8d7a4f'], ['Vibrazione', '#7a1fa2']],
+    play: [['Livella', 'qui:livella']] },
+  { key: 'dettatura', title: 'Dettatura', kind: 'tool', nuovo: '2026-11-26', art: ['#f7f1df', '#1d1b18', 'Journal', 'righe'], tags: [['Web Speech', '#4285f4'], ['SpeechSynthesis', '#9d00ff'], ['Testo', '#161616']],
+    play: [['Dettatura', 'qui:dettatura']] },
+  { key: 'tavolozza', title: 'Tavolozza', kind: 'tool', nuovo: '2026-11-26', art: ['#b3121f', '#f2eee3', 'Monkey Bars', 'tessere'], tags: [['OKLCH', '#b3121f'], ['WCAG', '#1446a0'], ['CSS Color 4', 'css']],
+    play: [['Tavolozza', 'qui:tavolozza']] },
   { key: 'wrapped', title: '5BT Wrapped', kind: 'tool', art: ['#1f6feb', '#0a0f1e', 'Modern', 'barre'], tags: [['Node.js', 'nodejs'], ['WhatsApp', '#25d366']] },
   { key: 'email', title: 'Posta OS', kind: 'tool', art: ['#9d00ff', '#2a0047', 'Monkey Bars', 'buste'], tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['HTML email', 'html5']] },
   { key: 'pulizia', title: 'Pulizia OS', kind: 'tool', art: ['#ccff00', '#5d7a00', 'Vampyre', 'scintille'], tags: [['C#', 'csharp'], ['Windows', '#0078d4'], ['Terminal', '#3fb950']] },
 ]
 
 // Gli strumenti, in pillole come i ruoli di Discord: [nome, icona di icons.js].
+// L’ordine racconta il percorso: web, runtime e linguaggi, 3D, AI, tecnica, media, infrastruttura.
+// La stessa lista, con gli stessi nomi, sta nella sezione Strumenti di /studio/ del sito
+// professionale: se cambia una voce, cambia in tutte e due (26.11.2026).
 export const TOOLS = [
-  ['HTML', 'html5'], ['CSS', 'css'], ['JavaScript', 'javascript'], ['TypeScript', 'typescript'], ['React', 'react'], ['Node.js', 'nodejs'],
-  ['Vite', 'vite'], ['three.js', 'threejs'], ['C#', 'csharp'], ['Python', 'python'], ['PowerShell', 'powershell'], ['Claude Code', 'claude'],
-  ['AutoCAD', 'autocad'], ['Figma', 'figma'], ['FFmpeg', 'ffmpeg'], ['Vercel', 'vercel'], ['Git', 'git'],
+  // web
+  ['HTML', 'html5'], ['CSS', 'css'], ['JavaScript', 'javascript'], ['TypeScript', 'typescript'],
+  ['React', 'react'], ['Next.js', 'nextjs'], ['Astro', 'astro'], ['Svelte', 'svelte'],
+  ['Tailwind CSS', 'tailwindcss'], ['GSAP', 'gsap'],
+  // runtime e linguaggi
+  ['Node.js', 'nodejs'], ['Bun', 'bun'], ['Vite', 'vite'], ['C#', 'csharp'], ['Rust', 'rust'],
+  ['Python', 'python'], ['PowerShell', 'powershell'],
+  // 3D, grafica e calcolo
+  ['three.js', 'threejs'], ['Babylon.js', 'babylonjs'], ['WebGPU', 'webgpu'], ['WebAssembly', 'webassembly'],
+  // AI
+  ['Claude Code', 'claude'], ['Ollama', 'ollama'],
+  // tecnica e disegno (26.11: la stessa lista di /studio/, rilievo compreso)
+  ['AutoCAD', 'autocad'], ['cadwork', 'cadwork'], ['Archicad', 'archicad'], ['QGIS', 'qgis'],
+  ['CloudCompare', 'cloudcompare'], ['Agisoft Metashape', 'metashape'], ['Pregeo e Docfa', 'pregeo'],
+  ['Blender', 'blender'], ['Figma', 'figma'],
+  // media
+  ['Illustrator', 'illustrator'], ['InDesign', 'indesign'], ['Photoshop', 'photoshop'], ['DaVinci Resolve', 'davinciresolve'],
+  ['FFmpeg', 'ffmpeg'], ['OBS Studio', 'obs'],
+  // infrastruttura e pubblicazione
+  ['Docker', 'docker'], ['PostgreSQL', 'postgresql'], ['Vercel', 'vercel'], ['Git', 'git'],
 ]
 
 export const LANGS = [

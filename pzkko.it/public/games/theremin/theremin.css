@@ -1,0 +1,26 @@
+/* THEREMIN: il campo. Un pannello scuro con le note della scala, la scia del dito e la linea del volume.
+   Claude Code: .th-* è il disegno, i ganci sono data-scena, data-tela, data-nota, data-suona, data-scala. */
+
+.th-scena{background:#10120f;border:1.5px solid #2a2e26;min-height:300px;touch-action:none;cursor:crosshair;overflow:hidden}
+.th-scena canvas{width:100%;height:100%}
+.th-lettura{position:absolute;right:52px;top:8px;display:flex;align-items:baseline;gap:9px;pointer-events:none;text-shadow:0 0 10px rgba(204,255,0,.3);background:rgba(16,18,15,.82);border:1px solid rgba(204,255,0,.22);padding:3px 9px 4px}
+.th-lettura b{font:400 40px/1 "Anton",Impact,sans-serif;color:#ccff00;letter-spacing:.02em}
+.th-lettura span{font:400 12px/1 "Special Elite","Courier New",monospace;color:#93a857}
+.th-volume{position:absolute;right:10px;top:12px;bottom:12px;width:16px;border:1px solid rgba(204,255,0,.35);background:rgba(0,0,0,.35);pointer-events:none}
+.th-volume i{position:absolute;left:0;right:0;bottom:0;height:calc(var(--v) * 100%);background:linear-gradient(#ccff00,#5a7a00);transition:height .08s linear}
+.th-volume span{position:absolute;right:22px;bottom:-2px;font:400 10px/1 "Special Elite","Courier New",monospace;color:#ccff00;white-space:nowrap}
+.th-suona{padding:4px 22px 5px;border:0;background:var(--lab-inchiostro);color:var(--lab-carta);font:400 22px/1 "Anton",Impact,sans-serif;text-transform:lowercase;cursor:pointer;transform:rotate(-1.4deg);box-shadow:2px 2px 0 rgba(0,0,0,.16)}
+.th-suona[aria-pressed="true"]{background:#7cc400;color:#10120f}
+.th-scala,.th-onde{display:flex;flex-wrap:wrap;gap:6px}
+.th-scala .lab-tasto{flex:1 1 44%}
+.th-onde .lab-tasto{flex:1}
+.lab-colonna--lato .lab-pannello{padding:8px 10px}
+
+@media (max-width:900px){
+  .th-scena{min-height:280px}
+  .lab-colonna--lato{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+}
+@media (max-width:560px){
+  .lab-colonna--lato{grid-template-columns:minmax(0,1fr)}
+  .th-lettura b{font-size:32px}
+}

@@ -83,13 +83,14 @@ document.addEventListener('visibilitychange', () => {
   else { errori = 0; chiedi(); collega() }
 })
 
-/** L'ultima vetrina arrivata: { luogo, app: [{ n, i, su }], musica: { titolo, artista, album, img, inizio, fine } | null }, o null. */
+/** L'ultima vetrina arrivata: { luogo, app: [{ n, i, su, str? }] (str: la chiave dello strumento in uso con quell'app, se il pc la sa), musica: { titolo, artista, album, img, inizio, fine } | null }, o null. */
 export const vetrina = () => dati
-/** Chiama `f(dati)` a ogni cambio (e comincia a chiedere). */
+/** Chiama `f(dati)` a ogni cambio (e comincia a chiedere). Restituisce come smettere. */
 export function ascolta(f) {
   ascolti.add(f)
   if (dati) f(dati)
   else { chiedi(); collega() }
+  return () => ascolti.delete(f)
 }
 /** L'indirizzo di un'icona o di una copertina. */
 export const immagine = (id) => `/api/vetrina/?img=${encodeURIComponent(id)}`

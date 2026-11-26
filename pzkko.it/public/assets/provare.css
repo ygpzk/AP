@@ -1,0 +1,231 @@
+/* ══ «da provare»: la grafica (Claude) · 26.11.2026
+   pzkko: «fai questa zona stra animata e stra nel mio stile, animazione per cambio app, switch e transizione in base
+   all'utilizzo. Tu pensa alla grafica, DeepSeek pensa a UX».
+   La UX è di DeepSeek (provare.js, design/da-provare-ux.md): lui decide cosa succede e quando, e mette i ganci
+   (data-stato, data-motivo, data-uso, data-prossimo, .is-out, .is-in, .is-appena, .is-nuova, --dir, --ritardo,
+   --timbro-ritardo). Qui c'è solo come si vede: un pezzo di muro. I volantini sono appesi col nastro gommato vero e
+   dondolano; quello che sta per cambiare cede piano dal nastro, poi si strappa e cade lasciando il pezzetto di carta
+   sotto il nastro; quello nuovo viene sbattuto sul muro e il nastro arriva dopo. A mano la fila vola via di lato.
+   Quando torni da un'app il suo volantino prende il timbro verde e vola dentro la tessera, e il buco si timbra
+   quando arriva. La penna rossa è appesa alla tessera con lo spago.
+   Lo stile sta qui e non in site.css (lo riscrivono più sessioni insieme): lo carica provare-arte.js, che mette
+   data-arte sulla zona. Senza questo file la zona resta com'era, ferma ma intera.
+   Si muovono solo transform, rotate, scale, translate, opacity e clip-path. ══ */
+
+.annunci[data-arte] { --pz-respiro: 6200ms; --pz-appena: 1150ms; --pza-molla: cubic-bezier(.2, 1.5, .4, 1); --pza-inchiostro: radial-gradient(circle at 40% 35%, #e0303c, var(--pz-rosso) 60%, #7a0a14); }
+
+/* ── il titolo: sbattuto giù, poi il pennarello lo sottolinea e scrive la voce ── */
+.annunci[data-arte] .annunci__h { position: relative; }
+.annunci[data-arte] .annunci__h h2 { position: relative; rotate: -1.4deg; transform-origin: 0 100%; }
+.annunci[data-arte] .annunci__h h2::after { content: ""; position: absolute; left: -3px; right: -10px; bottom: -8px; height: 11px; background: var(--pz-rosso); pointer-events: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'%3E%3Cpath d='M3 6C38 2 71 9 108 5s61-3 89 2M14 11c45-3 104 2 168-2' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'%3E%3Cpath d='M3 6C38 2 71 9 108 5s61-3 89 2M14 11c45-3 104 2 168-2' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
+[data-theme=dark] .annunci[data-arte] .annunci__h h2::after { background: #ff6b70; }
+/* la freccia a pennarello che dalla voce scende verso i volantini */
+.annunci[data-arte] .annunci__voce { position: relative; padding-right: 34px; }
+.annunci[data-arte] .annunci__voce::after { content: ""; position: absolute; right: 0; top: 30%; width: 28px; height: 30px; background: currentColor; pointer-events: none;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 30'%3E%3Cpath d='M3 4c11-2 19 5 17 20M12 17l8 9 6-11' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 30'%3E%3Cpath d='M3 4c11-2 19 5 17 20M12 17l8 9 6-11' fill='none' stroke='%23000' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+.annunci[data-arte="1"][data-stato="gira"] .annunci__voce::after { animation: pza-freccia 2.6s ease-in-out infinite; }
+
+/* in attesa (la zona non è ancora in vista): niente è ancora attaccato al muro */
+.annunci[data-arte="attesa"] .annunci__h h2, .annunci[data-arte="attesa"] .annunci__fila .fly, .annunci[data-arte="attesa"] .pza-porta, .annunci[data-arte="attesa"] .annunci__comandi { opacity: 0; }
+.annunci[data-arte="attesa"] .annunci__voce { clip-path: inset(-8px 100% -8px -8px); }
+/* l'entrata, una volta per montaggio: titolo, sottolineatura, voce, tessera, poi i volantini uno dopo l'altro */
+.annunci[data-arte="entra"] .annunci__h h2 { animation: pza-titolo .5s var(--pza-molla) both; }
+.annunci[data-arte="entra"] .annunci__h h2::after { animation: pza-scrivi .42s .34s ease-out both; }
+.annunci[data-arte="entra"] .annunci__voce { animation: pza-scrivi .8s .5s cubic-bezier(.4, 0, .6, 1) both; }
+.annunci[data-arte="entra"] .pza-porta { animation: pza-attacca .55s .3s both; }
+.annunci[data-arte="entra"] .annunci__fila .fly { animation: pza-attacca .58s calc(.42s + var(--pza-i, 0) * .13s) both; }
+.annunci[data-arte="entra"] .annunci__fila .fly .pz-nastro { animation: pza-nastro-su .3s calc(.7s + var(--pza-i, 0) * .13s) both; }
+.annunci[data-arte="entra"] .annunci__fila .fly > .timbro { animation: pza-timbra .34s calc(.86s + var(--pza-i, 0) * .13s) both; }
+.annunci[data-arte="entra"] .annunci__comandi { animation: pza-compare .3s 1.2s both; }
+.annunci[data-arte] .fly[data-slot="0"] { --pza-i: 0; --pza-cade: -1; }
+.annunci[data-arte] .fly[data-slot="1"] { --pza-i: 1; --pza-cade: 1; }
+.annunci[data-arte] .fly[data-slot="2"] { --pza-i: 2; --pza-cade: -1; }
+.annunci[data-arte] .fly[data-slot="3"] { --pza-i: 3; --pza-cade: 1; }
+
+/* ── i volantini: appesi per il nastro (quello vero, di carta gommata) ── */
+.annunci[data-arte] .annunci__fila .fly { transform-origin: 50% 0; will-change: transform; }
+.annunci[data-arte] .annunci__fila .fly .pz-nastro { top: -15px; width: 78px; height: 30px; margin-left: -39px; clip-path: none; background: url(/art/nastro/carta-gommata.webp) center / 100% 100% no-repeat; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .28)); }
+.annunci[data-arte] .fly[data-slot="1"] .pz-nastro, .annunci[data-arte] .fly[data-slot="3"] .pz-nastro { --n: 3deg; scale: -1 1; }
+.annunci[data-arte] .fly__foto .art__shot img, .annunci[data-arte] .fly__foto .art { transition: scale .5s cubic-bezier(.2, .8, .2, 1); }
+/* dondolano piano quando il muro gira; col mouse sopra o fuori vista restano fermi dove sono */
+.annunci[data-arte="1"] .annunci__fila .fly[data-stato="pronto"] { animation: pza-dondola calc(5.2s + var(--pza-i, 0) * .7s) calc(var(--pza-i, 0) * -1.9s) ease-in-out infinite alternate; }
+.annunci[data-arte="1"]:not([data-stato="gira"]) .annunci__fila .fly[data-stato="pronto"] { animation-play-state: paused; }
+@media (hover: hover) {
+  .annunci[data-arte] .annunci__fila .fly[data-stato="pronto"]:hover { z-index: 2; filter: drop-shadow(0 1px .5px rgba(0, 0, 0, .45)) drop-shadow(0 16px 16px rgba(0, 0, 0, .3)); }
+  .annunci[data-arte] .fly:hover .fly__foto .art { scale: 1.06; }
+  .annunci[data-arte] .fly:hover .pz-tasto { animation: pza-tasto .5s var(--pza-molla); }
+}
+/* quello indicato dalla tessera (il mouse è sul suo buco) si fa avanti */
+.annunci[data-arte] .annunci__fila .fly.is-qui { z-index: 2; scale: 1.04; transition: scale .2s var(--pza-molla); }
+
+/* quello che cambierà al prossimo giro: cede piano dal nastro per tutto il tempo del conto, poi si strappa */
+.annunci[data-arte="1"][data-stato="gira"] .annunci__fila .fly[data-prossimo][data-stato="pronto"] { animation: pza-cede var(--pz-respiro) linear both; }
+.annunci[data-arte="1"][data-stato="gira"] .annunci__fila .fly[data-prossimo][data-stato="pronto"] .pz-nastro { animation: pza-nastro-cede var(--pz-respiro) linear both; }
+
+/* ── il cambio ──
+   esce: strappato dal muro e cade (giro) · vola via di lato (mano) · vola dentro la tessera (usata)
+   entra: sbattuto sul muro, il nastro arriva dopo, il timbro per ultimo */
+.annunci[data-arte] .annunci__fila .fly.is-out { z-index: 4; animation: pza-strappa var(--pz-scambio) var(--ritardo, 0ms) both; }
+.annunci[data-arte] .annunci__fila .fly.is-out .pz-nastro { animation: pza-nastro-via calc(var(--pz-scambio) * .5) var(--ritardo, 0ms) ease-out both; }
+.annunci[data-arte] .annunci__fila .fly.is-out[data-motivo="mano"] { animation-name: pza-via-lato; }
+.annunci[data-arte] .annunci__fila .fly.is-out[data-motivo="mano"] .pz-nastro { animation: none; }
+.annunci[data-arte] .annunci__fila .fly.is-out[data-motivo="usata"] { z-index: 7; animation-name: pza-in-tessera; }
+.annunci[data-arte] .annunci__fila .fly.is-out[data-motivo="usata"] .pz-nastro { animation-duration: calc(var(--pz-scambio) * .3); }
+.annunci[data-arte] .annunci__fila .fly.is-in { z-index: 3; animation: pza-attacca var(--pz-scambio) var(--ritardo, 0ms) both; }
+.annunci[data-arte] .annunci__fila .fly.is-in .pz-nastro { animation: pza-nastro-su calc(var(--pz-scambio) * .5) calc(var(--ritardo, 0ms) + var(--pz-scambio) * .46) both; }
+.annunci[data-arte] .annunci__fila .fly.is-in > .timbro { animation: pza-timbra calc(var(--pz-scambio) * .42) calc(var(--ritardo, 0ms) + var(--pz-scambio) * .58) both; }
+.annunci[data-arte] .annunci__fila .fly.is-in[data-motivo="mano"] { animation-name: pza-da-lato; }
+.annunci[data-arte] .annunci__fila .fly.is-in[data-motivo="mano"] .pz-nastro { animation: none; }
+/* i vicini sentono il colpo quando quello nuovo arriva sul muro */
+.annunci[data-arte] .annunci__fila .fly.is-trema { animation: pza-trema .32s ease-out both; }
+
+/* il pezzetto di carta rimasto sotto il nastro quando un volantino viene strappato (lo mette provare-arte.js) */
+.pza-resto { position: absolute; z-index: 0; width: 74px; height: 53px; margin: -16px 0 0 -37px; pointer-events: none; rotate: var(--n, -4deg); background: url(/art/nastro/resto-bianco.webp) center / contain no-repeat; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .3)); animation: pza-compare .12s calc(var(--pz-scambio, 560ms) * .16) both; }
+.pza-resto.is-via { animation: pza-scompare .2s both; }
+
+/* ── appena usata: il timbro verde si stampa, la carta sente il colpo, l'evidenziatore passa sul nome ── */
+.annunci[data-arte] .annunci__fila .fly.is-appena { z-index: 5; animation: pza-colpo .5s var(--pza-molla) both; }
+.annunci[data-arte] .annunci__fila .fly.is-appena > .timbro { animation: pza-timbra .42s .1s both; }
+.annunci[data-arte] .annunci__fila .fly.is-appena .fly__t { width: fit-content; background: var(--pz-evidenzia) 0 0 / 100% 100% no-repeat; animation: pza-evidenzia .45s .42s ease-out both; }
+
+/* ── la nota d'uso (una riga a penna sull'evidenziatore: il suo aspetto è in site.css): si scrive quando il volantino arriva ── */
+.annunci[data-arte] .fly.is-in .fly__nota { animation: pza-scrivi calc(var(--pz-scambio) * .5) calc(var(--ritardo, 0ms) + var(--pz-scambio) * .5) both; }
+
+/* ── in base all'uso: quelle già provate hanno l'orecchia piegata, quelle nuove hanno il timbro che non sta fermo ── */
+.annunci[data-arte] .fly[data-uso="provata"]::before, .annunci[data-arte] .fly[data-uso="provata"]::after { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%); }
+.annunci[data-arte] .fly[data-uso="provata"]::before { background: linear-gradient(168deg, rgba(255, 255, 255, .4), rgba(255, 255, 255, 0) 42%, rgba(120, 84, 20, .1)), #f1ead6; }
+.annunci[data-arte] .fly[data-uso="provata"] .fly__tasti::after { content: ""; position: absolute; right: 0; bottom: 0; width: 20px; height: 20px; pointer-events: none; background: linear-gradient(135deg, #fbf7ea 0 46%, #d9cfb4 50%, rgba(0, 0, 0, .16) 51%, transparent 62%); }
+.annunci[data-arte="1"][data-stato="gira"] .fly[data-uso="nuova"][data-stato="pronto"] > .timbro { animation: pza-occhio 3.6s calc(var(--pza-i, 0) * .45s) ease-in-out infinite; }
+
+/* ── i tasti avanti/indietro: il tasto nero storto, appeso fuori dalla fila ── */
+.annunci[data-arte] .annunci__comandi { inset-inline: -25px; top: 38%; }
+.annunci[data-arte] .annunci__nav { display: grid; place-items: center; width: 36px; height: 46px; padding: 0; border: 0; border-radius: 0; background: var(--pz-ink); color: #fff; cursor: pointer; rotate: -5deg; box-shadow: 3px 3px 0 rgba(0, 0, 0, .28); transition: translate .18s var(--pza-molla), rotate .18s var(--pza-molla), scale .18s var(--pza-molla); }
+.annunci[data-arte] .annunci__nav--next { rotate: 4deg; }
+[data-theme=dark] .annunci[data-arte] .annunci__nav { background: var(--pz-carta); color: var(--pz-ink); box-shadow: 3px 3px 0 rgba(0, 0, 0, .5); }
+.annunci[data-arte] .annunci__nav svg { width: 22px; height: 22px; stroke-width: 3; }
+.annunci[data-arte] .annunci__nav:focus-visible { outline: 3px solid var(--pz-giallo); outline-offset: 3px; }
+.annunci[data-arte] .annunci__nav:active { scale: .92; box-shadow: 1px 1px 0 rgba(0, 0, 0, .28); }
+@media (hover: hover) {
+  .annunci[data-arte] .annunci__nav--prev:hover { translate: -4px 0; rotate: -9deg; }
+  .annunci[data-arte] .annunci__nav--next:hover { translate: 4px 0; rotate: 8deg; }
+}
+/* sul telefono (due colonne) stanno sotto la fila, in mezzo: lì si cambia trascinando */
+@container (max-width: 700px) {
+  .annunci[data-arte] .annunci__comandi { position: static; transform: none; grid-column: 1 / -1; order: 9; justify-content: center; gap: 22px; margin-top: 2px; }
+}
+
+/* ── la tessera: appesa col nastro, la penna rossa legata con lo spago ── */
+.pza-porta { position: relative; display: block; margin-left: auto; }
+.pza-porta > .tessera { margin-left: 0; }
+@media (max-width: 760px) { .pza-porta { margin-left: 0; } }
+.pza-porta::before { content: ""; position: absolute; z-index: 2; right: -15px; top: -8px; width: 50px; height: 19px; rotate: 36deg; pointer-events: none; background: url(/art/nastro/carta-gommata.webp) center / 100% 100% no-repeat; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .25)); }
+.pza-penna { position: absolute; z-index: 6; right: -7px; top: calc(100% - 10px); width: 11px; height: 118px; pointer-events: none; transform-origin: 50% 0; background: url(/art/penne/rossa-aperta.webp) center / 100% 100% no-repeat; filter: drop-shadow(1px 2px 1.5px rgba(0, 0, 0, .35)); rotate: 3deg; }
+.annunci[data-arte="1"][data-stato="gira"] .pza-penna { animation: pza-pendola 4.4s ease-in-out infinite alternate; }
+.annunci[data-arte] .pza-penna.is-colpo { animation: pza-pendola-forte 1.5s cubic-bezier(.3, .7, .4, 1) both; }
+.annunci[data-arte] .tessera__buchi { gap: 5px; }
+.annunci[data-arte] .tessera__buchi i { position: relative; width: 13px; height: 13px; transition: scale .2s var(--pza-molla), box-shadow .2s; }
+.annunci[data-arte] .tessera__buchi i.on { background: var(--pza-inchiostro); }
+.annunci[data-arte] .tessera__buchi i.on:nth-child(3n) { rotate: 24deg; scale: 1.06; }
+.annunci[data-arte] .tessera__buchi i.on:nth-child(4n + 1) { translate: .5px -1px; scale: .94; }
+/* il buco del volantino sotto il mouse */
+.annunci[data-arte] .tessera__buchi i.is-qui { z-index: 2; scale: 1.6; box-shadow: 0 0 0 2px var(--pz-giallo), 0 0 0 3.5px var(--pz-ink); }
+/* il buco appena timbrato: resta vuoto finché il volantino non arriva (--timbro-ritardo), poi il timbro batte */
+.annunci[data-arte] .tessera__buchi i.is-nuova { z-index: 3; animation: pza-buco .62s var(--timbro-ritardo, 0ms) both; }
+.annunci[data-arte] .tessera:has(i.is-nuova) { animation: pza-tessera-colpo .5s calc(var(--timbro-ritardo, 0ms) + 60ms) both; }
+.annunci[data-arte] .tessera:has(i.is-nuova) .tessera__t { animation: pza-conta .5s calc(var(--timbro-ritardo, 0ms) + 60ms) both; }
+/* tessera piena: l'evidenziatore sulla scritta, e la carta luccica */
+.annunci[data-arte] .tessera[data-stato="piena"] { background: linear-gradient(115deg, #ffd9e8 0 38%, #fff3b0 50%, #ffd9e8 62% 100%) 0 0 / 260% 100%; }
+.annunci[data-arte] .tessera[data-stato="piena"] .tessera__t { width: fit-content; background: var(--pz-evidenzia); color: var(--pz-ink); }
+.annunci[data-arte="1"][data-stato="gira"] .tessera[data-stato="piena"] { animation: pza-luccica 3.2s linear infinite; }
+
+/* ── la festa (tessera piena adesso): piovono le fiches (le mette provare-arte.js) ── */
+.pza-pioggia { position: absolute; inset: 0; z-index: 8; pointer-events: none; }
+.pza-pioggia i { position: absolute; top: -70px; left: var(--x, 50%); width: var(--d, 44px); aspect-ratio: 1; background: var(--f) center / contain no-repeat; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, .35)); animation: pza-fiche var(--t, 1.8s) var(--r, 0s) cubic-bezier(.4, 0, .9, .6) both; }
+.annunci[data-arte][data-festa="1"] .pza-porta { animation: pza-salta .7s var(--pza-molla) 3 both; }
+
+/* ── bentornato (manchi da giorni): due parole a pennarello accanto al titolo, poi spariscono ── */
+.annunci[data-arte][data-ritorno="1"] .annunci__h h2::before { content: "rieccoti!"; position: absolute; left: 100%; bottom: 100%; margin: 0 0 -14px -22px; padding: 2px 9px 1px; white-space: nowrap; background: var(--pz-giallo); color: var(--pz-ink); font: 400 15px/1.2 var(--pz-marker); letter-spacing: 0; rotate: 7deg; box-shadow: 2px 2px 0 rgba(0, 0, 0, .25); animation: pza-rieccoti 4.8s var(--pza-molla) both; }
+:root:not(:lang(it)) .annunci[data-arte][data-ritorno="1"] .annunci__h h2::before { content: "you’re back!"; }
+
+/* ── i movimenti ── */
+@keyframes pza-compare { from { opacity: 0; } }
+@keyframes pza-scompare { to { opacity: 0; } }
+@keyframes pza-scrivi { from { clip-path: inset(-8px 100% -8px -8px); } to { clip-path: inset(-8px -40px -8px -8px); } }
+@keyframes pza-titolo { from { opacity: 0; scale: 1.5; rotate: -7deg; } 60% { opacity: 1; } }
+@keyframes pza-freccia { 50% { translate: 2px 5px; rotate: 6deg; } }
+@keyframes pza-dondola { from { rotate: -.55deg; } to { rotate: .55deg; } }
+@keyframes pza-tasto { 30% { rotate: -5deg; scale: 1.1; } 60% { rotate: 3deg; } }
+/* sbattuto sul muro: arriva grande e storto, schiaccia, rimbalza */
+@keyframes pza-attacca {
+  0% { opacity: 0; transform: translateY(-34px) rotate(calc(var(--r, 0deg) + var(--pza-cade, 1) * 9deg)) scale(1.22); animation-timing-function: cubic-bezier(.5, 0, .9, .5); }
+  14% { opacity: 1; }
+  48% { opacity: 1; transform: translateY(2px) rotate(calc(var(--r, 0deg) - var(--pza-cade, 1) * 1.4deg)) scale(.965); animation-timing-function: ease-out; }
+  72% { transform: translateY(-1px) rotate(calc(var(--r, 0deg) + var(--pza-cade, 1) * .6deg)) scale(1.012); }
+  100% { opacity: 1; transform: rotate(var(--r, 0deg)); }
+}
+@keyframes pza-nastro-su { 0% { opacity: 0; translate: 0 -20px; scale: 1.5; } 60% { opacity: 1; translate: 0 1px; scale: .96; } 100% { opacity: 1; } }
+@keyframes pza-timbra { 0% { opacity: 0; scale: 2.8; } 50% { opacity: 1; scale: .86; } 74% { scale: 1.07; } 100% { scale: 1; } }
+/* strappato: uno strattone, il nastro salta, poi giù per il suo peso */
+@keyframes pza-strappa {
+  0% { opacity: 1; transform: rotate(var(--r, 0deg)); animation-timing-function: ease-out; }
+  16% { opacity: 1; transform: translateY(-6px) rotate(calc(var(--r, 0deg) + var(--pza-cade, 1) * 3.5deg)) scale(1.02); animation-timing-function: cubic-bezier(.55, 0, 1, .45); }
+  78% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(var(--pza-cade, 1) * 30px), 112%) rotate(calc(var(--r, 0deg) + var(--pza-cade, 1) * 21deg)) scale(.98); }
+}
+@keyframes pza-nastro-via { 0% { opacity: 1; } 30% { opacity: 1; translate: 0 -3px; rotate: calc(var(--n, -4deg) - 9deg); } 100% { opacity: 0; translate: calc(var(--pza-cade, 1) * -14px) -30px; rotate: calc(var(--n, -4deg) - 50deg); } }
+/* a mano: la fila vola via dalla parte del gesto, quella nuova arriva dall'altra */
+@keyframes pza-via-lato {
+  0% { opacity: 1; transform: rotate(var(--r, 0deg)); animation-timing-function: cubic-bezier(.3, 0, .2, 1); }
+  18% { opacity: 1; transform: translateX(calc(var(--dir, 1) * 5%)) rotate(calc(var(--r, 0deg) + var(--dir, 1) * 2.5deg)); animation-timing-function: cubic-bezier(.5, 0, .9, .5); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(calc(var(--dir, 1) * -115%)) rotate(calc(var(--r, 0deg) + var(--dir, 1) * -15deg)) scale(.94); }
+}
+@keyframes pza-da-lato {
+  0% { opacity: 0; transform: translateX(calc(var(--dir, 1) * 115%)) rotate(calc(var(--r, 0deg) + var(--dir, 1) * 14deg)) scale(.94); animation-timing-function: cubic-bezier(.2, .9, .3, 1); }
+  16% { opacity: 1; }
+  64% { opacity: 1; transform: translateX(calc(var(--dir, 1) * -3%)) rotate(calc(var(--r, 0deg) + var(--dir, 1) * -2deg)); }
+  100% { opacity: 1; transform: rotate(var(--r, 0deg)); }
+}
+/* usata: si stacca, prende la mira e vola nel suo buco della tessera (--tx/--ty li misura provare-arte.js) */
+@keyframes pza-in-tessera {
+  0% { opacity: 1; transform: rotate(var(--r, 0deg)); animation-timing-function: ease-out; }
+  22% { opacity: 1; transform: translateY(8px) rotate(calc(var(--r, 0deg) - 3deg)) scale(1.05); animation-timing-function: cubic-bezier(.6, 0, .8, .6); }
+  88% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--tx, 0px), var(--ty, -120%)) rotate(calc(var(--r, 0deg) + 34deg)) scale(.04); }
+}
+@keyframes pza-colpo { 0% { scale: 1; } 28% { scale: .955; } 62% { scale: 1.025; } 100% { scale: 1; } }
+@keyframes pza-trema { 25% { translate: 0 2px; rotate: .5deg; } 55% { translate: 0 -1px; rotate: -.3deg; } }
+@keyframes pza-evidenzia { from { background-size: 0% 100%; } to { background-size: 100% 100%; } }
+@keyframes pza-occhio { 0%, 86%, 100% { rotate: 0deg; scale: 1; } 89% { rotate: -5deg; scale: 1.12; } 93% { rotate: 4deg; scale: 1.08; } 96% { rotate: -2deg; } }
+/* il conto: fermo per più di metà, poi il volantino comincia a cedere e resta appeso per un angolo */
+@keyframes pza-cede {
+  0%, 58% { rotate: 0deg; translate: 0 0; }
+  66% { rotate: .9deg; } 71% { rotate: -.2deg; } 79% { rotate: 1.7deg; translate: 0 1px; } 84% { rotate: 1.1deg; } 92% { rotate: 2.5deg; translate: 0 2px; }
+  100% { rotate: 3.2deg; translate: 0 3px; }
+}
+@keyframes pza-nastro-cede { 0%, 60% { translate: 0 0; rotate: var(--n, -4deg); } 80% { translate: -2px -1px; rotate: calc(var(--n, -4deg) - 5deg); } 100% { translate: -5px -4px; rotate: calc(var(--n, -4deg) - 13deg); } }
+@keyframes pza-pendola { from { rotate: -4deg; } to { rotate: 7deg; } }
+@keyframes pza-pendola-forte { 0% { rotate: 3deg; } 12% { rotate: -26deg; } 32% { rotate: 20deg; } 52% { rotate: -12deg; } 72% { rotate: 8deg; } 88% { rotate: -1deg; } 100% { rotate: 3deg; } }
+/* il timbro sul buco: prima vuoto (per tutta l'attesa), poi arriva grande, batte e lascia l'alone d'inchiostro */
+@keyframes pza-buco {
+  0% { scale: 1; opacity: 1; background: transparent; border: 1.5px dashed rgba(90, 16, 51, .45); box-shadow: 0 0 0 0 rgba(179, 18, 31, 0); }
+  1% { scale: 3.4; opacity: 0; background: var(--pza-inchiostro); border: 0 solid transparent; box-shadow: 0 0 0 0 rgba(179, 18, 31, .55); animation-timing-function: cubic-bezier(.5, 0, .9, .5); }
+  42% { scale: .78; opacity: 1; background: var(--pza-inchiostro); border: 0 solid transparent; box-shadow: 0 0 0 0 rgba(179, 18, 31, .55); }
+  66% { scale: 1.28; }
+  100% { scale: 1; opacity: 1; background: var(--pza-inchiostro); border: 0 solid transparent; box-shadow: 0 0 0 11px rgba(179, 18, 31, 0); }
+}
+@keyframes pza-tessera-colpo { 0% { scale: 1; } 30% { scale: .94; translate: 0 2px; } 62% { scale: 1.035; } 100% { scale: 1; } }
+@keyframes pza-conta { 30% { color: var(--pz-rosso); scale: 1.06; } }
+@keyframes pza-luccica { to { background-position: -260% 0; } }
+@keyframes pza-fiche { 0% { opacity: 1; translate: 0 0; rotate: 0deg; } 85% { opacity: 1; } 100% { opacity: 0; translate: var(--dx, 0px) var(--y, 520px); rotate: var(--g, 540deg); } }
+@keyframes pza-salta { 40% { translate: 0 -9px; rotate: -2deg; } }
+@keyframes pza-rieccoti { 0% { opacity: 0; scale: 2; } 9% { opacity: 1; scale: 1; } 88% { opacity: 1; scale: 1; } 100% { opacity: 0; scale: .9; } }
+
+/* chi ha chiesto meno movimento: tutto al suo posto, niente che si muove (i cambi sono già istantanei: --pz-scambio 0) */
+@media (prefers-reduced-motion: reduce) {
+  .annunci[data-arte] *, .annunci[data-arte] *::before, .annunci[data-arte] *::after, .pza-resto, .pza-pioggia i { animation: none !important; transition: none !important; }
+  .annunci[data-arte] .pza-resto, .annunci[data-arte] .pza-pioggia { display: none; }
+}

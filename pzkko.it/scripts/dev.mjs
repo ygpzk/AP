@@ -22,7 +22,8 @@ const SICUREZZA = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'SAMEORIGIN',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+  // (26.11) il laboratorio accende microfono, camera, MIDI e sensori solo per sé: le altre origini restano fuori.
+  'Permissions-Policy': 'camera=(self), microphone=(self), midi=(self), xr-spatial-tracking=(self), accelerometer=(self), gyroscope=(self), magnetometer=(self), geolocation=(), payment=(), usb=()',
   'Cross-Origin-Resource-Policy': 'same-origin',
 }
 
@@ -44,6 +45,7 @@ createServer(async (req, res) => {
   }
   // la vecchia pagina /community/ non esiste più: la scheda sta nella home, a #community
   if (p === '/community' || p === '/community/') { res.writeHead(308, { ...SICUREZZA, Location: '/#community' }); return res.end() }
+  if (p === '/studio' || p === '/studio/') { res.writeHead(308, { ...SICUREZZA, Location: '/#studio' }); return res.end() }
   const radicePub = normalize(pub)
   let file = normalize(join(radicePub, p))
   if (file !== radicePub && !file.startsWith(radicePub + sep)) { res.writeHead(403, SICUREZZA); return res.end() }

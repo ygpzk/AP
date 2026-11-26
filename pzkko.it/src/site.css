@@ -2,6 +2,7 @@
    ABC Ginto Nord e quelli dei nomi), la sua cornice e il suo effetto veri, e il tema
    del profilo (dal 26.11 #ffd21a → #d81e1e) calcolato come lo calcola Discord. */
 @import "tailwindcss" source(none);
+@import "./scheda-attivita.css";
 @source "../public/index.html";
 @source "../public/404.html";
 @source "../public/assets/app.js";
@@ -1314,6 +1315,98 @@ span.igc__srv { cursor: default; }
 .igc__tt svg:nth-child(2) { color: #fe2c55; translate: 1.5px 1px; }
 .igc__tt svg:nth-child(3) { color: #fff; }
 
+/* ─── gli strumenti (26.11, pzkko: «fai questa zona stra animata e stra nel mio stile, animazione per cambio app, switch e
+   transizione in base all'utilizzo»). Il comportamento è di DeepSeek (design/strumenti-ux-deepseek.md), il disegno è il
+   muro: un foglio col nastro, i cartellini scritti a macchina, e quello che ha in mano adesso nel riquadro in alto a
+   sinistra, fermato dalla puntina rossa (art/nastro/puntina.webp), col timbro e l'evidenziatore. Tutto sotto .st: le
+   pillole .role dei progetti restano quelle di prima. Il motore è public/assets/strumenti.js. ─── */
+.st { min-width: 0; padding: 6px 2px 4px; container-type: inline-size; }
+.st__h { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 0 4px 2px; }
+.st__h h2 { margin: 0; font: 400 42px/1 var(--pz-fa); text-transform: lowercase; letter-spacing: .005em; color: var(--text); }
+.st__voce { margin: 0; min-height: 1.2em; font: 400 16px/1.2 var(--pz-marker); color: var(--pz-rosso); rotate: -1.5deg; transform-origin: 0 50%; }
+[data-theme=dark] .st__voce { color: #ff6b70; }
+.st__voce.is-scrive { animation: stscrive .42s cubic-bezier(.3, .7, .3, 1) backwards; }
+/* il foglio: la carta col nastro dei tavoli, allungata come nei popup */
+/* (i cartellini sono parole di una riga giustificata: ognuno largo quanto il suo nome, e girano intorno al riquadro
+   «in mano», che è un float in alto a sinistra) */
+.st__banco { --nastro: 92px; --fuori: 34px; position: relative; isolation: isolate; display: flow-root; margin: calc(var(--fuori) + 2px) 22px calc(var(--fuori) - 8px); padding: 16px 20px 2px;
+  font: 400 10px/0 var(--pz-mac); word-spacing: 3px; text-align: justify; text-align-last: left; color: var(--pz-ink); color-scheme: light; }
+.st__banco::before { content: ""; position: absolute; inset: calc(var(--fuori) * -1); z-index: -1; pointer-events: none; border: 0 solid transparent;
+  border-image: url(/art/roulette/carta.webp) 300 fill / var(--nastro) stretch; filter: drop-shadow(0 1px .5px rgba(0, 0, 0, .45)) drop-shadow(0 10px 14px rgba(0, 0, 0, .24)); }
+/* il riquadro «in mano»: vuoto è un tratteggio a matita con la scritta a pennarello */
+.st__mano { float: left; width: 252px; height: 78px; margin: 0 14px 10px 0; display: grid; place-items: center; min-width: 0; border: 2px dashed rgba(27, 25, 22, .3); border-radius: 3px 7px 4px 8px; font: 400 17px/1.1 var(--pz-marker); color: var(--pz-matita); text-align: center; }
+.st__mano span { padding: 0 8px; rotate: -3deg; opacity: .85; transition: opacity .2s; }
+.ha-su .st__mano { display: none; }
+/* il cartellino */
+.st__t { position: relative; z-index: 1; display: inline-flex; vertical-align: top; align-items: center; gap: 7px; min-width: 0; max-width: 100%; height: 34px; margin: 0 0 10px; padding: 0 9px 0 8px; border: 1.5px solid rgba(27, 25, 22, .42); border-radius: 2px; background: #fffefa; color: var(--pz-ink);
+  font: 400 12.5px/1 var(--pz-mac); text-align: left; cursor: pointer; rotate: var(--r, 0deg); transform-origin: 50% 0; box-shadow: 0 1px 1px rgba(0, 0, 0, .22), 0 6px 8px -6px rgba(0, 0, 0, .4);
+  transition: rotate .2s cubic-bezier(.2, 1.4, .4, 1), translate .2s cubic-bezier(.2, 1.4, .4, 1), box-shadow .2s, border-color .2s; -webkit-tap-highlight-color: transparent; }
+.st__t .bi { width: 16px; height: 16px; color: var(--icl); }
+.st__pallino { flex: 0 0 auto; width: 12px; height: 12px; border-radius: 50%; background: var(--c, var(--pz-matita)); }
+.st__n { min-width: 0; padding: 3px 1px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  background: linear-gradient(transparent 70%, color-mix(in srgb, var(--c, #888) 40%, transparent) 70% 97%, transparent 97%) no-repeat 0 0 / 0% 100%; transition: background-size .22s; }
+@media (hover: hover) {
+  .st__t:hover { rotate: 0deg; translate: 0 -2px; border-color: var(--pz-ink); box-shadow: 0 1px 1px rgba(0, 0, 0, .22), 0 12px 12px -8px rgba(0, 0, 0, .5); }
+  .st__t:hover .st__n { background-size: 100% 100%; }
+}
+.st__t:active { translate: 0 1px; }
+.st__t:focus-visible { outline: 3px solid var(--pz-giallo); outline-offset: 3px; border-radius: 2px; rotate: 0deg; }
+/* aperto sul pc: il bordo pieno e il punto verde */
+.st__t.is-aperto { border-color: rgba(27, 25, 22, .85); }
+.st__t.is-aperto::after { content: ""; flex: 0 0 auto; width: 7px; height: 7px; margin-left: auto; border-radius: 50%; background: var(--pz-verde); animation: stvivo 2.4s infinite; }
+/* in mano adesso: il cartellino grande, appeso alla puntina */
+.st__t.is-su { float: left; width: 252px; height: 78px; margin: 0 14px 10px 0; z-index: 3; display: grid; grid-template-columns: 40px minmax(0, 1fr); grid-template-rows: auto auto; align-content: center; gap: 3px 12px; padding: 13px 14px 8px;
+  border: 2px solid var(--pz-ink); rotate: 0deg; box-shadow: 0 2px 2px rgba(0, 0, 0, .28), 0 16px 18px -12px rgba(0, 0, 0, .55); animation: stdondola 6s ease-in-out infinite; }
+.st__t.is-su::after { content: none; }
+.st__t.is-su .bi { grid-row: 1 / span 2; align-self: center; width: 40px; height: 40px; }
+.st__t.is-su .st__n { justify-self: start; align-self: end; max-width: 100%; margin-left: -3px; padding: 3px 5px 0 3px; font: 400 29px/1.05 var(--pz-fa); letter-spacing: .005em; text-transform: lowercase;
+  background: linear-gradient(transparent 12%, rgba(255, 212, 0, .62) 12% 90%, transparent 90%) no-repeat 0 0 / 100% 100%; }
+.st__app { grid-column: 2; align-self: start; display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; font: 400 11.5px/1.3 var(--pz-mac); color: var(--pz-matita); white-space: nowrap; }
+.st__app img { flex: 0 0 auto; width: 16px; height: 16px; }
+.st__timbro { position: absolute; right: -9px; top: -11px; padding: 3px 7px 2px; border: 2.5px solid currentColor; border-radius: 3px; background: rgba(255, 255, 255, .88); color: var(--pz-rosso); font: 400 11px/1.1 var(--pz-mac); letter-spacing: .12em;
+  text-transform: uppercase; white-space: nowrap; rotate: 7deg; box-shadow: 0 2px 6px rgba(0, 0, 0, .22); }
+.st__pin { position: absolute; left: 50%; top: -18px; width: 28px; height: 32px; margin-left: -14px; background: url(/art/nastro/puntina.webp) center / contain no-repeat; filter: drop-shadow(0 3px 2px rgba(0, 0, 0, .35)); pointer-events: none; }
+.st__pin, .st__timbro { transition: opacity .16s, translate .16s, rotate .16s, scale .16s; }
+/* il cambio: esce (si spegne dov'è), vola, e all'arrivo il colpo della puntina, il timbro, l'evidenziatore */
+.st__t.is-via, .st__t.is-arrivo, .st__t.is-volo { animation: none; }
+.st__t.is-via { box-shadow: 0 1px 1px rgba(0, 0, 0, .22), 0 6px 8px -6px rgba(0, 0, 0, .4); }
+.st__t.is-via .st__pin, .st__t.is-arrivo .st__pin { opacity: 0; translate: 0 -16px; scale: 1.35; }
+.st__t.is-via .st__timbro, .st__t.is-arrivo .st__timbro { opacity: 0; translate: 0 7px; rotate: 18deg; }
+.st__t.is-via .st__n, .st__t.is-arrivo .st__n { background-size: 0% 100%; }
+.st__t.is-volo { z-index: 4; }
+.st__t.is-su.is-volo { z-index: 6; }
+.st__t.is-colpo .st__pin { animation: stpin .3s cubic-bezier(.3, 1.7, .5, 1) backwards; }
+.st__t.is-colpo .st__timbro { animation: sttimbro .24s .1s cubic-bezier(.2, 1.5, .4, 1) backwards; }
+.st__t.is-colpo .st__n { animation: stevid .34s .06s ease-out backwards; }
+/* la prima volta i cartellini si posano uno dopo l'altro */
+.st--attesa .st__t, .st--attesa .st__mano { opacity: 0; }
+.st--entra .st__t { animation: stposa .44s cubic-bezier(.2, 1.3, .4, 1) backwards; animation-delay: calc(var(--n, 0) * 20ms + 60ms); }
+/* la riga in fondo al foglio: la legenda, o lo strumento sotto il puntatore */
+.st__riga { clear: both; min-width: 0; height: 34px; margin: 0; padding-top: 4px; text-align: left; border-top: 2px dashed rgba(27, 25, 22, .22); overflow: hidden; font: 400 12.5px/28px var(--pz-mac); color: var(--pz-matita); white-space: nowrap; text-overflow: ellipsis; }
+.st__riga.is-detto { animation: stscrive .3s ease-out backwards; }
+.st__riga b { font-weight: 400; color: var(--pz-ink); background: var(--pz-evidenzia); }
+.st__riga u { color: var(--pz-penna); text-decoration: none; border-bottom: 1.5px solid currentColor; }
+.st__seg { display: inline-block; margin-right: 6px; }
+.st__seg--pin { width: 13px; height: 15px; vertical-align: -3px; background: url(/art/nastro/puntina.webp) center / contain no-repeat; }
+.st__seg--punto { width: 7px; height: 7px; margin-left: 16px; border-radius: 50%; vertical-align: 1px; background: var(--pz-verde); }
+.filter--tool .bi { width: 14px; height: 14px; color: currentColor; }
+@keyframes stscrive { from { clip-path: inset(-20% 100% -20% 0); } to { clip-path: inset(-20% -5% -20% 0); } }
+@keyframes stdondola { 0%, 100% { rotate: -.7deg; } 50% { rotate: .7deg; } }
+@keyframes stvivo { 0% { box-shadow: 0 0 0 0 rgba(31, 122, 69, .5); } 70%, 100% { box-shadow: 0 0 0 6px rgba(31, 122, 69, 0); } }
+@keyframes stpin { from { opacity: 0; translate: 0 -30px; scale: 1.7; } 60% { opacity: 1; } }
+@keyframes sttimbro { from { opacity: 0; scale: 2.3; rotate: 22deg; } }
+@keyframes stevid { from { background-size: 0% 100%; } }
+@keyframes stposa { from { opacity: 0; translate: 0 -18px; scale: 1.18; rotate: calc(var(--r, 0deg) * 5); } }
+/* stretto (telefono, zoom): i cartellini a capo con la loro larghezza, quello in mano a tutta riga */
+@container (max-width: 560px) {
+  .st__h h2 { font-size: 36px; }
+  .st__banco { --nastro: 64px; --fuori: 24px; display: flex; flex-wrap: wrap; gap: 9px 8px; margin-inline: 12px; padding: 14px 14px 2px; }
+  .st__mano, .st__t.is-su { flex: 0 0 100%; float: none; width: auto; height: 84px; margin: 0 0 2px; }
+  .st__t { flex: 1 1 auto; height: 38px; margin: 0; padding: 0 11px 0 10px; font-size: 13px; }
+  .st__t.is-su .st__n { font-size: 26px; }
+  .st__riga { flex: 0 0 100%; height: auto; min-height: 34px; white-space: normal; line-height: 1.5; padding: 8px 0 6px; }
+}
+
 /* ─── la vetrina (25.11): dove è pzkko e le app aperte sul suo pc, nel riquadro «adesso» ─── */
 .luogo { display: inline-flex; align-items: center; gap: 5px; font-weight: 500; color: var(--muted); }
 .luogo::before { content: "·"; margin-right: 3px; }
@@ -1329,3 +1422,245 @@ span.igc__srv { cursor: default; }
 .pcapp__i.is-su::before { content: ""; position: absolute; right: -3px; bottom: -3px; width: 12px; height: 12px; border-radius: 50%; background: var(--ok); border: 3px solid var(--ring); }
 .pcapp__i:hover::after, .pcapp__i:focus::after { content: attr(data-n); position: absolute; bottom: calc(100% + 6px); left: 50%; translate: -50% 0; z-index: 5; padding: 4px 8px; border-radius: 6px; background: #111214; color: #fff; font-size: 12px; font-weight: 600; white-space: nowrap; pointer-events: none; }
 .pcapp__i:focus-visible { box-shadow: 0 0 0 2px var(--tint); }
+
+/* il richiamo in bacheca */
+/* il richiamo dello Studio (26.11, stile pzk come lo Studio e tutte le app: /games/pzk-stile.css): un foglio col nastro
+   sul muro, il nome in Anton, il tasto nero storto, le tecnologie come cartellini. La carta resta carta col tema scuro. */
+.lab-teaser { --nastro: 80px; --fuori: 26px; position: relative; isolation: isolate; display: grid; gap: 9px; margin: 22px 20px 18px; padding: 14px 18px 16px; border-radius: 0; background: none; color: var(--pz-ink); color-scheme: light; rotate: -.4deg; }
+.lab-teaser::before { content: ""; position: absolute; inset: calc(var(--fuori) * -1); z-index: -1; pointer-events: none; border: 0 solid transparent;
+  border-image: url(/art/roulette/carta.webp) 300 fill / var(--nastro) stretch; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3)) drop-shadow(0 14px 16px rgba(0, 0, 0, .26)); }
+.lab-teaser .widget__h { flex-wrap: wrap; gap: 8px 14px; margin: 0; color: var(--pz-ink); }
+.lab-teaser .widget__h > span { font: 400 34px/1 var(--pz-fa); letter-spacing: .005em; text-transform: lowercase; color: var(--pz-ink); }
+.lab-teaser .widget__h .link { padding: .12em .5em .16em; background: var(--pz-ink); color: #fff; font: 400 19px/1.05 var(--pz-fa); text-transform: lowercase; transform: rotate(-2deg); box-shadow: 3px 3px 0 rgba(0, 0, 0, .18); transition: transform .18s cubic-bezier(.22, 1, .36, 1); }
+@media (hover: hover) { .lab-teaser .widget__h .link:hover { transform: rotate(-2deg) translateY(-2px); } }
+.lab-teaser .widget__h .link:focus-visible { outline: 3px solid var(--pz-giallo); outline-offset: 3px; }
+.lab-teaser p { margin: 0; color: var(--pz-testo); font: 400 13px/1.45 var(--pz-mac); }
+.lab-teaser .lab-teaser__cose { display: flex; flex-wrap: wrap; gap: 6px 7px; padding-top: 2px; }
+.lab-teaser .lab-teaser__cose span { padding: 3px 7px 2px; border: 1px solid rgba(22, 22, 22, .6); border-radius: 2px; background: #fffdf6; color: var(--pz-ink); box-shadow: 1px 1px 0 rgba(0, 0, 0, .14); font: 400 11px/1.15 var(--pz-mac); rotate: -1deg; }
+.lab-teaser .lab-teaser__cose span:nth-child(2n) { rotate: 1.2deg; }
+.lab-teaser .lab-teaser__cose span:nth-child(3n) { rotate: -.4deg; }
+@media (max-width: 760px) { .lab-teaser { margin: 20px 14px 16px; --nastro: 64px; --fuori: 22px; } .lab-teaser .widget__h > span { font-size: 30px; } }
+@media (prefers-reduced-motion: reduce) { .lab-teaser .widget__h .link { transition: none; } }
+
+/* adesso: struttura (DeepSeek) ─────────────────────────────────────────────
+   Solo perché lo scheletro del riquadro «ADESSO» (adesso.js) stia in piedi.
+   Niente colori, font o disegni: curve, tempi e disegno sono di Claude.
+   Qui ci sono i meccanismi: FLIP (is-flip/--dx/--dy), entrata/uscita
+   (is-entra/is-esce), la barra che avanza col solo transform. I tempi sono
+   neutri e vanno sostituiti da Claude (max: entrata/uscita 300 ms, FLIP 250 ms). */
+[data-adesso] { min-width: 0; }
+[data-adesso][data-motion="off"] .pcapp__i, [data-adesso][data-motion="off"] .adesso__voce { transition: none !important; }
+.adesso__voce + .adesso__voce { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.bar-t__fill { width: 100%; transform-origin: left center; }
+.pcapp__row { position: relative; }
+.pcapp__i { transform: translate(0, 0); }
+.pcapp__i.is-flip { transition: none; transform: translate(var(--dx, 0px), var(--dy, 0px)); }
+.pcapp__i.is-flip.is-flip-on { transition: transform .24s ease; transform: translate(0, 0); }
+.pcapp__i.is-entra, .adesso__voce.is-entra { opacity: 0; transition: none; }
+.pcapp__i.is-entra.is-entra-on, .adesso__voce.is-entra.is-entra-on { opacity: 1; transition: opacity .24s ease; }
+.pcapp__i.is-esce, .adesso__voce.is-esce { opacity: 0; transition: opacity .2s ease; }
+
+/* «chi sono» vivo (26.11): lo stile NON sta qui. È in public/assets/chisono.css e lo carica chisono.js da solo
+   (questo file viene riscritto da più sessioni insieme: lì non si perde). Non rimetterlo qui: farebbe doppio. */
+
+/* ── UX «da provare» (DeepSeek): struttura, niente grafica ──
+   Solo quello che serve perché il motore di provare.js funzioni: le variabili di tempo che il
+   JS legge (--pz-scambio quanto dura il cambio di un volantino, --pz-respiro ogni quanto il muro
+   gira da solo, --pz-appena l'attesa prima che il volantino appena usato esca, --pz-sfalsa lo
+   sfalsamento del cambio a mano) e la disposizione dei tasti avanti/indietro. Niente colori,
+   niente caratteri, niente keyframe: i movimenti, l'aspetto di chi esce/entra e i timbri
+   li disegna Claude sui ganci già pronti (data-stato, data-motivo, data-prossimo, .is-out,
+   .is-in, .is-appena, .is-nuova, --timbro-ritardo). */
+.annunci { position: relative; --pz-scambio: 560ms; --pz-respiro: 5200ms; --pz-appena: 1000ms; --pz-sfalsa: 90ms; }
+@media (prefers-reduced-motion: reduce) { .annunci { --pz-scambio: 0ms; } }
+/* la fila: il tocco orizzontale cambia app, quello verticale scorre la pagina */
+.annunci__fila { position: relative; touch-action: pan-y; }
+.annunci__fila:focus-visible { outline: 3px solid var(--pz-giallo); outline-offset: 3px; }
+/* i tasti avanti/indietro, fuori dal flusso (la posizione fine è di Claude) */
+.annunci__comandi { position: absolute; inset-inline: 0; top: 50%; transform: translateY(-50%); display: flex; justify-content: space-between; pointer-events: none; z-index: 5; }
+.annunci__nav { pointer-events: auto; }
+/* durante il cambio il volantino non risponde, così non si clicca una cosa che se ne va */
+.annunci .fly.is-out { pointer-events: none; }
+
+/* ── «da provare»: la grafica (Claude) sta in public/assets/provare.css, che carica provare-arte.js (questo file lo
+   riscrivono più sessioni insieme: lì non si perde). Qui solo due cose che devono esserci da subito:
+   · finché la grafica non ha acceso la zona (data-arte) i volantini aspettano nascosti, al massimo un secondo e mezzo:
+     così non si vedono fermi e poi sbattuti sul muro; se la grafica non arriva, compaiono da soli;
+   · la nota d'uso a penna, che sta anche sul volantino in basso e in «prova anche», fuori dalla zona. ── */
+.annunci[data-provare]:not([data-arte]) .annunci__fila .fly { animation: pza-aspetta 1.5s; }
+@keyframes pza-aspetta { from, to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .annunci[data-provare]:not([data-arte]) .annunci__fila .fly { animation: none; } }
+.fly__nota { width: fit-content; max-width: 100%; margin: 1px 0 0 -2px; padding: 1px 5px 0; font: 400 12.5px/1.25 var(--pz-marker); color: var(--pz-penna); background: var(--pz-evidenzia); rotate: -1.6deg; }
+.fly__nota:empty { display: none; }
+
+/* ══ adesso: grafica (Claude) · 26.11 (pzkko: «fai questa zona stra animata e stra nel mio stile, animazione per cambio
+   app, switch e transizione in base all'utilizzo»). La UX è di DeepSeek (design/adesso-vivo.md): resta la lista dei
+   fatti, col suo motore (adesso.js) e i suoi agganci. Il vestito è questo, e lo mette adesso-arte.js (.adx): un
+   cartoncino con le graffette (il foglio crema col nastro è già quello di «chi sono», accanto), il titolo in Anton, la
+   voce a pennarello, lo stato e il luogo timbrati, le app come adesivi di carta (più le usa più sono grandi, quelle mai
+   toccate sbiadiscono), quella in primo piano sul foglietto colorato in cima alla fila, il brano in una polaroid col
+   vinile che gira. Il motore muove con `transform` (FLIP): qui si usano solo rotate / scale / translate, che non lo
+   toccano. Tempi dentro i massimi del brief: FLIP 250 ms, entrate 300, uscite 220, cambi di stato 300. ══ */
+.adx { --nastro: 26px; --fuori: 8px; position: relative; isolation: isolate; display: flex; flex-flow: row wrap; align-items: flex-start; column-gap: 38px; padding: 24px 20px 18px; border-radius: 0; background: none; color: var(--pz-ink); font-family: var(--pz-mac); color-scheme: light; container: adx / inline-size; }
+.adx::before { content: ""; position: absolute; inset: calc(var(--fuori) * -1); z-index: -1; pointer-events: none; border: 0 solid transparent;
+  border-image: url(/art/carta/kraft.webp) 44 fill / var(--nastro) stretch; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3)) drop-shadow(0 14px 16px rgba(0, 0, 0, .26)); }
+
+/* la testa: «adesso» in Anton, la voce a pennarello, il timbro «dal vivo» */
+.adx .adx__testa { position: relative; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin: 0 0 10px; padding-right: 96px; text-transform: none; letter-spacing: 0; color: var(--pz-ink); }
+.adx__titolo { font: 400 40px/.95 var(--pz-fa); text-transform: lowercase; letter-spacing: .005em; }
+.adx__voce { font: 400 14px/1.15 var(--pz-marker); color: #a30d1a; rotate: -2deg; text-wrap: balance; }
+.adx .timbro { transform: none; background: rgba(255, 253, 246, .9); }
+.adx .adx__vivo { position: absolute; right: -4px; top: 4px; margin: 0; display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px 2px; color: var(--pz-verde); font: 400 12px/1.1 var(--pz-mac); letter-spacing: .12em; text-transform: uppercase; rotate: 5deg; }
+.adx .adx__vivo::before { width: 8px; height: 8px; background: currentColor; animation: none; }
+.adx .adx__vivo::after { content: ""; position: absolute; left: 8px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: currentColor; opacity: 0; animation: adxpolso 1.8s ease-out infinite; }
+
+/* i timbri: lo stato di Discord e il luogo */
+.adx .adx__timbri { flex-wrap: wrap; gap: 8px 12px; margin: 0 0 16px; font-size: 12px; font-weight: 400; }
+.adx .status-dot { display: none; }
+.adx__stato { display: inline-flex; align-items: center; gap: 6px; color: var(--pz-verde); rotate: -3deg; }
+.adx__stato::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.adx[data-stato="idle"] .adx__stato { color: #9a5a00; }
+.adx[data-stato="dnd"] .adx__stato { color: var(--pz-rosso); }
+.adx[data-stato="offline"] .adx__stato { color: var(--pz-matita); }
+.adx .adx__luogo { display: inline-flex; align-items: center; gap: 5px; font-weight: 400; color: var(--pz-penna); rotate: 2deg; }
+.adx .adx__luogo::before { content: none; }
+.adx .adx__luogo svg { width: 12px; height: 12px; color: inherit; }
+.adx .adx__luogo[data-luogo="giro"] { color: #6b2a94; }
+.adx__spento { color: var(--pz-rosso); rotate: -5deg; }
+.adx .timbro.is-batte { animation: adxtimbra .3s cubic-bezier(.2, 1.2, .3, 1) backwards; }
+.adx .adx__vuoto { margin: 4px 0 10px; font: 400 16px/1.3 var(--pz-marker); color: var(--pz-penna); rotate: -1deg; }
+
+/* le etichette battute a macchina, con la riga tratteggiata */
+.adx .adesso__voce > .widget__h, .adx .adx__app > .widget__h { gap: 8px; margin: 0 0 10px; font: 400 11px/1.1 var(--pz-mac); letter-spacing: .14em; text-transform: uppercase; color: rgba(27, 25, 22, .74); }
+.adx .adesso__voce > .widget__h::after, .adx .adx__app > .widget__h::after { content: ""; flex: 1; min-width: 12px; border-top: 1.5px dashed rgba(27, 25, 22, .42); }
+.adx .adesso__voce > .widget__h > svg, .adx .adx__app > .widget__h > svg { width: 13px; height: 13px; }
+.adx .adx__app > .widget__h .right { order: 2; margin: 0; font: 400 18px/.8 var(--pz-fa); letter-spacing: 0; color: var(--pz-ink); }
+.adx .adx__app > .widget__h .right::before { content: none; }
+
+/* le voci: il brano (o il gioco). La copertina è una polaroid col nastro, dietro esce il vinile */
+.adx__voci { display: grid; gap: 16px; margin: 0 0 18px; }
+.adx__voci:empty { display: none; }
+.adx .adesso__voce + .adesso__voce { margin-top: 0; padding-top: 0; border-top: 0; }
+.adx .act { position: relative; gap: 14px; align-items: center; min-height: 100px; }
+.adx [data-adx="musica"] .act { gap: 32px; }
+.adx .act__art { z-index: 1; width: 84px; padding: 6px 6px 18px; background: linear-gradient(168deg, #fff, #f1ece1); box-shadow: 0 1px 1px rgba(0, 0, 0, .35), 0 8px 12px -6px rgba(0, 0, 0, .5); rotate: -3deg; }
+.adx .act__art > img, .adx .act__art > .act__ph { width: 72px; height: 72px; border-radius: 0; background: #161616; color: #fff; }
+.adx .act__art > .act__small { right: -6px; bottom: 8px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; }
+.adx .act__art .pz-nastro { top: -8px; width: 44px; height: 14px; margin-left: -22px; --n: 3deg; }
+.adx__vinile { position: absolute; left: 40px; top: 50%; z-index: 0; width: 70px; height: 70px; margin-top: -37px; border-radius: 50%;
+  background: radial-gradient(circle, #f6f1e4 0 3%, var(--pz-rosso) 3.5% 17%, transparent 17.5%), repeating-radial-gradient(circle, #141414 0 2px, #242424 2px 3px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .45); animation: adxgira 2.6s linear infinite; }
+.adx__vinile::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 20deg, transparent 0 8%, rgba(255, 255, 255, .2) 12%, transparent 17% 58%, rgba(255, 255, 255, .13) 62%, transparent 67%); }
+.adx .act__lines { flex: 1; gap: 3px; font: 400 12.5px/1.25 var(--pz-mac); color: var(--pz-testo); }
+.adx .act__lines b { font: 400 24px/1.08 var(--pz-fa); text-transform: lowercase; letter-spacing: .005em; color: var(--pz-ink); }
+.adx .act__muted { color: var(--pz-testo); }
+.adx [data-adx="musica"] .act__lines b + .act__muted { font: 400 15px/1.2 var(--pz-marker); color: var(--pz-penna); }
+.adx__eq { order: 2; display: inline-flex; align-items: flex-end; gap: 2px; height: 11px; }
+.adx__eq i { width: 3px; height: 100%; background: var(--pz-rosso); transform-origin: 50% 100%; animation: adxeq .9s ease-in-out infinite; }
+.adx__eq i:nth-child(2) { animation-delay: -.3s; } .adx__eq i:nth-child(3) { animation-delay: -.55s; } .adx__eq i:nth-child(4) { animation-delay: -.15s; }
+/* la barra: una riga a puntini, il tratto di pennarello che avanza, il pallino rosso. Il motore dà il punto una volta
+   al secondo; fino al secondo dopo ci si arriva con una transizione lineare (data-salta: di colpo) */
+.adx .bar-t { gap: 7px; margin-top: 10px; font: 400 11px/1 var(--pz-mac); color: rgba(27, 25, 22, .78); }
+.adx .bar-t__track { position: relative; height: 12px; border-radius: 0; background: none; overflow: visible; }
+.adx .bar-t__track::before { content: ""; position: absolute; left: 0; right: 0; top: 5px; border-top: 2px dotted rgba(27, 25, 22, .42); }
+.adx .bar-t__fill { position: absolute; left: 0; top: 3px; height: 6px; border-radius: 3px; background: var(--pz-ink); transition: transform 1s linear; }
+.adx .bar-t__track::after { content: ""; position: absolute; left: -6px; top: 0; width: 100%; height: 12px; background: radial-gradient(circle at 6px 50%, var(--pz-rosso) 0 5.4px, transparent 6px); transform: translateX(calc(var(--pct, 0) * 100%)); transition: transform 1s linear; }
+.adx .bar-t[data-salta] .bar-t__fill, .adx .bar-t[data-salta] .bar-t__track::after { transition: none; }
+
+/* le app aperte: adesivi di carta col loro pezzetto di nastro. Il peso (0-3) viene dall'uso */
+.adx .adx__app { margin: 0; padding: 0; border: 0; }
+.adx .adx__fila { align-items: flex-end; gap: 13px 9px; padding: 6px 2px 0; }
+.adx .pcapp__i { --lato: 36px; width: var(--lato); height: var(--lato); border-radius: 0; background: #fffdf6; rotate: var(--r, 0deg); box-shadow: 0 1px 1px rgba(0, 0, 0, .32), 0 5px 7px -4px rgba(0, 0, 0, .45); transition: rotate .25s cubic-bezier(.2, 1.4, .4, 1), opacity .3s, filter .3s; }
+.adx .pcapp__i[data-peso="0"] { --lato: 32px; opacity: .74; filter: saturate(.45); }
+.adx .pcapp__i[data-peso="2"] { --lato: 41px; }
+.adx .pcapp__i[data-peso="3"] { --lato: 47px; }
+.adx .pcapp__i > img { width: 72%; height: 72%; }
+.adx .pcapp__i > b { font: 400 20px/1 var(--pz-fa); color: var(--pz-ink); text-transform: lowercase; }
+.adx .pcapp__i::before, .adx .pcapp__i.is-su::before { content: ""; position: absolute; left: 50%; right: auto; top: -6px; bottom: auto; width: 22px; height: 10px; margin-left: -11px; border: 0; border-radius: 0; background: var(--pz-nastro-carta); clip-path: var(--pz-code); rotate: calc(var(--r, 0deg) * -2); }
+.adx__nota { display: none; }
+/* il nome, col mouse o con la tastiera: un'etichetta battuta a macchina */
+.adx .pcapp__i:not(.is-su):hover, .adx .pcapp__i:not(.is-su):focus-visible { z-index: 4; rotate: 0deg; opacity: 1; filter: none; }
+.adx .pcapp__i:not(.is-su):hover::after, .adx .pcapp__i:not(.is-su):focus::after { content: attr(data-app); bottom: calc(100% + 9px); padding: 4px 7px 2px; border-radius: 0; background: var(--pz-ink); color: #fffdf6; font: 400 12px/1.2 var(--pz-mac); letter-spacing: .04em; rotate: -2deg; }
+.adx .pcapp__i:focus-visible { box-shadow: 0 0 0 3px var(--pz-giallo), 0 5px 7px -4px rgba(0, 0, 0, .45); }
+/* in primo piano: il foglietto colorato, largo quanto la fila, con l'adesivo, il nome, da quanto e le tacche */
+.adx .pcapp__i.is-su { --foglio: #ffd83a; order: -1; flex: 1 0 100%; width: auto; height: auto; min-height: 70px; display: flex; place-items: initial; align-items: center; gap: 13px; padding: 12px 16px 13px 13px; opacity: 1; filter: none; rotate: -1.2deg; transform-origin: 50% 0;
+  background: linear-gradient(172deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 42%, rgba(60, 40, 0, .1)), var(--foglio); box-shadow: 0 1px 1px rgba(0, 0, 0, .3), 0 12px 14px -9px rgba(0, 0, 0, .55); animation: adxdondola 7s ease-in-out infinite; }
+.adx .pcapp__i.is-su[data-carta="rosa"] { --foglio: #ffa3c4; }
+.adx .pcapp__i.is-su[data-carta="azzurro"] { --foglio: #a9daf7; }
+.adx .pcapp__i.is-su[data-carta="verde"] { --foglio: #bfe873; }
+.adx .pcapp__i.is-su[data-carta="arancio"] { --foglio: #ffb765; }
+.adx .pcapp__i.is-su::before { top: -8px; width: 58px; height: 16px; margin-left: -29px; rotate: 2deg; }
+.adx .pcapp__i.is-su > img, .adx .pcapp__i.is-su > b { flex: 0 0 auto; width: 48px; height: 48px; padding: 6px; display: grid; place-items: center; background: #fffdf6; box-shadow: 0 1px 1px rgba(0, 0, 0, .35), 0 4px 6px -3px rgba(0, 0, 0, .45); rotate: -4deg; }
+.adx .pcapp__i.is-su > b { font-size: 26px; }
+.adx .pcapp__i.is-su .adx__nota { display: grid; gap: 4px; min-width: 0; flex: 1; }
+.adx .pcapp__i .adx__nome { font: 400 30px/1 var(--pz-fa); text-transform: lowercase; letter-spacing: .005em; color: var(--pz-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adx__da { display: flex; align-items: center; gap: 9px; min-height: 15px; font: 400 12.5px/1.2 var(--pz-mac); color: var(--pz-testo); }
+.adx__tempo { font-style: normal; padding: 1px 3px 0; background: linear-gradient(transparent 8%, rgba(255, 255, 255, .62) 8% 92%, transparent 92%); font-variant-numeric: tabular-nums; }
+.adx__tempo:empty { display: none; }
+.adx__da:has(> .adx__tempo:empty):has(> .adx__tacche[data-k="0"]) { display: none; }
+/* le tacche: una per ogni volta che c'è tornato (dalla seconda) */
+.adx__tacche { --k: 0; width: calc(var(--k) * 5px); height: 13px; background: repeating-linear-gradient(98deg, var(--pz-rosso) 0 2px, transparent 2px 5px); rotate: -3deg; transition: width .25s cubic-bezier(.2, 1.4, .4, 1); }
+/* ci sta da dieci minuti: la puntina */
+.adx .pcapp__i.is-su::after { content: ""; position: absolute; z-index: 3; left: auto; bottom: auto; right: 10px; top: -9px; padding: 0; border-radius: 0; translate: none; width: 22px; height: 25px; background: url(/art/nastro/puntina.webp) center / contain no-repeat; filter: drop-shadow(0 3px 2px rgba(0, 0, 0, .4)); scale: 0; opacity: 0; transition: scale .28s cubic-bezier(.2, 1.7, .4, 1), opacity .15s; }
+.adx .pcapp__i.is-su[data-fisso]::after { scale: 1; opacity: 1; }
+
+/* il piede: «attivo su» */
+.adx .adx__piede { margin-top: 16px; font: 400 12px/1.2 var(--pz-mac); color: rgba(27, 25, 22, .78); }
+.adx .adx__piede .role { min-height: 22px; padding: 2px 8px 1px 6px; border-radius: 2px; border: 1.5px solid rgba(27, 25, 22, .6); background: #fffefa; color: var(--pz-ink); font: 400 12px/1.3 var(--pz-mac); }
+
+/* largo (la scheda «attività»): il brano a sinistra, le app a destra. (Una regola @container non può cambiare il
+   contenitore stesso: per questo il cartoncino è una riga che va a capo, e qui cambiano solo le misure dei figli) */
+.adx > * { flex: 1 1 100%; min-width: 0; }
+@container adx (min-width: 620px) {
+  .adx > .adx__voci { flex: 1 1 calc(47% - 19px); margin-bottom: 0; }
+  .adx > .adx__app { flex: 1 1 calc(53% - 19px); }
+  .adx > .adx__voci:empty + .adx__app { flex-basis: 100%; }
+}
+@container adx (max-width: 300px) {
+  .adx .adx__testa { padding-right: 0; } .adx .adx__vivo { position: static; rotate: 3deg; }
+  .adx__nome { font-size: 24px; } .adx .act__lines b { font-size: 20px; } .adx [data-adx="musica"] .act { gap: 26px; }
+}
+
+/* ── il movimento. Gli adesivi: entrano cadendo, escono volando via, scivolano col FLIP del motore ── */
+.adx .pcapp__i.is-flip.is-flip-on { transition: transform .25s cubic-bezier(.3, 1.25, .4, 1); }
+.adx .pcapp__i.is-entra.is-entra-on { transition: opacity .12s; animation: adxcade .3s cubic-bezier(.25, 1.5, .4, 1) backwards; }
+.adx .pcapp__i.is-esce { opacity: 0; transition: opacity .2s .02s; animation: adxvola .22s cubic-bezier(.5, 0, .8, .4) forwards; }
+.adx .adesso__voce.is-entra.is-entra-on { transition: opacity .2s; animation: adxvoce .3s cubic-bezier(.2, 1.2, .3, 1) backwards; }
+.adx .adesso__voce.is-esce { transition: opacity .2s; animation: adxvoce-via .22s ease-in forwards; }
+/* il cambio dell'app in primo piano: il gesto dipende dall'uso (adesso-arte.js mette data-cambio) */
+.adx .pcapp__i.is-su.is-arriva { animation: adxschiaffo .3s cubic-bezier(.2, 1.3, .35, 1) backwards, adxdondola 7s ease-in-out .3s infinite; }
+.adx .pcapp__i.is-su.is-arriva[data-cambio="veloce"] { animation: adxscatto .14s ease-out backwards, adxdondola 7s ease-in-out .14s infinite; }
+.adx .pcapp__i.is-su.is-arriva[data-cambio="torna"] { animation: adxgirata .26s cubic-bezier(.3, 1.3, .4, 1) backwards, adxdondola 7s ease-in-out .26s infinite; }
+.adx .pcapp__i.is-su.is-arriva[data-cambio="lungo"] { animation: adxbotta .3s cubic-bezier(.2, 1.4, .3, 1) backwards, adxdondola 7s ease-in-out .3s infinite; }
+.adx .pcapp__i.is-su.is-arriva:not([data-cambio="veloce"]) .adx__nome { animation: adxbatti .24s steps(var(--n, 8), end) .05s backwards; }
+.adx .pcapp__i.is-su.is-arriva > img { animation: adxicona .3s cubic-bezier(.2, 1.6, .4, 1) backwards; }
+.adx .pcapp__i.is-posa { animation: adxposa .22s cubic-bezier(.2, 1.4, .4, 1) backwards; }
+/* il brano che cambia: la polaroid arriva di nuovo, il vinile rientra ed esce, il titolo si ribatte */
+.adx .adesso__voce.is-cambia .act__art { animation: adxfoto .3s cubic-bezier(.2, 1.3, .35, 1) backwards; }
+.adx .adesso__voce.is-cambia .adx__vinile { animation: adxdisco .3s cubic-bezier(.3, 1.3, .4, 1) backwards, adxgira 2.6s linear .3s infinite; }
+.adx .adesso__voce.is-cambia .act__lines b { animation: adxbatti .26s steps(var(--n, 10), end) .04s backwards; }
+
+@keyframes adxpolso { 0% { scale: 1; opacity: .55; } 70%, 100% { scale: 2.7; opacity: 0; } }
+@keyframes adxgira { to { rotate: 360deg; } }
+@keyframes adxeq { 0%, 100% { scale: 1 .3; } 50% { scale: 1 1; } }
+@keyframes adxdondola { 0%, 100% { rotate: -1.2deg; } 50% { rotate: -.3deg; } }
+@keyframes adxtimbra { 0% { opacity: 0; scale: 2.2; } 55% { opacity: 1; scale: .93; } 100% { scale: 1; } }
+@keyframes adxcade { 0% { translate: 0 -30px; rotate: 24deg; scale: 1.35; } }
+@keyframes adxvola { to { translate: 10px 40px; rotate: 36deg; } }
+@keyframes adxvoce { 0% { translate: -14px -6px; rotate: -2deg; } }
+@keyframes adxvoce-via { to { translate: 12px 14px; rotate: 2deg; } }
+@keyframes adxschiaffo { 0% { opacity: .3; scale: 1.14; rotate: -6deg; translate: 0 -14px; } 60% { opacity: 1; scale: .985; rotate: .2deg; translate: 0 1px; } 100% { scale: 1; rotate: -1.2deg; translate: 0 0; } }
+@keyframes adxbotta { 0% { opacity: 0; scale: 1.3; rotate: -9deg; translate: 0 -22px; } 55% { opacity: 1; scale: .96; rotate: 1.4deg; translate: 0 2px; } 100% { scale: 1; rotate: -1.2deg; translate: 0 0; } }
+@keyframes adxscatto { 0% { opacity: .5; translate: 0 -6px; } }
+@keyframes adxgirata { 0% { scale: 1 .04; opacity: .6; } 60% { scale: 1 1.07; opacity: 1; } 100% { scale: 1 1; } }
+@keyframes adxbatti { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes adxicona { 0% { scale: .5; rotate: -30deg; } }
+@keyframes adxposa { 0% { scale: 1.3; rotate: 9deg; } }
+@keyframes adxfoto { 0% { opacity: 0; translate: -26px -10px; rotate: -17deg; } 100% { rotate: -3deg; } }
+@keyframes adxdisco { 0% { translate: -26px 0; } }
+
+/* fuori dallo schermo: quello che gira sempre si ferma. Movimento ridotto: niente */
+.adx[data-fuori] :is(.adx__vinile, .adx__eq i, .adx__vivo, .pcapp__i)::after, .adx[data-fuori] :is(.adx__vinile, .adx__eq i, .pcapp__i) { animation-play-state: paused; }
+.adx[data-motion="off"] *, .adx[data-motion="off"] *::before, .adx[data-motion="off"] *::after { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) { .adx *, .adx *::before, .adx *::after { animation: none !important; transition: none !important; } }
+/* ══ fine adesso: grafica ══ */

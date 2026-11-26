@@ -1,0 +1,252 @@
+/* Lo stile pzk di TUTTE le app di pzkko.it (26.11.2026).
+   pzkko: «fai tutte le app con lo stesso stile, altrimenti non si capisce più nulla: tutte stile pzk prima di Discord».
+   Quindi un solo foglio decide come sono fatti i pezzi che le app hanno in comune, e lo caricano tutti e tre i giri:
+     - le dieci app dentro il profilo  (public/games/<app>/, guscio games/lab/lab.css, finestra .fg.lab)
+     - lo Studio                        (public/assets/studio/, scheda #panel-studio, schede .lab__card)
+     - la Frontiera                     (public/frontiera/, pagina .lab-pagina, finestre .lab-dlg)
+   È il muro di pzkko, quello di prima del profilo Discord: la saracinesca (art/muro.webp), i fogli col nastro
+   (art/roulette/carta.webp), Anton per i titoli, il pennarello rosso per la voce, la macchina da scrivere per il resto,
+   il tasto nero storto, l'evidenziatore giallo, i timbri, i cartellini, i post-it.
+
+   Come si usa: ogni guscio fa `@import url("/games/pzk-stile.css")` in cima al suo foglio e lì tiene solo
+   l'impaginazione. Tasti, cursori, campi, pannelli, timbri, cartellini e avvisi stanno QUI, con i nomi delle classi dei
+   tre gusci (non si toccano i motori). Una regola nuova che vale per tutti va qui, non in un guscio.
+   Niente regole globali: ogni selettore sta dentro .fg.lab, .lab-pagina, .lab-dlg o #panel-studio. */
+
+@font-face { font-family: "Anton"; src: url(/fonts/anton.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Special Elite"; src: url(/fonts/special-elite.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Permanent Marker"; src: url(/fonts/permanent-marker.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+
+/* ── i colori e le misure del muro ───────────────────────────────────────────────────────────────────────────── */
+.fg.lab, .lab-pagina, .lab-dlg, #panel-studio {
+  --pzk-ink: #161616;
+  --pzk-testo: #36312b;
+  --pzk-matita: #5a544c;
+  --pzk-filo: rgba(22, 22, 22, .2);
+  --pzk-carta: #f2eee3;
+  --pzk-foglietto: #fffdf6;
+  --pzk-rosso: #b3121f;
+  --pzk-penna: #1446a0;
+  --pzk-verde: #23864a;
+  --pzk-arancio: #c96a00;
+  --pzk-giallo: #ffd400;
+  --pzk-fosforo: #ccff00;              /* gli schermi degli strumenti: fosfori verdi, come un oscilloscopio vero */
+  --pzk-fa: "Anton", Impact, "Arial Narrow", sans-serif;
+  --pzk-marker: "Permanent Marker", "Comic Sans MS", cursive;
+  --pzk-mac: "Special Elite", "Courier New", monospace;
+  --pzk-grana: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='90'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .22 0 0 0 0 .16 0 0 0 0 .1 0 0 0 -1.7 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --pzk-evidenzia: linear-gradient(transparent 14%, rgba(255, 212, 0, .62) 14% 86%, transparent 86%);
+  --pzk-nastro: linear-gradient(rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 38%, rgba(110, 90, 40, .16)), rgba(234, 222, 182, .9);
+  --pzk-code: polygon(0 0, 3px 17%, 0 34%, 3px 50%, 0 67%, 3px 84%, 0 100%, 100% 100%, calc(100% - 3px) 84%, 100% 67%, calc(100% - 3px) 50%, 100% 34%, calc(100% - 3px) 17%, 100% 0);
+  --pzk-ombra-foglietto: 0 1px 1px rgba(40, 30, 10, .1), 0 8px 16px -10px rgba(40, 30, 10, .45);
+  --pzk-ombra-schermo: 0 1px 2px rgba(0, 0, 0, .25), 0 12px 22px -12px rgba(0, 0, 0, .65);
+}
+
+/* ── il tasto della macchina da scrivere: tutti i comandi normali ─────────────────────────────────────────────── */
+.fg.lab .lab-tasto,
+:is(.lab-pagina, .lab-dlg) :is(.lab-tasto, .lab-tab),
+#panel-studio .lab__bottone--fantasma {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 0; padding: 6px 11px 5px;
+  border: 1.5px solid var(--pzk-ink); border-radius: 3px;
+  background: var(--pzk-foglietto); color: var(--pzk-ink);
+  box-shadow: 0 2px 0 var(--pzk-ink);
+  font: 400 13px/1.05 var(--pzk-mac); letter-spacing: 0; text-transform: none; text-decoration: none; white-space: nowrap;
+  cursor: pointer; transform: none;
+  transition: transform .1s, box-shadow .1s, background .12s, color .12s;
+}
+@media (hover: hover) {
+  .fg.lab .lab-tasto:not(:disabled):hover,
+  :is(.lab-pagina, .lab-dlg) :is(.lab-tasto, .lab-tab):not(:disabled):hover,
+  #panel-studio .lab__bottone--fantasma:not(:disabled):hover { background: #fff; transform: translateY(-1px); box-shadow: 0 3px 0 var(--pzk-ink); }
+}
+.fg.lab .lab-tasto:not(:disabled):active,
+:is(.lab-pagina, .lab-dlg) :is(.lab-tasto, .lab-tab):not(:disabled):active,
+#panel-studio .lab__bottone--fantasma:not(:disabled):active { transform: translateY(2px); box-shadow: 0 0 0 var(--pzk-ink); }
+/* premuto (una scelta accesa, un effetto attivo, una scheda aperta): il tasto resta giù, nero */
+.fg.lab .lab-tasto:is([aria-pressed="true"], .is-on),
+:is(.lab-pagina, .lab-dlg) :is(.lab-tasto, .lab-tab):is([aria-pressed="true"], [aria-selected="true"], .is-on),
+#panel-studio .lab__bottone--fantasma[aria-pressed="true"] {
+  background: var(--pzk-ink); color: var(--pzk-foglietto); border-color: var(--pzk-ink);
+  transform: translateY(1px); box-shadow: 0 1px 0 #000;
+}
+.fg.lab .lab-tasto:disabled,
+:is(.lab-pagina, .lab-dlg) :is(.lab-tasto, .lab-tab):disabled,
+#panel-studio .lab__bottone--fantasma:disabled { opacity: .38; cursor: default; box-shadow: 0 2px 0 var(--pzk-ink); transform: none; }
+
+/* ── il tasto nero storto: l'azione principale di ogni app («suona», «accendi», «apri») ───────────────────────── */
+.fg.lab .lab-tasto--pieno, .fg.lab .bt-play, .fg.lab .th-suona,
+:is(.lab-pagina, .lab-dlg) :is(.lab-tasto--pieno, .lab-apri),
+#panel-studio .lab__bottone:not(.lab__bottone--fantasma) {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 0; padding: .14em .55em .2em;
+  border: 0; border-radius: 0;
+  background: var(--pzk-ink); color: #fff;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, .18);
+  font: 400 19px/1 var(--pzk-fa); letter-spacing: .01em; text-transform: lowercase; text-decoration: none; white-space: nowrap;
+  cursor: pointer; transform: rotate(-2deg);
+  transition: transform .18s cubic-bezier(.22, 1, .36, 1), background .12s, opacity .15s;
+}
+@media (hover: hover) {
+  .fg.lab :is(.lab-tasto--pieno, .bt-play, .th-suona):not(:disabled):hover,
+  :is(.lab-pagina, .lab-dlg) :is(.lab-tasto--pieno, .lab-apri):not(:disabled):hover,
+  #panel-studio .lab__bottone:not(.lab__bottone--fantasma):not(:disabled):hover { background: var(--pzk-ink); color: #fff; transform: rotate(-2deg) translateY(-2px); box-shadow: 3px 5px 0 rgba(0, 0, 0, .16); }
+}
+.fg.lab :is(.lab-tasto--pieno, .bt-play, .th-suona):not(:disabled):active,
+:is(.lab-pagina, .lab-dlg) :is(.lab-tasto--pieno, .lab-apri):not(:disabled):active,
+#panel-studio .lab__bottone:not(.lab__bottone--fantasma):not(:disabled):active { transform: rotate(-2deg) translateY(2px); box-shadow: 1px 1px 0 rgba(0, 0, 0, .2); }
+/* acceso (sta suonando, la camera è accesa): il nero diventa rosso, come la voce */
+.fg.lab :is(.lab-tasto--pieno, .bt-play, .th-suona):is([aria-pressed="true"], .is-on),
+:is(.lab-pagina, .lab-dlg) .lab-tasto--pieno:is([aria-pressed="true"], .is-on),
+#panel-studio .lab__bottone:not(.lab__bottone--fantasma)[aria-pressed="true"] { background: var(--pzk-rosso); color: #fff; border: 0; }
+.fg.lab :is(.lab-tasto--pieno, .bt-play, .th-suona):disabled,
+:is(.lab-pagina, .lab-dlg) :is(.lab-tasto--pieno, .lab-apri):disabled,
+#panel-studio .lab__bottone:not(.lab__bottone--fantasma):disabled { opacity: .35; cursor: default; }
+
+/* il tasto che cancella: inchiostro rosso */
+:is(.lab-pagina, .lab-dlg) .lab-tasto--pericolo { border-color: var(--pzk-rosso); color: var(--pzk-rosso); box-shadow: 0 2px 0 var(--pzk-rosso); }
+@media (hover: hover) { :is(.lab-pagina, .lab-dlg) .lab-tasto--pericolo:not(:disabled):hover { background: #fff4f2; box-shadow: 0 3px 0 var(--pzk-rosso); } }
+
+/* ── il collegamento a pennarello blu ─────────────────────────────────────────────────────────────────────────── */
+.fg.lab .lab-link,
+:is(.lab-pagina, .lab-dlg) .lab-link {
+  padding: 0 0 1px; border: 0; border-bottom: 2px solid currentColor; border-radius: 0; background: none;
+  color: var(--pzk-penna); font: 400 14px/1.15 var(--pzk-marker); text-decoration: none; cursor: pointer;
+}
+
+/* ── i focus: l'evidenziatore giallo, ovunque ─────────────────────────────────────────────────────────────────── */
+.fg.lab :focus-visible,
+:is(.lab-pagina, .lab-dlg) :focus-visible,
+#panel-studio .lab :focus-visible { outline: 3px solid var(--pzk-giallo); outline-offset: 2px; }
+
+/* ── il cursore: una riga a matita e la puntina rossa ──────────────────────────────────────────────────────────── */
+.fg.lab .lab-range,
+:is(.lab-pagina, .lab-dlg) :is(.lab-range, input[type="range"]),
+#panel-studio .lab input[type="range"] {
+  -webkit-appearance: none; appearance: none;
+  height: 22px; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; accent-color: var(--pzk-rosso);
+}
+.fg.lab .lab-range::-webkit-slider-runnable-track,
+:is(.lab-pagina, .lab-dlg) :is(.lab-range, input[type="range"])::-webkit-slider-runnable-track,
+#panel-studio .lab input[type="range"]::-webkit-slider-runnable-track {
+  height: 3px; border-radius: 2px; background: rgba(22, 22, 22, .55); box-shadow: 0 1px 0 rgba(255, 255, 255, .6);
+}
+.fg.lab .lab-range::-moz-range-track,
+:is(.lab-pagina, .lab-dlg) :is(.lab-range, input[type="range"])::-moz-range-track,
+#panel-studio .lab input[type="range"]::-moz-range-track { height: 3px; border-radius: 2px; background: rgba(22, 22, 22, .55); }
+.fg.lab .lab-range::-webkit-slider-thumb,
+:is(.lab-pagina, .lab-dlg) :is(.lab-range, input[type="range"])::-webkit-slider-thumb,
+#panel-studio .lab input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 16px; height: 16px; margin-top: -6.5px; border: 0; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff8a8a, var(--pzk-rosso) 52%, #6d0810);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, .4);
+}
+.fg.lab .lab-range::-moz-range-thumb,
+:is(.lab-pagina, .lab-dlg) :is(.lab-range, input[type="range"])::-moz-range-thumb,
+#panel-studio .lab input[type="range"]::-moz-range-thumb {
+  width: 16px; height: 16px; border: 0; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff8a8a, var(--pzk-rosso) 52%, #6d0810);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, .4);
+}
+.fg.lab .lab-range:disabled, :is(.lab-pagina, .lab-dlg) .lab-range:disabled { opacity: .4; cursor: default; }
+
+/* ── i campi: si scrive a macchina sulla riga ─────────────────────────────────────────────────────────────────── */
+.fg.lab :is(.pl-input, .tv-hex, .de-sel),
+:is(.lab-pagina, .lab-dlg) :is(.lab-campo, .lab-area, .lab-scelta),
+#panel-studio .lab :is(input[type="text"], input[type="number"], select, textarea) {
+  padding: 5px 8px 4px; border: 0; border-bottom: 2px solid var(--pzk-ink); border-radius: 0;
+  background: var(--pzk-foglietto); color: var(--pzk-ink); box-shadow: inset 0 0 0 1px rgba(22, 22, 22, .12);
+  font: 400 14px/1.25 var(--pzk-mac);
+}
+:is(.lab-pagina, .lab-dlg) .lab-area { background: repeating-linear-gradient(to bottom, var(--pzk-foglietto) 0 23px, rgba(20, 70, 160, .2) 23px 24px); line-height: 24px; }
+.fg.lab :is(.pl-input, .tv-hex, .de-sel):focus,
+:is(.lab-pagina, .lab-dlg) :is(.lab-campo, .lab-area, .lab-scelta):focus { outline: 3px solid var(--pzk-giallo); outline-offset: 1px; background-color: #fffbe0; }
+:is(.lab-pagina, .lab-dlg) :is(.lab-campo, .lab-area)::placeholder { color: rgba(22, 22, 22, .4); }
+
+/* ── il foglietto: ogni pannello è un pezzo di carta attaccato col nastro ─────────────────────────────────────── */
+.fg.lab .lab-pannello,
+.lab-dlg .lab-pannello {
+  position: relative; isolation: isolate; padding: 12px 12px 11px; border: 0; border-radius: 0;
+  background: linear-gradient(170deg, rgba(255, 255, 255, .7), rgba(255, 255, 255, 0) 55%, rgba(90, 70, 30, .05)), var(--pzk-foglietto);
+  box-shadow: var(--pzk-ombra-foglietto);
+}
+/* la grana della carta, leggera (la stessa dei volantini della bacheca) */
+.fg.lab .lab-pannello::after,
+.lab-dlg .lab-pannello::after { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--pzk-grana) 0 0 / 180px 90px; opacity: .2; pointer-events: none; }
+.fg.lab .lab-pannello::before,
+.lab-dlg .lab-pannello::before {
+  content: ""; position: absolute; z-index: 2; left: 50%; top: -8px; width: 54px; height: 16px; margin-left: -27px;
+  background: var(--pzk-nastro); clip-path: var(--pzk-code); rotate: var(--pzk-n, -3deg); pointer-events: none;
+}
+.fg.lab .lab-pannello:nth-of-type(2n)::before, .lab-dlg .lab-pannello:nth-of-type(2n)::before { --pzk-n: 4deg; left: 38%; }
+.fg.lab .lab-pannello:nth-of-type(3n)::before, .lab-dlg .lab-pannello:nth-of-type(3n)::before { --pzk-n: -6deg; left: 62%; }
+.fg.lab .lab-pannello--fondo { background: #ece6d6; }
+/* il titolo del foglietto: pennarello, con l'evidenziatore sotto */
+.fg.lab :is(.lab-pannello > h3, .lab-titolo),
+.lab-dlg .lab-pannello > h3 {
+  display: inline-block; margin: 0 0 8px; padding: 0 4px;
+  background: var(--pzk-evidenzia); color: var(--pzk-ink);
+  font: 400 14px/1.15 var(--pzk-marker); letter-spacing: .01em; text-transform: lowercase;
+}
+
+/* ── il post-it: gli avvisi ───────────────────────────────────────────────────────────────────────────────────── */
+.fg.lab .lab-avviso,
+.lab-pagina :is(.lab-avviso-pagina, .lab-errore-pagina) {
+  position: relative; padding: 9px 11px 9px; border: 0; border-radius: 0;
+  background: linear-gradient(175deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 40%), #fff1a1;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .1), 2px 8px 12px -8px rgba(0, 0, 0, .45);
+  color: #3b3208; font: 400 12.5px/1.4 var(--pzk-mac); transform: rotate(-.6deg);
+}
+.fg.lab .lab-avviso--ok { background: linear-gradient(175deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 40%), #d8f1c6; color: #173d22; }
+.fg.lab .lab-avviso--attesa { background: linear-gradient(175deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 40%), #ffdca0; color: #4d3000; }
+.lab-pagina .lab-errore-pagina { background: linear-gradient(175deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 40%), #ffd1c9; color: #5a1010; }
+.lab-pagina :is(.lab-avviso-pagina, .lab-errore-pagina) a { color: var(--pzk-penna); font-family: var(--pzk-marker); }
+
+/* ── il timbro: gli stati («pronto», «serve android», «in prova») ─────────────────────────────────────────────── */
+:is(.lab-pagina, .lab-dlg) :is(.lab-supporto, .lab-badge),
+#panel-studio .lab__stato {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 7px 2px; border: 2.5px solid currentColor; border-radius: 3px;
+  background: rgba(255, 255, 255, .72); color: var(--pzk-matita); box-shadow: none;
+  font: 400 11px/1.1 var(--pzk-mac); letter-spacing: .12em; text-transform: uppercase; white-space: nowrap;
+  transform: rotate(-4deg); mix-blend-mode: multiply;
+}
+:is(.lab-pagina, .lab-dlg) :is(.lab-supporto, .lab-badge) i { display: none; }
+:is(.lab-pagina, .lab-dlg) .lab-supporto[data-stato="ok"], :is(.lab-pagina, .lab-dlg) .lab-badge--acceso, #panel-studio .lab__stato[data-tono="ok"] { color: var(--pzk-verde); border-color: currentColor; }
+:is(.lab-pagina, .lab-dlg) .lab-supporto[data-stato="parziale"] { color: var(--pzk-arancio); border-color: currentColor; }
+:is(.lab-pagina, .lab-dlg) .lab-supporto[data-stato="no"], :is(.lab-pagina, .lab-dlg) .lab-badge--male, #panel-studio .lab__stato[data-tono="no"] { color: var(--pzk-rosso); border-color: currentColor; }
+
+/* ── il cartellino: le tecnologie, le etichette ───────────────────────────────────────────────────────────────── */
+:is(.lab-pagina, .lab-dlg) .lab-tech li,
+#panel-studio :is(.lab__tech span, .lab__api li) {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 7px 2px; border: 1px solid rgba(22, 22, 22, .6); border-radius: 2px;
+  background: var(--pzk-foglietto); color: var(--pzk-ink); box-shadow: 1px 1px 0 rgba(0, 0, 0, .14);
+  font: 400 11px/1.15 var(--pzk-mac); letter-spacing: 0; text-transform: none; white-space: nowrap;
+  transform: rotate(-1deg);
+}
+:is(.lab-pagina, .lab-dlg) .lab-tech li:nth-child(2n),
+#panel-studio :is(.lab__tech span, .lab__api li):nth-child(2n) { transform: rotate(1.2deg); }
+:is(.lab-pagina, .lab-dlg) .lab-tech li:nth-child(3n),
+#panel-studio :is(.lab__tech span, .lab__api li):nth-child(3n) { transform: rotate(-.4deg); }
+
+/* ── la spia: un punto di pennarello ──────────────────────────────────────────────────────────────────────────── */
+.fg.lab .lab-led { width: 9px; height: 9px; border-radius: 50%; background: #b9b2a5; box-shadow: inset 0 -1px 1px rgba(0, 0, 0, .25); }
+.fg.lab .lab-led.is-on { background: var(--pzk-verde); box-shadow: 0 0 0 3px rgba(35, 134, 74, .18); }
+.fg.lab .lab-led.is-attesa { background: var(--pzk-arancio); box-shadow: 0 0 0 3px rgba(201, 106, 0, .18); }
+.fg.lab .lab-led.is-rosso { background: var(--pzk-rosso); box-shadow: 0 0 0 3px rgba(179, 18, 31, .18); }
+
+/* ── le note a macchina ───────────────────────────────────────────────────────────────────────────────────────── */
+.fg.lab .lab-nota,
+.lab-dlg .lab-nota { color: var(--pzk-matita); font: 400 12px/1.4 var(--pzk-mac); }
+.fg.lab .lab-nota b, .lab-dlg .lab-nota b { color: var(--pzk-ink); font-weight: 400; background: var(--pzk-evidenzia); padding: 0 2px; }
+
+/* ── le barre di scorrimento: matita ──────────────────────────────────────────────────────────────────────────── */
+.fg.lab *, .lab-dlg *, .lab-pagina { scrollbar-width: thin; scrollbar-color: rgba(22, 22, 22, .35) transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fg.lab :is(.lab-tasto, .lab-tasto--pieno, .bt-play, .th-suona),
+  :is(.lab-pagina, .lab-dlg) :is(.lab-tasto, .lab-tab, .lab-apri),
+  #panel-studio .lab__bottone { transition: none; }
+}

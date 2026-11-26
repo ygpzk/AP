@@ -1,0 +1,28 @@
+/* SABBIA: il terrario. Un canvas nero, il cerchio del pennello e i materiali come pastiglie.
+   Claude Code: .sb-* è il disegno, i ganci sono data-tela, data-mat, data-pausa, data-pioggia, data-vulcano. */
+
+.sb-comandi{padding:8px 12px;display:flex;flex-direction:column;gap:7px}
+.sb-materiali{display:flex;flex-wrap:wrap;gap:5px}
+.sb-materiali .lab-tasto{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;font-size:12px}
+.sb-materiali .lab-tasto[aria-pressed="true"]{background:var(--lab-inchiostro);color:var(--lab-carta);border-color:var(--lab-inchiostro)}
+.sb-materiali i{width:9px;height:9px;border-radius:50%;border:1px solid rgba(22,22,22,.35);flex:none}
+.sb-pennello{display:grid;grid-template-columns:62px minmax(0,1fr) 28px;align-items:center;gap:6px}
+.sb-pennello span{font:400 11px/1 "Special Elite","Courier New",monospace;color:var(--lab-matita)}
+.sb-pennello .lab-range{height:18px}
+.sb-pennello .lab-valore{font-size:11px;text-align:right}
+.sb-scena{background:#0b0d0a;border:1.5px solid #2a2e26;min-height:380px;overflow:hidden;touch-action:none;cursor:crosshair}
+.sb-scena canvas{width:100%;height:100%}
+.sb-cursore{position:absolute;border:1.5px solid rgba(204,255,0,.85);border-radius:50%;box-shadow:0 0 0 1px rgba(0,0,0,.45),inset 0 0 0 1px rgba(0,0,0,.3);pointer-events:none;transform:translate(-50%,-50%);z-index:2}
+.sb-cursore[hidden]{display:none}
+.sb-eti{position:absolute;right:9px;bottom:7px;font:400 10px/1 "Special Elite","Courier New",monospace;letter-spacing:.1em;text-transform:uppercase;color:rgba(204,255,0,.35);pointer-events:none}
+.lab-colonna--lato .lab-pannello{padding:8px 10px}
+
+@media (max-width:900px){
+  .sb-scena{min-height:340px}
+  .lab-colonna--lato{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+}
+@media (max-width:560px){
+  .lab-colonna--lato{grid-template-columns:minmax(0,1fr)}
+  .sb-scena{min-height:300px}
+  .sb-materiali .lab-tasto{flex:1 1 30%}
+}

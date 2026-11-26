@@ -2,7 +2,9 @@
 // e la musica dal suo Spotify invece che da Lanyard). Il dato lo prepara il pc di pzkko e lo lascia nel server dei dati
 // (pzkko/vetrina.json, le immagini in pzkko/vetrina-immagini.json); qui si legge attraverso il ponte firmato e si passa
 // solo il risultato: dove è, i nomi e le icone delle app aperte, il brano che suona.
-//   GET /api/vetrina/            { ok, luogo, app: [{ n, i, su }], musica, agg }   (sempre fresco: no-store)
+//   GET /api/vetrina/            { ok, luogo, app: [{ n, i, su, str? }], musica, agg }   (sempre fresco: no-store)
+//                                (26.11: `str` è la chiave dello strumento che quell'app sta facendo usare, se il pc lo
+//                                sa: «javascript», «autocad»… Solo la chiave: mai titoli di finestre o nomi di file.)
 //   GET /api/vetrina/?img=<id>   l'icona o la copertina (png/jpeg), per sempre: l'id è l'impronta del contenuto
 //   GET /api/vetrina/?biglietto=1 { ok, url, biglietto } per il canale diretto (Server-Sent Events) sul pc:
 //                                così il brano cambia nel browser appena Spotify cambia, senza aspettare il CDN.
@@ -16,6 +18,7 @@ const vuoto = () => ({})
 const testo = (s, n = 80) => (typeof s === 'string' ? s.replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, n) : '')
 const id = (s) => (typeof s === 'string' && /^[0-9a-f]{16}$/.test(s) ? s : null)
 const ora = (n) => (Number.isFinite(n) && n > 1.7e12 && n < 4e12 ? Math.round(n) : null)
+const chiave = (s) => (typeof s === 'string' && /^[a-z0-9]{2,16}$/.test(s) ? s : null)
 
 function intestazioni(res, tipo, cache) {
   res.setHeader('Content-Type', tipo)
@@ -31,7 +34,7 @@ function intestazioni(res, tipo, cache) {
 export function pulisci(d, adesso = Date.now()) {
   const fresco = Number.isFinite(d?.t) && adesso - d.t < FRESCO
   if (!fresco) return { ok: true, luogo: 'giro', app: [], musica: null, agg: ora(d?.t) }
-  const app = (Array.isArray(d.app) ? d.app : []).slice(0, 16).map((a) => ({ n: testo(a?.n, 40), i: id(a?.i), su: a?.su === true })).filter((a) => a.n)
+  const app = (Array.isArray(d.app) ? d.app : []).slice(0, 16).map((a) => ({ n: testo(a?.n, 40), i: id(a?.i), su: a?.su === true, ...(chiave(a?.str) && { str: a.str }) })).filter((a) => a.n)
   const m = d.musica
   const musica = m && testo(m.titolo) && testo(m.artista)
     ? { titolo: testo(m.titolo), artista: testo(m.artista), album: testo(m.album), img: id(m.img), inizio: ora(m.inizio), fine: ora(m.fine) }

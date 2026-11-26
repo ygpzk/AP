@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Frontiera — pzkko.it</title>
+<meta name="description" content="Dieci tecnologie di frontiera dentro il browser: WebGL, crittografia, fotocamera, voce, file locali, IA e realtà aumentata. Tutto nel browser, niente server nostro.">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#8e8e8a">
+<link rel="canonical" href="https://pzkko.it/frontiera/">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="/frontiera/lab.css">
+<script type="module" src="/frontiera/hub.js"></script>
+</head>
+<body class="lab-pagina">
+<a class="lab-salta" href="#lab-griglia">Salta agli esperimenti</a>
+
+<header class="lab-testa-pagina">
+  <p class="lab-occhiello">pzkko.it / frontiera</p>
+  <h1>dieci tecnologie di frontiera<span class="lab-punto">.</span></h1>
+  <p class="lab-voce-pagina">il secondo giro del laboratorio: aprile qui sotto</p>
+  <p class="lab-sommario">Dentro: <b>WebGL, crittografia, fotocamera, voce, file locali, IA e realtà aumentata</b>. Niente server, niente installazioni, niente account. Alcuni chiedono un permesso: foto, file e disegno restano sul tuo dispositivo. Solo il riconoscimento vocale di Chrome manda l'audio al servizio del browser; per tutto il resto c'è la riga di testo.</p>
+  <div class="lab-azioni-pagina">
+    <a class="lab-tasto lab-tasto--pieno" href="/">← torna al profilo</a>
+    <a class="lab-tasto lab-tasto--fantasma" href="/#studio">← allo Studio</a>
+    <a class="lab-tasto lab-tasto--fantasma" href="/frontiera/" target="_blank" rel="noopener" data-esterno hidden>Apri in una scheda</a>
+  </div>
+</header>
+
+<p class="lab-avviso-pagina" data-avviso-iframe hidden>Sei dentro il profilo. Per la fotocamera, il microfono e la realtà aumentata è meglio <a href="/frontiera/" target="_blank" rel="noopener">aprire la Frontiera in una scheda</a>.</p>
+<p class="lab-errore-pagina" data-errore hidden role="alert"></p>
+
+<main id="lab-griglia" class="lab-griglia-pagina">
+  <article class="lab-scheda" data-lab="ink">
+    <div class="lab-scheda__testa"><span class="lab-num">01</span><span class="lab-supporto" data-supporto="ink"><i></i><span>controllo…</span></span></div>
+    <h2>Muro liquido</h2>
+    <p>Inchiostro neon che scorre, si mescola e non si asciuga mai. Si disegna col dito o col puntatore.</p>
+    <ul class="lab-tech"><li>WebGL2</li><li>shader</li><li>pointer</li></ul>
+    <button class="lab-apri" type="button" data-apri="ink">Apri <span>→</span></button>
+  </article>
+
+  <article class="lab-scheda" data-lab="battito">
+    <div class="lab-scheda__testa"><span class="lab-num">02</span><span class="lab-supporto" data-supporto="battito"><i></i><span>controllo…</span></span></div>
+    <h2>Battito</h2>
+    <p>Una radio chiptune che si genera da sola. Suona con la tastiera, col mouse o con un MIDI vero.</p>
+    <ul class="lab-tech"><li>Web Audio</li><li>MIDI</li><li>oscilloscopio</li></ul>
+    <button class="lab-apri" type="button" data-apri="battito">Apri <span>→</span></button>
+  </article>
+
+  <article class="lab-scheda" data-lab="due">
+    <div class="lab-scheda__testa"><span class="lab-num">03</span><span class="lab-supporto" data-supporto="due"><i></i><span>controllo…</span></span></div>
+    <h2>Due schede</h2>
+    <p>Pong fra due schede dello stesso browser, senza server: una fa da campo, l'altra da racchetta.</p>
+    <ul class="lab-tech"><li>BroadcastChannel</li><li>canvas</li><li>0 server</li></ul>
+    <button class="lab-apri" type="button" data-apri="due">Apri <span>→</span></button>
+  </article>
+
+  <article class="lab-scheda" data-lab="busta">
+    <div class="lab-scheda__testa"><span class="lab-num">04</span><span class="lab-supporto" data-supporto="busta"><i></i><span>controllo…</span></span></div>
+    <h2>Busta</h2>
+    <p>Un messaggio cifrato dentro un link. La chiave viaggia nel link, non passa da nessun server.</p>
+    <ul class="lab-tech"><li>Web Crypto</li><li>AES-GCM</li><li>link</li></ul>
+    <button class="lab-apri" type="button" data-apri="busta">Apri <span>→</span></button>
+  </article>
+
+  <article class="lab-scheda" data-lab="occhio">
+    <div class="lab-scheda__testa"><span class="lab-num">05</span><span class="lab-supporto" data-supporto="occhio"><i></i><span>controllo…</span></span></div>
+    <h2>Occhio</h2>
+    <p>Legge QR e codici a barre con la fotocamera. Se il browser non sa leggerli, li incolli a mano. Nessuna immagine esce dal dispositivo.</p>
+    <ul class="lab-tech"><li>BarcodeDetector</li><li>fotocamera</li><li>locale</li></ul>
+    <button class="lab-apri" type="button" data-apri="occhio">Apri <span>→</span></button>
+  </article>
+
+  <article class="lab-scheda" data-lab="voce">
+    <div class="lab-scheda__testa"><span class="lab-num">06</span><span class="lab-supporto" data-supporto="voce"><i></i><span>controllo…</span></span></div>
+    <h2>Parla col muro</h2>
+    <p>Dai ordini a voce: colori, adesivi, pioggia, terremoto. Il muro obbedisce e risponde. C'è anche la riga di testo.</p>
+    <ul class="lab-tech"><li>Web Speech</li><li>canvas</li><li>voce</li></ul>
+    <button class="lab-apri" type="button" data-apri="voce">Apri <span>→</span></button>
+  </article>
+
+  <article class="lab-scheda" data-lab="zaino">
+    <div class="lab-scheda__testa"><span class="lab-num">07</span><span class="lab-supporto" data-supporto="zaino"><i></i><span>controllo…</span></span></div>
+    <h2>Zaino</h2>
+    <p>Trascina dei file: restano nel browser, su questo dispositivo. Niente cloud, niente upload.</p>
+    <ul class="lab-tech"><li>OPFS</li><li>file system</li><li>locale</li></ul>
+    <button class="lab-apri" type="button" data-apri="zaino">Apri <span>→</span></button>
+  </article>
+
+  <article class="lab-scheda" data-lab="boomerang">
+    <div class="lab-scheda__testa"><span class="lab-num">08</span><span class="lab-supporto" data-supporto="boomerang"><i></i><span>controllo…</span></span></div>
+    <h2>Boomerang</h2>
+    <p>Tre secondi di webcam in loop, con la cornice pzk. Il filmato si crea e resta qui.</p>
+    <ul class="lab-tech"><li>MediaRecorder</li><li>canvas</li><li>webcam</li></ul>
+    <button class="lab-apri" type="button" data-apri="boomerang">Apri <span>→</span></button>
+  </article>
+
+  <article class="lab-scheda" data-lab="poeta">
+    <div class="lab-scheda__testa"><span class="lab-num">09</span><span class="lab-supporto" data-supporto="poeta"><i></i><span>controllo…</span></span></div>
+    <h2>Poeta</h2>
+    <p>Un motto per il muro, generato sul tuo dispositivo. Con l'IA del browser, se c'è; altrimenti con una catena di Markov.</p>
+    <ul class="lab-tech"><li>IA locale</li><li>Markov</li><li>0 rete</li></ul>
+    <button class="lab-apri" type="button" data-apri="poeta">Apri <span>→</span></button>
+  </article>
+
+  <article class="lab-scheda" data-lab="ar">
+    <div class="lab-scheda__testa"><span class="lab-num">10</span><span class="lab-supporto" data-supporto="ar"><i></i><span>controllo…</span></span></div>
+    <h2>AR</h2>
+    <p>Attacca un adesivo pzk nel mondo vero, con la realtà aumentata. Serve un telefono compatibile.</p>
+    <ul class="lab-tech"><li>WebXR</li><li>hit-test</li><li>telefono</li></ul>
+    <button class="lab-apri" type="button" data-apri="ar">Apri <span>→</span></button>
+  </article>
+</main>
+
+<footer class="lab-piede-pagina">
+  <span>pzkko.it · frontiera · 26.11.2026</span>
+  <span>tutto gira nel browser · <a href="/">profilo</a> · <a href="/#studio">studio</a></span>
+</footer>
+
+<noscript><p class="lab-avviso-pagina">La Frontiera ha bisogno di JavaScript: gli esperimenti girano tutti nel browser.</p></noscript>
+</body>
+</html>

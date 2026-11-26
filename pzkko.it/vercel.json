@@ -28,6 +28,16 @@
       "permanent": false
     },
     {
+      "source": "/studio",
+      "destination": "/#studio",
+      "permanent": false
+    },
+    {
+      "source": "/studio/",
+      "destination": "/#studio",
+      "permanent": false
+    },
+    {
       "source": "/direttaos/DirettaOS-Setup.exe",
       "destination": "/direttaos/",
       "permanent": false
@@ -265,7 +275,7 @@
         },
         {
           "key": "Permissions-Policy",
-          "value": "accelerometer=(), autoplay=(self), bluetooth=(), browsing-topics=(), camera=(), clipboard-read=(), clipboard-write=(self), display-capture=(), encrypted-media=(), fullscreen=(self), gamepad=(self), geolocation=(), gyroscope=(), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), local-fonts=(), magnetometer=(), microphone=(), midi=(), otp-credentials=(), payment=(), picture-in-picture=(), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), usb=(), web-share=(), xr-spatial-tracking=()"
+          "value": "accelerometer=(self), autoplay=(self), bluetooth=(), browsing-topics=(), camera=(self), clipboard-read=(), clipboard-write=(self), display-capture=(), encrypted-media=(), fullscreen=(self), gamepad=(self), geolocation=(), gyroscope=(self), hid=(), identity-credentials-get=(), idle-detection=(), interest-cohort=(), local-fonts=(), magnetometer=(self), microphone=(self), midi=(self), otp-credentials=(), payment=(), picture-in-picture=(self), publickey-credentials-get=(), screen-wake-lock=(), serial=(), speaker-selection=(), usb=(), web-share=(self), xr-spatial-tracking=(self)"
         },
         {
           "key": "Content-Security-Policy",

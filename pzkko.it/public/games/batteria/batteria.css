@@ -1,0 +1,43 @@
+/* BATTERIA: il sequencer. Sedici colonne, sei file; i pad sono bottoni veri, il passo che suona si accende.
+   Claude Code: .bt-* è il disegno, i ganci sono data-str, data-passo, data-play, data-preset. */
+
+.bt-trasporto{padding:9px 12px}
+.bt-play{padding:4px 20px 5px;border:0;background:var(--lab-inchiostro);color:var(--lab-carta);font:400 22px/1 "Anton",Impact,sans-serif;text-transform:lowercase;cursor:pointer;transform:rotate(-1.2deg);box-shadow:2px 2px 0 rgba(0,0,0,.16)}
+.bt-play[aria-pressed="true"]{background:var(--lab-accento)}
+.bt-contatore{font:400 26px/1 "Anton",Impact,sans-serif;color:var(--lab-accento);min-width:36px;text-align:right}
+.bt-slider{display:grid;grid-template-columns:72px minmax(0,1fr) 58px;align-items:center;gap:6px;margin-top:4px}
+.bt-slider span{font:400 11px/1.1 "Special Elite","Courier New",monospace;color:var(--lab-matita);text-transform:lowercase}
+.bt-slider .lab-range{height:18px}
+.bt-slider .lab-valore{font-size:11px;text-align:right;white-space:nowrap}
+
+.bt-scena{flex:1;min-height:0;padding:2px 0 0;overflow:auto}
+.bt-griglia{display:grid;grid-template-columns:82px repeat(16,minmax(22px,1fr));gap:3px;align-items:stretch;min-width:620px}
+.bt-num{font:400 10px/1 "Special Elite","Courier New",monospace;color:var(--lab-matita);text-align:center;padding-bottom:2px}
+.bt-num:nth-child(4n+2){color:var(--lab-inchiostro)}
+.bt-nome{display:flex;align-items:center;gap:5px;font:400 11px/1.1 "Special Elite","Courier New",monospace;color:var(--lab-matita);text-transform:lowercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bt-nome::before{content:"";flex:none;width:8px;height:8px;background:var(--c);border-radius:50%}
+.bt-pad{position:relative;min-height:30px;border:1.5px solid rgba(22,22,22,.25);background:rgba(255,255,255,.35);cursor:pointer;padding:0;transition:background .08s,transform .08s}
+.bt-pad::after{content:"";position:absolute;inset:4px;background:var(--c);opacity:.12;transition:opacity .08s}
+.bt-pad:hover{border-color:rgba(22,22,22,.55)}
+.bt-pad.is-on{background:var(--c);border-color:var(--c);box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.bt-pad.is-on::after{opacity:.22}
+.bt-pad.is-ora{outline:2px solid var(--lab-inchiostro);outline-offset:-1px;background:rgba(255,212,0,.35)}
+.bt-pad.is-on.is-ora{filter:brightness(1.18)}
+.bt-pad:active{transform:scale(.96)}
+.bt-griglia .bt-num.is-ora{color:var(--lab-accento);font-weight:700}
+
+.bt-pezzi{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.bt-pezzi li{display:flex;align-items:center;gap:7px;font:400 12px/1.1 "Special Elite","Courier New",monospace;color:var(--lab-inchiostro)}
+.bt-pezzi i{width:10px;height:10px;border-radius:50%;flex:none}
+.bt-pezzi .lab-link{margin-left:auto}
+.bt-preset{display:flex;flex-wrap:wrap;gap:6px}
+.bt-preset .lab-tasto{flex:1 1 44%;padding:5px 4px}
+
+@media (max-width:900px){
+  .bt-griglia{grid-template-columns:70px repeat(16,minmax(20px,1fr));min-width:560px}
+  .bt-pad{min-height:34px}
+}
+@media (max-width:560px){
+  .bt-trasporto .lab-fila--tra{align-items:flex-start}
+  .bt-slider{grid-template-columns:64px minmax(0,1fr) 52px}
+}
