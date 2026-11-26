@@ -9,11 +9,11 @@ iPhone, gallerie delle pagine interne, strisce dell’iPhone 18 Pro) stanno in
 | `rivaltasulmincio-it` | www.rivaltasulmincio.it | `rivalta-*` (home + mappa desktop e mobile con la scheda della chiesa, scheda del luogo su tablet) |
 | `cascina-fontana` | www.cascinafontana.xyz | `cascina-*` (home + Prodotti, galleria con la lightbox, Contatti) |
 | `albertopecchini-it` | www.albertopecchini.it | `ap-*` (home + `ap-iphone-NN`, pagina intera a strisce) |
-| `dario-donelli` | dariodonelli.vercel.app | `dd-*` (home) |
-| `pzkko-it` | www.pzkko.it | `pzk-*` (home di giorno con `?ora=12:00&notte=0`, la stessa di notte con `?ora=22:00&notte=1`, la roulette aperta su tablet, la 404 sul telefono; la finestra è la scena 3D, aspettata finché è pronta, le pagine intere il muro senza 3D, `?muro=1`) |
+| `dario-donelli` | www.dariodonelli.com | `dd-*` (home) |
 
-L’indirizzo viene da `web.url` in `src/data/projects.js`: quando Donelli passerà al suo
-dominio basta cambiarlo lì.
+L’indirizzo viene da `web.url` in `src/data/projects.js`: quando un sito cambia dominio
+basta cambiarlo lì (Donelli è passato da dariodonelli.vercel.app a dariodonelli.com il
+24.11.2026). Un progetto nascosto (`NASCOSTI`, oggi Rivalta) si salta senza fermare gli altri.
 
 ## Come funziona
 
@@ -45,7 +45,7 @@ web»); l’iPhone è 402×812 a 2x, a strisce di al più 2400 px CSS (4800 px) 
 - **a ogni push** che tocca lo strumento o il workflow: stesso giro (con lo strumento
   cambiato si rifà tutto, ma i file identici non producono commit).
 - **a mano**, da GitHub → Actions → *Catture dei siti* → *Run workflow*: si possono indicare
-  i siti (`rivalta`, `cascina`, `ap`, `dd`, `pzk`) e forzarli anche se non sono cambiati.
+  i siti (`cascina`, `ap`, `dd`) e forzarli anche se non sono cambiati.
 
 L’ultima impronta di ogni sito non sta nel repository ma nella cache delle Actions
 (`stato.json`): se la cache sparisce, il giro successivo rifotografa tutto e pubblica solo
