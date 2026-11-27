@@ -87,24 +87,31 @@ pagina `/community/` è stata tolta: `/community` e `/community/` rimandano a
 ## Giugnoh's Cast in bacheca (27.11.2026)
 
 In cima alla Bacheca c'è il palco del podcast, nello stile della tv e dei pezzi
-di Diretta OS: l'insegna ON AIR, il logo in Pricedown che ondeggia, la prossima
-puntata col conto alla rovescia e «Unisciti» (l'invito di OLLARE, più il link
-diretto al palco @OLLARE PODCAST), il rullo dell'argomento a caso, l'archivio
-delle puntate coi loro argomenti e il nastro che scorre. Motore e disegno sono
-in `public/assets/podcast.js` e `podcast.css` (lo carica il modulo, non sta in
-`src/site.css`); in `app.js` ci sono solo l'aggancio in `renderBoard` e
-`mioRedattore()`.
+di Diretta OS: l'insegna ON AIR, un banner tutto SVG con la cup di lean che si
+rovescia, il titolo della puntata (mai argomenti estratti) e il massimo di
+spettatori in simultanea di ieri; sotto la puntata in onda o rimandata col conto
+alla rovescia e «Unisciti» (l'invito di OLLARE, più il link diretto al palco
+@OLLARE PODCAST), il voto del podcast ogni sei ore senza account, i redattori
+coi soprannomi Giugnoh, Maggioh e Aprileh, l'archivio delle puntate e il nastro
+che scorre. Motore e disegno sono in `public/assets/podcast.js` e
+`podcast.css` (lo carica il modulo, non sta in `src/site.css`); in `app.js` ci
+sono solo l'aggancio in `renderBoard` e `mioRedattore()`.
 
 - **Le puntate** si scrivono a mano in `PODCAST` di `config.js`, con l'ora
-  italiana e il fuso; il palco passa da sé da «in arrivo» a «in onda» e ad
-  «andata in onda».
+  italiana, il fuso e un `titolo`; con `stato: 'rimandata'` non hanno data e
+  restano «a data da destinarsi». Il palco passa da sé da «in arrivo» a «in
+  onda» e ad «andata in onda».
+- **I numeri di ieri** (`spettatoriIeri`) e il titolo della puntata sono scritti
+  a mano; il banner non estrae mai argomenti.
 - **I redattori** sono pzkko (il profilo del sito, dal vivo) e quelli in
   `public/media/cast/redattori.json`: profilo, tema, badge, tag e foto vere,
   scaricate dalla CDN di Discord in `public/media/cast/`. Si rinfrescano con
   `scripts/cast-profili.py`, lanciato col Python del collegamento Discord (vedi
-  la testa dello script). Al clic su un redattore si apre la sua scheda: le
-  stesse classi della scheda del profilo, coi suoi colori calcolati come li
-  calcola Discord.
+  la testa dello script). I soprannomi e l'ordine stanno in `PODCAST.cast`; al
+  clic su un redattore si apre la sua scheda: le stesse classi della scheda del
+  profilo, coi suoi colori calcolati come li calcola Discord.
+- **Il voto** è nel browser (localStorage), senza account: si può dare una volta
+  ogni sei ore (`PODCAST.voto.ogniOre`) e il pulsante mostra il tempo che manca.
 
 ## Instagram in bacheca (24.11.2026)
 

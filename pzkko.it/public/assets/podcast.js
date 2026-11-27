@@ -1,12 +1,12 @@
 // Giugnoh's Cast in bacheca (27.11): il palco del podcast nello stile della tv e dei pezzi di Diretta OS (neon lime e
-// viola, Pricedown che ondeggia, l'insegna ON AIR, il rullo dell'argomento a caso coi coriandoli, il nastro che scorre
-// con la lumaca al neon). In cima la puntata che sta per andare in onda, col conto alla rovescia e «Unisciti»; sotto
-// i redattori, ognuno con la sua scheda Discord vera (la stessa del profilo, coi suoi colori, le sue foto e il suo
-// tema), il rullo e l'archivio delle puntate.
+// viola, Pricedown che ondeggia, l'insegna ON AIR, il nastro che scorre con la lumaca al neon). In cima un banner
+// tutto SVG (la cup di lean che si rovescia, fluida) con il titolo della puntata e i numeri di ieri; sotto la
+// puntata che sta per andare in onda (o quella rimandata), il voto del podcast (uno ogni sei ore, senza account),
+// i redattori coi loro soprannomi e l'archivio delle puntate.
 //
-// Dati: puntate, palco e argomenti in config.js (PODCAST); i redattori in /media/cast/redattori.json, con le foto
-// scaricate dalla CDN di Discord (scripts/cast-profili.py); pzkko arriva dal profilo dal vivo (`mio()` da app.js).
-// Lo stile è podcast.css, qui accanto: lo carica questo modulo, src/site.css non lo contiene.
+// Dati: puntate, palco, soprannomi e voto in config.js (PODCAST); i redattori in /media/cast/redattori.json, con le
+// foto scaricate dalla CDN di Discord (scripts/cast-profili.py); pzkko arriva dal profilo dal vivo (`mio()` da
+// app.js). Lo stile è podcast.css, qui accanto: lo carica questo modulo, src/site.css non lo contiene.
 
 import { PODCAST, NAME_FONTS } from './config.js'
 import { mountEffect } from './fx.js'
@@ -19,13 +19,10 @@ document.head.append(stile)
 
 const TZ = 'Europe/Rome'
 const MIN = 60_000
-const COLORI = ['#ccff00', '#9d00ff', '#eb459e', '#2dff7a', '#f0b232', '#ffffff', '#c77dff', '#05d9e8']
 const NOME = PODCAST.nome
 
 const TESTI = {
   it: {
-    motto: 'il podcast di Giugnoh',
-    puntata: 'puntata',
     prossima: 'prossima puntata',
     inOnda: 'in onda adesso',
     daAnnunciare: 'da annunciare',
@@ -36,30 +33,35 @@ const TESTI = {
     notaInvito: (palco) => `Si entra dal server OLLARE: il palco ${palco} si apre all’ora della puntata.`,
     notaOnda: (palco) => `Siamo sul palco ${palco}: entra, ascolta, chiedi la parola.`,
     notaNessuna: 'La prossima si annuncia su OLLARE: entra e non te la perdi.',
+    rimandata: 'rimandata',
+    aData: 'a data da destinarsi',
+    notaRimandata: 'La puntata di stasera non si fa: la nuova data si annuncia su OLLARE.',
     redattori: 'redattori principali',
     apri: (n) => `Apri il profilo di ${n}`,
-    argomento: 'argomento a caso',
-    ultimo: (n) => `l’ultimo estratto in onda · puntata ${n}`,
-    tuo: 'estratto adesso, da te: portalo in puntata',
-    gira: 'Gira', giraAncora: 'Gira ancora',
+    voto: 'vota il podcast',
+    votoDomanda: 'Quanto ti piace Giugnoh’s Cast?',
+    votoNota: 'Un voto ogni 6 ore · senza accedere',
+    votoSenza: 'Nessun account: chiunque può votare, senza accedere.',
+    votoFatto: (n) => `Hai votato ${n}/5. Grazie!`,
+    votoAttesa: (s) => `Puoi votare di nuovo tra ${s}`,
+    stella: (n) => (n === 1 ? '1 stella' : `${n} stelle`),
     puntate: 'le puntate',
     andata: 'andata in onda', inArrivo: 'in arrivo', ora: 'in onda',
-    argomenti: 'argomenti estratti',
-    nessunArgomento: 'gli argomenti si estraggono in diretta',
     durata: (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`),
     da: 'da',
     numeri: 'OLLARE in numeri',
+    ieri: 'ieri',
+    spettatori: 'max spettatori in simultanea',
     // la scheda dei redattori
     profilo: 'Profilo', membroDa: 'Membro da', collegamenti: 'Collegamenti', verificato: 'Verificato',
     messaggio: 'Messaggio', copia: 'Copia il nome utente', chiudi: 'Chiudi',
     prec: 'Redattore precedente', succ: 'Redattore successivo',
     ruolo: 'Redattore principale', dalla: (n, d) => `dalla puntata ${n} · ${d}`,
     avatar: (n) => `Avatar di ${n}`, decorazione: 'Decorazione',
+    castTag: (n) => `Nel cast: ${n}`,
     ora_it: 'ora italiana',
   },
   en: {
-    motto: 'Giugnoh’s podcast',
-    puntata: 'episode',
     prossima: 'next episode',
     inOnda: 'on air now',
     daAnnunciare: 'to be announced',
@@ -70,24 +72,31 @@ const TESTI = {
     notaInvito: (palco) => `You get in through the OLLARE server: the ${palco} stage opens when the episode starts.`,
     notaOnda: (palco) => `We’re on the ${palco} stage: come in, listen, ask to speak.`,
     notaNessuna: 'The next one is announced on OLLARE: join and you won’t miss it.',
+    rimandata: 'postponed',
+    aData: 'date to be announced',
+    notaRimandata: 'Tonight’s episode is postponed: the new date is announced on OLLARE.',
     redattori: 'main hosts',
     apri: (n) => `Open ${n}’s profile`,
-    argomento: 'random topic',
-    ultimo: (n) => `last topic drawn on air · episode ${n}`,
-    tuo: 'drawn just now, by you: bring it to the show',
-    gira: 'Spin', giraAncora: 'Spin again',
+    voto: 'vote the podcast',
+    votoDomanda: 'How much do you like Giugnoh’s Cast?',
+    votoNota: 'One vote every 6 hours · no sign-in',
+    votoSenza: 'No account: anyone can vote, without signing in.',
+    votoFatto: (n) => `You voted ${n}/5. Thank you!`,
+    votoAttesa: (s) => `You can vote again in ${s}`,
+    stella: (n) => (n === 1 ? '1 star' : `${n} stars`),
     puntate: 'episodes',
     andata: 'aired', inArrivo: 'coming up', ora: 'on air',
-    argomenti: 'topics drawn',
-    nessunArgomento: 'topics are drawn live',
     durata: (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`),
     da: 'for',
     numeri: 'OLLARE in numbers',
+    ieri: 'yesterday',
+    spettatori: 'peak viewers at the same time',
     profilo: 'Profile', membroDa: 'Member since', collegamenti: 'Connections', verificato: 'Verified',
     messaggio: 'Message', copia: 'Copy username', chiudi: 'Close',
     prec: 'Previous host', succ: 'Next host',
     ruolo: 'Main host', dalla: (n, d) => `since episode ${n} · ${d}`,
     avatar: (n) => `${n}’s avatar`, decorazione: 'Decoration',
+    castTag: (n) => `In the cast: ${n}`,
     ora_it: 'Italian time',
   },
 }
@@ -105,29 +114,36 @@ const tempo = (s) => { s = Math.max(0, Math.floor(s)); return `${Math.floor(s / 
 // i nomi coi caratteri larghi (「ＳＥＲＩＣ」): nella scheda piccola vanno un po' più stretti, se no vanno a capo a lettere
 const largo = (s) => /[　-〿＀-￯]/.test(String(s || ''))
 
-// il rullo: parte forte e frena piano, va un filo oltre e torna, come lo scatto della diretta (cast.js di Diretta OS)
-const GIRA_DA = 0.75, GIRA_FINO = 5.2
-function posizione(t, indice) {
-  if (t <= GIRA_DA) return 0
-  if (t < GIRA_FINO) { const u = (t - GIRA_DA) / (GIRA_FINO - GIRA_DA); return indice * (1 - (1 - u) ** 3.6) }
-  const d = t - GIRA_FINO
-  return indice + 0.2 * Math.sin(d * 21) * Math.exp(-d * 7)
+// il voto: nessun account, resta nel browser; uno ogni sei ore (PODCAST.voto in config.js)
+const VOTO_KEY = 'pzkko-cast-voto'
+const leggiVoto = () => {
+  try {
+    const v = JSON.parse(localStorage.getItem(VOTO_KEY) || 'null')
+    return Number.isFinite(v?.stelle) && Number.isFinite(v?.quando) ? v : null
+  } catch { return null }
 }
+const salvaVoto = (v) => { try { localStorage.setItem(VOTO_KEY, JSON.stringify(v)) } catch {} }
 
-// ─── le puntate: quale è in onda, quale viene dopo, quali sono passate ────────
+// ─── le puntate: quale è in onda, quale viene dopo, quali sono passate, quale è rimandata ───
 function calendario(adesso) {
-  const lista = (PODCAST.puntate || []).map((p) => {
+  const tutte = (PODCAST.puntate || []).map((p) => {
+    if (p.stato === 'rimandata' || !p.inizio) return { ...p, a: NaN, f: NaN, rimandata: true }
     const a = Date.parse(p.inizio)
     const f = p.fine ? Date.parse(p.fine) : a + (PODCAST.durata || 150) * MIN
-    return { ...p, a, f, argomenti: Array.isArray(p.argomenti) ? p.argomenti : [] }
-  }).filter((p) => Number.isFinite(p.a) && Number.isFinite(p.f)).sort((x, y) => x.a - y.a)
+    return { ...p, a, f, rimandata: false }
+  }).filter((p) => p.rimandata || (Number.isFinite(p.a) && Number.isFinite(p.f)))
+  const lista = tutte.filter((p) => !p.rimandata).sort((x, y) => x.a - y.a)
+  const rimandata = tutte.filter((p) => p.rimandata).sort((x, y) => x.n - y.n)[0] || null
   const onda = lista.find((p) => p.a <= adesso && adesso < p.f) || null
   const prossima = lista.find((p) => p.a > adesso) || null
   const passate = lista.filter((p) => p.f <= adesso)
   // il prossimo istante in cui cambia qualcosa (si accende l'insegna, finisce una puntata)
   const cambio = Math.min(...lista.flatMap((p) => [p.a, p.f]).filter((x) => x > adesso), Infinity)
-  return { lista, onda, prossima, passate, cambio }
+  return { tutte, lista, onda, prossima, passate, rimandata, cambio }
 }
+
+// «EP 1 - Attualità, Sessualità e Ambiente»: sempre un titolo, mai gli argomenti estratti
+const nomePuntata = (p) => (p ? `EP ${p.n}${p.titolo ? ` - ${p.titolo}` : ''}` : NOME)
 
 // «stasera alle 23:00», «domani alle 23:00», «ven 4 dic alle 23:00»
 function quando(ms, adesso, t, locale) {
@@ -177,37 +193,60 @@ export async function monta(root, ctx) {
   const [altri] = await Promise.all([caricaRedattori(), vestito])
   if (!root.isConnected) return
   root.style.removeProperty('min-height')
-  const redattori = () => [ctx.mio(), ...altri]
 
-  let cal = calendario(Date.now()), visibile = true, timer = 0, chiaveMio = ''
-  const chiave = (m) => JSON.stringify([m.nome, m.foto, m.gilda, m.stileNome])
+  // i soprannomi e l'ordine del cast: Giugnoh, Maggioh, Aprileh (PODCAST.cast in config.js)
+  const ordine = PODCAST.cast || []
+  const trovaCast = (r) => ordine.find((c) => (c.id && c.id === r.id) || (c.username && c.username.toLowerCase() === String(r.username || '').toLowerCase()))
+  const posCast = (r) => { const i = ordine.findIndex((c) => (c.id && c.id === r.id) || (c.username && c.username.toLowerCase() === String(r.username || '').toLowerCase())); return i < 0 ? 999 : i }
+  const conSoprannome = (r) => ({ ...r, soprannome: r.soprannome || trovaCast(r)?.soprannome || r.nome })
+  const redattori = () => [ctx.mio(), ...altri].map(conSoprannome).sort((a, b) => posCast(a) - posCast(b))
+
+  let cal = calendario(Date.now()), visibile = true, timer = 0, chiaveMio = '', voto = leggiVoto()
+  const chiave = (m) => JSON.stringify([m.nome, m.soprannome, m.foto, m.gilda, m.stileNome])
+  const statoVoto = () => {
+    const stelle = Number(voto?.stelle) || 0
+    const resta = voto ? Math.max(0, Number(voto.quando) + (PODCAST.voto?.ogniOre || 6) * 3600_000 - Date.now()) : 0
+    return { stelle, resta }
+  }
+  const aggiornaVoto = () => {
+    const el = root.querySelector('[data-voto-nota]')
+    if (!el) return
+    const { stelle, resta } = statoVoto()
+    el.textContent = resta > 0 ? `${t.votoFatto(stelle)} · ${t.votoAttesa(tempo(resta / 1000))}` : t.votoNota
+    // finite le sei ore, le stelle tornano cliccabili senza ricaricare la pagina
+    for (const b of root.querySelectorAll('[data-voto]')) {
+      const bloccato = resta > 0
+      if (b.disabled !== bloccato) b.disabled = bloccato
+    }
+  }
   const disegna = () => {
     cal = calendario(Date.now())
     const red = redattori()
     chiaveMio = chiave(red[0])
-    root.dataset.stato = cal.onda ? 'onda' : cal.prossima ? 'attesa' : 'nessuna'
-    root.innerHTML = markup(cal, t, ctx, red)
+    root.dataset.stato = cal.onda ? 'onda' : cal.prossima ? 'attesa' : cal.rimandata ? 'rimandata' : 'nessuna'
+    root.innerHTML = markup(cal, t, ctx, red, voto)
     nastro(root, cal, t, red)
-    rullo(root, cal, t, ctx)
     aggiorna()
   }
   // pzkko è il profilo dal vivo: quando la presenza porta un tag, una foto o una decorazione nuovi, la sua scheda
   // piccola si ridisegna (solo lei, e solo se è cambiato qualcosa)
   const smetti = ctx.ascolta?.(() => {
     if (!root.isConnected) return ferma()
-    const m = ctx.mio(), k = chiave(m)
+    const m = conSoprannome(ctx.mio()), k = chiave(m)
     if (k === chiaveMio) return
     chiaveMio = k
-    const li = root.querySelector('[data-gc-red="0"]')?.closest('li')
-    if (li) li.outerHTML = redHtml(m, 0, t, ctx)
+    const i = redattori().findIndex((r) => r.tuo)
+    const li = root.querySelector(`[data-gc-red="${i}"]`)?.closest('li')
+    if (li) li.outerHTML = redHtml(m, i, t, ctx)
   })
 
-  // ogni secondo: l'orologio, il conto alla rovescia o da quanto è in onda; al cambio di fase si ridisegna tutto
+  // ogni secondo: l'orologio, il conto alla rovescia, da quanto è in onda e il tempo rimasto per votare
   const aggiorna = () => {
     const adesso = Date.now()
     if (adesso >= cal.cambio) { disegna(); return }
     const ora = root.querySelector('[data-gc-orologio]')
     if (ora) ora.textContent = oraDi(adesso)
+    aggiornaVoto()
     if (cal.onda) {
       for (const el of root.querySelectorAll('[data-gc-da]')) el.textContent = tempo((adesso - cal.onda.a) / 1000)
     } else if (cal.prossima) {
@@ -230,10 +269,30 @@ export async function monta(root, ctx) {
   io.observe(root)
   document.addEventListener('visibilitychange', batti)
 
-  // i redattori: sul computer la foto e il banner animati partono al passaggio del mouse, al clic la scheda
+  // i redattori: sul computer la foto e il banner animati partono al passaggio del mouse, al clic la scheda;
+  // le stelle del voto: un clic, poi il voto resta fermo per sei ore
   root.addEventListener('click', (e) => {
     const r = e.target.closest('[data-gc-red]')
     if (r) { e.preventDefault(); return apriScheda(redattori(), +r.dataset.gcRed, t, ctx, r) }
+    const st = e.target.closest('[data-voto]')
+    if (st) {
+      e.preventDefault()
+      if (st.disabled) return
+      const n = +st.dataset.voto
+      voto = { stelle: n, quando: Date.now() }
+      salvaVoto(voto)
+      const box = st.closest('[data-voto-box]')
+      for (const b of root.querySelectorAll('[data-voto]')) {
+        b.classList.toggle('is-on', +b.dataset.voto <= n)
+        b.setAttribute('aria-checked', String(+b.dataset.voto === n))
+        b.disabled = true
+      }
+      box?.classList.remove('is-fatto')
+      void box?.offsetWidth
+      box?.classList.add('is-fatto')
+      setTimeout(() => box?.classList.remove('is-fatto'), 1000)
+      return aggiornaVoto()
+    }
     const v = e.target.closest('[data-gc-vai]')
     if (v) { e.preventDefault(); ctx.vai(v.dataset.gcVai) }
   })
@@ -247,46 +306,31 @@ export async function monta(root, ctx) {
   batti()
 }
 
-function markup(cal, t, ctx, red) {
+function markup(cal, t, ctx, red, voto) {
   const adesso = Date.now(), loc = ctx.locale
-  const p = cal.onda || cal.prossima
-  const ultimaConArgomenti = [...cal.passate].reverse().find((x) => x.argomenti.length)
+  const p = cal.onda || cal.prossima || cal.rimandata
   return `<div class="gc__sfondo" aria-hidden="true"><i class="gc-lu gc-lu1"></i><i class="gc-lu gc-lu2"></i><i class="gc-lu gc-lu3"></i><div class="gc__pavimento"><i></i></div><i class="gc__scansione"></i></div>
 
   <header class="gc__testa">
     <div class="gc-onair" aria-hidden="true"><i></i><span>${cal.onda ? 'ON AIR' : 'OFF AIR'}</span></div>
     <div class="gc__dx">
       <div class="gc__ora" title="${esc(t.ora_it)}" data-gc-orologio>${oraDi(adesso)}</div>
-      <div class="gc__ep">${p ? `${esc(t.puntata)} ${p.n}` : esc(NOME)}${cal.onda ? `<span class="gc__da">${esc(t.da)} <b data-gc-da>0:00</b></span>` : ''}</div>
+      <div class="gc__ep">${p ? `EP ${p.n}` : esc(NOME)}${p?.rimandata ? `<span class="gc__rim">${esc(t.rimandata)}</span>` : ''}${cal.onda ? `<span class="gc__da">${esc(t.da)} <b data-gc-da>0:00</b></span>` : ''}</div>
     </div>
   </header>
 
-  <div class="gc__marchio">
-    <img class="gc__cuffie" src="/art/chat-ufficio/cuffie.webp" alt="" width="120" height="135" draggable="false">
-    <h2 class="gc__logo" aria-label="${esc(NOME)}"><span class="gc__lettere" aria-hidden="true">${lettere(NOME, 10)}</span></h2>
-    <p class="gc__motto">${esc(t.motto)}<span> · OLLARE</span></p>
-  </div>
+  ${bannerHtml(cal, t, red)}
 
   <div class="gc__corpo">
     ${prossimaHtml(cal, t, ctx)}
+    ${votoHtml(t, voto)}
     <section class="gc-redattori" aria-label="${esc(t.redattori)}">
       <h3 class="gc-et">${esc(t.redattori)}</h3>
       <ul>${red.map((r, i) => redHtml(r, i, t, ctx)).join('')}</ul>
     </section>
-    <section class="gc-rullo" data-gc-rullo aria-label="${esc(t.argomento)}">
-      <span class="gc-chip gc-chip--viola">${esc(t.argomento)}</span>
-      <div class="gc-rullo__corpo">
-        <i class="gc-rullo__banda" aria-hidden="true"></i>
-        <div class="gc-rullo__finestra"><div class="gc-rullo__nastro" data-nastro></div></div>
-        <i class="gc-freccia gc-freccia--sx" aria-hidden="true"></i><i class="gc-freccia gc-freccia--dx" aria-hidden="true"></i>
-        <i class="gc-lampo" aria-hidden="true"></i>
-        <div class="gc-cor" data-cor aria-hidden="true"></div>
-      </div>
-      <div class="gc-rullo__sotto"><span class="gc-rullo__nota" data-nota aria-live="polite">${ultimaConArgomenti ? esc(t.ultimo(ultimaConArgomenti.n)) : ''}</span><button type="button" class="gc-gira" data-gira><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0 .6 4"/><path d="M20 4v7h-7"/></svg><span>${esc(t.gira)}</span></button></div>
-    </section>
     <section class="gc-archivio" aria-label="${esc(t.puntate)}">
       <h3 class="gc-et">${esc(t.puntate)}</h3>
-      <ol>${[...cal.lista].reverse().map((x) => puntataHtml(x, cal, t, loc)).join('')}</ol>
+      <ol>${[...cal.tutte].sort((a, b) => b.n - a.n).map((x) => puntataHtml(x, cal, t, loc)).join('')}</ol>
       <button type="button" class="gc-numeri" data-gc-vai="community">${esc(t.numeri)} →</button>
     </section>
   </div>
@@ -296,14 +340,145 @@ function markup(cal, t, ctx, red) {
   <footer class="gc__nastrino" aria-hidden="true"><div class="gc__scorre" data-scorre></div></footer>`
 }
 
+// ─── il banner: tutto SVG, la cup di lean che si rovescia, il titolo e i numeri di ieri ───
+function bannerHtml(cal, t, red) {
+  const ep = cal.onda || cal.prossima || cal.passate.at(-1) || cal.rimandata
+  const n = ep?.n || 1
+  const spett = Number(PODCAST.spettatoriIeri ?? cal.passate.at(-1)?.spettatori) || 0
+  const titolo = ep?.titolo ? String(ep.titolo) : ''
+  // il titolo va a capo dove respira: dopo la virgola e prima della «e» (Attualità, / Sessualità / e Ambiente)
+  const gruppi = titolo.split(/\s*,\s*/).filter(Boolean)
+  const righe = gruppi.flatMap((g, i) => {
+    const pezzi = g.split(/\s+e\s+/i).map((x, k) => (k === 0 ? x : `e ${x}`))
+    if (i < gruppi.length - 1) pezzi[pezzi.length - 1] += ','
+    return pezzi
+  })
+  const titoloHtml = righe.map((x) => `<span>${esc(x)}</span>`).join('')
+  const nomi = red.map((r) => esc(r.soprannome || r.nome)).join('<i>·</i>')
+  return `<section class="gc-banner" aria-label="${esc(`${NOME}: EP ${n}${titolo ? ` - ${titolo}` : ''}. ${spett} ${t.spettatori} ${t.ieri}. ${red.map((r) => r.soprannome || r.nome).join(', ')}`)}">
+    <svg class="gc-banner__fondo" viewBox="0 0 1000 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="gcb-bg" x1="0" y1="0" x2="1000" y2="420" gradientUnits="userSpaceOnUse"><stop stop-color="#1c0730"/><stop offset=".46" stop-color="#12071c"/><stop offset="1" stop-color="#0b090e"/></linearGradient>
+        <radialGradient id="gcb-lime" cx=".2" cy=".14" r=".8"><stop stop-color="#ccff00" stop-opacity=".36"/><stop offset="1" stop-color="#ccff00" stop-opacity="0"/></radialGradient>
+        <radialGradient id="gcb-viola" cx=".78" cy=".72" r=".82"><stop stop-color="#9d00ff" stop-opacity=".56"/><stop offset="1" stop-color="#9d00ff" stop-opacity="0"/></radialGradient>
+        <linearGradient id="gcb-striscia" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#ccff00" stop-opacity="0"/><stop offset=".5" stop-color="#ccff00" stop-opacity=".2"/><stop offset="1" stop-color="#ccff00" stop-opacity="0"/></linearGradient>
+        <pattern id="gcb-griglia" width="42" height="42" patternUnits="userSpaceOnUse"><path d="M42 0H0V42" fill="none" stroke="#ccff00" stroke-width="1" stroke-opacity=".12"/></pattern>
+        <pattern id="gcb-punti" width="18" height="18" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="#eb459e" opacity=".2"/></pattern>
+        <path id="gcb-stella" d="M0-9 2-2 9 0 2 2 0 9-2 2-9 0-2-2Z"/>
+      </defs>
+      <rect width="1000" height="420" fill="url(#gcb-bg)"/>
+      <rect width="1000" height="420" fill="url(#gcb-griglia)"/>
+      <rect width="1000" height="420" fill="url(#gcb-punti)"/>
+      <circle cx="170" cy="60" r="270" fill="url(#gcb-lime)"/>
+      <circle cx="850" cy="340" r="300" fill="url(#gcb-viola)"/>
+      <g class="gc-banner__raggi" stroke="#ccff00" stroke-opacity=".14" stroke-width="2">
+        <path d="M780 230 1080 30M780 230 1080 130M780 230 1080 230M780 230 1080 330M780 230 1080 430M780 230 1040 510M780 230 940 540M780 230 840 560M780 230 720 560M780 230 620 540M780 230 520 510M780 230 480 430M780 230 480 330M780 230 480 230M780 230 480 130M780 230 480 30M780 230 520-70M780 230 620-100M780 230 720-120M780 230 840-120M780 230 940-100M780 230 1040-70M780 230 1080-30"/>
+      </g>
+      <g class="gc-banner__orbite" fill="none">
+        <ellipse cx="740" cy="210" rx="280" ry="120" stroke="#9d00ff" stroke-opacity=".55" stroke-width="2" stroke-dasharray="4 16" transform="rotate(-18 740 210)"/>
+        <ellipse cx="740" cy="210" rx="210" ry="84" stroke="#ccff00" stroke-opacity=".3" stroke-width="1.5" stroke-dasharray="2 10" transform="rotate(16 740 210)"/>
+        <circle cx="740" cy="210" r="170" stroke="#71c2d9" stroke-opacity=".18" stroke-width="1"/>
+      </g>
+      <g class="gc-banner__strisce">
+        <path d="M-300 470 240-50 330-50-210 470Z" fill="url(#gcb-striscia)"/>
+        <path d="M-160 470 380-50 410-50-130 470Z" fill="url(#gcb-striscia)" opacity=".65"/>
+        <path d="M640 470 1180-50 1210-50 670 470Z" fill="url(#gcb-striscia)" opacity=".4"/>
+      </g>
+      <g class="gc-banner__stelle" fill="#ccff00">
+        <use href="#gcb-stella" transform="translate(86 312) scale(1.15)" style="--d:0s"/>
+        <use href="#gcb-stella" transform="translate(242 70) scale(.7)" style="--d:-1.2s"/>
+        <use href="#gcb-stella" transform="translate(880 92) scale(1.3)" style="--d:-2.4s"/>
+        <use href="#gcb-stella" transform="translate(936 348) scale(.8)" style="--d:-.6s"/>
+        <use href="#gcb-stella" transform="translate(620 380) scale(.6)" style="--d:-3.1s"/>
+      </g>
+      <g fill="#c773ff"><circle cx="900" cy="390" r="2.4" opacity=".8"/><circle cx="820" cy="70" r="1.8" opacity=".7"/><circle cx="300" cy="380" r="2" opacity=".55"/><circle cx="70" cy="200" r="1.6" opacity=".5"/></g>
+    </svg>
+    <div class="gc-banner__contenuto">
+      <div class="gc-banner__marchio">
+        <h2 class="gc-banner__logo" aria-label="${esc(NOME)}">
+          <span class="gc-banner__riga" aria-hidden="true">${lettere("Giugnoh's")}</span>
+          <span class="gc-banner__riga gc-banner__riga--2" aria-hidden="true">${lettere('Cast')}</span>
+        </h2>
+        <p class="gc-banner__cast" aria-label="${esc(red.map((r) => r.soprannome || r.nome).join(', '))}"><b>${nomi}</b></p>
+      </div>
+      <div class="gc-banner__cup" aria-hidden="true">${cupSvg()}</div>
+      <div class="gc-banner__ep">
+        <span class="gc-banner__n">EP ${n}</span>
+        ${titoloHtml ? `<p class="gc-banner__titolo">${titoloHtml}</p>` : ''}
+        ${spett ? `<div class="gc-banner__dati"><span class="gc-banner__ieri">${esc(t.ieri)}</span><b>${spett}</b><span class="gc-banner__spett">${esc(t.spettatori)}</span></div>` : ''}
+      </div>
+    </div>
+  </section>`
+}
+
+function cupSvg() {
+  return `<svg class="gc-cup" viewBox="0 0 440 340" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="gcb-cup" x1="120" y1="70" x2="260" y2="290" gradientUnits="userSpaceOnUse"><stop stop-color="#fffdf4"/><stop offset=".55" stop-color="#f2ead7"/><stop offset="1" stop-color="#d5c8ad"/></linearGradient>
+      <linearGradient id="gcb-cup2" x1="150" y1="80" x2="280" y2="280" gradientUnits="userSpaceOnUse"><stop stop-color="#e7dcc2"/><stop offset="1" stop-color="#c3b495"/></linearGradient>
+      <linearGradient id="gcb-lean" x1="140" y1="60" x2="250" y2="120" gradientUnits="userSpaceOnUse"><stop stop-color="#e39cff"/><stop offset=".45" stop-color="#9d00ff"/><stop offset="1" stop-color="#5c0096"/></linearGradient>
+      <linearGradient id="gcb-straw" x1="260" y1="30" x2="240" y2="130" gradientUnits="userSpaceOnUse"><stop stop-color="#ff8ec7"/><stop offset=".5" stop-color="#eb459e"/><stop offset="1" stop-color="#ff3d4a"/></linearGradient>
+      <radialGradient id="gcb-alone" cx=".5" cy=".5" r=".5"><stop stop-color="#9d00ff" stop-opacity=".55"/><stop offset=".55" stop-color="#9d00ff" stop-opacity=".14"/><stop offset="1" stop-color="#9d00ff" stop-opacity="0"/></radialGradient>
+    </defs>
+    <ellipse class="gc-cup__alone" cx="220" cy="170" rx="168" ry="158" fill="url(#gcb-alone)"/>
+    <ellipse class="gc-cup__ombra" cx="214" cy="294" rx="116" ry="18" fill="#050207" opacity=".75"/>
+    <g class="gc-cup__corpo">
+      <path d="M264 30 244 126" stroke="#0b090e" stroke-width="17" stroke-linecap="round"/>
+      <path d="M264 30 244 126" stroke="url(#gcb-straw)" stroke-width="11" stroke-linecap="round"/>
+      <path d="M258 60 252 90" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".55"/>
+      <path d="M140 78 163 268Q165 283 180 283L242 283Q257 283 259 268L282 78Z" fill="url(#gcb-cup2)" stroke="#0b090e" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M118 78 142 268Q144 284 160 284L220 284Q236 284 238 268L262 78Z" fill="url(#gcb-cup)" stroke="#0b090e" stroke-width="7" stroke-linejoin="round"/>
+      <ellipse cx="190" cy="78" rx="72" ry="18" fill="#f8f2e3" stroke="#0b090e" stroke-width="7"/>
+      <ellipse cx="190" cy="82" rx="58" ry="12" fill="#5c0096"/>
+      <ellipse cx="190" cy="79" rx="58" ry="12" fill="url(#gcb-lean)"/>
+      <ellipse cx="190" cy="79" rx="58" ry="12" fill="none" stroke="#ccff00" stroke-width="2" opacity=".55"/>
+      <g class="gc-cup__liquido">
+        <rect x="160" y="66" width="22" height="20" rx="4" transform="rotate(-18 171 76)" fill="#e8fbff" stroke="#8ad9e8" stroke-width="2"/>
+        <rect x="195" y="68" width="18" height="16" rx="4" transform="rotate(14 204 76)" fill="#e8fbff" stroke="#8ad9e8" stroke-width="2"/>
+        <rect x="212" y="73" width="14" height="14" rx="3" transform="rotate(-28 219 80)" fill="#f4feff" stroke="#8ad9e8" stroke-width="2" opacity=".9"/>
+      </g>
+      <path d="M130 96Q136 112 129 122" stroke="#9d00ff" stroke-width="7" stroke-linecap="round"/>
+      <path d="M252 98Q246 116 253 126" stroke="#9d00ff" stroke-width="6" stroke-linecap="round" opacity=".8"/>
+      <path d="M126 118Q190 130 254 118" stroke="#d4c8ae" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+      <path d="M132 156Q190 168 248 156" stroke="#d4c8ae" stroke-width="4" stroke-linecap="round" opacity=".55"/>
+      <path d="M138 194Q190 205 242 194" stroke="#d4c8ae" stroke-width="4" stroke-linecap="round" opacity=".35"/>
+      <path d="M184 138 162 184 182 184 172 224 206 168 186 168 198 138Z" fill="#ccff00" stroke="#0b090e" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M148 100Q142 150 152 228" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".38"/>
+    </g>
+    <g class="gc-cup__pozza"><ellipse cx="398" cy="326" rx="50" ry="12" fill="#9d00ff" opacity=".85"/><ellipse cx="398" cy="322" rx="30" ry="6" fill="#d66bff" opacity=".95"/></g>
+    <g class="gc-cup__flusso"><path d="M394 264C414 292 410 314 398 328" stroke="#6a00ad" stroke-width="20" stroke-linecap="round"/><path d="M394 264C414 292 410 314 398 328" stroke="#9d00ff" stroke-width="14" stroke-linecap="round"/><path d="M394 266C410 291 406 311 398 324" stroke="#e39cff" stroke-width="5" stroke-linecap="round"/></g>
+    <g class="gc-cup__gocce">
+      <circle class="g1" cx="402" cy="282" r="8"/><circle class="g2" cx="414" cy="296" r="6"/><circle class="g3" cx="390" cy="304" r="5"/>
+    </g>
+  </svg>`
+}
+
+function votoHtml(t, voto) {
+  const ore = PODCAST.voto?.ogniOre || 6
+  const stelle = Number(voto?.stelle) || 0
+  const resta = voto ? Math.max(0, Number(voto.quando) + ore * 3600_000 - Date.now()) : 0
+  const bloccato = resta > 0
+  const stella = (n) => `<button type="button" role="radio" aria-checked="${stelle === n}" aria-label="${esc(t.stella(n))}" data-voto="${n}" class="${n <= stelle ? 'is-on' : ''}" style="--n:${n}" ${bloccato ? 'disabled' : ''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.5 2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.6l-6 3.3 1.3-6.7-5-4.7 6.8-.8z"/></svg></button>`
+  const nota = resta > 0 ? `${t.votoFatto(stelle)} · ${t.votoAttesa(tempo(resta / 1000))}` : t.votoNota
+  return `<section class="gc-voto" data-voto-box aria-label="${esc(t.voto)}">
+    <span class="gc-chip gc-chip--lime">${esc(t.voto)}</span>
+    <div class="gc-voto__corpo">
+      <p class="gc-voto__domanda">${esc(t.votoDomanda)}</p>
+      <div class="gc-stelle" role="radiogroup" aria-label="${esc(t.votoDomanda)}">${[1, 2, 3, 4, 5].map(stella).join('')}</div>
+      <p class="gc-voto__nota" data-voto-nota>${esc(nota)}</p>
+      <p class="gc-voto__libera">${esc(t.votoSenza)}</p>
+    </div>
+  </section>`
+}
+
 function prossimaHtml(cal, t, ctx) {
   const adesso = Date.now(), palco = PODCAST.nomePalco || 'OLLARE'
   const ext = ctx.I?.ext || ''
   if (cal.onda) {
     const p = cal.onda
-    return `<section class="gc-prossima gc-prossima--onda" aria-label="${esc(`${t.inOnda}: ${t.puntata} ${p.n}`)}">
+    return `<section class="gc-prossima gc-prossima--onda" aria-label="${esc(`${t.inOnda}: ${nomePuntata(p)}`)}">
       <span class="gc-chip gc-chip--rosso"><i class="gc-rec"></i>${esc(t.inOnda)}</span>
-      <h3 class="gc-prossima__titolo">${esc(t.puntata)} ${p.n}</h3>
+      <h3 class="gc-prossima__titolo">${esc(nomePuntata(p))}</h3>
       <p class="gc-prossima__quando">${esc(t.dalle)} ${oraDi(p.a)} · <span class="gc-prossima__da"><i class="gc-rec"></i><b data-gc-da>0:00</b></span></p>
       <div class="gc-azioni">
         <a class="gc-unisciti gc-unisciti--ora" href="${esc(PODCAST.invito)}" target="_blank" rel="noopener noreferrer">${esc(t.unisciOra)}<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></svg></a>
@@ -315,9 +490,9 @@ function prossimaHtml(cal, t, ctx) {
   if (cal.prossima) {
     const p = cal.prossima
     const u = t.unita
-    return `<section class="gc-prossima" aria-label="${esc(`${t.prossima}: ${t.puntata} ${p.n}, ${quando(p.a, adesso, t, ctx.locale)}`)}">
+    return `<section class="gc-prossima" aria-label="${esc(`${t.prossima}: ${nomePuntata(p)}, ${quando(p.a, adesso, t, ctx.locale)}`)}">
       <span class="gc-chip">${esc(t.prossima)}</span>
-      <h3 class="gc-prossima__titolo">${esc(t.puntata)} ${p.n}</h3>
+      <h3 class="gc-prossima__titolo">${esc(nomePuntata(p))}</h3>
       <p class="gc-prossima__quando">${esc(quando(p.a, adesso, t, ctx.locale))}</p>
       <div class="gc-conto" aria-hidden="true">
         <div class="gc-conto__g"><b data-gc-conto="g">00</b><small>${esc(u.g)}</small></div>
@@ -330,6 +505,19 @@ function prossimaHtml(cal, t, ctx) {
         <a class="gc-palco" href="${esc(PODCAST.palco)}" target="_blank" rel="noopener noreferrer">${esc(t.apriPalco)} ${esc(palco)} ${ext}</a>
       </div>
       <p class="gc-nota">${esc(t.notaInvito(palco))}</p>
+    </section>`
+  }
+  if (cal.rimandata) {
+    const p = cal.rimandata
+    return `<section class="gc-prossima gc-prossima--rimandata" aria-label="${esc(`${nomePuntata(p)}: ${t.rimandata}, ${t.aData}`)}">
+      <span class="gc-chip gc-chip--ambra">${esc(t.rimandata)}</span>
+      <h3 class="gc-prossima__titolo">${esc(`EP ${p.n}`)}</h3>
+      <p class="gc-prossima__quando gc-prossima__quando--data">${esc(t.aData)}</p>
+      <div class="gc-azioni">
+        <a class="gc-unisciti" href="${esc(PODCAST.invito)}" target="_blank" rel="noopener noreferrer">${esc(t.entra)}<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></svg></a>
+        <a class="gc-palco" href="${esc(PODCAST.palco)}" target="_blank" rel="noopener noreferrer">${esc(t.apriPalco)} ${esc(palco)} ${ext}</a>
+      </div>
+      <p class="gc-nota">${esc(t.notaRimandata)}</p>
     </section>`
   }
   return `<section class="gc-prossima gc-prossima--niente" aria-label="${esc(t.prossima)}">
@@ -353,115 +541,53 @@ function redHtml(r, i, t, ctx) {
   const c = colori(r, ctx, true)
   const banner = percorso(f.banner), anim = ctx.heavy ? percorso(f.bannerAnim) : ''
   const deco = percorso(f.deco), decoAnim = ctx.heavy ? percorso(f.decoAnim) : ''
-  return `<li><button type="button" class="gc-red${c.neutro ? ' gc-red--neutro' : ''}" data-gc-red="${i}" style="${c.css}" aria-haspopup="dialog" aria-label="${esc(t.apri(r.nome))}">
+  const sop = r.soprannome || r.nome
+  return `<li><button type="button" class="gc-red${c.neutro ? ' gc-red--neutro' : ''}" data-gc-red="${i}" style="${c.css}" aria-haspopup="dialog" aria-label="${esc(`${t.apri(r.nome)} · ${t.castTag(sop)}`)}">
     <span class="gc-red__banner">${banner ? `<img src="${esc(banner)}"${anim ? ` data-anim="${esc(anim)}"` : ''} alt="" loading="lazy" decoding="async" draggable="false">` : ''}</span>
     <span class="gc-red__av"><img class="gc-red__img" src="${esc(percorso(f.avatar) || '/me.png')}" alt="" width="72" height="72" loading="lazy" decoding="async" draggable="false">${deco ? `<img class="gc-red__deco" src="${esc(deco)}"${decoAnim ? ` data-anim="${esc(decoAnim)}"` : ''} alt="" loading="lazy" decoding="async" draggable="false">` : ''}</span>
-    <span class="gc-red__nome${n.font ? ' is-font' : ''}${largo(r.nome) ? ' is-largo' : ''}" style="${n.css}">${esc(r.nome)}</span>
-    <span class="gc-red__user">${esc(r.username)}</span>
+    <span class="gc-red__sop">${esc(sop)}</span>
+    ${r.nome && r.nome !== sop ? `<span class="gc-red__nome${n.font ? ' is-font' : ''}${largo(r.nome) ? ' is-largo' : ''}" style="${n.css}">${esc(r.nome)}</span>` : ''}
+    <span class="gc-red__user">@${esc(r.username)}</span>
     ${r.gilda?.tag ? `<span class="gc-red__tag">${percorso(r.gilda.stemma) ? `<img src="${esc(percorso(r.gilda.stemma))}" alt="" width="14" height="14">` : ''}${esc(r.gilda.tag)}</span>` : ''}
   </button></li>`
 }
 
 function puntataHtml(p, cal, t, loc) {
-  const stato = cal.onda === p ? 'onda' : p.f <= Date.now() ? 'andata' : 'arrivo'
-  const etichetta = { onda: t.ora, andata: t.andata, arrivo: t.inArrivo }[stato]
-  const orari = p.fine ? `${oraDi(p.a)} → ${oraDi(p.f)}` : `${oraDi(p.a)}`
-  const durata = p.fine ? ` · ${t.durata(Math.round((p.f - p.a) / MIN))}` : ''
+  const rimandata = !!p.rimandata
+  const stato = rimandata ? 'rimandata' : cal.onda === p ? 'onda' : p.f <= Date.now() ? 'andata' : 'arrivo'
+  const etichetta = { onda: t.ora, andata: t.andata, arrivo: t.inArrivo, rimandata: t.rimandata }[stato]
+  const orari = rimandata ? '' : p.fine ? `${oraDi(p.a)} → ${oraDi(p.f)}` : `${oraDi(p.a)}`
+  const durata = !rimandata && p.fine ? ` · ${t.durata(Math.round((p.f - p.a) / MIN))}` : ''
+  const spett = Number(p.spettatori ?? (p.n === 1 ? PODCAST.spettatoriIeri : 0)) || 0
+  const icona = stato === 'onda' ? '<i class="gc-rec"></i>' : stato === 'andata' ? '<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : stato === 'rimandata' ? '<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>' : ''
   return `<li class="gc-ep gc-ep--${stato}">
     <span class="gc-ep__n">#${p.n}</span>
     <div class="gc-ep__testo">
-      <div class="gc-ep__riga"><b>${esc(dataBreve(p.a, loc))}</b><span>${orari}${durata}</span><em class="gc-ep__stato">${stato === 'onda' ? '<i class="gc-rec"></i>' : stato === 'andata' ? '<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}${esc(etichetta)}</em></div>
-      ${p.argomenti.length ? `<div class="gc-ep__argo"><small>${esc(t.argomenti)}</small>${p.argomenti.map((a, i) => `<span><b>${i + 1}</b>${esc(a)}</span>`).join('')}</div>` : stato === 'andata' ? '' : `<div class="gc-ep__argo gc-ep__argo--vuoto"><small>${esc(t.nessunArgomento)}</small></div>`}
+      <div class="gc-ep__titolo"><b>${esc(nomePuntata(p))}</b>${spett ? `<span class="gc-ep__spett"><b>${spett}</b>${esc(t.spettatori)}<em>${esc(t.ieri)}</em></span>` : ''}</div>
+      <div class="gc-ep__riga">${rimandata ? `<b>${esc(t.aData)}</b>` : `<b>${esc(dataBreve(p.a, loc))}</b><span>${orari}${durata}</span>`}<em class="gc-ep__stato">${icona}${esc(etichetta)}</em></div>
     </div>
   </li>`
 }
 
-// ─── il nastro in basso: la puntata, i redattori, gli argomenti ──────────────
+// ─── il nastro in basso: la puntata, i redattori, i numeri di ieri, il voto ───
 function nastro(root, cal, t, red) {
   const s = root.querySelector('[data-scorre]')
   if (!s) return
   const pezzi = [`<span class="m">${esc(NOME)}</span>`]
-  if (cal.onda) pezzi.push(`<span>${esc(t.puntata)} ${cal.onda.n} · ${esc(t.inOnda)}</span>`)
-  else if (cal.prossima) pezzi.push(`<span>${esc(t.puntata)} ${cal.prossima.n} · ${esc(quando(cal.prossima.a, Date.now(), t, 'it-IT'))}</span>`)
+  if (cal.onda) pezzi.push(`<span>${esc(nomePuntata(cal.onda))} · ${esc(t.inOnda)}</span>`)
+  else if (cal.prossima) pezzi.push(`<span>${esc(nomePuntata(cal.prossima))} · ${esc(quando(cal.prossima.a, Date.now(), t, 'it-IT'))}</span>`)
+  else if (cal.rimandata) pezzi.push(`<span>EP ${cal.rimandata.n} · ${esc(t.rimandata)} · ${esc(t.aData)}</span>`)
   pezzi.push(`<span>${esc(PODCAST.nomePalco || 'OLLARE')}</span>`)
-  pezzi.push(`<span>${esc(t.redattori)}: ${red.map((r) => esc(r.nome)).join(' · ')}</span>`)
-  for (const p of [...cal.passate].reverse()) p.argomenti.forEach((a, i) => pezzi.push(`<span>#${p.n}.${i + 1} ${esc(a)}</span>`))
+  pezzi.push(`<span>${esc(t.redattori)}: ${red.map((r) => esc(r.soprannome || r.nome)).join(' · ')}</span>`)
+  for (const p of [...cal.passate].reverse()) {
+    pezzi.push(`<span>${esc(nomePuntata(p))}</span>`)
+    if (p.spettatori) pezzi.push(`<span>${p.spettatori} ${esc(t.spettatori)} · ${esc(t.ieri)}</span>`)
+  }
+  pezzi.push(`<span>${esc(t.voto)} · ${esc(t.votoNota)}</span>`)
   pezzi.push('<span>pzkko.it</span>')
   const h = `${pezzi.join('<i></i>')}<i></i>`
   s.innerHTML = h + h // due volte: scorre in tondo senza salti
   requestAnimationFrame(() => { s.style.setProperty('--durata', `${Math.max(24, s.scrollWidth / 2 / 46).toFixed(1)}s`) })
-}
-
-// ─── il rullo dell'argomento a caso ──────────────────────────────────────────
-function rullo(root, cal, t, ctx) {
-  const box = root.querySelector('[data-gc-rullo]')
-  if (!box) return
-  const nastroEl = box.querySelector('[data-nastro]'), nota = box.querySelector('[data-nota]'), btn = box.querySelector('[data-gira]')
-  const tutti = (PODCAST.argomenti || []).filter(Boolean)
-  const ultima = [...cal.passate].reverse().find((x) => x.argomenti.length)
-  let voci = [ultima?.argomenti.at(-1) || tutti[0] || NOME], corrente = 0, gira = false
-  const disegna = () => { nastroEl.innerHTML = voci.map((v, i) => `<div class="gc-voce${i === corrente ? ' is-scelta' : ''}" style="--n:${i}"><span>${esc(v)}</span></div>`).join('') }
-  const metti = (p, vel = 0) => { nastroEl.style.transform = `translate3d(0, calc(${(-p).toFixed(4)} * var(--voce)), 0)`; box.style.setProperty('--vel', Math.min(30, Math.abs(vel)).toFixed(2)) }
-  disegna()
-  metti(0)
-  btn?.addEventListener('click', () => {
-    if (gira || !tutti.length) return
-    const prima = voci[corrente]
-    const altri = tutti.filter((a) => a !== prima)
-    const scelto = altri[Math.floor(Math.random() * altri.length)] || prima
-    const giro = [prima]
-    for (let i = 0; i < 26; i++) giro.push(altri[Math.floor(Math.random() * altri.length)] || prima)
-    giro.push(scelto)
-    voci = giro
-    corrente = -1
-    const indice = giro.length - 1
-    const finito = () => {
-      corrente = indice
-      gira = false
-      box.dataset.fase = 'preso'
-      btn.disabled = false
-      btn.querySelector('span').textContent = t.giraAncora
-      if (nota) nota.textContent = t.tuo
-      // per non tenere nel DOM le 28 voci: si riparte dalla scelta
-      voci = [scelto]; corrente = 0; disegna(); metti(0)
-    }
-    if (ctx.reduced) { voci = [scelto]; corrente = 0; disegna(); metti(0); finito(); return }
-    gira = true
-    btn.disabled = true
-    box.dataset.fase = 'gira'
-    disegna()
-    metti(0)
-    let botto = false
-    const t0 = performance.now()
-    const passo = (ora) => {
-      const s = (ora - t0) / 1000 + GIRA_DA
-      const p = posizione(s, indice)
-      metti(p, (posizione(s + 0.02, indice) - posizione(s - 0.02, indice)) / 0.04)
-      if (!botto && s >= GIRA_FINO) {
-        botto = true
-        nastroEl.children[indice]?.classList.add('is-scelta')
-        esplodi(box)
-      }
-      if (s < GIRA_FINO + 0.9 && box.isConnected) requestAnimationFrame(passo)
-      else if (box.isConnected) finito()
-    }
-    requestAnimationFrame(passo)
-  })
-}
-
-function esplodi(box) {
-  box.classList.remove('botto')
-  void box.offsetWidth
-  box.classList.add('botto')
-  setTimeout(() => box.classList.remove('botto'), 1000)
-  const cor = box.querySelector('[data-cor]')
-  if (!cor) return
-  const seme = Math.random() * 1000
-  cor.innerHTML = Array.from({ length: 30 }, (_, i) => {
-    const a = caso(seme + i) * Math.PI * 2, d = 70 + caso(seme + i + 50) * 170
-    return `<i style="--dx:${(Math.cos(a) * d).toFixed(0)}px;--dy:${(Math.sin(a) * d * 0.55 - 40).toFixed(0)}px;--r:${(caso(seme + i + 90) * 720 - 360).toFixed(0)}deg;--w:${(7 + caso(seme + i + 9) * 7).toFixed(1)}px;background:${COLORI[i % COLORI.length]}"></i>`
-  }).join('')
-  setTimeout(() => { if (cor.isConnected) cor.replaceChildren() }, 1900)
 }
 
 // ─── la scheda del redattore: la stessa scheda del profilo, coi suoi colori ──
@@ -563,6 +689,7 @@ function schedaHtml(r, t, ctx) {
         </button>
         <div class="card__body">
           <h2 class="dname" id="gcp-nome"${n.font ? ' data-font' : ''} style="${n.css}">${esc(r.nome)}</h2>
+          ${r.soprannome ? `<p class="gcp-sop">${esc(t.castTag(r.soprannome))}</p>` : ''}
           <div class="uname"><span>${esc(r.username)}</span>${r.pronomi ? `<span class="pron">${esc(r.pronomi)}</span>` : ''}${r.gilda?.tag ? `<span class="gtag">${percorso(r.gilda.stemma) ? `<img src="${esc(percorso(r.gilda.stemma))}" alt="">` : ''}${esc(r.gilda.tag)}</span>` : ''}</div>
           ${badge ? `<div class="badges gcp-badges">${badge}</div>` : ''}
           <div class="actions">
@@ -574,7 +701,7 @@ function schedaHtml(r, t, ctx) {
             ${membro ? `<section class="sec"><h3 class="sec__h">${esc(t.membroDa)}</h3><p class="sec__p">${esc(membro)}</p></section>` : ''}
           </div>
           ${conns ? `<div class="box"><section class="sec"><h3 class="sec__h">${esc(t.collegamenti)}</h3><ul class="conns">${conns}</ul></section></div>` : ''}
-          <div class="box gcp-cast"><span class="gcp-cast__logo">${esc(NOME)}</span><span class="gcp-cast__ruolo">${esc(t.ruolo)}${prima ? ` · ${esc(t.dalla(prima.n, new Intl.DateTimeFormat(ctx.locale, { timeZone: TZ, day: 'numeric', month: 'short' }).format(prima.a)))}` : ''}</span></div>
+          <div class="box gcp-cast"><span class="gcp-cast__logo">${esc(NOME)}</span><span class="gcp-cast__sop">${esc(r.soprannome || r.nome)}</span><span class="gcp-cast__ruolo">${esc(t.ruolo)}${prima ? ` · ${esc(t.dalla(prima.n, new Intl.DateTimeFormat(ctx.locale, { timeZone: TZ, day: 'numeric', month: 'short' }).format(prima.a)))}` : ''}</span></div>
         </div>
         <div class="fx gcp-fx" data-fx aria-hidden="true"></div>
       </div>

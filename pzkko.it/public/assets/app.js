@@ -4,7 +4,7 @@
 // cornice e l'effetto veri. La musica (il suo Spotify, non quello di Lanyard), le app
 // aperte sul pc e dove è arrivano dalla vetrina (vetrina.js). Niente librerie.
 
-import { CONFIG, COLLECTIBLES, NAME_FONTS, SOCIALS, PERSONAL_SOCIALS, PROJECTS, TOOLS, LANGS } from './config.js'
+import { CONFIG, COLLECTIBLES, NAME_FONTS, SOCIALS, PERSONAL_SOCIALS, PROJECTS, TOOLS, LANGS, PODCAST } from './config.js'
 import { I18N, LINGUE, caricaLingua } from './i18n.js'
 import { ICONS } from './icons.js'
 import { MEDIA } from './media.js'
@@ -676,8 +676,9 @@ function mioRedattore() {
   const av = u?.avatar ?? p.avatar
   const deco = u && !fisso('decoration') ? u.avatar_decoration_data?.asset : p.decoration
   const g = u?.primary_guild?.identity_enabled ? { tag: u.primary_guild.tag, id: u.primary_guild.identity_guild_id, badge: u.primary_guild.badge } : (u ? null : p.guild)
+  const soprannome = (PODCAST.cast || []).find((c) => c.id === ID || c.username?.toLowerCase() === String(p.username).toLowerCase())?.soprannome
   return {
-    id: ID, tuo: true, username: p.username, nome: p.displayName, pronomi: p.pronouns || '', bio: p.bio || '',
+    id: ID, tuo: true, username: p.username, nome: p.displayName, soprannome, pronomi: p.pronouns || '', bio: p.bio || '',
     membroDa: sinceDate().toISOString(), tema: p.theme, coloreBanner: p.bannerColor,
     stileNome: u?.display_name_styles ?? p.nameStyle,
     gilda: g?.tag ? { tag: g.tag, stemma: ok(g.badge) && /^\d+$/.test(g.id) ? `${CDN}/clan-badges/${g.id}/${g.badge}.png?size=32` : '' } : null,
