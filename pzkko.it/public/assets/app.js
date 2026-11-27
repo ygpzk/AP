@@ -15,6 +15,9 @@ import { creaAdesso } from './adesso.js'
 import { creaArte } from './adesso-arte.js'
 import { creaScheda } from './scheda-attivita.js'
 import { provare } from './provare.js'
+// (27.11) le miniature vive: ogni copertina .art[data-mini] la disegna miniature/<chiave>.js (motore in miniature/index.js)
+import { avvia as avviaMiniature } from './miniature/index.js'
+avviaMiniature()
 
 const $ = (s, r = document) => r.querySelector(s)
 const $$ = (s, r = document) => [...r.querySelectorAll(s)]
@@ -467,7 +470,7 @@ function mediaHtml(p, { eager = false, chips = true, video = true } = {}) {
   const m = MEDIA[p.key], n = m?.shots.length || 0
   const [c1, c2, font, pat] = p.art || ['#9d00ff', '#2a0047', 'Pricedown', 'punti']
   const ink = lum(hex2rgb(c1)) > 0.45 ? '#141414' : '#ffffff'
-  return `<span class="art" data-pat="${esc(pat)}" style="--c1:${esc(c1)};--c2:${esc(c2)};--ink:${ink};--af:'${esc(font)}';--fs:${Math.min(11.5, 104 / Math.max(...p.title.split(' ').map((w) => w.length))).toFixed(1)}cqw">
+  return `<span class="art" data-mini="${esc(p.key)}" data-pat="${esc(pat)}" style="--c1:${esc(c1)};--c2:${esc(c2)};--ink:${ink};--af:'${esc(font)}';--fs:${Math.min(11.5, 104 / Math.max(...p.title.split(' ').map((w) => w.length))).toFixed(1)}cqw">
       <span class="art__title">${esc(p.title)}</span>
       ${m ? `<span class="art__shot"><img src="${esc(m.cover)}" alt="" width="1280" height="720" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" draggable="false">${m.video && video ? `<video muted loop playsinline preload="none" disableremoteplayback data-src="${esc(m.video.src)}" aria-hidden="true" tabindex="-1"></video>` : ''}</span>` : ''}
     </span>

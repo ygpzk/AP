@@ -1,0 +1,8 @@
+.mprova { margin: 0; background: #1e1f22; color: #dbdee1; font: 14px/1.4 "gg sans", system-ui, sans-serif; padding: 20px; }
+.mprova__testa h1 { font: 400 28px "Anton", sans-serif; margin: 0 0 4px; text-transform: lowercase; }
+.mprova__testa p { margin: 0 0 18px; opacity: .6; font-family: "gg mono", monospace; font-size: 12px; }
+.mprova__griglia { display: flex; flex-direction: column; gap: 18px; }
+.mprova__riga { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+.mprova__cella { display: flex; flex-direction: column; gap: 4px; }
+.mprova__cella small { font-family: "gg mono", monospace; font-size: 11px; opacity: .6; }
+.mprova .media { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; border-radius: 8px; background: #0c0c0c; border: 0; padding: 0; }
