@@ -102,38 +102,29 @@ export const NAME_FONTS = {
 
 // (27.11) Giugnoh's Cast, il podcast: il palco in bacheca (podcast.js). Si fa sul palco «@OLLARE PODCAST» del
 // server OLLARE. Le puntate si scrivono qui, a mano, con l'ora italiana e il fuso (+01:00 d'inverno, +02:00
-// d'estate); senza `fine`, una puntata resta «in onda» per `durata` minuti dall'inizio. Gli `argomenti` sono
-// quelli estratti dal rullo di Diretta OS. I redattori oltre a pzkko (che è questo profilo) stanno in
-// /media/cast/redattori.json, con le loro foto: li rinfresca scripts/cast-profili.py.
+// d'estate); senza `fine`, una puntata resta «in onda» per `durata` minuti dall'inizio. Una puntata ha sempre
+// un `titolo` (mai argomenti estratti); con `stato: 'rimandata'` non ha data e resta «a data da destinarsi».
+// `spettatoriIeri` è il massimo in simultanea della puntata di ieri, scritto a mano. I redattori oltre a pzkko
+// (che è questo profilo) stanno in /media/cast/redattori.json, con le loro foto: li rinfresca
+// scripts/cast-profili.py. `cast` dà i soprannomi e l'ordine in cui compaiono.
 export const PODCAST = {
   nome: "Giugnoh's Cast",
   invito: 'https://discord.gg/ollare',
   palco: 'https://discord.com/channels/1571451216893050891/1571499545337266276',
   nomePalco: '@OLLARE PODCAST',
   durata: 150,
+  cast: [
+    { id: '459791358899519498', username: 'pzkko', soprannome: 'Giugnoh' },
+    { username: '_sericco_', soprannome: 'Maggioh' },
+    { username: 'paky.glory_', soprannome: 'Aprileh' },
+  ],
+  spettatoriIeri: 17,
   puntate: [
-    { n: 1, inizio: '2026-11-26T23:00:00+01:00', fine: '2026-11-27T01:30:00+01:00', argomenti: ['Il tuo primo telefono', 'L’animale che vorresti in casa'] },
-    { n: 2, inizio: '2026-11-27T23:00:00+01:00' },
+    { n: 1, titolo: 'Attualità, Sessualità e Ambiente', inizio: '2026-11-26T23:00:00+01:00', fine: '2026-11-27T01:30:00+01:00', spettatori: 17 },
+    { n: 2, stato: 'rimandata' },
   ],
-  // il rullo «argomento a caso» della bacheca: gli stessi della regia di Diretta OS
-  argomenti: [
-    'La figuraccia più grande della tua vita', 'Pizza con l’ananas: sì o no?', 'Il gioco che ti ha cambiato la vita',
-    'Cosa faresti con un milione di euro domani', 'Il prof che non dimenticherai mai', 'Il superpotere più inutile che vorresti',
-    'Mantova è la città più bella d’Italia?', 'Red Bull: quante sono troppe?', 'La cosa più cringe che hai fatto alle medie',
-    'Un giorno da invisibile: cosa fai?', 'Il film che tutti amano e tu no', 'Meglio l’estate o l’inverno',
-    'Il cibo più sopravvalutato del mondo', 'Se potessi vivere dentro un videogioco', 'La canzone che ascolti di nascosto',
-    'Tre cose su un’isola deserta', 'Tortelli di zucca contro tutto il resto', 'Il tuo primo telefono',
-    'La teoria del complotto più assurda', 'Quante volte rimandi la sveglia', 'Il sogno più strano che ricordi',
-    'Il viaggio dei sogni', 'Cosa cambieresti della scuola', 'L’animale che vorresti in casa', 'Il meme dell’anno',
-    'La chiamata su Discord più lunga di sempre', 'Dove sarai fra dieci anni', 'Il regalo più brutto che hai ricevuto',
-    'La nebbia padana: pro e contro', 'Hai mai creduto a una bufala?', 'L’app che non cancelleresti mai',
-    'La serie tv da vedere per forza', 'Colazione dolce o salata', 'Il soprannome più strano che hai avuto',
-    'La cosa più costosa che hai rotto', 'CS2, Minecraft o Fortnite', 'Sindaco per un giorno: la prima legge',
-    'La paura più irrazionale', 'Il lavoro dei sogni da bambino', 'La lite più stupida con un amico',
-    'Cosa non manca mai nel tuo frigo', 'Il messaggio che non dovevi mandare', 'Gaming su pc o su console',
-    'Il posto più bello dove hai dormito', 'Una regola di casa che odiavi', 'La moda di adesso che non capisci',
-    'Il tuo record più inutile', 'Cosa compreresti con i $pzk',
-  ],
+  // il voto della bacheca: uno ogni sei ore, senza account (resta nel browser di chi vota)
+  voto: { ogniOre: 6 },
 }
 
 // I social. `icon` è il nome dell'icona in icons.js; `dark` il colore col tema scuro
