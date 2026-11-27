@@ -15,7 +15,7 @@ export const CONFIG = {
     displayName: 'pzkko',
     // (26.11) Il profilo «segnaletica»: cartello con la lumaca, banner «lavori in corso», tema
     // giallo → rosso, decorazione «Questionable», effetto «Boost Relic». Su Discord sta nel profilo
-    // del server SOLLARY, e Lanyard e dcdn danno solo il profilo principale, rimasto quello di prima:
+    // di un server, e Lanyard e dcdn danno solo il profilo principale, rimasto quello di prima:
     // perciò le voci elencate in `fisso` non si prendono dal vivo ma da qui (foto e banner sono file
     // del sito, in /media/profilo/). Quando il profilo principale di Discord diventa questo, basta
     // svuotare `fisso` e il sito torna a seguirlo da solo.
@@ -98,6 +98,42 @@ export const NAME_FONTS = {
   3: ['Sakura', 400, '.04em'], 4: ['Jellybean', 400, '0'], 6: ['Modern', 500, '.01em'], 7: ['Medieval', 400, '.02em'],
   8: ['8Bit', 400, '.02em'], 10: ['Vampyre', 400, '.01em'], 12: ['Tempo', 600, '.03em'], 13: ['Monkey Bars', 700, '0'],
   14: ['Mainframe', 700, '.03em'], 15: ['Headbang', 400, '0'], 16: ['Journal', 700, '0'], 17: ['Pricedown', 700, '0'],
+}
+
+// (27.11) Giugnoh's Cast, il podcast: il palco in bacheca (podcast.js). Si fa sul palco «@OLLARE PODCAST» del
+// server OLLARE. Le puntate si scrivono qui, a mano, con l'ora italiana e il fuso (+01:00 d'inverno, +02:00
+// d'estate); senza `fine`, una puntata resta «in onda» per `durata` minuti dall'inizio. Gli `argomenti` sono
+// quelli estratti dal rullo di Diretta OS. I redattori oltre a pzkko (che è questo profilo) stanno in
+// /media/cast/redattori.json, con le loro foto: li rinfresca scripts/cast-profili.py.
+export const PODCAST = {
+  nome: "Giugnoh's Cast",
+  invito: 'https://discord.gg/ollare',
+  palco: 'https://discord.com/channels/1571451216893050891/1571499545337266276',
+  nomePalco: '@OLLARE PODCAST',
+  durata: 150,
+  puntate: [
+    { n: 1, inizio: '2026-11-26T23:00:00+01:00', fine: '2026-11-27T01:30:00+01:00', argomenti: ['Il tuo primo telefono', 'L’animale che vorresti in casa'] },
+    { n: 2, inizio: '2026-11-27T23:00:00+01:00' },
+  ],
+  // il rullo «argomento a caso» della bacheca: gli stessi della regia di Diretta OS
+  argomenti: [
+    'La figuraccia più grande della tua vita', 'Pizza con l’ananas: sì o no?', 'Il gioco che ti ha cambiato la vita',
+    'Cosa faresti con un milione di euro domani', 'Il prof che non dimenticherai mai', 'Il superpotere più inutile che vorresti',
+    'Mantova è la città più bella d’Italia?', 'Red Bull: quante sono troppe?', 'La cosa più cringe che hai fatto alle medie',
+    'Un giorno da invisibile: cosa fai?', 'Il film che tutti amano e tu no', 'Meglio l’estate o l’inverno',
+    'Il cibo più sopravvalutato del mondo', 'Se potessi vivere dentro un videogioco', 'La canzone che ascolti di nascosto',
+    'Tre cose su un’isola deserta', 'Tortelli di zucca contro tutto il resto', 'Il tuo primo telefono',
+    'La teoria del complotto più assurda', 'Quante volte rimandi la sveglia', 'Il sogno più strano che ricordi',
+    'Il viaggio dei sogni', 'Cosa cambieresti della scuola', 'L’animale che vorresti in casa', 'Il meme dell’anno',
+    'La chiamata su Discord più lunga di sempre', 'Dove sarai fra dieci anni', 'Il regalo più brutto che hai ricevuto',
+    'La nebbia padana: pro e contro', 'Hai mai creduto a una bufala?', 'L’app che non cancelleresti mai',
+    'La serie tv da vedere per forza', 'Colazione dolce o salata', 'Il soprannome più strano che hai avuto',
+    'La cosa più costosa che hai rotto', 'CS2, Minecraft o Fortnite', 'Sindaco per un giorno: la prima legge',
+    'La paura più irrazionale', 'Il lavoro dei sogni da bambino', 'La lite più stupida con un amico',
+    'Cosa non manca mai nel tuo frigo', 'Il messaggio che non dovevi mandare', 'Gaming su pc o su console',
+    'Il posto più bello dove hai dormito', 'Una regola di casa che odiavi', 'La moda di adesso che non capisci',
+    'Il tuo record più inutile', 'Cosa compreresti con i $pzk',
+  ],
 }
 
 // I social. `icon` è il nome dell'icona in icons.js; `dark` il colore col tema scuro

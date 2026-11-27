@@ -1,9 +1,9 @@
-// La scheda #community: i numeri pubblici di OLLARE e SOLLARY dentro il profilo.
-// Si carica solo quando la scheda si apre (import dinamico da app.js) e rilegge
-// /api/community, che a sua volta legge solo gli inviti pubblici di Discord.
+// La scheda #community: i numeri pubblici di OLLARE dentro il profilo (dal 27.11 solo OLLARE, il server dove si fa il
+// podcast). Si carica solo quando la scheda si apre (import dinamico da app.js) e rilegge /api/community, che a sua
+// volta legge solo l'invito pubblico di Discord.
 //
-// Niente nomi, niente messaggi, niente canali vocali: qui passano membri, online,
-// boost, tier, verifica e l'anno di nascita del server. Il resto resta fuori.
+// Niente nomi, niente messaggi, niente canali vocali: qui passano membri, online, boost, tier, verifica e l'anno di
+// nascita del server. Il resto resta fuori.
 
 const NUM = new Intl.NumberFormat('it-IT', { useGrouping: true })
 const PCT = new Intl.NumberFormat('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
@@ -15,140 +15,110 @@ const ORA = new Intl.DateTimeFormat('en-GB', {
 
 const REFRESH = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0 .6 4"/><path d="M20 4v7h-7"/></svg>'
 const EXT = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>'
+const TIER3 = 14 // i boost che servono per il Tier 3
 
 const TESTI = {
   it: {
     kicker: 'Community · dati pubblici',
-    title1: 'OLLARE e SOLLARY,',
+    title1: 'OLLARE,',
     title2: 'in chiaro.',
-    text: 'Membri, presenze e boost letti dagli inviti pubblici. Nessun nome, nessun canale vocale, nessuno storico di persone.',
+    text: 'Membri, presenze e boost letti dall’invito pubblico. Nessun nome, nessun canale vocale, nessuno storico di persone.',
     refresh: 'Aggiorna',
     updating: 'Aggiorno…',
     updated: 'aggiornato',
     noNames: 'membri tracciati',
-    servers: 'Server',
     members: 'Membri',
     online: 'Online ora',
-    boost: 'Boost',
-    membersNote: 'somma degli iscritti',
-    onlineNote: 'presenze dichiarate',
-    boostNote: 'potenziamenti dei due server',
-    serversLead: 'OLLARE è piccola e appena nata; SOLLARY è un server pubblico grande. I numeri sono quelli che Discord mostra a chiunque apra l’invito.',
     presence: 'Presenza',
+    boost: 'Boost',
+    membersNote: 'iscritti al server',
+    onlineNote: 'presenze dichiarate',
+    presenceNote: 'online ÷ membri',
+    boostNote: (tier) => `Tier ${tier}`,
+    serverLead: 'OLLARE è nato il 15 novembre 2026 ed è casa di Giugnoh’s Cast: il podcast va in onda sul suo palco. I numeri sono quelli che Discord mostra a chiunque apra l’invito.',
     tier: 'Tier',
     verification: 'Verifica',
     since: 'Dal',
     join: 'Apri invito',
     community: 'Community',
     tag: 'Tag',
-    membersTitle: 'Membri',
     presenceTitle: 'Presenza online',
     boostTitle: 'Boost',
-    scaleLinear: 'scala lineare',
-    scalePresence: (max) => `scala 0–${max}%`,
-    boosts: 'potenziamenti',
-    membersNote1: 'SOLLARY è circa ',
-    membersNote2: ' volte OLLARE. La barra parte da zero: per questo OLLARE si vede appena.',
-    presenceNote: (nome, pct) => `${nome} ha la quota più alta di persone online (${pct}). L’altro server ha più persone in assoluto.`,
-    boostNote: 'Il Tier 3 si raggiunge con 14 boost: il resto è margine.',
-    together: 'Insieme adesso',
-    twoServers: 'i due server',
     onlineWord: 'online',
-    togetherNote1: 'persone online su ',
-    togetherNote2: ' iscritte, sommando i due server.',
+    presenceLong: (on, tot) => `${on} persone online su ${tot} iscritte.`,
+    boostLong: (n) => `${n} boost: il Tier 3 si raggiunge con 14, il resto è margine.`,
     percentNote: 'Le percentuali sono calcolate sui conteggi approssimativi; non sono una misura del traffico interno né delle ore vocali.',
+    castTitle: 'Sul palco',
+    castText: 'Giugnoh’s Cast, il podcast, si fa in diretta sul palco @OLLARE PODCAST. Le puntate, i redattori e il conto alla rovescia sono in bacheca.',
+    castCta: 'Vai al podcast',
     methodSection: 'Metodo',
-    methodTitle: 'Il patto, in chiaro.',
-    methodLead: 'La differenza tra una statistica pubblica e una sorveglianza. Qui sta tutto il patto.',
     method: [
       { title: 'Fonte pubblica', text: 'Leggo l’endpoint pubblico degli inviti di Discord, con cache di cinque minuti. I numeri sono quelli che Discord dà a chiunque apra l’invito.' },
-      { title: 'Niente persone', text: 'Non leggo nomi, messaggi, canali vocali o attività individuali. Non c’è un bot dentro OLLARE o SOLLARY e non c’è uno storico di chi entra o esce.' },
-      { title: 'Vocali e clip: solo con un bot tuo', text: 'Per ore vocali aggregate, zona clip ed eventi del podcast serve un bot autorizzato dagli admin in un server tuo. Qui non lo simulo e non lo faccio di nascosto.' },
+      { title: 'Niente persone', text: 'Non leggo nomi, messaggi, canali vocali o attività individuali. Non c’è un bot dentro OLLARE e non c’è uno storico di chi entra o esce.' },
+      { title: 'Vocali e clip: solo con un bot', text: 'Per ore vocali aggregate, zona clip ed eventi del podcast serve un bot autorizzato dagli admin del server. Qui non lo simulo e non lo faccio di nascosto.' },
     ],
     privacy: { label: 'Privacy', text: 'Questa scheda non usa cookie e non conserva dati personali: la funzione serverless tiene in memoria solo i conteggi aggregati per cinque minuti e un’impronta dell’IP per il limite di richieste.' },
-    brand: { label: 'Marchi', text: 'OLLARE e SOLLARY appartengono ai loro proprietari. Questa scheda non è affiliata a Discord Inc.' },
+    brand: { label: 'Marchi', text: 'OLLARE appartiene ai suoi proprietari. Questa scheda non è affiliata a Discord Inc.' },
     avviso: 'Non riesco a rileggere adesso: restano i numeri dell’ultima lettura.',
-    partial: 'Un server non ha risposto: i numeri possono essere parziali. Riprova fra poco.',
+    partial: 'Il server non ha risposto: restano i numeri dell’ultima lettura buona. Riprova fra poco.',
     verificaNomi: ['Nessuna', 'Bassa', 'Media', 'Alta', 'Molto alta'],
   },
   en: {
     kicker: 'Community · public data',
-    title1: 'OLLARE and SOLLARY,',
+    title1: 'OLLARE,',
     title2: 'in the open.',
-    text: 'Members, presence and boosts read from public invites. No names, no voice channels, no history of people.',
+    text: 'Members, presence and boosts read from the public invite. No names, no voice channels, no history of people.',
     refresh: 'Refresh',
     updating: 'Refreshing…',
     updated: 'updated',
     noNames: 'members tracked',
-    servers: 'Servers',
     members: 'Members',
     online: 'Online now',
-    boost: 'Boosts',
-    membersNote: 'sum of members',
-    onlineNote: 'reported presence',
-    boostNote: 'boosts across both',
-    serversLead: 'OLLARE is small and brand new; SOLLARY is a large public server. These are the numbers Discord shows to anyone opening the invite.',
     presence: 'Presence',
+    boost: 'Boosts',
+    membersNote: 'server members',
+    onlineNote: 'reported presence',
+    presenceNote: 'online ÷ members',
+    boostNote: (tier) => `Tier ${tier}`,
+    serverLead: 'OLLARE was born on 15 November 2026 and is home to Giugnoh’s Cast: the podcast airs on its stage. These are the numbers Discord shows to anyone opening the invite.',
     tier: 'Tier',
     verification: 'Verification',
     since: 'Since',
     join: 'Open invite',
     community: 'Community',
     tag: 'Tag',
-    membersTitle: 'Members',
     presenceTitle: 'Online presence',
     boostTitle: 'Boosts',
-    scaleLinear: 'linear scale',
-    scalePresence: (max) => `0–${max}% scale`,
-    boosts: 'boosts',
-    membersNote1: 'SOLLARY is about ',
-    membersNote2: ' times OLLARE. The bar starts at zero: that’s why OLLARE is barely visible.',
-    presenceNote: (nome, pct) => `${nome} has the highest share of people online (${pct}). The other server has more people overall.`,
-    boostNote: 'Tier 3 is reached with 14 boosts: the rest is headroom.',
-    together: 'Together now',
-    twoServers: 'both servers',
     onlineWord: 'online',
-    togetherNote1: 'people online out of ',
-    togetherNote2: ' members, across both servers.',
+    presenceLong: (on, tot) => `${on} people online out of ${tot} members.`,
+    boostLong: (n) => `${n} boosts: Tier 3 takes 14, the rest is headroom.`,
     percentNote: 'Percentages use approximate counts; they are not a measure of internal traffic or voice hours.',
+    castTitle: 'On stage',
+    castText: 'Giugnoh’s Cast, the podcast, goes out live on the @OLLARE PODCAST stage. Episodes, hosts and the countdown are on the board.',
+    castCta: 'Go to the podcast',
     methodSection: 'Method',
-    methodTitle: 'The deal, in the open.',
-    methodLead: 'The difference between a public statistic and surveillance. This is the whole deal.',
     method: [
       { title: 'Public source', text: 'I read Discord’s public invite endpoint, cached for five minutes. These are the numbers Discord gives anyone opening the invite.' },
-      { title: 'No people', text: 'I don’t read names, messages, voice channels or individual activity. There is no bot inside OLLARE or SOLLARY and no history of who joins or leaves.' },
-      { title: 'Voice and clips: only with your bot', text: 'Aggregate voice hours, a clips zone and podcast events need a bot authorised by the admins in a server you own. I don’t simulate it and I don’t do it secretly.' },
+      { title: 'No people', text: 'I don’t read names, messages, voice channels or individual activity. There is no bot inside OLLARE and no history of who joins or leaves.' },
+      { title: 'Voice and clips: only with a bot', text: 'Aggregate voice hours, a clips zone and podcast events need a bot authorised by the server admins. I don’t simulate it and I don’t do it secretly.' },
     ],
     privacy: { label: 'Privacy', text: 'This tab uses no cookies and stores no personal data: the serverless function only keeps aggregate counts in memory for five minutes and a hash of the IP for rate limiting.' },
-    brand: { label: 'Trademarks', text: 'OLLARE and SOLLARY belong to their owners. This tab is not affiliated with Discord Inc.' },
+    brand: { label: 'Trademarks', text: 'OLLARE belongs to its owners. This tab is not affiliated with Discord Inc.' },
     avviso: 'I can’t refresh right now: the numbers from the last read stay.',
-    partial: 'One server didn’t respond: the numbers may be partial. Try again shortly.',
+    partial: 'The server didn’t respond: the numbers from the last good read stay. Try again shortly.',
     verificaNomi: ['None', 'Low', 'Medium', 'High', 'Very high'],
   },
 }
 
-// I due server. I numeri sono la fotografia del 24.11.2026: se l'API non
-// risponde, la scheda resta leggibile e dice che sono quelli dell'ultima lettura.
-const BASE = [
-  {
-    codice: 'ollare', nome: 'OLLARE', tag: 'LEAN', invito: 'https://discord.gg/ollare',
-    icona: 'https://cdn.discordapp.com/icons/1571451216893050891/a_d823b4f1b373f417daefcd4d217728e3.png?size=128',
-    sotto: { it: '@OLLARE #0.2k · tag LEAN', en: '@OLLARE #0.2k · LEAN tag' },
-    membri: 205, online: 52, boost: 19, tier: 3, verifica: 2, creato: '2026-11-15T09:06:06.259Z',
-  },
-  {
-    codice: 'sollary', nome: 'SOLLARY', tag: 'SOLL', invito: 'https://discord.gg/sollary',
-    icona: 'https://cdn.discordapp.com/icons/703694620617343077/a_37546f7ec7fcf3c024c0378dfc373403.png?size=128',
-    sotto: { it: 'Social · Gaming · Discord Italia', en: 'Social · Gaming · Discord Italy' },
-    membri: 70677, online: 6477, boost: 133, tier: 3, verifica: 4, creato: '2020-04-25T19:51:11.569Z',
-  },
-]
-
-const RISERVA = {
-  aggiornato: '2026-11-24T01:54:00.701Z',
-  parziale: false,
-  server: BASE,
+// Il server. I numeri sono la fotografia del 24.11.2026: se l'API non risponde, la scheda resta leggibile e dice che
+// sono quelli dell'ultima lettura.
+const BASE = {
+  codice: 'ollare', nome: 'OLLARE', tag: 'LEAN', invito: 'https://discord.gg/ollare',
+  icona: 'https://cdn.discordapp.com/icons/1571451216893050891/a_d823b4f1b373f417daefcd4d217728e3.png?size=128',
+  sotto: { it: '@OLLARE #0.2k · tag LEAN', en: '@OLLARE #0.2k · LEAN tag' },
+  membri: 205, online: 52, boost: 19, tier: 3, verifica: 2, creato: '2026-11-15T09:06:06.259Z',
 }
+const RISERVA = { aggiornato: '2026-11-24T01:54:00.701Z', parziale: false, server: [BASE] }
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
 const pick = (v, lang) => (typeof v === 'string' ? v : v?.[lang] || v?.en || v?.it || '')
@@ -171,42 +141,8 @@ function anno(iso) {
   return Number.isFinite(d.getFullYear()) ? String(d.getFullYear()) : '—'
 }
 
-function serverCard(s, t, lang) {
-  const presenza = pct(s.online, s.membri)
-  return `<article class="cm-server" data-cm-server="${s.codice}">
-    <div class="cm-server__top">
-      <img class="cm-server__ico" src="${esc(s.icona)}" alt="" width="48" height="48" loading="lazy" data-cm-icona>
-      <div class="cm-server__name"><h3>${esc(s.nome)}</h3><p>${esc(pick(s.sotto, lang))}</p></div>
-      <a class="cm-server__join" href="${esc(s.invito)}" target="_blank" rel="noopener noreferrer">${esc(t.join)} ${EXT}</a>
-    </div>
-    <div class="cm-server__nums">
-      <div><span>${esc(t.members)}</span><b data-cm-campo="membri">${NUM.format(s.membri)}</b></div>
-      <div><span>${esc(t.online)}</span><b data-cm-campo="online">${NUM.format(s.online)}</b></div>
-      <div><span>${esc(t.presence)}</span><b data-cm-campo="presenza">${PCT.format(presenza)}%</b></div>
-    </div>
-    <div class="cm-track" role="img" aria-label="${NUM.format(s.online)} / ${NUM.format(s.membri)} · ${PCT.format(presenza)}%">
-      <i data-cm-campo="barra" style="--cm-p:${Math.min(100, presenza).toFixed(2)}%"></i>
-    </div>
-    <div class="cm-facts">
-      <div class="cm-fact"><span>${esc(t.tier)}</span><b data-cm-campo="tier">${s.tier}</b></div>
-      <div class="cm-fact"><span>${esc(t.boost)}</span><b data-cm-campo="boost">${NUM.format(s.boost)}</b></div>
-      <div class="cm-fact"><span>${esc(t.verification)}</span><b data-cm-campo="verifica">${esc(t.verificaNomi[s.verifica] || '—')}</b></div>
-      <div class="cm-fact"><span>${esc(t.since)}</span><b data-cm-campo="creato">${anno(s.creato)}</b></div>
-    </div>
-    <div class="cm-tags"><span class="tag">${esc(t.community)}</span><span class="tag">${esc(t.tag)} ${esc(s.tag)}</span><span class="tag">${esc(t.tier)} ${s.tier}</span></div>
-  </article>`
-}
-
-function brow(key, nome, valore, testo) {
-  return `<div class="cm-brow"><span class="cm-brow__name">${nome}</span><div class="cm-track"><i data-cm-compare="${key}" style="--cm-p:${valore.toFixed(2)}%"></i></div><b data-cm-valore="${key}">${testo}</b></div>`
-}
-
 function markup(t, lang) {
-  const o = BASE[0], s = BASE[1]
-  const oPres = pct(o.online, o.membri), sPres = pct(s.online, s.membri)
-  const totaleMembri = o.membri + s.membri, totaleOnline = o.online + s.online, totaleBoost = o.boost + s.boost
-  const totalePres = pct(totaleOnline, totaleMembri)
-  const alta = oPres >= sPres ? o : s
+  const s = BASE, pres = pct(s.online, s.membri)
   return `<div class="cm-tab">
   <section class="cm-banner cm-banner--tab">
     <img class="cm-banner__art" src="/assets/community/hero.svg" alt="" width="1200" height="760" loading="lazy" aria-hidden="true">
@@ -224,46 +160,57 @@ function markup(t, lang) {
   </section>
 
   <div class="cm-kpis">
-    <article class="cm-kpi"><span>${esc(t.servers)}</span><b data-cm-totale="server">${BASE.length}</b><small>OLLARE · SOLLARY</small></article>
-    <article class="cm-kpi"><span>${esc(t.members)}</span><b data-cm-totale="membri">${NUM.format(totaleMembri)}</b><small>${esc(t.membersNote)}</small></article>
-    <article class="cm-kpi"><span>${esc(t.online)}</span><b data-cm-totale="online">${NUM.format(totaleOnline)}</b><small>${esc(t.onlineNote)}</small></article>
-    <article class="cm-kpi"><span>${esc(t.boost)}</span><b data-cm-totale="boost">${NUM.format(totaleBoost)}</b><small>${esc(t.boostNote)}</small></article>
+    <article class="cm-kpi"><span>${esc(t.members)}</span><b data-cm-campo="membri">${NUM.format(s.membri)}</b><small>${esc(t.membersNote)}</small></article>
+    <article class="cm-kpi"><span>${esc(t.online)}</span><b data-cm-campo="online">${NUM.format(s.online)}</b><small>${esc(t.onlineNote)}</small></article>
+    <article class="cm-kpi"><span>${esc(t.presence)}</span><b data-cm-campo="presenza">${PCT.format(pres)}%</b><small>${esc(t.presenceNote)}</small></article>
+    <article class="cm-kpi"><span>${esc(t.boost)}</span><b data-cm-campo="boost">${NUM.format(s.boost)}</b><small data-cm-campo="tier-nota">${esc(t.boostNote(s.tier))}</small></article>
   </div>
 
-  <p class="cm-fine cm-fine--lead">${esc(t.serversLead)}</p>
-  <div class="cm-servers">${BASE.map((x) => serverCard(x, t, lang)).join('')}</div>
-  <p class="cm-fine">${esc(t.presence)} = online ÷ ${esc(t.members.toLowerCase())}. ${esc(t.percentNote)}</p>
+  <p class="cm-fine cm-fine--lead">${esc(t.serverLead)}</p>
+  <div class="cm-servers">
+    <article class="cm-server" data-cm-server="${s.codice}">
+      <div class="cm-server__top">
+        <img class="cm-server__ico" src="${esc(s.icona)}" alt="" width="48" height="48" loading="lazy" data-cm-icona>
+        <div class="cm-server__name"><h3>${esc(s.nome)}</h3><p>${esc(pick(s.sotto, lang))}</p></div>
+        <a class="cm-server__join" href="${esc(s.invito)}" target="_blank" rel="noopener noreferrer">${esc(t.join)} ${EXT}</a>
+      </div>
+      <div class="cm-server__nums">
+        <div><span>${esc(t.members)}</span><b data-cm-campo="membri">${NUM.format(s.membri)}</b></div>
+        <div><span>${esc(t.online)}</span><b data-cm-campo="online">${NUM.format(s.online)}</b></div>
+        <div><span>${esc(t.presence)}</span><b data-cm-campo="presenza">${PCT.format(pres)}%</b></div>
+      </div>
+      <div class="cm-track" role="img" aria-label="${NUM.format(s.online)} / ${NUM.format(s.membri)} · ${PCT.format(pres)}%">
+        <i data-cm-campo="barra" style="--cm-p:${Math.min(100, pres).toFixed(2)}%"></i>
+      </div>
+      <div class="cm-facts">
+        <div class="cm-fact"><span>${esc(t.tier)}</span><b data-cm-campo="tier">${s.tier}</b></div>
+        <div class="cm-fact"><span>${esc(t.boost)}</span><b data-cm-campo="boost">${NUM.format(s.boost)}</b></div>
+        <div class="cm-fact"><span>${esc(t.verification)}</span><b data-cm-campo="verifica">${esc(t.verificaNomi[s.verifica] || '—')}</b></div>
+        <div class="cm-fact"><span>${esc(t.since)}</span><b data-cm-campo="creato">${anno(s.creato)}</b></div>
+      </div>
+      <div class="cm-tags"><span class="tag">${esc(t.community)}</span><span class="tag">${esc(t.tag)} ${esc(s.tag)}</span><span class="tag" data-cm-campo="tier-tag">${esc(t.tier)} ${s.tier}</span></div>
+    </article>
+  </div>
+  <p class="cm-fine">${esc(t.percentNote)}</p>
 
   <div class="cm-compare">
     <article class="cm-panel">
-      <div class="cm-panel__h"><span>${esc(t.membersTitle)}</span><span>${esc(t.scaleLinear)}</span></div>
-      ${brow('membri-ollare', 'OLLARE', (o.membri / s.membri) * 100, NUM.format(o.membri))}
-      ${brow('membri-sollary', 'SOLLARY', 100, NUM.format(s.membri))}
-      <p class="cm-fine">${esc(t.membersNote1)}<b data-cm-ratio>${NUM.format(Math.round(s.membri / o.membri))}</b>${esc(t.membersNote2)}</p>
-    </article>
-
-    <article class="cm-panel">
-      <div class="cm-panel__h"><span>${esc(t.presenceTitle)}</span><span data-cm-scala="presenza">${esc(t.scalePresence(30))}</span></div>
-      ${brow('presenza-ollare', 'OLLARE', (oPres / 30) * 100, `${PCT.format(oPres)}%`)}
-      ${brow('presenza-sollary', 'SOLLARY', (sPres / 30) * 100, `${PCT.format(sPres)}%`)}
-      <p class="cm-fine" data-cm-nota="presenza">${esc(t.presenceNote(alta.nome, `${PCT.format(pct(alta.online, alta.membri))}%`))}</p>
-    </article>
-
-    <article class="cm-panel">
-      <div class="cm-panel__h"><span>${esc(t.boostTitle)}</span><span>${esc(t.boosts)}</span></div>
-      ${brow('boost-ollare', 'OLLARE', (o.boost / s.boost) * 100, NUM.format(o.boost))}
-      ${brow('boost-sollary', 'SOLLARY', 100, NUM.format(s.boost))}
-      <p class="cm-fine">${esc(t.boostNote)}</p>
-    </article>
-
-    <article class="cm-panel">
-      <div class="cm-panel__h"><span>${esc(t.together)}</span><span>${esc(t.twoServers)}</span></div>
+      <div class="cm-panel__h"><span>${esc(t.presenceTitle)}</span><span>OLLARE</span></div>
       <div class="cm-donut-wrap">
-        <div class="cm-donut" data-cm-donut style="--cm-p:${totalePres.toFixed(1)}" role="img" aria-label="${PCT.format(totalePres)}% ${esc(t.onlineWord)}: ${NUM.format(totaleOnline)} / ${NUM.format(totaleMembri)}">
-          <div><b data-cm-donut-valore>${PCT.format(totalePres)}%</b><span>${esc(t.onlineWord)}</span></div>
+        <div class="cm-donut" data-cm-donut style="--cm-p:${pres.toFixed(1)}" role="img" aria-label="${PCT.format(pres)}% ${esc(t.onlineWord)}: ${NUM.format(s.online)} / ${NUM.format(s.membri)}">
+          <div><b data-cm-campo="presenza">${PCT.format(pres)}%</b><span>${esc(t.onlineWord)}</span></div>
         </div>
-        <div class="cm-donut-txt"><p><b data-cm-valore="online-totale">${NUM.format(totaleOnline)}</b> ${esc(t.togetherNote1)}<b data-cm-valore="membri-totale">${NUM.format(totaleMembri)}</b>${esc(t.togetherNote2)}</p></div>
+        <div class="cm-donut-txt"><p data-cm-campo="presenza-testo">${esc(t.presenceLong(NUM.format(s.online), NUM.format(s.membri)))}</p></div>
       </div>
+    </article>
+
+    <article class="cm-panel">
+      <div class="cm-panel__h"><span>${esc(t.boostTitle)}</span><span>Tier 3 = ${TIER3}</span></div>
+      <div class="cm-brow"><span class="cm-brow__name">OLLARE</span><div class="cm-track"><i data-cm-campo="boost-barra" style="--cm-p:${Math.min(100, (s.boost / TIER3) * 100).toFixed(2)}%"></i></div><b data-cm-campo="boost">${NUM.format(s.boost)}</b></div>
+      <p class="cm-fine" data-cm-campo="boost-testo">${esc(t.boostLong(NUM.format(s.boost)))}</p>
+      <div class="cm-panel__h" style="margin-top:14px"><span>${esc(t.castTitle)}</span></div>
+      <p class="cm-fine cm-fine--lead">${esc(t.castText)}</p>
+      <button type="button" class="btn btn--ghost" style="margin-top:10px" data-cm-podcast>${esc(t.castCta)} →</button>
     </article>
   </div>
 
@@ -277,121 +224,53 @@ function markup(t, lang) {
 </div>`
 }
 
-function setAll(root, sel, testo) {
-  for (const el of root.querySelectorAll(sel)) el.textContent = testo
-}
-
-function setCampo(card, campo, testo) {
-  const el = card.querySelector(`[data-cm-campo="${campo}"]`)
-  if (el) el.textContent = testo
-}
-
-function setBarra(root, chiave, valore) {
-  const el = root.querySelector(`[data-cm-compare="${chiave}"]`)
-  if (el) el.style.setProperty('--cm-p', `${Math.max(0, Math.min(100, valore)).toFixed(2)}%`)
-}
-
-function setValore(root, chiave, testo) {
-  setAll(root, `[data-cm-valore="${chiave}"]`, testo)
+function setCampo(root, campo, testo) {
+  for (const el of root.querySelectorAll(`[data-cm-campo="${campo}"]`)) el.textContent = testo
 }
 
 function applica(root, dati, t) {
-  const server = Array.isArray(dati?.server) ? dati.server : []
-  const per = new Map(server.map((s) => [s.codice, s]))
-  let completo = server.length >= BASE.length
-  const valori = []
+  const d = (Array.isArray(dati?.server) ? dati.server : []).find((s) => s.codice === BASE.codice)
+  const membri = num(d?.membri) ?? BASE.membri
+  const online = num(d?.online) ?? BASE.online
+  const boost = num(d?.boost) ?? BASE.boost
+  const tier = num(d?.tier) ?? BASE.tier
+  const verifica = num(d?.verifica) ?? BASE.verifica
+  const creato = d?.creato || BASE.creato
+  const presenza = pct(online, membri)
 
-  for (const base of BASE) {
-    const d = per.get(base.codice)
-    const membri = num(d?.membri) ?? base.membri
-    const online = num(d?.online) ?? base.online
-    const boost = num(d?.boost) ?? base.boost
-    const tier = num(d?.tier) ?? base.tier
-    const verifica = num(d?.verifica) ?? base.verifica
-    const creato = d?.creato || base.creato
-    if (num(d?.membri) == null || num(d?.online) == null) completo = false
-    const presenza = pct(online, membri)
-    valori.push({ ...base, membri, online, boost, tier, verifica, creato, presenza })
+  setCampo(root, 'membri', NUM.format(membri))
+  setCampo(root, 'online', NUM.format(online))
+  setCampo(root, 'presenza', `${PCT.format(presenza)}%`)
+  setCampo(root, 'boost', NUM.format(boost))
+  setCampo(root, 'tier', String(tier))
+  setCampo(root, 'tier-tag', `${t.tier} ${tier}`)
+  setCampo(root, 'tier-nota', t.boostNote(tier))
+  setCampo(root, 'verifica', t.verificaNomi[verifica] || '—')
+  setCampo(root, 'creato', anno(creato))
+  setCampo(root, 'presenza-testo', t.presenceLong(NUM.format(online), NUM.format(membri)))
+  setCampo(root, 'boost-testo', t.boostLong(NUM.format(boost)))
 
-    const card = root.querySelector(`[data-cm-server="${base.codice}"]`)
-    if (!card) continue
-    setCampo(card, 'membri', NUM.format(membri))
-    setCampo(card, 'online', NUM.format(online))
-    setCampo(card, 'presenza', `${PCT.format(presenza)}%`)
-    setCampo(card, 'tier', String(tier))
-    setCampo(card, 'boost', NUM.format(boost))
-    setCampo(card, 'verifica', t.verificaNomi[verifica] || '—')
-    setCampo(card, 'creato', anno(creato))
-    const barra = card.querySelector('[data-cm-campo="barra"]')
-    if (barra) {
-      barra.style.setProperty('--cm-p', `${Math.min(100, presenza).toFixed(2)}%`)
-      barra.parentElement.setAttribute('aria-label', `${NUM.format(online)} / ${NUM.format(membri)} · ${PCT.format(presenza)}%`)
-    }
-    const img = card.querySelector('[data-cm-icona]')
-    if (img && typeof d?.icona === 'string' && /^https:\/\/cdn\.discordapp\.com\//.test(d.icona)) img.src = d.icona
+  const barra = root.querySelector('[data-cm-campo="barra"]')
+  if (barra) {
+    barra.style.setProperty('--cm-p', `${Math.min(100, presenza).toFixed(2)}%`)
+    barra.parentElement.setAttribute('aria-label', `${NUM.format(online)} / ${NUM.format(membri)} · ${PCT.format(presenza)}%`)
   }
-
-  const o = valori.find((x) => x.codice === 'ollare')
-  const s = valori.find((x) => x.codice === 'sollary')
-  const totaleMembri = valori.reduce((a, x) => a + x.membri, 0)
-  const totaleOnline = valori.reduce((a, x) => a + x.online, 0)
-  const totaleBoost = valori.reduce((a, x) => a + x.boost, 0)
-  const totalePres = pct(totaleOnline, totaleMembri)
-
-  if (completo) {
-    setAll(root, '[data-cm-totale="server"]', String(valori.length))
-    setAll(root, '[data-cm-totale="membri"]', NUM.format(totaleMembri))
-    setAll(root, '[data-cm-totale="online"]', NUM.format(totaleOnline))
-    setAll(root, '[data-cm-totale="boost"]', NUM.format(totaleBoost))
-    setValore(root, 'membri-totale', NUM.format(totaleMembri))
-    setValore(root, 'online-totale', NUM.format(totaleOnline))
-  }
-
-  if (o && s) {
-    const maxMembri = Math.max(o.membri, s.membri, 1)
-    setBarra(root, 'membri-ollare', (o.membri / maxMembri) * 100)
-    setBarra(root, 'membri-sollary', (s.membri / maxMembri) * 100)
-    setValore(root, 'membri-ollare', NUM.format(o.membri))
-    setValore(root, 'membri-sollary', NUM.format(s.membri))
-    if (o.membri > 0) setAll(root, '[data-cm-ratio]', NUM.format(Math.round(s.membri / o.membri)))
-
-    const scala = Math.max(30, Math.ceil(Math.max(o.presenza, s.presenza) / 10) * 10)
-    setAll(root, '[data-cm-scala="presenza"]', t.scalePresence(scala))
-    setBarra(root, 'presenza-ollare', (o.presenza / scala) * 100)
-    setBarra(root, 'presenza-sollary', (s.presenza / scala) * 100)
-    setValore(root, 'presenza-ollare', `${PCT.format(o.presenza)}%`)
-    setValore(root, 'presenza-sollary', `${PCT.format(s.presenza)}%`)
-    const nota = root.querySelector('[data-cm-nota="presenza"]')
-    if (nota) {
-      const alta = o.presenza >= s.presenza ? o : s
-      nota.textContent = t.presenceNote(alta.nome, `${PCT.format(alta.presenza)}%`)
-    }
-
-    const maxBoost = Math.max(o.boost, s.boost, 1)
-    setBarra(root, 'boost-ollare', (o.boost / maxBoost) * 100)
-    setBarra(root, 'boost-sollary', (s.boost / maxBoost) * 100)
-    setValore(root, 'boost-ollare', NUM.format(o.boost))
-    setValore(root, 'boost-sollary', NUM.format(s.boost))
-  }
-
+  root.querySelector('[data-cm-campo="boost-barra"]')?.style.setProperty('--cm-p', `${Math.min(100, (boost / TIER3) * 100).toFixed(2)}%`)
   const donut = root.querySelector('[data-cm-donut]')
-  if (completo && donut && totaleMembri > 0) {
-    donut.style.setProperty('--cm-p', totalePres.toFixed(1))
-    donut.setAttribute('aria-label', `${PCT.format(totalePres)}% ${t.onlineWord}: ${NUM.format(totaleOnline)} / ${NUM.format(totaleMembri)}`)
-    setAll(root, '[data-cm-donut-valore]', `${PCT.format(totalePres)}%`)
+  if (donut && membri > 0) {
+    donut.style.setProperty('--cm-p', presenza.toFixed(1))
+    donut.setAttribute('aria-label', `${PCT.format(presenza)}% ${t.onlineWord}: ${NUM.format(online)} / ${NUM.format(membri)}`)
   }
+  const img = root.querySelector('[data-cm-icona]')
+  if (img && typeof d?.icona === 'string' && /^https:\/\/cdn\.discordapp\.com\//.test(d.icona)) img.src = d.icona
 
   const quando = dati?.aggiornato ? dataOra(dati.aggiornato) : null
-  if (quando) setAll(root, '[data-cm-aggiornato]', quando)
+  for (const el of root.querySelectorAll('[data-cm-aggiornato]')) if (quando) el.textContent = quando
 
   const avviso = root.querySelector('[data-cm-avviso]')
   if (avviso) {
-    if (dati?.parziale) {
-      avviso.hidden = false
-      avviso.textContent = t.partial
-    } else {
-      avviso.hidden = true
-    }
+    avviso.hidden = !dati?.parziale
+    if (dati?.parziale) avviso.textContent = t.partial
   }
 }
 
@@ -415,7 +294,7 @@ async function carica(root, t) {
   }
 }
 
-export function monta(root, { lang = 'it' } = {}) {
+export function monta(root, { lang = 'it', vai } = {}) {
   const t = TESTI[lang] || TESTI.en
   root.innerHTML = markup(t, lang)
   applica(root, RISERVA, t)
@@ -432,6 +311,13 @@ export function monta(root, { lang = 'it' } = {}) {
     await carica(root, t)
     if (span) span.textContent = testo
     btn.disabled = false
+  })
+  // dalla community al podcast in bacheca
+  root.querySelector('[data-cm-podcast]')?.addEventListener('click', () => {
+    if (typeof vai === 'function') vai('board')
+    else location.hash = '#bacheca'
+    // (il cambio di scheda passa da una transizione: si scorre quando la bacheca c'è)
+    setTimeout(() => document.getElementById('cast-card')?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 420)
   })
 
   carica(root, t)

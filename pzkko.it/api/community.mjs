@@ -1,5 +1,5 @@
-// /api/community: i numeri pubblici dei due server Discord che stanno nella
-// pagina /community/ (OLLARE e SOLLARY).  Non è un bot e non entra nei server:
+// /api/community: i numeri pubblici del server Discord che sta nella scheda
+// #community (OLLARE, dal 27.11 l'unico).  Non è un bot e non entra nel server:
 // legge solo l'endpoint pubblico degli inviti, quello che vede chiunque apra
 // un invito, e restituisce i conteggi aggregati.
 //
@@ -23,7 +23,6 @@ const TTL = 5 * 60_000
 // arrivano da Discord: il nome del server può cambiare, l'etichetta no.
 const INVITI = [
   { codice: 'ollare', nome: 'OLLARE', colore: '#b06cff' },
-  { codice: 'sollary', nome: 'SOLLARY', colore: '#71c2d9' },
 ]
 
 const stato = (globalThis.__pzkkoCommunity ??= { dati: null, quando: 0, parziale: false })
@@ -34,8 +33,8 @@ const json = (res, status, body, cache) => {
   res.end(JSON.stringify(body))
 }
 
-// Il 15.11.2026 OLLARE è nato; SOLLARY è del 2020.  La data di nascita di un
-// server Discord si ricava dal suo ID (neve: millisecondi dall'epoca Discord).
+// OLLARE è nato il 15.11.2026.  La data di nascita di un server Discord si
+// ricava dal suo ID (neve: millisecondi dall'epoca Discord).
 const creato = (id) => {
   try {
     const ms = Number((BigInt(id) >> 22n) + 1420070400000n)
