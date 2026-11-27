@@ -29,35 +29,133 @@ function costruisci() {
     larga: true,
     corpo: `
       <div class="lab-boom">
-        <div class="lab-telecamera lab-telecamera--quadrata">
-          <canvas class="lab-tela" width="${W}" height="${H}" aria-label="la webcam con la cornice pzk"></canvas>
-          <video class="lab-boom-video" data-video loop muted playsinline hidden aria-label="il boomerang registrato"></video>
-          <div class="lab-sovrapposizione" data-velo>webcam spenta<br><small>premi «accendi» per vederti</small></div>
+        <div class="boom-sinistra">
+        <section class="boom-cabina" aria-label="la cabina del boomerang">
+          <span class="boom-nastro boom-nastro--sx" aria-hidden="true"></span>
+          <span class="boom-nastro boom-nastro--dx" aria-hidden="true"></span>
+
+          <div class="boom-insegna">
+            <span class="boom-insegna__nome">boomerang</span>
+            <span class="boom-insegna__num">cabina 08</span>
+            <span class="boom-spia" aria-hidden="true"><i class="boom-spia__luce"></i><b class="boom-spia__parola"></b></span>
+          </div>
+
+          <div class="lab-telecamera lab-telecamera--quadrata boom-schermo">
+            <canvas class="lab-tela" width="${W}" height="${H}" aria-label="la webcam con la cornice pzk"></canvas>
+            <video class="lab-boom-video" data-video loop muted playsinline hidden aria-label="il boomerang registrato"></video>
+            <span class="boom-vetro" aria-hidden="true"></span>
+            <span class="boom-live" aria-hidden="true">dal vivo</span>
+            <span class="boom-timbro-loop" aria-hidden="true">loop</span>
+
+            <div class="lab-sovrapposizione boom-velo" data-velo>
+              <div class="boom-poster">
+                <span class="boom-poster__timbro" aria-hidden="true">spenta</span>
+                <span class="boom-poster__occhiello">cabina 08 · tre secondi</span>
+                <span class="boom-poster__disegno" aria-hidden="true">
+                  <svg viewBox="0 0 132 96" focusable="false">
+                    <path d="M14 30c0-3 2-5 5-5h16l7-11h34l7 11h16c3 0 5 2 5 5v49c0 3-2 5-5 5H19c-3 0-5-2-5-5Z"/>
+                    <circle cx="62" cy="55" r="20"/>
+                    <circle cx="62" cy="55" r="9"/>
+                    <path d="M99 36h12M30 24h10"/>
+                    <path d="M112 14l4-8M120 22l9-3M103 8l-1-7"/>
+                  </svg>
+                </span>
+                <p class="boom-poster__titolo">mettiti in posa</p>
+                <p class="boom-poster__testo" data-velo-testo>webcam spenta</p>
+                <button type="button" class="lab-tasto lab-tasto--pieno boom-poster__accendi" data-accendi-velo>accendi la webcam</button>
+                <p class="boom-poster__sotto">tre secondi · niente audio · il filmato resta qui</p>
+              </div>
+            </div>
+
+            <div class="boom-conta" data-conta hidden aria-hidden="true">
+              <span class="boom-conta__rec" data-conta-rec><i></i> REC</span>
+              <span class="boom-conta__num" data-conta-num>3</span>
+              <span class="boom-conta__via" data-conta-via hidden>via!</span>
+              <span class="boom-conta__sotto">tre secondi · guarda l'obiettivo</span>
+            </div>
+            <span class="boom-lampo" data-lampo hidden aria-hidden="true"></span>
+          </div>
+
+          <div class="boom-davanzale">
+            <span class="boom-davanzale__testo">3 secondi · muto · 720 × 720</span>
+            <span class="boom-davanzale__slot" aria-hidden="true"></span>
+            <span class="boom-adesivo" aria-hidden="true">pzk</span>
+          </div>
+
+          <i class="boom-vite boom-vite--tl" aria-hidden="true"></i>
+          <i class="boom-vite boom-vite--tr" aria-hidden="true"></i>
+          <i class="boom-vite boom-vite--bl" aria-hidden="true"></i>
+          <i class="boom-vite boom-vite--br" aria-hidden="true"></i>
+        </section>
+
+        <aside class="boom-cartello">
+          <span class="boom-cartello__timbro" aria-hidden="true">3 secondi</span>
+          <p><b>un giro solo.</b> guarda l'obiettivo: il conto alla rovescia parte da sé e il loop resta qui.</p>
+          <span class="boom-cartello__freccia" aria-hidden="true">
+            <svg viewBox="0 0 76 54" focusable="false">
+              <path d="M8 47c8-19 22-31 45-35"/>
+              <path d="M43 6l11 5M43 6l6 11"/>
+            </svg>
+          </span>
+        </aside>
         </div>
-        <div class="lab-colonna">
-          <div class="lab-pannello">
-            <div class="lab-riga">
-              <button type="button" class="lab-tasto lab-tasto--pieno" data-accendi data-focus>accendi</button>
-              <button type="button" class="lab-tasto lab-tasto--fantasma" data-spegni disabled>spegni</button>
+
+        <div class="boom-lato">
+          <div class="lab-pannello boom-comandi">
+            <div class="boom-comandi__testa">
+              <h3>i comandi</h3>
               <span class="lab-badge" data-stato-cam>webcam spenta</span>
             </div>
-            <div class="lab-divisore"></div>
-            <div class="lab-riga">
-              <button type="button" class="lab-tasto lab-tasto--pieno" data-registra disabled>registra 3s</button>
-              <button type="button" class="lab-tasto lab-tasto--fantasma" data-rifai disabled>rifai</button>
-              <button type="button" class="lab-tasto lab-tasto--fantasma" data-scarica hidden>scarica</button>
+            <div class="boom-tasti boom-tasti--cam">
+              <button type="button" class="lab-tasto lab-tasto--pieno" data-accendi data-focus>accendi</button>
+              <button type="button" class="lab-tasto lab-tasto--fantasma" data-spegni disabled>spegni</button>
             </div>
-            <div class="lab-divisore"></div>
-            <label class="lab-riga lab-nota" style="cursor:pointer">
-              <input type="checkbox" data-specchio checked> specchio (come in uno specchio vero)
+            <hr class="boom-divisore">
+            <button type="button" class="lab-tasto lab-tasto--pieno boom-registra" data-registra disabled><i aria-hidden="true"></i>registra 3s</button>
+            <div class="boom-tasti boom-tasti--loop">
+              <button type="button" class="lab-tasto lab-tasto--fantasma" data-rifai disabled>rifai</button>
+              <button type="button" class="lab-tasto boom-scarica" data-scarica hidden>scarica</button>
+            </div>
+            <label class="boom-specchio">
+              <input type="checkbox" data-specchio checked>
+              <span>specchio</span>
+              <small>come in uno specchio vero</small>
             </label>
-            <p class="lab-nota" style="margin-top:10px" data-nota-boom>La registrazione parte quando premi «registra 3s» e si ferma da sola. Il video è muto e in loop.</p>
+            <p class="lab-nota boom-nota" data-nota-boom>la registrazione parte quando premi «registra 3s» e si ferma da sola: il video è muto e in loop.</p>
           </div>
-          <div class="lab-pannello">
-            <h3>Come funziona</h3>
-            <p class="lab-nota">La telecamera disegna ogni fotogramma su una tela; la tela viene registrata con <b>MediaRecorder</b> per tre secondi. Il risultato è un file <b>WebM</b> (o MP4, se il browser preferisce) che vive solo in questa scheda finché non lo scarichi.</p>
-            <p class="lab-nota" style="margin-top:8px">La cornice, l'ora e l'adesivo fanno parte del video: non sono un filtro sopra.</p>
-          </div>
+
+          <section class="boom-pellicola" aria-labelledby="boom-come">
+            <div class="boom-pellicola__testa">
+              <h3 id="boom-come">come funziona</h3>
+              <span class="boom-pellicola__tempo" aria-hidden="true">00:03</span>
+            </div>
+            <ol class="boom-fotogrammi">
+              <li>
+                <span class="boom-fotogramma__n" aria-hidden="true">1</span>
+                <span class="boom-fotogramma__titolo">accendi</span>
+                <small>la webcam parte solo dopo il tuo clic</small>
+              </li>
+              <li>
+                <span class="boom-fotogramma__n" aria-hidden="true">2</span>
+                <span class="boom-fotogramma__titolo">3 · 2 · 1</span>
+                <small>tre secondi: cornice, ora e adesivo sono già nel video</small>
+              </li>
+              <li>
+                <span class="boom-fotogramma__n" aria-hidden="true">3</span>
+                <span class="boom-fotogramma__titolo">loop</span>
+                <small>resta in loop, muto. scarica il webm o rifai</small>
+              </li>
+            </ol>
+            <p class="boom-pellicola__firma">nessun fotogramma esce dal dispositivo: il file è un blob locale.</p>
+          </section>
+
+          <aside class="boom-bollo">
+            <span class="boom-bollo__timbro" aria-hidden="true">solo locale</span>
+            <p><b>la webcam parte solo dal tuo clic</b> e si spegne quando chiudi. il loop resta un blob nella scheda: niente upload, niente servizi, niente audio.</p>
+            <p class="boom-bollo__firma">se chiudi o premi «spegni», la spia si spegne davvero.</p>
+          </aside>
+
+          <p class="boom-tecnica">tela <b>720 × 720</b> · <b>MediaRecorder</b> · webm locale · niente audio, niente schermo</p>
         </div>
       </div>`,
     onChiudi: () => { ui = null },
@@ -68,6 +166,13 @@ function costruisci() {
   const ctx = tela.getContext('2d')
   const videoEl = q('[data-video]')
   const velo = q('[data-velo]')
+  const veloTesto = q('[data-velo-testo]')
+  const bVelo = q('[data-accendi-velo]')
+  const conta = q('[data-conta]')
+  const contaRec = q('[data-conta-rec]')
+  const contaNum = q('[data-conta-num]')
+  const contaVia = q('[data-conta-via]')
+  const lampo = q('[data-lampo]')
   const bAccendi = q('[data-accendi]')
   const bSpegni = q('[data-spegni]')
   const bRegistra = q('[data-registra]')
@@ -101,6 +206,8 @@ function costruisci() {
   let url = null
   let streamTela = null
   let scarta = false
+  let tVia = 0
+  let ultimoConteggio = 0
 
   const supportoRec = !!(window.MediaRecorder && HTMLCanvasElement.prototype.captureStream)
 
@@ -108,6 +215,54 @@ function costruisci() {
     bStato.textContent = testo
     bStato.classList.toggle('lab-badge--acceso', tipo === 'ok')
     bStato.classList.toggle('lab-badge--male', tipo === 'male')
+  }
+
+  // Il conto alla rovescia vive nel DOM, sopra la tela: è scenografico ma NON viene
+  // registrato (dentro il canvas restano solo cornice, ora e adesivo). Il numero è
+  // decorativo perché a parlare ai lettori di schermo è già .lab-stato.
+  function battiConteggio(n) {
+    ultimoConteggio = n
+    contaNum.textContent = String(n)
+    contaNum.classList.remove('is-batti')
+    void contaNum.offsetWidth
+    contaNum.classList.add('is-batti')
+  }
+
+  function mostraConteggio() {
+    clearTimeout(tVia)
+    conta.hidden = false
+    contaRec.hidden = false
+    contaVia.hidden = true
+    contaNum.hidden = false
+    lampo.hidden = true
+    lampo.classList.remove('is-on')
+    battiConteggio(3)
+  }
+
+  function mostraVia() {
+    clearTimeout(tVia)
+    contaRec.hidden = true
+    contaNum.hidden = true
+    contaVia.hidden = false
+    contaVia.classList.remove('is-via')
+    void contaVia.offsetWidth
+    contaVia.classList.add('is-via')
+    lampo.hidden = false
+    lampo.classList.remove('is-on')
+    void lampo.offsetWidth
+    lampo.classList.add('is-on')
+    tVia = setTimeout(nascondiConteggio, 850)
+  }
+
+  function nascondiConteggio() {
+    clearTimeout(tVia)
+    conta.hidden = true
+    contaVia.hidden = true
+    contaVia.classList.remove('is-via')
+    contaNum.hidden = false
+    contaNum.classList.remove('is-batti')
+    lampo.hidden = true
+    lampo.classList.remove('is-on')
   }
 
   function rettangolo(x, y, w, h, r) {
@@ -211,12 +366,13 @@ function costruisci() {
   async function accendi() {
     if (!navigator.mediaDevices?.getUserMedia) {
       velo.hidden = false
-      velo.textContent = 'questo browser non ha la webcam'
+      veloTesto.textContent = 'questo browser non ha la webcam'
       return
     }
     bAccendi.disabled = true
+    bVelo.disabled = true
     velo.hidden = false
-    velo.textContent = 'chiedo il permesso per la webcam…'
+    veloTesto.textContent = 'chiedo il permesso per la webcam…'
     stato('chiedo il permesso', 'attesa')
     try {
       stream = await navigator.mediaDevices.getUserMedia({
@@ -236,6 +392,10 @@ function costruisci() {
         d.nota('webcam accesa · premi registra 3s', 'ok')
       }
       stato('webcam accesa', 'ok')
+      // il tasto che ha aperto la webcam sparisce sotto il poster: il focus va
+      // sull'azione successiva, non sul body
+      if (supportoRec) bRegistra.focus({ preventScroll: true })
+      else bSpegni.focus({ preventScroll: true })
       cancelAnimationFrame(raf)
       raf = requestAnimationFrame(giro)
     } catch (e) {
@@ -245,14 +405,16 @@ function costruisci() {
         : e?.name === 'NotReadableError' ? 'la webcam è occupata da un altro programma'
         : 'non riesco ad accendere la webcam'
       velo.hidden = false
-      velo.textContent = msg
+      veloTesto.textContent = msg
       stato('spenta', 'male')
       d.nota(msg, 'male')
       bAccendi.disabled = false
+      bVelo.disabled = false
     }
   }
 
   function spegni() {
+    nascondiConteggio()
     if (registrando) {
       scarta = true
       fermaRegistrazione()
@@ -264,10 +426,12 @@ function costruisci() {
     video.srcObject = null
     pulisciLoop()
     bAccendi.disabled = false
+    bVelo.disabled = false
     bSpegni.disabled = true
     bRegistra.disabled = true
     velo.hidden = false
-    velo.textContent = 'webcam spenta'
+    veloTesto.textContent = 'webcam spenta'
+    bVelo.focus({ preventScroll: true })
     stato('webcam spenta')
     ctx.fillStyle = '#05070a'
     ctx.fillRect(0, 0, W, H)
@@ -298,6 +462,7 @@ function costruisci() {
         if (fermo) return
         if (scarta) {
           scarta = false
+          nascondiConteggio()
           bRegistra.disabled = !attivo
           stato('webcam spenta')
           return
@@ -313,6 +478,7 @@ function costruisci() {
         bScarica.hidden = false
         bRegistra.disabled = false
         bScarica.textContent = tipo.includes('mp4') ? 'scarica .mp4' : 'scarica .webm'
+        mostraVia()
         stato('loop pronto', 'ok')
         d.nota('loop pronto · premi scarica o rifai', 'ok')
       }
@@ -322,10 +488,13 @@ function costruisci() {
       bRifai.disabled = true
       bScarica.hidden = true
       recorder.start(100)
+      mostraConteggio()
       const contagiri = setInterval(() => {
         if (!registrando) { clearInterval(contagiri); return }
         const resto = Math.max(0, DURATA - (performance.now() - inizio))
-        stato(`REC · ${Math.ceil(resto / 1000)}s`, 'attesa')
+        const n = Math.ceil(resto / 1000)
+        if (n > 0 && n !== ultimoConteggio) battiConteggio(n)
+        stato(`REC · ${n}s`, 'attesa')
       }, 250)
       setTimeout(() => clearInterval(contagiri), DURATA + 200)
       setTimeout(() => { if (registrando) fermaRegistrazione() }, DURATA + 80)
@@ -334,6 +503,7 @@ function costruisci() {
     } catch (e) {
       console.error(e)
       registrando = false
+      nascondiConteggio()
       stato('non riesco a registrare', 'male')
       d.nota(`non riesco a registrare: ${e?.message || e}`, 'male')
     }
@@ -353,9 +523,11 @@ function costruisci() {
   }
 
   bAccendi.addEventListener('click', accendi)
+  bVelo.addEventListener('click', accendi)
   bSpegni.addEventListener('click', spegni)
   bRegistra.addEventListener('click', registra)
   bRifai.addEventListener('click', () => {
+    nascondiConteggio()
     pulisciLoop()
     stato(attivo ? 'webcam accesa' : 'webcam spenta', attivo ? 'ok' : '')
     d.nota('di nuovo dal vivo')
@@ -374,6 +546,7 @@ function costruisci() {
 
   d.suPulizia(() => {
     fermo = true
+    clearTimeout(tVia)
     cancelAnimationFrame(raf)
     if (registrando) {
       registrando = false

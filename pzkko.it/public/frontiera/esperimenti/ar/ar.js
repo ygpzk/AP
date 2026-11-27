@@ -28,35 +28,66 @@ function costruisci() {
     larga: true,
     corpo: `
       <div class="lab-ar">
-        <div class="lab-ar-vista">
-          <canvas class="lab-ar-canvas" width="640" height="640" aria-label="la realtà aumentata"></canvas>
-          <div class="lab-ar-fallback" data-fallback>
-            <div class="lab-ar-sticker" aria-hidden="true"><b>pzk</b><i>★</i></div>
-            <p class="lab-nota" data-fallback-testo>Controllo la realtà aumentata…</p>
+        <div class="lab-ar-sinistra">
+          <div class="lab-ar-vista">
+            <canvas class="lab-ar-canvas" width="640" height="640" aria-label="la realtà aumentata: un adesivo pzk sopra il pavimento"></canvas>
+            <div class="lab-ar-fallback" data-fallback>
+              <div class="lab-ar-scena" aria-hidden="true">
+                <span class="lab-ar-parete"></span>
+                <span class="lab-ar-pavimento"></span>
+                <span class="lab-ar-chiazza"></span>
+                <span class="lab-ar-orizzonte"></span>
+                <span class="lab-ar-ombra"></span>
+                <span class="lab-ar-mirino"></span>
+                <div class="lab-ar-sticker"><b>pzk</b><i>★</i></div>
+                <span class="lab-ar-annotazione lab-ar-annotazione--adesivo">l'adesivo</span>
+                <span class="lab-ar-annotazione lab-ar-annotazione--mirino">il mirino</span>
+                <span class="lab-ar-vignetta"></span>
+                <span class="lab-ar-timbro">anteprima</span>
+              </div>
+              <div class="lab-ar-velo">
+                <p class="lab-ar-frase" data-fallback-testo>cerco la realtà aumentata su questo dispositivo…</p>
+                <a class="lab-ar-prova" href="/frontiera/#ar" target="_blank" rel="noopener" data-focus>apri in una scheda</a>
+              </div>
+            </div>
+            <div class="lab-ar-ui" data-ar-ui hidden>
+              <span class="lab-badge lab-badge--acceso" data-ar-stato role="status" aria-live="polite">inquadra il pavimento</span>
+              <button type="button" class="lab-tasto lab-tasto--pieno lab-tasto--piccolo" data-esci>esci dall'AR</button>
+            </div>
           </div>
-          <div class="lab-ar-ui" data-ar-ui hidden>
-            <span class="lab-badge lab-badge--acceso" data-ar-stato>inquadra il pavimento</span>
-            <button type="button" class="lab-tasto lab-tasto--pieno" data-esci>esci dall'AR</button>
-          </div>
+          <p class="lab-ar-didascalia">anteprima disegnata in css · niente fotocamera</p>
         </div>
-        <div class="lab-colonna">
-          <div class="lab-pannello">
-            <div class="lab-riga">
-              <button type="button" class="lab-tasto lab-tasto--pieno" data-entra data-focus disabled>entra in AR</button>
+        <div class="lab-colonna lab-ar-lato">
+          <div class="lab-pannello lab-ar-azione">
+            <div class="lab-riga lab-ar-riga-azione">
+              <button type="button" class="lab-tasto lab-tasto--pieno" data-entra disabled>entra in AR</button>
               <span class="lab-badge" data-supporto-ar>controllo…</span>
             </div>
-            <p class="lab-nota" style="margin-top:10px">Serve un telefono con WebXR (Chrome su Android). La fotocamera la apre il browser quando entri; il mirino lo calcola il <b>hit-test</b>, senza mandare immagini a nessuno.</p>
+            <p class="lab-nota">La sessione parte solo con un clic. La fotocamera la apre il browser e si spegne quando esci.</p>
           </div>
           <div class="lab-pannello">
-            <h3>Come si usa</h3>
+            <h3>come si usa</h3>
             <ol class="lab-passi">
-              <li>Premi «entra in AR» e punta il telefono verso il pavimento.</li>
-              <li>Aspetta che compare il mirino: vuol dire che il piano è stato trovato.</li>
-              <li>Tocca lo schermo: l'adesivo si attacca lì. Puoi attaccarne più di uno.</li>
+              <li>premi «entra in AR» e punta il telefono verso il pavimento.</li>
+              <li>aspetta che compaia il mirino: vuol dire che il piano è stato trovato.</li>
+              <li>tocca lo schermo: l'adesivo si attacca lì. Puoi attaccarne più di uno.</li>
               <li>«esci dall'AR» chiude la sessione e torna qui.</li>
             </ol>
-            <p class="lab-nota" style="margin-top:8px">Se il tasto non si accende, il browser non ha la realtà aumentata: prova da Chrome su Android, oppure apri il laboratorio in una scheda.</p>
           </div>
+          <div class="lab-pannello">
+            <h3>cosa serve</h3>
+            <ul class="lab-ar-elenco">
+              <li><b>Chrome su Android</b> un telefono con la realtà aumentata.</li>
+              <li><b>HTTPS</b> la pagina deve viaggiare in sicurezza.</li>
+              <li><b>un clic</b> niente parte da solo.</li>
+            </ul>
+          </div>
+          <div class="lab-pannello lab-pannello--fondo lab-ar-privacy">
+            <h3>privacy e hit-test</h3>
+            <p class="lab-nota">Il mirino lo calcola il <b>hit-test</b> del browser sul dispositivo. Nessuna immagine della fotocamera viene caricata o mandata a un server.</p>
+            <span class="lab-ar-timbro-piccolo">nessun upload</span>
+          </div>
+          <p class="lab-ar-nota-fondo">se il tasto è spento non è un errore: la realtà aumentata vive sul telefono.</p>
         </div>
       </div>`,
     onChiudi: () => { ui = null },
@@ -64,6 +95,7 @@ function costruisci() {
 
   const q = (s) => d.corpo.querySelector(s)
   const canvas = q('.lab-ar-canvas')
+  const vista = q('.lab-ar-vista')
   const fallback = q('[data-fallback]')
   const fallbackTesto = q('[data-fallback-testo]')
   const bEntra = q('[data-entra]')
@@ -71,6 +103,8 @@ function costruisci() {
   const uiAr = q('[data-ar-ui]')
   const statoAr = q('[data-ar-stato]')
   const bSupporto = q('[data-supporto-ar]')
+  const prova = q('.lab-ar-prova')
+  const notaFondo = q('.lab-ar-nota-fondo')
 
   let gl = null
   let sessione = null
@@ -90,14 +124,51 @@ function costruisci() {
     d.nota(testo, tipo)
   }
 
-  function fallbackMotivo(testo) {
+  // Fuori dall'AR lo stato in alto dice il motivo, la vista dice cosa fare: due
+  // frasi diverse, non la stessa scritta ripetuta due volte.
+  function fallbackMotivo(motivo, istruzione) {
     bEntra.disabled = true
+    bEntra.hidden = false
+    bEntra.removeAttribute('data-focus')
+    prova?.setAttribute('data-focus', '')
     bSupporto.textContent = 'non disponibile'
     bSupporto.classList.add('lab-badge--male')
     fallback.hidden = false
-    fallbackTesto.textContent = testo
-    d.nota(testo, 'attesa')
+    fallbackTesto.textContent = istruzione
+    notaFondo.textContent = 'se il tasto è spento non è un errore: la realtà aumentata vive sul telefono.'
+    d.nota(motivo, 'attesa')
   }
+
+  // ── l'anteprima: un parallasse leggero col puntatore (solo la scena CSS) ────
+  // Il canvas WebXR non si tocca: qui si muovono solo le carte del ripiego.
+  const menoMovimento = matchMedia('(prefers-reduced-motion: reduce)')
+  let quadro = 0
+  let miraX = 0
+  let miraY = 0
+
+  function parallasse(e) {
+    if (menoMovimento.matches || e.pointerType !== 'mouse' || d.dlg.classList.contains('lab-ar-on')) return
+    const r = vista.getBoundingClientRect()
+    if (!r.width || !r.height) return
+    miraX = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width - .5) * 2))
+    miraY = Math.max(-1, Math.min(1, ((e.clientY - r.top) / r.height - .5) * 2))
+    if (quadro) return
+    quadro = requestAnimationFrame(() => {
+      quadro = 0
+      vista.style.setProperty('--ar-x', miraX.toFixed(3))
+      vista.style.setProperty('--ar-y', miraY.toFixed(3))
+    })
+  }
+
+  function quieta() {
+    if (quadro) cancelAnimationFrame(quadro)
+    quadro = 0
+    vista.style.setProperty('--ar-x', '0')
+    vista.style.setProperty('--ar-y', '0')
+  }
+
+  vista.addEventListener('pointermove', parallasse)
+  vista.addEventListener('pointerleave', quieta)
 
   // ── il WebGL2 e le texture ─────────────────────────────────────────────────
 
@@ -379,6 +450,7 @@ function costruisci() {
 
   async function entra() {
     if (!navigator.xr || !sessione) {
+      quieta()
       try {
         if (!navigator.xr) throw new Error('WebXR non c\'è')
         const supportato = await navigator.xr.isSessionSupported('immersive-ar')
@@ -417,6 +489,7 @@ function costruisci() {
         bEntra.hidden = true
         fallback.hidden = true
         stato('inquadra il pavimento e tocca per attaccare', 'ok')
+        bEsci.focus({ preventScroll: true })
         ultimoFrame = s.requestAnimationFrame(frame)
       } catch (e) {
         console.error(e)
@@ -425,6 +498,7 @@ function costruisci() {
           : e?.message || 'non riesco a entrare in AR'
         stato(msg, 'male')
         bEntra.disabled = false
+        fallbackTesto.textContent = 'la sessione non è partita: controlla i permessi della fotocamera e riprova.'
       }
     }
   }
@@ -453,8 +527,9 @@ function costruisci() {
     bEntra.hidden = false
     bEntra.disabled = false
     fallback.hidden = false
-    fallbackTesto.textContent = 'Sessione AR finita. Puoi rientrare quando vuoi.'
+    fallbackTesto.textContent = 'la sessione è finita: puoi rientrare quando vuoi.'
     stato('AR finita')
+    if (d.dlg.open) bEntra.focus({ preventScroll: true })
   }
 
   async function esci() {
@@ -467,6 +542,9 @@ function costruisci() {
 
   d.suPulizia(() => {
     fermo = true
+    quieta()
+    vista.removeEventListener('pointermove', parallasse)
+    vista.removeEventListener('pointerleave', quieta)
     if (sessione) {
       try { sorgenteHit?.cancel() } catch {}
       try { sessione.cancelAnimationFrame(ultimoFrame) } catch {}
@@ -475,25 +553,37 @@ function costruisci() {
     sessione = null
   })
 
+  d.apri()
+  d.nota('controllo la realtà aumentata…', 'attesa')
+
   // ── la disponibilità ───────────────────────────────────────────────────────
+  // Il controllo viene dopo l'apertura: se il browser non ha proprio WebXR, il
+  // motivo non viene sovrascritto dalla scritta «controllo…».
+  const istruzioneRipiego = 'serve un telefono con WebXR: prova da Chrome su Android, oppure apri in una scheda.'
   if (!navigator.xr?.isSessionSupported) {
-    fallbackMotivo('Questo browser non ha WebXR. Prova da Chrome su Android, oppure apri il laboratorio in una scheda.')
+    fallbackMotivo('questo browser non ha WebXR', istruzioneRipiego)
   } else {
     navigator.xr.isSessionSupported('immersive-ar').then((ok) => {
       if (fermo) return
       if (!ok) {
-        fallbackMotivo('Questo dispositivo non ha la realtà aumentata. Prova da Chrome su Android.')
+        fallbackMotivo('questo dispositivo non ha la realtà aumentata', istruzioneRipiego)
         return
       }
       bEntra.disabled = false
+      bEntra.setAttribute('data-focus', '')
+      prova?.removeAttribute('data-focus')
       bSupporto.textContent = 'pronto'
       bSupporto.classList.add('lab-badge--acceso')
-      fallbackTesto.textContent = 'La realtà aumentata è pronta: premi «entra in AR».'
+      fallbackTesto.textContent = 'la realtà aumentata è pronta: premi «entra in AR».'
+      notaFondo.textContent = 'dopo «entra in AR» il browser chiede il permesso della fotocamera.'
       d.nota('AR pronta · serve un telefono compatibile', 'ok')
-    }).catch(() => fallbackMotivo('Non riesco a chiedere la realtà aumentata a questo browser.'))
+      // se il controllo era ancora in volo, il focus non resta sul collegamento
+      if (document.activeElement === prova) bEntra.focus({ preventScroll: true })
+    }).catch(() => fallbackMotivo(
+      'non riesco a chiedere la realtà aumentata a questo browser',
+      istruzioneRipiego,
+    ))
   }
 
-  d.apri()
-  d.nota('controllo la realtà aumentata…', 'attesa')
   return d
 }

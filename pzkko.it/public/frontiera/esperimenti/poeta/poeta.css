@@ -1,0 +1,554 @@
+/* poeta.css — il corpo di «Poeta» (09 · il motto del muro).
+ *
+ * La scena è il retro del laboratorio: a sinistra il poster giallo strappato e
+ * attaccato col nastro, sotto i comandi; a destra il foglio «come funziona»
+ * (con lo stato vero dell'IA locale) e il quaderno del corpus.
+ *
+ * Tutto sta dentro .lab-dlg[data-lab="poeta"]: lab.css si carica anche nel
+ * profilo e non deve cambiare. I pezzi comuni (tasti, pannelli, badge, stato)
+ * restano quelli di lab.css/pzk-stile.css; qui prendono la faccia del poster.
+ */
+
+/* ── la scena: poster a sinistra, note a destra ─────────────────────────────────────────────────────────────── */
+
+.lab-dlg[data-lab="poeta"] .lab-poeta {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 30px;
+  align-items: stretch;
+}
+
+.lab-dlg[data-lab="poeta"] .lab-poeta-scena {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* ── il poster: carta gialla, strappo in basso, nastro agli angoli ──────────────────────────────────────────── */
+
+.lab-dlg[data-lab="poeta"] .lab-pannello.lab-poeta-quadro {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 460px;
+  margin: 12px 12px 0 8px;
+  padding: 40px 30px 38px;
+  background: none;
+  box-shadow: none;
+  transform: rotate(-.9deg);
+  filter: drop-shadow(0 1px .5px rgba(0, 0, 0, .45)) drop-shadow(0 13px 16px rgba(0, 0, 0, .28));
+}
+/* lo strappo vero è l'immagine della carta: il bordo inferiore resta irregolare anche quando il poster cresce */
+.lab-dlg[data-lab="poeta"] .lab-poeta-quadro::before {
+  content: '';
+  position: absolute;
+  inset: -28px -16px -28px -10px;
+  width: auto;
+  height: auto;
+  margin: 0;
+  z-index: -2;
+  pointer-events: none;
+  border: 0 solid transparent;
+  border-image: url(/art/carta/giallo.webp) 112 fill / 64px stretch;
+  clip-path: none;
+  rotate: 0deg;
+  background: none;
+}
+/* la grana della carta e una piega leggerissima, per non farlo sembrare un rettangolo pieno */
+.lab-dlg[data-lab="poeta"] .lab-poeta-quadro::after {
+  content: '';
+  position: absolute;
+  inset: 3px 2px 4px;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(101deg, transparent 0 47.5%, rgba(120, 92, 0, .06) 48% 49.5%, transparent 50%),
+    var(--pzk-grana) 0 0 / 180px 90px;
+  opacity: .24;
+  mix-blend-mode: multiply;
+}
+
+.lab-dlg[data-lab="poeta"] .lab-poeta-testa {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-marchio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+/* il numero 09: Anton vuoto, come lo stencil dei volantini */
+.lab-dlg[data-lab="poeta"] .lab-poeta-num {
+  flex: none;
+  color: transparent;
+  -webkit-text-stroke: 2px rgba(22, 22, 22, .58);
+  font: 400 58px/.78 var(--pzk-fa);
+  letter-spacing: .01em;
+  transform: rotate(-2deg);
+}
+/* il timbro rosso del titolo */
+.lab-dlg[data-lab="poeta"] .lab-poeta-timbro {
+  display: inline-block;
+  padding: 3px 8px 2px;
+  border: 3px double var(--pzk-rosso);
+  color: var(--pzk-rosso);
+  font: 400 10.5px/1 var(--pzk-mac);
+  letter-spacing: .17em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: rotate(-4deg);
+  mix-blend-mode: multiply;
+  opacity: .86;
+}
+/* il badge del modello: un secondo timbro, in alto a destra */
+.lab-dlg[data-lab="poeta"] .lab-badge.lab-poeta-modello {
+  flex: none;
+  margin-top: 4px;
+  padding: 3px 8px 2px;
+  border: 3px double currentColor;
+  background: transparent;
+  box-shadow: none;
+  color: var(--pzk-rosso);
+  font: 400 10px/1.1 var(--pzk-mac);
+  letter-spacing: .13em;
+  transform: rotate(6deg);
+  mix-blend-mode: multiply;
+  opacity: .9;
+}
+
+/* il motto: Anton, grande ma capace di stare nella carta anche quando l'IA scrive lungo */
+.lab-dlg[data-lab="poeta"] .lab-motto {
+  margin: auto 0;
+  padding: 18px 0;
+  color: var(--pzk-ink);
+  font: 400 clamp(28px, 3.9vw, 50px)/1.04 var(--pzk-fa);
+  letter-spacing: .005em;
+  text-transform: lowercase;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.lab-dlg[data-lab="poeta"] .lab-motto::before,
+.lab-dlg[data-lab="poeta"] .lab-motto::after {
+  color: var(--pzk-rosso);
+  font-family: var(--pzk-marker);
+  font-size: .86em;
+  line-height: 1;
+  vertical-align: .02em;
+}
+.lab-dlg[data-lab="poeta"] .lab-motto::before { content: '«'; margin-right: .05em; }
+.lab-dlg[data-lab="poeta"] .lab-motto::after { content: '»'; margin-left: .05em; }
+.lab-dlg[data-lab="poeta"] .lab-motto.is-nuovo {
+  animation: poeta-motto-entra .4s cubic-bezier(.2, 1.4, .4, 1);
+}
+@keyframes poeta-motto-entra {
+  from { opacity: 0; transform: translateY(9px) rotate(-1.6deg) scale(.97); }
+}
+
+/* la firma a pennarello e la data, in fondo al poster */
+.lab-dlg[data-lab="poeta"] .lab-poeta-fondo {
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-firma {
+  padding-bottom: 3px;
+  border-bottom: 1.5px solid rgba(22, 22, 22, .42);
+  color: var(--pzk-ink);
+  font: 400 17px/1 var(--pzk-marker);
+  white-space: nowrap;
+  transform: rotate(-1.6deg);
+  transform-origin: 0 100%;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-data {
+  color: var(--pzk-matita);
+  font: 400 11px/1 var(--pzk-mac);
+  letter-spacing: .1em;
+  white-space: nowrap;
+  transform: rotate(1deg);
+}
+
+/* ── i comandi, appena sotto il poster ─────────────────────────────────────────────────────────────────────── */
+
+.lab-dlg[data-lab="poeta"] .lab-poeta-comandi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  margin: 34px 12px 0 10px;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-invito {
+  margin: 0;
+  color: var(--pzk-matita);
+  font: 400 14px/1.15 var(--pzk-marker);
+  transform: rotate(-1.2deg);
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-tasti {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lab-dlg[data-lab="poeta"] [data-genera] {
+  padding: .16em .72em .22em;
+  font-size: 24px;
+}
+.lab-dlg[data-lab="poeta"] [data-copia] {
+  min-height: 34px;
+  padding: 6px 12px 5px;
+  font-size: 12.5px;
+}
+/* il feedback locale della copia: verde per un attimo, senza perdere il focus */
+.lab-dlg[data-lab="poeta"] [data-copia].is-fatto {
+  border-color: var(--pzk-verde);
+  background: var(--pzk-verde);
+  color: #fff;
+  box-shadow: 0 2px 0 #14562e;
+  transform: translateY(1px);
+}
+
+/* ── la colonna destra: il retro del laboratorio ───────────────────────────────────────────────────────────── */
+
+.lab-dlg[data-lab="poeta"] .lab-poeta-note {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+}
+
+/* «come funziona»: il foglio con lo stato dell'IA in evidenza */
+.lab-dlg[data-lab="poeta"] .lab-pannello.lab-poeta-come {
+  position: relative;
+  flex: none;
+  padding: 18px 18px 16px;
+  transform: rotate(.15deg);
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-come::before {
+  left: auto;
+  right: 28px;
+  margin-left: 0;
+  rotate: 5deg;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-come__testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-come__testa h3 { margin-bottom: 4px; }
+.lab-dlg[data-lab="poeta"] .lab-poeta-spiega {
+  margin: 0;
+  color: var(--pzk-testo);
+  font: 400 12.5px/1.5 var(--pzk-mac);
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-spiega b {
+  padding: 0 2px;
+  background: var(--pzk-evidenzia);
+  color: var(--pzk-ink);
+  font-weight: 400;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-ia {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 9px 11px 10px 10px;
+  border-left: 4px solid var(--pzk-matita);
+  background: rgba(255, 253, 246, .62);
+  box-shadow: inset 0 0 0 1px rgba(22, 22, 22, .08);
+  transition: border-color .2s, background .2s;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-ia__led {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  margin-top: 13px;
+  border-radius: 50%;
+  background: var(--pzk-matita);
+  box-shadow: 0 0 0 3px rgba(90, 84, 76, .16);
+  transition: background .2s, box-shadow .2s;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-ia__corpo { min-width: 0; }
+.lab-dlg[data-lab="poeta"] .lab-poeta-ia__label {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--pzk-matita);
+  font: 400 9.5px/1 var(--pzk-mac);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-ia__testo {
+  margin: 0;
+  color: var(--pzk-ink);
+  font: 400 13px/1.35 var(--pzk-marker);
+  overflow-wrap: anywhere;
+}
+/* i tre stati veri, colorati dal motore con data-ia */
+.lab-dlg[data-lab="poeta"][data-ia="pronta"] .lab-poeta-ia {
+  border-left-color: var(--pzk-verde);
+  background: rgba(35, 134, 74, .07);
+}
+.lab-dlg[data-lab="poeta"][data-ia="pronta"] .lab-poeta-ia__led {
+  background: var(--pzk-verde);
+  box-shadow: 0 0 0 3px rgba(35, 134, 74, .18);
+}
+.lab-dlg[data-lab="poeta"][data-ia="scaricare"] .lab-poeta-ia {
+  border-left-color: var(--pzk-arancio);
+  background: rgba(201, 106, 0, .07);
+}
+.lab-dlg[data-lab="poeta"][data-ia="scaricare"] .lab-poeta-ia__led {
+  background: var(--pzk-arancio);
+  box-shadow: 0 0 0 3px rgba(201, 106, 0, .18);
+}
+.lab-dlg[data-lab="poeta"][data-ia="markov"] .lab-poeta-ia {
+  border-left-color: var(--pzk-penna);
+  background: rgba(20, 70, 160, .06);
+}
+.lab-dlg[data-lab="poeta"][data-ia="markov"] .lab-poeta-ia__led {
+  background: var(--pzk-penna);
+  box-shadow: 0 0 0 3px rgba(20, 70, 160, .16);
+}
+
+/* la scheda tecnica: due righe da leggere in un colpo */
+.lab-dlg[data-lab="poeta"] .lab-poeta-scheda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 16px;
+  margin: 12px 0 0;
+  padding: 8px 10px 7px;
+  border: 1px dashed rgba(22, 22, 22, .28);
+  background: rgba(255, 255, 255, .34);
+  color: var(--pzk-matita);
+  font: 400 10.5px/1.35 var(--pzk-mac);
+  list-style: none;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-scheda li {
+  display: flex;
+  gap: 5px;
+  margin: 0;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-scheda span {
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  font-size: 9px;
+  padding-top: 2px;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-scheda b {
+  padding: 0 2px;
+  background: var(--pzk-evidenzia);
+  color: var(--pzk-ink);
+  font-weight: 400;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-senza-rete {
+  flex: none;
+  margin: 0;
+  padding: 2px 9px 1px;
+  border: 3px double var(--pzk-rosso);
+  border-radius: 44%;
+  color: var(--pzk-rosso);
+  font: 400 10px/1.1 var(--pzk-mac);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: rotate(-7deg);
+  mix-blend-mode: multiply;
+  opacity: .8;
+}
+
+/* ── il quaderno del corpus: una pagina strappata, con le righe ────────────────────────────────────────────── */
+
+.lab-dlg[data-lab="poeta"] .lab-pannello.lab-poeta-quaderno {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  height: clamp(260px, 33vh, 330px);
+  min-height: 0;
+  margin: 0 4px 6px;
+  padding: 17px 14px 18px 42px;
+  background:
+    linear-gradient(90deg, transparent 27px, rgba(179, 18, 31, .28) 27px 28px, transparent 28px),
+    linear-gradient(180deg, rgba(255, 255, 255, .52), rgba(255, 255, 255, 0) 46%),
+    #f7f1e2;
+  box-shadow: 0 1px 1px rgba(40, 30, 10, .12), 0 9px 16px -12px rgba(40, 30, 10, .5);
+  transform: rotate(.35deg);
+  counter-reset: poeta-frasi;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-quaderno::before {
+  left: 22px;
+  margin-left: 0;
+  top: -10px;
+  rotate: -7deg;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-quaderno__testa {
+  display: flex;
+  flex: none;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-quaderno__testa h3 { margin-bottom: 4px; }
+.lab-dlg[data-lab="poeta"] .lab-poeta-conta {
+  position: absolute;
+  top: 18px;
+  right: 14px;
+  margin: 0;
+  color: var(--pzk-matita);
+  font: 400 10px/1.1 var(--pzk-mac);
+  letter-spacing: .08em;
+  white-space: nowrap;
+  transform: rotate(-2deg);
+}
+.lab-dlg[data-lab="poeta"] .lab-poeta-conta::after {
+  content: counter(poeta-frasi) ' frasi';
+}
+.lab-dlg[data-lab="poeta"] .lab-corpus {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+  padding: 1px 8px 4px 20px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  color: var(--pzk-testo);
+  font: 400 12.5px/24px var(--pzk-mac);
+  background: repeating-linear-gradient(to bottom, transparent 0 23px, rgba(20, 70, 160, .16) 23px 24px);
+  background-attachment: local;
+}
+.lab-dlg[data-lab="poeta"] .lab-corpus li {
+  margin: 0;
+  counter-increment: poeta-frasi;
+}
+.lab-dlg[data-lab="poeta"] .lab-corpus li::marker { color: var(--pzk-rosso); }
+.lab-dlg[data-lab="poeta"] .lab-poeta-quaderno__piede {
+  flex: none;
+  margin: 6px 0 0;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(22, 22, 22, .22);
+  color: var(--pzk-matita);
+  font: 400 10.5px/1.3 var(--pzk-mac);
+  transform: rotate(-.4deg);
+}
+/* il bordo di sotto non è una linea: è carta strappata */
+.lab-dlg[data-lab="poeta"] .lab-poeta-strappo {
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  bottom: -8px;
+  height: 15px;
+  background: #f7f1e2;
+  clip-path: polygon(
+    0 0, 100% 0, 100% 30%, 96% 58%, 92% 26%, 87% 64%, 82% 36%, 77% 70%,
+    71% 32%, 66% 60%, 60% 28%, 54% 66%, 49% 34%, 43% 72%, 38% 40%, 32% 62%,
+    27% 28%, 21% 68%, 16% 38%, 11% 58%, 6% 26%, 0 46%
+  );
+  filter: drop-shadow(0 1px .5px rgba(40, 30, 10, .2));
+  pointer-events: none;
+}
+
+/* ── schermi più stretti: prima il poster, poi le note ─────────────────────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .lab-dlg[data-lab="poeta"] .lab-poeta {
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    gap: 22px;
+  }
+  .lab-dlg[data-lab="poeta"] .lab-motto { font-size: clamp(26px, 3.2vw, 44px); }
+}
+
+@media (max-width: 820px) {
+  .lab-dlg[data-lab="poeta"] .lab-poeta {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-quadro::before {
+    inset: -21px -11px -22px -9px;
+    border-image-width: 52px;
+  }
+  .lab-dlg[data-lab="poeta"] .lab-motto {
+    font-size: clamp(27px, 7.2vw, 40px);
+    padding: 14px 0;
+  }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-num { font-size: 48px; }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-comandi { margin: 30px 12px 0 12px; }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-note { height: auto; }
+  .lab-dlg[data-lab="poeta"] .lab-pannello.lab-poeta-quaderno {
+    height: auto;
+    min-height: 260px;
+  }
+  .lab-dlg[data-lab="poeta"] .lab-corpus { max-height: 290px; }
+}
+
+@media (max-width: 520px) {
+  .lab-dlg[data-lab="poeta"] .lab-poeta-quadro::before {
+    inset: -18px -9px -19px -7px;
+    border-image-width: 46px;
+  }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-testa { gap: 8px; }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-marchio { gap: 8px; }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-num { font-size: 38px; }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-timbro {
+    padding: 2px 6px 1px;
+    font-size: 9px;
+    letter-spacing: .12em;
+  }
+  .lab-dlg[data-lab="poeta"] .lab-badge.lab-poeta-modello {
+    padding: 2px 6px 1px;
+    font-size: 9px;
+    letter-spacing: .1em;
+  }
+  .lab-dlg[data-lab="poeta"] .lab-motto {
+    font-size: clamp(25px, 6.9vw, 34px);
+    padding: 12px 0;
+  }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-firma { font-size: 15px; }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-data { font-size: 10px; }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-invito { display: none; }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-comandi { margin: 28px 8px 0; }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-tasti {
+    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .lab-dlg[data-lab="poeta"] [data-genera] {
+    flex: 1;
+    min-height: 44px;
+    font-size: 22px;
+  }
+  .lab-dlg[data-lab="poeta"] [data-copia] {
+    min-height: 44px;
+    padding: 8px 14px 7px;
+    font-size: 13px;
+  }
+  .lab-dlg[data-lab="poeta"] .lab-pannello.lab-poeta-come { padding: 16px 14px 14px; }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-ia { padding: 8px 9px 9px 9px; }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-ia__testo { font-size: 12.5px; }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-scheda { gap: 4px 12px; }
+  .lab-dlg[data-lab="poeta"] .lab-pannello.lab-poeta-quaderno {
+    margin: 0 2px 6px;
+    padding: 15px 10px 16px 34px;
+  }
+  .lab-dlg[data-lab="poeta"] .lab-corpus {
+    max-height: 300px;
+    font-size: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-dlg[data-lab="poeta"] .lab-motto.is-nuovo { animation: none; }
+  .lab-dlg[data-lab="poeta"] .lab-poeta-ia,
+  .lab-dlg[data-lab="poeta"] .lab-poeta-ia__led { transition: none; }
+}

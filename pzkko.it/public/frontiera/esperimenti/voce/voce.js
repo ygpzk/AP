@@ -80,44 +80,71 @@ function costruisci() {
     larga: true,
     corpo: `
       <div class="lab-voce">
-        <section class="lab-colonna">
-          <div class="lab-telecamera lab-muro-tela">
-            <canvas class="lab-tela" data-voce-tela role="img" aria-label="il muro che risponde agli ordini"></canvas>
+        <section class="lab-colonna lab-voce__sinistra">
+          <figure class="lab-muro">
+            <figcaption class="lab-muro__eti">
+              <span class="lab-muro__num">06</span>
+              <span class="lab-muro__nome">il muro</span>
+              <span class="lab-muro__dica">ascolta · risponde</span>
+            </figcaption>
+            <div class="lab-muro-tela">
+              <div class="lab-muro__cornice">
+                <canvas class="lab-tela" data-voce-tela role="img" aria-label="il muro che risponde: qui compaiono i colori, gli adesivi, la pioggia, la neve, le stelle e le parole scritte"></canvas>
+                <span class="lab-muro__luce" aria-hidden="true"></span>
+              </div>
+            </div>
+          </figure>
+
+          <div class="lab-voce__blocco lab-voce__blocco--colori">
+            <p class="lab-etichetta lab-voce__eti" id="vo-colori-eti">i colori <span>un tappo, un muro</span></p>
+            <div class="lab-riga lab-voce__colori" data-voce-colori role="group" aria-labelledby="vo-colori-eti"></div>
           </div>
 
-          <div class="lab-riga lab-voce__colori" data-voce-colori role="group" aria-label="i colori del muro"></div>
-
-          <div class="lab-riga" data-voce-esempi role="group" aria-label="ordini di esempio">
-            ${ESEMPI.map((e) => `<button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-comando="${e}">${e}</button>`).join('')}
+          <div class="lab-voce__blocco lab-voce__blocco--esempi">
+            <p class="lab-etichetta lab-voce__eti" id="vo-esempi-eti">gli ordini <span>tocca un foglietto</span></p>
+            <div class="lab-riga lab-voce__esempi" data-voce-esempi role="group" aria-labelledby="vo-esempi-eti">
+              ${ESEMPI.map((e) => `<button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-comando="${e}">${e}</button>`).join('')}
+            </div>
           </div>
-
-          <p class="lab-nota"><b>Come funziona:</b> gli ordini si possono dire o scrivere. «pioggia», «neve», «stelle», «cuori», «fuochi», «balla», «terremoto», «pulisci», un colore, oppure «scrivi ciao». La voce sintetica risponde. Il riconoscimento di Chrome manda l’audio al servizio del browser: per questo la riga di testo funziona sempre e non manda niente a nessuno.</p>
         </section>
 
-        <section class="lab-colonna">
-          <div class="lab-pannello">
+        <section class="lab-colonna lab-voce__destra">
+          <div class="lab-pannello lab-voce__microfono">
             <h3>il microfono</h3>
-            <div class="lab-riga">
-              <button type="button" class="lab-tasto lab-tasto--pieno" data-voce-mic aria-pressed="false" data-focus>ascolta</button>
-              <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-voce-risposta aria-pressed="true">risponde: sì</button>
+            <button type="button" class="lab-tasto lab-tasto--pieno lab-voce__mic" data-voce-mic aria-pressed="false" data-focus>ascolta</button>
+            <p class="lab-voce__ascolto" aria-hidden="true"><i></i>ascolto…</p>
+            <p class="lab-voce__dice" data-voce-stato role="status" aria-live="polite">sono qui · dammi un ordine</p>
+            <p class="lab-voce__udito lab-nota" data-voce-udito aria-live="polite"></p>
+            <div class="lab-voce__opzioni">
+              <label class="lab-voce__lingua" for="vo-lingua">lingua
+                <select id="vo-lingua" class="lab-scelta" data-voce-lingua aria-label="lingua della voce">
+                  ${LINGUE.map(([code, nome]) => `<option value="${code}">${nome}</option>`).join('')}
+                </select>
+              </label>
+              <button type="button" class="lab-voce__risponde" data-voce-risposta aria-pressed="true">risponde: sì</button>
             </div>
-            <label class="lab-etichetta" for="vo-lingua" style="margin-top:12px">lingua</label>
-            <select id="vo-lingua" class="lab-scelta" data-voce-lingua aria-label="lingua della voce">
-              ${LINGUE.map(([code, nome]) => `<option value="${code}">${nome}</option>`).join('')}
-            </select>
-            <p class="lab-nota" data-voce-stato role="status" aria-live="polite" style="margin-top:10px">scrivi un ordine o accendi il microfono</p>
-            <p class="lab-nota lab-voce__udito" data-voce-udito aria-live="polite"></p>
           </div>
 
-          <form class="lab-riga" data-voce-form>
-            <input class="lab-campo lab-cresce" data-voce-input placeholder="es. pioggia, muro viola, scrivi ciao" aria-label="un ordine per il muro" autocomplete="off">
-            <button type="submit" class="lab-tasto lab-tasto--pieno">dai l’ordine</button>
+          <form class="lab-voce__form" data-voce-form>
+            <label class="lab-etichetta lab-voce__eti" for="vo-input">oppure scrivilo <span>invio per l’ordine</span></label>
+            <div class="lab-voce__riga">
+              <input id="vo-input" class="lab-campo" data-voce-input placeholder="es. muro viola, pioggia" aria-label="un ordine per il muro" autocomplete="off">
+              <button type="submit" class="lab-tasto lab-tasto--pieno">dai l’ordine</button>
+            </div>
           </form>
 
-          <div class="lab-pannello">
-            <h3>la conversazione</h3>
-            <div class="lab-trascrizione" data-voce-trascrizione aria-live="polite"></div>
+          <div class="lab-pannello lab-voce__conversazione">
+            <div class="lab-voce__testata">
+              <h3>la conversazione</h3>
+              <span class="lab-voce__conteggio">ultime 12</span>
+            </div>
+            <div class="lab-trascrizione" data-voce-trascrizione role="log" aria-live="polite" aria-label="chi ha parlato e cosa ha risposto il muro"></div>
           </div>
+
+          <aside class="lab-voce__note">
+            <p class="lab-nota"><b>come funziona:</b> gli ordini si dicono o si scrivono: «pioggia», «neve», «stelle», «cuori», «fuochi», «balla», «terremoto», «pulisci», un colore, «adesivo», oppure «scrivi ciao». Il muro risponde a voce e scrive nella conversazione.</p>
+            <p class="lab-nota lab-voce__privacy"><b>privacy:</b> il riconoscimento vocale di Chrome può usare il servizio del browser e mandare l’audio fuori dal dispositivo. La riga di testo non manda niente a nessuno; il microfono parte solo quando lo accendi.</p>
+          </aside>
         </section>
       </div>`,
     onChiudi: () => { ui = null },
@@ -163,6 +190,7 @@ function costruisci() {
   let W = 800
   let H = 450
   let dpr = 1
+  let grana = null
   const accumuli = Object.create(null)
 
   // ── il muro ───────────────────────────────────────────────────────────────
@@ -177,6 +205,25 @@ function costruisci() {
     }))
   }
 
+  // la grana della calce: un rumore morbido, fatto una volta e riusato a ogni giro
+  function creaGrana() {
+    const c = document.createElement('canvas')
+    c.width = Math.max(1, Math.round(W / 2))
+    c.height = Math.max(1, Math.round(H / 2))
+    const g = c.getContext('2d')
+    if (!g) { grana = null; return }
+    const img = g.createImageData(c.width, c.height)
+    for (let i = 0; i < img.data.length; i += 4) {
+      const v = 110 + Math.random() * 90
+      img.data[i] = v
+      img.data[i + 1] = v
+      img.data[i + 2] = v
+      img.data[i + 3] = 255
+    }
+    g.putImageData(img, 0, 0)
+    grana = c
+  }
+
   function ridimensiona() {
     const r = tela.getBoundingClientRect()
     W = Math.max(280, Math.round(r.width || 800))
@@ -186,6 +233,7 @@ function costruisci() {
     tela.height = Math.round(H * dpr)
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     creaStelle()
+    creaGrana()
   }
 
   function caso(min, max) {
@@ -344,37 +392,129 @@ function costruisci() {
       scossa = Math.max(0, scossa - dt)
     }
 
-    // il fondo: il colore scelto, molto smorzato nel nero
+    // il muro: calce calda, non nera. Il colore scelto lo vela appena, come una luce sulla parete.
     const grad = ctx.createLinearGradient(0, 0, 0, H)
-    grad.addColorStop(0, mescola('#07090b', colore, .10))
-    grad.addColorStop(1, mescola('#07090b', colore, .24))
+    grad.addColorStop(0, mescola('#514939', colore, .07))
+    grad.addColorStop(.52, mescola('#463f31', colore, .12))
+    grad.addColorStop(1, mescola('#393328', colore, .20))
     ctx.fillStyle = grad
     ctx.fillRect(-24, -24, W + 48, H + 48)
 
-    const alone = ctx.createRadialGradient(W * .5, H * .95, 10, W * .5, H * .95, H * .9)
-    alone.addColorStop(0, rgba(colore, .22))
-    alone.addColorStop(1, rgba(colore, 0))
-    ctx.fillStyle = alone
+    // il filo di luce che arriva da sinistra in alto
+    const luce = ctx.createRadialGradient(W * .16, -H * .2, 8, W * .16, -H * .2, H * 1.18)
+    luce.addColorStop(0, 'rgba(255, 241, 203, .2)')
+    luce.addColorStop(.55, 'rgba(255, 236, 190, .06)')
+    luce.addColorStop(1, 'rgba(255, 236, 190, 0)')
+    ctx.fillStyle = luce
     ctx.fillRect(-24, -24, W + 48, H + 48)
 
-    ctx.strokeStyle = 'rgba(255,255,255,.035)'
-    ctx.lineWidth = 1
-    for (let x = 0; x < W; x += 56) {
+    // le macchie della calce: chiazze chiare e ombre, come un muro vissuto
+    const macchie = [
+      [.2, .24, .42, 'rgba(255, 242, 208, .055)'],
+      [.78, .7, .36, 'rgba(16, 13, 9, .10)'],
+      [.48, .08, .3, 'rgba(255, 244, 214, .05)'],
+      [.94, .94, .34, 'rgba(16, 13, 9, .12)'],
+      [.58, .56, .2, 'rgba(255, 240, 202, .035)'],
+    ]
+    for (const [fx, fy, fr, tinta] of macchie) {
+      const r = Math.max(W, H) * fr
+      const chiazza = ctx.createRadialGradient(W * fx, H * fy, 2, W * fx, H * fy, r)
+      chiazza.addColorStop(0, tinta)
+      chiazza.addColorStop(1, 'rgba(0, 0, 0, 0)')
+      ctx.fillStyle = chiazza
+      ctx.fillRect(-24, -24, W + 48, H + 48)
+    }
+
+    // le passate di frattazzo: righe larghe e storte, non una griglia
+    ctx.lineWidth = 2
+    for (let y = H * .16, riga = 0; y < H; y += Math.max(74, H / 5.6), riga++) {
       ctx.beginPath()
-      ctx.moveTo(x, 0)
-      ctx.lineTo(x, H)
+      for (let x = -10; x <= W + 10; x += 26) {
+        const yy = y + Math.sin((x / W) * 6.2 + riga) * 2.4
+        if (x < 0) ctx.moveTo(x, yy)
+        else ctx.lineTo(x, yy)
+      }
+      ctx.strokeStyle = riga % 2 ? 'rgba(255, 246, 224, .04)' : 'rgba(16, 13, 9, .055)'
       ctx.stroke()
     }
-    for (let y = 0; y < H; y += 56) {
+
+    // la grana della calce
+    if (grana) {
+      ctx.save()
+      ctx.globalAlpha = .09
+      ctx.drawImage(grana, 0, 0, W, H)
+      ctx.restore()
+    }
+
+    // lo zoccolo in fondo: il muro ha un pavimento
+    const zoccolo = Math.max(12, Math.round(H * .035))
+    ctx.fillStyle = 'rgba(14, 11, 8, .22)'
+    ctx.fillRect(0, H - zoccolo, W, zoccolo)
+    ctx.fillStyle = 'rgba(255, 244, 214, .10)'
+    ctx.fillRect(0, H - zoccolo, W, 1.5)
+
+    // la vignetta: gli angoli si perdono nel buio della stanza
+    const vignetta = ctx.createRadialGradient(W * .5, H * .46, Math.min(W, H) * .3, W * .5, H * .46, Math.max(W, H) * .78)
+    vignetta.addColorStop(0, 'rgba(8, 7, 5, 0)')
+    vignetta.addColorStop(1, 'rgba(8, 7, 5, .44)')
+    ctx.fillStyle = vignetta
+    ctx.fillRect(-24, -24, W + 48, H + 48)
+
+    // con le stelle il muro diventa un pezzo di cielo: la luna, la notte, le stelle
+    const notte = effetti.has('stelle')
+    if (!notte) {
+      // l'interruttore della luce, sul bordo del muro: una placca vera
+      const sx = W - 36
+      const sy = H * .54
+      ctx.save()
+      ctx.fillStyle = 'rgba(12, 9, 6, .2)'
+      ctx.fillRect(sx + 2, sy + 3, 20, 32)
+      ctx.fillStyle = 'rgba(238, 228, 205, .5)'
+      ctx.fillRect(sx, sy, 20, 32)
+      ctx.strokeStyle = 'rgba(38, 32, 22, .45)'
+      ctx.lineWidth = 1
+      ctx.strokeRect(sx + .5, sy + .5, 19, 31)
+      ctx.fillStyle = 'rgba(38, 32, 22, .5)'
+      ctx.fillRect(sx + 7, sy + 9, 6, 10)
       ctx.beginPath()
-      ctx.moveTo(0, y)
-      ctx.lineTo(W, y)
-      ctx.stroke()
+      ctx.arc(sx + 10, sy + 25, 1.2, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
+    }
+    if (notte) {
+      const cielo = ctx.createLinearGradient(0, 0, 0, H)
+      cielo.addColorStop(0, 'rgba(10, 17, 33, .68)')
+      cielo.addColorStop(.62, 'rgba(17, 24, 41, .54)')
+      cielo.addColorStop(1, 'rgba(24, 24, 28, .22)')
+      ctx.fillStyle = cielo
+      ctx.fillRect(-24, -24, W + 48, H + 48)
+
+      const mx = W * .82
+      const my = H * .2
+      const mr = Math.max(14, Math.min(W, H) * .065)
+      const aloneLuna = ctx.createRadialGradient(mx, my, mr * .4, mx, my, mr * 3.4)
+      aloneLuna.addColorStop(0, 'rgba(255, 243, 208, .3)')
+      aloneLuna.addColorStop(1, 'rgba(255, 243, 208, 0)')
+      ctx.fillStyle = aloneLuna
+      ctx.beginPath()
+      ctx.arc(mx, my, mr * 3.4, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.fillStyle = 'rgba(248, 238, 206, .92)'
+      ctx.beginPath()
+      ctx.arc(mx, my, mr, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.fillStyle = 'rgba(196, 189, 169, .42)'
+      ctx.beginPath()
+      ctx.arc(mx - mr * .3, my - mr * .22, mr * .22, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.beginPath()
+      ctx.arc(mx + mr * .36, my + mr * .18, mr * .14, 0, Math.PI * 2)
+      ctx.fill()
     }
 
     for (const adesivo of adesivi) disegnaAdesivo(adesivo)
 
-    if (effetti.has('stelle')) {
+    if (notte) {
       for (const s of stelle) {
         const tw = rid ? .7 : .35 + .65 * Math.abs(Math.sin(tempo * s.vel + s.fase))
         ctx.beginPath()
@@ -413,8 +553,11 @@ function costruisci() {
         ctx.beginPath()
         ctx.moveTo(p.x, p.y)
         ctx.lineTo(p.x - p.vx * .018, p.y - p.vy * .022)
-        ctx.strokeStyle = rgba(colore, p.alfa)
+        ctx.lineWidth = 2.6
+        ctx.strokeStyle = 'rgba(255, 246, 220, .10)'
+        ctx.stroke()
         ctx.lineWidth = 1.4
+        ctx.strokeStyle = rgba(colore, p.alfa)
         ctx.stroke()
         if (p.y > H + 30) particelle.splice(i, 1)
         continue
@@ -569,10 +712,16 @@ function costruisci() {
 
     const scrivi = originale.match(/\b(?:scrivi|write|say|dici)\b[\s:,-]+(.+)/i)
     if (scrivi?.[1]) {
+      // «scrivi …» è tutto il messaggio: il resto della frase non è un altro ordine
       const valore = scrivi[1].trim().slice(0, 120)
       testo = { valore, fino: tempo + (ridotto() ? 6 : 5) }
-      risposte.push(`ho scritto ${valore}`)
-      fatto = true
+      const risposta = `ho scritto ${valore}`
+      stato.textContent = risposta
+      trascrivi('muro', risposta)
+      if (daVoce) udito.textContent = `«${originale}»`
+      d.nota(`ordine eseguito · ${risposta}`, 'ok')
+      if (daVoce || voceAttiva) rispondi(risposta)
+      return
     }
 
     if (/\b(che ore sono|che ora e|che ora sono|what time is it|what s the time|the time)\b/.test(f)) {
@@ -584,7 +733,7 @@ function costruisci() {
 
     if (/\b(ciao|hello|hey|salve)\b/.test(f)) {
       testo = { valore: 'ciao', fino: tempo + 4 }
-      risposte.push('ciao')
+      risposte.push('ciao · sono il muro')
       fatto = true
     }
 
@@ -606,13 +755,13 @@ function costruisci() {
 
     if (vuoleAdesivo) {
       aggiungiAdesivo(coloreTrovato?.hex || colore)
-      risposte.push('adesivo attaccato')
+      risposte.push('adesivo attaccato al muro')
       fatto = true
     }
 
     if (coloreTrovato && !soloAdesivo) {
       colore = coloreTrovato.hex
-      risposte.push(`muro ${coloreTrovato.nome}`)
+      risposte.push(`ecco il ${coloreTrovato.nome}`)
       fatto = true
     }
 
@@ -641,6 +790,12 @@ function costruisci() {
       scossa = 1.4
       risposte.push('tutto trema')
       fatto = true
+      if (!ridotto()) {
+        d.dlg.classList.remove('lab-voce--scossa')
+        void d.dlg.offsetWidth
+        d.dlg.classList.add('lab-voce--scossa')
+        setTimeout(() => d.dlg.classList.remove('lab-voce--scossa'), 1400)
+      }
     }
 
     if (!stop && /\b(fermati|stop|basta|smetti|calma|quieto)\b/.test(f)) {
@@ -664,10 +819,10 @@ function costruisci() {
 
     if (daVoce) udito.textContent = `«${originale}»`
     if (!fatto) {
-      stato.textContent = 'non ho capito: prova «pioggia», «muro viola», «scrivi ciao»'
-      trascrivi('muro', 'non ho capito. Prova pioggia, neve, oppure muro viola.')
+      stato.textContent = 'non ho capito · prova «pioggia», «muro viola» o «scrivi ciao»'
+      trascrivi('muro', 'non ho capito · prova «pioggia», un colore o «scrivi ciao»')
       if (daVoce) rispondi('Non ho capito. Prova pioggia, neve, oppure muro viola.')
-      d.nota('ordine non riconosciuto', 'attesa')
+      d.nota('non ho capito · prova «pioggia» o «muro viola»', 'attesa')
       return
     }
 
@@ -675,7 +830,7 @@ function costruisci() {
     stato.textContent = risposta
     trascrivi('muro', risposta)
     segnaColore()
-    d.nota('ordine eseguito', 'ok')
+    d.nota(`ordine eseguito · ${risposta}`, 'ok')
     if (daVoce || voceAttiva) rispondi(risposte[risposte.length - 1] || 'fatto')
     if (spegniMic) setTimeout(() => { if (ascolto) fermaAscolto() }, 1800)
   }
@@ -693,7 +848,7 @@ function costruisci() {
       mic.classList.add('is-on')
       mic.setAttribute('aria-pressed', 'true')
       aggiornaMic()
-      d.nota('microfono acceso · parla', 'ok')
+      d.nota('ascolto… parla pure', 'ok')
     }
     r.onresult = (e) => {
       let intermedio = ''
@@ -749,6 +904,7 @@ function costruisci() {
     mic.classList.toggle('is-on', ascolto)
     mic.setAttribute('aria-pressed', String(ascolto))
     mic.textContent = !SR ? 'scrivi' : ascolto ? (parlando ? 'rispondo' : 'ferma') : 'ascolta'
+    d.dlg.classList.toggle('lab-voce--ascolto', ascolto && !parlando)
     if (!SR) {
       mic.disabled = true
       mic.setAttribute('aria-disabled', 'true')

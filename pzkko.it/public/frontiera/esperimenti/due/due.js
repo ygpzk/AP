@@ -33,25 +33,71 @@ function costruisci() {
     voce: 'Pong fra due schede dello stesso browser: una tiene il campo, l\'altra è la racchetta. Senza server, senza account.',
     larga: true,
     corpo: `
-      <div class="lab-colonna">
-        <div class="lab-riga lab-riga--tra">
-          <div class="lab-riga">
+      <div class="lab-due">
+        <div class="lab-due-marquee">
+          <span class="lab-due-marchio"><b>PONG</b><i>/ due schede</i></span>
+          <span class="lab-due-targhetta">cabina 03 · broadcast channel</span>
+          <span class="lab-due-punteggio">
+            <span class="lab-due-punto"><small data-punteggio-etichetta="1">tu</small><b data-punteggio="1">0</b></span>
+            <i class="lab-due-duepunti">:</i>
+            <span class="lab-due-punto"><small data-punteggio-etichetta="2">muro</small><b data-punteggio="2">0</b></span>
+          </span>
+        </div>
+        <div class="lab-due-scena">
+          <div class="lab-telecamera lab-due-tela">
+            <canvas class="lab-tela" width="${W}" height="${H}" tabindex="0" data-focus aria-label="il campo da pong"></canvas>
+            <span class="lab-due-riflesso" aria-hidden="true"></span>
+            <div class="lab-due-velo" data-velo hidden>
+              <div class="lab-due-velo-foglio">
+                <p class="lab-due-velo-titolo">aspetto l'altra scheda</p>
+                <p class="lab-due-velo-testo">questa resta il campo. apri una scheda accanto: l'altra diventa la racchetta.</p>
+                <button type="button" class="lab-tasto lab-tasto--pieno lab-tasto--piccolo" data-apri-scheda>apri un'altra scheda</button>
+              </div>
+            </div>
+            <span class="lab-due-vite lab-due-vite--1" aria-hidden="true"></span>
+            <span class="lab-due-vite lab-due-vite--2" aria-hidden="true"></span>
+            <span class="lab-due-vite lab-due-vite--3" aria-hidden="true"></span>
+            <span class="lab-due-vite lab-due-vite--4" aria-hidden="true"></span>
+          </div>
+        </div>
+        <div class="lab-due-banco">
+          <div class="lab-due-istruzioni">
+            <p class="lab-nota lab-due-istruzioni--campo"><b>campo</b> muovi la racchetta con <b>W / S</b> o col puntatore. il muro gioca da solo finché non arriva l'altra scheda.</p>
+            <p class="lab-nota lab-due-istruzioni--doppio"><b>in due</b> tu a sinistra con <b>W / S</b>; l'ospite a destra con <b>↑ / ↓</b>. primo a 7.</p>
+            <p class="lab-nota lab-due-istruzioni--racchetta"><b>racchetta</b> sei a destra: muoviti con <b>↑ / ↓</b> o col puntatore. il campo resta all'altra scheda.</p>
+          </div>
+          <div class="lab-due-stato">
             <span class="lab-badge" data-ruolo>in attesa…</span>
             <span class="lab-badge lab-badge--acceso" data-ospite hidden>seconda scheda collegata</span>
+            <span class="lab-due-regola">primo a 7</span>
           </div>
-          <div class="lab-riga">
+          <div class="lab-due-comandi">
             <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-apri-scheda>apri un'altra scheda</button>
             <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-copia>copia link</button>
             <button type="button" class="lab-tasto lab-tasto--piccolo" data-rigioca>rigioca</button>
+            <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-prendi hidden>prendi il campo</button>
+          </div>
+          <div class="lab-due-gettoniera" aria-hidden="true">
+            <span class="lab-due-fessura"></span>
+            <span class="lab-due-gettoniera-testo">una scheda · gratis</span>
           </div>
         </div>
-        <div class="lab-telecamera lab-due-tela">
-          <canvas class="lab-tela" width="${W}" height="${H}" tabindex="0" data-focus aria-label="il campo da pong"></canvas>
-        </div>
-        <div class="lab-riga lab-riga--tra">
-          <p class="lab-nota"><b>Come si gioca:</b> il campo si muove con <b>W/S</b> o col puntatore; la racchetta con <b>frecce</b> o col puntatore. Se nessuno entra, il muro gioca da solo. Apri un'altra scheda su <b>/frontiera/#due</b> per il secondo giocatore.</p>
-          <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-prendi hidden>prendi il campo</button>
-        </div>
+      </div>
+      <div class="lab-due-guida lab-due-guida--campo">
+        <span class="lab-due-guida-titolo">come si gioca</span>
+        <ol>
+          <li>questa scheda tiene il campo;</li>
+          <li>apri un'altra scheda: diventa la racchetta di destra;</li>
+          <li>muoviti con <b>W/S</b> e <b>frecce</b>, o col dito. primo a 7.</li>
+        </ol>
+      </div>
+      <div class="lab-due-guida lab-due-guida--ospite">
+        <span class="lab-due-guida-titolo">come si gioca</span>
+        <ol>
+          <li>questa scheda è la racchetta di destra;</li>
+          <li>l'altra scheda tiene il campo e il punteggio;</li>
+          <li>muoviti con <b>↑ ↓</b>, o col dito. primo a 7.</li>
+        </ol>
       </div>`,
     onChiudi: () => { ui = null },
   })
@@ -60,6 +106,10 @@ function costruisci() {
   const ctx = tela.getContext('2d')
   const badge = d.corpo.querySelector('[data-ruolo]')
   const badgeOspite = d.corpo.querySelector('[data-ospite]')
+  const veloDom = d.corpo.querySelector('[data-velo]')
+  const punteggi = [1, 2].map((n) => d.corpo.querySelector(`[data-punteggio="${n}"]`))
+  const etichette = [1, 2].map((n) => d.corpo.querySelector(`[data-punteggio-etichetta="${n}"]`))
+  let timerCopia = 0
   if (!('BroadcastChannel' in window)) {
     d.nota('questo browser non ha BroadcastChannel', 'male')
     d.apri()
@@ -95,8 +145,18 @@ function costruisci() {
 
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n))
 
+  // il velo di attesa vive dentro il campo: si vede solo quando il campo è solo
+  // (e non a partita finita, che ha già il suo velo disegnato dal motore).
+  function aggiornaVelo() {
+    if (!veloDom) return
+    const mostra = ruolo === 'host' && !ospiteId && !S.over && !perso
+    if (veloDom.hidden !== !mostra) veloDom.hidden = !mostra
+  }
+
   function aggiornaBadge() {
     if (!badge) return
+    d.dlg.dataset.modo = ruolo
+    d.dlg.dataset.ospite = ospiteId ? 'si' : 'no'
     badge.classList.toggle('lab-badge--acceso', ruolo !== 'attesa')
     if (ruolo === 'host') {
       badge.textContent = ospiteId ? 'campo · due giocatori' : 'campo · gioca il muro'
@@ -108,6 +168,15 @@ function costruisci() {
       badge.textContent = 'in attesa…'
       badgeOspite.hidden = true
     }
+    if (etichette[0]) etichette[0].textContent = ruolo === 'ospite' ? 'campo' : 'tu'
+    if (etichette[1]) etichette[1].textContent = ruolo === 'ospite' ? 'tu' : (ospiteId ? 'ospite' : 'muro')
+    aggiornaVelo()
+  }
+
+  // il tabellone del cabinato: legge lo stesso punteggio del canvas, senza ridisegnarlo
+  function aggiornaPunteggio() {
+    if (punteggi[0] && punteggi[0].textContent !== String(S.s1)) punteggi[0].textContent = String(S.s1)
+    if (punteggi[1] && punteggi[1].textContent !== String(S.s2)) punteggi[1].textContent = String(S.s2)
   }
 
   function resetPalla(dir = Math.random() < 0.5 ? -1 : 1) {
@@ -323,6 +392,9 @@ function costruisci() {
       velo(`partita finita · ${S.s1} – ${S.s2}`)
     }
     if (perso) velo('il campo non risponde · prendi il campo')
+
+    aggiornaPunteggio()
+    aggiornaVelo()
   }
 
   function velo(t) {
@@ -453,12 +525,25 @@ function costruisci() {
 
   d.corpo.addEventListener('click', (e) => {
     if (e.target.closest('[data-apri-scheda]')) {
-      const w = window.open(`${location.origin}/frontiera/#due`, '_blank', 'noopener')
+      const w = window.open(`${location.origin}/frontiera/#due`, '_blank')
       if (!w) d.nota('il browser ha bloccato la scheda: aprila a mano su /frontiera/#due', 'male')
+      else { try { w.opener = null } catch {} }
       return
     }
     if (e.target.closest('[data-copia]')) {
-      copia(`${location.origin}/frontiera/#due`).then((ok) => d.nota(ok ? 'link copiato' : 'non riesco a copiare', ok ? 'ok' : 'male'))
+      const tasto = e.target.closest('[data-copia]')
+      copia(`${location.origin}/frontiera/#due`).then((ok) => {
+        d.nota(ok ? 'link copiato' : 'non riesco a copiare', ok ? 'ok' : 'male')
+        if (!ok || !tasto) return
+        clearTimeout(timerCopia)
+        if (!tasto.dataset.testo) tasto.dataset.testo = tasto.textContent
+        tasto.textContent = 'copiato ✓'
+        tasto.classList.add('is-copiato')
+        timerCopia = setTimeout(() => {
+          tasto.textContent = tasto.dataset.testo
+          tasto.classList.remove('is-copiato')
+        }, 1800)
+      })
       return
     }
     if (e.target.closest('[data-rigioca]')) {
@@ -495,6 +580,7 @@ function costruisci() {
     fermo = true
     cancelAnimationFrame(raf)
     clearTimeout(attesaHost)
+    clearTimeout(timerCopia)
     clearInterval(battito)
     document.removeEventListener('keydown', giu)
     document.removeEventListener('keyup', su)

@@ -28,7 +28,8 @@ function sbaglia(testo) {
 }
 
 function nomeDaHash() {
-  const h = decodeURIComponent(location.hash.slice(1))
+  let h = ''
+  try { h = decodeURIComponent(location.hash.slice(1)) } catch { return null }
   if (h.startsWith('b1.')) return 'busta'
   return Object.hasOwn(MODULI, h) ? h : null
 }
@@ -114,7 +115,8 @@ document.addEventListener('click', (e) => {
 window.addEventListener('pzkko-lab-chiuso', (e) => {
   const id = e.detail?.id
   if (!id) return
-  const h = decodeURIComponent(location.hash.slice(1))
+  let h = ''
+  try { h = decodeURIComponent(location.hash.slice(1)) } catch { h = '' }
   if (h === id) history.replaceState(null, '', location.pathname + location.search)
 })
 

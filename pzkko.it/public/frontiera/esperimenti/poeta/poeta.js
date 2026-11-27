@@ -7,6 +7,11 @@
 //      funziona ovunque, non scarica niente, non chiama nessuno.
 //
 //   apri()  apre il poeta
+//
+// Agganci aggiunti il 27.11 (solo grafica, niente motore):
+//   [data-data]           la data di oggi in fondo al poster;
+//   [data-copia-etichetta] l'etichetta del tasto copia («copiato ✓» per un attimo);
+//   [data-ia] sul <dialog> lo stato vero dell'IA locale: pronta | scaricare | markov.
 
 import { creaDialogo, copia } from '../../shell.js'
 
@@ -85,26 +90,56 @@ function costruisci() {
     larga: true,
     corpo: `
       <div class="lab-poeta">
-        <div class="lab-pannello lab-poeta-quadro">
-          <p class="lab-occhiello">motto del muro</p>
-          <blockquote class="lab-motto" data-motto>…</blockquote>
-          <div class="lab-riga lab-riga--tra">
-            <span class="lab-badge" data-modello>Markov locale</span>
-            <div class="lab-riga">
+        <div class="lab-poeta-scena">
+          <div class="lab-pannello lab-poeta-quadro">
+            <div class="lab-poeta-testa">
+              <div class="lab-poeta-marchio">
+                <span class="lab-poeta-num" aria-hidden="true">09</span>
+                <span class="lab-poeta-timbro">motto del muro</span>
+              </div>
+              <span class="lab-badge lab-poeta-modello" data-modello>Markov locale</span>
+            </div>
+            <blockquote class="lab-motto" data-motto>…</blockquote>
+            <div class="lab-poeta-fondo">
+              <span class="lab-poeta-firma">pzkko · frontiera</span>
+              <time class="lab-poeta-data" data-data></time>
+            </div>
+          </div>
+          <div class="lab-poeta-comandi">
+            <p class="lab-poeta-invito">un motto nuovo,<br>la stessa parete</p>
+            <div class="lab-poeta-tasti">
               <button type="button" class="lab-tasto lab-tasto--pieno" data-genera data-focus>genera</button>
-              <button type="button" class="lab-tasto lab-tasto--fantasma" data-copia>copia</button>
+              <button type="button" class="lab-tasto lab-tasto--fantasma" data-copia><span data-copia-etichetta>copia</span></button>
             </div>
           </div>
         </div>
-        <div class="lab-colonna">
-          <div class="lab-pannello">
-            <h3>Come funziona</h3>
-            <p class="lab-nota">Se Chrome ha l'<b>IA locale</b> già pronta, il motto lo scrive lei, sul tuo dispositivo. Altrimenti si usa una <b>catena di Markov</b> costruita con le frasi qui sotto: nessuna chiamata a un server, nessun modello da scaricare.</p>
-            <p class="lab-nota" data-ia-stato style="margin-top:8px">controllo l'IA del browser…</p>
+        <div class="lab-poeta-note">
+          <div class="lab-pannello lab-poeta-come">
+            <div class="lab-poeta-come__testa">
+              <h3>come funziona</h3>
+              <span class="lab-poeta-senza-rete" aria-hidden="true">senza rete</span>
+            </div>
+            <p class="lab-nota lab-poeta-spiega">Se Chrome ha l'<b>IA locale</b> già pronta, il motto lo scrive lei, sul tuo dispositivo. Altrimenti si usa una <b>catena di Markov</b> costruita con le frasi qui sotto: nessuna chiamata a un server, nessun modello da scaricare.</p>
+            <div class="lab-poeta-ia">
+              <span class="lab-poeta-ia__led" aria-hidden="true"></span>
+              <div class="lab-poeta-ia__corpo">
+                <span class="lab-poeta-ia__label">stato dell'IA locale</span>
+                <p class="lab-poeta-ia__testo" data-ia-stato>controllo l'IA del browser…</p>
+              </div>
+            </div>
+            <ul class="lab-poeta-scheda">
+              <li><span>gira</span> <b>sul tuo dispositivo</b></li>
+              <li><span>rete</span> <b>nessuna</b></li>
+            </ul>
           </div>
-          <div class="lab-pannello">
-            <h3>Le frasi da cui impara</h3>
+          <div class="lab-pannello lab-poeta-quaderno">
+            <span class="lab-poeta-strappo" aria-hidden="true"></span>
+            <div class="lab-poeta-quaderno__testa">
+              <h3>le frasi da cui impara</h3>
+            </div>
             <ul class="lab-corpus" data-corpus></ul>
+            <p class="lab-poeta-quaderno__piede">nessun modello scaricato · nessuna frase esce da qui</p>
+            <span class="lab-poeta-conta" aria-hidden="true"></span>
           </div>
         </div>
       </div>`,
@@ -115,9 +150,22 @@ function costruisci() {
   const motto = q('[data-motto]')
   const bGenera = q('[data-genera]')
   const bCopia = q('[data-copia]')
+  const copiaEtichetta = q('[data-copia-etichetta]')
   const badge = q('[data-modello]')
   const iaStato = q('[data-ia-stato]')
+  const dataEl = q('[data-data]')
   const corpusEl = q('[data-corpus]')
+
+  // la data del poster: quella di oggi, scritta a macchina in fondo al foglio
+  try {
+    const oggi = new Date()
+    const due = (n) => String(n).padStart(2, '0')
+    const iso = `${oggi.getFullYear()}-${due(oggi.getMonth() + 1)}-${due(oggi.getDate())}`
+    dataEl.textContent = `${due(oggi.getDate())}.${due(oggi.getMonth() + 1)}.${oggi.getFullYear()}`
+    dataEl.dateTime = iso
+  } catch {
+    dataEl.textContent = '—'
+  }
 
   for (const frase of CORPUS) {
     const li = document.createElement('li')
@@ -129,6 +177,7 @@ function costruisci() {
   let iaPronta = false
   let fermo = false
   let ultimi = new Set()
+  let copiaTimer = 0
   const catena = costruisciCatena(CORPUS)
 
   function generaMarkov() {
@@ -172,6 +221,7 @@ function costruisci() {
 
   async function genera() {
     if (fermo) return
+    const avevaFocus = document.activeElement === bGenera
     bGenera.disabled = true
     d.nota('scrivo…', 'attesa')
     let testo = ''
@@ -184,21 +234,46 @@ function costruisci() {
         console.warn('Poeta: l\'IA non risponde, uso Markov', e)
         iaPronta = false
         badge.textContent = 'Markov locale'
+        d.dlg.dataset.ia = 'markov'
         iaStato.textContent = 'l\'IA del browser non ha risposto: da adesso uso la catena di Markov.'
       }
     }
     if (!testo) testo = generaMarkov()
     if (fermo) return
     motto.textContent = testo
+    adattaMotto()
     motto.classList.remove('is-nuovo')
     void motto.offsetWidth
     motto.classList.add('is-nuovo')
     d.nota(usataIa ? 'motto scritto dall\'IA del browser' : 'motto scritto dalla catena di Markov', 'ok')
     bGenera.disabled = false
+    if (avevaFocus) bGenera.focus({ preventScroll: true })
   }
+
+  // Il motto può essere lungo (l'IA arriva a 180 caratteri): se serve, cala il
+  // corpo di un paio di punti alla volta, così la carta non lo lascia fuori.
+  // Non tocca il testo: cambia solo la misura del blockquote.
+  function adattaMotto() {
+    if (!motto.isConnected) return
+    motto.style.fontSize = ''
+    const max = Math.min(360, Math.max(260, Math.round(innerHeight * .4)))
+    let corpo = parseFloat(getComputedStyle(motto).fontSize) || 48
+    let giri = 0
+    while (motto.offsetHeight > max && corpo > 24 && giri < 40) {
+      corpo -= 2
+      motto.style.fontSize = `${corpo}px`
+      giri += 1
+    }
+  }
+  const osservatore = new MutationObserver(() => adattaMotto())
+  osservatore.observe(motto, { childList: true, characterData: true, subtree: true })
+  const suRidimensiona = () => adattaMotto()
+  window.addEventListener('resize', suRidimensiona)
+  document.fonts?.ready.then(() => adattaMotto()).catch(() => {})
 
   async function controllaIa() {
     if (!LM?.create) {
+      d.dlg.dataset.ia = 'markov'
       iaStato.textContent = 'Questo browser non espone l\'IA locale: resta la catena di Markov, che funziona ovunque.'
       return
     }
@@ -214,28 +289,51 @@ function costruisci() {
       }
       if (disp === 'available' || disp === 'readily') {
         iaPronta = true
+        d.dlg.dataset.ia = 'pronta'
         badge.textContent = 'IA del browser'
         iaStato.textContent = 'L\'IA locale è pronta: il prossimo motto lo scrive lei, senza rete.'
       } else if (disp === 'downloadable' || disp === 'downloading') {
+        d.dlg.dataset.ia = 'scaricare'
         badge.textContent = 'IA da scaricare'
         iaStato.textContent = 'L\'IA locale c\'è ma il modello non è ancora pronto: per ora uso Markov. Se lo scarichi dalle impostazioni di Chrome, il Poeta lo usa da solo.'
       } else {
+        d.dlg.dataset.ia = 'markov'
         iaStato.textContent = 'L\'IA locale non è disponibile: uso la catena di Markov.'
       }
     } catch {
+      d.dlg.dataset.ia = 'markov'
       iaStato.textContent = 'Non riesco a chiedere all\'IA locale: uso la catena di Markov.'
     }
   }
 
   bGenera.addEventListener('click', genera)
-  bCopia.addEventListener('click', () => {
-    copia(motto.textContent || '').then((ok) => d.nota(ok ? 'motto copiato' : 'non riesco a copiare', ok ? 'ok' : 'male'))
+  bCopia.addEventListener('click', async () => {
+    const ok = await copia(motto.textContent || '')
+    d.nota(ok ? 'motto copiato' : 'non riesco a copiare', ok ? 'ok' : 'male')
+    if (ok) {
+      copiaEtichetta.textContent = 'copiato ✓'
+      bCopia.classList.add('is-fatto')
+      clearTimeout(copiaTimer)
+      copiaTimer = setTimeout(() => {
+        if (!copiaEtichetta.isConnected) return
+        copiaEtichetta.textContent = 'copia'
+        bCopia.classList.remove('is-fatto')
+      }, 1500)
+    }
+    // la copia di riserva crea una textarea per copiare: il focus torna al tasto
+    if (document.activeElement !== bCopia) bCopia.focus({ preventScroll: true })
   })
 
-  d.suPulizia(() => { fermo = true })
+  d.suPulizia(() => {
+    fermo = true
+    clearTimeout(copiaTimer)
+    osservatore.disconnect()
+    window.removeEventListener('resize', suRidimensiona)
+  })
 
   d.apri()
   motto.textContent = generaMarkov()
+  adattaMotto()
   d.nota('pronto · genera un motto', 'ok')
   controllaIa()
   return d
