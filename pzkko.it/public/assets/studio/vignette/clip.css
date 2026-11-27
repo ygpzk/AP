@@ -1,0 +1,141 @@
+/* la vignetta «clip» dello Studio: solo le sue classi (.lab-clip* e dintorni), sotto #panel-studio
+   (tranne .lab-pip*, che vale anche nella finestra Picture-in-Picture). Si carica da studio.css. */
+/* 10 · la clip (27.11.2026): una videocamera da tasca attaccata al foglio. Il canvas è lo schermo a cristalli
+   liquidi, sopra c'è il mirino (angoli, STBY/REC, timecode, batteria, conto alla rovescia da pellicola); la clip
+   girata esce come una polaroid col nastro e la didascalia a pennarello. Keyframe con il prefisso clip-. */
+
+/* ── la videocamera ───────────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-clip {
+  --n: 3deg;
+  position: relative; container: clip / inline-size;
+  width: min(100%, 470px); margin: 10px auto 0; padding: 32px 12px 30px 30px;
+  border-radius: 16px 16px 22px 16px;
+  background:
+    radial-gradient(120% 80% at 30% 0%, rgba(255, 255, 255, .13), transparent 55%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .025) 0 2px, transparent 2px 5px),
+    linear-gradient(160deg, #3a3740, #1c1b1f 60%, #151417);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .18), inset 0 -3px 0 rgba(0, 0, 0, .45),
+    0 2px 3px rgba(0, 0, 0, .3), 0 18px 26px -14px rgba(0, 0, 0, .7);
+  rotate: -.8deg;
+}
+/* la cerniera dello schermo che si apre, a sinistra */
+#panel-studio .lab-clip::before {
+  content: ""; position: absolute; left: 9px; top: 22%; bottom: 22%; width: 11px; border-radius: 4px;
+  background: repeating-linear-gradient(180deg, #4a4650 0 6px, #232126 6px 8px);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .5), 1px 0 0 rgba(255, 255, 255, .08);
+}
+#panel-studio .lab-clip__tela {
+  display: block; width: 100%; height: auto; aspect-ratio: 1; border-radius: 4px; background: #f4ecda;
+  box-shadow: 0 0 0 2px #0b0a0d, 0 0 0 4px #2b2930; cursor: pointer;
+}
+#panel-studio .lab-clip__marca {
+  position: absolute; left: 30px; bottom: 8px; color: #c9c4cf; font: 400 11px/1 var(--pzk-fa); letter-spacing: .14em; text-transform: uppercase;
+}
+#panel-studio .lab-clip__marca b { margin-left: 5px; padding: 1px 4px; border: 1px solid #8b8593; border-radius: 2px; color: #8b8593; font-weight: 400; font-size: 9px; }
+#panel-studio .lab-clip__spia {
+  position: absolute; right: 16px; bottom: 10px; width: 9px; height: 9px; border-radius: 50%;
+  background: #4b1416; box-shadow: inset 0 1px 1px rgba(0, 0, 0, .6);
+}
+#panel-studio .lab-clip[data-stato="rec"] .lab-clip__spia { background: #ff3b30; box-shadow: 0 0 6px 2px rgba(255, 59, 48, .7), inset 0 -1px 1px rgba(0, 0, 0, .3); }
+#panel-studio .lab-clip[data-stato="fatto"] .lab-clip__spia { background: #3ddc6b; box-shadow: 0 0 5px 1px rgba(61, 220, 107, .55); }
+
+/* ── il mirino: la riga di stato sopra lo schermo, gli angoli sull'immagine ───────────────────────────────────── */
+/* l'immagine resta pulita (è quella che finisce nella clip): STBY/REC, timecode e batteria stanno nella fascia nera
+   in alto, la barra dei sei secondi in quella in basso; sull'immagine solo gli angoli e il conto alla rovescia */
+#panel-studio .lab-clip__velo {
+  position: absolute; inset: 0; pointer-events: none;
+  color: #fff; font: 400 clamp(9px, 2.9cqw, 13px)/1 var(--pzk-mac); letter-spacing: .08em;
+  text-shadow: 0 0 2px #000, 0 1px 3px rgba(0, 0, 0, .9);
+}
+#panel-studio .lab-clip__ang { position: absolute; width: 6%; aspect-ratio: 1; border: 2px solid rgba(255, 255, 255, .8); filter: drop-shadow(0 0 1.5px rgba(0, 0, 0, .9)); }
+#panel-studio .lab-clip__ang--a { left: 38px; top: 42px; border-right: 0; border-bottom: 0; }
+#panel-studio .lab-clip__ang--b { right: 20px; top: 42px; border-left: 0; border-bottom: 0; }
+#panel-studio .lab-clip__ang--c { left: 38px; bottom: 38px; border-right: 0; border-top: 0; }
+#panel-studio .lab-clip__ang--d { right: 20px; bottom: 38px; border-left: 0; border-top: 0; }
+#panel-studio .lab-clip__sx { position: absolute; left: 32px; top: 9px; display: flex; gap: 8px; align-items: center; }
+#panel-studio .lab-clip__dx { position: absolute; right: 14px; top: 9px; display: flex; gap: 9px; align-items: center; font-variant-numeric: tabular-nums; color: #e9e6ee; }
+#panel-studio .lab-clip__velo [data-rec] { display: inline-flex; align-items: center; gap: 5px; color: #ff4d4d; }
+#panel-studio .lab-clip__velo [data-rec][hidden] { display: none; }
+#panel-studio .lab-clip__velo [data-rec]::before {
+  content: ""; width: .85em; height: .85em; border-radius: 50%; background: #ff2d2d; box-shadow: 0 0 5px #ff2d2d;
+  animation: clip-bollino 1s steps(1, end) infinite;
+}
+#panel-studio .lab-clip[data-stato="rec"] .lab-clip__stby { display: none; }
+#panel-studio .lab-clip__stby { color: #9dff9d; }
+#panel-studio .lab-clip[data-stato="conto"] .lab-clip__stby { color: #ffd84d; }
+/* la batteria, un po' scarica come sempre */
+#panel-studio .lab-clip__batt {
+  position: relative; width: 1.9em; height: .95em; border: 1.5px solid currentColor; border-radius: 2px;
+  background: linear-gradient(90deg, currentColor 0 62%, transparent 62%) content-box; padding: 1.5px; box-sizing: border-box;
+}
+#panel-studio .lab-clip__batt::after { content: ""; position: absolute; right: -4px; top: 25%; width: 2.5px; height: 50%; background: currentColor; border-radius: 0 1px 1px 0; }
+#panel-studio .lab-clip__fmt { position: absolute; left: 50%; top: 10px; translate: -50% 0; color: #8b8593; font-size: .82em; white-space: nowrap; text-shadow: none; }
+#panel-studio .lab-clip[data-stato="rec"] .lab-clip__fmt { display: none; }
+#panel-studio .lab-clip__barra {
+  position: absolute; left: 130px; right: 36px; bottom: 12px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, .25);
+  box-shadow: 0 0 2px rgba(0, 0, 0, .6); opacity: 0; transition: opacity .2s;
+}
+#panel-studio .lab-clip__barra i { position: absolute; inset: 0; border-radius: inherit; background: #ff3b30; transform: scaleX(0); transform-origin: 0 50%; }
+#panel-studio .lab-clip[data-stato="rec"] .lab-clip__barra { opacity: 1; }
+/* il conto alla rovescia: la coda della pellicola, cerchio, mirino e lancetta che spazza */
+#panel-studio .lab-clip__conto {
+  position: absolute; left: 50%; top: 50%; display: grid; place-items: center; width: 42%; aspect-ratio: 1; margin: -21% 0 0 -21%;
+  border: 3px solid #fff; border-radius: 50%;
+  background:
+    linear-gradient(#fff, #fff) center / 100% 2px no-repeat,
+    linear-gradient(#fff, #fff) center / 2px 100% no-repeat,
+    radial-gradient(circle, transparent 58%, rgba(255, 255, 255, .9) 58.5% 60%, transparent 60.5%),
+    rgba(20, 16, 24, .55);
+  color: #fff; font: 400 clamp(40px, 22cqw, 110px)/1 var(--pzk-fa); text-shadow: 0 2px 0 rgba(0, 0, 0, .6);
+  overflow: hidden; animation: clip-conto .62s cubic-bezier(.2, 1.4, .4, 1);
+}
+#panel-studio .lab-clip__conto[hidden] { display: none; }
+#panel-studio .lab-clip__conto::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(rgba(255, 255, 255, .32) 0 var(--clip-giro, 0deg), transparent 0);
+  animation: clip-spazza .62s linear forwards;
+}
+@property --clip-giro { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes clip-spazza { to { --clip-giro: 360deg; } }
+@keyframes clip-conto { from { transform: scale(1.25); opacity: .2; } to { transform: none; opacity: 1; } }
+@keyframes clip-bollino { 50% { opacity: .15; } }
+
+/* la didascalia a pennarello sotto la videocamera */
+#panel-studio .lab-clip__dida {
+  margin: 8px 0 0; text-align: center; color: var(--pzk-rosso); font: 400 14px/1.2 var(--pzk-marker); transform: rotate(-1.2deg);
+}
+#panel-studio .lab-clip__dida::before { content: "↑ "; }
+
+/* ── la clip girata: una polaroid col nastro ──────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-clip__foto {
+  position: relative; width: min(82%, 300px); margin: 22px auto 6px; padding: 10px 10px 0;
+  background: #fffdf6; box-shadow: var(--pzk-ombra-schermo); rotate: 2.2deg;
+  animation: clip-foto .5s cubic-bezier(.2, 1.3, .4, 1);
+}
+#panel-studio .lab-clip__foto[hidden] { display: none; }
+#panel-studio .lab-clip__foto::after {
+  content: ""; position: absolute; z-index: 3; left: 50%; top: -9px; width: 70px; height: 18px; margin-left: -35px;
+  background: var(--pzk-nastro); clip-path: var(--pzk-code); rotate: -4deg; pointer-events: none;
+}
+#panel-studio .lab-clip__video { display: block; width: 100%; height: auto; aspect-ratio: 1; margin: 0; border: 0; border-radius: 0; background: #111; box-shadow: none; rotate: none; }
+#panel-studio .lab-clip__didafoto { padding: 9px 4px 12px; color: var(--pzk-ink); font: 400 13px/1.25 var(--pzk-marker); text-align: center; overflow-wrap: anywhere; }
+@keyframes clip-foto { from { transform: translateY(-14px) rotate(-6deg); opacity: 0; } to { transform: none; opacity: 1; } }
+
+@container clip (max-width: 390px) { #panel-studio .lab-clip__fmt { display: none; } }
+@media (max-width: 420px) {
+  #panel-studio .lab-clip { padding: 28px 9px 26px 22px; }
+  #panel-studio .lab-clip::before { left: 6px; width: 9px; }
+  #panel-studio .lab-clip__marca { left: 22px; }
+  #panel-studio .lab-clip__sx { left: 24px; top: 8px; }
+  #panel-studio .lab-clip__dx { right: 11px; top: 8px; }
+  #panel-studio .lab-clip__ang--a, #panel-studio .lab-clip__ang--c { left: 29px; }
+  #panel-studio .lab-clip__ang--b, #panel-studio .lab-clip__ang--d { right: 16px; }
+  #panel-studio .lab-clip__ang--a, #panel-studio .lab-clip__ang--b { top: 35px; }
+  #panel-studio .lab-clip__ang--c, #panel-studio .lab-clip__ang--d { bottom: 33px; }
+  #panel-studio .lab-clip__barra { left: 110px; bottom: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #panel-studio .lab-clip__velo [data-rec]::before, #panel-studio .lab-clip__conto, #panel-studio .lab-clip__conto::before, #panel-studio .lab-clip__foto { animation: none; }
+  #panel-studio .lab-clip__conto::before { --clip-giro: 360deg; }
+}

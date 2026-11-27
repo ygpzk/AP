@@ -1,0 +1,202 @@
+/* la vignetta «quadro» dello Studio: solo le sue classi (.lab-quadro* e dintorni), sotto #panel-studio
+   (tranne .lab-pip*, che vale anche nella finestra Picture-in-Picture). Si carica da studio.css.
+   02 · il quadro (27.11.2026): un olio che si dipinge col brano, in una cornice dorata pacchiana attaccata al foglio col
+   nastro (sì, col nastro), la lampada da museo, la chiocciola-custode col basco seduta sulla cornice, sotto la targhetta
+   del museo col prezzo assurdo e il timbro, la tavolozza coi cinque colori veri e il cartello «vietato toccare». */
+@font-face { font-family: "Quadro Didone"; font-display: swap; src: url(/fonts/abril-fatface.woff2) format("woff2"); }
+
+#panel-studio .lab__card[data-lab="quadro"] .lab__corpo { container-type: inline-size; }
+
+/* ── la cornice ───────────────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab__card[data-lab="quadro"] .lab-quadro {
+  --oro: linear-gradient(135deg, #6e4c0f 0%, #e9c766 12%, #fff1b0 22%, #b8862b 36%, #f3d77c 50%, #a3751c 64%, #f7e39a 78%, #8a6414 90%, #5c3f0b 100%);
+  --rosetta: radial-gradient(circle, #fffbe0 0 1.6px, #f0cd63 2.4px 4px, #7a5513 4.8px 5.6px, #e2b74a 6.3px 7.4px, rgba(90, 60, 10, .7) 8px, transparent 8.8px);
+  position: relative; z-index: 1; margin: 26px 4px 6px; padding: 24px; rotate: .7deg;
+  background:
+    var(--rosetta) 2px 2px / 20px 20px no-repeat, var(--rosetta) right 2px top 2px / 20px 20px no-repeat,
+    var(--rosetta) 2px calc(100% - 2px) / 20px 20px no-repeat, var(--rosetta) right 2px bottom 2px / 20px 20px no-repeat,
+    var(--rosetta) 2px 50% / 20px 20px no-repeat, var(--rosetta) right 2px top 50% / 20px 20px no-repeat,
+    var(--oro);
+  box-shadow:
+    inset 0 0 0 1.5px #3f2805, inset 0 0 0 3.5px #f8e39a, inset 0 0 0 4.5px #6b4a10,
+    inset 4px 4px 7px rgba(255, 250, 215, .55), inset -4px -4px 8px rgba(60, 35, 0, .6),
+    0 2px 2px rgba(0, 0, 0, .35), 5px 18px 22px -8px rgba(0, 0, 0, .55);
+  transition: rotate .5s cubic-bezier(.3, 1.6, .5, 1);
+}
+@media (hover: hover) { #panel-studio .lab__card[data-lab="quadro"]:hover .lab-quadro { rotate: -.4deg; } }
+/* il nastro: due pezzi sugli angoli in alto (una cornice d'oro attaccata col nastro, come tutto sul muro) */
+#panel-studio .lab__card[data-lab="quadro"] .lab-quadro::after { left: -12px; top: 2px; width: 62px; margin-left: 0; rotate: -38deg; z-index: 4; }
+#panel-studio .lab__card[data-lab="quadro"] .lab-quadro::before {
+  content: ""; position: absolute; z-index: 4; right: -12px; top: 3px; width: 58px; height: 18px;
+  background: var(--pzk-nastro); clip-path: var(--pzk-code); rotate: 41deg; pointer-events: none;
+}
+
+/* la tela: il listello scuro, il filo d'oro, la fila di perline */
+#panel-studio .lab__card[data-lab="quadro"] .lab-quadro__tela {
+  position: relative; z-index: 1; display: block; width: 100%; height: 250px; border-radius: 0; cursor: pointer;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .05) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(0, 0, 0, .05) 0 1px, transparent 1px 3px), #d8c6a0;
+  box-shadow: 0 0 0 2px #2a1a04, 0 0 0 4px #e7c35a, 0 0 0 5.5px #5a3c0c, 0 0 0 11.5px rgba(92, 60, 8, .55), 0 0 0 12.5px #4a3006;
+  outline: 3.6px dotted #ffeeb0; outline-offset: 7px;
+}
+@container (max-width: 420px) {
+  #panel-studio .lab__card[data-lab="quadro"] .lab-quadro { padding: 21px; }
+  #panel-studio .lab__card[data-lab="quadro"] .lab-quadro__tela { height: 220px; outline-width: 3px; outline-offset: 6.5px; box-shadow: 0 0 0 2px #2a1a04, 0 0 0 3.5px #e7c35a, 0 0 0 5px #5a3c0c, 0 0 0 10.5px rgba(92, 60, 8, .55), 0 0 0 11.5px #4a3006; }
+}
+
+/* la lampada da museo, in ottone, sopra la cornice */
+#panel-studio .lab-quadro__lampada {
+  position: absolute; z-index: 5; left: 50%; top: -19px; width: min(38%, 170px); height: 13px; translate: -50% 0;
+  border-radius: 7px 7px 5px 5px;
+  background: linear-gradient(#fff3c0, #d4a640 30%, #8a6015 70%, #c79a3a);
+  box-shadow: 0 0 0 1px #4a3006, 0 3px 4px rgba(0, 0, 0, .35);
+  pointer-events: none;
+}
+#panel-studio .lab-quadro__lampada::before {
+  content: ""; position: absolute; left: 50%; top: 11px; width: 7px; height: 16px; margin-left: -3.5px; z-index: -1;
+  background: linear-gradient(90deg, #6b4a10, #f3d77c 45%, #7a5513); border-radius: 0 0 3px 3px;
+}
+#panel-studio .lab-quadro__lampada i {
+  position: absolute; left: 6%; right: 6%; top: 9px; height: 46px;
+  background: radial-gradient(ellipse 50% 100% at 50% 0, rgba(255, 238, 180, .75), rgba(255, 230, 170, .25) 45%, transparent 75%);
+  mix-blend-mode: screen; animation: quadro-lampada 5.2s ease-in-out infinite;
+}
+@keyframes quadro-lampada { 50% { opacity: .62; } }
+
+/* la placca d'ottone sulla cornice, in basso */
+#panel-studio .lab-quadro__placca {
+  position: absolute; z-index: 2; left: 50%; bottom: 4px; translate: -50% 0; padding: 2px 12px 1px; white-space: nowrap;
+  background: linear-gradient(#fff4c6, #d9ae4a 45%, #a37a22); border-radius: 2px;
+  box-shadow: 0 0 0 1px #5a3c0c, inset 0 1px 0 rgba(255, 255, 255, .6), 0 1px 2px rgba(0, 0, 0, .4);
+  color: #3b2905; font: 400 8.5px/1.4 var(--pzk-mac); letter-spacing: .16em; text-transform: uppercase; text-shadow: 0 1px 0 rgba(255, 245, 200, .7);
+  pointer-events: none;
+}
+#panel-studio .lab-quadro__placca::before, #panel-studio .lab-quadro__placca::after {
+  content: ""; position: absolute; top: 50%; width: 3px; height: 3px; margin-top: -1.5px; border-radius: 50%; background: #6b4a10; box-shadow: inset 0 0 0 .5px #3b2905;
+}
+#panel-studio .lab-quadro__placca::before { left: 4px; }
+#panel-studio .lab-quadro__placca::after { right: 4px; }
+
+/* ── la chiocciola-custode ────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-quadro__lumaca {
+  position: absolute; z-index: 3; right: 5%; bottom: 3px; width: 84px; height: auto; overflow: visible;
+  filter: drop-shadow(1px 3px 2px rgba(0, 0, 0, .35)); pointer-events: none;
+}
+#panel-studio .lab-quadro__corpo { transform-box: fill-box; transform-origin: 50% 100%; animation: quadro-respiro 4.6s ease-in-out infinite; }
+#panel-studio .lab-quadro__antenna { transform-box: fill-box; transform-origin: 60% 100%; animation: quadro-antenna 3.4s ease-in-out infinite alternate; }
+#panel-studio .lab-quadro__antenna--b { animation-delay: -1.3s; animation-duration: 2.9s; }
+#panel-studio .lab-quadro__punta { animation: quadro-punta 2.2s ease-in-out infinite; transform-box: fill-box; transform-origin: 0 100%; }
+#panel-studio .lab-quadro__chiuso, #panel-studio .lab-quadro__zzz { opacity: 0; }
+#panel-studio .lab-quadro__zzz { fill: #161616; font: 400 13px/1 var(--pzk-marker); }
+#panel-studio .lab-quadro[data-dorme="1"] .lab-quadro__pupilla { opacity: 0; }
+#panel-studio .lab-quadro[data-dorme="1"] .lab-quadro__chiuso { opacity: 1; }
+#panel-studio .lab-quadro[data-dorme="1"] .lab-quadro__zzz { opacity: 1; animation: quadro-zzz 3s ease-in-out infinite; }
+#panel-studio .lab-quadro[data-dorme="1"] .lab-quadro__antenna { animation: none; rotate: -14deg; }
+#panel-studio .lab-quadro[data-dorme="1"] .lab-quadro__antenna--b { rotate: 10deg; }
+@media (hover: hover) {
+  #panel-studio .lab__card[data-lab="quadro"]:hover .lab-quadro:not([data-dorme="1"]) .lab-quadro__antenna { animation-duration: .9s; }
+}
+#panel-studio .lab-quadro[data-scossa="1"] .lab-quadro__lumaca { animation: quadro-no-a .55s ease-in-out; }
+#panel-studio .lab-quadro[data-scossa="0"] .lab-quadro__lumaca { animation: quadro-no-b .55s ease-in-out; }
+@keyframes quadro-respiro { 50% { transform: scale(1.015, 1.035); } }
+@keyframes quadro-antenna { from { rotate: -7deg; } to { rotate: 8deg; } }
+@keyframes quadro-punta { 50% { rotate: 25deg; } }
+@keyframes quadro-zzz { 50% { translate: 3px -4px; } }
+@keyframes quadro-no-a { 20% { translate: -4px 0; rotate: -4deg; } 45% { translate: 4px 0; rotate: 4deg; } 70% { translate: -2px 0; rotate: -2deg; } }
+@keyframes quadro-no-b { 20% { translate: -4px 0; rotate: -4deg; } 45% { translate: 4px 0; rotate: 4deg; } 70% { translate: -2px 0; rotate: -2deg; } }
+
+/* il fumetto del custode */
+#panel-studio .lab-quadro__fumetto {
+  position: absolute; z-index: 6; right: calc(5% + 64px); bottom: 64px; max-width: min(64%, 250px); margin: 0; padding: 6px 11px 5px;
+  background: #fffdf6; border: 2px solid var(--pzk-ink); border-radius: 14px 14px 3px 14px;
+  box-shadow: 2px 3px 0 rgba(0, 0, 0, .25);
+  color: var(--pzk-ink); font: 400 14px/1.15 var(--pzk-marker);
+  opacity: 0; scale: .6; transform-origin: 100% 100%; pointer-events: none;
+  transition: opacity .18s ease, scale .32s cubic-bezier(.3, 1.7, .5, 1);
+}
+#panel-studio .lab-quadro__fumetto:empty { display: none; }
+#panel-studio .lab-quadro__fumetto::after {
+  content: ""; position: absolute; right: -9px; bottom: -2px; width: 12px; height: 10px;
+  background: #fffdf6; border-right: 2px solid var(--pzk-ink); border-bottom: 2px solid var(--pzk-ink); transform: skewX(-35deg);
+}
+#panel-studio .lab-quadro[data-parla="1"] .lab-quadro__fumetto { opacity: 1; scale: 1; }
+
+/* ── sotto il quadro: la targhetta e il banco del pittore ─────────────────────────────────────────────────────── */
+#panel-studio .lab-quadro__pie {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 14px 16px; margin: 18px 2px 0;
+  color: var(--pzk-ink); font: 400 12px/1.4 var(--pzk-mac);
+}
+#panel-studio .lab-quadro__targa {
+  position: relative; display: flex; flex-direction: column; gap: 1px; min-width: 0; max-width: 330px; padding: 11px 14px 11px 13px;
+  background: linear-gradient(170deg, #ffffff, #f6f4ee); border: 1px solid rgba(0, 0, 0, .07);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .18), 2px 8px 12px -7px rgba(0, 0, 0, .5);
+  color: #2a2622; rotate: -.7deg;
+}
+#panel-studio .lab-quadro__targa > span { min-width: 0; overflow-wrap: anywhere; }
+#panel-studio .lab-quadro__autore small { display: block; color: var(--pzk-matita); font: 400 10px/1.2 var(--pzk-mac); }
+#panel-studio .lab-quadro__autore small[hidden] { display: none; }
+#panel-studio .lab-quadro__autore b { font: 400 15px/1.15 var(--pzk-fa); letter-spacing: .02em; }
+#panel-studio .lab-quadro__opera { margin: 3px 0 2px; font: 400 17px/1.12 "Quadro Didone", Georgia, serif; }
+#panel-studio .lab-quadro__opera cite { font-style: normal; }
+#panel-studio .lab-quadro__avanza { display: flex; align-items: center; gap: 8px; margin-top: 3px; color: var(--pzk-rosso); }
+#panel-studio .lab-quadro__barra { position: relative; flex: 0 0 56px; height: 4px; background: rgba(0, 0, 0, .1); border-radius: 2px; overflow: hidden; }
+#panel-studio .lab-quadro__barra > i { position: absolute; inset: 0; background: var(--pzk-rosso); transform-origin: 0 50%; transform: scaleX(0); }
+#panel-studio .lab-quadro__coll { margin-top: 5px; color: var(--pzk-matita); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; }
+#panel-studio .lab-quadro__prezzo { display: flex; align-items: center; gap: 7px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(0, 0, 0, .25); color: var(--pzk-rosso); font: 400 15px/1.15 var(--pzk-marker); rotate: -1deg; }
+#panel-studio .lab-quadro__bollino { flex: 0 0 auto; width: 12px; height: 12px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff8a8a, #d3141f 55%, #8a0a12); box-shadow: 0 1px 1px rgba(0, 0, 0, .3); }
+
+/* il timbro: «lavori in corso» mentre si dipinge, poi il verdetto, che cade col tonfo */
+#panel-studio .lab-quadro__timbro {
+  position: absolute; z-index: 2; right: -16px; top: -14px; max-width: 150px; padding: 4px 8px 3px;
+  border: 3px double currentColor; border-radius: 5px; color: #c96a00;
+  font: 400 13px/1.05 var(--pzk-fa); letter-spacing: .07em; text-align: center; text-transform: uppercase;
+  background: rgba(255, 253, 246, .35); rotate: 9deg; opacity: .88; mix-blend-mode: multiply;
+  -webkit-mask: var(--pzk-grana) 0 0 / 90px 45px, linear-gradient(#000, #000); -webkit-mask-composite: xor; mask-composite: exclude;
+  pointer-events: none;
+}
+#panel-studio .lab-quadro__timbro[data-fase="fatto"] { color: var(--pzk-rosso); rotate: -11deg; animation: quadro-timbro .5s cubic-bezier(.2, .9, .3, 1.4) both; }
+@keyframes quadro-timbro { from { scale: 2.4; opacity: 0; rotate: -2deg; } 60% { scale: .94; opacity: .95; } to { scale: 1; } }
+
+/* il banco: la tavolozza coi cinque colori veri, il cartello, il tasto */
+#panel-studio .lab-quadro__banco { display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 2px; }
+#panel-studio .lab-quadro__tavolozza {
+  position: relative; display: block; width: 122px; height: 80px; rotate: -8deg;
+  background:
+    repeating-linear-gradient(98deg, rgba(90, 50, 15, 0) 0 5px, rgba(90, 50, 15, .13) 5px 6px, rgba(90, 50, 15, 0) 6px 11px),
+    radial-gradient(ellipse at 70% 30%, #e7b878, #c38a4c 55%, #9a6630);
+  border-radius: 55% 45% 48% 52% / 60% 54% 46% 40%;
+  -webkit-mask: radial-gradient(circle 9px at 21% 66%, transparent 98%, #000); mask: radial-gradient(circle 9px at 21% 66%, transparent 98%, #000);
+  filter: drop-shadow(1px 4px 4px rgba(0, 0, 0, .4));
+}
+#panel-studio .lab-quadro__palette { position: absolute; inset: 0; display: block; }
+#panel-studio .lab-quadro__palette i {
+  position: absolute; width: 20px; height: 16px; border: 0;
+  border-radius: 52% 48% 56% 44% / 58% 50% 50% 42%;
+  box-shadow: inset -2px -3px 3px rgba(0, 0, 0, .28), inset 2px 2px 2px rgba(255, 255, 255, .5), 0 1px 1px rgba(0, 0, 0, .25);
+  rotate: calc(var(--i, 0) * 37deg);
+}
+#panel-studio .lab-quadro__palette i:nth-child(1) { left: 34%; top: 10%; }
+#panel-studio .lab-quadro__palette i:nth-child(2) { left: 57%; top: 9%; width: 18px; }
+#panel-studio .lab-quadro__palette i:nth-child(3) { left: 75%; top: 30%; height: 18px; }
+#panel-studio .lab-quadro__palette i:nth-child(4) { left: 68%; top: 60%; }
+#panel-studio .lab-quadro__palette i:nth-child(5) { left: 44%; top: 62%; width: 17px; }
+
+#panel-studio .lab-quadro__vietato {
+  display: block; max-width: 128px; padding: 4px 7px 3px; border: 2px solid var(--pzk-rosso); border-radius: 3px;
+  background: #fff; color: var(--pzk-rosso); font: 400 9.5px/1.15 var(--pzk-mac); letter-spacing: .08em; text-align: center; text-transform: uppercase;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .25); rotate: 2deg;
+}
+#panel-studio .lab-quadro__tocca { font-size: 12px; }
+
+/* foglio stretto: la targhetta sopra, il banco sotto, in riga */
+@container (max-width: 420px) {
+  #panel-studio .lab-quadro__pie { grid-template-columns: minmax(0, 1fr); }
+  #panel-studio .lab-quadro__targa { max-width: none; margin-right: 12px; }
+  #panel-studio .lab-quadro__banco { flex-flow: row wrap; justify-content: center; gap: 10px 14px; }
+  #panel-studio .lab-quadro__tavolozza { width: 104px; height: 68px; }
+  #panel-studio .lab-quadro__lumaca { width: 70px; right: 3%; }
+  #panel-studio .lab-quadro__fumetto { right: calc(3% + 54px); bottom: 54px; font-size: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #panel-studio .lab-quadro, #panel-studio .lab-quadro *, #panel-studio .lab-quadro__pie * { animation: none !important; transition: none !important; }
+}

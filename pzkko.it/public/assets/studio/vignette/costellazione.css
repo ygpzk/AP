@@ -1,0 +1,101 @@
+/* la vignetta «costellazione» dello Studio: solo le sue classi (.lab-cost*), sotto #panel-studio. Si carica da studio.css.
+   06 · la carta del cielo: una stampa antica blu di Prussia attaccata al foglio col nastro, il timbro dell'osservatorio,
+   una meteora ogni tanto e, sotto, la chiocciola astronoma col cannocchiale che legge l'oroscopo della stella accesa.
+   La carta resta la stessa anche col tema scuro: è una stampa. Keyframe col prefisso cost-. */
+#panel-studio .lab-cost { position: relative; display: grid; gap: 4px; }
+
+/* ── la stampa ── */
+#panel-studio .lab-cost__carta { position: relative; margin: 6px 2px 0; padding: 5px; background: #efe4c8;
+  box-shadow: var(--pzk-ombra-schermo); rotate: -.35deg; }
+#panel-studio .lab-cost__carta::before,
+#panel-studio .lab-cost__carta::after { content: ""; position: absolute; z-index: 3; width: 58px; height: 18px; background: var(--pzk-nastro);
+  box-shadow: 0 1px 1px rgba(60, 40, 10, .14); clip-path: var(--pzk-code); pointer-events: none; }
+#panel-studio .lab-cost__carta::before { top: -8px; left: -16px; rotate: -38deg; }
+#panel-studio .lab-cost__carta::after { bottom: -8px; right: -14px; rotate: -36deg; }
+#panel-studio .lab-cost__tela { display: block; width: 100%; aspect-ratio: 6 / 5; min-height: 320px; max-height: 450px; border: 0; border-radius: 0;
+  background: #0a1228; touch-action: none; cursor: grab; }
+#panel-studio .lab-cost__tela:focus-visible { outline: 3px solid var(--pzk-giallo); outline-offset: 3px; }
+
+/* il timbro dell'osservatorio, in alto a destra, mezzo fuori dalla carta */
+#panel-studio .lab-cost__timbro { position: absolute; z-index: 2; top: -9px; right: 6px; padding: 3px 7px 2px; border: 2px solid rgba(179, 18, 31, .82);
+  border-radius: 3px; color: rgba(179, 18, 31, .86); background: rgba(239, 228, 200, .55); font: 400 9.5px/1.1 var(--pzk-mac); letter-spacing: .08em;
+  text-transform: uppercase; rotate: 5deg; pointer-events: none; mix-blend-mode: multiply; }
+
+/* la meteora: passa ogni tanto, in alto, e sparisce */
+#panel-studio .lab-cost__meteora { position: absolute; z-index: 1; top: 16%; left: 34%; width: 86px; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, rgba(255, 253, 246, 0), rgba(255, 253, 246, .95) 85%, #fff); opacity: 0; rotate: 24deg;
+  pointer-events: none; animation: cost-meteora 13s 2.5s linear infinite; }
+#panel-studio .lab-cost__meteora::after { content: ""; position: absolute; right: -2px; top: -2px; width: 6px; height: 6px; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 8px 2px rgba(255, 240, 200, .8); }
+#panel-studio .lab-cost__carta[data-fermo="1"] .lab-cost__meteora { animation-play-state: paused; }
+@keyframes cost-meteora {
+  0%, 90% { opacity: 0; translate: 0 0; }
+  91% { opacity: 1; }
+  96% { opacity: .9; }
+  98%, 100% { opacity: 0; translate: 150px 66px; }
+}
+
+/* ── il cartellino del bagaglio ── */
+#panel-studio .lab-cost__tip { position: absolute; z-index: 4; display: grid; gap: 1px; min-width: 120px; max-width: 196px; padding: 6px 10px 6px 22px;
+  border: 1.5px solid #6b5426; border-radius: 3px 10px 10px 3px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .25), rgba(0, 0, 0, 0) 40%), var(--pzk-grana), #e9d7a8;
+  color: var(--pzk-ink); box-shadow: 2px 3px 0 rgba(0, 0, 0, .28), 0 8px 18px -8px rgba(0, 0, 0, .6); pointer-events: none;
+  rotate: -2deg; transform-origin: 0 0; animation: cost-tip .22s cubic-bezier(.3, 1.5, .5, 1) both; }
+#panel-studio .lab-cost__tip[data-lato="sx"] { rotate: 2deg; transform-origin: 100% 0; }
+#panel-studio .lab-cost__tip::before { content: ""; position: absolute; left: 7px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%;
+  background: #0a1228; box-shadow: 0 0 0 2px #b79a5a, inset 1px 1px 2px rgba(0, 0, 0, .5); }
+#panel-studio .lab-cost__tip::after { content: ""; position: absolute; left: 2px; top: -19px; width: 1.5px; height: 22px; background: #b3121f;
+  rotate: -28deg; transform-origin: 50% 100%; }
+#panel-studio .lab-cost__tip[data-lato="sx"]::after { left: auto; right: 2px; rotate: 28deg; }
+#panel-studio .lab-cost__tip[data-su="1"]::after { top: auto; bottom: -19px; transform-origin: 50% 0; rotate: 28deg; }
+#panel-studio .lab-cost__tip[data-su="1"][data-lato="sx"]::after { rotate: -28deg; }
+#panel-studio .lab-cost__tip b { font: 400 18px/1.05 var(--pzk-fa); letter-spacing: .01em; text-transform: lowercase; }
+#panel-studio .lab-cost__tip span { color: var(--pzk-matita); font: 400 10px/1.25 var(--pzk-mac); }
+#panel-studio .lab-cost__tip .lab-cost__tip-tipo { color: #6b5426; text-transform: uppercase; letter-spacing: .06em; font-size: 9px; }
+#panel-studio .lab-cost__tip .lab-cost__tip-cost { color: var(--pzk-penna); font: 400 12px/1.15 var(--pzk-marker); }
+#panel-studio .lab-cost__tip .lab-cost__tip-apri { color: var(--pzk-rosso); }
+@keyframes cost-tip { from { opacity: 0; scale: .85; } to { opacity: 1; scale: 1; } }
+
+/* ── l'astronoma: chiocciola col cannocchiale e il suo post-it ── */
+#panel-studio .lab-cost__piede { display: flex; justify-content: flex-end; margin: -10px 0 -4px; }
+#panel-studio .lab-cost__astronoma { position: relative; display: flex; align-items: flex-end; gap: 0; max-width: 100%; padding: 0; border: 0;
+  background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+#panel-studio .lab-cost__postit { position: relative; z-index: 1; display: grid; gap: 2px; width: min(270px, 62vw); margin: 0 22px 14px 0; padding: 9px 11px 10px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .04), rgba(0, 0, 0, 0) 22%), #fff27a; color: var(--pzk-ink);
+  box-shadow: 0 1px 1px rgba(60, 40, 0, .15), 3px 8px 12px -8px rgba(60, 40, 0, .55); rotate: 1.6deg;
+  clip-path: polygon(0 0, 100% 0, 100% 86%, 93% 100%, 0 100%); transition: rotate .25s cubic-bezier(.3, 1.6, .5, 1); }
+#panel-studio .lab-cost__chi { color: var(--pzk-matita); font: 400 9.5px/1.1 var(--pzk-mac); letter-spacing: .06em; text-transform: uppercase; }
+#panel-studio .lab-cost__frase { color: var(--pzk-rosso); font: 400 14px/1.22 var(--pzk-marker); }
+#panel-studio .lab-cost__astronoma[data-oroscopo] .lab-cost__frase { color: var(--pzk-penna); }
+#panel-studio .lab-cost__astronoma[data-oroscopo] .lab-cost__postit { rotate: -1.2deg; }
+#panel-studio .lab-cost__lumaca { flex: none; width: 118px; height: auto; overflow: visible; margin-right: 2px; }
+#panel-studio .lab-cost__cannocchiale { transform-origin: 21px 27px; transform-box: view-box; animation: cost-cerca 7s ease-in-out infinite; }
+#panel-studio .lab-cost__guscio { transform-origin: 88px 90px; transform-box: view-box; }
+@keyframes cost-cerca {
+  0%, 100% { transform: rotate(0deg); }
+  30% { transform: rotate(-7deg); }
+  55% { transform: rotate(3deg); }
+}
+@keyframes cost-ride {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  25% { transform: translateY(-5px) rotate(-4deg); }
+  55% { transform: translateY(0) rotate(3deg); }
+  75% { transform: translateY(-2px) rotate(-1deg); }
+}
+#panel-studio .lab-cost__astronoma.is-ride .lab-cost__guscio { animation: cost-ride .6s cubic-bezier(.3, 1.4, .5, 1); }
+@media (hover: hover) {
+  #panel-studio .lab-cost__astronoma:hover .lab-cost__postit { rotate: -.6deg; }
+}
+#panel-studio .lab-cost__astronoma:focus-visible { outline: 2px dashed var(--pzk-rosso); outline-offset: 4px; }
+#panel-studio .lab-cost__carta[data-fermo="1"] ~ .lab-cost__piede .lab-cost__cannocchiale { animation-play-state: paused; }
+
+@media (max-width: 760px) {
+  #panel-studio .lab-cost__lumaca { width: 96px; }
+  #panel-studio .lab-cost__frase { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #panel-studio .lab-cost__meteora { display: none; }
+  #panel-studio .lab-cost__cannocchiale,
+  #panel-studio .lab-cost__astronoma.is-ride .lab-cost__guscio,
+  #panel-studio .lab-cost__tip { animation: none; }
+}

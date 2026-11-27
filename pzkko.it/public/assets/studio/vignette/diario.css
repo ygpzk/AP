@@ -1,0 +1,272 @@
+/* la vignetta «diario» dello Studio: solo le sue classi (.lab-diario* e dintorni), sotto #panel-studio
+   (tranne .lab-pip*, che vale anche nella finestra Picture-in-Picture). Si carica da studio.css. */
+/* 03 · il diario di bordo (27.11): un registro a spirale attaccato al foglio. Pagina a righe blu col doppio margine
+   rosso, l'ora a biro, un timbro di gomma per tipo, le frasi a macchina col dato vero evidenziato; intestazione da
+   modulo stampato (nave, porto, pagina), segnalibro di raso, macchia di caffè, barchetta scarabocchiata; in fondo la
+   chiocciola di bordo che cambia faccia con lo stato. «Svuota» arma il timbro DA STRAPPARE e la miccia di 3 s; il
+   secondo clic strappa la pagina. Tutti i keyframe sono lab-diario-*; con prefers-reduced-motion niente si muove. */
+
+/* l'ora scritta a mano: Caveat è nei font del sito ma non dichiarato in site.css, quindi un nome tutto suo */
+@font-face { font-family: "Diario Caveat"; src: url(/fonts/caveat.woff2) format("woff2"); font-display: swap; }
+
+#panel-studio .lab__card[data-lab="diario"] { --dr-riga: 24px; --dr-blu: #1446a0; --dr-biro: #1d3f94; --dr-carta: #fffcf2; }
+
+/* ── la testata: il conteggio come cartellino, i due tasti ───────────────────────────────────────────────────── */
+#panel-studio .lab-diario__testa { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 10px; color: var(--pzk-matita); font: 400 11px/1.2 var(--pzk-mac); }
+#panel-studio .lab-diario__testa .lab__azioni { flex-wrap: nowrap; margin-top: 0; gap: 8px; }
+#panel-studio .lab-diario__conta {
+  position: relative; padding: 4px 9px 4px 16px; background: #efe9da; color: var(--pzk-ink);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .12), 0 5px 8px -6px rgba(0, 0, 0, .4); transform: rotate(-1.2deg);
+  clip-path: polygon(7px 0, 100% 0, 100% 100%, 7px 100%, 0 50%);
+}
+#panel-studio .lab-diario__conta::before { content: ""; position: absolute; left: 6px; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%; background: #fffdf6; box-shadow: inset 0 1px 1px rgba(0, 0, 0, .35); }
+#panel-studio .lab-diario__svuota[data-on="1"] { background: var(--pzk-rosso); color: #fff; border-color: var(--pzk-rosso); animation: lab-diario-pulsa .5s ease-in-out infinite alternate; }
+
+/* l'avviso drammatico, con la miccia che brucia in 3 s */
+#panel-studio .lab-diario__avviso {
+  display: grid; gap: 6px; margin: 2px 2px 0; padding: 7px 10px 8px; border: 2px dashed var(--pzk-rosso); background: #fff4f0;
+  color: var(--pzk-rosso); font: 400 14px/1.25 var(--pzk-marker); transform: rotate(-.8deg); animation: lab-diario-entra .3s cubic-bezier(.2, 1.4, .4, 1) both;
+}
+#panel-studio .lab-diario__avviso[hidden] { display: none; }
+#panel-studio .lab-diario__miccia { position: relative; display: block; height: 5px; border-radius: 3px; background: rgba(90, 84, 76, .18); }
+#panel-studio .lab-diario__miccia i {
+  position: absolute; inset: 0 auto 0 0; width: 100%; border-radius: 3px;
+  background: repeating-linear-gradient(120deg, #8a5a2b 0 3px, #c79a5a 3px 6px); animation: lab-diario-miccia 3s linear forwards;
+}
+#panel-studio .lab-diario__miccia i::after {
+  content: ""; position: absolute; right: -6px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 15%, #ffd400 30%, #ff7a00 55%, rgba(255, 80, 0, 0) 72%); animation: lab-diario-scintilla .45s ease-in-out infinite alternate;
+}
+
+/* ── il quaderno ──────────────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-diario__quaderno {
+  position: relative; container-type: inline-size; margin: 22px 2px 30px; padding: 0;
+  background: radial-gradient(120% 90% at 50% 40%, rgba(255, 255, 255, 0) 60%, rgba(150, 120, 60, .14)), var(--dr-carta);
+  border-radius: 3px 3px 5px 5px; transform: rotate(-.45deg);
+  box-shadow: inset 0 0 0 1px rgba(60, 45, 20, .1), 0 3px 0 -1px #f4efe2, 0 3px 0 0 rgba(60, 45, 20, .14), 0 6px 0 -2px #ebe4d2, 0 6px 0 -1px rgba(60, 45, 20, .14),
+    0 18px 26px -16px rgba(0, 0, 0, .55);
+}
+#panel-studio .lab-diario__quaderno::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--pzk-grana) 0 0 / 180px 90px; opacity: .18; pointer-events: none; }
+#panel-studio .lab-diario__defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+/* la spirale: fori nella carta e anelli di filo di ferro */
+#panel-studio .lab-diario__spirale {
+  position: absolute; z-index: 4; left: 14px; right: 14px; top: -15px; height: 30px; pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='30'%3E%3Cellipse cx='11' cy='22.5' rx='3.3' ry='3' fill='%232a2620' fill-opacity='.78'/%3E%3Cpath d='M8.6 23.4C6 16 6.6 6 11.6 3.6c3.8-1.8 5.6 3 4.6 9.6' fill='none' stroke='%23464646' stroke-width='3.2' stroke-linecap='round'/%3E%3Cpath d='M8.6 21C7.4 14 8.4 7.4 11.6 5.6' fill='none' stroke='%23e6e6e6' stroke-width='1' stroke-linecap='round'/%3E%3C/svg%3E") 0 0 / 22px 30px space no-repeat;
+  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, .28));
+}
+/* il segnalibro di raso rosso, che pende sotto il quaderno */
+#panel-studio .lab-diario__segnalibro {
+  position: absolute; z-index: 3; right: 16px; top: 4px; bottom: -34px; width: 13px; pointer-events: none;
+  background: linear-gradient(90deg, #7d0a14, #c81f2c 35%, #e0414d 50%, #b0131f 70%, #84101a);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 9px), 0 100%);
+  filter: drop-shadow(1px 2px 1px rgba(0, 0, 0, .25)); transform-origin: 50% 0; animation: lab-diario-raso 5s ease-in-out infinite;
+}
+#panel-studio .lab-diario__caffe { position: absolute; z-index: 2; left: -34px; bottom: 54px; width: 118px; height: 118px; pointer-events: none; mix-blend-mode: multiply; transform: rotate(18deg); }
+
+/* l'intestazione: un modulo stampato, riempito a biro */
+#panel-studio .lab-diario__modulo {
+  position: relative; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 14px; padding: 24px 92px 8px 64px;
+  border-bottom: 3px double rgba(179, 18, 31, .55);
+}
+#panel-studio .lab-diario__intestazione { flex: 1 0 100%; color: var(--pzk-ink); font: 400 21px/1 var(--pzk-fa); letter-spacing: .03em; text-transform: lowercase; }
+#panel-studio .lab-diario__campo { display: inline-flex; align-items: baseline; gap: 5px; min-width: 0; }
+#panel-studio .lab-diario__campo small { color: var(--pzk-matita); font: 400 9px/1 var(--pzk-mac); letter-spacing: .12em; text-transform: uppercase; }
+#panel-studio .lab-diario__campo em {
+  padding: 0 4px; border-bottom: 1px dotted rgba(22, 22, 22, .45); color: var(--dr-biro);
+  font: 400 19px/1.1 "Diario Caveat", var(--pzk-marker); font-style: normal; white-space: nowrap;
+}
+#panel-studio .lab-diario__barca { position: absolute; right: 38px; top: 18px; width: 52px; height: 33px; transform: rotate(-6deg); opacity: .85; }
+#panel-studio .lab-diario__barca-scafo { transform-box: fill-box; transform-origin: 50% 100%; animation: lab-diario-dondola 3.6s ease-in-out infinite; }
+
+/* ── la pagina a righe ────────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-diario__pagina { position: relative; }
+#panel-studio .lab-diario {
+  position: relative; display: block; min-height: calc(var(--dr-riga) * 6); max-height: calc(var(--dr-riga) * 13); margin: 0; padding: 0 34px var(--dr-riga) 0; overflow: auto; list-style: none;
+  overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: rgba(20, 70, 160, .35) transparent;
+  background:
+    linear-gradient(90deg, transparent 55px, rgba(179, 18, 31, .5) 55px 56.5px, transparent 56.5px 59px, rgba(179, 18, 31, .5) 59px 60.5px, transparent 60.5px),
+    repeating-linear-gradient(180deg, transparent 0 calc(var(--dr-riga) - 1px), rgba(20, 70, 160, .26) calc(var(--dr-riga) - 1px) var(--dr-riga));
+  background-attachment: local;
+}
+#panel-studio .lab-diario__riga {
+  position: relative; display: grid; grid-template-columns: 54px 36px minmax(0, 1fr); align-items: start; min-height: var(--dr-riga);
+  padding: 0; font: 400 12.5px/var(--dr-riga) var(--pzk-mac); transition: background-color .3s;
+}
+@media (hover: hover) {
+  #panel-studio .lab-diario__riga:hover { background: linear-gradient(90deg, transparent 62px, rgba(255, 212, 0, .16) 62px); }
+  #panel-studio .lab-diario__riga:hover i svg { transform: rotate(calc(var(--g) - 14deg)) scale(1.12); }
+}
+#panel-studio .lab-diario__riga time {
+  position: relative; justify-self: end; padding-right: 7px; color: var(--dr-biro);
+  font: 400 21px/var(--dr-riga) "Diario Caveat", var(--pzk-marker); letter-spacing: .01em; white-space: nowrap;
+}
+#panel-studio .lab-diario__riga i { display: flex; justify-content: flex-end; height: var(--dr-riga); padding-right: 4px; color: var(--dr-blu); }
+#panel-studio .lab-diario__riga i svg {
+  flex: none; width: 29px; height: 29px; margin-top: -3px; overflow: visible; opacity: .9; mix-blend-mode: multiply;
+  filter: url(#lab-diario-gomma); transform: rotate(var(--g)); transition: transform .25s cubic-bezier(.2, 1.4, .4, 1);
+}
+#panel-studio .lab-diario__x { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+#panel-studio .lab-diario__riga span { min-width: 0; padding-left: 4px; color: var(--pzk-ink); overflow-wrap: anywhere; }
+#panel-studio .lab-diario__riga span::first-letter { text-transform: uppercase; }
+#panel-studio .lab-diario__riga mark {
+  padding: 0 2px; background: var(--pzk-evidenzia); color: inherit; -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+/* gli inchiostri dei timbri */
+#panel-studio .lab-diario__riga[data-tipo="inizio"] i { color: #1446a0; }
+#panel-studio .lab-diario__riga[data-tipo="stato"][data-v="online"] i { color: #1e7a42; }
+#panel-studio .lab-diario__riga[data-tipo="stato"][data-v="idle"] i { color: #b86200; }
+#panel-studio .lab-diario__riga[data-tipo="stato"][data-v="dnd"] i { color: #b3121f; }
+#panel-studio .lab-diario__riga[data-tipo="stato"][data-v="offline"] i { color: #5a544c; }
+#panel-studio .lab-diario__riga[data-tipo="musica"] i { color: #6a2f9e; }
+#panel-studio .lab-diario__riga[data-tipo="app"] i { color: #1d5fb8; }
+#panel-studio .lab-diario__riga[data-tipo="luogo"] i { color: #0f6e6a; }
+#panel-studio .lab-diario__riga[data-tipo="gioco"] i { color: #c0262f; }
+#panel-studio .lab-diario__riga[data-tipo="custom"] i { color: #2b2620; }
+#panel-studio .lab-diario__riga[data-v="no"] i { opacity: .8; }
+#panel-studio .lab-diario__riga[data-v="no"] span { color: var(--pzk-testo); }
+/* l'ultima riga: l'ora cerchiata a pennarello */
+#panel-studio .lab-diario__riga.is-ultima time::after {
+  content: ""; position: absolute; left: -5px; right: 1px; top: 1px; bottom: 0; border: 2px solid rgba(179, 18, 31, .75);
+  border-radius: 52% 46% 55% 44% / 58% 50% 52% 44%; transform: rotate(-4deg); pointer-events: none;
+}
+/* il giorno, a pennarello sopra il suo gruppo di righe */
+#panel-studio .lab-diario__giorno {
+  height: var(--dr-riga); padding-left: 66px; color: var(--pzk-rosso); font: 400 14px/calc(var(--dr-riga) + 4px) var(--pzk-marker);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#panel-studio .lab-diario__giorno::first-letter { text-transform: uppercase; }
+#panel-studio .lab-diario__riga + .lab-diario__giorno { margin-top: var(--dr-riga); }
+#panel-studio .lab-diario__vuoto { min-height: calc(var(--dr-riga) * 3); padding: 0 0 0 66px; color: var(--pzk-matita); font: 400 14px/var(--dr-riga) var(--pzk-marker); }
+#panel-studio .lab-diario__vuoto--attesa { animation: lab-diario-respira 1.6s ease-in-out infinite alternate; }
+#panel-studio .lab-diario__vuoto--errore { color: var(--pzk-rosso); }
+
+/* la riga appena scritta: il timbro batte, la frase si scrive, l'evidenziatore passa */
+#panel-studio .lab-diario__riga.is-nuova { animation: lab-diario-evidenzia 2.4s ease-out both; }
+#panel-studio .lab-diario__riga.is-nuova i svg { animation: lab-diario-timbra .5s cubic-bezier(.2, 1.5, .4, 1) .05s both; }
+#panel-studio .lab-diario__riga.is-nuova time { animation: lab-diario-entra .35s ease-out both; }
+#panel-studio .lab-diario__riga.is-nuova span { animation: lab-diario-scrivi .9s steps(16, end) .3s both; }
+
+/* il timbro DA STRAPPARE quando «Svuota» è armato */
+#panel-studio .lab-diario__allarme {
+  position: absolute; z-index: 5; left: 50%; top: 42%; padding: 4px 14px 2px; border: 4px double currentColor; border-radius: 6px;
+  color: rgba(179, 18, 31, .85); font: 400 40px/1 var(--pzk-fa); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+  pointer-events: none; opacity: 0; transform: translate(-50%, -50%) rotate(-12deg) scale(1.8); mix-blend-mode: multiply;
+  transition: opacity .15s, transform .25s cubic-bezier(.2, 1.6, .4, 1);
+}
+#panel-studio [data-armato="1"] .lab-diario__allarme { opacity: 1; transform: translate(-50%, -50%) rotate(-12deg) scale(1); }
+#panel-studio [data-armato="1"] .lab-diario { animation: lab-diario-trema .2s ease-in-out infinite alternate; }
+
+/* lo strappo */
+#panel-studio [data-strappo="1"] .lab-diario { z-index: 6; overflow: hidden; animation: lab-diario-vola .7s cubic-bezier(.5, 0, .75, .3) forwards; background-color: var(--dr-carta); }
+#panel-studio [data-strappo="nuova"] .lab-diario { animation: lab-diario-pagina .5s ease-out both; }
+#panel-studio .lab-diario__brandello {
+  position: absolute; z-index: 7; left: var(--x); top: 52%; width: 12px; height: 9px; pointer-events: none;
+  background: linear-gradient(180deg, var(--dr-carta) 60%, rgba(20, 70, 160, .5) 60% 70%, var(--dr-carta) 70%);
+  clip-path: polygon(0 20%, 30% 0, 60% 18%, 100% 4%, 88% 60%, 100% 100%, 50% 82%, 12% 100%);
+  animation: lab-diario-cade .95s var(--t) cubic-bezier(.4, 0, .7, .6) both;
+}
+
+/* ── il piede: la chiocciola di bordo e il suo fumetto ───────────────────────────────────────────────────────── */
+#panel-studio .lab-diario__piede { position: relative; z-index: 4; display: flex; align-items: flex-end; justify-content: flex-end; gap: 4px; min-height: 76px; padding: 6px 40px 0 62px; }
+#panel-studio .lab-diario__fumetto {
+  position: relative; flex: 0 1 auto; max-width: 250px; margin: 0 0 36px; padding: 6px 11px 6px;
+  background: #fffdf6; border: 2px solid var(--pzk-ink); border-radius: 20px 14px 22px 12px / 14px 20px 12px 22px;
+  color: var(--pzk-ink); font: 400 13px/1.25 var(--pzk-marker); transform: rotate(-1.5deg);
+  box-shadow: 2px 3px 0 rgba(22, 22, 22, .12);
+}
+#panel-studio .lab-diario__fumetto:empty { visibility: hidden; }
+#panel-studio .lab-diario__fumetto::after {
+  content: ""; position: absolute; right: -8px; bottom: 9px; width: 13px; height: 13px; background: #fffdf6;
+  border: solid var(--pzk-ink); border-width: 0 2px 2px 0; border-bottom-right-radius: 3px; transform: rotate(-45deg) skew(12deg, 12deg);
+}
+#panel-studio .lab-diario__fumetto.is-detto { animation: lab-diario-fumetto .35s cubic-bezier(.2, 1.5, .4, 1) both; }
+#panel-studio .lab-diario__chiocciola {
+  flex: none; width: 136px; height: 95px; margin: 0 0 -18px; padding: 0; border: 0; border-radius: 12px; background: none; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+#panel-studio .lab-diario__chiocciola:focus-visible { outline: 2px dashed var(--pzk-penna); outline-offset: 2px; }
+#panel-studio .lab-diario__chiocciola svg { display: block; width: 100%; height: 100%; overflow: visible; filter: drop-shadow(0 3px 2px rgba(0, 0, 0, .2)); }
+#panel-studio .lab-diario__chiocciola.is-salta svg { animation: lab-diario-salta .6s cubic-bezier(.3, 1.4, .5, 1); }
+#panel-studio .lab-diario__chiocciola :is(.cl-testa, .cl-ant1, .cl-ant2, .cl-matita, .cl-guscio, .cl-cartello, .cl-note, .cl-zzz, .cl-pup, .cl-palpebre, .cl-porta) { transform-box: fill-box; }
+#panel-studio .lab-diario__chiocciola .cl-testa { transform-origin: 0% 100%; transition: transform .6s cubic-bezier(.3, 1.3, .5, 1), opacity .4s; }
+#panel-studio .lab-diario__chiocciola .cl-ant1 { transform-origin: 100% 100%; animation: lab-diario-antenna 3.2s ease-in-out infinite; }
+#panel-studio .lab-diario__chiocciola .cl-ant2 { transform-origin: 0% 100%; animation: lab-diario-antenna 2.7s ease-in-out .4s infinite reverse; }
+#panel-studio .lab-diario__chiocciola .cl-pup { animation: lab-diario-sguardo 6s ease-in-out infinite; }
+#panel-studio .lab-diario__chiocciola .cl-matita { transform-origin: 0% 100%; transition: opacity .3s; }
+#panel-studio .lab-diario__chiocciola :is(.cl-palpebre, .cl-cartello, .cl-note, .cl-zzz, .cl-porta) { opacity: 0; transition: opacity .4s; }
+#panel-studio .lab-diario__chiocciola .cl-cartello { transform-origin: 50% 0%; }
+/* scrive (una riga nuova) */
+#panel-studio [data-scrive="1"] .lab-diario__chiocciola .cl-matita { animation: lab-diario-scarabocchio .18s ease-in-out 7 alternate; }
+#panel-studio [data-scrive="1"] .lab-diario__chiocciola .cl-testa { animation: lab-diario-annuisce .6s ease-in-out 2; }
+/* musica: le note salgono, la testa va a tempo */
+#panel-studio [data-musica="1"] .lab-diario__chiocciola .cl-note { opacity: 1; animation: lab-diario-note 2.4s ease-in-out infinite; }
+#panel-studio [data-umore="online"][data-musica="1"]:not([data-scrive="1"]) .lab-diario__chiocciola .cl-testa { animation: lab-diario-annuisce 1s ease-in-out infinite; }
+/* in pausa: palpebre giù, antenne mosce */
+#panel-studio [data-umore="idle"] .lab-diario__chiocciola .cl-palpebre { opacity: 1; }
+#panel-studio [data-umore="idle"] .lab-diario__chiocciola .cl-pup { animation: none; transform: translateY(1px); }
+#panel-studio [data-umore="idle"] .lab-diario__chiocciola .cl-ant1 { animation: none; transform: rotate(-10deg); transition: transform .6s; }
+#panel-studio [data-umore="idle"] .lab-diario__chiocciola .cl-ant2 { animation: none; transform: rotate(26deg); transition: transform .6s; }
+#panel-studio [data-umore="idle"] .lab-diario__chiocciola .cl-matita { opacity: 0; }
+/* non disturbare: il cartello sul guscio */
+#panel-studio [data-umore="dnd"] .lab-diario__chiocciola .cl-cartello { opacity: 1; animation: lab-diario-cartello 2.8s ease-in-out infinite; }
+/* offline: dentro il guscio, a dormire */
+#panel-studio [data-umore="offline"] .lab-diario__chiocciola .cl-testa { transform: translate(-30px, 10px) scale(.3); opacity: 0; }
+#panel-studio [data-umore="offline"] .lab-diario__chiocciola :is(.cl-zzz, .cl-porta) { opacity: 1; }
+#panel-studio [data-umore="offline"] .lab-diario__chiocciola .cl-zzz text { animation: lab-diario-zzz 3s ease-in-out infinite; }
+#panel-studio [data-umore="offline"] .lab-diario__chiocciola .cl-zzz text:nth-child(2) { animation-delay: .5s; }
+#panel-studio [data-umore="offline"] .lab-diario__chiocciola .cl-zzz text:nth-child(3) { animation-delay: 1s; }
+#panel-studio [data-umore="offline"] .lab-diario__chiocciola .cl-guscio { transform-origin: 50% 100%; animation: lab-diario-respiro 4s ease-in-out infinite; }
+#panel-studio [data-umore="offline"] .lab-diario__chiocciola .cl-bava { opacity: .2; }
+
+/* ── il ritmo ─────────────────────────────────────────────────────────────────────────────────────────────────── */
+@keyframes lab-diario-timbra { 0% { opacity: 0; transform: rotate(calc(var(--g) + 24deg)) scale(2.3); } 60% { opacity: 1; transform: rotate(var(--g)) scale(.92); } 100% { opacity: .9; transform: rotate(var(--g)) scale(1); } }
+@keyframes lab-diario-scrivi { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes lab-diario-entra { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@keyframes lab-diario-evidenzia { 0%, 30% { background-color: rgba(255, 212, 0, .28); } 100% { background-color: rgba(255, 212, 0, 0); } }
+@keyframes lab-diario-respira { from { opacity: .45; } to { opacity: 1; } }
+@keyframes lab-diario-pulsa { from { transform: rotate(-1deg) scale(1); } to { transform: rotate(1deg) scale(1.05); } }
+@keyframes lab-diario-miccia { from { width: 100%; } to { width: 0; } }
+@keyframes lab-diario-scintilla { from { transform: scale(.75); } to { transform: scale(1.2); } }
+@keyframes lab-diario-trema { from { transform: rotate(-.3deg) translateX(-1px); } to { transform: rotate(.3deg) translateX(1px); } }
+@keyframes lab-diario-vola {
+  0% { transform: none; opacity: 1; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+  22% { transform: translate(-2px, -6px) rotate(-1.5deg); opacity: 1; clip-path: polygon(0 3%, 8% 0, 17% 4%, 29% 1%, 41% 5%, 55% 0, 68% 4%, 80% 1%, 92% 5%, 100% 2%, 100% 100%, 0 100%); }
+  100% { transform: translate(46px, 190px) rotate(17deg); opacity: 0; clip-path: polygon(0 3%, 8% 0, 17% 4%, 29% 1%, 41% 5%, 55% 0, 68% 4%, 80% 1%, 92% 5%, 100% 2%, 100% 100%, 0 100%); }
+}
+@keyframes lab-diario-pagina { from { opacity: 0; transform: translateY(-10px) rotate(.6deg); } to { opacity: 1; transform: none; } }
+@keyframes lab-diario-cade { 0% { opacity: 0; transform: none; } 10% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), 170px) rotate(var(--r)); } }
+@keyframes lab-diario-raso { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(1.4deg); } }
+@keyframes lab-diario-dondola { 0%, 100% { transform: rotate(-5deg) translateY(0); } 50% { transform: rotate(5deg) translateY(-1.5px); } }
+@keyframes lab-diario-fumetto { from { opacity: 0; transform: rotate(-1.5deg) scale(.6) translate(30px, 10px); } to { opacity: 1; transform: rotate(-1.5deg); } }
+@keyframes lab-diario-salta { 0% { transform: none; } 30% { transform: translateY(-14px) scale(.96, 1.06); } 60% { transform: translateY(0) scale(1.08, .9); } 80% { transform: scale(.98, 1.03); } 100% { transform: none; } }
+@keyframes lab-diario-antenna { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(5deg); } }
+@keyframes lab-diario-sguardo { 0%, 40%, 100% { transform: none; } 50%, 65% { transform: translate(-1.2px, .4px); } 75%, 90% { transform: translate(.8px, -.6px); } }
+@keyframes lab-diario-scarabocchio { from { transform: rotate(-7deg) translateX(-1px); } to { transform: rotate(6deg) translateX(1.5px); } }
+@keyframes lab-diario-annuisce { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-4deg); } }
+@keyframes lab-diario-note { 0% { transform: translateY(4px); opacity: 0; } 25% { opacity: 1; } 80% { opacity: 1; } 100% { transform: translateY(-8px) rotate(-8deg); opacity: 0; } }
+@keyframes lab-diario-cartello { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes lab-diario-zzz { 0% { opacity: 0; transform: translate(0, 4px); } 30%, 70% { opacity: 1; } 100% { opacity: 0; transform: translate(6px, -8px); } }
+@keyframes lab-diario-respiro { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03, .98); } }
+
+/* fermo quando non si vede; niente movimento per chi l'ha chiesto */
+#panel-studio [data-fermo="1"], #panel-studio [data-fermo="1"] *, #panel-studio [data-fermo="1"] *::before, #panel-studio [data-fermo="1"] *::after { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) {
+  #panel-studio .lab__card[data-lab="diario"] *, #panel-studio .lab__card[data-lab="diario"] *::before, #panel-studio .lab__card[data-lab="diario"] *::after { animation: none !important; transition: none !important; }
+}
+
+/* ── i fogli stretti (il quaderno si misura da solo) ──────────────────────────────────────────────────────────── */
+@container (max-width: 400px) {
+  #panel-studio .lab-diario__modulo { padding: 22px 70px 8px 14px; gap: 2px 10px; }
+  #panel-studio .lab-diario__barca { right: 30px; width: 40px; height: 26px; }
+  #panel-studio .lab-diario { padding-right: 28px; background:
+    linear-gradient(90deg, transparent 47px, rgba(179, 18, 31, .5) 47px 48.5px, transparent 48.5px 51px, rgba(179, 18, 31, .5) 51px 52.5px, transparent 52.5px),
+    repeating-linear-gradient(180deg, transparent 0 calc(var(--dr-riga) - 1px), rgba(20, 70, 160, .26) calc(var(--dr-riga) - 1px) var(--dr-riga));
+    background-attachment: local; }
+  #panel-studio .lab-diario__riga { grid-template-columns: 46px 34px minmax(0, 1fr); font-size: 11.5px; }
+  #panel-studio .lab-diario__riga time { font-size: 19px; padding-right: 5px; }
+  #panel-studio .lab-diario__riga i svg { width: 26px; height: 26px; margin-top: -1px; }
+  #panel-studio .lab-diario__giorno, #panel-studio .lab-diario__vuoto { padding-left: 58px; }
+  #panel-studio .lab-diario__piede { padding: 6px 34px 0 12px; }
+  #panel-studio .lab-diario__chiocciola { width: 96px; height: 67px; }
+  #panel-studio .lab-diario__fumetto { font-size: 12px; margin-bottom: 30px; }
+}

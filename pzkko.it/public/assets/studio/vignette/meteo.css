@@ -1,0 +1,309 @@
+/* la vignetta «meteo» dello Studio: solo le sue classi (.lab-meteo* e dintorni), sotto #panel-studio
+   (tranne .lab-pip*, che vale anche nella finestra Picture-in-Picture). Si carica da studio.css.
+   09 · il meteo (27.11): il «Telemuro», un televisore di legno col meteorologo-chiocciola davanti alla cartina di
+   Mantova, una scena per famiglia del tempo (data-meteo); sotto, il ritaglio della «Gazzetta del Muro» col termometro a
+   mercurio e tre strumenti appesi con la puntina: manica a vento, pluviometro, ottotipo. Le animazioni sono su
+   transform/opacity, si fermano quando la scheda non si vede (data-fermo) e con prefers-reduced-motion.
+   Il fulmine fa due lampi ogni sette secondi: mai più di tre lampi al secondo. Keyframe col prefisso meteo-. */
+
+@font-face { font-family: "pzk meteo testata"; src: url(/fonts/abril-fatface.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+
+#panel-studio .lab-meteo { --mt-ink: #24406e; position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; padding: 6px 2px 2px; color: var(--pzk-ink); }
+
+/* ── cosa si vede con quale tempo: data-f="famiglie in cui c'è", data-no="famiglie in cui sparisce" ─────────────── */
+#panel-studio .lab-meteo [data-f], #panel-studio .lab-meteo [data-tt] { display: none; }
+#panel-studio .lab-meteo[data-meteo="sereno"] [data-f~="sereno"],
+#panel-studio .lab-meteo[data-meteo="poco"] [data-f~="poco"],
+#panel-studio .lab-meteo[data-meteo="nuvoloso"] [data-f~="nuvoloso"],
+#panel-studio .lab-meteo[data-meteo="nebbia"] [data-f~="nebbia"],
+#panel-studio .lab-meteo[data-meteo="pioggia"] [data-f~="pioggia"],
+#panel-studio .lab-meteo[data-meteo="neve"] [data-f~="neve"],
+#panel-studio .lab-meteo[data-meteo="temporale"] [data-f~="temporale"],
+#panel-studio .lab-meteo[data-meteo="attesa"] [data-f~="attesa"],
+#panel-studio .lab-meteo[data-meteo="giu"] [data-f~="giu"],
+#panel-studio .lab-meteo[data-temp="gelo"] [data-tt~="gelo"],
+#panel-studio .lab-meteo[data-temp="caldo"] [data-tt~="caldo"],
+#panel-studio .lab-meteo[data-temp="afa"] [data-tt~="afa"] { display: var(--mostra, inline); }
+#panel-studio .lab-meteo[data-meteo="sereno"] [data-no~="sereno"],
+#panel-studio .lab-meteo[data-meteo="poco"] [data-no~="poco"],
+#panel-studio .lab-meteo[data-meteo="pioggia"] [data-no~="pioggia"],
+#panel-studio .lab-meteo[data-meteo="neve"] [data-no~="neve"],
+#panel-studio .lab-meteo[data-meteo="temporale"] [data-no~="temporale"] { display: none; }
+#panel-studio .lab-meteo[data-giorno="0"] [data-giorno-si],
+#panel-studio .lab-meteo:not([data-giorno="0"]) [data-giorno-no] { display: none; }
+
+/* ── il televisore ─────────────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-meteo__icona { position: relative; margin: 0; padding: 0 2px; }
+#panel-studio .lab-meteo__tv { position: relative; aspect-ratio: 400 / 300; container-type: inline-size; rotate: -.6deg; }
+#panel-studio .lab-meteo__mobile { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: visible;
+  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, .3)) drop-shadow(0 12px 12px rgba(30, 20, 5, .32)); }
+#panel-studio .lab-meteo__marca { fill: #d9c9a3; font: 400 11px/1 var(--pzk-fa); letter-spacing: .12em; }
+#panel-studio .lab-meteo__targhetta { fill: #b9ab8a; font: 400 6.5px/1 var(--pzk-mac); letter-spacing: .14em; }
+#panel-studio .lab-meteo__antenna { transform-box: view-box; transform-origin: 205px 30px; }
+@media (hover: hover) { #panel-studio .lab-meteo__tv:hover .lab-meteo__antenna { animation: meteo-antenna .7s cubic-bezier(.3, 1.6, .5, 1); } }
+@keyframes meteo-antenna { 30% { transform: rotate(-5deg); } 60% { transform: rotate(3deg); } 80% { transform: rotate(-1deg); } }
+
+/* il post-it attaccato sull'altoparlante */
+#panel-studio .lab-meteo__postit {
+  position: absolute; z-index: 7; right: 1.2%; top: 58%; width: 20%; padding: .55em .45em .6em;
+  background: linear-gradient(175deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 45%), #fff1a1;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .12), 1px 6px 8px -5px rgba(0, 0, 0, .55);
+  color: var(--pzk-rosso); font: 400 clamp(7px, 2.4cqw, 13px)/1.08 var(--pzk-marker); text-align: center; rotate: 8deg;
+}
+
+/* lo schermo: allineato al vetro del mobile (16,44 – 296,254 su 400 × 300) */
+#panel-studio .lab-meteo__schermo { position: absolute; left: 4%; top: 14.6667%; width: 70%; height: 70%; overflow: hidden; isolation: isolate;
+  border-radius: 9% / 12%; background: #0b0d10; }
+#panel-studio .lab-meteo__mappa { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+#panel-studio .lab-meteo[data-giorno="0"] .lab-meteo__schermo::before { content: ""; position: absolute; inset: 0; z-index: 1; background: rgba(16, 26, 70, .42); pointer-events: none; }
+#panel-studio .lab-meteo__strato { --mostra: block; position: absolute; inset: 0; z-index: 2; overflow: hidden; pointer-events: none; }
+#panel-studio .lab-meteo__vetro { position: absolute; inset: 0; z-index: 9; pointer-events: none;
+  background: radial-gradient(110% 80% at 28% 12%, rgba(255, 255, 255, .24), rgba(255, 255, 255, 0) 42%),
+    repeating-linear-gradient(rgba(0, 0, 0, .1) 0 1px, transparent 1px 3px);
+  box-shadow: inset 0 0 6cqw rgba(0, 0, 0, .55), inset 0 0 1.2cqw rgba(0, 0, 0, .7); }
+
+/* la cartina */
+#panel-studio .lab-meteo__citta { fill: #161616; font: 400 13px/1 var(--pzk-fa); letter-spacing: .06em; paint-order: stroke; stroke: #f6f1e2; stroke-width: 3.2px; stroke-linejoin: round; }
+#panel-studio .lab-meteo__fiume { fill: #1f4f98; font: 400 11px/1 var(--pzk-marker); }
+#panel-studio .lab-meteo__fiume--piccolo { fill: rgba(31, 55, 90, .7); font: 400 7.5px/1 var(--pzk-mac); }
+#panel-studio .lab-meteo__onda { transform-box: fill-box; transform-origin: center; animation: meteo-onda 2.2s ease-out infinite; }
+@keyframes meteo-onda { from { transform: scale(1); opacity: .9; } to { transform: scale(3.4); opacity: 0; } }
+#panel-studio .lab-meteo__corrente { animation: meteo-corrente 3s linear infinite; }
+@keyframes meteo-corrente { to { stroke-dashoffset: -30; } }
+
+/* il simbolo sopra Mantova */
+#panel-studio .lab-meteo__raggi { transform-box: fill-box; transform-origin: center; animation: meteo-gira 24s linear infinite; }
+@keyframes meteo-gira { to { transform: rotate(360deg); } }
+#panel-studio .lab-meteo__nuvola { animation: meteo-deriva 7s ease-in-out infinite alternate; }
+#panel-studio .lab-meteo__nuvola--dietro { animation-duration: 9s; animation-direction: alternate-reverse; }
+@keyframes meteo-deriva { from { transform: translateX(-4px); } to { transform: translateX(5px); } }
+#panel-studio .lab-meteo__goccina { animation: meteo-goccina 1s linear infinite; }
+#panel-studio .lab-meteo__goccina:nth-child(2) { animation-delay: -.35s; }
+#panel-studio .lab-meteo__goccina:nth-child(3) { animation-delay: -.7s; }
+@keyframes meteo-goccina { from { transform: translateY(-4px); opacity: 0; } 20% { opacity: 1; } to { transform: translateY(12px); opacity: 0; } }
+#panel-studio .lab-meteo__fiocco { transform-box: fill-box; transform-origin: center; animation: meteo-gira 9s linear infinite; }
+#panel-studio .lab-meteo__saetta { opacity: .45; animation: meteo-saetta 7s linear infinite; }
+#panel-studio .lab-meteo__lampo svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+@keyframes meteo-saetta { 0%, 7%, 100% { opacity: .45; } 1%, 4.4% { opacity: 1; } }
+#panel-studio .lab-meteo__stella { transform-box: fill-box; transform-origin: center; animation: meteo-brilla 2.6s ease-in-out infinite alternate; }
+#panel-studio .lab-meteo__stella--2 { animation-delay: -1.3s; }
+@keyframes meteo-brilla { from { opacity: .35; transform: scale(.7); } to { opacity: 1; transform: scale(1.1); } }
+
+/* il meteorologo */
+#panel-studio .lab-meteo__lumaca { transform-box: view-box; transform-origin: 72px 200px; animation: meteo-respira 3.2s ease-in-out infinite alternate; }
+@keyframes meteo-respira { from { transform: none; } to { transform: translateY(-1.6px) scaleY(1.015); } }
+#panel-studio .lab-meteo[data-meteo="sereno"] .lab-meteo__lumaca { animation: meteo-balla 1.3s ease-in-out infinite alternate; }
+@keyframes meteo-balla { from { transform: rotate(-1.6deg); } to { transform: rotate(1.8deg) translateY(-2px); } }
+#panel-studio .lab-meteo.is-annuisce .lab-meteo__lumaca { animation: meteo-annuisce .85s cubic-bezier(.3, 1.5, .5, 1); }
+@keyframes meteo-annuisce { 25% { transform: rotate(3deg) translateY(-5px); } 55% { transform: rotate(-2deg) translateY(1px); } 80% { transform: rotate(1deg); } }
+#panel-studio .lab-meteo__bacchetta { transform-box: view-box; transform-origin: 128px 157px; animation: meteo-indica 2.4s ease-in-out infinite; }
+@keyframes meteo-indica { 0%, 60%, 100% { transform: none; } 70% { transform: rotate(-6deg); } 80% { transform: rotate(1deg); } 88% { transform: rotate(-4deg); } }
+#panel-studio .lab-meteo__ombrello { transform-box: view-box; transform-origin: 120px 162px; animation: meteo-ombrello 2.6s ease-in-out infinite alternate; }
+@keyframes meteo-ombrello { from { transform: rotate(-3deg); } to { transform: rotate(3deg); } }
+#panel-studio .lab-meteo__sudore { animation: meteo-sudore 2.2s ease-in infinite; }
+@keyframes meteo-sudore { 0% { transform: none; opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(14px); opacity: 0; } }
+#panel-studio .lab-meteo__sciarpa { transform-box: view-box; transform-origin: 132px 174px; animation: meteo-ombrello 1.8s ease-in-out infinite alternate; }
+#panel-studio .lab-meteo__cumulo { transform-box: fill-box; transform-origin: 50% 100%; animation: meteo-accumula 24s cubic-bezier(.2, .7, .3, 1) both; }
+@keyframes meteo-accumula { from { transform: scaleY(.45); } to { transform: none; } }
+#panel-studio .lab-meteo__cumulo:not(.lab-meteo__cumulo--tv) { animation-name: meteo-accumula-poco; }
+@keyframes meteo-accumula-poco { from { transform: scaleY(.8); } to { transform: none; } }
+#panel-studio .lab-meteo__cerchio { transform-box: fill-box; transform-origin: center; animation: meteo-cerchio 1.6s ease-out infinite; }
+#panel-studio .lab-meteo__cerchio--2 { animation-delay: -.8s; }
+@keyframes meteo-cerchio { from { transform: scale(.3); opacity: 1; } to { transform: scale(2.2); opacity: 0; } }
+/* il temporale: la chiocciola sta nel guscio e trema dopo ogni tuono */
+#panel-studio .lab-meteo[data-meteo="temporale"] .lab-meteo__guscio { transform-box: view-box; transform-origin: 58px 196px; animation: meteo-trema 7s linear infinite; }
+@keyframes meteo-trema { 0%, 9%, 17%, 100% { transform: none; } 10% { transform: translateX(-1.5px) rotate(-1deg); } 11.5% { transform: translateX(1.5px) rotate(1deg); } 13% { transform: translateX(-1px); } 14.5% { transform: translateX(1px); } }
+#panel-studio .lab-meteo__sbircia { animation: meteo-sbircia 7s ease-in-out infinite; }
+@keyframes meteo-sbircia { 0%, 6% { transform: none; } 9%, 30% { transform: translate(-6px, 3px); } 40%, 100% { transform: none; } }
+
+/* la pioggia sullo schermo: due tende di righe oblique a velocità diverse */
+#panel-studio .lab-meteo__pioggia { background: rgba(24, 44, 80, .2); }
+#panel-studio .lab-meteo[data-meteo="temporale"] .lab-meteo__pioggia { background: rgba(14, 12, 40, .55); }
+#panel-studio .lab-meteo[data-meteo="pioggia"] .lab-meteo__pioggia { background: rgba(24, 44, 80, .26); }
+#panel-studio .lab-meteo__pioggia::before, #panel-studio .lab-meteo__pioggia::after {
+  content: ""; position: absolute; top: -90px; left: 0; right: -60px; bottom: 0; will-change: transform;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='90'%3E%3Cg stroke='%23ffffff' stroke-width='1.8' stroke-linecap='round' opacity='.9'%3E%3Cpath d='M12 4l-6 9M44 18l-6 9M26 44l-6 9M54 58l-6 9M9 68l-6 9M36 80l-6 9'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 60px 90px;
+  animation: meteo-piove .42s linear infinite;
+}
+#panel-studio .lab-meteo__pioggia::after { top: -135px; right: -90px; background-size: 90px 135px; opacity: .55; animation-name: meteo-piove-2; animation-duration: .75s; }
+@keyframes meteo-piove { to { transform: translate(-60px, 90px); } }
+@keyframes meteo-piove-2 { to { transform: translate(-90px, 135px); } }
+
+/* la neve: fiocchi che scendono ondeggiando */
+#panel-studio .lab-meteo__neve { background: rgba(232, 240, 250, .3); }
+#panel-studio .lab-meteo__neve::before, #panel-studio .lab-meteo__neve::after {
+  content: ""; position: absolute; top: -80px; left: -20px; right: -20px; bottom: 0; will-change: transform;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg fill='%23fff'%3E%3Ccircle cx='10' cy='12' r='2.2'/%3E%3Ccircle cx='52' cy='6' r='1.6'/%3E%3Ccircle cx='34' cy='34' r='2.6'/%3E%3Ccircle cx='70' cy='44' r='2'/%3E%3Ccircle cx='18' cy='60' r='1.7'/%3E%3Ccircle cx='58' cy='72' r='2.4'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 80px 80px;
+  animation: meteo-nevica 5s linear infinite;
+}
+#panel-studio .lab-meteo__neve::after { top: -120px; background-size: 120px 120px; opacity: .75; animation: meteo-nevica-2 9s linear infinite; }
+@keyframes meteo-nevica { 25% { transform: translate(6px, 20px); } 50% { transform: translate(0, 40px); } 75% { transform: translate(-6px, 60px); } to { transform: translate(0, 80px); } }
+@keyframes meteo-nevica-2 { 25% { transform: translate(-8px, 30px); } 50% { transform: translate(0, 60px); } 75% { transform: translate(8px, 90px); } to { transform: translate(0, 120px); } }
+
+/* la nebbia padana: tre banchi che vanno e vengono, si vedono solo i fari della chiocciola */
+#panel-studio .lab-meteo__nebbia { background: linear-gradient(rgba(222, 226, 228, .62), rgba(214, 218, 220, .9) 55%, rgba(206, 210, 212, .96)); }
+#panel-studio .lab-meteo__nebbia i { position: absolute; left: -60%; width: 220%; height: 60%; will-change: transform;
+  background: radial-gradient(closest-side at 30% 50%, rgba(244, 245, 246, .95), rgba(244, 245, 246, 0)), radial-gradient(closest-side at 70% 55%, rgba(236, 238, 240, .9), rgba(236, 238, 240, 0));
+  animation: meteo-banco 14s ease-in-out infinite alternate; }
+#panel-studio .lab-meteo__nebbia i:nth-child(1) { top: -15%; }
+#panel-studio .lab-meteo__nebbia i:nth-child(2) { top: 22%; animation-duration: 19s; animation-direction: alternate-reverse; }
+#panel-studio .lab-meteo__nebbia i:nth-child(3) { top: 52%; animation-duration: 23s; }
+@keyframes meteo-banco { from { transform: translateX(-14%); } to { transform: translateX(14%); } }
+#panel-studio .lab-meteo__fari { z-index: 3; }
+#panel-studio .lab-meteo__fari i { position: absolute; left: 38.57%; top: 37.14%; width: 12cqw; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
+  background: radial-gradient(circle, #fffbe6 0 12%, rgba(255, 228, 120, .8) 20%, rgba(255, 220, 100, .25) 45%, rgba(255, 220, 100, 0) 70%);
+  animation: meteo-faro 2.8s ease-in-out infinite alternate; }
+#panel-studio .lab-meteo__fari i + i { left: 49.29%; top: 38.1%; animation-delay: -1.4s; }
+@keyframes meteo-faro { from { opacity: .75; transform: scale(.9); } to { opacity: 1; transform: scale(1.06); } }
+
+/* il lampo: due lampi ravvicinati ogni sette secondi */
+#panel-studio .lab-meteo__lampo { z-index: 3; opacity: 0; background: radial-gradient(circle at 78% 18%, rgba(255, 255, 240, .95), rgba(214, 214, 255, .55) 60%); animation: meteo-lampo 7s linear infinite; }
+@keyframes meteo-lampo { 0%, 6.5%, 100% { opacity: 0; } 1% { opacity: .78; } 2.6% { opacity: .06; } 4.4% { opacity: .6; } }
+
+/* il bollino «in diretta», il canale e il sottopancia del telegiornale */
+#panel-studio .lab-meteo__bollino { position: absolute; z-index: 4; top: 6%; left: 7%; right: 7%; display: flex; gap: 8px; align-items: center; pointer-events: none; }
+#panel-studio .lab-meteo__bollino span { display: inline-flex; align-items: center; gap: .4em; padding: .3em .55em .25em; background: #b3121f; color: #fff;
+  font: 400 clamp(7px, 2.3cqw, 12px)/1 var(--pzk-fa); letter-spacing: .08em; text-transform: uppercase; box-shadow: 1px 1px 0 rgba(0, 0, 0, .4); }
+#panel-studio .lab-meteo__bollino span::before { content: ""; width: .55em; height: .55em; border-radius: 50%; background: #fff; animation: meteo-rec 2s ease-in-out infinite; }
+@keyframes meteo-rec { 50% { opacity: .2; } }
+#panel-studio .lab-meteo__bollino b { color: #eaffd8; font: 400 clamp(7px, 2.2cqw, 12px)/1 "8Bit", var(--pzk-mac); text-shadow: 0 0 4px rgba(150, 255, 120, .9), 1px 1px 0 #000; opacity: .9; }
+#panel-studio .lab-meteo__sottopancia { position: absolute; z-index: 4; left: 0; right: 0; bottom: 6%; height: 12%; display: flex; align-items: stretch;
+  background: linear-gradient(#1d58c0, #123e8c); border-top: 2px solid var(--pzk-giallo); box-shadow: 0 -1px 0 rgba(0, 0, 0, .3); }
+#panel-studio .lab-meteo__sottopancia > b { flex: none; display: flex; align-items: center; margin-left: -6px; padding: 0 .55em 0 calc(.55em + 10px); background: #b3121f; color: #fff;
+  font: 400 clamp(9px, 3.5cqw, 18px)/1 var(--pzk-fa); letter-spacing: .04em; text-transform: uppercase; transform: skewX(-10deg); box-shadow: 2px 0 0 #ffd400; }
+#panel-studio .lab-meteo__nastro { flex: 1; min-width: 0; display: flex; align-items: center; overflow: hidden; }
+#panel-studio .lab-meteo__nastro > span { flex: none; padding-left: .8em; color: #fff; white-space: pre; font: 400 clamp(8px, 2.7cqw, 14px)/1 var(--pzk-mac); text-transform: uppercase; will-change: transform;
+  animation: meteo-nastro 20s linear infinite; }
+@keyframes meteo-nastro { to { transform: translateX(-50%); } }
+
+/* sintonizzazione: l'effetto neve del televisore, scuro e senza lampi */
+#panel-studio .lab-meteo__statico { z-index: 6; display: grid; place-items: center; background: #4b4d50; }
+#panel-studio .lab-meteo__statico::before { content: ""; position: absolute; inset: -40px; opacity: .55;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='1' stitchTiles='stitch'/%3E%3CfeColorMatrix values='.33 .33 .33 0 0 .33 .33 .33 0 0 .33 .33 .33 0 0 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 140px 140px;
+  animation: meteo-statico .8s steps(5) infinite; }
+@keyframes meteo-statico { to { transform: translate(-37px, 23px); } }
+#panel-studio .lab-meteo__statico::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 24%; background: linear-gradient(transparent, rgba(255, 255, 255, .14), transparent); animation: meteo-rullo 3.2s linear infinite; }
+@keyframes meteo-rullo { from { transform: translateY(-100%); } to { transform: translateY(420%); } }
+#panel-studio .lab-meteo__statico b { position: relative; z-index: 1; padding: .5em .8em; background: rgba(0, 0, 0, .62); color: #eaffd8; font: 400 clamp(8px, 2.8cqw, 15px)/1.2 "8Bit", var(--pzk-mac); }
+
+/* il ponte è giù: il monoscopio e il biglietto della chiocciola */
+#panel-studio .lab-meteo__mono { z-index: 6; background:
+  linear-gradient(90deg, #0000c0 0 14.3%, #141414 0 28.6%, #c000c0 0 42.9%, #141414 0 57.1%, #00c0c0 0 71.4%, #141414 0 85.7%, #c0c0c0 0) 0 70% / 100% 8% no-repeat,
+  linear-gradient(90deg, #00214c 0 18%, #f4f4f4 0 36%, #32006a 0 54%, #141414 0) 0 100% / 100% 22% no-repeat, #141414; }
+#panel-studio .lab-meteo__barre { position: absolute; inset: 0 0 32% 0; background: linear-gradient(90deg, #c0c0c0 0 14.3%, #c0c000 0 28.6%, #00c0c0 0 42.9%, #00c000 0 57.1%, #c000c0 0 71.4%, #c00000 0 85.7%, #0000c0 0); }
+#panel-studio .lab-meteo__tondo { position: absolute; left: 44%; top: 44%; width: 38%; aspect-ratio: 1; translate: -50% -50%; display: grid; place-content: center; gap: .35em; border: .7cqw solid #f4f4f4; border-radius: 50%;
+  background: #111; text-align: center; box-shadow: 0 0 0 .5cqw #111; }
+#panel-studio .lab-meteo__tondo b { color: #fff; font: 400 clamp(9px, 3.8cqw, 20px)/1 var(--pzk-fa); letter-spacing: .1em; }
+#panel-studio .lab-meteo__tondo span { color: var(--pzk-giallo); font: 400 clamp(6px, 2cqw, 11px)/1.1 "8Bit", var(--pzk-mac); text-transform: uppercase; }
+#panel-studio .lab-meteo__biglietto { position: absolute; z-index: 2; right: 5%; bottom: 9%; width: 32%; margin: 0; padding: .6em .55em .7em; display: grid; gap: .25em;
+  background: linear-gradient(175deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 45%), #fff1a1; box-shadow: 1px 6px 8px -4px rgba(0, 0, 0, .7);
+  text-align: center; rotate: -7deg; transform-origin: 50% 0; animation: meteo-biglietto 4s ease-in-out infinite alternate; }
+#panel-studio .lab-meteo__biglietto::before { content: ""; position: absolute; left: 50%; top: -.5em; width: 50%; height: 1em; translate: -50% 0; background: var(--pzk-nastro); clip-path: var(--pzk-code); rotate: 4deg; }
+#panel-studio .lab-meteo__biglietto b { color: var(--pzk-rosso); font: 400 clamp(9px, 3.6cqw, 19px)/1 var(--pzk-marker); }
+#panel-studio .lab-meteo__biglietto span { color: #3b3208; font: 400 clamp(6px, 1.9cqw, 10px)/1.15 var(--pzk-mac); }
+@keyframes meteo-biglietto { from { transform: rotate(0deg); } to { transform: rotate(3deg); } }
+
+/* ── il comando ────────────────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-meteo__comandi { position: relative; z-index: 2; display: flex; justify-content: center; margin: calc(-7% - 8px) 0 4px; }
+
+/* ── il ritaglio della Gazzetta del Muro ───────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-meteo__testo { position: relative; isolation: isolate; display: grid; grid-template-columns: 50px minmax(0, 1fr); gap: 12px; align-items: start;
+  margin: 6px 6px 0; padding: 16px 16px 14px 12px; rotate: -.7deg;
+  filter: drop-shadow(0 1px 1px rgba(40, 30, 10, .18)) drop-shadow(0 7px 8px rgba(40, 30, 10, .2)); }
+#panel-studio .lab-meteo__testo::before { content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(170deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 50%), linear-gradient(rgba(240, 234, 216, .6), rgba(240, 234, 216, .6)), var(--pzk-grana), #efe8d4;
+  clip-path: polygon(0 3px, 22% 0, 61% 2px, 100% 0, calc(100% - 2px) 48%, 100% 100%, 64% calc(100% - 2px), 30% 100%, 2px calc(100% - 1px), 0 52%); }
+#panel-studio .lab-meteo[data-meteo="sereno"] .lab-meteo__testo::before { background: radial-gradient(90% 120% at 100% 0, rgba(255, 210, 80, .4), rgba(255, 210, 80, 0) 60%), linear-gradient(rgba(244, 236, 212, .6), rgba(244, 236, 212, .6)), var(--pzk-grana), #f3ead0; }
+#panel-studio .lab-meteo[data-meteo="pioggia"] .lab-meteo__testo::before,
+#panel-studio .lab-meteo[data-meteo="temporale"] .lab-meteo__testo::before { background:
+  radial-gradient(circle at 82% 30%, rgba(90, 120, 160, 0) 15px, rgba(90, 120, 160, .2) 16px 18px, rgba(90, 120, 160, 0) 19px),
+  radial-gradient(circle at 18% 86%, rgba(90, 120, 160, .1) 0 11px, rgba(90, 120, 160, .22) 12px 13px, rgba(90, 120, 160, 0) 14px), linear-gradient(rgba(232, 229, 216, .6), rgba(232, 229, 216, .6)), var(--pzk-grana), #e8e5d8; }
+#panel-studio .lab-meteo[data-meteo="neve"] .lab-meteo__testo::before { background: linear-gradient(rgba(220, 236, 250, .5), rgba(220, 236, 250, 0) 60%), linear-gradient(rgba(238, 238, 230, .6), rgba(238, 238, 230, .6)), var(--pzk-grana), #eeeee6; }
+/* il nastro in alto */
+#panel-studio .lab-meteo__testo::after { content: ""; position: absolute; z-index: 2; left: 50%; top: -9px; width: 70px; height: 18px; margin-left: -35px;
+  background: var(--pzk-nastro); clip-path: var(--pzk-code); rotate: 3deg; }
+#panel-studio .lab-meteo__termometro { display: block; width: 50px; height: auto; margin-top: 2px; rotate: -2deg; }
+#panel-studio .lab-meteo__mercurio { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(var(--t, 0)); transition: transform 1.8s cubic-bezier(.25, 1.35, .45, 1); }
+#panel-studio .lab-meteo__scala { fill: #161616; font: 400 9px/1 var(--pzk-mac); }
+#panel-studio .lab-meteo__articolo { position: relative; display: grid; gap: 3px; min-width: 0; }
+#panel-studio .lab-meteo__testata { display: grid; gap: 2px; margin: 0 0 4px; padding-bottom: 5px; border-bottom: 3px double rgba(22, 22, 22, .75); }
+#panel-studio .lab-meteo__testata span { color: #161616; font: 400 21px/1 "pzk meteo testata", Georgia, serif; letter-spacing: .005em; overflow-wrap: anywhere; }
+#panel-studio .lab-meteo__testata i { color: var(--pzk-matita); font: 400 10px/1.2 var(--pzk-mac); font-style: normal; letter-spacing: .14em; text-transform: uppercase; }
+#panel-studio .lab-meteo__riga { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
+#panel-studio .lab-meteo__riga b { color: var(--pzk-ink); font: 400 58px/.95 var(--pzk-fa); letter-spacing: -.005em; }
+#panel-studio .lab-meteo__riga span { padding: 0 3px; background: var(--pzk-evidenzia); color: var(--pzk-ink); font: 400 16px/1.25 var(--pzk-mac); }
+#panel-studio .lab-meteo__articolo small { color: var(--pzk-matita); font: 400 10.5px/1.2 var(--pzk-mac); letter-spacing: .04em; }
+#panel-studio .lab-meteo__battuta { margin: 6px 0 0; color: var(--pzk-rosso); font: 400 16px/1.22 var(--pzk-marker); rotate: -1deg; transform-origin: 0 50%; }
+#panel-studio .lab-meteo.is-annuisce .lab-meteo__battuta { animation: meteo-battuta .5s cubic-bezier(.3, 1.5, .5, 1); }
+@keyframes meteo-battuta { from { opacity: 0; transform: translateY(4px) scale(.98); } }
+#panel-studio .lab-meteo__frase { margin: 2px 0 0; color: var(--pzk-testo); font: 400 12px/1.35 var(--pzk-mac); }
+#panel-studio .lab-meteo__frase:empty { display: none; }
+#panel-studio .lab-meteo__timbro { --mostra: inline-block; position: absolute; right: 2px; top: 34px; padding: 4px 8px 3px; border: 3px solid var(--pzk-rosso); border-radius: 4px;
+  color: var(--pzk-rosso); font: 400 15px/1 var(--pzk-fa); letter-spacing: .1em; text-transform: uppercase; rotate: -11deg; opacity: .82; mix-blend-mode: multiply;
+  animation: meteo-timbro .45s cubic-bezier(.3, 1.6, .5, 1) both; }
+@keyframes meteo-timbro { from { transform: scale(1.8); opacity: 0; } }
+/* la neve si posa sul ritaglio */
+#panel-studio .lab-meteo[data-meteo="neve"] .lab-meteo__articolo::after { content: ""; position: absolute; z-index: 3; left: -76px; right: -18px; top: -26px; height: 16px;
+  background: radial-gradient(14px 9px at 10% 100%, #fbfdff 98%, transparent), radial-gradient(22px 11px at 32% 100%, #fbfdff 98%, transparent), radial-gradient(18px 8px at 55% 100%, #fbfdff 98%, transparent),
+    radial-gradient(26px 12px at 78% 100%, #fbfdff 98%, transparent), radial-gradient(14px 7px at 96% 100%, #fbfdff 98%, transparent);
+  filter: drop-shadow(0 1px 0 #c6d6e6); transform-origin: 50% 100%; animation: meteo-accumula 30s cubic-bezier(.2, .7, .3, 1) both; }
+
+/* ── i tre strumenti appesi con la puntina ─────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-meteo__numeri { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 6px; padding: 0; border: 0; }
+#panel-studio .lab-meteo__strumento { --r: -1.4deg; position: relative; display: grid; justify-items: center; align-content: start; gap: 2px; min-width: 0; padding: 12px 5px 9px;
+  background: #fffdf6; border: 1px solid rgba(22, 22, 22, .18); box-shadow: var(--pzk-ombra-foglietto); text-align: center; rotate: var(--r); }
+#panel-studio .lab-meteo__strumento:nth-child(2) { --r: 1deg; margin-top: 5px; }
+#panel-studio .lab-meteo__strumento:nth-child(3) { --r: -.4deg; }
+#panel-studio .lab-meteo__strumento::before { content: ""; position: absolute; z-index: 2; left: 50%; top: -5px; width: 11px; height: 11px; margin-left: -5.5px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff8a8a, #c8141f 55%, #7d0b14); box-shadow: 1px 2px 2px rgba(0, 0, 0, .35); }
+#panel-studio .lab-meteo__disegno { display: block; width: 100%; max-width: 116px; height: 64px; overflow: visible; }
+#panel-studio .lab-meteo__strumento b { margin-top: 3px; color: var(--pzk-ink); font: 400 20px/1 var(--pzk-fa); letter-spacing: .01em; white-space: nowrap; }
+#panel-studio .lab-meteo__strumento small { color: var(--pzk-matita); font: 400 10px/1.2 var(--pzk-mac); }
+#panel-studio .lab-meteo__strumento em { min-height: 1.1em; color: var(--pzk-rosso); font: 400 12px/1.1 var(--pzk-marker); font-style: normal; rotate: -2deg; }
+#panel-studio .lab-meteo[data-meteo="neve"] .lab-meteo__strumento::after { content: ""; position: absolute; left: 4px; right: 4px; top: -5px; height: 7px; border-radius: 6px 6px 2px 2px;
+  background: #fbfdff; box-shadow: 0 1px 0 #c6d6e6; transform-origin: 50% 100%; animation: meteo-accumula 30s cubic-bezier(.2, .7, .3, 1) both; }
+
+/* la manica a vento: piegata giù con la calma, dritta e tesa col vento forte */
+#panel-studio .lab-meteo__manica { transform-box: view-box; transform-origin: 16px 16px; transform: rotate(calc((1 - var(--v, 0)) * 74deg)) scaleX(calc(.74 + var(--v, 0) * .26));
+  transition: transform 1.8s cubic-bezier(.3, 1.4, .5, 1); }
+#panel-studio .lab-meteo__sventola { transform-box: view-box; transform-origin: 16px 16px; animation: meteo-sventola var(--fl, 2.4s) ease-in-out infinite alternate; }
+@keyframes meteo-sventola { from { transform: skewY(-2.5deg) scaleY(.93); } to { transform: skewY(3deg) scaleY(1.04); } }
+/* il pluviometro */
+#panel-studio .lab-meteo__acqua { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(var(--p, 0)); transition: transform 1.8s cubic-bezier(.25, 1.2, .45, 1); }
+#panel-studio .lab-meteo__stilla { animation: meteo-stilla 1.1s ease-in infinite; }
+#panel-studio .lab-meteo__stilla--2 { animation-delay: -.4s; }
+#panel-studio .lab-meteo__stilla--3 { animation-delay: -.75s; }
+@keyframes meteo-stilla { from { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 80% { opacity: 1; } to { transform: translateY(26px); opacity: 0; } }
+/* l'ottotipo: M / A N / T O V A, che si sfoca con la visibilità */
+#panel-studio .lab-meteo__ottotipo { display: grid; justify-items: center; align-content: center; gap: 2px; width: 62px; height: 64px; background: #fff; border: 1px solid rgba(22, 22, 22, .3);
+  box-shadow: inset 0 0 0 3px #fff, inset 0 0 0 4px rgba(22, 22, 22, .12); color: #161616; font-family: var(--pzk-fa); line-height: 1; }
+#panel-studio .lab-meteo__ottotipo span { filter: blur(var(--sfoca, 0px)); transition: filter 1.6s ease; }
+#panel-studio .lab-meteo__ottotipo span:nth-child(1) { font-size: 24px; }
+#panel-studio .lab-meteo__ottotipo span:nth-child(2) { font-size: 14px; letter-spacing: .12em; }
+#panel-studio .lab-meteo__ottotipo span:nth-child(3) { font-size: 9px; letter-spacing: .14em; }
+
+/* ── le gocce che cadono sul foglio ────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-meteo__gocce { --mostra: block; position: absolute; inset: 0; z-index: 3; overflow: hidden; pointer-events: none; }
+#panel-studio .lab-meteo__gocce i { position: absolute; left: var(--x); top: var(--y); width: 8px; height: 10px; border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%; opacity: 0;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, .95) 0 16%, rgba(140, 185, 235, .35) 32%, rgba(60, 110, 190, .5) 85%);
+  box-shadow: 0 1px 1px rgba(20, 40, 80, .28); animation: meteo-goccia 6s ease-in var(--d, 0s) infinite; }
+@keyframes meteo-goccia { 0% { opacity: 0; transform: translateY(-8px) scale(.3); } 8% { opacity: .95; transform: none; } 55% { opacity: .9; transform: translateY(22px) scaleY(1.2); } 100% { opacity: 0; transform: translateY(64px) scaleY(1.45); } }
+
+/* ── fermo quando non si vede, e niente movimento per chi lo chiede ────────────────────────────────────────────── */
+#panel-studio .lab-meteo[data-fermo="1"] *, #panel-studio .lab-meteo[data-fermo="1"] *::before, #panel-studio .lab-meteo[data-fermo="1"] *::after { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) {
+  #panel-studio .lab-meteo *, #panel-studio .lab-meteo *::before, #panel-studio .lab-meteo *::after { animation: none !important; transition: none !important; }
+}
+
+/* ── foglio stretto ────────────────────────────────────────────────────────────────────────────────────────────── */
+@container (max-width: 360px) {
+  #panel-studio .lab-meteo__postit { display: none; }
+}
+@media (max-width: 520px) {
+  #panel-studio .lab-meteo__riga b { font-size: 48px; }
+  #panel-studio .lab-meteo__testata span { font-size: 18px; }
+  #panel-studio .lab-meteo__battuta { font-size: 15px; }
+  #panel-studio .lab-meteo__numeri { gap: 7px; }
+  #panel-studio .lab-meteo__strumento b { font-size: 17px; }
+  #panel-studio .lab-meteo__strumento em { font-size: 11px; }
+}
