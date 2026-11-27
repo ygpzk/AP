@@ -1,0 +1,293 @@
+/* Giugnoh's Cast in bacheca (podcast.js): la tv e i pezzi di Diretta OS portati nel profilo. Scuro di fondo anche col
+   tema chiaro (è un palco), neon lime #ccff00 e viola #9d00ff di pzkko, Pricedown come il nome su Discord, Ginto Nord
+   per le scritte, gg mono per i numeri. Le scritte stanno sospese col contorno scuro, pochi riquadri. Si muove solo
+   con transform e opacity; fuori vista (.is-fuori) le animazioni si fermano.
+   Sotto: la scheda del redattore (.gcp), che usa le classi della scheda del profilo (card__in, banner, avatar, dname,
+   uname, gtag, badges, box, sec, conns) con le variabili del suo tema. */
+
+.gc, .gcp {
+  --gc-lime: #ccff00; --gc-viola: #9d00ff; --gc-lilla: #e2b3ff; --gc-rosso: #ff3d4a; --gc-rosa: #eb459e; --gc-scuro: #0b090e; --gc-testo: #f6f4f8;
+  --gc-molla: cubic-bezier(.2, .9, .25, 1);
+  --gc-c2: 1.5px 0 0 #0b090e, -1.5px 0 0 #0b090e, 0 1.5px 0 #0b090e, 0 -1.5px 0 #0b090e, 1px 1px 0 #0b090e, -1px 1px 0 #0b090e, 1px -1px 0 #0b090e, -1px -1px 0 #0b090e, 0 3px 8px rgba(0, 0, 0, .5);
+  --gc-c3: 2px 0 0 #0b090e, -2px 0 0 #0b090e, 0 2px 0 #0b090e, 0 -2px 0 #0b090e, 1.5px 1.5px 0 #0b090e, -1.5px 1.5px 0 #0b090e, 1.5px -1.5px 0 #0b090e, -1.5px -1.5px 0 #0b090e, 0 4px 0 #0b090e, 0 7px 14px rgba(0, 0, 0, .5);
+}
+
+/* ── il palco ── */
+.gc { position: relative; isolation: isolate; overflow: hidden; container: gc / inline-size; padding: 16px 18px 0; border-radius: 18px; color: var(--gc-testo); font-family: var(--font-sans);
+  background: radial-gradient(ellipse 140% 90% at 50% 115%, #1d0c2e 0%, #0e0914 52%, #0b090e 100%);
+  box-shadow: 0 0 0 1px rgba(204, 255, 0, .16), 0 26px 60px -26px rgba(157, 0, 255, .6); }
+.gc :focus-visible { outline: 3px solid var(--gc-lime); outline-offset: 3px; }
+
+.gc__sfondo { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.gc-lu { position: absolute; border-radius: 50%; aspect-ratio: 1; will-change: transform; }
+.gc-lu1 { width: 72%; left: -24%; top: -36%; background: radial-gradient(closest-side, rgba(204, 255, 0, .17), rgba(204, 255, 0, 0)); animation: gc-lu1 38s ease-in-out infinite; }
+.gc-lu2 { width: 90%; right: -32%; bottom: -36%; background: radial-gradient(closest-side, rgba(157, 0, 255, .5), rgba(157, 0, 255, 0)); animation: gc-lu2 46s ease-in-out infinite; }
+.gc-lu3 { width: 46%; left: 30%; top: 22%; background: radial-gradient(closest-side, rgba(235, 69, 158, .14), rgba(235, 69, 158, 0)); animation: gc-lu3 31s ease-in-out infinite; }
+@keyframes gc-lu1 { 50% { transform: translate(18%, 12%) scale(1.15); } }
+@keyframes gc-lu2 { 50% { transform: translate(-16%, -8%) scale(.9); } }
+@keyframes gc-lu3 { 50% { transform: translate(24%, 14%) scale(1.3); } }
+.gc__pavimento { position: absolute; left: -12%; right: -12%; bottom: 0; height: 210px; perspective: 240px; perspective-origin: 50% 0; overflow: hidden; -webkit-mask-image: linear-gradient(transparent, #000 62%); mask-image: linear-gradient(transparent, #000 62%); }
+.gc__pavimento i { position: absolute; left: 0; right: 0; top: 0; height: 900px; transform-origin: 50% 0; transform: rotateX(72deg); background-image: linear-gradient(rgba(204, 255, 0, .17) 1.5px, transparent 1.5px), linear-gradient(90deg, rgba(157, 0, 255, .34) 1.5px, transparent 1.5px); background-size: 100% 46px, 46px 100%; animation: gc-pavimento 4s linear infinite; }
+@keyframes gc-pavimento { from { transform: rotateX(72deg) translateY(-46px); } to { transform: rotateX(72deg) translateY(0); } }
+.gc__scansione { position: absolute; left: 0; right: 0; top: 0; height: 90px; background: linear-gradient(rgba(204, 255, 0, 0), rgba(204, 255, 0, .05), rgba(204, 255, 0, 0)); animation: gc-scansione 9s linear infinite; will-change: transform; }
+@keyframes gc-scansione { from { transform: translateY(-90px); } to { transform: translateY(1500px); } }
+
+/* in alto: l'insegna a sinistra, l'ora e la puntata a destra */
+.gc__testa { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.gc-onair { display: inline-flex; align-items: center; gap: 9px; padding: 6px 13px 7px 10px; border: 3px solid #3a3340; border-radius: 12px; background: rgba(10, 8, 14, .6); color: #4a4253; font: 800 16px/1 var(--font-headline); letter-spacing: .05em; white-space: nowrap; }
+.gc-onair i { width: 11px; height: 11px; border-radius: 50%; background: #3a3340; }
+.gc[data-stato=onda] .gc-onair { border-color: var(--gc-rosso); color: #fff; background: rgba(60, 6, 14, .55); box-shadow: 0 0 18px rgba(255, 61, 74, .7), inset 0 0 12px rgba(255, 61, 74, .45); text-shadow: 0 0 9px var(--gc-rosso), 0 0 3px var(--gc-rosso); animation: gc-accende 1.3s steps(1) both; }
+.gc[data-stato=onda] .gc-onair i { background: var(--gc-rosso); box-shadow: 0 0 9px var(--gc-rosso); animation: gc-pallino 1.6s ease-in-out infinite; }
+@keyframes gc-accende { 0% { opacity: .2; } 10% { opacity: 1; } 18% { opacity: .3; } 30% { opacity: 1; } 36% { opacity: .5; } 44%, 100% { opacity: 1; } }
+@keyframes gc-pallino { 50% { transform: scale(.7); opacity: .55; } }
+.gc__dx { text-align: right; }
+.gc__ora { font: 700 28px/1 var(--font-mono); color: #fff; letter-spacing: -.02em; text-shadow: 0 0 14px rgba(157, 0, 255, .85); font-variant-numeric: tabular-nums; }
+.gc__ep { margin-top: 6px; font: 800 11px/1 var(--font-headline); color: var(--gc-lime); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.gc__da { margin-left: 8px; font: 700 11px/1 var(--font-mono); color: var(--gc-lilla); text-transform: none; letter-spacing: 0; }
+.gc__da b { font-weight: 700; }
+
+/* il marchio: le cuffie di pzkko sopra «Giugnoh's Cast» */
+.gc__marchio { position: relative; z-index: 1; margin-top: -4px; text-align: center; }
+.gc__cuffie { display: block; width: 54px; height: auto; margin: 0 auto -8px; image-rendering: pixelated; image-rendering: crisp-edges; filter: drop-shadow(0 0 12px rgba(204, 255, 0, .35)); transform-origin: 50% 100%; animation: gc-cuffie 3.2s ease-in-out infinite; }
+@keyframes gc-cuffie { 50% { transform: translateY(-3px) rotate(-3deg); } }
+.gc__logo { margin: 0; font: 700 clamp(38px, 10.5cqi, 74px)/1 "Pricedown", var(--font-headline); letter-spacing: .01em; white-space: nowrap; }
+.gc__lettere { display: inline-flex; align-items: flex-end; }
+.gc__lettere span { display: inline-block; color: var(--gc-lime); text-shadow: 0 2px 0 #6a00ad, 0 4px 0 #3d0066, 0 0 20px rgba(157, 0, 255, .75); animation: gc-lettera 3s ease-in-out infinite; animation-delay: calc(var(--i) * -.19s); will-change: transform; }
+.gc__lettere span.b { color: #fff; }
+.gc-sp { display: inline-block; width: .26em; }
+@keyframes gc-lettera { 50% { transform: translateY(-5px) rotate(-1.5deg); } }
+.gc__motto { margin: 9px 0 0; font: 800 10.5px/1.2 var(--font-sans); letter-spacing: .3em; text-transform: uppercase; color: var(--gc-lilla); text-shadow: 0 0 10px rgba(157, 0, 255, .9); }
+.gc__motto span { color: var(--gc-lime); }
+
+/* il corpo: la puntata e il rullo affiancati, poi i redattori e l'archivio */
+.gc__corpo { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; margin-top: 20px; }
+@container gc (min-width: 600px) {
+  .gc__corpo { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 26px 22px; align-items: center; }
+  .gc-prossima { grid-area: 1 / 1; }
+  .gc-rullo { grid-area: 1 / 2; }
+  .gc-redattori { grid-area: 2 / 1 / 3 / -1; }
+  .gc-archivio { grid-area: 3 / 1 / 4 / -1; }
+}
+.gc-et { display: flex; align-items: center; gap: 9px; margin: 0 0 10px; font: 800 10.5px/1 var(--font-headline); letter-spacing: .14em; text-transform: uppercase; color: var(--gc-lime); text-shadow: var(--gc-c2); }
+.gc-et::after { content: ""; flex: 1 1 auto; height: 2px; border-radius: 2px; background: linear-gradient(90deg, rgba(204, 255, 0, .5), rgba(204, 255, 0, 0)); }
+
+.gc-chip { display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px 6px; border-radius: 9px; background: var(--gc-viola); color: #fff; font: 800 10.5px/1 var(--font-headline); letter-spacing: .1em; text-transform: uppercase; box-shadow: 0 0 16px rgba(157, 0, 255, .7); white-space: nowrap; }
+.gc-chip--rosso { background: var(--gc-rosso); box-shadow: 0 0 18px rgba(255, 61, 74, .75); }
+.gc-rec { flex: 0 0 auto; width: 9px; height: 9px; border-radius: 50%; background: var(--gc-rosso); box-shadow: 0 0 0 2px #0b090e, 0 0 9px var(--gc-rosso); animation: gc-rec 1.6s steps(1) infinite; }
+.gc-chip--rosso .gc-rec { background: #fff; box-shadow: 0 0 8px #fff; }
+@keyframes gc-rec { 50% { opacity: .25; } }
+
+/* ── la prossima puntata (o quella in onda) ── */
+.gc-prossima { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 0; }
+.gc-prossima__titolo { margin: 3px 0 0; font: 800 clamp(26px, 6.4cqi, 36px)/1 var(--font-headline); color: #fff; letter-spacing: -.01em; text-transform: uppercase; text-shadow: var(--gc-c3); }
+.gc-prossima__quando { margin: 0; font: 800 15px/1.25 var(--font-sans); color: var(--gc-lilla); text-shadow: var(--gc-c2); }
+.gc-prossima__quando::first-letter { text-transform: uppercase; }
+.gc-prossima__da { display: inline-flex; align-items: center; gap: 6px; margin-left: 2px; font: 700 15px/1 var(--font-mono); color: #fff; font-variant-numeric: tabular-nums; }
+.gc-conto { display: flex; align-items: flex-start; gap: 5px; margin-top: 4px; }
+.gc-conto > div { text-align: center; }
+.gc-conto b { display: block; min-width: 2.1ch; font: 700 clamp(34px, 8.6cqi, 50px)/1 var(--font-mono); color: var(--gc-lime); letter-spacing: -.03em; text-shadow: var(--gc-c3), 0 0 22px rgba(204, 255, 0, .35); font-variant-numeric: tabular-nums; }
+.gc-conto small { display: block; margin-top: 6px; font: 800 9px/1 var(--font-sans); letter-spacing: .2em; text-transform: uppercase; color: var(--gc-lilla); }
+.gc-conto__due { font: 700 clamp(28px, 7cqi, 40px)/1.1 var(--font-mono); color: #fff; text-shadow: var(--gc-c2); animation: gc-due 1s steps(1) infinite; }
+@keyframes gc-due { 50% { opacity: .2; } }
+.gc-conto__g { display: none; margin-right: 10px; }
+.gc-conto[data-giorni] .gc-conto__g { display: block; }
+.gc-conto__g b { color: #fff; }
+.gc-conto[data-vicino] b { animation: gc-batte 1s ease-in-out infinite; }
+@keyframes gc-batte { 50% { transform: scale(1.06); } }
+.gc-azioni { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin-top: 10px; }
+.gc-unisciti { display: inline-flex; align-items: center; gap: 8px; padding: 11px 16px 12px 20px; border: 3px solid #0b090e; border-radius: 13px; background: var(--gc-lime); color: #0b090e; font: 800 16px/1 var(--font-headline); letter-spacing: .05em; text-transform: uppercase; text-decoration: none; box-shadow: 0 5px 0 #0b090e, 0 0 26px rgba(204, 255, 0, .42); transition: transform .12s, box-shadow .12s, background .15s; }
+.gc-unisciti:hover { color: #0b090e; text-decoration: none; transform: translateY(-2px) rotate(-1deg); box-shadow: 0 7px 0 #0b090e, 0 0 36px rgba(204, 255, 0, .6); }
+.gc-unisciti:active { transform: translateY(3px); box-shadow: 0 2px 0 #0b090e, 0 0 20px rgba(204, 255, 0, .4); }
+.gc-unisciti--ora { animation: gc-chiama 1.6s ease-in-out infinite; }
+@keyframes gc-chiama { 50% { box-shadow: 0 5px 0 #0b090e, 0 0 0 6px rgba(204, 255, 0, .25), 0 0 44px rgba(204, 255, 0, .7); } }
+.gc-palco { display: inline-flex; align-items: center; gap: 4px; color: var(--gc-lilla); font: 700 12.5px/1.25 var(--font-sans); text-decoration: none; border-bottom: 1.5px dashed rgba(226, 179, 255, .55); }
+.gc-palco:hover { color: #fff; border-bottom-color: #fff; text-decoration: none; }
+.gc-palco svg { flex: 0 0 auto; }
+.gc-nota { margin: 4px 0 0; max-width: 48ch; color: rgba(246, 244, 248, .66); font-size: 12px; line-height: 1.45; }
+
+/* ── l'argomento a caso: il rullo della diretta ── */
+.gc-rullo { --voce: 48px; --vel: 0; position: relative; display: flex; flex-direction: column; align-items: center; min-width: 0; text-align: center; }
+.gc-rullo__corpo { position: relative; width: 100%; height: calc(var(--voce) * 3); margin-top: 10px; }
+.gc-rullo__finestra { position: absolute; top: 0; bottom: 0; left: 30px; right: 30px; overflow: hidden; -webkit-mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent); mask-image: linear-gradient(transparent, #000 30%, #000 70%, transparent); }
+.gc-rullo__nastro { position: absolute; left: 0; right: 0; top: 50%; will-change: transform; }
+.gc-voce { position: absolute; left: 0; right: 0; top: calc(var(--n) * var(--voce) - var(--voce) / 2); height: var(--voce); display: flex; align-items: center; justify-content: center; padding: 0 6px; }
+.gc-voce span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font: 800 clamp(14px, 3.1cqi, 17px)/1.15 var(--font-headline); color: #fff; letter-spacing: -.01em; text-shadow: var(--gc-c2); filter: blur(calc(var(--vel) * .045px)); }
+.gc-voce.is-scelta span { color: var(--gc-lime); }
+.gc-rullo__banda { position: absolute; left: 18px; right: 18px; top: 50%; height: calc(var(--voce) + 6px); transform: translateY(-50%); border-top: 3px solid var(--gc-lime); border-bottom: 3px solid var(--gc-lime); background: linear-gradient(90deg, rgba(204, 255, 0, 0), rgba(204, 255, 0, .13) 30%, rgba(204, 255, 0, .13) 70%, rgba(204, 255, 0, 0)); box-shadow: 0 0 18px rgba(204, 255, 0, .3), 0 -2px 0 #0b090e, 0 2px 0 #0b090e; }
+.gc-freccia { position: absolute; top: 50%; width: 22px; height: 26px; margin-top: -13px; transform-origin: 25% 50%; transform: rotate(calc(var(--vel) * -1.4deg));
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 44'%3E%3Cpath d='M6 5 L35 22 L6 39 Z' fill='%23ccff00' stroke='%230b090e' stroke-width='5' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+.gc-freccia--sx { left: 0; }
+.gc-freccia--dx { right: 0; transform: scaleX(-1) rotate(calc(var(--vel) * -1.4deg)); }
+.gc-lampo { position: absolute; left: 50%; top: 50%; width: 130%; height: 220%; transform: translate(-50%, -50%); background: radial-gradient(closest-side, rgba(204, 255, 0, .6), rgba(157, 0, 255, .28) 55%, rgba(157, 0, 255, 0)); opacity: 0; pointer-events: none; }
+.gc-rullo.botto .gc-lampo { animation: gc-lampo .95s ease-out; }
+.gc-rullo.botto .gc-rullo__corpo { animation: gc-scossa .5s ease-out; }
+@keyframes gc-lampo { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.35); } 14% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
+@keyframes gc-scossa { 12% { transform: translate(-5px, 3px) rotate(-.7deg); } 30% { transform: translate(4px, -2px) rotate(.5deg); } 50% { transform: translate(-3px, 1px); } 72% { transform: translate(1px, -1px); } 100% { transform: none; } }
+.gc-cor { position: absolute; left: 50%; top: 50%; width: 0; height: 0; z-index: 3; pointer-events: none; }
+.gc-cor i { position: absolute; left: 0; top: 0; width: var(--w); height: calc(var(--w) * .55); border-radius: 2px; box-shadow: 0 0 0 1.5px #0b090e; opacity: 0; animation: gc-cor 1.7s cubic-bezier(.2, .65, .45, 1) forwards; }
+@keyframes gc-cor {
+  0% { transform: translate(0, 0) rotate(0) scale(.3); opacity: 1; }
+  40% { transform: translate(calc(var(--dx) * .7), var(--dy)) rotate(calc(var(--r) * .5)) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), calc(var(--dy) + 150px)) rotate(var(--r)) scale(.9); opacity: 0; }
+}
+.gc-rullo__sotto { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px; margin-top: 10px; }
+.gc-rullo__nota { font: 700 11.5px/1.3 var(--font-sans); color: var(--gc-lilla); }
+.gc-gira { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px 8px; border: 2.5px solid #0b090e; border-radius: 10px; background: #fff; color: #0b090e; font: 800 12px/1 var(--font-headline); letter-spacing: .06em; text-transform: uppercase; cursor: pointer; box-shadow: 0 4px 0 #0b090e; transition: transform .12s, background .15s, box-shadow .12s; }
+.gc-gira:hover { background: var(--gc-lime); transform: translateY(-1px); }
+.gc-gira:active { transform: translateY(3px); box-shadow: 0 1px 0 #0b090e; }
+.gc-gira:disabled { cursor: progress; background: #d9d2e3; }
+.gc-rullo[data-fase=gira] .gc-gira svg { animation: gc-giro .7s linear infinite; }
+@keyframes gc-giro { to { transform: rotate(360deg); } }
+
+/* ── i redattori: tre schede piccole, coi colori del loro profilo ── */
+.gc-redattori ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@container gc (min-width: 600px) { .gc-redattori ul { gap: 14px; } }
+.gc-red { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; height: 100%; margin: 0; padding: 0 8px 12px; overflow: hidden; border: 2px solid rgba(255, 255, 255, .1); border-radius: 14px; cursor: pointer; color: #fff; font: inherit; text-align: center;
+  background: linear-gradient(rgba(0, 0, 0, .58), rgba(0, 0, 0, .58)), linear-gradient(var(--p), var(--p) 54px, var(--a));
+  box-shadow: 0 10px 24px -14px #000; transition: transform .3s var(--gc-molla), border-color .2s, box-shadow .2s; }
+.gc-red--neutro { --ring: #111214; background: #111214; }
+.gc-red:hover { transform: translateY(-4px) rotate(-.8deg); border-color: var(--gc-lime); box-shadow: 0 0 0 3px #0b090e, 0 0 26px rgba(204, 255, 0, .35), 0 16px 26px -14px #000; }
+.gc-redattori li:nth-child(2) .gc-red:hover { transform: translateY(-4px) rotate(.8deg); }
+.gc-red:active { transform: translateY(-1px) scale(.98); }
+.gc-red__banner { align-self: stretch; height: 54px; margin: 0 -8px; overflow: hidden; background: var(--banner-c, #5865f2); }
+.gc-red__banner img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.gc-red__av { position: relative; flex: 0 0 auto; width: 72px; height: 72px; margin-top: -36px; }
+.gc-red__img { display: block; width: 100%; height: 100%; box-sizing: border-box; border: 5px solid var(--ring); border-radius: 50%; background: var(--ring); object-fit: cover; }
+.gc-red__deco { position: absolute; left: -10%; top: -10%; width: 120%; height: 120%; max-width: none; pointer-events: none; }
+.gc-red__nome { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; max-width: 100%; margin-top: 8px; font: 700 16px/1.15 var(--font-sans); overflow-wrap: anywhere; }
+.gc-red__nome.is-font { font-family: var(--dn-font), var(--font-sans); font-weight: var(--dn-weight, 400); letter-spacing: var(--dn-space, 0); font-size: clamp(16px, 3.6cqi, 23px); line-height: 1.02; }
+.gc-red__nome.is-largo { font-size: clamp(11px, 2.9cqi, 20px); white-space: nowrap; }
+.gc-red__user { max-width: 100%; margin-top: 5px; overflow: hidden; color: rgba(255, 255, 255, .72); font: 500 11.5px/1.2 var(--font-sans); text-overflow: ellipsis; white-space: nowrap; }
+.gc-red__tag { display: inline-flex; align-items: center; gap: 4px; margin-top: 7px; padding: 2px 6px 2px 4px; border: 1px solid rgba(255, 255, 255, .2); border-radius: 6px; background: rgba(47, 49, 54, .6); font: 600 10.5px/1.3 var(--font-sans); }
+.gc-red__tag img { width: 13px; height: 13px; }
+@container gc (max-width: 420px) {
+  .gc-red { padding: 0 5px 10px; }
+  .gc-red__banner { height: 40px; margin: 0 -5px; }
+  .gc-red__av { width: 58px; height: 58px; margin-top: -29px; }
+  .gc-red__img { border-width: 4px; }
+  .gc-red__tag { display: none; }
+}
+
+/* ── l'archivio delle puntate ── */
+.gc-archivio ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.gc-ep { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; padding: 11px 13px 12px 11px; border: 1px solid rgba(255, 255, 255, .08); border-left: 3px solid var(--gc-viola); border-radius: 12px; background: rgba(11, 9, 14, .58); }
+.gc-ep--arrivo { border-left-color: var(--gc-lime); }
+.gc-ep--onda { border-left-color: var(--gc-rosso); box-shadow: 0 0 18px rgba(255, 61, 74, .25); }
+.gc-ep__n { min-width: 1.5em; font: 700 34px/.9 "Pricedown", var(--font-headline); color: var(--gc-lime); text-shadow: 0 2px 0 #6a00ad, 0 3px 0 #3d0066; }
+.gc-ep--andata .gc-ep__n { color: #fff; }
+.gc-ep__testo { min-width: 0; }
+.gc-ep__riga { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.gc-ep__riga b { font: 800 14px/1.25 var(--font-sans); color: #fff; }
+.gc-ep__riga b::first-letter { text-transform: uppercase; }
+.gc-ep__riga > span { font: 700 13px/1.25 var(--font-mono); color: var(--gc-lilla); font-variant-numeric: tabular-nums; }
+.gc-ep__stato { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; font: 800 9.5px/1 var(--font-headline); font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: #2dff7a; }
+.gc-ep--arrivo .gc-ep__stato { color: var(--gc-lime); }
+.gc-ep--onda .gc-ep__stato { color: var(--gc-rosso); }
+.gc-ep__argo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 9px; }
+.gc-ep__argo small { width: 100%; font: 800 9px/1 var(--font-sans); letter-spacing: .16em; text-transform: uppercase; color: rgba(226, 179, 255, .75); }
+.gc-ep__argo--vuoto { margin-top: 6px; }
+.gc-ep__argo--vuoto small { letter-spacing: .08em; text-transform: none; font-size: 11px; font-weight: 600; }
+.gc-ep__argo span { display: inline-flex; align-items: center; gap: 7px; padding: 5px 11px 5px 5px; border: 1.5px solid rgba(157, 0, 255, .75); border-radius: 999px; background: rgba(157, 0, 255, .26); color: #fff; font: 700 12.5px/1.15 var(--font-sans); }
+.gc-ep__argo span b { display: grid; place-items: center; flex: 0 0 auto; width: 18px; height: 18px; border-radius: 50%; background: var(--gc-lime); color: #0b090e; font: 800 10px/1 var(--font-headline); }
+.gc-numeri { margin-top: 12px; padding: 0; border: 0; background: none; color: rgba(246, 244, 248, .7); font: 700 12px/1 var(--font-sans); cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+.gc-numeri:hover { color: var(--gc-lime); }
+
+/* ── in fondo: le barre della voce, la lumaca al neon, il nastro che scorre ── */
+.gc-eq { position: relative; z-index: 0; display: flex; justify-content: center; align-items: flex-end; gap: 5px; height: 42px; margin: 18px 0 0; pointer-events: none; }
+.gc-eq i { flex: 1 1 0; max-width: 9px; height: 100%; border-radius: 5px; background: linear-gradient(#6a5a7a, #3a2d48); transform-origin: 50% 100%; transform: scaleY(var(--h)); animation: gc-eq-piano calc(var(--d) * 3.2) ease-in-out var(--r) infinite alternate; }
+@keyframes gc-eq-piano { from { transform: scaleY(calc(var(--h) * .45)); } to { transform: scaleY(var(--h)); } }
+.gc[data-stato=onda] .gc-eq i { background: linear-gradient(var(--gc-lime), var(--gc-viola)); animation: gc-eq var(--d) ease-in-out var(--r) infinite alternate; }
+@keyframes gc-eq { from { transform: scaleY(.08); } to { transform: scaleY(.96); } }
+.gc__lumaca { position: absolute; left: 0; bottom: 33px; z-index: 2; width: 44px; height: auto; image-rendering: pixelated; image-rendering: crisp-edges; filter: drop-shadow(0 0 8px rgba(5, 217, 232, .6)); animation: gc-lumaca 80s linear infinite; will-change: transform; pointer-events: none; }
+@keyframes gc-lumaca { from { transform: translateX(-60px); } to { transform: translateX(calc(100cqi + 20px)); } }
+.gc__nastrino { position: relative; height: 34px; margin: 0 -18px; overflow: hidden; border-top: 2px solid var(--gc-lime); background: linear-gradient(#150e1d, #0b090e); box-shadow: 0 -8px 24px rgba(204, 255, 0, .12); }
+.gc__scorre { position: absolute; left: 0; top: 0; height: 100%; display: flex; align-items: center; white-space: nowrap; animation: gc-scorre var(--durata, 40s) linear infinite; will-change: transform; }
+.gc__scorre span { padding: 0 12px; color: #fff; font: 800 12px/1 var(--font-headline); letter-spacing: .02em; }
+.gc__scorre span.m { color: var(--gc-lime); font: 700 17px/1 "Pricedown", var(--font-headline); letter-spacing: .01em; }
+.gc__scorre i { flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; background: var(--gc-viola); box-shadow: 0 0 8px var(--gc-viola); }
+@keyframes gc-scorre { to { transform: translateX(-50%); } }
+
+/* fuori vista si ferma tutto */
+.gc.is-fuori *, .gc.is-fuori *::before, .gc.is-fuori *::after { animation-play-state: paused !important; }
+
+@container gc (max-width: 420px) {
+  .gc-onair { gap: 7px; padding: 5px 10px 6px 8px; border-width: 2px; font-size: 13px; }
+  .gc__ora { font-size: 23px; }
+  .gc-unisciti { padding: 10px 14px 11px 16px; font-size: 15px; }
+}
+
+/* ── la scheda del redattore: un <dialog> col profilo vero ── */
+.gcp { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; overflow: auto; overscroll-behavior: contain; border: 0; background: transparent; color: var(--gc-testo); font-family: var(--font-sans); }
+.gcp[open] { display: grid; place-items: center; }
+.gcp::backdrop { background: radial-gradient(ellipse at 50% 120%, rgba(157, 0, 255, .34), rgba(157, 0, 255, 0) 62%), rgba(5, 4, 8, .86); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.gcp :focus-visible { outline: 3px solid var(--gc-lime); outline-offset: 3px; }
+.gcp__giro { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 64px 14px 72px; }
+.gcp__scena { flex: 0 0 auto; width: min(340px, calc(100vw - 140px)); perspective: 1000px; }
+.gcp__freccia, .gcp__x { display: grid; place-items: center; flex: 0 0 auto; width: 46px; height: 46px; padding: 0; border: 3px solid #0b090e; border-radius: 50%; background: var(--gc-lime); color: #0b090e; cursor: pointer; box-shadow: 0 4px 0 #0b090e, 0 0 20px rgba(204, 255, 0, .35); transition: transform .12s, box-shadow .12s; }
+.gcp__freccia:hover { transform: translateY(-2px) scale(1.05); }
+.gcp__freccia:active, .gcp__x:active { transform: translateY(3px); box-shadow: 0 1px 0 #0b090e; }
+.gcp__x { position: fixed; top: 16px; right: 16px; z-index: 2; background: #fff; box-shadow: 0 4px 0 #0b090e; }
+.gcp__x:hover { background: var(--gc-lime); }
+.gcp__punti { position: fixed; left: 50%; bottom: 24px; display: flex; gap: 8px; transform: translateX(-50%); }
+.gcp__punti button { width: 11px; height: 11px; padding: 0; border: 2px solid #0b090e; border-radius: 6px; background: rgba(255, 255, 255, .4); cursor: pointer; transition: width .3s var(--gc-molla), background .2s; }
+.gcp__punti button[aria-current=true] { width: 28px; background: var(--gc-lime); }
+/* sul telefono le frecce vanno sotto la scheda, ai lati dei pallini */
+@media (max-width: 520px) {
+  .gcp__giro { flex-wrap: wrap; gap: 16px 96px; padding: 64px 12px 28px; }
+  .gcp__scena { order: -1; width: min(340px, calc(100vw - 28px)); }
+  .gcp__punti { position: static; justify-content: center; align-items: center; height: 46px; margin: -74px auto 28px; transform: none; }
+}
+
+/* la scheda: le stesse regole della scheda del profilo, con le variabili del tema di chi è */
+.gcp-card { --banner-h: 120px; --avatar: 92px; position: relative; outline: none; animation: gcp-entra .5s var(--gc-molla) both; }
+.gcp-card.entra-dx { animation-name: gcp-dx; }
+.gcp-card.entra-sx { animation-name: gcp-sx; }
+@keyframes gcp-entra { from { opacity: 0; transform: translateY(26px) scale(.94); } }
+@keyframes gcp-dx { from { opacity: 0; transform: translateX(60px) rotate(3deg); } }
+@keyframes gcp-sx { from { opacity: 0; transform: translateX(-60px) rotate(-3deg); } }
+.gcp-card[data-tema=chiaro] {
+  --ov: rgba(255, 255, 255, .8); --text-base: #2e3035; --muted-base: #555861;
+  --text: color-mix(in oklab, var(--text-base) 76%, var(--tint)); --muted: color-mix(in oklab, var(--muted-base) 78%, var(--tint)); --faint: color-mix(in oklab, var(--muted) 78%, transparent);
+  --box: rgba(255, 255, 255, .45); --box-2: rgba(255, 255, 255, .72); --box-3: rgba(255, 255, 255, .92); --line: color-mix(in srgb, var(--tint) 14%, transparent);
+  --pill: rgba(255, 255, 255, .5); --pill-line: rgba(47, 49, 54, .2);
+  --btn-h: color-mix(in srgb, var(--btn) 90%, #fff); --btn-a: color-mix(in srgb, var(--btn) 80%, #fff); --menu: #fdfcff; color-scheme: light;
+}
+.gcp-card[data-tema=scuro] {
+  --ov: rgba(0, 0, 0, .6); --text-base: #f4f5f7; --muted-base: #c9ccd3;
+  --text: color-mix(in oklab, var(--text-base) 88%, var(--tint)); --muted: color-mix(in oklab, var(--muted-base) 84%, var(--tint)); --faint: color-mix(in oklab, var(--muted) 78%, transparent);
+  --box: rgba(0, 0, 0, .34); --box-2: rgba(255, 255, 255, .08); --box-3: rgba(255, 255, 255, .16); --line: rgba(255, 255, 255, .12);
+  --pill: rgba(47, 49, 54, .5); --pill-line: rgba(255, 255, 255, .2);
+  --btn-h: color-mix(in srgb, var(--btn) 90%, #000); --btn-a: color-mix(in srgb, var(--btn) 80%, #000); --menu: #17151b; color-scheme: dark;
+}
+/* senza tema, i colori di Discord: il fondo pieno e il tasto blurple */
+.gcp-card--neutro[data-tema=scuro] { --ov: transparent; --p: #111214; --a: #111214; --ring: #111214; --btn: #5865f2; --btn-h: #4752c4; --btn-a: #3c45a5; --text: #f2f3f5; --muted: #b5bac1; --box: rgba(255, 255, 255, .045); --box-2: rgba(255, 255, 255, .08); --box-3: rgba(255, 255, 255, .14); --pill: rgba(47, 49, 54, .6); --pill-line: rgba(255, 255, 255, .16); }
+.gcp-card--neutro[data-tema=chiaro] { --ov: transparent; --p: #ffffff; --a: #ffffff; --ring: #ffffff; --btn: #5865f2; --btn-h: #4752c4; --btn-a: #3c45a5; --text: #313338; --muted: #5c5e66; --box: #f2f3f5; --box-2: #e8e9ec; --box-3: #dfe1e5; --pill: #f2f3f5; --pill-line: rgba(47, 49, 54, .16); }
+.gcp-card__tilt { position: relative; border-radius: 18px; transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .55s var(--gc-molla); }
+.gcp-card.is-sopra .gcp-card__tilt { transition: transform .08s linear; }
+.gcp-in { color: var(--text); box-shadow: 0 0 0 1px rgba(255, 255, 255, .08), 0 34px 80px -24px rgba(0, 0, 0, .85), 0 0 60px -10px color-mix(in srgb, var(--a) 45%, transparent); }
+.gcp-banner { display: block; width: 100%; background: var(--banner-c); }
+.gcp-card .card__body { padding-bottom: 18px; }
+.gcp-card .dname { color: var(--text); }
+.gcp-card .avatar { transition: transform .2s var(--gc-molla); }
+.gcp-card .avatar:hover { transform: scale(1.05) rotate(-2deg); }
+.gcp-card .avatar.is-boop { animation: gcp-boop .65s var(--gc-molla); }
+@keyframes gcp-boop { 0% { transform: scale(1); } 28% { transform: scale(.86) rotate(-7deg); } 60% { transform: scale(1.12) rotate(4deg); } 100% { transform: scale(1); } }
+.gcp-luce { position: absolute; inset: 0; z-index: 6; border-radius: 18px; pointer-events: none; background: radial-gradient(circle at var(--mx, 50%) var(--my, 0%), rgba(255, 255, 255, .26), rgba(255, 255, 255, 0) 46%); mix-blend-mode: soft-light; opacity: 0; transition: opacity .3s; }
+.gcp-card.is-sopra .gcp-luce { opacity: 1; }
+/* i badge col fumetto di Discord */
+.gcp-badges a, .gcp-badges span { position: relative; outline-offset: 1px; }
+.gcp-badges [data-tip]::after { content: attr(data-tip); position: absolute; left: 50%; bottom: calc(100% + 8px); z-index: 9; width: max-content; max-width: 220px; padding: 6px 9px; border-radius: 7px; background: #111214; color: #dbdee1; font: 600 12px/1.3 var(--font-sans); text-align: center; white-space: normal; box-shadow: 0 8px 18px rgba(0, 0, 0, .4); opacity: 0; pointer-events: none; transform: translate(-50%, 4px); transition: opacity .12s, transform .12s; }
+.gcp-badges [data-tip]:hover::after, .gcp-badges [data-tip]:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
+.gcp-badges > :first-child::after { left: 0; transform: translate(-4px, 4px); }
+.gcp-badges > :first-child:hover::after, .gcp-badges > :first-child:focus-visible::after { transform: translate(-4px, 0); }
+.gcp-puntini { letter-spacing: .1em; }
+/* il cartellino del podcast, in fondo alla scheda */
+.gcp-cast { display: flex; flex-direction: column; gap: 5px; border: 2px solid #0b090e; background: linear-gradient(120deg, rgba(157, 0, 255, .92), rgba(11, 9, 14, .92) 78%); color: #fff; }
+.gcp-cast__logo { font: 700 23px/1 "Pricedown", var(--font-headline); color: var(--gc-lime); text-shadow: 0 2px 0 #6a00ad, 0 3px 0 #3d0066; letter-spacing: .01em; }
+.gcp-cast__ruolo { font: 700 12px/1.35 var(--font-sans); }
+
+@media (prefers-reduced-motion: reduce) {
+  .gc *, .gc *::before, .gc *::after, .gcp *, .gcp *::before, .gcp *::after { animation: none !important; transition: none !important; }
+  .gc-eq i { transform: scaleY(var(--h)); }
+  .gc__lumaca { display: none; }
+}

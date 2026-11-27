@@ -668,26 +668,32 @@ const makeAutoIO = () => new IntersectionObserver((es) => { for (const e of es) 
 // ─── le schede a destra ──────────────────────────────────────────────────────
 const TABS = ['board', 'community', 'projects', 'chat', 'activity', 'social', 'studio']
 const SLUG = { board: 'bacheca', community: 'community', projects: 'progetti', chat: 'chat', activity: 'attivita', social: 'social', studio: 'studio' }
-// il banner in bacheca: Giugnoh's Cast e i due server, con il tema del profilo
-const COMMUNITY_COPY = {
-  it: {
-    kicker: "Giugnoh's Cast · community",
-    title1: 'Il podcast e le clip,',
-    title2: 'in due server.',
-    text: 'OLLARE e SOLLARY: i numeri pubblici della community, senza bot e senza nomi. Il podcast e le clip li registro io, in tutti e due.',
-    cta: 'Apri la community',
-    noNames: 'membri tracciati',
-  },
-  en: {
-    kicker: "Giugnoh's Cast · community",
-    title1: 'The podcast and the clips,',
-    title2: 'across two servers.',
-    text: 'OLLARE and SOLLARY: the community’s public numbers, no bots and no names. I record the podcast and the clips in both.',
-    cta: 'Open the community',
-    noNames: 'members tracked',
-  },
+// (27.11) pzkko come redattore di Giugnoh's Cast: la scheda del profilo negli stessi termini di
+// /media/cast/redattori.json, così podcast.js la disegna come quelle degli altri (coi valori fissi e quelli dal vivo)
+function mioRedattore() {
+  const u = presence?.discord_user, p = profile
+  const ok = (h) => typeof h === 'string' && /^[a-z0-9_]+$/i.test(h)
+  const av = u?.avatar ?? p.avatar
+  const deco = u && !fisso('decoration') ? u.avatar_decoration_data?.asset : p.decoration
+  const g = u?.primary_guild?.identity_enabled ? { tag: u.primary_guild.tag, id: u.primary_guild.identity_guild_id, badge: u.primary_guild.badge } : (u ? null : p.guild)
+  return {
+    id: ID, tuo: true, username: p.username, nome: p.displayName, pronomi: p.pronouns || '', bio: p.bio || '',
+    membroDa: sinceDate().toISOString(), tema: p.theme, coloreBanner: p.bannerColor,
+    stileNome: u?.display_name_styles ?? p.nameStyle,
+    gilda: g?.tag ? { tag: g.tag, stemma: ok(g.badge) && /^\d+$/.test(g.id) ? `${CDN}/clan-badges/${g.id}/${g.badge}.png?size=32` : '' } : null,
+    badge: p.badges.filter((b) => ok(b.icon)).map((b) => ({ id: b.id, testo: b.description, icona: `${CDN}/badge-icons/${b.icon}.png`, link: b.link })),
+    collegamenti: p.connections,
+    foto: {
+      avatar: (fisso('avatar') && p.avatarSrc) || (ok(av) ? `${CDN}/avatars/${ID}/${av}.webp?size=256` : '/me.png'),
+      banner: fisso('banner') && p.bannerSrc ? p.bannerSrc : ok(p.banner) ? `${CDN}/banners/${ID}/${p.banner}.webp?size=600` : '',
+      bannerAnim: !fisso('banner') && ok(p.banner) && p.banner.startsWith('a_') ? `${CDN}/banners/${ID}/${p.banner}.webp?size=600&animated=true` : '',
+      deco: ok(deco) ? `${CDN}/avatar-decoration-presets/${deco}.png?size=240&passthrough=false` : '',
+      decoAnim: ok(deco) && deco.startsWith('a_') ? `${CDN}/avatar-decoration-presets/${deco}.webp?size=240&animated=true` : '',
+    },
+    effetto: p.effectSku ? collectibles[p.effectSku] || null : null,
+    stato: presence?.discord_status || 'offline',
+  }
 }
-const communityCopy = () => COMMUNITY_COPY[lang] || COMMUNITY_COPY.en
 let activeTab = 'board', filter = 'all', toolFilter = null
 function renderTabs() {
   $('#tabs').innerHTML = TABS.map((k) => `<button class="tab" role="tab" id="tab-${k}" aria-controls="panel-${k}" aria-selected="${k === activeTab}" tabindex="${k === activeTab ? 0 : -1}" data-tab="${k}">${esc(tabLabel(k))}${k === 'projects' ? `<span class="tab__n">${PROJECTS.length}</span>` : ''}</button>`).join('') + '<span class="tabs__ink" aria-hidden="true"></span>'
@@ -730,26 +736,13 @@ $('#tabs').addEventListener('keydown', (e) => {
 })
 
 function renderBoard() {
-  const u = ui(), cc = communityCopy()
+  const u = ui()
   const feat = PROJECTS.find((p) => p.featured && MEDIA[p.key]) || PROJECTS.find((p) => MEDIA[p.key]) || PROJECTS[0], tx = projText(feat.key)
   const others = PROJECTS.filter((p) => p !== feat)
   const root = $('#panel-board')
+  // (27.11) in cima il podcast, Giugnoh's Cast: il palco lo disegna podcast.js (col suo podcast.css)
   root.innerHTML = `<div class="grid2">
-    <section class="cm-banner cm-banner--home span2 rise" style="--i:0" aria-label="${esc(cc.kicker)}">
-      <img class="cm-banner__art" src="/assets/community/hero.svg" alt="" width="1200" height="760" loading="lazy" aria-hidden="true">
-      <span class="cm-banner__shade" aria-hidden="true"></span>
-      <div class="cm-banner__body">
-        <span class="cm-kicker"><i></i>${esc(cc.kicker)}</span>
-        <h2>${esc(cc.title1)}<br>${esc(cc.title2)}</h2>
-        <p>${esc(cc.text)}</p>
-        <div class="cm-banner__actions">
-          <a class="btn btn--msg" href="#community" data-goto="community">${esc(cc.cta)} →</a>
-          <a class="btn btn--ghost" href="https://discord.gg/ollare" target="_blank" rel="noopener noreferrer">OLLARE ${I.ext}</a>
-          <a class="btn btn--ghost" href="https://discord.gg/sollary" target="_blank" rel="noopener noreferrer">SOLLARY ${I.ext}</a>
-        </div>
-      </div>
-      <span class="cm-banner__badge"><b>0</b>${esc(cc.noNames)}</span>
-    </section>
+    <section class="span2 rise" style="--i:0" id="cast-card" aria-label="Giugnoh's Cast"></section>
     <article class="hero span2 rise">
       ${feat.key === 'zero' ? '<div class="hero__media hero__zero" data-zero-slot></div>' : `<button type="button" class="hero__media media" data-open="${feat.key}" data-auto="1" aria-label="${esc(`${u.details}: ${feat.title}`)}">${mediaHtml(feat, { eager: true })}</button>`}
       <div class="hero__body">
@@ -778,6 +771,9 @@ function renderBoard() {
   </div>`
   $('[data-zero-slot]', root)?.append(zeroButton())
   wireMedia(root)
+  const cast = $('#cast-card', root)
+  if (cast) import('./podcast.js').then((m) => { if (cast.isConnected) m.monta(cast, { lang, locale: locale(), mio: mioRedattore, ascolta: (f) => { liveListeners.add(f); return () => liveListeners.delete(f) }, themeVars, statusSvg, connRow, copia: copy, stati: t().status, vai: (k) => showTab(k, { focus: true }), heavy, reduced, canHover, I }) })
+    .catch((e) => console.error(e))
   // la zona «da provare» (comportamento in provare.js): le passiamo i pezzi che le servono
   provare.monta($('#annunci', root), { APPS, provate, provata, isNew, appDi, seme, flyerHtml, tesseraHtml, spot, esc, reduced, canHover, heavy, occupato, attivo: () => activeTab === 'board', I })
   const nw = $('#now-widget', root)
@@ -860,7 +856,7 @@ function renderCommunity() {
   const root = $('#panel-community')
   root.innerHTML = `<div class="cm-tab"><div class="widget"><p class="cm-loading">${esc(cap({ it: 'Carico i numeri…', en: 'Loading the numbers…' }))}</p></div></div>`
   import('./community-tab.js')
-    .then((m) => m.monta(root, { lang }))
+    .then((m) => m.monta(root, { lang, vai: (k) => showTab(k) }))
     .catch((e) => {
       communityMounted = false
       communityLang = null

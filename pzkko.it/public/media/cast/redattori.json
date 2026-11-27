@@ -1,0 +1,124 @@
+{
+ "preso": "2026-11-27T02:43:12Z",
+ "redattori": [
+  {
+   "id": "793600603548418061",
+   "username": "_sericco_",
+   "nome": "「ＳＥＲＩＣ」",
+   "pronomi": "",
+   "bio": ". \n. \n. \n.",
+   "membroDa": "2020-12-29T22:05:28.272000Z",
+   "tema": [
+    "#000000",
+    "#ff00b6"
+   ],
+   "coloreBanner": "#000000",
+   "stileNome": {
+    "font_id": 17,
+    "effect_id": 1,
+    "colors": [
+     14287177
+    ]
+   },
+   "decorazione": {
+    "nome": "Hex"
+   },
+   "gilda": {
+    "tag": "LEAN",
+    "id": "1571451216893050891",
+    "stemma": "/media/cast/badge/tag-04cee49fbcaa69a71206ccb637470e72.png"
+   },
+   "badge": [
+    {
+     "id": "premium",
+     "testo": "Abbonato fin dal giorno 28/10/26",
+     "icona": "/media/cast/badge/7294f50817c5fe9fd98631d230ac2e5d.png",
+     "link": "https://discord.com/settings/premium"
+    },
+    {
+     "id": "guild_booster_lvl1",
+     "testo": "Potenziando il server dal 14/11/26",
+     "icona": "/media/cast/badge/51040c70d4f20a921ad6674ff86fc95c.png",
+     "link": "https://discord.com/settings/guild-boosting"
+    },
+    {
+     "id": "gifting",
+     "testo": "Regali: Luminare",
+     "icona": "/media/cast/badge/beddfe5a71fba596694521e96130fac6.png"
+    },
+    {
+     "id": "streaming",
+     "testo": "Streaming",
+     "icona": "/media/cast/badge/046ddc05551d3b91d269460956d81188.png"
+    },
+    {
+     "id": "account_age",
+     "testo": "Età account",
+     "icona": "/media/cast/badge/c2ff7d8d6285305f969be81c3c92dd78.png"
+    },
+    {
+     "id": "hypesquad_house_2",
+     "testo": "HypeSquad Brilliance",
+     "icona": "/media/cast/badge/011940fd013da3f7fb926e4a1cd2e618.png"
+    },
+    {
+     "id": "legacy_username",
+     "testo": "Prima si chiamava 「ＳＥＲＩＣ」#6345",
+     "icona": "/media/cast/badge/6de6d34650760ba5551a79732e98ed60.png"
+    }
+   ],
+   "collegamenti": [
+    {
+     "type": "twitch",
+     "name": "ser_icc",
+     "id": "978601065",
+     "verified": true
+    }
+   ],
+   "foto": {
+    "avatar": "/media/cast/793600603548418061/avatar.webp",
+    "banner": "/media/cast/793600603548418061/banner.webp",
+    "bannerAnim": "/media/cast/793600603548418061/banner-anim.webp",
+    "deco": "/media/cast/793600603548418061/deco.png",
+    "decoAnim": "/media/cast/793600603548418061/deco-anim.webp"
+   }
+  },
+  {
+   "id": "542000754270011403",
+   "username": "paky.glory_",
+   "nome": "JE O METTO NCULO",
+   "pronomi": "ig: 5yne5the5ia",
+   "bio": "OFFICIAL",
+   "membroDa": "2019-02-04T15:17:29.705000Z",
+   "tema": null,
+   "coloreBanner": "#f70019",
+   "stileNome": {
+    "font_id": 17,
+    "effect_id": 1,
+    "colors": []
+   },
+   "decorazione": null,
+   "gilda": {
+    "tag": "LEAN",
+    "id": "1571451216893050891",
+    "stemma": "/media/cast/badge/tag-04cee49fbcaa69a71206ccb637470e72.png"
+   },
+   "badge": [
+    {
+     "id": "account_age",
+     "testo": "Età account",
+     "icona": "/media/cast/badge/e9cdafeb9234bd7262e733e6072d1739.png"
+    },
+    {
+     "id": "hypesquad_house_3",
+     "testo": "HypeSquad Balance",
+     "icona": "/media/cast/badge/3aa41de486fa12454c3761e8e223442e.png"
+    }
+   ],
+   "collegamenti": [],
+   "foto": {
+    "avatar": "/media/cast/542000754270011403/avatar.webp"
+   }
+  }
+ ]
+}

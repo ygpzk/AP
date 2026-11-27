@@ -909,7 +909,7 @@ dialog.tel.pieno .t-nav button { font: 600 15px/1 var(--font-sans); letter-spaci
 .acc__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
 .acc__pzk { margin-left: auto; padding-left: 8px; color: var(--muted); }
 
-/* ══ 24.11 · community: il banner in bacheca e la scheda #community, coi numeri pubblici di OLLARE e SOLLARY ══ */
+/* ══ 24.11 · community: la scheda #community, coi numeri pubblici di OLLARE (dal 27.11 in bacheca c'è il podcast: podcast.css) ══ */
 .cm-tab { display: grid; gap: 12px; min-width: 0; }
 
 /* il banner: scuro per leggere l'arte e il testo, come il banner di un server */
@@ -961,7 +961,6 @@ dialog.tel.pieno .t-nav button { font: 600 15px/1 var(--font-sans); letter-spaci
 [data-theme=dark] .cm-server__nums b { color: var(--p); }
 .cm-track { height: 7px; border-radius: 99px; overflow: hidden; background: var(--line); }
 .cm-track i { display: block; width: var(--cm-p, 0%); height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--p), var(--a)); transition: width .55s cubic-bezier(.2, .8, .2, 1); }
-.cm-server[data-cm-server=sollary] .cm-track i { background: linear-gradient(90deg, var(--a), var(--p)); }
 .cm-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 12px; }
 .cm-fact { min-width: 0; border: 1px solid var(--line); border-radius: 8px; background: var(--box-2); padding: 6px 7px; }
 .cm-fact span { display: block; color: var(--muted); font: 700 7.5px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; }
@@ -1006,7 +1005,6 @@ dialog.tel.pieno .t-nav button { font: 600 15px/1 var(--font-sans); letter-spaci
 .cm-loading::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--p); animation: livepulse 2s infinite; flex: 0 0 auto; }
 
 @media (min-width: 680px) {
-  .cm-servers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cm-compare { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cm-method { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

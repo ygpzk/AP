@@ -36,7 +36,7 @@ const CATALOGO = [
   { k: 'throw', t: 'pzk', f: 'shrik', w: 2.1, c: 't', nuvola: 1 },
   { k: 'throw', t: 'PZKKO', f: 'sakura', w: 2.6, c: 't' },
   { k: 'pezzo', t: 'pzkko', f: 'bungee', w: 2.7, c: 't', nuvola: 1 },
-  { k: 'pezzo', t: 'SOLLARY', f: 'rubik', w: 2.5, c: 't' },
+  { k: 'pezzo', t: 'OLLARE', f: 'rubik', w: 2.5, c: 't' },
   { k: 'pezzo', t: 'ygpzk', f: 'price', w: 2.2, c: 't', nuvola: 1 },
   { k: 'tag', t: 'pzkko', f: 'salt', w: 1.6, c: 't', deco: 'corona' },
   { k: 'tag', t: 'pzk', f: 'marker', w: 1.1, c: 't', deco: 'stella' },

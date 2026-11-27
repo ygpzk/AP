@@ -3,7 +3,7 @@
 // zona abitata [lat, lng, raggio in km (30 se manca)]: il punto vero si pesca a caso lì intorno, su una strada asfaltata
 // (punti.js), quindi non è mai la città, e mai lo stesso posto. Vicino ai confini i raggi sono corti, e punti.js chiede
 // comunque in che stato è caduto il punto.
-// AMICI: i dischi da 10 km degli amici di Discord, coi nomi che hanno su Sollary. Niente altro su di loro.
+// AMICI: i dischi da 10 km degli amici di Discord, coi nomi che hanno su Discord. Niente altro su di loro.
 
 export const PAESI = {
   // Europa
