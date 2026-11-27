@@ -1,0 +1,63 @@
+/* la vignetta «cartolina» dello Studio: solo le sue classi (.lab-cartolina* e .cart-* dentro lo SVG), sotto #panel-studio
+   (tranne .lab-pip*, che vale anche nella finestra Picture-in-Picture). Si carica da studio.css. Keyframe: cart-*. */
+/* 05 · la cartolina: una cartolina vera, appoggiata sul foglio e fermata col nastro */
+#panel-studio .lab-cartolina {
+  --n: -4deg;
+  padding: 0; background: #f1e6cd; rotate: .9deg;
+  box-shadow: 0 1px 1px rgba(40, 30, 10, .18), 3px 14px 18px -10px rgba(40, 30, 10, .55);
+  transition: rotate .3s cubic-bezier(.2, 1.3, .4, 1), translate .3s cubic-bezier(.2, 1.3, .4, 1), box-shadow .3s;
+}
+/* un secondo pezzo di nastro, sull'angolo in basso a sinistra (sul muretto, dove non copre niente) */
+#panel-studio .lab-cartolina::before {
+  content: ""; position: absolute; z-index: 3; left: -14px; bottom: 6px; width: 54px; height: 16px;
+  background: var(--pzk-nastro); clip-path: var(--pzk-code); rotate: 38deg; pointer-events: none;
+}
+@media (hover: hover) {
+  #panel-studio .lab-cartolina:hover { rotate: 0deg; translate: 0 -2px; box-shadow: 0 1px 1px rgba(40, 30, 10, .18), 4px 20px 24px -12px rgba(40, 30, 10, .6); }
+}
+#panel-studio .lab-cartolina svg { display: block; width: 100%; height: auto; border-radius: 0; }
+
+/* le parti che si toccano (anteprima soltanto) */
+#panel-studio .lab-cartolina .cart-tocca { cursor: pointer; outline: none; }
+#panel-studio .lab-cartolina .cart-tocca:focus-visible { outline: 3px solid var(--pzk-penna); outline-offset: 4px; }
+
+/* il francobollo si alza un po' al passaggio */
+#panel-studio .lab-cartolina .cart-francobollo { transform-box: fill-box; transform-origin: 50% 0; transition: transform .25s cubic-bezier(.2, 1.4, .4, 1); }
+@media (hover: hover) { #panel-studio .lab-cartolina:hover .cart-francobollo { transform: rotate(-4deg) translateY(-3px); } }
+
+/* il timbro postale arriva battuto, e si ribatte al clic */
+#panel-studio .lab-cartolina .cart-timbro { transform-box: fill-box; transform-origin: 50% 50%; animation: cart-batti .55s cubic-bezier(.3, 1.6, .5, 1) .35s both; }
+#panel-studio .lab-cartolina .cart-timbro.is-batti { animation: cart-ribatti .45s cubic-bezier(.3, 1.6, .5, 1) both; }
+#panel-studio .lab-cartolina .cart-gomma { transform-box: fill-box; transform-origin: 50% 50%; animation: cart-batti .5s cubic-bezier(.3, 1.6, .5, 1) .8s both; }
+@keyframes cart-batti { 0% { opacity: 0; transform: scale(1.5) rotate(8deg); } 55% { opacity: .9; transform: scale(.94) rotate(-1deg); } 100% { opacity: .8; transform: none; } }
+@keyframes cart-ribatti { 0% { transform: scale(1); } 30% { transform: scale(1.18) rotate(6deg); opacity: .5; } 65% { transform: scale(.95); opacity: .9; } 100% { transform: none; opacity: .8; } }
+
+/* la chiocciola: antenne che ondeggiano, occhi che sbattono, note che salgono, zeta che volano, caffè che fuma */
+#panel-studio .lab-cartolina .cart-antenne { transform-box: fill-box; transform-origin: 50% 100%; animation: cart-antenne 2.6s ease-in-out infinite; }
+#panel-studio .lab-cartolina .cart-occhi { transform-box: fill-box; transform-origin: 50% 50%; animation: cart-occhi 4.2s ease-in-out infinite; }
+@keyframes cart-antenne { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(5deg); } }
+@keyframes cart-occhi { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.15); } }
+#panel-studio .lab-cartolina .cart-corpo { transform-box: fill-box; transform-origin: 50% 100%; animation: cart-respiro 3.2s ease-in-out infinite; }
+@keyframes cart-respiro { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.015, .985); } }
+#panel-studio .lab-cartolina .cart-nota { transform-box: fill-box; transform-origin: 50% 50%; animation: cart-nota 2.4s ease-in-out infinite; }
+#panel-studio .lab-cartolina g > g:nth-child(2) > .cart-nota { animation-delay: -.8s; }
+#panel-studio .lab-cartolina g > g:nth-child(3) > .cart-nota { animation-delay: -1.6s; }
+@keyframes cart-nota { 0% { opacity: 0; transform: translate(-6px, 10px) rotate(-10deg); } 25% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; transform: translate(8px, -16px) rotate(12deg); } }
+#panel-studio .lab-cartolina .cart-zzz text { animation: cart-zzz 3s ease-in-out infinite; }
+#panel-studio .lab-cartolina .cart-zzz text:nth-child(2) { animation-delay: .5s; }
+#panel-studio .lab-cartolina .cart-zzz text:nth-child(3) { animation-delay: 1s; }
+@keyframes cart-zzz { 0%, 100% { opacity: .25; translate: 0 4px; } 50% { opacity: 1; translate: 3px -4px; } }
+#panel-studio .lab-cartolina .cart-fumo path { animation: cart-fumo 2.2s ease-in-out infinite; }
+#panel-studio .lab-cartolina .cart-fumo path + path { animation-delay: -1.1s; }
+@keyframes cart-fumo { 0% { opacity: 0; translate: 0 6px; } 40% { opacity: .8; } 100% { opacity: 0; translate: 0 -8px; } }
+
+/* il fumetto della chiocciola */
+#panel-studio .lab-cartolina .cart-fumetto { pointer-events: none; }
+#panel-studio .lab-cartolina .cart-fumetto__in { opacity: 0; transform-box: fill-box; transform-origin: 15% 100%; transform: scale(.6); transition: opacity .18s, transform .3s cubic-bezier(.2, 1.6, .4, 1); }
+#panel-studio .lab-cartolina .cart-fumetto.is-on .cart-fumetto__in { opacity: 1; transform: none; }
+
+/* ferma quando non si vede; niente movimento per chi l'ha chiesto */
+#panel-studio .lab-cartolina[data-fermo="1"] * { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) {
+  #panel-studio .lab-cartolina, #panel-studio .lab-cartolina * { animation: none !important; transition: none !important; }
+}

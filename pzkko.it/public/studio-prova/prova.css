@@ -1,0 +1,6 @@
+/* la pagina di prova dello Studio: solo per fotografare le vignette, non è nel sito */
+.sprova { margin: 0; padding: 18px; background: var(--bg, #f2efe6); }
+.sprova #panel-studio { display: block !important; }
+.sprova[data-solo] #panel-studio .lab__grid { grid-template-columns: repeat(auto-fill, var(--w, 560px)); justify-content: start; }
+.sprova[data-solo] #panel-studio .lab__card:not([data-solo-si]) { display: none; }
+.sprova[data-testa="0"] #panel-studio .lab__testa, .sprova[data-testa="0"] #panel-studio .lab__frontiera { display: none; }

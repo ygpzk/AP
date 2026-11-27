@@ -1,0 +1,195 @@
+/* la vignetta «stanza» dello Studio: solo le sue classi (.lab-stanza* e i pezzi del disegno .stz-*), sotto #panel-studio
+   (tranne .lab-pip*, che vale anche nella finestra Picture-in-Picture). Si carica da studio.css.
+   07 · la stanza: una polaroid attaccata col nastro. Dentro, la cameretta-studio della chiocciola: la luce è vera
+   (il buio copre tutto tranne dove c'è luce: la finestra, lo schermo, la lampada), gli stati si vedono da lontano. */
+
+/* ── la polaroid ─────────────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-stanza {
+  position: relative; padding: 8px 8px 2px; background: #fffdf6; border-radius: 1px; rotate: -.6deg;
+  box-shadow: 0 1px 1px rgba(40, 30, 10, .14), 0 10px 18px -10px rgba(40, 30, 10, .55);
+}
+#panel-studio .lab-stanza::before {
+  content: ""; position: absolute; z-index: 3; top: -9px; left: 50%; width: 74px; height: 19px; translate: -50% 0; rotate: 2.5deg;
+  background: var(--pzk-nastro); clip-path: var(--pzk-code); pointer-events: none;
+}
+#panel-studio .lab-stanza__foto { position: relative; overflow: hidden; background: #0b1030; outline: 1px solid rgba(22, 22, 22, .35); }
+#panel-studio .lab-stanza__foto::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(120% 95% at 50% 45%, transparent 58%, rgba(20, 10, 0, .38)), var(--pzk-grana);
+  background-size: auto, 180px 90px; mix-blend-mode: multiply; opacity: .4;
+}
+#panel-studio .lab-stanza__svg { display: block; width: 100%; height: auto; }
+#panel-studio .lab-stanza__didascalia { margin: 6px 4px 3px; min-height: 1.3em; color: var(--pzk-ink); font: 400 13.5px/1.3 var(--pzk-marker); overflow-wrap: anywhere; }
+
+/* sotto la foto: il tasto per bussare e il post-it con la battuta */
+#panel-studio .lab-stanza__sotto { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 10px 14px; margin-top: 12px; }
+#panel-studio .lab-stanza__bussa { flex: 0 0 auto; margin-top: 4px; }
+#panel-studio .lab-stanza__battuta {
+  position: relative; flex: 1 1 170px; max-width: 290px; min-height: 2.6em; margin: 0 2px 0 auto; padding: 12px 12px 11px;
+  background: linear-gradient(#fff6a0, #ffe95e); color: var(--pzk-ink); font: 400 14px/1.25 var(--pzk-marker); rotate: 2.2deg;
+  box-shadow: 0 1px 1px rgba(40, 30, 10, .18), 2px 9px 12px -8px rgba(40, 30, 10, .55); text-wrap: balance;
+}
+#panel-studio .lab-stanza__battuta::before {
+  content: ""; position: absolute; top: -8px; left: 38%; width: 46px; height: 15px; rotate: -4deg;
+  background: var(--pzk-nastro); clip-path: var(--pzk-code);
+}
+#panel-studio .lab-stanza__battuta:empty { display: none; }
+
+/* il fumetto quando si bussa */
+#panel-studio .lab-stanza__fumetto {
+  position: absolute; z-index: 2; max-width: 46%; margin: 0; padding: 6px 10px 7px; display: none;
+  background: #fffdf6; color: var(--pzk-ink); border: 2px solid var(--pzk-ink); border-radius: 14px 14px 14px 4px;
+  font: 400 13px/1.2 var(--pzk-marker); box-shadow: 2px 3px 0 rgba(0, 0, 0, .35);
+}
+#panel-studio .lab-stanza__fumetto::after {
+  content: ""; position: absolute; bottom: -10px; left: 14px; width: 14px; height: 10px; background: var(--pzk-ink);
+  clip-path: polygon(0 0, 100% 0, 10% 100%);
+}
+#panel-studio .lab-stanza[data-fumetto] .lab-stanza__fumetto { display: block; animation: stanza-fumetto .35s cubic-bezier(.2, 1.5, .4, 1) both; }
+#panel-studio .lab-stanza[data-fumetto="sedia"] .lab-stanza__fumetto { left: 33%; top: 25%; }
+#panel-studio .lab-stanza[data-fumetto="letto"] .lab-stanza__fumetto { left: 7%; top: 27%; }
+
+/* ── i caratteri del disegno ─────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .stz-t:not([fill]) { fill: var(--pzk-ink); }
+#panel-studio .stz-t--marker { font-family: var(--pzk-marker); }
+#panel-studio .stz-t--mac { font-family: var(--pzk-mac); }
+#panel-studio .stz-t--fa { font-family: var(--pzk-fa); letter-spacing: .02em; }
+#panel-studio .lab-stanza__piu { fill: #fffdf6; font-family: var(--pzk-fa); }
+#panel-studio .stz-badge { display: none; }
+#panel-studio .lab-stanza[data-troppe="true"] .stz-badge { display: inline; }
+#panel-studio .stz-lumaca { cursor: pointer; }
+
+/* ── la luce ─────────────────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-stanza__buio { fill: #0a0e2c; opacity: 0; transition: opacity .9s ease; }
+#panel-studio .lab-stanza[data-notte="true"] .lab-stanza__buio { opacity: .74; }
+#panel-studio .lab-stanza[data-notte="false"][data-online="false"] .lab-stanza__buio { opacity: .22; }
+#panel-studio :is(.stz-m-lampada, .stz-m-schermo, .stz-m-riverbero, .stz-m-lucine) { opacity: 0; transition: opacity .9s ease; }
+#panel-studio .lab-stanza[data-online="true"] :is(.stz-m-lampada, .stz-m-lucine) { opacity: 1; }
+#panel-studio .lab-stanza[data-schermo="on"] .stz-m-schermo { opacity: 1; }
+#panel-studio .lab-stanza[data-schermo="on"][data-online="true"] .stz-m-riverbero { opacity: .6; }
+
+#panel-studio :is(.lab-stanza__alone, .lab-stanza__cono, .lab-stanza__lucine, .lab-stanza__riverbero, .lab-stanza__raggio) { opacity: 0; transition: opacity .9s ease; }
+#panel-studio .lab-stanza[data-online="true"] .lab-stanza__alone { opacity: 1; animation: stanza-accendi 1.3s ease-out both; }
+#panel-studio .lab-stanza[data-online="true"] .lab-stanza__cono { opacity: .75; }
+#panel-studio .lab-stanza[data-online="true"][data-notte="false"] .lab-stanza__alone { opacity: .55; }
+#panel-studio .lab-stanza[data-online="true"] .lab-stanza__lucine { opacity: 1; }
+#panel-studio .lab-stanza[data-online="true"][data-schermo="on"][data-notte="true"] .lab-stanza__riverbero { opacity: 1; }
+#panel-studio .lab-stanza[data-notte="false"] .lab-stanza__raggio { opacity: .9; }
+#panel-studio .lab-stanza__luna { opacity: 0; transition: opacity .9s ease; }
+#panel-studio .lab-stanza[data-notte="true"] .lab-stanza__luna { opacity: 1; }
+#panel-studio .stz-lampadina { transition: fill .5s ease; }
+#panel-studio .lab-stanza[data-online="true"] .stz-lampadina { fill: #fff6c8; }
+
+/* ── la finestra ─────────────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio :is(.lab-stanza__giorno, .lab-stanza__notte, .stz-tetti__luci) { transition: opacity .9s ease; }
+#panel-studio .lab-stanza[data-notte="false"] :is(.lab-stanza__notte, .stz-tetti__luci) { opacity: 0; }
+#panel-studio .lab-stanza[data-notte="true"] .lab-stanza__giorno { opacity: 0; }
+#panel-studio .stz-tetti > path { transition: fill .9s ease, stroke .9s ease; }
+#panel-studio .lab-stanza[data-notte="true"] .stz-tetti > path:first-child { fill: #161c33; }
+#panel-studio .lab-stanza[data-notte="true"] .stz-tetti > path + path { stroke: #161c33; }
+#panel-studio .stz-nuvola { animation: stanza-nuvola 46s linear infinite alternate; }
+#panel-studio .stz-nuvola--2 { animation-duration: 34s; animation-direction: alternate-reverse; }
+#panel-studio .stz-stella { animation: stanza-brilla 3.2s ease-in-out infinite alternate; animation-delay: var(--d); }
+#panel-studio .stz-evento { opacity: 0; }
+#panel-studio .lab-stanza[data-evento="piccione"] .stz-evento--piccione { animation: stanza-piccione 2.6s cubic-bezier(.4, .1, .6, .9) both; }
+#panel-studio .lab-stanza[data-evento="stella"] .stz-evento--stella { animation: stanza-cadente 1.4s ease-in both; }
+
+/* ── lo schermo e le app ─────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-stanza__display { transition: opacity .6s ease; }
+#panel-studio .lab-stanza[data-schermo="off"] .lab-stanza__display { opacity: 0; }
+#panel-studio .stz-spento { opacity: 0; transition: opacity .6s ease; }
+#panel-studio .lab-stanza[data-schermo="off"] .stz-spento { opacity: 1; }
+#panel-studio .stz-app { transform-box: fill-box; transform-origin: 50% 50%; }
+#panel-studio .stz-app[data-on="false"] { opacity: .16; }
+#panel-studio .stz-app[data-on="false"] [data-app] { fill: none; stroke: #9fd3e0; stroke-dasharray: 2 2; }
+#panel-studio .stz-app[data-on="false"] :is(.stz-app__barra, .stz-app__dentro) { display: none; }
+#panel-studio .stz-app[data-on="true"] { animation: stanza-pop .45s cubic-bezier(.2, 1.6, .4, 1) backwards; animation-delay: var(--d); }
+#panel-studio .stz-cursore { animation: stanza-cursore 1s steps(1) infinite; }
+
+/* ── le casse e le note ──────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-stanza__onde { transition: opacity .5s ease; }
+#panel-studio .lab-stanza[data-music="false"] .lab-stanza__onde { opacity: 0; }
+#panel-studio .stz-woofer { transform-box: fill-box; transform-origin: 50% 50%; }
+#panel-studio .lab-stanza[data-music="true"] .stz-woofer { animation: stanza-woofer .26s ease-in-out infinite alternate; }
+#panel-studio .lab-stanza[data-music="true"] .stz-cassa { animation: stanza-trema .26s ease-in-out infinite alternate; }
+#panel-studio .lab-stanza[data-music="true"] .stz-cassa--2 { animation-delay: -.13s; }
+#panel-studio .stz-archi path { animation: stanza-arco .52s ease-out infinite alternate; }
+#panel-studio .stz-archi path:nth-child(2n) { animation-delay: .13s; }
+#panel-studio .stz-note use { transform-box: fill-box; transform-origin: 50% 50%; animation: stanza-nota 2.7s ease-out infinite; animation-delay: var(--d); }
+
+/* ── la chiocciola: alla scrivania se è online, nel letto se no ──────────────────────────────────────────────── */
+#panel-studio .lab-stanza[data-online="true"] .stz-lumaca--letto,
+#panel-studio .lab-stanza[data-online="false"] :is(.stz-lumaca--sedia, .stz-codice, .stz-pausa, .stz-vapore) { display: none; }
+#panel-studio .stz-lumaca { transform-box: fill-box; transform-origin: 50% 100%; }
+#panel-studio .stz-lumaca__corpo { transform-box: fill-box; transform-origin: 50% 100%; }
+#panel-studio .stz-cuffie, #panel-studio .stz-occhi--felici, #panel-studio .stz-palpebre, #panel-studio .stz-cartello, #panel-studio .stz-pausa { display: none; }
+#panel-studio .lab-stanza[data-music="true"] .stz-cuffie { display: inline; }
+#panel-studio .lab-stanza[data-music="true"] .stz-lumaca--sedia .stz-occhi--aperti { display: none; }
+#panel-studio .lab-stanza[data-music="true"] .stz-lumaca--sedia .stz-occhi--felici { display: inline; }
+#panel-studio .lab-stanza[data-stato="idle"] .stz-palpebre { display: inline; }
+#panel-studio .lab-stanza[data-stato="idle"] .stz-pausa { display: inline; }
+#panel-studio .lab-stanza[data-stato="dnd"] .stz-cartello { display: inline; }
+#panel-studio .lab-stanza[data-stato="idle"] .stz-codice { display: none; }
+/* lavora: legge lo schermo e batte sui tasti */
+#panel-studio .stz-lumaca--sedia .stz-lumaca__corpo { animation: stanza-scrive 1.6s ease-in-out infinite; }
+#panel-studio .stz-lumaca--sedia .stz-pupille { animation: stanza-legge 4s ease-in-out infinite; }
+/* balla */
+#panel-studio .lab-stanza[data-music="true"] .stz-lumaca--sedia .stz-lumaca__corpo { animation: stanza-balla .52s ease-in-out infinite alternate; }
+/* in pausa: respira piano */
+#panel-studio .lab-stanza[data-stato="idle"] .stz-lumaca--sedia .stz-lumaca__corpo { animation: stanza-respira 4.2s ease-in-out infinite; }
+#panel-studio .stz-pausa circle { animation: stanza-puntini 2.4s ease-in-out infinite; }
+#panel-studio .stz-pausa circle:nth-child(2) { animation-delay: .3s; }
+#panel-studio .stz-pausa circle:nth-child(3) { animation-delay: .6s; }
+/* dorme */
+#panel-studio .stz-lumaca--letto .stz-guscio { transform-box: fill-box; transform-origin: 50% 100%; animation: stanza-respira 4.2s ease-in-out infinite; }
+#panel-studio .stz-lumaca--letto .stz-cuffie { animation: none; }
+#panel-studio .stz-zzz { display: none; }
+#panel-studio .lab-stanza[data-online="false"] .stz-zzz { display: inline; }
+#panel-studio .stz-zzz text { animation: stanza-zzz 3.3s ease-out infinite; animation-delay: var(--d); }
+/* bussare: salta */
+#panel-studio .lab-stanza[data-salto="true"] .stz-lumaca { animation: stanza-salto .8s cubic-bezier(.3, 1.4, .5, 1); }
+
+/* le cose che si muovono da sole */
+#panel-studio .stz-ragnetto { animation: stanza-ragno 7s ease-in-out infinite; }
+#panel-studio .lab-stanza[data-music="true"] .stz-ragnetto { animation-duration: 1.04s; }
+#panel-studio .stz-vapore path { animation: stanza-vapore 2.6s ease-out infinite; }
+#panel-studio .stz-vapore path + path { animation-delay: 1.3s; }
+#panel-studio .stz-codice text { animation: stanza-codice 2.4s ease-out infinite; animation-delay: var(--d); }
+#panel-studio .lab-stanza__lucine > g { animation: stanza-lucina 2.4s ease-in-out infinite alternate; animation-delay: var(--d); }
+
+/* fermi quando la scheda non si vede */
+#panel-studio .lab-stanza[data-ferma="true"] *, #panel-studio .lab-stanza[data-ferma="true"] *::after { animation-play-state: paused !important; }
+
+@keyframes stanza-fumetto { from { opacity: 0; transform: translateY(6px) scale(.8); } to { opacity: 1; transform: none; } }
+@keyframes stanza-accendi { 0% { opacity: 0; } 30% { opacity: .7; } 45% { opacity: .35; } 100% { opacity: 1; } }
+@keyframes stanza-nuvola { from { transform: translateX(-26px); } to { transform: translateX(34px); } }
+@keyframes stanza-brilla { from { opacity: .25; } to { opacity: 1; } }
+@keyframes stanza-piccione { 0% { opacity: 1; transform: translate(124px, 96px) scale(.8); } 50% { transform: translate(184px, 78px) scale(1); } 100% { opacity: 1; transform: translate(248px, 86px) scale(.9); } }
+@keyframes stanza-cadente { 0% { opacity: 0; transform: translate(236px, 64px); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(156px, 96px); } }
+@keyframes stanza-pop { from { transform: scale(.4); } to { transform: none; } }
+@keyframes stanza-cursore { 50% { opacity: 0; } }
+@keyframes stanza-woofer { from { transform: scale(.94); } to { transform: scale(1.1); } }
+@keyframes stanza-trema { from { transform: translateY(0); } to { transform: translateY(-1px); } }
+@keyframes stanza-arco { from { opacity: .2; } to { opacity: 1; } }
+@keyframes stanza-nota {
+  0% { opacity: 0; transform: translate(0, 0) scale(.5) rotate(-12deg); }
+  15% { opacity: 1; }
+  60% { opacity: 1; transform: translate(calc(var(--dx) * .6), -36px) scale(1) rotate(10deg); }
+  100% { opacity: 0; transform: translate(var(--dx), -62px) scale(.9) rotate(-6deg); }
+}
+@keyframes stanza-scrive { 0%, 100% { transform: none; } 20% { transform: translateY(-1px) rotate(-1deg); } 40% { transform: none; } 60% { transform: translateY(-1px) rotate(-.6deg); } }
+@keyframes stanza-legge { 0%, 100% { transform: translate(0, 0); } 30% { transform: translate(1.4px, -.4px); } 60% { transform: translate(-.4px, .2px); } }
+@keyframes stanza-balla { from { transform: rotate(-5deg) translateY(0); } to { transform: rotate(5deg) translateY(-4px); } }
+@keyframes stanza-respira { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.035, 1.05); } }
+@keyframes stanza-puntini { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
+@keyframes stanza-zzz { 0% { opacity: 0; transform: translate(0, 6px) rotate(-10deg); } 20% { opacity: 1; } 100% { opacity: 0; transform: translate(-14px, -34px) rotate(8deg); } }
+@keyframes stanza-salto { 0%, 100% { transform: none; } 30% { transform: translateY(-16px) scale(.96, 1.06); } 55% { transform: translateY(0) scale(1.06, .92); } 75% { transform: translateY(-4px); } }
+@keyframes stanza-vapore { 0% { opacity: 0; transform: translateY(2px); } 30% { opacity: .8; } 100% { opacity: 0; transform: translateY(-8px); } }
+@keyframes stanza-codice { 0% { opacity: 0; transform: translateY(4px); } 25% { opacity: 1; } 100% { opacity: 0; transform: translateY(-26px); } }
+@keyframes stanza-ragno { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+@keyframes stanza-lucina { from { opacity: .62; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  #panel-studio .lab-stanza *, #panel-studio .lab-stanza *::after { animation: none !important; transition: none !important; }
+  #panel-studio .lab-stanza[data-fumetto] .lab-stanza__fumetto { animation: none; }
+}

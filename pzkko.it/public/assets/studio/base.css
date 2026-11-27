@@ -1,0 +1,92 @@
+/* -- lo Studio (26.11.2026), in stile pzk -------------------------------------------------------------------------
+   Dieci esperimenti veri, attaccati al muro come le zone della bacheca («da provare», «chi sono», «strumenti»):
+   ogni esperimento è un foglio col nastro dei tavoli (art/roulette/carta.webp allungata con border-image, come i popup),
+   appena storto; i titoli in Anton minuscolo, la voce a pennarello rosso, il resto a macchina da scrivere; canvas e SVG
+   sono foto e schermi attaccati sul foglio. Tasti, cursori, timbri e cartellini NON stanno qui: li dà il foglio comune
+   di tutte le app, /games/pzk-stile.css (importato qui sopra), così lo Studio è uguale alle app del profilo e alla
+   Frontiera. La carta resta carta anche col tema scuro: dentro i fogli l'inchiostro è sempre nero.
+   Tutto sta sotto #panel-studio: la finestra delle app del profilo (dialog.fg.lab) vive nello stesso documento e
+   non deve prendere niente da qui. Fanno eccezione le classi .lab-pip*, che servono anche alla finestra
+   Picture-in-Picture (un documento a sé, senza #panel-studio) e non esistono altrove. */
+
+/* i colori del muro per i canvas (api.tema() li legge da qui) e l'inchiostro dei fogli per i moduli che leggono
+   --text / --line / --muted (la costellazione) */
+#panel-studio .lab { --p: #b3121f; --a: #1446a0; display: grid; gap: 22px; }
+#panel-studio .lab__card, .lab-pip {
+  --text: #161616; --muted: #5a544c; --faint: #7a7266; --line: rgba(22, 22, 22, .2);
+  --box: #fffdf6; --box-2: #efe9da; --box-3: #fffdf6; --menu: #fffdf6; --ok: #23864a;
+}
+#panel-studio .lab > .lab__nota { margin: 8px 4px; color: var(--muted); font: 400 14px/1.3 var(--pzk-marker); }
+
+/* ── la testata: come i titoli delle zone in bacheca ──────────────────────────────────────────────────────────── */
+#panel-studio .lab__testa { display: grid; gap: 10px; margin: 0 4px 6px; padding: 2px 0 0; }
+#panel-studio .lab__h { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; }
+#panel-studio .lab__titolo { margin: 0; color: var(--text); font: 400 46px/1 var(--pzk-fa); letter-spacing: .005em; text-transform: lowercase; }
+#panel-studio .lab__voce { margin: 0; color: var(--pzk-rosso); font: 400 17px/1.2 var(--pzk-marker); transform: rotate(-1.5deg); transform-origin: 0 50%; }
+[data-theme=dark] #panel-studio .lab__voce { color: #ff6b70; }
+#panel-studio .lab__intro { max-width: 66ch; margin: 0; color: var(--text); font: 400 14px/1.45 var(--pzk-mac); }
+#panel-studio .lab__fine { margin: 0; color: var(--muted); font: 400 12px/1.45 var(--pzk-mac); }
+#panel-studio .lab__api { display: flex; flex-wrap: wrap; gap: 7px 8px; margin: 2px 0 0; padding: 0; list-style: none; }
+#panel-studio .lab__api li i { width: 8px; height: 8px; border-radius: 50%; background: var(--pzk-rosso); box-shadow: none; }
+#panel-studio .lab__api li[data-ok="true"] i { background: var(--pzk-verde); }
+
+/* ── i fogli ──────────────────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 46px 40px; align-items: start; padding: 26px 22px 18px; }
+#panel-studio .lab__card {
+  --nastro: 76px; --fuori: 26px; --r: -.5deg;
+  position: relative; isolation: isolate; display: flex; flex-direction: column; gap: 10px; min-width: 0;
+  padding: 16px 16px 14px; color: var(--pzk-ink); color-scheme: light;
+  rotate: var(--r); transition: rotate .25s cubic-bezier(.2, 1.3, .4, 1);
+}
+#panel-studio .lab__card::before {
+  content: ""; position: absolute; inset: calc(var(--fuori) * -1); z-index: -1; pointer-events: none; border: 0 solid transparent;
+  border-image: url(/art/roulette/carta.webp) 300 fill / var(--nastro) stretch;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3)) drop-shadow(0 14px 16px rgba(0, 0, 0, .26));
+}
+#panel-studio .lab__card:nth-child(2n) { --r: .55deg; }
+#panel-studio .lab__card:nth-child(3n) { --r: -.25deg; }
+#panel-studio .lab__card:nth-child(5n) { --r: .35deg; }
+@media (hover: hover) { #panel-studio .lab__card:hover { rotate: 0deg; } }
+#panel-studio .lab__card:focus-within { rotate: 0deg; }
+
+#panel-studio .lab__capo { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px 10px; min-width: 0; }
+#panel-studio .lab__n { flex: 0 0 auto; color: var(--pzk-rosso); font: 400 30px/.9 var(--pzk-fa); letter-spacing: .01em; transform: rotate(-5deg) translateY(1px); }
+#panel-studio .lab__capo h3 { flex: 1 1 150px; min-width: 0; margin: 1px 0 0; color: var(--pzk-ink); font: 400 26px/1 var(--pzk-fa); letter-spacing: .005em; text-transform: lowercase; overflow-wrap: break-word; }
+#panel-studio .lab__stato { flex: 0 1 auto; max-width: 100%; margin: 2px -4px 0 auto; overflow: hidden; text-overflow: ellipsis; font-size: 10px; transform: rotate(4deg); }
+#panel-studio .lab__descr { margin: 0; color: var(--pzk-testo); font: 400 13px/1.42 var(--pzk-mac); }
+#panel-studio .lab__corpo { min-width: 0; }
+#panel-studio .lab__tech { display: flex; flex-wrap: wrap; gap: 6px 7px; margin-top: auto; padding-top: 4px; }
+#panel-studio .lab__nota { margin: 9px 0 0; color: var(--pzk-matita); font: 400 11.5px/1.42 var(--pzk-mac); }
+#panel-studio .lab__errore { margin: 0; color: var(--pzk-rosso); font: 400 15px/1.3 var(--pzk-marker); }
+#panel-studio .lab__azioni { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; margin-top: 12px; }
+#panel-studio .lab__bottone[data-on="1"] { background: var(--pzk-rosso); }
+#panel-studio .lab__bottone--fantasma[data-on="1"] { background: var(--pzk-ink); color: var(--pzk-foglietto); }
+
+/* il ponte verso la Frontiera: un post-it in fondo */
+#panel-studio .lab__frontiera {
+  justify-self: start; max-width: 560px; margin: 8px 8px 6px; padding: 12px 14px 12px;
+  background: linear-gradient(175deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 40%), #fff1a1;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .1), 2px 10px 14px -9px rgba(0, 0, 0, .5);
+  color: #3b3208; font: 400 13px/1.45 var(--pzk-mac); transform: rotate(-.8deg); color-scheme: light;
+}
+#panel-studio .lab__frontiera b { font-weight: 400; background: var(--pzk-evidenzia); padding: 0 2px; }
+#panel-studio .lab__frontiera a { display: inline-block; margin-left: 4px; color: var(--pzk-penna); border-bottom: 2px solid currentColor; font: 400 15px/1.15 var(--pzk-marker); text-decoration: none; }
+
+/* ── le foto e gli schermi attaccati sul foglio ───────────────────────────────────────────────────────────────── */
+/* la cornice: bordo di carta bianca, ombra; il nastro (::before) dove c'è un contenitore che lo può portare */
+#panel-studio :is(.lab-quadro, .lab-cartolina, .lab-stanza, .lab-sole > svg, .lab-clip, .lab-cost__tela, .lab-radio__barre) { box-shadow: var(--pzk-ombra-schermo); }
+#panel-studio :is(.lab-cartolina, .lab-stanza, .lab-clip, .lab-quadro) { position: relative; }
+#panel-studio :is(.lab-cartolina, .lab-stanza, .lab-clip, .lab-quadro)::after {
+  content: ""; position: absolute; z-index: 3; left: 50%; top: -9px; width: 64px; height: 18px; margin-left: -32px;
+  background: var(--pzk-nastro); clip-path: var(--pzk-code); rotate: var(--n, -3deg); pointer-events: none;
+}
+
+
+@media (max-width: 760px) {
+  #panel-studio .lab__grid { grid-template-columns: minmax(0, 1fr); gap: 44px; padding: 24px 14px 14px; }
+  #panel-studio .lab__card { --nastro: 64px; --fuori: 22px; }
+  #panel-studio .lab__titolo { font-size: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #panel-studio .lab__card { transition: none; }
+}

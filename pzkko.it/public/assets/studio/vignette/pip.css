@@ -1,0 +1,356 @@
+/* la vignetta «pip» dello Studio: solo le sue classi (.lab-pip* e dintorni), sotto #panel-studio
+   (tranne .lab-pip*, che vale anche nella finestra Picture-in-Picture). Si carica da studio.css. */
+/* 01 · «adesso, sempre» (27.11): un biglietto del muro con la matrice, il tratteggio e le forbici. Dentro c'è un
+   tamagotchi di plastica arancione coi cristalli liquidi, dove vive la chiocciola: cambia umore con lo stato.
+   Il biglietto (.lab-pip) è lo stesso nella pagina e nella finestra Picture-in-Picture: lì non ci sono #panel-studio
+   né le variabili --pzk-*, quindi i colori del biglietto stanno qui sotto, su .lab-pip. Keyframe: pip-*. */
+
+/* ── il biglietto ─────────────────────────────────────────────────────────────────────────────────────────────── */
+.lab-pip {
+  --pp-ink: #161616; --pp-matita: #5a544c; --pp-rosso: #b3121f; --pp-verde: #23864a; --pp-arancio: #c96a00;
+  --pp-carta: #fbf6e8; --pp-lcd: #b8c497; --pp-pix: #232b1a; --pp-plastica: #e8622c; --pp-blu: #1d5f8a;
+  --pp-tacca: 40px;
+  position: relative; isolation: isolate; padding: 0 14px 12px; color: var(--pp-ink); color-scheme: light;
+  background:
+    radial-gradient(120% 60% at 15% 0%, rgba(255, 255, 255, .7), transparent 60%),
+    linear-gradient(176deg, #fffdf4, var(--pp-carta) 45%, #f1e8d2);
+  font: 400 12px/1.35 "Special Elite", "Courier New", monospace;
+  /* il bordo strappato in alto (i buchi della perforazione) e le due tacche ai lati, come i biglietti veri */
+  --pp-buchi: radial-gradient(circle 3.2px at 50% 0, #0000 96%, #000) 0 0 / 10px 100% repeat-x,
+    radial-gradient(circle 9px at 0 var(--pp-tacca), #0000 96%, #000), radial-gradient(circle 9px at 100% var(--pp-tacca), #0000 96%, #000);
+  -webkit-mask: var(--pp-buchi); -webkit-mask-composite: source-in;
+  mask: var(--pp-buchi); mask-composite: intersect;
+}
+/* la grana della carta e una macchia di caffè (ironia: la chiocciola beve il caffè anche quando non è in pausa) */
+.lab-pip::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .3; mix-blend-mode: multiply;
+  background:
+    radial-gradient(circle at 86% 88%, transparent 17px, rgba(150, 100, 40, .14) 18px, rgba(150, 100, 40, .05) 21px, transparent 23px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='90'%3E%3Cfilter id='n' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .22 0 0 0 0 .16 0 0 0 0 .1 0 0 0 -1.7 1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* la testata: pzkko · biglietto «adesso» · dal vivo, poi il tratteggio all'altezza delle tacche */
+.lab-pip__capo {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; height: var(--pp-tacca); margin: 0 -2px 12px;
+  padding-top: 5px; box-sizing: border-box; border-bottom: 2px dashed rgba(22, 22, 22, .32);
+  color: var(--pp-matita); font: 400 10px/1 "Special Elite", "Courier New", monospace; letter-spacing: .14em; text-transform: uppercase;
+}
+.lab-pip__marca { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.lab-pip__marca b { margin-right: 4px; color: var(--pp-rosso); font: 400 19px/1 "Anton", Impact, sans-serif; letter-spacing: .01em; text-transform: lowercase; vertical-align: -2px; }
+.lab-pip__live { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; color: var(--pp-rosso); letter-spacing: .04em; font: 400 13px/1 "Permanent Marker", cursive; text-transform: lowercase; transform: rotate(-3deg); }
+.lab-pip__live i { width: 8px; height: 8px; border-radius: 50%; background: var(--pp-rosso); box-shadow: 0 0 0 2px rgba(179, 18, 31, .18); animation: pip-pulse 1.8s ease-in-out infinite; }
+.lab-pip[data-stato="offline"] .lab-pip__live { color: var(--pp-matita); }
+.lab-pip[data-stato="offline"] .lab-pip__live i { background: #8a8479; box-shadow: none; animation: none; }
+
+/* ── il tamagotchi: plastica arancione a puntini, cristalli liquidi, tre tasti ─────────────────────────────────── */
+.lab-pip__schermo {
+  position: relative; padding: 10px 10px 22px; border-radius: 18px 18px 26px 26px / 18px 18px 34px 34px;
+  background:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, .16) 1px, transparent 1.6px) 0 0 / 7px 7px,
+    radial-gradient(110% 70% at 30% 0%, #ff8a55, var(--pp-plastica) 55%, #c4461a);
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, .35), inset 0 -3px 0 rgba(0, 0, 0, .18), 0 2px 0 #9b3410, 0 9px 14px -8px rgba(0, 0, 0, .55);
+  rotate: -.6deg;
+}
+/* i tre tasti in basso (decorativi: il tasto vero è la chiocciola) */
+.lab-pip__schermo::after {
+  content: ""; position: absolute; left: 50%; bottom: 6px; width: 54px; height: 11px; margin-left: -27px; pointer-events: none;
+  background: radial-gradient(circle 4.5px at 7px 50%, #ffe9a8 80%, #9b3410 90%, transparent 100%) 0 0 / 20px 100% repeat-x;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .25));
+}
+.lab-pip__scena {
+  display: block; width: 100%; height: auto; aspect-ratio: 80 / 34; border-radius: 7px;
+  background:
+    repeating-linear-gradient(90deg, rgba(35, 43, 26, .05) 0 1px, transparent 1px 1.25%),
+    repeating-linear-gradient(0deg, rgba(35, 43, 26, .05) 0 1px, transparent 1px 2.94%),
+    radial-gradient(130% 120% at 30% 10%, #c9d4a8, var(--pp-lcd) 60%, #a3b083);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, .38), inset 0 0 0 2px #2b2a24, 0 0 0 3px #f6d9b8;
+  /* l'ombra dei pixel sul fondo dei cristalli, come nei tamagotchi veri */
+  filter: drop-shadow(.8px 1.2px 0 rgba(35, 43, 26, .2));
+}
+.lab-pip__px { fill: var(--pp-pix); }
+.lab-pip__px2 { fill: var(--pp-pix); opacity: .34; }
+.lab-pip[data-stato="offline"] .lab-pip__scena { --pp-pix: #1a2014; background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, .05) 0 1px, transparent 1px 1.25%),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, .05) 0 1px, transparent 1px 2.94%),
+    radial-gradient(130% 120% at 30% 10%, #93a07c, #7d8a66 60%, #6c7858); }
+/* il riflesso del vetro */
+.lab-pip__schermo::before {
+  content: ""; position: absolute; z-index: 1; top: 12px; left: 14px; width: 38%; height: 32%; border-radius: 6px 30px 6px 6px; pointer-events: none;
+  background: linear-gradient(160deg, rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 70%);
+}
+.lab-pip__lcd, .lab-pip__ora {
+  position: absolute; z-index: 1; top: 15px; color: var(--pp-pix); font: 400 10px/1 "8Bit", "Courier New", monospace; letter-spacing: .06em;
+  opacity: .9; pointer-events: none;
+}
+.lab-pip__lcd { left: 17px; }
+.lab-pip__ora { right: 17px; }
+.lab-pip[data-stato="offline"] .lab-pip__lcd, .lab-pip[data-stato="offline"] .lab-pip__ora { color: #1a2014; }
+.lab-pip__toc { fill: var(--pp-pix); font: 400 4px/1 "8Bit", "Courier New", monospace; opacity: 0; }
+
+/* il tasto invisibile sopra la chiocciola: si tocca, si nasconde e protesta */
+.lab-pip__bestia {
+  position: absolute; z-index: 2; inset: 10px 10px 22px; margin: 0; padding: 0; border: 0; border-radius: 7px; background: transparent;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.lab-pip__bestia:focus-visible { outline: 3px solid var(--pp-blu); outline-offset: 2px; }
+.lab-pip__fumetto {
+  position: absolute; z-index: 3; left: 50%; top: -14px; max-width: 88%; padding: 6px 10px 5px; border: 2px solid var(--pp-ink); border-radius: 14px;
+  background: #fff; color: var(--pp-ink); font: 400 13px/1.15 "Permanent Marker", cursive; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  box-shadow: 2px 3px 0 rgba(0, 0, 0, .2); translate: -50% 0; scale: 0; opacity: 0; pointer-events: none;
+}
+.lab-pip__fumetto:empty { display: none; }
+.lab-pip[data-tocco="1"] .lab-pip__fumetto { animation: pip-fumetto 1.9s cubic-bezier(.2, 1.4, .4, 1) both; }
+.lab-pip[data-tocco="1"] .lab-pip__scena > g:not(.lab-pip__stelle), .lab-pip[data-tocco="1"] .lab-pip__scena > path:not(:first-child) { animation: pip-salto .5s steps(2, end) 2; }
+
+/* il cartello «non disturbare» appeso all'angolo del tamagotchi (solo dnd) */
+.lab-pip__cartello {
+  position: absolute; z-index: 3; right: -6px; top: 8px; display: grid; justify-items: center; gap: 2px; width: 82px; padding: 15px 6px 7px;
+  border-radius: 12px 12px 4px 4px; background: #fff3c4; color: var(--pp-rosso); box-shadow: 1px 2px 0 rgba(0, 0, 0, .18), 0 8px 10px -6px rgba(0, 0, 0, .5);
+  transform-origin: 50% 0; rotate: 7deg; animation: pip-dondola 3.2s ease-in-out infinite;
+}
+.lab-pip__cartello::before { content: ""; position: absolute; top: 4px; left: 50%; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--pp-plastica); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .5); }
+.lab-pip__cartello b { font: 400 15px/.95 "Anton", Impact, sans-serif; text-transform: lowercase; text-align: center; }
+.lab-pip__cartello small { color: var(--pp-matita); font: 400 9px/1 "Special Elite", monospace; }
+
+/* la battuta a pennarello sotto lo schermo */
+.lab-pip__battuta { margin: 9px 2px 0; color: var(--pp-rosso); font: 400 14px/1.2 "Permanent Marker", cursive; rotate: -1.2deg; text-wrap: balance; }
+.lab-pip__battuta::before { content: "↑ "; }
+
+/* ── lo stato, il luogo, lo stato personale ───────────────────────────────────────────────────────────────────── */
+.lab-pip__riga { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 7px; margin-top: 10px; padding-top: 9px; border-top: 1px solid rgba(22, 22, 22, .16); color: var(--pp-ink); font: 400 20px/1.05 "Anton", Impact, sans-serif; text-transform: lowercase; letter-spacing: .01em; }
+.lab-pip__riga span { color: var(--pp-matita); font: 400 12px/1.2 "Special Elite", monospace; text-transform: none; }
+.lab-pip__punto { flex: 0 0 auto; align-self: center; width: 11px; height: 11px; border-radius: 50%; background: #8a8479; box-shadow: 0 0 0 2px #fffdf6, 0 0 0 3.5px rgba(22, 22, 22, .35); }
+.lab-pip__punto[data-stato="online"] { background: var(--pp-verde); }
+.lab-pip__punto[data-stato="idle"] { background: var(--pp-arancio); }
+.lab-pip__punto[data-stato="dnd"] { background: var(--pp-rosso); }
+.lab-pip__custom { margin: 7px 0 0; color: #36312b; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.lab-pip__custom span { color: var(--pp-blu); font: 400 13px/1 "Permanent Marker", cursive; }
+.lab-pip__custom mark { padding: 0 3px; color: inherit; background: linear-gradient(transparent 14%, rgba(255, 212, 0, .62) 14% 86%, transparent 86%); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+
+/* ── il brano: la copertina col nastro, il titolo, la bava che avanza ─────────────────────────────────────────── */
+.lab-pip__musica { display: flex; gap: 12px; align-items: center; margin-top: 12px; }
+.lab-pip__arte { position: relative; flex: 0 0 58px; width: 58px; height: 58px; padding: 3px 3px 8px; background: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 9px -5px rgba(0, 0, 0, .55); rotate: -4deg; display: grid; place-items: center; color: var(--pp-matita); }
+.lab-pip__arte::after { content: ""; position: absolute; top: -6px; left: 50%; width: 34px; height: 12px; margin-left: -17px; background: linear-gradient(rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 38%, rgba(110, 90, 40, .16)), rgba(234, 222, 182, .9); rotate: 6deg; }
+.lab-pip__arte img { width: 100%; height: 100%; object-fit: cover; }
+.lab-pip[data-umore="musica"] .lab-pip__arte { animation: pip-copertina 1s ease-in-out infinite alternate; }
+.lab-pip__brano { display: grid; min-width: 0; gap: 2px; }
+.lab-pip__brano b { overflow: hidden; color: var(--pp-ink); font: 400 18px/1.1 "Anton", Impact, sans-serif; letter-spacing: .01em; white-space: nowrap; text-overflow: ellipsis; }
+.lab-pip__brano span { overflow: hidden; color: var(--pp-matita); font-size: 11px; white-space: nowrap; text-overflow: ellipsis; }
+.lab-pip__brano span + span { font-style: italic; }
+
+.lab-pip__barra { --fatto: 0; display: flex; align-items: center; gap: 8px; margin-top: 16px; padding-bottom: 12px; color: var(--pp-matita); font: 400 10.5px/1 "Special Elite", monospace; }
+.lab-pip__barra > i { position: relative; flex: 1; height: 5px; border-radius: 3px; background: repeating-linear-gradient(90deg, rgba(22, 22, 22, .3) 0 3px, transparent 3px 7px) 0 50% / 100% 1.5px no-repeat; }
+/* la bava: lucida, verdina, un po' tremolante */
+.lab-pip__barra > i > b {
+  position: absolute; inset: 0; border-radius: 3px; transform-origin: 0 50%; scale: var(--fatto) 1;
+  background: linear-gradient(rgba(255, 255, 255, .8), rgba(255, 255, 255, 0) 45%), linear-gradient(90deg, rgba(150, 175, 120, .35), rgba(130, 165, 105, .85));
+  box-shadow: 0 1px 0 rgba(60, 80, 40, .25); transition: scale 1s linear;
+}
+.lab-pip__lumachina { position: absolute; left: calc(var(--fatto) * 100%); bottom: -3px; width: 30px; height: 20px; translate: -78% 0; overflow: visible; transition: left 1s linear; }
+.lab-pip__lm-corpo { fill: #d9c9a4; stroke: var(--pp-ink); stroke-width: 1.3; stroke-linejoin: round; }
+.lab-pip__lm-ant { fill: none; stroke: var(--pp-ink); stroke-width: 1.3; stroke-linecap: round; }
+.lab-pip__lumachina circle { fill: var(--pp-ink); }
+.lab-pip__lumachina .lab-pip__lm-guscio { fill: var(--pp-plastica); stroke: var(--pp-ink); stroke-width: 1.3; }
+.lab-pip__lm-spira { fill: none; stroke: var(--pp-ink); stroke-width: 1.2; stroke-linecap: round; }
+.lab-pip__barra em { position: absolute; left: 0; right: 0; top: 9px; color: var(--pp-matita); font: 400 10px/1 "Permanent Marker", cursive; font-style: normal; text-align: center; opacity: .8; }
+.lab-pip__tempo { font-variant-numeric: tabular-nums; }
+
+/* ── il gioco: una cartuccia grigia con l'etichetta ───────────────────────────────────────────────────────────── */
+.lab-pip__gioco {
+  position: relative; display: grid; gap: 2px; margin-top: 12px; padding: 13px 12px 9px; border-radius: 4px 4px 2px 2px;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, .07) 0 2px, transparent 2px 6px) 0 0 / 100% 7px no-repeat, linear-gradient(#5d5d63, #3d3d42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 5px 8px -5px rgba(0, 0, 0, .6); rotate: .8deg;
+}
+.lab-pip__gioco small { position: absolute; top: -9px; right: 10px; padding: 2px 6px; background: #fff1a1; color: #3b3208; font: 400 11px/1 "Permanent Marker", cursive; rotate: 4deg; box-shadow: 0 2px 3px -1px rgba(0, 0, 0, .35); }
+.lab-pip__gioco b, .lab-pip__gioco span { padding: 0 8px; background: #fbf6e8; }
+.lab-pip__gioco b { padding-top: 5px; color: var(--pp-ink); font: 400 17px/1.1 "Anton", Impact, sans-serif; letter-spacing: .01em; overflow-wrap: anywhere; border-radius: 3px 3px 0 0; }
+.lab-pip__gioco span { padding-bottom: 6px; color: var(--pp-matita); font-size: 11px; border-radius: 0 0 3px 3px; }
+.lab-pip__gioco b:last-child { padding-bottom: 6px; border-radius: 3px; }
+
+.lab-pip__vuoto { margin: 12px 0 0; color: var(--pp-matita); font: 400 14px/1.3 "Permanent Marker", cursive; }
+
+/* ── le app aperte: adesivi attaccati in fila ─────────────────────────────────────────────────────────────────── */
+.lab-pip__apps { display: grid; gap: 7px; margin-top: 13px; color: var(--pp-matita); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.lab-pip__apps em { margin-left: 3px; padding: 0 4px; color: var(--pp-rosso); border: 1.5px solid currentColor; border-radius: 3px; font-style: normal; letter-spacing: .04em; }
+.lab-pip__apps ul { display: flex; flex-wrap: wrap; gap: 7px; margin: 0; padding: 0; list-style: none; }
+.lab-pip__apps li {
+  position: relative; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; background: #fff; border: 1.5px solid rgba(22, 22, 22, .18);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .18), 0 5px 7px -5px rgba(0, 0, 0, .5); rotate: -2deg; transition: rotate .2s cubic-bezier(.2, 1.4, .4, 1), translate .2s;
+}
+.lab-pip__apps li:nth-child(2n) { rotate: 4deg; }
+.lab-pip__apps li:nth-child(3n) { rotate: -5deg; }
+.lab-pip__apps li:hover { rotate: 0deg; translate: 0 -3px; }
+/* l'app in primo piano ha la puntina rossa */
+.lab-pip__apps li[data-su="1"]::after { content: ""; position: absolute; top: -4px; right: -3px; width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff7a80, var(--pp-rosso) 60%, #6b0a12); box-shadow: 0 2px 2px rgba(0, 0, 0, .35); }
+.lab-pip__apps img { width: 22px; height: 22px; object-fit: contain; }
+.lab-pip__apps b { font: 400 15px/1 "Anton", Impact, sans-serif; color: var(--pp-ink); }
+
+/* ── il piede: le scritte piccole e il codice a barre ─────────────────────────────────────────────────────────── */
+.lab-pip__piede { display: flex; align-items: flex-end; gap: 10px; margin-top: 13px; padding-top: 8px; border-top: 1px dashed rgba(22, 22, 22, .28); color: #7a7266; font-size: 8.5px; line-height: 1.3; letter-spacing: .02em; }
+.lab-pip__piede span { flex: 1; min-width: 0; }
+.lab-pip__piede i { flex: 0 0 62px; height: 22px; background: repeating-linear-gradient(90deg, #161616 0 1px, transparent 1px 3px, #161616 3px 5px, transparent 5px 6px, #161616 6px 7px, transparent 7px 10px, #161616 10px 13px, transparent 13px 14px); opacity: .8; }
+
+/* il timbro «chiuso per letargo» (offline) */
+.lab-pip__timbro {
+  position: absolute; z-index: 4; right: 12px; bottom: 44px; padding: 5px 9px 3px; border: 3px double var(--pp-rosso); border-radius: 5px;
+  color: var(--pp-rosso); font: 400 15px/1 "Anton", Impact, sans-serif; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+  rotate: -11deg; opacity: .78; mix-blend-mode: multiply; pointer-events: none;
+}
+
+.lab-pip--mini { font-size: 11px; }
+
+/* ── la scena: gli umori della chiocciola (tutto a scatti, come i cristalli veri) ─────────────────────────────── */
+.lab-pip__f2 { opacity: 0; }
+.lab-pip__f1 { animation: pip-f1 1.3s step-end infinite; }
+.lab-pip__f2 { animation: pip-f2 1.3s step-end infinite; }
+.lab-pip[data-umore="musica"] :is(.lab-pip__f1, .lab-pip__f2) { animation-duration: .52s; }
+.lab-pip[data-umore="idle"] :is(.lab-pip__f1, .lab-pip__f2) { animation-duration: 2.6s; }
+.lab-pip[data-umore="offline"] :is(.lab-pip__f1, .lab-pip__f2) { animation-duration: 2.2s; }
+/* online: striscia a destra, si gira, torna (la bava resta dietro) */
+.lab-pip__striscia { animation: pip-striscia 26s infinite; }
+.lab-pip__gira { transform-box: fill-box; transform-origin: center; animation: pip-gira 26s step-end infinite; }
+.lab-pip__bava--sx { opacity: 0; }
+.lab-pip__bava--dx { animation: pip-bava-dx 26s step-end infinite; }
+.lab-pip__bava--sx { animation: pip-bava-sx 26s step-end infinite; }
+/* musica: balla a tempo, le note salgono */
+.lab-pip__balla { animation: pip-balla .52s step-end infinite; }
+.lab-pip__note > g { opacity: 0; animation: pip-nota 2.6s steps(13, end) infinite; }
+.lab-pip__n2 { animation-delay: -.65s !important; }
+.lab-pip__n3 { animation-delay: -1.3s !important; }
+.lab-pip__n4 { animation-delay: -1.95s !important; }
+/* dorme: le zeta salgono, le stelle fanno l'occhiolino, il guscio respira */
+.lab-pip__zeta > g { opacity: 0; animation: pip-zeta 3.6s steps(12, end) infinite; }
+.lab-pip__z2 { animation-delay: -1.2s !important; }
+.lab-pip__z3 { animation-delay: -2.4s !important; }
+.lab-pip__respiro { animation: pip-respiro 3.6s step-end infinite; }
+/* non disturbare: toc toc, il guscio trema, nessuno apre */
+.lab-pip__tremo { animation: pip-tremo 5s step-end infinite; }
+.lab-pip__toc { animation: pip-toc 5s step-end infinite; }
+/* gioco: il pezzo cade nel televisorino */
+.lab-pip__cade { animation: pip-cade 2.4s steps(4, end) infinite; }
+
+/* ── nella pagina: la matrice, il tratteggio con le forbici, il posto del biglietto ───────────────────────────── */
+#panel-studio .lab-pip__anteprima { position: relative; display: grid; max-width: 390px; margin: 16px 0 0 4px; }
+#panel-studio .lab-pip__matrice { grid-area: 1 / 1; }
+#panel-studio .lab-pip__taglio { grid-area: 2 / 1; }
+#panel-studio .lab-pip__matrice {
+  position: relative; display: flex; align-items: center; gap: 10px; min-width: 0; height: 34px; padding: 0 14px; box-sizing: border-box;
+  background: linear-gradient(176deg, #fffdf4, #f4ecd8); color: var(--pzk-matita); font: 400 9.5px/1 var(--pzk-mac); letter-spacing: .12em; text-transform: uppercase;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .18);
+  -webkit-mask: radial-gradient(circle 3.2px at 50% 100%, #0000 96%, #000) 0 0 / 10px 100% repeat-x;
+  mask: radial-gradient(circle 3.2px at 50% 100%, #0000 96%, #000) 0 0 / 10px 100% repeat-x;
+}
+#panel-studio .lab-pip__matrice b { color: var(--pzk-ink); font: 400 17px/1 var(--pzk-fa); letter-spacing: .03em; }
+#panel-studio .lab-pip__matrice span { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+#panel-studio .lab-pip__matrice em { flex: 0 0 auto; color: var(--pzk-rosso); font: 400 12px/1 var(--pzk-marker); font-style: normal; letter-spacing: 0; text-transform: lowercase; rotate: -4deg; }
+#panel-studio .lab-pip__matrice i { flex: 0 0 34px; height: 18px; background: repeating-linear-gradient(90deg, #161616 0 1px, transparent 1px 3px, #161616 3px 5px, transparent 5px 6px); opacity: .7; }
+/* il nastro che tiene la matrice sul foglio */
+#panel-studio .lab-pip__anteprima::before {
+  content: ""; position: absolute; z-index: 5; top: -9px; left: -12px; width: 56px; height: 20px; background: var(--pzk-nastro); clip-path: var(--pzk-code); rotate: -32deg; pointer-events: none;
+}
+#panel-studio .lab-pip__anteprima::after {
+  content: ""; position: absolute; z-index: 5; top: -8px; right: -14px; width: 56px; height: 19px; background: var(--pzk-nastro); clip-path: var(--pzk-code); rotate: 28deg; pointer-events: none;
+}
+/* il tratteggio: le forbici e «strappa qui» */
+#panel-studio .lab-pip__taglio { position: relative; z-index: 4; display: flex; align-items: center; gap: 6px; height: 0; margin: 0 -14px 0 -18px; color: var(--pzk-ink); pointer-events: none; }
+#panel-studio .lab-pip__forbici { flex: 0 0 auto; width: 28px; height: 18px; translate: 0 -1px; rotate: 0deg; transition: translate .6s cubic-bezier(.3, 1.4, .5, 1); }
+#panel-studio .lab-pip__taglio span { position: absolute; right: 14px; top: -11px; padding: 1px 5px; background: #fff1a1; color: #3b3208; font: 400 11px/1.2 var(--pzk-marker); rotate: 3deg; box-shadow: 0 2px 3px -1px rgba(0, 0, 0, .35); }
+@media (hover: hover) {
+  #panel-studio .lab__card[data-lab="pip"]:hover .lab-pip__forbici { translate: 46px -1px; animation: pip-taglia .25s step-end 4; }
+}
+#panel-studio .lab-pip__posto { grid-area: 3 / 1; min-width: 0; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .2)) drop-shadow(0 10px 10px rgba(0, 0, 0, .22)); transform-origin: 85% 0; }
+#panel-studio .lab-pip__posto .lab-pip { rotate: .7deg; transform-origin: 50% 0; }
+
+/* staccato: il biglietto vola via e resta l'impronta tratteggiata */
+#panel-studio .lab-pip__fantasma {
+  grid-area: 3 / 1; display: grid; align-content: center; justify-items: center; gap: 8px; margin: 4px 2px 0; padding: 18px; border: 2.5px dashed rgba(22, 22, 22, .35); border-radius: 4px;
+  background: repeating-linear-gradient(-45deg, rgba(22, 22, 22, .04) 0 8px, transparent 8px 16px); color: var(--pzk-matita); text-align: center;
+  visibility: hidden; opacity: 0;
+}
+#panel-studio .lab-pip__fantasma b { color: var(--pzk-rosso); font: 400 19px/1.15 var(--pzk-marker); text-wrap: balance; rotate: -2deg; }
+#panel-studio .lab-pip__fantasma b span { display: inline-block; animation: pip-freccia 1.2s ease-in-out infinite; }
+#panel-studio .lab-pip__fantasma > span { max-width: 30ch; font: 400 12px/1.4 var(--pzk-mac); }
+#panel-studio .lab-pip__anteprima[data-staccato="1"] .lab-pip__posto { visibility: hidden; opacity: 0; transition: visibility 0s .75s, opacity 0s .75s; animation: pip-vola .75s cubic-bezier(.5, -.4, .7, .4) forwards; pointer-events: none; }
+#panel-studio .lab-pip__anteprima[data-staccato="1"] .lab-pip__fantasma { visibility: visible; opacity: 1; transition: opacity .4s .35s; }
+#panel-studio .lab-pip__anteprima[data-staccato="1"] .lab-pip__forbici { translate: 120px -1px; }
+#panel-studio .lab-pip__anteprima[data-staccato="torna"] .lab-pip__posto { animation: pip-torna .85s cubic-bezier(.2, 1.3, .4, 1) both; }
+
+/* lo scarabocchio a margine (solo se il foglio è largo abbastanza): «si stacca davvero!» con la freccia al tasto */
+#panel-studio .lab__card[data-lab="pip"] .lab__corpo { position: relative; container-type: inline-size; }
+#panel-studio .lab-pip__margine { display: none; }
+@container (min-width: 500px) {
+  #panel-studio .lab-pip__margine {
+    position: absolute; right: 0; bottom: 64px; display: grid; gap: 4px; width: calc(100% - 412px); max-width: 130px; margin: 0;
+    color: var(--pzk-penna); font: 400 15px/1.1 var(--pzk-marker); rotate: 5deg; pointer-events: none;
+  }
+  #panel-studio .lab-pip__margine span { color: var(--pzk-matita); font: 400 11px/1.3 var(--pzk-mac); }
+  #panel-studio .lab-pip__margine svg { width: 80px; height: 62px; margin: 2px 0 0 -10px; fill: none; stroke: var(--pzk-penna); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+}
+
+/* lo scotch: un pezzo in più a ogni ritorno (al massimo tre) */
+#panel-studio .lab-pip__scotch { position: relative; z-index: 6; grid-area: 2 / 1; height: 0; pointer-events: none; }
+#panel-studio .lab-pip__scotch i { position: absolute; top: -12px; width: 46px; height: 24px; background: var(--pzk-nastro); clip-path: var(--pzk-code); opacity: 0; scale: 1.4; transition: opacity .25s, scale .35s cubic-bezier(.2, 1.5, .4, 1); }
+#panel-studio .lab-pip__scotch i:nth-child(1) { left: 18%; rotate: -8deg; }
+#panel-studio .lab-pip__scotch i:nth-child(2) { left: 52%; rotate: 5deg; }
+#panel-studio .lab-pip__scotch i:nth-child(3) { left: 76%; rotate: -14deg; }
+#panel-studio .lab-pip__anteprima:is([data-scotch="1"], [data-scotch="2"], [data-scotch="3"]) .lab-pip__scotch i:nth-child(1),
+#panel-studio .lab-pip__anteprima:is([data-scotch="2"], [data-scotch="3"]) .lab-pip__scotch i:nth-child(2),
+#panel-studio .lab-pip__anteprima[data-scotch="3"] .lab-pip__scotch i:nth-child(3) { opacity: 1; scale: 1; }
+#panel-studio .lab-pip__anteprima[data-staccato="1"] .lab-pip__scotch { display: none; }
+
+/* ── nella finestra Picture-in-Picture: il biglietto attaccato al vetro col suo pezzo di nastro ───────────────── */
+.lab-pip__finestra { position: relative; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3)) drop-shadow(0 14px 16px rgba(0, 0, 0, .35)); }
+.lab-pip__finestra::before {
+  content: ""; position: absolute; z-index: 5; top: -11px; left: 50%; width: 84px; height: 22px; margin-left: -42px; rotate: -3deg; pointer-events: none;
+  background: linear-gradient(rgba(255, 255, 255, .34), rgba(255, 255, 255, 0) 38%, rgba(110, 90, 40, .16)), rgba(234, 222, 182, .9);
+  clip-path: polygon(0 0, 3px 17%, 0 34%, 3px 50%, 0 67%, 3px 84%, 0 100%, 100% 100%, calc(100% - 3px) 84%, 100% 67%, calc(100% - 3px) 50%, 100% 34%, calc(100% - 3px) 17%, 100% 0);
+}
+.lab-pip__finestra .lab-pip { font-size: 12.5px; }
+.lab-pip__finestra .lab-pip__lcd, .lab-pip__finestra .lab-pip__ora { font-size: 11px; }
+
+/* ── i keyframe ───────────────────────────────────────────────────────────────────────────────────────────────── */
+@keyframes pip-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .35; transform: scale(.75); } }
+@keyframes pip-f1 { 0% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes pip-f2 { 0% { opacity: 0; } 50% { opacity: 1; } }
+@keyframes pip-striscia {
+  0% { translate: -14px 0; animation-timing-function: steps(28, end); }
+  48% { translate: 14px 0; animation-timing-function: step-end; }
+  52% { translate: 14px 0; animation-timing-function: steps(28, end); }
+  98% { translate: -14px 0; animation-timing-function: step-end; }
+  100% { translate: -14px 0; }
+}
+@keyframes pip-gira { 0% { scale: 1 1; } 50% { scale: -1 1; } 100% { scale: -1 1; } }
+@keyframes pip-bava-dx { 0% { opacity: 1; } 49% { opacity: 0; } }
+@keyframes pip-bava-sx { 0% { opacity: 0; } 52% { opacity: 1; } 99% { opacity: 0; } }
+@keyframes pip-balla { 0% { translate: 0 0; } 50% { translate: 0 -1px; } }
+@keyframes pip-nota { 0% { opacity: 0; translate: 0 0; } 8% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; translate: 3px -13px; } }
+@keyframes pip-zeta { 0% { opacity: 0; translate: 0 0; } 10% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; translate: 6px -12px; } }
+@keyframes pip-respiro { 0% { translate: 0 0; } 50% { translate: 0 -1px; } }
+@keyframes pip-tremo { 0%, 62% { translate: 0 0; } 64% { translate: -1px 0; } 66% { translate: 1px 0; } 68% { translate: -1px 0; } 70% { translate: 1px 0; } 72%, 100% { translate: 0 0; } }
+@keyframes pip-toc { 0%, 40% { opacity: 0; } 42%, 80% { opacity: 1; } 82%, 100% { opacity: 0; } }
+@keyframes pip-cade { 0% { translate: 0 -1px; } 100% { translate: 0 4px; } }
+@keyframes pip-salto { 0% { translate: 0 -2px; } 50% { translate: 0 0; } }
+@keyframes pip-fumetto { 0% { scale: 0; opacity: 0; } 12% { scale: 1; opacity: 1; } 85% { scale: 1; opacity: 1; } 100% { scale: .9; opacity: 0; } }
+@keyframes pip-dondola { 0%, 100% { rotate: 7deg; } 50% { rotate: 2deg; } }
+@keyframes pip-copertina { from { rotate: -5deg; } to { rotate: -2deg; } }
+@keyframes pip-taglia { 0% { rotate: 0deg; } 50% { rotate: -8deg; } }
+@keyframes pip-freccia { 0%, 100% { translate: 0 0; } 50% { translate: 4px -4px; } }
+@keyframes pip-vola {
+  0% { transform: none; opacity: 1; }
+  25% { transform: translate(0, 6px) rotate(-2deg); opacity: 1; }
+  100% { transform: translate(60px, -120px) rotate(14deg) scale(.7); opacity: 0; visibility: hidden; }
+}
+@keyframes pip-torna {
+  0% { transform: translate(40px, -90px) rotate(10deg) scale(.8); opacity: 0; }
+  60% { transform: translate(0, 4px) rotate(-1deg); opacity: 1; }
+  100% { transform: none; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-pip *, .lab-pip *::before, .lab-pip *::after,
+  #panel-studio .lab-pip__anteprima, #panel-studio .lab-pip__anteprima * { animation: none !important; transition: none !important; }
+  .lab-pip__f2, .lab-pip__bava--sx, .lab-pip__toc { opacity: 0; }
+  .lab-pip__note > g, .lab-pip__zeta > g { opacity: 1; }
+  .lab-pip[data-tocco="1"] .lab-pip__fumetto { scale: 1; opacity: 1; }
+  #panel-studio .lab-pip__anteprima[data-staccato="1"] .lab-pip__posto { visibility: hidden; }
+}

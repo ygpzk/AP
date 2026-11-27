@@ -27,10 +27,17 @@ che c'è.
   `pip.js`, `quadro.js`, `diario.js`, `radio.js`, `cartolina.js`,
   `costellazione.js`, `stanza.js`, `sole.js`, `meteo.js`, `clip.js`.
 - `public/assets/studio/studio.css` - il foglio dello Studio, caricato solo quando si apre
-  la scheda: le classi `.lab*` e `.lab-*`. È autonomo (usa le variabili di
-  `src/site.css`, ma non sta dentro Tailwind). Il richiamo in bacheca
-  `.lab-teaser` invece sta in `src/site.css`, perché serve prima che la scheda
-  si apra.
+  la scheda. Dal 27.11 è solo un indice di `@import`, in quest'ordine: `/games/pzk-stile.css`
+  (il foglio comune di tutte le app), `base.css` (testata, fogli, cornici: le classi `.lab*`
+  comuni) e una vignetta per file in `vignette/<id>.css` (le classi `.lab-<id>*` di quella
+  scheda, più eventuali asset in `vignette/<id>/`). Ogni vignetta si rifà da sola senza
+  toccare le altre. È autonomo (usa le variabili di `src/site.css`, ma non sta dentro
+  Tailwind). Il richiamo in bacheca `.lab-teaser` invece sta in `src/site.css`, perché serve
+  prima che la scheda si apra.
+- `public/studio-prova/` e `scripts/studio-foto.mjs` (27.11) — la pagina di prova col guscio
+  vero e dati finti (`?solo=radio&stato=offline&musica=0&meteo=61&tema=dark&lang=en`), e lo
+  script che la fotografa con Edge senza finestra:
+  `node scripts/studio-foto.mjs --solo radio --w 560 --q "stato=offline"`.
 - `public/assets/app.js` — `renderStudio()`, la voce `studio` in `TABS`/`SLUG`, il
   richiamo in bacheca e `liveListeners` (la presenza arriva qui senza aprire un
   secondo socket).

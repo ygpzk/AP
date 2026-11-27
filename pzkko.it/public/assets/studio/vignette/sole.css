@@ -1,0 +1,173 @@
+/* la vignetta «sole» dello Studio: solo le sue classi (.lab-sole* e dintorni), sotto #panel-studio
+   (tranne .lab-pip*, che vale anche nella finestra Picture-in-Picture). Si carica da studio.css. */
+/* 08 · il sole (27.11): il panorama della pianura è una stampa attaccata al foglio col nastro, i numeri sono quattro
+   biglietti (andata, ritorno, validità, quota), le battute un post-it. Keyframe col prefisso sole-. */
+
+/* ── la stampa ────────────────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-sole {
+  position: relative; padding: 7px 7px 9px; background: #fffdf6; rotate: .5deg;
+  box-shadow: var(--pzk-ombra-schermo);
+}
+#panel-studio .lab-sole::before, #panel-studio .lab-sole::after {
+  content: ""; position: absolute; z-index: 4; top: -10px; width: 70px; height: 20px;
+  background: var(--pzk-nastro); clip-path: var(--pzk-code); pointer-events: none;
+}
+#panel-studio .lab-sole::before { left: 8%; rotate: -6deg; }
+#panel-studio .lab-sole::after { right: 9%; rotate: 5deg; }
+#panel-studio .lab-sole__foto { position: relative; overflow: hidden; container-type: inline-size; }
+#panel-studio .lab-sole__foto::after { /* la grana della stampa */
+  content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: var(--pzk-grana) 0 0 / 180px 90px; opacity: .28; mix-blend-mode: multiply;
+}
+#panel-studio .lab-sole [data-svg] > svg { display: block; width: 100%; height: auto; }
+
+/* i pezzi dell'SVG */
+#panel-studio .lab-sole__curva { fill: none; stroke-width: 1.6; stroke-dasharray: 2 6; stroke-linecap: round; }
+#panel-studio .lab-sole__curva--giu { stroke: rgba(255, 214, 150, .5); }
+#panel-studio .lab-sole__corda { fill: none; stroke: #e9d9b0; stroke-width: 1.7; stroke-dasharray: 5 1.4; stroke-linecap: round; }
+#panel-studio .lab-sole__metro { font: 400 15px/1 var(--pzk-fa); fill: #161616; text-anchor: middle; }
+#panel-studio .lab-sole__mano { font: 400 13px/1 var(--pzk-marker); fill: #f2dcb0; opacity: .85; }
+#panel-studio .lab-sole__mano--chiara { fill: #ffd27a; opacity: .95; }
+#panel-studio .lab-sole__metro-h { font: 400 11px/1 var(--pzk-mac); fill: #6b5a10; }
+#panel-studio .lab-sole__didascalia { margin: 7px 2px 0; color: var(--pzk-matita); font: 400 11px/1.3 var(--pzk-mac); }
+#panel-studio .lab-sole__uccelli { animation: sole-volo 9s ease-in-out infinite alternate; }
+@keyframes sole-volo { from { translate: 0 0; } to { translate: 26px -6px; } }
+#panel-studio .lab-sole .s-corpo { fill: #f3e6cb; stroke: #1d3f55; stroke-width: 2; stroke-linejoin: round; }
+#panel-studio .lab-sole .s-guscio { fill: #e8632b; stroke: #1d3f55; stroke-width: 2; }
+#panel-studio .lab-sole .s-spira { fill: none; stroke: #1d3f55; stroke-width: 2; stroke-linecap: round; }
+#panel-studio .lab-sole .s-tratto { fill: none; stroke: #1d3f55; stroke-width: 2; stroke-linecap: round; }
+#panel-studio .lab-sole .s-tratto-scuro { fill: none; stroke: #5a2a08; stroke-width: 1.5; stroke-linecap: round; }
+#panel-studio .lab-sole .s-occhio { fill: #fffdf6; stroke: #1d3f55; stroke-width: 1.6; }
+
+/* le animazioni: lente, su transform e opacity */
+#panel-studio .lab-sole__raggi { transform-box: view-box; transform-origin: 0 0; animation: sole-gira 60s linear infinite; }
+#panel-studio .lab-sole__brillo { transform-box: fill-box; transform-origin: center; animation: sole-brilla 4.2s ease-in-out infinite; animation-delay: calc(var(--i) * -.73s); }
+#panel-studio .lab-sole__zeta text { animation: sole-zeta 3.6s ease-in-out infinite; }
+#panel-studio .lab-sole__zeta text:nth-child(2) { animation-delay: -1.2s; }
+#panel-studio .lab-sole__zeta text:nth-child(3) { animation-delay: -2.4s; }
+#panel-studio .lab-sole .s-antenne { transform-box: fill-box; transform-origin: 50% 100%; animation: sole-antenne 3.4s ease-in-out infinite; }
+#panel-studio .lab-sole__lumaca--dorme { animation: sole-respira 4s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+#panel-studio .lab-sole__fatica { animation: sole-fatica 1.6s ease-in-out infinite; }
+#panel-studio .lab-sole__goccia { animation: sole-goccia 2.8s ease-in infinite; }
+#panel-studio .lab-sole__lombrico { animation: sole-lombrico 7s ease-in-out infinite; }
+@media (hover: hover) {
+  #panel-studio .lab-sole__astro:hover .lab-sole__occhiolino { transform-box: fill-box; transform-origin: center; transform: scaleY(.15); }
+}
+@keyframes sole-gira { to { rotate: 360deg; } }
+@keyframes sole-brilla { 0%, 100% { opacity: .25; scale: .6; } 50% { opacity: 1; scale: 1.1; } }
+@keyframes sole-zeta { 0% { opacity: 0; translate: 0 6px; } 30%, 70% { opacity: 1; } 100% { opacity: 0; translate: 6px -6px; } }
+@keyframes sole-antenne { 0%, 100% { rotate: -4deg; } 50% { rotate: 5deg; } }
+@keyframes sole-respira { 0%, 100% { scale: 1 1; } 50% { scale: 1.02 .97; } }
+@keyframes sole-fatica { 0%, 100% { opacity: .2; translate: 0 0; } 50% { opacity: .9; translate: -2px 0; } }
+@keyframes sole-goccia { 0%, 40% { opacity: 0; translate: 0 0; } 55% { opacity: 1; } 100% { opacity: 0; translate: 4px 14px; } }
+@keyframes sole-lombrico { 0%, 100% { translate: 0 0; } 50% { translate: -14px 1px; } }
+
+/* la nebbia della bassa e la stella cadente: livelli HTML sopra la stampa, mossi su transform */
+#panel-studio .lab-sole__nebbia { position: absolute; inset: 52% 0 26% 0; z-index: 2; pointer-events: none; opacity: var(--sole-nebbia, .4); }
+#panel-studio .lab-sole__nebbia i {
+  position: absolute; inset: 0 -30% 0 -30%;
+  background:
+    radial-gradient(40% 60% at 20% 55%, rgba(236, 238, 245, .85), transparent 70%),
+    radial-gradient(30% 50% at 55% 40%, rgba(236, 238, 245, .7), transparent 70%),
+    radial-gradient(38% 55% at 85% 60%, rgba(236, 238, 245, .8), transparent 70%);
+  animation: sole-nebbia 46s ease-in-out infinite alternate;
+}
+#panel-studio .lab-sole__nebbia i + i { top: 30%; opacity: .7; scale: 1.2 .8; animation-duration: 63s; animation-direction: alternate-reverse; }
+#panel-studio .lab-sole[data-fase="giorno"] .lab-sole__nebbia i { background-color: transparent; }
+#panel-studio .lab-sole:is([data-fase="notte"], [data-fase="blu"]) .lab-sole__nebbia { filter: brightness(.5) saturate(.5); }
+@keyframes sole-nebbia { from { translate: -12% 0; } to { translate: 12% 0; } }
+
+#panel-studio .lab-sole__cometa {
+  position: absolute; z-index: 2; left: 18%; top: 10%; width: 90px; height: 2px; pointer-events: none; opacity: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), #fff); border-radius: 2px; rotate: 18deg;
+}
+#panel-studio .lab-sole[data-fase="notte"] .lab-sole__cometa { animation: sole-cometa 17s linear infinite 4s; }
+@keyframes sole-cometa {
+  0%, 93% { opacity: 0; translate: 0 0; }
+  94% { opacity: .95; }
+  98% { opacity: 0; translate: 160px 52px; }
+  100% { opacity: 0; translate: 160px 52px; }
+}
+
+/* il fumetto del sole, a pennarello */
+#panel-studio .lab-sole__fumetto {
+  position: absolute; z-index: 3; margin: 0; padding: 4px 8px 3px; max-width: 46%;
+  background: #fffdf6; color: var(--pzk-ink); border: 1.5px solid var(--pzk-ink); border-radius: 12px 12px 12px 3px;
+  font: 400 clamp(10px, 2.6cqi, 14px)/1.15 var(--pzk-marker); white-space: nowrap;
+  translate: 22px calc(-100% - 16px); rotate: -2deg; box-shadow: 2px 3px 0 rgba(0, 0, 0, .18);
+}
+#panel-studio .lab-sole__fumetto[data-lato="sx"] { translate: calc(-100% - 22px) calc(-100% - 16px); border-radius: 12px 12px 3px 12px; rotate: 2deg; }
+#panel-studio .lab-sole__fumetto[hidden] { display: none; }
+
+/* ── i biglietti ──────────────────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-sole__numeri {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 8px; margin-top: 16px;
+  filter: drop-shadow(0 1px 1px rgba(40, 30, 10, .2)) drop-shadow(0 5px 6px rgba(40, 30, 10, .18));
+}
+#panel-studio .lab-sole__numeri span {
+  --bg: #fff1a1; --tinta: #8a6d00;
+  position: relative; display: grid; align-content: start; gap: 3px; min-width: 0; padding: 18px 8px 9px 10px;
+  background:
+    linear-gradient(175deg, rgba(255, 255, 255, .5), rgba(255, 255, 255, 0) 45%),
+    repeating-linear-gradient(90deg, transparent 0 5px, rgba(0, 0, 0, .025) 5px 6px), var(--bg);
+  color: var(--pzk-matita); font: 400 9.5px/1.15 var(--pzk-mac); letter-spacing: .04em; text-transform: uppercase;
+  -webkit-mask: radial-gradient(circle 4.5px at 0 58%, transparent 98%, #000) , radial-gradient(circle 4.5px at 100% 58%, transparent 98%, #000);
+  -webkit-mask-composite: source-in; mask: radial-gradient(circle 4.5px at 0 58%, transparent 98%, #000), radial-gradient(circle 4.5px at 100% 58%, transparent 98%, #000);
+  mask-composite: intersect;
+  rotate: -1.2deg; transition: rotate .25s cubic-bezier(.2, 1.4, .4, 1), translate .25s cubic-bezier(.2, 1.4, .4, 1);
+}
+#panel-studio .lab-sole__numeri span:nth-child(2) { --bg: #ffd2a6; --tinta: #a4460b; rotate: 1.4deg; }
+#panel-studio .lab-sole__numeri span:nth-child(3) { --bg: #fff1a1; --tinta: #7a6200; rotate: -.4deg; }
+#panel-studio .lab-sole__numeri span:nth-child(4) { --bg: #cfe2ff; --tinta: #1446a0; rotate: 1deg; }
+#panel-studio .lab-sole__numeri span:first-child { --bg: #ffd6dc; --tinta: #b3121f; }
+@media (hover: hover) { #panel-studio .lab-sole__numeri span:hover { rotate: 0deg; translate: 0 -3px; } }
+#panel-studio .lab-sole__numeri span::before { /* la riga forata */
+  content: ""; position: absolute; left: 6px; right: 6px; top: 58%; border-top: 1.5px dashed rgba(22, 22, 22, .22);
+}
+#panel-studio .lab-sole__numeri span::after { /* l'iconcina in alto a destra */
+  content: ""; position: absolute; right: 7px; top: 5px; width: 20px; height: 14px; background: var(--tinta);
+  -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat;
+}
+#panel-studio .lab-sole__numeri span[data-k="alba"] { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 14'%3E%3Cpath d='M4 12a6 6 0 0 1 12 0z M0 13h20v1H0z M10 0v3 M3 3l2 2 M17 3l-2 2' stroke='%23000' stroke-width='1.6'/%3E%3Cpath d='M10 1l2 2h-4z'/%3E%3C/svg%3E"); }
+#panel-studio .lab-sole__numeri span[data-k="tramonto"] { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 14'%3E%3Cpath d='M4 12a6 6 0 0 1 12 0z M0 13h20v1H0z M3 3l2 2 M17 3l-2 2' stroke='%23000' stroke-width='1.6'/%3E%3Cpath d='M10 4l2-2h-4z M9.2 0h1.6v2h-1.6z'/%3E%3C/svg%3E"); }
+#panel-studio .lab-sole__numeri span[data-k="durata"] { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 14'%3E%3Cpath d='M6 0h8v1.5L10.8 7 14 12.5V14H6v-1.5L9.2 7 6 1.5z M8 12.5h4L10 9.5z' fill-rule='evenodd'/%3E%3C/svg%3E"); }
+#panel-studio .lab-sole__numeri span[data-k="altezza"] { --ico: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 14'%3E%3Cpath d='M1 13h18M1 13A12 12 0 0 1 19 13M1 13L14 4' fill='none' stroke='%23000' stroke-width='1.6'/%3E%3Ccircle cx='14.5' cy='3.6' r='2.6'/%3E%3C/svg%3E"); }
+#panel-studio .lab-sole__numeri i {
+  position: absolute; left: 10px; top: 5px; color: var(--tinta); font: 400 9px/1 var(--pzk-mac); font-style: normal; letter-spacing: .16em;
+}
+#panel-studio .lab-sole__numeri b {
+  color: var(--pzk-ink); font: 400 clamp(19px, 5.4cqi, 26px)/1 var(--pzk-fa); letter-spacing: .01em; text-transform: none;
+  font-variant-numeric: tabular-nums; margin-bottom: 7px;
+}
+#panel-studio .lab__corpo:has(.lab-sole) { container-type: inline-size; }
+
+/* ── il post-it con le battute ────────────────────────────────────────────────────────────────────────────────── */
+#panel-studio .lab-sole__postit {
+  position: relative; display: flex; flex-wrap: wrap; align-items: flex-end; gap: 6px 12px; margin: 18px 4px 2px auto; max-width: 92%;
+  padding: 14px 14px 10px 16px; color: #3b3208; color-scheme: light;
+  background: linear-gradient(175deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 40%), #fff1a1;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .1), 2px 10px 14px -9px rgba(0, 0, 0, .5);
+  rotate: -1.2deg;
+}
+#panel-studio .lab-sole__postit::before { /* la puntina */
+  content: ""; position: absolute; left: 50%; top: -6px; width: 13px; height: 13px; margin-left: -6px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff8a8a, var(--pzk-rosso) 52%, #6d0810); box-shadow: 1px 3px 3px rgba(0, 0, 0, .35);
+}
+#panel-studio .lab-sole__battuta { flex: 1 1 220px; min-width: 0; margin: 0; color: var(--pzk-rosso); font: 400 15.5px/1.3 var(--pzk-marker); }
+#panel-studio .lab-sole__battuta--nuova { animation: sole-battuta .45s cubic-bezier(.2, 1.4, .4, 1); }
+#panel-studio .lab-sole__altra { flex: 0 0 auto; margin-left: auto; }
+@keyframes sole-battuta { from { opacity: 0; translate: 0 6px; rotate: -2deg; } to { opacity: 1; translate: 0 0; rotate: 0deg; } }
+
+/* fermo quando non si vede, e per chi non vuole movimento */
+#panel-studio .lab-sole[data-fermo="1"] *, #panel-studio .lab-sole[data-fermo="1"] ~ * * { animation-play-state: paused !important; }
+@media (prefers-reduced-motion: reduce) {
+  #panel-studio .lab-sole *, #panel-studio .lab-sole__battuta--nuova, #panel-studio .lab-sole__numeri span { animation: none !important; transition: none !important; }
+  #panel-studio .lab-sole__cometa { display: none; }
+}
+
+@media (max-width: 760px) {
+  #panel-studio .lab-sole__numeri { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@container (max-width: 380px) {
+  #panel-studio .lab-sole__numeri { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
