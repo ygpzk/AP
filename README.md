@@ -50,14 +50,16 @@ Tutto il resto — le schede, le app, gli esperimenti, i raccoglitori di Instagr
 
 ## Pubblicazione
 
-Due progetti Vercel, tutti e due in produzione da `main`:
+Due progetti Vercel:
 
-| Progetto | Root Directory | Sito |
-|---|---|---|
-| `albertopecchini.it` | `albertopecchini.it` | <https://www.albertopecchini.it> |
-| `pzkko.it` | `pzkko.it` | <https://pzkko.it> |
+| Progetto | Root Directory | Sito | Ramo di produzione |
+|---|---|---|---|
+| `albertopecchini.it` | `albertopecchini.it` | <https://www.albertopecchini.it> | `main` |
+| `pzkko.it` | `pzkko.it` | <https://pzkko.it> | `albertopecchini.it` |
 
-Ogni push su `main` produce un deploy di produzione; gli altri rami sono anteprime. Su `main`
+`pzkko.it` è ancora agganciato al ramo `albertopecchini.it`: una modifica a `pzkko.it/` che sta
+solo su `main` è un'anteprima, non va in produzione. Dopo il push su `main` si porta lo stesso
+commit sul ramo (`git cherry-pick`) e si pusha quello. Su `main`
 scrive anche GitHub Actions: **build.yml** costruisce il portfolio a ogni push, **catture.yml**
 ogni ora controlla Rivalta, Cascina Fontana, Dario Donelli, questo sito e pzkko.it e, se uno è
 cambiato, fa un commit con le catture nuove (vedi
