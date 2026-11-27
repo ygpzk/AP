@@ -6,7 +6,7 @@
 export const catture = {
   'ap-desktop-tall.webp': { w: 1200, h: 2833, v: 'd4347858' },
   'ap-desktop.webp': { w: 1200, h: 750, v: '8db0263b' },
-  'ap-iphone-01.webp': { w: 804, h: 4312, v: 'b1007cbf' },
+  'ap-iphone-01.webp': { w: 804, h: 4312, v: '2c5b5511' },
   'ap-iphone-02.webp': { w: 804, h: 4312, v: '69ca6e02' },
   'ap-iphone-03.webp': { w: 804, h: 4312, v: 'd21e72f4' },
   'ap-iphone-04.webp': { w: 804, h: 4312, v: '70c268bc' },
@@ -37,9 +37,9 @@ export const catture = {
   'pzk-bologna-m.webp': { w: 540, h: 720, v: 'ae6d59d0' },
   'pzk-bologna.webp': { w: 1080, h: 1440, v: '4cc7cd1d' },
   'pzk-casino-mobile.webp': { w: 600, h: 1298, v: '8e037056' },
-  'pzk-chat-tablet.webp': { w: 720, h: 960, v: '9a0428ba' },
-  'pzk-desktop.webp': { w: 1200, h: 750, v: '422a45c1' },
-  'pzk-mobile.webp': { w: 600, h: 1298, v: '39600288' },
-  'pzk-progetti-desktop.webp': { w: 1200, h: 750, v: '80e7e812' },
-  'pzk-tablet.webp': { w: 720, h: 1036, v: '5d2b53a6' },
+  'pzk-chat-tablet.webp': { w: 720, h: 960, v: '4ea42ad5' },
+  'pzk-desktop.webp': { w: 1200, h: 750, v: 'cf99efd7' },
+  'pzk-mobile.webp': { w: 600, h: 1298, v: '4088a7fb' },
+  'pzk-progetti-desktop.webp': { w: 1200, h: 750, v: '381b1ae3' },
+  'pzk-tablet.webp': { w: 720, h: 1036, v: '68c32417' },
 }
