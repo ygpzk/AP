@@ -29,7 +29,7 @@ altro sito personale.
 - **Il profilo «segnaletica» (26.11.2026).** Foto col cartello della lumaca,
   banner «lavori in corso», tema giallo → rosso, decorazione «Questionable»,
   effetto «Boost Relic», pronomi e bio nuovi. Su Discord questo profilo sta nel
-  profilo del server SOLLARY, e Lanyard e `dcdn.dstn.to` danno solo il profilo
+  profilo di un server, e Lanyard e `dcdn.dstn.to` danno solo il profilo
   principale: per questo le voci elencate in `profile.fisso` di `config.js`
   (`avatar`, `banner`, `theme`, `decoration`, `effect`) non si prendono dal
   vivo ma da `config.js`, e foto e banner sono file del sito
@@ -73,16 +73,38 @@ nel sito.
 
 ## Community (24.11.2026)
 
-La scheda **`#community`** sta dentro la home, mai una pagina a sé: il banner in
+La scheda **`#community`** sta dentro la home, mai una pagina a sé: il podcast in
 Bacheca e la voce nel piè di pagina portano lì con l'hash. Mette in fila i numeri
-pubblici dei due server Discord che seguo, OLLARE e SOLLARY: membri, presenze e
-boost. Non c'è un bot dentro i server: `api/community.mjs` legge solo gli inviti
-pubblici (`with_counts=true`), tiene i conteggi in cache cinque minuti e non
+pubblici di OLLARE, il server dove si fa il podcast: membri, presenze e boost.
+Non c'è un bot dentro il server: `api/community.mjs` legge solo l'invito
+pubblico (`with_counts=true`), tiene i conteggi in cache cinque minuti e non
 restituisce nomi, messaggi, canali vocali o presenze individuali. Il modulo
 `public/assets/community-tab.js` si carica solo quando la scheda si apre; la hero
 è `public/assets/community/hero.svg`, disegnata con Claude Code (Opus). La vecchia
 pagina `/community/` è stata tolta: `/community` e `/community/` rimandano a
 `/#community` in `vercel.json` (e nel server di prova).
+
+## Giugnoh's Cast in bacheca (27.11.2026)
+
+In cima alla Bacheca c'è il palco del podcast, nello stile della tv e dei pezzi
+di Diretta OS: l'insegna ON AIR, il logo in Pricedown che ondeggia, la prossima
+puntata col conto alla rovescia e «Unisciti» (l'invito di OLLARE, più il link
+diretto al palco @OLLARE PODCAST), il rullo dell'argomento a caso, l'archivio
+delle puntate coi loro argomenti e il nastro che scorre. Motore e disegno sono
+in `public/assets/podcast.js` e `podcast.css` (lo carica il modulo, non sta in
+`src/site.css`); in `app.js` ci sono solo l'aggancio in `renderBoard` e
+`mioRedattore()`.
+
+- **Le puntate** si scrivono a mano in `PODCAST` di `config.js`, con l'ora
+  italiana e il fuso; il palco passa da sé da «in arrivo» a «in onda» e ad
+  «andata in onda».
+- **I redattori** sono pzkko (il profilo del sito, dal vivo) e quelli in
+  `public/media/cast/redattori.json`: profilo, tema, badge, tag e foto vere,
+  scaricate dalla CDN di Discord in `public/media/cast/`. Si rinfrescano con
+  `scripts/cast-profili.py`, lanciato col Python del collegamento Discord (vedi
+  la testa dello script). Al clic su un redattore si apre la sua scheda: le
+  stesse classi della scheda del profilo, coi suoi colori calcolati come li
+  calcola Discord.
 
 ## Instagram in bacheca (24.11.2026)
 
@@ -267,9 +289,11 @@ così fotocamera, microfono, MIDI e WebXR non hanno i limiti dell'iframe.
 La fotocamera e il microfono partono solo dopo un gesto e si spengono alla
 chiusura; il riconoscimento vocale di Chrome può usare il servizio del browser
 (la nota lo dice). La Clip e il Boomerang restano Blob locali; la Busta non
-manda il frammento a nessuno. I motori e la UX sono di DeepSeek (OpenCode), la
-grafica di Claude Code: il brief è `design/frontiera-ux-deepseek.md`, il
-messaggio di consegna `design/MESSAGGIO-OPENCODE-LAB.md`. Per le prove:
+manda il frammento a nessuno. I motori e la UX sono di DeepSeek (OpenCode), il
+primo giro grafico di Claude Code; la grafica è stata rifinita il 27.11.2026 e
+ogni esperimento ha il suo foglio `esperimenti/<id>/<id>.css`, caricato dopo
+`lab.css`. Il brief è `design/frontiera-ux-deepseek.md`, il messaggio di
+consegna `design/MESSAGGIO-OPENCODE-LAB.md`. Per le prove:
 `npm run check`, `npm run build`, `npm run serve` e `/frontiera/`.
 
 ## Le dieci app in-profile (26.11.2026)

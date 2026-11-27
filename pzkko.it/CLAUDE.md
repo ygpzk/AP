@@ -21,12 +21,15 @@ qualcosa, lo scrive in `design/MESSAGGIO-OPENCODE-TIKTOK.md`; si risponde in
 La seconda ondata di esperimenti è in `public/frontiera/`: dieci tecnologie
 nuove (WebGL2, Web Audio, BroadcastChannel, Web Crypto, BarcodeDetector, Web
 Speech, OPFS, MediaRecorder, IA locale, WebXR). I motori sono fatti; la grafica
-è da rifinire. Brief: `design/frontiera-ux-deepseek.md`; consegna:
-`design/MESSAGGIO-OPENCODE-LAB.md`. La pagina è `/frontiera/` e il ponte è la
-riga `.lab__frontiera` in fondo allo Studio. **Non riscrivere i motori** e non
-aggiungere CSS globale: `lab.css` si carica anche dentro il profilo, quindi
-reset e variabili restano chiusi in `.lab-pagina` / `.lab-dlg`. Non toccare le
-dieci schede dello Studio né le dieci app di `public/games/lab/`.
+è stata rifinita il 27.11. Ogni esperimento ha il suo foglio
+(`esperimenti/<nome>/<nome>.css`, caricato dopo `lab.css` da `index.html`): si
+rifà un corpo senza toccare gli altri. Brief: `design/frontiera-ux-deepseek.md`;
+consegna: `design/MESSAGGIO-OPENCODE-LAB.md`; risposta:
+`design/RISPOSTA-OPENCODE-LAB.md`. La pagina è `/frontiera/` e il
+ponte è la riga `.lab__frontiera` in fondo allo Studio. **Non riscrivere i
+motori** e non aggiungere CSS globale: `lab.css` si carica anche dentro il
+profilo, quindi reset e variabili restano chiusi in `.lab-pagina` / `.lab-dlg`.
+Non toccare le dieci schede dello Studio né le dieci app di `public/games/lab/`.
 
 La scheda **Strumenti** della bacheca (26.11) passa da 17 a 42 voci: il lato
 dati è in `public/assets/config.js` e `public/assets/icons.js`, la UI e la
@@ -52,6 +55,9 @@ Specchio, Sabbia, Plotter, Livella, Dettatura, Tavolozza) sono ancora un'altra
 cosa. Non fonderli.
 Se manca un aggancio: `design/MESSAGGIO-OPENCODE-STUDIO.md`, risposta in
 `design/RISPOSTA-CLAUDE-STUDIO.md`.
+Dal 27.11 `studio/studio.css` è solo un indice: la base comune è `studio/base.css` e ogni vignetta ha il suo
+`studio/vignette/<id>.css` (si rifà una vignetta senza toccare le altre). Per vederle senza aspettare i dati veri:
+`/studio-prova/` (dati finti) e `node scripts/studio-foto.mjs --solo <id> --q "stato=offline&tema=dark"`.
 
 Il riquadro **«Chi sono»** della bacheca (26.11) è vivo: un foglio del muro col
 nastro che mostra quello che pzkko sta facendo sul pc (la chiocciola cambia
