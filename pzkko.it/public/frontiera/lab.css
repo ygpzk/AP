@@ -8,12 +8,14 @@
  * foglio col nastro dei tavoli e delle app del profilo (art/roulette/carta.webp, come games/foglio.css).
  *
  * I pezzi comuni (tasti, cursori, campi, foglietti, timbri, cartellini, post-it, note) li decide il foglio comune
- * /games/pzk-stile.css, importato qui sopra: qui c'è l'impaginazione della pagina, il guscio dei dialoghi e i corpi
- * dei dieci esperimenti. Le parti:
+ * /games/pzk-stile.css, importato qui sopra: qui c'è l'impaginazione della pagina, il guscio dei dialoghi e i pezzi
+ * condivisi dagli esperimenti. Le parti:
  *   1. la pagina della Frontiera (la saracinesca, il manifesto, i volantini);
  *   2. il guscio dei dialoghi (shell.js);
- *   3. i pezzi degli esperimenti (schermi, liste, colori, barre…);
- *   4. i dieci corpi.
+ *   3. i pezzi condivisi degli esperimenti (schermi, liste, colori, barre…).
+ *
+ * Dal 27.11 ogni esperimento ha il suo foglio, caricato dopo questo: `esperimenti/<nome>/<nome>.css`. Si rifà un
+ * corpo senza toccare gli altri (come le vignette dello Studio). Le regole dei corpi stanno lì, non qui.
  *
  * Il vincolo resta: niente regole globali. Questo foglio si carica anche dentro il profilo quando si apre una finestra
  * della Frontiera, quindi tutto sta dentro .lab-pagina o .lab-dlg. Le variabili --lab-* restano (qualcuno può
@@ -534,8 +536,6 @@ label.lab-tasto { cursor: pointer; }
 .lab-tela { display: block; width: 100%; height: 100%; touch-action: none; }
 .lab-range { width: 100%; }
 
-/* le due schede della busta: due tasti; la scheda aperta resta giù (foglio comune) */
-.lab-schede { display: flex; gap: 8px; padding-bottom: 4px; }
 
 /* lo schermo: la tela dei motori resta scura, incorniciata come una foto e attaccata col nastro agli angoli */
 .lab-telecamera {
@@ -610,20 +610,6 @@ label.lab-tasto { cursor: pointer; }
 .lab-lista li strong { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; color: var(--pzk-ink); }
 .lab-lista li small { margin-left: auto; flex: none; color: var(--pzk-matita); font: 400 11px/1 var(--pzk-mac); }
 
-/* la barra: un righello a matita riempito a tratteggio rosso */
-.lab-barra {
-  height: 12px;
-  border: 1.5px solid var(--pzk-ink);
-  background: var(--pzk-foglietto);
-  overflow: hidden;
-}
-.lab-barra > i {
-  display: block;
-  width: 0;
-  height: 100%;
-  background: repeating-linear-gradient(-45deg, var(--pzk-rosso) 0 4px, #d8404a 4px 8px);
-  transition: width .25s;
-}
 
 /* i foglietti li dà il foglio comune; qui i titoli anche quando non sono figli diretti (lo zaino) */
 .lab-dlg .lab-pannello h3 {
@@ -695,332 +681,14 @@ label.lab-tasto { cursor: pointer; }
   font: 400 15px/1.35 var(--pzk-marker);
 }
 
-/* ── 4. i dieci corpi ─────────────────────────────────────────────────────────────────────────────────────────── */
 
-/* 02 · battito: i pad sono tasti grossi della macchina da scrivere, quello che suona si accende di rosso */
-.lab-battito { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 20px; align-items: start; }
-.lab-scope-box { aspect-ratio: 3 / 1; }
-.lab-scope { display: block; width: 100%; height: 100%; }
-.lab-pads { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
-.lab-pad {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 6px;
-  min-height: 60px;
-  padding: 8px 9px 7px;
-  border: 1.5px solid var(--pzk-ink);
-  border-radius: 4px;
-  background: var(--pzk-foglietto);
-  color: var(--pzk-ink);
-  box-shadow: 0 3px 0 var(--pzk-ink);
-  transition: transform .08s, box-shadow .08s, background .1s, color .1s;
-}
-.lab-pad b { font: 400 24px/1 var(--pzk-fa); color: var(--pzk-ink); }
-.lab-pad span { font: 400 10px/1 var(--pzk-mac); color: var(--pzk-matita); text-transform: lowercase; }
-.lab-pad:active { transform: translateY(3px); box-shadow: 0 0 0 var(--pzk-ink); }
-.lab-pad.is-on { background: var(--pzk-rosso); border-color: var(--pzk-rosso); transform: translateY(2px); box-shadow: 0 1px 0 #5a0a12; }
-.lab-pad.is-on b, .lab-pad.is-on span { color: #fff; }
 
-/* 03 · due schede */
-.lab-due-tela { aspect-ratio: 900 / 520; }
 
-/* 04 · busta: il messaggio letto è una lettera a righe, chiusa con la ceralacca */
-.lab-messaggio {
-  position: relative;
-  min-height: 130px;
-  max-height: 340px;
-  margin: 0;
-  padding: 10px 46px 10px 14px;
-  border: 0;
-  background: repeating-linear-gradient(to bottom, var(--pzk-foglietto) 0 23px, rgba(20, 70, 160, .2) 23px 24px);
-  box-shadow: inset 0 0 0 1px rgba(22, 22, 22, .12);
-  color: var(--pzk-ink);
-  font: 400 15px/24px var(--pzk-mac);
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  overflow: auto;
-}
-.lab-dlg [data-letto-box] { position: relative; }
-.lab-dlg [data-letto-box]:not([hidden])::after {
-  content: '';
-  position: absolute;
-  z-index: 3;
-  right: 14px;
-  top: 12px;
-  width: 44px;
-  height: 44px;
-  border-radius: 46% 54% 50% 48%;
-  background:
-    radial-gradient(circle at 50% 50%, transparent 38%, rgba(0, 0, 0, .18) 40% 44%, transparent 46%),
-    radial-gradient(circle at 36% 30%, #e0505a, var(--pzk-rosso) 48%, #6d0810);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, .35);
-  transform: rotate(-12deg);
-  pointer-events: none;
-}
-.lab-dlg [data-uscita] .lab-campo { font-size: 12px; }
 
-/* 05 · occhio */
-.lab-occhio {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  gap: 20px;
-  align-items: start;
-}
-.lab-occhio__tela {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  pointer-events: none;
-}
-.lab-occhio__invito {
-  display: grid;
-  gap: 12px;
-  justify-items: center;
-  pointer-events: auto;
-}
-.lab-occhio__ultimo {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-height: 0;
-}
-.lab-occhio__val {
-  margin: 0;
-  font: 400 13px/1.45 var(--pzk-mac);
-  overflow-wrap: anywhere;
-}
-.lab-occhio__lista li { flex-wrap: wrap; }
-.lab-occhio__lista li .lab-occhio__val { flex: 1 1 160px; font-size: 12.5px; }
-@media (max-width: 820px) {
-  .lab-occhio { grid-template-columns: 1fr; }
-}
 
-/* 06 · voce: il muro, i colori e la conversazione scritta a macchina */
-.lab-voce { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; align-items: start; }
-.lab-muro-tela { aspect-ratio: 16 / 9; }
-.lab-voce__udito { min-height: 1.2em; font-family: var(--pzk-marker); color: var(--pzk-penna); }
-.lab-trascrizione {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  max-height: 230px;
-  overflow: auto;
-  padding-right: 4px;
-}
-.lab-riga-voce {
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-  margin: 0;
-  padding: 6px 2px;
-  border-bottom: 1.5px dashed rgba(22, 22, 22, .22);
-  font: 400 13px/1.4 var(--pzk-mac);
-}
-.lab-riga-voce:last-child { border-bottom: 0; }
-.lab-riga-voce b {
-  flex: none;
-  min-width: 38px;
-  font: 400 13px/1 var(--pzk-marker);
-  letter-spacing: 0;
-  text-transform: lowercase;
-  color: var(--pzk-matita);
-}
-.lab-riga-voce span { min-width: 0; overflow-wrap: anywhere; color: var(--pzk-ink); }
-.lab-riga-voce--tu b { color: var(--pzk-penna); }
-.lab-riga-voce--muro b { color: var(--pzk-rosso); }
-.lab-riga-voce--muro span { background: var(--pzk-evidenzia); padding: 0 2px; }
 
-/* 07 · zaino: la scatola dove si buttano i file */
-.lab-zaino-drop {
-  position: relative;
-  display: grid;
-  place-items: center;
-  gap: 6px;
-  min-height: 160px;
-  padding: 26px;
-  border: 2.5px dashed rgba(22, 22, 22, .55);
-  border-radius: 4px 9px 5px 10px;
-  background: url(/art/carta/kraft.webp) 50% 50% / cover;
-  box-shadow: inset 0 0 0 6px rgba(255, 255, 255, .12), var(--pzk-ombra-foglietto);
-  text-align: center;
-  color: var(--pzk-ink);
-  cursor: pointer;
-  transition: border-color .16s, transform .16s;
-}
-.lab-zaino-drop b { font: 400 34px/1 var(--pzk-fa); text-transform: lowercase; letter-spacing: .005em; }
-.lab-zaino-drop span { color: #2d2418; font: 400 13px/1.35 var(--pzk-mac); }
-.lab-zaino-drop u { color: var(--pzk-penna); font-family: var(--pzk-marker); text-decoration: none; border-bottom: 2px solid currentColor; }
-.lab-zaino-drop.is-over { border-color: var(--pzk-rosso); border-style: solid; transform: rotate(-.6deg) scale(1.01); }
-.lab-zaino-drop.is-off { opacity: .55; cursor: not-allowed; }
-.lab-zaino-lista li { flex-wrap: wrap; }
-.lab-zaino-lista li > strong { flex: 1 1 220px; }
-.lab-zaino-lista li > small { margin-left: 0; flex: 0 0 auto; }
-/* l'icona del file: un cartellino con l'angolo piegato */
-.lab-zaino-icona {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 36px;
-  height: 42px;
-  border: 1.5px solid var(--pzk-ink);
-  background: linear-gradient(225deg, transparent 8px, var(--pzk-foglietto) 8px);
-  color: var(--pzk-ink);
-  font: 400 9px/1 var(--pzk-mac);
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
-  box-shadow: 1px 1px 0 rgba(0, 0, 0, .14);
-}
 
-/* 08 · boomerang */
-.lab-boom { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 22px; align-items: start; }
-.lab-boom-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; background: #0b0c0a; }
 
-/* 09 · poeta: il motto è un manifesto giallo attaccato col suo nastro */
-.lab-poeta { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 26px; align-items: start; }
-.lab-dlg .lab-pannello.lab-poeta-quadro {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 330px;
-  margin: 10px 6px 6px;
-  padding: 28px 24px 22px;
-  background: none;
-  box-shadow: none;
-  transform: rotate(-.8deg);
-  filter: drop-shadow(0 1px .5px rgba(0, 0, 0, .4)) drop-shadow(0 10px 12px rgba(0, 0, 0, .25));
-}
-.lab-dlg .lab-pannello.lab-poeta-quadro::before {
-  inset: -25px -14px -24px -7px;
-  left: -7px;
-  top: -25px;
-  width: auto;
-  height: auto;
-  margin: 0;
-  z-index: -1;
-  background: none;
-  clip-path: none;
-  rotate: 0deg;
-  border: 0 solid transparent;
-  border-image: url(/art/carta/giallo.webp) 110 fill / 56px stretch;
-}
-.lab-poeta-quadro .lab-occhiello { color: #4a3d00; }
-.lab-motto {
-  margin: 20px 0 26px;
-  font: 400 clamp(30px, 4.4vw, 52px)/1 var(--pzk-fa);
-  letter-spacing: .005em;
-  text-transform: lowercase;
-  text-wrap: balance;
-  color: var(--pzk-ink);
-}
-.lab-motto::before { content: '«'; color: var(--pzk-rosso); font-family: var(--pzk-marker); }
-.lab-motto::after { content: '»'; color: var(--pzk-rosso); font-family: var(--pzk-marker); }
-.lab-motto.is-nuovo { animation: lab-motto-entra .4s cubic-bezier(.2, 1.4, .4, 1); }
-@keyframes lab-motto-entra { from { opacity: 0; transform: translateY(10px) rotate(-2deg) scale(.96); } }
-.lab-corpus {
-  max-height: 190px;
-  margin: 0;
-  padding: 0 0 0 20px;
-  overflow: auto;
-  color: var(--pzk-testo);
-  font: 400 12px/24px var(--pzk-mac);
-  background: repeating-linear-gradient(to bottom, transparent 0 23px, rgba(20, 70, 160, .16) 23px 24px);
-}
-.lab-corpus li { margin: 0; }
-.lab-corpus li::marker { color: var(--pzk-rosso); }
-
-/* 10 · ar: il ripiego è un adesivo vero che galleggia, l'AR è uno schermo */
-.lab-ar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; align-items: start; }
-.lab-ar-vista {
-  position: relative;
-  aspect-ratio: 1;
-  border: 7px solid var(--pzk-foglietto);
-  border-radius: 1px;
-  background: radial-gradient(ellipse at 50% 40%, #2a2b27, #0b0c0a 72%);
-  box-shadow: var(--pzk-ombra-schermo);
-  overflow: hidden;
-}
-.lab-ar-canvas { display: block; width: 100%; height: 100%; object-fit: cover; background: transparent; }
-.lab-ar-fallback {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 18px;
-  padding: 26px;
-  text-align: center;
-}
-.lab-ar-fallback .lab-nota { color: rgba(204, 255, 0, .82); font: 400 15px/1.35 var(--pzk-marker); }
-.lab-ar-fallback[hidden] { display: none; }
-/* lo stesso adesivo che l'AR attacca (lime, «pzk»), fustellato col bordo bianco */
-.lab-ar-sticker {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 150px;
-  height: 150px;
-  border: 9px solid #fff;
-  border-radius: 34px;
-  background: var(--pzk-fosforo);
-  color: var(--pzk-ink);
-  transform: perspective(600px) rotateX(8deg) rotateY(-14deg) rotateZ(-4deg);
-  box-shadow: 0 26px 40px rgba(0, 0, 0, .5), 0 0 0 1.5px rgba(0, 0, 0, .25);
-  animation: lab-ar-vola 4s ease-in-out infinite;
-}
-.lab-ar-sticker b { font: 400 66px/1 var(--pzk-fa); letter-spacing: 0; text-transform: lowercase; }
-.lab-ar-sticker i { position: absolute; right: 12px; bottom: 6px; font-style: normal; font-size: 22px; }
-@keyframes lab-ar-vola {
-  50% { transform: perspective(600px) rotateX(12deg) rotateY(12deg) rotateZ(3deg) translateY(-8px); }
-}
-/* il pannello sopra la camera: una striscia di carta */
-.lab-ar-ui {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: 12px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 10px 12px;
-  background: var(--pzk-foglietto);
-  box-shadow: var(--pzk-ombra-foglietto);
-  color: var(--pzk-ink);
-}
-.lab-ar-ui[hidden] { display: none; }
-.lab-passi { margin: 0; padding-left: 22px; color: var(--pzk-testo); font: 400 13px/1.55 var(--pzk-mac); }
-.lab-passi li { margin-bottom: 4px; }
-.lab-passi li::marker { color: var(--pzk-rosso); font-family: var(--pzk-fa); }
-
-/* quando la sessione AR è accesa, la finestra diventa un vetro sopra la camera: niente carta, niente velo */
-.lab-dlg.lab-ar-on {
-  width: 100vw;
-  height: 100dvh;
-  max-height: none;
-  margin: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-.lab-dlg.lab-ar-on::before { display: none; }
-.lab-dlg.lab-ar-on::backdrop { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
-.lab-dlg.lab-ar-on .lab-dentro { max-height: none; height: 100dvh; }
-.lab-dlg.lab-ar-on .lab-testa,
-.lab-dlg.lab-ar-on .lab-piede,
-.lab-dlg.lab-ar-on .lab-ar > .lab-colonna,
-.lab-dlg.lab-ar-on .lab-ar-fallback { display: none; }
-.lab-dlg.lab-ar-on .lab-corpo { padding: 0; overflow: visible; }
-.lab-dlg.lab-ar-on .lab-ar { display: block; }
-.lab-dlg.lab-ar-on .lab-ar-vista { position: fixed; inset: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; overflow: visible; }
-.lab-dlg.lab-ar-on .lab-ar-canvas { position: fixed; inset: 0; width: 100vw; height: 100dvh; }
-.lab-dlg.lab-ar-on .lab-ar-ui { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 3; }
 
 /* ── le finestre basse e i telefoni: il foglio prende tutto lo schermo, senza nastro (come foglio.css) ──────── */
 @media (max-width: 820px), (max-height: 680px) {
@@ -1046,7 +714,7 @@ label.lab-tasto { cursor: pointer; }
   .lab-descrizione { font-size: 12.5px; }
   .lab-corpo { padding: 14px 14px calc(16px + env(safe-area-inset-bottom)); }
   .lab-piede { padding: 0 14px calc(6px + env(safe-area-inset-bottom)); }
-  .lab-griglia-2, .lab-griglia-3, .lab-battito, .lab-voce, .lab-boom, .lab-poeta, .lab-ar { grid-template-columns: 1fr; }
+  .lab-griglia-2, .lab-griglia-3 { grid-template-columns: 1fr; }
 }
 @media (max-width: 820px) {
   .lab-griglia-pagina { grid-template-columns: 1fr; gap: 50px; padding: 40px 26px 60px; }
@@ -1065,12 +733,12 @@ label.lab-tasto { cursor: pointer; }
 }
 @media (max-width: 520px) {
   .lab-telecamera { aspect-ratio: 4 / 3; }
+  .lab-telecamera--quadrata { aspect-ratio: 1; }
   .lab-testa-pagina h1 { font-size: 50px; }
   .lab-scheda h2 { font-size: 30px; }
-  .lab-pads { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lab-dlg[open], .lab-dlg.lab-chiude, .lab-scheda, .lab-apri, .lab-chiudi, .lab-pad, .lab-zaino-drop { animation: none; transition: none; }
-  .lab-caricamento::before, .lab-ar-sticker, .lab-motto.is-nuovo { animation: none; }
+  .lab-dlg[open], .lab-dlg.lab-chiude, .lab-scheda, .lab-apri, .lab-chiudi { animation: none; transition: none; }
+  .lab-caricamento::before { animation: none; }
 }

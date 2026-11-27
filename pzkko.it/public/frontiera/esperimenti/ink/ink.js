@@ -21,6 +21,8 @@ const PALETTE = [
   ['bianco', '#ffffff'],
   ['rosso', '#ff2d55'],
 ]
+// le gocce automatiche non usano il bianco: schiarirebbe il muro invece di colorarlo
+const AUTO = PALETTE.filter(([nome]) => nome !== 'bianco')
 
 let ui = null
 
@@ -37,25 +39,56 @@ function costruisci() {
     voce: 'Inchiostro neon che scorre e non si asciuga. Disegna col dito o col puntatore; il muro fa il resto.',
     larga: true,
     corpo: `
-      <div class="lab-colonna">
-        <div class="lab-riga lab-riga--tra">
-          <div class="lab-riga" role="group" aria-label="il colore">
-            ${PALETTE.map(([nome, colore], i) => `
-              <button type="button" class="lab-colore${i === 0 ? ' is-on' : ''}" data-colore="${colore}"
-                aria-label="${nome}" aria-pressed="${i === 0}" style="--colore:${colore}">
-                <span></span>
-              </button>`).join('')}
-          </div>
-          <div class="lab-riga">
-            <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-auto aria-pressed="true">auto: sì</button>
-            <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-pulisci>pulisci</button>
-            <button type="button" class="lab-tasto lab-tasto--piccolo" data-salva>salva</button>
+      <div class="ink-banco">
+        <div class="ink-quadro">
+          <div class="lab-telecamera ink-muro">
+            <canvas class="lab-tela" width="${W}" height="${H}" aria-label="il muro da disegnare"></canvas>
+            <span class="ink-velo" aria-hidden="true"></span>
+            <div class="ink-invito" aria-hidden="true">
+              <span>disegna qui</span>
+              <small>premi e trascina</small>
+            </div>
+            <span class="ink-bagnato" aria-hidden="true">bagnato<small>non asciuga</small></span>
           </div>
         </div>
-        <div class="lab-telecamera">
-          <canvas class="lab-tela" width="${W}" height="${H}" aria-label="il muro da disegnare"></canvas>
+
+        <div class="ink-comandi">
+          <div class="ink-colori">
+            <p class="ink-mini">i colori</p>
+            <div class="ink-palette" role="group" aria-label="il colore">
+              ${PALETTE.map(([nome, colore], i) => `
+                <button type="button" class="lab-colore ink-penna${i === 0 ? ' is-on' : ''}" data-colore="${colore}"${i === 0 ? ' data-focus' : ''}
+                  aria-label="${nome}" aria-pressed="${i === 0}" style="--colore:${colore}">
+                  <span class="ink-tappo" aria-hidden="true"></span>
+                  <span class="ink-nome" aria-hidden="true">${nome}</span>
+                </button>`).join('')}
+            </div>
+          </div>
+          <div class="ink-tasti">
+            <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo ink-auto" data-auto aria-pressed="true">auto: sì</button>
+            <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo ink-gomma" data-pulisci>pulisci</button>
+            <button type="button" class="lab-tasto lab-tasto--pieno lab-tasto--piccolo ink-salva" data-salva>salva <small>png</small></button>
+          </div>
         </div>
-        <p class="lab-nota"><b>Come funziona:</b> il puntatore lascia una scia; il colore si mescola da solo. «auto» accende le macchie che cadono mentre guardi. Tutto resta nella scheda: nessuna immagine parte.</p>
+
+        <aside class="ink-lato">
+          <div class="ink-etichetta">
+            <p class="ink-eti-occhiello"><span>frontiera · 01</span><span>ink</span></p>
+            <p class="ink-eti-titolo">muro liquido</p>
+            <p class="ink-eti-dati">inchiostro neon su nero<br>1280 × 720 · 2026</p>
+            <p class="ink-saggio" aria-hidden="true"><i style="--p:#ccff00"></i><i style="--p:#9d00ff"></i><i style="--p:#00e0ff"></i><span>prova</span></p>
+            <dl class="ink-eti-scheda">
+              <div><dt>gesto</dt><dd>puntatore o dito</dd></div>
+              <div><dt>tecnica</dt><dd>inchiostro liquido</dd></div>
+              <div><dt>uscita</dt><dd>immagine png</dd></div>
+            </dl>
+            <span class="ink-timbro" aria-hidden="true">pzk</span>
+            <p class="ink-eti-istruzioni">trascina il dito sul muro.<br>se ti fermi, <b>gocciola da solo</b>.</p>
+            <p class="ink-eti-freccia" aria-hidden="true">prendi un colore ↓</p>
+          </div>
+        </aside>
+
+        <p class="lab-nota ink-nota-fondo"><b>nota del muro:</b> la scia resta nella scheda; «auto» lascia cadere l'inchiostro, «salva» è un PNG. Nessuna immagine parte.</p>
       </div>`,
     onChiudi: () => { ui = null },
   })
@@ -65,15 +98,19 @@ function costruisci() {
 
   let tela = tela0
   let motore = null
+  let modoWebGL = false
   try {
     const gl = tela.getContext('webgl2', { alpha: false, antialias: false, depth: false, preserveDrawingBuffer: true })
     if (!gl) throw new Error('WebGL2 non disponibile')
     motore = new WebGLInk(gl, tela)
+    modoWebGL = true
     d.nota('WebGL2 · disegna sul muro')
   } catch (e) {
     console.warn('Muro liquido: passo a Canvas 2D', e)
     tela = ripiegaCanvas(tela)
     motore = new CanvasInk(tela.getContext('2d'), tela)
+    const tech = d.dlg.querySelector('.lab-tech')
+    if (tech) tech.textContent = 'Canvas 2D · scie'
     d.nota('Canvas 2D · disegna sul muro', 'attesa')
   }
 
@@ -94,23 +131,24 @@ function costruisci() {
     }
   }
 
-  const aggiungi = (p, raggio, col) => {
-    macchie.push({ x: p.x, y: p.y, r: raggio, c: col })
+  const aggiungi = (p, raggio, col, a = 0.55) => {
+    macchie.push({ x: p.x, y: p.y, r: raggio, c: col, a })
   }
 
   const giro = (now) => {
     if (fermo) return
     raf = requestAnimationFrame(giro)
     if (auto && now > prossimoAuto) {
-      const n = 1 + Math.floor(Math.random() * 2)
+      const n = Math.random() < 0.2 ? 2 : 1
       for (let i = 0; i < n; i++) {
         aggiungi(
           { x: Math.random() * W, y: Math.random() * H },
-          26 + Math.random() * 70,
-          PALETTE[Math.floor(Math.random() * PALETTE.length)][1],
+          34 + Math.random() * 58,
+          AUTO[Math.floor(Math.random() * AUTO.length)][1],
+          0.45 + Math.random() * 0.17,
         )
       }
-      prossimoAuto = now + 380 + Math.random() * 620
+      prossimoAuto = now + 380 + Math.random() * 440
     }
     motore.frame(now, macchie)
     macchie.length = 0
@@ -120,6 +158,7 @@ function costruisci() {
   tela.style.cursor = 'crosshair'
   tela.addEventListener('pointerdown', (e) => {
     e.preventDefault()
+    d.corpo.classList.add('ink-vivo')
     try { tela.setPointerCapture(e.pointerId) } catch {}
     giu = true
     ultimo = punto(e)
@@ -169,6 +208,7 @@ function costruisci() {
     if (e.target.closest('[data-pulisci]')) {
       motore.pulisci()
       macchie.length = 0
+      d.corpo.classList.remove('ink-vivo')
       d.nota('muro pulito', 'ok')
       return
     }
@@ -187,13 +227,41 @@ function costruisci() {
     motore?.ferma?.()
   })
 
-  // un paio di macchie all'apertura, così il muro non è vuoto
-  for (let i = 0; i < 3; i++) {
-    aggiungi(
-      { x: W * (0.25 + Math.random() * 0.5), y: H * (0.25 + Math.random() * 0.5) },
-      70 + Math.random() * 90,
-      PALETTE[i % PALETTE.length][1],
-    )
+  // il muro si apre con una colata già caduta: quattro pozze, una scia e qualche goccia.
+  // Le posizioni sono in frazioni della tela, così la composizione resta la stessa.
+  // Il ripiego Canvas 2D resta quello di prima: tre macchie, senza il fondale largo.
+  const AVVIO = [
+    // la pozza viola, in alto a sinistra
+    [.13, .24, 120, '#9d00ff'], [.19, .33, 86, '#9d00ff'], [.25, .42, 58, '#9d00ff'],
+    // la scia lime che scende verso il centro
+    [.34, .14, 92, '#ccff00'], [.40, .22, 72, '#ccff00'], [.46, .30, 55, '#ccff00'], [.52, .38, 40, '#ccff00'],
+    // la pozza arancio, a destra
+    [.66, .17, 115, '#ff6a00'], [.74, .27, 82, '#ff6a00'], [.81, .37, 56, '#ff6a00'], [.86, .16, 30, '#ffffff'],
+    // la colata rossa e viola, in basso
+    [.22, .70, 110, '#9d00ff'], [.30, .78, 78, '#ff2d55'], [.39, .83, 55, '#9d00ff'],
+    [.50, .80, 40, '#00e0ff'], [.61, .72, 65, '#9d00ff'], [.72, .66, 85, '#ff2d55'],
+    [.82, .58, 55, '#ff6a00'], [.90, .70, 30, '#ccff00'],
+    // le gocce
+    [.44, .57, 26, '#ccff00'], [.58, .52, 28, '#00e0ff'], [.14, .58, 32, '#00e0ff'],
+    [.68, .47, 22, '#ffffff'], [.31, .50, 36, '#00e0ff'],
+  ]
+  // il fondale: poche macchie larghissime e basse, per non lasciare il nero nudo
+  const FONDALE = [
+    [.20, .30, 300, '#9d00ff', .13], [.55, .18, 280, '#00e0ff', .10],
+    [.85, .40, 260, '#ff6a00', .12], [.55, .86, 300, '#ff2d55', .10],
+    [.24, .80, 240, '#ccff00', .09],
+  ]
+  if (modoWebGL) {
+    for (const [x, y, r, c, a] of FONDALE) aggiungi({ x: x * W, y: y * H }, r, c, a)
+    for (const [x, y, r, c] of AVVIO) aggiungi({ x: x * W, y: y * H }, r, c, 0.92)
+  } else {
+    for (let i = 0; i < 3; i++) {
+      aggiungi(
+        { x: W * (0.25 + Math.random() * 0.5), y: H * (0.25 + Math.random() * 0.5) },
+        70 + Math.random() * 90,
+        PALETTE[i % PALETTE.length][1],
+      )
+    }
   }
 
   d.apri()
@@ -345,7 +413,7 @@ class WebGLInk {
     gl.uniform2f(this.pieno.u.uRes, W, H)
     gl.uniform2f(this.pieno.u.uFlow, this.flow[0], this.flow[1])
     gl.uniform1f(this.pieno.u.uTime, this.tempo)
-    gl.uniform1f(this.pieno.u.uDecay, 0.986)
+    gl.uniform1f(this.pieno.u.uDecay, 0.9993)
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
 
     // 2. le macchie nuove, in addizione
@@ -357,7 +425,7 @@ class WebGLInk {
       gl.uniform2f(this.macchia.u.uCenter, (m.x / W) * 2 - 1, 1 - (m.y / H) * 2)
       gl.uniform2f(this.macchia.u.uSize, (m.r * 2) / W, (m.r * 2) / H)
       gl.uniform3f(this.macchia.u.uColor, c[0], c[1], c[2])
-      gl.uniform1f(this.macchia.u.uAlpha, 0.19)
+      gl.uniform1f(this.macchia.u.uAlpha, m.a ?? 0.55)
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
     }
 
@@ -464,7 +532,7 @@ void main() {
     texture(uTex, uv - vec2(1.0, 0.0) / uRes) +
     texture(uTex, uv + vec2(0.0, 1.0) / uRes) +
     texture(uTex, uv - vec2(0.0, 1.0) / uRes);
-  c = mix(c, b * 0.25, 0.14);
+  c = mix(c, b * 0.25, 0.1);
   outColor = c * uDecay;
 }`
 

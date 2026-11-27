@@ -1,0 +1,728 @@
+/* due.css — il corpo di «Due schede» (il campo da Pong). Le regole comuni stanno in lab.css.
+ *
+ * 03 · due schede — la cabina:
+ *   il campo è il vetro di un cabinato di lamiera nera; sopra il manifesto di carta («PONG / due schede»)
+ *   e il tabellone del punteggio, sotto il banco coi tasti e la striscia di carta delle istruzioni.
+ *   La finestra si prende l'altezza che serve perché il campo intero resti dentro, a qualunque misura.
+ */
+
+/* ── la finestra: più alta e più larga, per far stare tutto il campo ─────────────────────────────────────────── */
+.lab-dlg[data-lab='due'] {
+  width: min(1200px, calc(100vw - 72px));
+}
+.lab-dlg[data-lab='due'] .lab-dentro {
+  height: min(calc(100dvh - 76px), 940px);
+  max-height: min(calc(100dvh - 76px), 940px);
+}
+.lab-dlg[data-lab='due'] .lab-testa {
+  padding: 5px 8px 9px 22px;
+}
+/* la spiegazione sta già nella cabina e nel velo: qui ruba solo altezza al campo */
+.lab-dlg[data-lab='due'] .lab-descrizione {
+  display: none;
+}
+.lab-dlg[data-lab='due'] .lab-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px 16px 12px;
+}
+
+/* ── la cabina ───────────────────────────────────────────────────────────────────────────────────────────────── */
+.lab-dlg[data-lab='due'] .lab-due {
+  position: relative;
+  display: grid;
+  grid-template-areas:
+    'marquee'
+    'scena'
+    'banco';
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 10px 12px 12px;
+  border: 2px solid #0d0d0b;
+  border-radius: 10px 10px 5px 5px;
+  background:
+    radial-gradient(circle at 50% 50%, #8d8c81 0 1.4px, #30302b 2px 3px, transparent 3.7px) left 8px top 8px / 13px 13px no-repeat,
+    radial-gradient(circle at 50% 50%, #8d8c81 0 1.4px, #30302b 2px 3px, transparent 3.7px) right 8px top 8px / 13px 13px no-repeat,
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .022) 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, #282823, #1a1a16 60%, #151512);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .09),
+    inset 0 -18px 28px rgba(0, 0, 0, .28),
+    0 4px 0 rgba(0, 0, 0, .22),
+    0 22px 34px -18px rgba(0, 0, 0, .55);
+  color: #f1ead7;
+}
+
+/* il manifesto: una striscia di carta incollata sulla lamiera, col nome della cabina */
+.lab-dlg[data-lab='due'] .lab-due-marquee {
+  grid-area: marquee;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 50px;
+  padding: 5px 12px 5px 10px;
+  border-radius: 4px;
+  background:
+    radial-gradient(circle at 50% 50%, #8d8c81 0 1.4px, #2e2e29 2px 3px, transparent 3.7px) left 6px top 6px / 12px 12px no-repeat,
+    radial-gradient(circle at 50% 50%, #8d8c81 0 1.4px, #2e2e29 2px 3px, transparent 3.7px) right 6px top 6px / 12px 12px no-repeat,
+    linear-gradient(180deg, #12120f, #0b0b09);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .07),
+    inset 0 -8px 14px rgba(0, 0, 0, .55),
+    0 2px 0 rgba(0, 0, 0, .35);
+}
+.lab-dlg[data-lab='due'] .lab-due-marchio {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  flex: none;
+  padding: 3px 13px 4px;
+  background: linear-gradient(175deg, #fffdf1, #f0e8d2);
+  color: var(--pzk-ink);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .45), 0 5px 12px rgba(0, 0, 0, .25);
+  transform: rotate(-.9deg);
+}
+.lab-dlg[data-lab='due'] .lab-due-marchio::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  width: 54px;
+  height: 13px;
+  translate: -50% 0;
+  background: var(--pzk-nastro);
+  clip-path: var(--pzk-code);
+  transform: rotate(1.2deg);
+  opacity: .92;
+}
+.lab-dlg[data-lab='due'] .lab-due-marchio b {
+  font: 400 32px/.88 var(--pzk-fa);
+  letter-spacing: .015em;
+}
+.lab-dlg[data-lab='due'] .lab-due-marchio i {
+  font: 400 14px/1 var(--pzk-marker);
+  font-style: normal;
+  color: var(--pzk-rosso);
+  transform: rotate(-2deg);
+  transform-origin: 0 50%;
+}
+.lab-dlg[data-lab='due'] .lab-due-targhetta {
+  min-width: 0;
+  margin-left: 2px;
+  overflow: hidden;
+  color: #8e8a7c;
+  font: 400 9px/1.2 var(--pzk-mac);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* il tabellone: legge lo stesso punteggio del campo, ma si vede da fuori */
+.lab-dlg[data-lab='due'] .lab-due-punteggio {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex: none;
+  padding: 2px 9px 3px;
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 3px;
+  background: #060705;
+  box-shadow: inset 0 0 14px rgba(204, 255, 0, .05), 0 1px 0 rgba(255, 255, 255, .06);
+}
+.lab-dlg[data-lab='due'] .lab-due-punto {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+}
+.lab-dlg[data-lab='due'] .lab-due-punto small {
+  color: #7f7c70;
+  font: 400 7.5px/1 var(--pzk-mac);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.lab-dlg[data-lab='due'] .lab-due-punto b {
+  color: var(--pzk-fosforo);
+  font: 400 27px/.85 var(--pzk-fa);
+  text-shadow: 0 0 9px rgba(204, 255, 0, .45);
+}
+.lab-dlg[data-lab='due'] .lab-due-punto:last-child b {
+  color: #b46bff;
+  text-shadow: 0 0 9px rgba(157, 0, 255, .6);
+}
+.lab-dlg[data-lab='due'] .lab-due-duepunti {
+  align-self: center;
+  color: #57554d;
+  font: 400 20px/1 var(--pzk-mac);
+  font-style: normal;
+}
+
+/* ── il vetro: il campo resta 900 × 520, mai deformato ──────────────────────────────────────────────────────── */
+.lab-dlg[data-lab='due'] .lab-due-scena {
+  grid-area: scena;
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  padding: 14px 18px 6px;
+}
+.lab-dlg[data-lab='due'] .lab-due-tela {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 900 / 520;
+  border: 0;
+  border-radius: 2px;
+  background: #05070a;
+  box-shadow:
+    0 0 0 1px #000,
+    0 0 0 12px #2d2e29,
+    0 0 0 14px #0b0b09,
+    0 0 0 15px rgba(255, 255, 255, .07),
+    0 18px 28px rgba(0, 0, 0, .6);
+  overflow: visible;
+}
+/* il campo prende il lato corto: così a 1366×768 e a 900×900 sta intero, senza tagli */
+@media (min-width: 821px) {
+  .lab-dlg[data-lab='due'] .lab-due-scena {
+    container-type: size;
+  }
+  @supports (width: 1cqw) {
+    .lab-dlg[data-lab='due'] .lab-due-tela {
+      width: min(100cqw, calc(100cqh * 900 / 520));
+    }
+  }
+}
+.lab-dlg[data-lab='due'] .lab-due-tela .lab-tela {
+  position: relative;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 1px;
+  background: #05070a;
+  cursor: crosshair;
+}
+.lab-dlg[data-lab='due'] .lab-due-riflesso {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: 1px;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, .13) 0 1px, transparent 1px 3px),
+    linear-gradient(128deg, rgba(255, 255, 255, .07) 0 18%, transparent 34%);
+  opacity: .8;
+}
+/* le viti del vetro: quattro, ai quattro angoli del campo */
+.lab-dlg[data-lab='due'] .lab-due-vite {
+  position: absolute;
+  z-index: 8;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, #a2a198, #4a4a43 55%, #1b1b17 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .15), 0 1px 1px rgba(0, 0, 0, .7);
+  pointer-events: none;
+}
+.lab-dlg[data-lab='due'] .lab-due-vite::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 4px;
+  border-top: 1px solid #111;
+  transform: rotate(28deg);
+}
+.lab-dlg[data-lab='due'] .lab-due-vite--1 { top: -8px; left: -8px; }
+.lab-dlg[data-lab='due'] .lab-due-vite--2 { top: -8px; right: -8px; }
+.lab-dlg[data-lab='due'] .lab-due-vite--3 { bottom: -8px; left: -8px; }
+.lab-dlg[data-lab='due'] .lab-due-vite--4 { bottom: -8px; right: -8px; }
+/* il nastro che tiene il vetro, sopra la lamiera */
+.lab-dlg[data-lab='due'] .lab-due-tela::before,
+.lab-dlg[data-lab='due'] .lab-due-tela::after {
+  z-index: 9;
+  top: -17px;
+  width: 66px;
+  height: 18px;
+  background: var(--pzk-nastro);
+  opacity: .95;
+}
+
+/* ── il velo di attesa: un foglietto sul vetro, col tasto vero ─────────────────────────────────────────────── */
+.lab-dlg[data-lab='due'] .lab-due-velo {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  background: rgba(4, 6, 9, .55);
+}
+.lab-dlg[data-lab='due'] .lab-due-velo-foglio {
+  position: relative;
+  width: min(330px, 100%);
+  padding: 18px 18px 16px;
+  background: #f8f1dd;
+  color: var(--pzk-ink);
+  text-align: center;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, .4), 0 16px 26px rgba(0, 0, 0, .5);
+  transform: rotate(-1.1deg);
+  animation: due-appoggia .26s cubic-bezier(.2, 1.4, .4, 1);
+}
+.lab-dlg[data-lab='due'] .lab-due-velo-foglio::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  width: 52px;
+  height: 13px;
+  translate: -50% 0;
+  background: var(--pzk-nastro);
+  clip-path: var(--pzk-code);
+  opacity: .9;
+}
+.lab-dlg[data-lab='due'] .lab-due-velo-titolo {
+  margin: 0;
+  color: var(--pzk-rosso);
+  font: 400 21px/1.05 var(--pzk-marker);
+  transform: rotate(-1deg);
+}
+.lab-dlg[data-lab='due'] .lab-due-velo-testo {
+  margin: 6px 0 10px;
+  color: var(--pzk-testo);
+  font: 400 11.5px/1.4 var(--pzk-mac);
+}
+.lab-dlg[data-lab='due'] .lab-due-velo .lab-tasto {
+  width: 100%;
+  justify-content: center;
+  border-color: #0a0a08;
+  background: var(--pzk-ink);
+  color: #fff;
+  box-shadow: 0 4px 0 #0a0a08;
+}
+@keyframes due-appoggia {
+  from { opacity: 0; transform: translateY(-10px) rotate(-2.4deg) scale(.97); }
+}
+
+/* ── il banco: tasti veri, striscia di carta e timbri ───────────────────────────────────────────────────────── */
+.lab-dlg[data-lab='due'] .lab-due-banco {
+  grid-area: banco;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'istruzioni stato'
+    'istruzioni comandi';
+  align-items: center;
+  gap: 7px 16px;
+  padding: 9px 12px 11px;
+  border-radius: 3px;
+  background:
+    radial-gradient(circle at 50% 50%, #8d8c81 0 1.4px, #2e2e29 2px 3px, transparent 3.7px) left 6px top 6px / 12px 12px no-repeat,
+    radial-gradient(circle at 50% 50%, #8d8c81 0 1.4px, #2e2e29 2px 3px, transparent 3.7px) right 6px top 6px / 12px 12px no-repeat,
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, .02) 0 1px, transparent 1px 6px),
+    linear-gradient(180deg, #2b2b26, #20201c);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), inset 0 12px 20px rgba(0, 0, 0, .22);
+}
+.lab-dlg[data-lab='due'] .lab-due-istruzioni {
+  grid-area: istruzioni;
+  position: relative;
+  align-self: center;
+  max-width: 70ch;
+  padding: 7px 12px 8px;
+  background: linear-gradient(175deg, #fffdf2, #f1e9d4);
+  color: var(--pzk-testo);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .35), 0 7px 14px rgba(0, 0, 0, .22);
+  transform: rotate(-.45deg);
+}
+.lab-dlg[data-lab='due'] .lab-due-istruzioni::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 22px;
+  width: 46px;
+  height: 11px;
+  background: var(--pzk-nastro);
+  clip-path: var(--pzk-code);
+  opacity: .9;
+  transform: rotate(-2deg);
+}
+.lab-dlg[data-lab='due'] .lab-due-istruzioni .lab-nota {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+.lab-dlg[data-lab='due'] .lab-due-istruzioni--doppio,
+.lab-dlg[data-lab='due'] .lab-due-istruzioni--racchetta {
+  display: none;
+}
+.lab-dlg[data-lab='due'][data-ospite='si'] .lab-due-istruzioni--campo {
+  display: none;
+}
+.lab-dlg[data-lab='due'][data-ospite='si'] .lab-due-istruzioni--doppio {
+  display: block;
+}
+.lab-dlg[data-lab='due'][data-modo='ospite'] .lab-due-istruzioni--campo {
+  display: none;
+}
+.lab-dlg[data-lab='due'][data-modo='ospite'] .lab-due-istruzioni--racchetta {
+  display: block;
+}
+.lab-dlg[data-lab='due'] .lab-due-stato {
+  grid-area: stato;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+}
+/* i timbri devono leggersi sulla lamiera: niente moltiplicazione */
+.lab-dlg[data-lab='due'] .lab-due-stato .lab-badge {
+  background: #f7f1df;
+  mix-blend-mode: normal;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .45);
+}
+.lab-dlg[data-lab='due'] .lab-due-regola {
+  padding: 2px 6px 1px;
+  border: 1.5px solid rgba(230, 220, 191, .55);
+  border-radius: 2px;
+  color: #ded4b8;
+  font: 400 9px/1.1 var(--pzk-mac);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: rotate(3deg);
+}
+.lab-dlg[data-lab='due'] .lab-due-comandi {
+  grid-area: comandi;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.lab-dlg[data-lab='due'] .lab-due-comandi .lab-tasto {
+  min-height: 27px;
+  padding: 5px 11px 4px;
+  border-color: #0c0c0a;
+  box-shadow: 0 3px 0 #0c0c0a, 0 4px 0 rgba(255, 255, 255, .06);
+}
+.lab-dlg[data-lab='due'] .lab-due-comandi [data-apri-scheda] {
+  background: var(--pzk-giallo);
+}
+.lab-dlg[data-lab='due'] .lab-due-comandi [data-rigioca] {
+  background: var(--pzk-rosso);
+  color: #fff;
+  box-shadow: 0 3px 0 #5a0a12, 0 4px 0 rgba(255, 255, 255, .06);
+}
+.lab-dlg[data-lab='due'] .lab-due-comandi [data-copia].is-copiato {
+  background: #e9f6d9;
+  color: var(--pzk-verde);
+  border-color: var(--pzk-verde);
+  box-shadow: 0 3px 0 var(--pzk-verde);
+}
+@media (hover: hover) {
+  .lab-dlg[data-lab='due'] .lab-due-comandi [data-apri-scheda]:not(:disabled):hover {
+    background: #ffe45c;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-comandi [data-rigioca]:not(:disabled):hover {
+    background: #c51a29;
+    color: #fff;
+  }
+}
+/* la gettoniera: si vede solo quando il banco sta di fianco (schermi bassi) */
+.lab-dlg[data-lab='due'] .lab-due-gettoniera {
+  display: none;
+}
+
+/* i comandi che non servono a chi è ospite: la racchetta non apre altre schede */
+.lab-dlg[data-lab='due'][data-modo='ospite'] [data-apri-scheda] {
+  display: none;
+}
+.lab-dlg[data-lab='due'][data-ospite='si'] .lab-due-comandi [data-apri-scheda] {
+  display: none;
+}
+
+/* ── la guida: su telefono è un foglietto a parte, sotto la cabina ─────────────────────────────────────────── */
+.lab-dlg[data-lab='due'] .lab-due-guida {
+  display: none;
+  position: relative;
+  flex: none;
+  padding: 10px 14px 12px;
+  background: linear-gradient(175deg, #fffdf0, #f6edc9);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, .16), 0 10px 18px -12px rgba(0, 0, 0, .45);
+  transform: rotate(.35deg);
+}
+.lab-dlg[data-lab='due'] .lab-due-guida::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 18px;
+  width: 48px;
+  height: 11px;
+  background: var(--pzk-nastro);
+  clip-path: var(--pzk-code);
+  opacity: .9;
+  transform: rotate(-2.5deg);
+}
+.lab-dlg[data-lab='due'] .lab-due-guida-titolo {
+  display: inline-block;
+  padding: 0 4px;
+  background: var(--pzk-evidenzia);
+  color: var(--pzk-ink);
+  font: 400 15px/1.1 var(--pzk-marker);
+}
+.lab-dlg[data-lab='due'] .lab-due-guida ol {
+  margin: 7px 0 0;
+  padding-left: 18px;
+  color: var(--pzk-testo);
+  font: 400 11.5px/1.45 var(--pzk-mac);
+}
+.lab-dlg[data-lab='due'] .lab-due-guida li + li {
+  margin-top: 3px;
+}
+.lab-dlg[data-lab='due'] .lab-due-guida b {
+  color: var(--pzk-ink);
+  font-weight: 400;
+  background: var(--pzk-evidenzia);
+  padding: 0 2px;
+}
+
+/* ── gli schermi bassi (1366×768): il banco passa di fianco, così il campo resta grande ─────────────────────── */
+@media (min-width: 821px) and (max-height: 860px) {
+  .lab-dlg[data-lab='due'] .lab-due {
+    grid-template-columns: minmax(0, 1fr) 260px;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      'marquee marquee'
+      'scena banco';
+  }
+  .lab-dlg[data-lab='due'] .lab-due-banco {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 10px 11px 12px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-stato {
+    order: 1;
+    justify-content: flex-start;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-istruzioni {
+    order: 2;
+    max-width: none;
+    margin-top: 0;
+    align-self: stretch;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-gettoniera {
+    order: 3;
+    display: grid;
+    place-items: center;
+    gap: 7px;
+    flex: 1;
+    min-height: 34px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-fessura {
+    display: block;
+    width: 54px;
+    height: 8px;
+    border-radius: 50%;
+    background: #060605;
+    box-shadow: inset 0 2px 3px #000, 0 1px 0 rgba(255, 255, 255, .12);
+    transform: rotate(-2deg);
+  }
+  .lab-dlg[data-lab='due'] .lab-due-gettoniera-testo {
+    color: #7f7b6e;
+    font: 400 8px/1 var(--pzk-mac);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-comandi {
+    order: 4;
+    flex-direction: column;
+    margin-top: 0;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-comandi .lab-tasto {
+    width: 100%;
+    min-height: 30px;
+  }
+}
+
+/* ── il telefono: la finestra è tutta schermo, la cabina sta in alto e la guida sotto ────────────────────────── */
+@media (max-width: 820px) {
+  .lab-dlg[data-lab='due'] {
+    width: 100vw;
+    max-height: 100dvh;
+    height: 100dvh;
+    margin: 0;
+  }
+  .lab-dlg[data-lab='due'] .lab-dentro {
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+  .lab-dlg[data-lab='due'] .lab-testa {
+    padding: calc(6px + env(safe-area-inset-top)) 6px 8px 14px;
+  }
+  .lab-dlg[data-lab='due'] .lab-corpo {
+    gap: 8px;
+    padding: 6px 8px calc(10px + env(safe-area-inset-bottom));
+  }
+  .lab-dlg[data-lab='due'] .lab-due {
+    flex: none;
+    gap: 8px;
+    margin-top: auto;
+    padding: 8px;
+    border-radius: 7px 7px 4px 4px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-marquee {
+    min-height: 44px;
+    gap: 8px;
+    padding: 3px 8px 3px 7px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-marchio {
+    gap: 7px;
+    padding: 2px 9px 3px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-marchio b {
+    font-size: 27px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-marchio i {
+    font-size: 12px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-targhetta {
+    display: none;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-punteggio {
+    gap: 5px;
+    padding: 2px 7px 3px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-punto b {
+    font-size: 23px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-duepunti {
+    font-size: 16px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-scena {
+    padding: 12px 10px 4px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-tela {
+    width: 100%;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-tela::before,
+  .lab-dlg[data-lab='due'] .lab-due-tela::after {
+    top: -14px;
+    width: 52px;
+    height: 15px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-vite--1,
+  .lab-dlg[data-lab='due'] .lab-due-vite--3 { left: -7px; }
+  .lab-dlg[data-lab='due'] .lab-due-vite--2,
+  .lab-dlg[data-lab='due'] .lab-due-vite--4 { right: -7px; }
+  .lab-dlg[data-lab='due'] .lab-due-velo {
+    padding: 8px;
+    background: rgba(4, 6, 9, .38);
+  }
+  .lab-dlg[data-lab='due'] .lab-due-velo-foglio {
+    width: min(300px, 100%);
+    padding: 14px 12px 11px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-velo-titolo {
+    font-size: 17px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-velo-testo {
+    margin: 4px 0 7px;
+    font-size: 10.5px;
+    line-height: 1.3;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-velo .lab-tasto {
+    font-size: 16px;
+    padding: .12em .45em .16em;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-riflesso {
+    opacity: .55;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-banco {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'stato'
+      'comandi'
+      'istruzioni';
+    align-content: start;
+    gap: 8px;
+    padding: 8px 10px 10px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-stato {
+    justify-content: flex-start;
+    gap: 6px;
+  }
+  /* la seconda scheda si vede già nel campo e nello stato in alto: sul telefono il timbro è di troppo */
+  .lab-dlg[data-lab='due'] .lab-due-stato [data-ospite] {
+    display: none;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-comandi {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-comandi .lab-tasto {
+    width: 100%;
+    min-height: 38px;
+    padding: 6px 8px 5px;
+    font-size: 12px;
+    text-align: center;
+    white-space: normal;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-comandi [data-apri-scheda] {
+    grid-column: 1 / -1;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-istruzioni {
+    max-width: none;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-guida {
+    display: block;
+    margin-bottom: auto;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-guida--ospite {
+    display: none;
+  }
+  .lab-dlg[data-lab='due'][data-modo='ospite'] .lab-due-guida--campo {
+    display: none;
+  }
+  .lab-dlg[data-lab='due'][data-modo='ospite'] .lab-due-guida--ospite {
+    display: block;
+  }
+}
+
+@media (max-width: 420px) {
+  .lab-dlg[data-lab='due'] .lab-due-comandi .lab-tasto {
+    font-size: 11.5px;
+    min-height: 36px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-istruzioni .lab-nota {
+    font-size: 11px;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-guida ol {
+    font-size: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-dlg[data-lab='due'] .lab-due-velo-foglio {
+    animation: none;
+  }
+  .lab-dlg[data-lab='due'] .lab-due-marchio,
+  .lab-dlg[data-lab='due'] .lab-due-velo-foglio,
+  .lab-dlg[data-lab='due'] .lab-due-istruzioni,
+  .lab-dlg[data-lab='due'] .lab-due-guida {
+    transition: none;
+  }
+}

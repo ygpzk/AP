@@ -22,7 +22,7 @@ const NOMI = {
   qr_code: 'QR', ean_13: 'EAN-13', ean_8: 'EAN-8', upc_a: 'UPC-A', upc_e: 'UPC-E',
   code_128: 'Code 128', code_39: 'Code 39', code_93: 'Code 93', codabar: 'Codabar',
   itf: 'ITF', data_matrix: 'Data Matrix', pdf417: 'PDF417', aztec: 'Aztec',
-  testo: 'testo',
+  testo: 'codice a mano',
 }
 
 const MAX_STORIA = 8
@@ -63,44 +63,110 @@ function costruisci() {
     larga: true,
     corpo: `
       <div class="lab-occhio">
-        <section class="lab-colonna">
-          <div class="lab-telecamera lab-telecamera--quadrata" data-occhio-vista>
-            <video data-occhio-video muted playsinline autoplay aria-label="la fotocamera"></video>
+        <section class="occhio-scena">
+          <div class="lab-telecamera lab-telecamera--quadrata occhio-vista" data-occhio-vista>
+            <video data-occhio-video muted playsinline autoplay aria-label="il video della fotocamera"></video>
             <canvas class="lab-occhio__tela" data-occhio-tela aria-hidden="true"></canvas>
-            <div class="lab-sovrapposizione" data-occhio-avviso>
-              <div class="lab-occhio__invito">
-                <p class="lab-nota" data-occhio-invito>La fotocamera parte solo se la accendi tu.</p>
-                <button type="button" class="lab-tasto lab-tasto--pieno" data-occhio-accendi data-focus>accendi la fotocamera</button>
+
+            <div class="occhio-mirino" aria-hidden="true">
+              <i class="occhio-angolo occhio-angolo--tl"></i>
+              <i class="occhio-angolo occhio-angolo--tr"></i>
+              <i class="occhio-angolo occhio-angolo--bl"></i>
+              <i class="occhio-angolo occhio-angolo--br"></i>
+              <i class="occhio-scansiona"></i>
+              <span class="occhio-etichetta">inquadra un codice</span>
+            </div>
+
+            <div class="lab-sovrapposizione occhio-avviso" data-occhio-avviso>
+              <div class="lab-occhio__invito occhio-invito">
+                <span class="occhio-disegno" aria-hidden="true">
+                  <svg viewBox="0 0 122 82" focusable="false">
+                    <path d="M9 24c0-3 2-5 5-5h18l6-10h26l6 10h17c3 0 5 2 5 5v38c0 3-2 5-5 5H14c-3 0-5-2-5-5Z"/>
+                    <circle cx="61" cy="43" r="17"/>
+                    <circle cx="61" cy="43" r="8"/>
+                    <path d="M88 29h9"/>
+                    <circle cx="22" cy="29" r="1.6" fill="currentColor" stroke="none"/>
+                    <path d="M100 11l5-5M104 16l7-2M94 8l1-6"/>
+                  </svg>
+                </span>
+                <p class="lab-nota occhio-invito__testo" data-occhio-invito>la fotocamera parte solo se la accendi tu.</p>
+                <button type="button" class="lab-tasto lab-tasto--pieno occhio-accendi" data-occhio-accendi data-focus>accendi la fotocamera</button>
+                <span class="occhio-timbro-spenta" aria-hidden="true">spenta</span>
               </div>
             </div>
           </div>
-          <div class="lab-riga">
-            <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-occhio-gira hidden>gira la fotocamera</button>
-            <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-occhio-torcia hidden>torcia</button>
-            <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-occhio-spegni hidden>spegni</button>
-            <label class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" for="oc-foto">carica un'immagine</label>
+
+          <p class="lab-nota occhio-motore" data-occhio-motore>lettore: controllo…</p>
+
+          <div class="occhio-comandi">
+            <div class="occhio-tasti">
+              <button type="button" class="lab-tasto" data-occhio-gira hidden>gira la fotocamera</button>
+              <button type="button" class="lab-tasto" data-occhio-torcia hidden>torcia</button>
+              <button type="button" class="lab-tasto" data-occhio-spegni hidden>spegni</button>
+            </div>
+            <button type="button" class="occhio-sportello" data-occhio-scegli aria-label="leggi un'immagine" aria-describedby="oc-foto-nota">
+              <span class="occhio-sportello__titolo">leggi un'immagine</span>
+              <span class="occhio-sportello__nota" id="oc-foto-nota">un file dal telefono o dal disco: lo leggo qui, non lo mando a nessuno.</span>
+            </button>
             <input id="oc-foto" type="file" accept="image/*" data-occhio-file hidden>
           </div>
-          <p class="lab-nota" data-occhio-motore>lettore: controllo…</p>
-          <p class="lab-nota"><b>Come funziona:</b> il browser cerca i codici direttamente nel fotogramma. I riquadri li disegno sopra, ma il video non viene salvato. La lista resta nella scheda e sparisce alla chiusura.</p>
+
+          <div class="occhio-bollo" aria-hidden="true">
+            <span>non registra</span>
+            <small>nessun fotogramma viene salvato</small>
+          </div>
         </section>
 
-        <section class="lab-colonna">
-          <div class="lab-pannello">
+        <section class="occhio-lato">
+          <div class="lab-pannello occhio-lettura">
             <h3>l'ultimo codice</h3>
-            <div class="lab-vuoto" data-occhio-ultimo>Ancora niente. Inquadra un QR o un codice a barre.</div>
-            <div class="lab-divisore"></div>
-            <form class="lab-riga" data-occhio-form>
-              <input class="lab-campo lab-cresce" data-occhio-mano placeholder="oppure incolla qui un codice" aria-label="un codice a mano" autocomplete="off" spellcheck="false">
-              <button class="lab-tasto lab-tasto--piccolo" type="submit">leggi</button>
+            <div class="lab-vuoto occhio-ultimo-vuoto" data-occhio-ultimo>
+              <span class="occhio-vuoto__occhio" aria-hidden="true">
+                <svg viewBox="0 0 64 28" focusable="false">
+                  <path d="M3 14.5C11 5.5 21 2 32 2s21 3.5 29 12.5C53 23 43 26.5 32 26.5S11 23 3 14.5Z"/>
+                  <circle cx="32" cy="14.5" r="7"/>
+                  <circle cx="32" cy="14.5" r="2.2" fill="currentColor" stroke="none"/>
+                </svg>
+              </span>
+              <span>ancora niente da leggere.</span>
+              <small>inquadra un QR o un codice a barre, oppure scrivilo qui sotto.</small>
+            </div>
+            <form class="occhio-mano" data-occhio-form>
+              <label class="lab-etichetta" for="oc-mano">a mano</label>
+              <div class="lab-riga">
+                <input id="oc-mano" class="lab-campo lab-cresce" data-occhio-mano placeholder="incolla qui un codice" aria-label="un codice a mano" autocomplete="off" spellcheck="false">
+                <button class="lab-tasto" type="submit">leggi</button>
+              </div>
             </form>
           </div>
 
-          <div class="lab-pannello">
+          <div class="lab-pannello occhio-storico">
             <h3>letti in questa sessione</h3>
+            <button type="button" class="occhio-svuota" data-occhio-svuota hidden>svuota la lista</button>
             <ul class="lab-lista lab-occhio__lista" data-occhio-lista hidden></ul>
-            <p class="lab-nota" data-occhio-vuoto>La lista è vuota.</p>
+            <div class="lab-vuoto occhio-lista-vuota" data-occhio-vuoto>
+              <span class="occhio-vuoto__occhio" aria-hidden="true">
+                <svg viewBox="0 0 64 28" focusable="false">
+                  <path d="M3 14.5C11 5.5 21 2 32 2s21 3.5 29 12.5C53 23 43 26.5 32 26.5S11 23 3 14.5Z"/>
+                  <circle cx="32" cy="14.5" r="7"/>
+                  <circle cx="32" cy="14.5" r="2.2" fill="currentColor" stroke="none"/>
+                </svg>
+              </span>
+              <span>la lista è vuota.</span>
+              <small>i codici letti restano qui finché la finestra è aperta.</small>
+            </div>
           </div>
+
+          <aside class="occhio-nota">
+            <div class="occhio-nota__testa">
+              <h3>come funziona</h3>
+              <span class="occhio-timbro" aria-hidden="true">solo locale</span>
+            </div>
+            <p>il browser cerca i codici direttamente nel fotogramma. i riquadri sono disegnati sopra il video, ma il codice non viene copiato dentro il disegno.</p>
+            <p class="occhio-privacy"><b>il video non esce dal dispositivo.</b> non viene salvato né spedito; anche l'immagine che apri resta nella scheda: la leggo e la dimentico.</p>
+            <p>inquadra tutto il codice e tienilo fermo un attimo. se il browser non ha BarcodeDetector, il codice si incolla a mano: nessun errore e nessun ripiego strano.</p>
+            <p class="occhio-nota__firma">niente upload, niente servizi, niente telemetria. la lista sparisce quando chiudi.</p>
+          </aside>
         </section>
       </div>`,
     onChiudi: () => { ui = null },
@@ -122,6 +188,8 @@ function costruisci() {
   const ultimoBox = q('[data-occhio-ultimo]')
   const lista = q('[data-occhio-lista]')
   const listaVuota = q('[data-occhio-vuoto]')
+  const svuota = q('[data-occhio-svuota]')
+  const scegli = q('[data-occhio-scegli]')
   const formMano = q('[data-occhio-form]')
   const campoMano = q('[data-occhio-mano]')
 
@@ -136,8 +204,15 @@ function costruisci() {
   let davanti = 'environment'
   let storia = []
 
-  function aggiornaMotore(testo) {
+  function aggiornaMotore(testo, stato = '') {
     motore.textContent = `lettore: ${testo}`
+    if (stato) motore.dataset.stato = stato
+    else delete motore.dataset.stato
+  }
+
+  // il mirino dice la verità: quando il browser non sa leggere, niente linea che scorre
+  function mostraLettore(disponibile) {
+    vista.classList.toggle('senza-lettore', !disponibile)
   }
 
   function mostraAvviso(testo, { bottone = false } = {}) {
@@ -236,18 +311,24 @@ function costruisci() {
     } catch { return '—' }
   }
 
+  function nomeOrigine(origine) {
+    return origine === 'immagine' ? "da un'immagine" : origine === 'mano' ? 'scritto a mano' : 'dalla fotocamera'
+  }
+
   function mostraUltimo(voce) {
     ultimoBox.className = 'lab-occhio__ultimo lab-risultato'
     ultimoBox.replaceChildren()
 
-    const testa = nodo('div', 'lab-riga lab-riga--tra')
-    testa.append(nodo('span', 'lab-badge lab-badge--acceso', nomeFormato(voce.formato)))
-    testa.append(nodo('span', 'lab-nota', voce.origine === 'immagine' ? "da un'immagine" : voce.origine === 'mano' ? 'a mano' : 'dalla fotocamera'))
+    const testa = nodo('div', 'occhio-lettura__testa')
+    testa.append(nodo('span', 'occhio-formato', nomeFormato(voce.formato)))
+    testa.append(nodo('span', 'occhio-origine', ` · ${nomeOrigine(voce.origine)}`))
+    testa.append(nodo('time', 'occhio-quando', ` ${orario(voce.quando)}`))
 
     const valore = nodo('p', 'lab-occhio__val', voce.valore)
-    const tasti = nodo('div', 'lab-riga')
-    const copiaBtn = nodo('button', 'lab-tasto lab-tasto--fantasma lab-tasto--piccolo', 'copia')
+    const tasti = nodo('div', 'occhio-azioni')
+    const copiaBtn = nodo('button', 'occhio-azione occhio-azione--copia', 'copia')
     copiaBtn.type = 'button'
+    copiaBtn.setAttribute('aria-label', 'copia il codice')
     copiaBtn.addEventListener('click', async () => {
       const ok = await copia(voce.valore)
       d.nota(ok ? 'codice copiato' : 'non riesco a copiare', ok ? 'ok' : 'male')
@@ -256,10 +337,11 @@ function costruisci() {
 
     const link = linkSicuro(voce.valore)
     if (link) {
-      const a = nodo('a', 'lab-tasto lab-tasto--piccolo', 'apri il link')
+      const a = nodo('a', 'occhio-azione occhio-azione--apri', 'apri')
       a.href = link
       a.target = '_blank'
       a.rel = 'noopener noreferrer'
+      a.setAttribute('aria-label', 'apri il link del codice')
       tasti.append(a)
     }
 
@@ -270,29 +352,32 @@ function costruisci() {
     lista.replaceChildren()
     lista.hidden = storia.length === 0
     listaVuota.hidden = storia.length > 0
+    svuota.hidden = storia.length === 0
     for (const voce of storia) {
-      const li = nodo('li')
-      li.append(nodo('span', 'lab-badge', nomeFormato(voce.formato)))
-      const testo = nodo('span', 'lab-occhio__val', voce.valore)
-      li.append(testo)
-      li.append(nodo('small', '', orario(voce.quando)))
-      const copiaBtn = nodo('button', 'lab-tasto lab-tasto--fantasma lab-tasto--piccolo', 'copia')
+      const li = nodo('li', 'occhio-riga')
+      const testa = nodo('div', 'occhio-riga__testa')
+      testa.append(nodo('span', 'lab-badge', nomeFormato(voce.formato)))
+      testa.append(nodo('time', 'occhio-riga__ora', ` ${orario(voce.quando)}`))
+      const testo = nodo('p', 'occhio-riga__val', voce.valore)
+      const tasti = nodo('div', 'occhio-riga__tasti')
+      const copiaBtn = nodo('button', 'occhio-azione', 'copia')
       copiaBtn.type = 'button'
       copiaBtn.setAttribute('aria-label', `copia ${voce.valore}`)
       copiaBtn.addEventListener('click', async () => {
         const ok = await copia(voce.valore)
         d.nota(ok ? 'codice copiato' : 'non riesco a copiare', ok ? 'ok' : 'male')
       })
-      li.append(copiaBtn)
+      tasti.append(copiaBtn)
       const link = linkSicuro(voce.valore)
       if (link) {
-        const a = nodo('a', 'lab-tasto lab-tasto--fantasma lab-tasto--piccolo', 'apri')
+        const a = nodo('a', 'occhio-azione', 'apri')
         a.href = link
         a.target = '_blank'
         a.rel = 'noopener noreferrer'
         a.setAttribute('aria-label', `apri ${voce.valore}`)
-        li.append(a)
+        tasti.append(a)
       }
+      li.append(testa, testo, tasti)
       lista.append(li)
     }
   }
@@ -341,17 +426,20 @@ function costruisci() {
 
       detector ||= await creaDetector()
       if (detector) {
-        aggiornaMotore('BarcodeDetector · pronto')
+        aggiornaMotore('BarcodeDetector · pronto', 'ok')
+        mostraLettore(true)
         scansiona = true
         ultimoTempo = 0
         ciclo()
       } else {
-        aggiornaMotore('BarcodeDetector non disponibile · codice a mano')
-        d.nota("fotocamera accesa, ma questo browser non sa leggere i codici: incollalo a mano", 'attesa')
-        mostraAvviso("Questo browser non ha BarcodeDetector: puoi incollare il codice a mano. In Chrome su Android di solito funziona.", { bottone: false })
-        setTimeout(() => { if (stream) nascondiAvviso() }, 3200)
+        // il video resta visibile: il messaggio sta nella riga del lettore, non sopra lo schermo
+        aggiornaMotore('BarcodeDetector non disponibile · codice a mano', 'no')
+        mostraLettore(false)
+        d.nota('fotocamera accesa · leggi il codice a mano', 'attesa')
       }
       controllaTorcia()
+      // il tasto «accendi» sparisce sotto il mirino: il focus passa a «spegni»
+      bottoneSpegni.focus({ preventScroll: true })
     } catch (e) {
       mostraAvviso(messaggioCamera(e), { bottone: true })
       d.nota(messaggioCamera(e), 'male')
@@ -374,7 +462,8 @@ function costruisci() {
     bottoneSpegni.hidden = true
     bottoneGira.hidden = true
     ctx.clearRect(0, 0, tela.width, tela.height)
-    mostraAvviso('La fotocamera è spenta. Puoi riaccenderla quando vuoi.', { bottone: true })
+    mostraAvviso('la fotocamera parte solo se la accendi tu.', { bottone: true })
+    bottoneAccendi.focus({ preventScroll: true })
     d.nota('fotocamera spenta')
   }
 
@@ -414,22 +503,19 @@ function costruisci() {
       bmp = await createImageBitmap(file)
       if (!detector) detector = await creaDetector()
       if (!detector) {
-        aggiornaMotore('BarcodeDetector non disponibile · codice a mano')
-        d.nota("questo browser non sa leggere le immagini: incolla il codice a mano", 'attesa')
+        aggiornaMotore('BarcodeDetector non disponibile · codice a mano', 'no')
+        mostraLettore(false)
+        d.nota('questo browser non legge le immagini · codice a mano', 'attesa')
         return
       }
-      if (bmp.width && bmp.height) {
-        preparaTela(bmp.width, bmp.height)
-        ctx.drawImage(bmp, 0, 0)
-      }
+      // l'immagine non viene disegnata nel canvas dei riquadri: la leggo e la dimentico
       const letti = await detector.detect(bmp)
-      tracciaRiquadri(letti)
       if (!letti.length) {
         d.nota("nessun codice nell'immagine", 'attesa')
         return
       }
       for (const c of letti) aggiungi(c, 'immagine')
-      d.nota(`${letti.length} codic${letti.length === 1 ? 'e' : 'i'} nell'immagine`, 'ok')
+      if (letti.length > 1) d.nota(`${letti.length} codici nell'immagine`, 'ok')
     } catch (e) {
       console.warn('Occhio: immagine non letta', e)
       d.nota("non riesco a leggere questa immagine", 'male')
@@ -442,6 +528,14 @@ function costruisci() {
   bottoneSpegni.addEventListener('click', spegniCamera)
   bottoneGira.addEventListener('click', cambiaCamera)
   bottoneTorcia.addEventListener('click', cambiaTorcia)
+
+  scegli.addEventListener('click', () => fileInput.click())
+
+  svuota.addEventListener('click', () => {
+    storia = []
+    disegnaStoria()
+    d.nota('lista svuotata')
+  })
 
   fileInput.addEventListener('change', () => {
     const file = fileInput.files?.[0]
@@ -465,8 +559,9 @@ function costruisci() {
 
   creaDetector().then((det) => {
     detector = det
-    if (!det) aggiornaMotore('BarcodeDetector non disponibile · codice a mano')
-    else aggiornaMotore('BarcodeDetector · pronto')
+    mostraLettore(!!det)
+    if (!det) aggiornaMotore('BarcodeDetector non disponibile · codice a mano', 'no')
+    else aggiornaMotore('BarcodeDetector · pronto', 'ok')
   })
 
   // chiedere i formati può richiedere un attimo: intanto la finestra è aperta
@@ -476,6 +571,7 @@ function costruisci() {
   })
 
   disegnaStoria()
+  d.nota('pronto · accendi la fotocamera o scrivi il codice a mano')
   d.apri()
   return d
 }

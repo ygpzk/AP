@@ -1,0 +1,622 @@
+/* voce.css — il corpo di «Parla col muro» (06 · voce). Le regole comuni stanno in lab.css.
+ *
+ * La scena: il muro è un quadro di carta appeso al foglio, col nastro agli angoli e l'etichetta
+ * «il muro» scritta a pennarello. Sotto, i tappi dei colori e i foglietti degli ordini. A destra
+ * l'interfono: il microfono grande, la riga di testo sempre in vista, la conversazione a macchina.
+ * Tutto vive dentro .lab-dlg[data-lab="voce"]. */
+
+/* ── il banco: muro a sinistra, voce a destra ────────────────────────────────────────────────── */
+
+.lab-dlg[data-lab='voce'] .lab-voce {
+  display: grid;
+  grid-template-columns: minmax(0, 1.52fr) minmax(0, 1fr);
+  gap: 16px 22px;
+  align-items: start;
+}
+.lab-dlg[data-lab='voce'] .lab-voce > .lab-colonna { gap: 13px; }
+.lab-dlg[data-lab='voce'] .lab-voce__destra { gap: 12px; }
+
+/* ── il muro: la cornice di carta, il nastro, l'etichetta ───────────────────────────────────── */
+
+.lab-dlg[data-lab='voce'] .lab-muro {
+  position: relative;
+  min-width: 0;
+  margin: 0;
+  padding-top: 15px;
+  filter: drop-shadow(0 10px 13px rgba(40, 30, 12, .16));
+}
+.lab-dlg[data-lab='voce'] .lab-muro-tela {
+  position: relative;
+  padding: 9px 9px 11px;
+  background: #fffdf6;
+  box-shadow:
+    0 0 0 1px rgba(22, 22, 22, .18),
+    0 1px 0 rgba(255, 255, 255, .9) inset,
+    0 8px 14px -10px rgba(40, 30, 10, .5);
+}
+/* il nastro che tiene il quadro al muro: un pezzo in alto a destra, uno in basso a sinistra */
+.lab-dlg[data-lab='voce'] .lab-muro-tela::before,
+.lab-dlg[data-lab='voce'] .lab-muro-tela::after {
+  content: '';
+  position: absolute;
+  z-index: 3;
+  width: 76px;
+  height: 19px;
+  background: var(--pzk-nastro);
+  clip-path: var(--pzk-code);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .16);
+  pointer-events: none;
+}
+.lab-dlg[data-lab='voce'] .lab-muro-tela::before {
+  top: -9px;
+  right: -26px;
+  rotate: 37deg;
+}
+.lab-dlg[data-lab='voce'] .lab-muro-tela::after {
+  bottom: -8px;
+  left: -24px;
+  rotate: -34deg;
+}
+
+/* l'etichetta di nastro con la scritta a pennarello */
+.lab-dlg[data-lab='voce'] .lab-muro__eti {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  left: 16px;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 5px 13px 4px 8px;
+  background: var(--pzk-nastro);
+  clip-path: var(--pzk-code);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, .2);
+  color: var(--pzk-ink);
+  transform: rotate(-2.2deg);
+  transform-origin: 12% 50%;
+  pointer-events: none;
+}
+.lab-dlg[data-lab='voce'] .lab-muro__num {
+  padding: 2px 4px 1px;
+  border: 1px solid rgba(22, 22, 22, .7);
+  font: 400 8.5px/1 var(--pzk-mac);
+  letter-spacing: .08em;
+}
+.lab-dlg[data-lab='voce'] .lab-muro__nome {
+  font: 400 19px/1 var(--pzk-marker);
+  letter-spacing: .01em;
+}
+.lab-dlg[data-lab='voce'] .lab-muro__dica {
+  font: 400 8px/1 var(--pzk-mac);
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--pzk-matita);
+}
+
+/* il vetro: la tela resta sua, sopra ci va solo un filo di luce */
+.lab-dlg[data-lab='voce'] .lab-muro__cornice {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: #24211b;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, .55),
+    inset 0 0 20px rgba(0, 0, 0, .35);
+}
+.lab-dlg[data-lab='voce'] .lab-muro__cornice .lab-tela {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.lab-dlg[data-lab='voce'] .lab-muro__luce {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(112deg, rgba(255, 247, 220, .1) 0 14%, rgba(255, 247, 220, .03) 22%, transparent 36%),
+    radial-gradient(ellipse at 50% 46%, transparent 62%, rgba(0, 0, 0, .22) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .04);
+}
+
+/* ── i colori: tappi di latta, uno in mano ───────────────────────────────────────────────────── */
+
+.lab-dlg[data-lab='voce'] .lab-voce__blocco { min-width: 0; }
+.lab-dlg[data-lab='voce'] .lab-voce__eti {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 3px 8px;
+  margin: 0 0 5px;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__eti > span {
+  color: var(--pzk-matita);
+  font: 400 10.5px/1 var(--pzk-mac);
+  letter-spacing: .01em;
+  text-transform: lowercase;
+  opacity: .85;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__colori {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__colori .lab-colore {
+  width: 38px;
+  height: 38px;
+  padding: 2px;
+  transition: transform .15s ease;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__colori .lab-colore > span {
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 36% 28%, rgba(255, 255, 255, .5), transparent 44%),
+    var(--colore, var(--pzk-rosso));
+  box-shadow:
+    inset 0 -5px 0 rgba(0, 0, 0, .24),
+    inset 0 2px 0 rgba(255, 255, 255, .32),
+    0 1px 2px rgba(0, 0, 0, .4);
+}
+.lab-dlg[data-lab='voce'] .lab-voce__colori .lab-colore.is-on,
+.lab-dlg[data-lab='voce'] .lab-voce__colori .lab-colore[aria-pressed='true'] {
+  box-shadow: none;
+  transform: rotate(-7deg);
+}
+.lab-dlg[data-lab='voce'] .lab-voce__colori .lab-colore.is-on > span,
+.lab-dlg[data-lab='voce'] .lab-voce__colori .lab-colore[aria-pressed='true'] > span {
+  box-shadow:
+    inset 0 -5px 0 rgba(0, 0, 0, .24),
+    inset 0 2px 0 rgba(255, 255, 255, .32),
+    0 1px 2px rgba(0, 0, 0, .4),
+    0 0 0 3px #fffdf6,
+    0 0 0 5px var(--pzk-rosso);
+}
+
+/* ── gli ordini: foglietti attaccati col nastro ─────────────────────────────────────────────── */
+
+.lab-dlg[data-lab='voce'] .lab-voce__esempi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 7px;
+  padding-top: 3px;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__esempi .lab-tasto {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 6px 11px 5px;
+  border: 1px solid rgba(22, 22, 22, .35);
+  border-bottom-width: 2px;
+  border-radius: 2px 3px 2px 4px;
+  background: #fffdf6;
+  box-shadow: 1px 2px 0 rgba(50, 38, 16, .14);
+  color: var(--pzk-ink);
+  font: 400 14px/1 var(--pzk-marker);
+  letter-spacing: .01em;
+  transform: rotate(-1.1deg);
+  transition: transform .16s cubic-bezier(.2, 1.4, .4, 1), box-shadow .16s;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__esempi .lab-tasto::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  width: 24px;
+  height: 8px;
+  margin-left: -12px;
+  background: var(--pzk-nastro);
+  clip-path: var(--pzk-code);
+  opacity: .92;
+  transform: rotate(-2deg);
+  pointer-events: none;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__esempi .lab-tasto:nth-child(2n) { transform: rotate(1.2deg); }
+.lab-dlg[data-lab='voce'] .lab-voce__esempi .lab-tasto:nth-child(3n) { transform: rotate(-.4deg); }
+@media (hover: hover) {
+  .lab-dlg[data-lab='voce'] .lab-voce__esempi .lab-tasto:hover {
+    background: #fff;
+    box-shadow: 1px 4px 0 rgba(50, 38, 16, .12);
+    transform: rotate(0deg) translateY(-2px);
+  }
+}
+.lab-dlg[data-lab='voce'] .lab-voce__esempi .lab-tasto:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+/* ── l'interfono: microfono in evidenza, lingua, «risponde» ─────────────────────────────────── */
+
+.lab-dlg[data-lab='voce'] .lab-voce__microfono {
+  padding: 13px 12px 11px;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__microfono > h3 { margin-bottom: 7px; }
+
+.lab-dlg[data-lab='voce'] .lab-voce__mic {
+  position: relative;
+  width: 100%;
+  min-height: 50px;
+  padding: .12em .5em .18em;
+  gap: 10px;
+  font: 400 27px/1 var(--pzk-fa);
+  letter-spacing: .015em;
+  text-transform: lowercase;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__mic::before {
+  content: '';
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .72);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .12);
+  transition: background .2s;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__mic[aria-pressed='true'],
+.lab-dlg[data-lab='voce'] .lab-voce__mic.is-on {
+  background: var(--pzk-rosso);
+  color: #fff;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__mic.is-on::before {
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, .2);
+  animation: voce-pulsa 1.3s ease-in-out infinite;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__mic:disabled::before { background: rgba(255, 255, 255, .4); }
+
+/* la spia viva dell'ascolto: compare solo mentre il telefono è aperto */
+.lab-dlg[data-lab='voce'] .lab-voce__ascolto {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 17px;
+  margin: 5px 0 0;
+  color: var(--pzk-rosso);
+  font: 400 10px/1 var(--pzk-mac);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  visibility: hidden;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__ascolto i {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--pzk-rosso);
+  box-shadow: 0 0 0 3px rgba(179, 18, 31, .16);
+}
+.lab-dlg[data-lab='voce'].lab-voce--ascolto .lab-voce__ascolto { visibility: visible; }
+.lab-dlg[data-lab='voce'].lab-voce--ascolto .lab-voce__ascolto i {
+  animation: voce-pulsa 1.3s ease-in-out infinite;
+}
+
+/* quello che il muro risponde: la riga letta ad alta voce */
+.lab-dlg[data-lab='voce'] .lab-voce__dice {
+  min-height: 50px;
+  margin: 0;
+  padding: 8px 10px 7px;
+  border-left: 3px solid var(--pzk-rosso);
+  background: #fffbe0;
+  color: var(--pzk-ink);
+  font: 400 13.5px/1.4 var(--pzk-mac);
+  overflow-wrap: anywhere;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__dice::before {
+  content: 'il muro dice · ';
+  color: var(--pzk-matita);
+  font-size: 10px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__udito {
+  min-height: 15px;
+  margin: 3px 0 0;
+  color: var(--pzk-penna);
+  font: 400 13px/1.3 var(--pzk-marker);
+  overflow-wrap: anywhere;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__udito:empty::before {
+  content: 'qui la tua voce';
+  color: rgba(22, 22, 22, .3);
+  font: 400 9.5px/1 var(--pzk-mac);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.lab-dlg[data-lab='voce'] .lab-voce__opzioni {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-top: 7px;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__lingua {
+  display: flex;
+  flex: 1 1 150px;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  color: var(--pzk-matita);
+  font: 400 9.5px/1 var(--pzk-mac);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__lingua .lab-scelta {
+  width: 100%;
+  min-height: 32px;
+  font-size: 13px;
+}
+
+/* l'interruttore «risponde»: una levetta di carta */
+.lab-dlg[data-lab='voce'] .lab-voce__risponde {
+  position: relative;
+  flex: none;
+  min-height: 30px;
+  margin: 0;
+  padding: 5px 8px 4px 42px;
+  border: 1.5px solid var(--pzk-ink);
+  border-radius: 3px;
+  background: var(--pzk-foglietto);
+  box-shadow: 0 2px 0 var(--pzk-ink);
+  color: var(--pzk-ink);
+  font: 400 11.5px/1 var(--pzk-mac);
+  text-align: left;
+  transform: none;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__risponde::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 7px;
+  width: 28px;
+  height: 16px;
+  margin-top: -8px;
+  border: 1.5px solid var(--pzk-ink);
+  border-radius: 9px;
+  background: #d8d2c4;
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, .2);
+}
+.lab-dlg[data-lab='voce'] .lab-voce__risponde::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--pzk-ink);
+  transition: left .16s ease, background .16s ease;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__risponde[aria-pressed='true'] {
+  background: var(--pzk-foglietto);
+  color: var(--pzk-ink);
+  box-shadow: 0 2px 0 var(--pzk-ink);
+  transform: none;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__risponde[aria-pressed='true']::before {
+  background: var(--pzk-verde);
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, .2);
+}
+.lab-dlg[data-lab='voce'] .lab-voce__risponde[aria-pressed='true']::after {
+  left: 21px;
+  background: #fff;
+}
+
+/* ── la riga di testo: sempre lì, sotto il microfono ────────────────────────────────────────── */
+
+.lab-dlg[data-lab='voce'] .lab-voce__form { min-width: 0; }
+.lab-dlg[data-lab='voce'] .lab-voce__riga {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__riga .lab-campo {
+  flex: 1;
+  min-width: 0;
+  min-height: 42px;
+  font-size: 15px;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__riga .lab-tasto--pieno {
+  flex: none;
+  min-height: 42px;
+  font-size: 19px;
+}
+
+/* ── la conversazione: righe «tu» e «muro» ──────────────────────────────────────────────────── */
+
+.lab-dlg[data-lab='voce'] .lab-voce__conversazione {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__testata {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__testata h3 {
+  display: inline-block;
+  margin: 0;
+  padding: 0 4px;
+  background: var(--pzk-evidenzia);
+  color: var(--pzk-ink);
+  font: 400 14px/1.15 var(--pzk-marker);
+  letter-spacing: .01em;
+  text-transform: lowercase;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__conteggio {
+  color: var(--pzk-matita);
+  font: 400 9px/1 var(--pzk-mac);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity: .75;
+}
+.lab-dlg[data-lab='voce'] .lab-trascrizione {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 92px;
+  max-height: 196px;
+  overflow: auto;
+  padding: 0 4px 0 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(22, 22, 22, .35) transparent;
+}
+.lab-dlg[data-lab='voce'] .lab-riga-voce {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  margin: 0;
+  padding: 6px 2px 6px 0;
+  border-bottom: 1.5px dashed rgba(22, 22, 22, .2);
+  font: 400 12.5px/1.45 var(--pzk-mac);
+}
+.lab-dlg[data-lab='voce'] .lab-riga-voce:last-child { border-bottom: 0; }
+.lab-dlg[data-lab='voce'] .lab-riga-voce b {
+  display: inline-block;
+  justify-self: start;
+  padding: 2px 4px 1px;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  color: var(--pzk-penna);
+  font: 400 10px/1 var(--pzk-marker);
+  letter-spacing: .04em;
+  text-transform: lowercase;
+}
+.lab-dlg[data-lab='voce'] .lab-riga-voce span {
+  min-width: 0;
+  max-width: 100%;
+  justify-self: start;
+  overflow-wrap: anywhere;
+  color: var(--pzk-ink);
+}
+.lab-dlg[data-lab='voce'] .lab-riga-voce--tu b { color: var(--pzk-penna); }
+.lab-dlg[data-lab='voce'] .lab-riga-voce--muro b { color: var(--pzk-rosso); }
+.lab-dlg[data-lab='voce'] .lab-riga-voce--muro span {
+  background: var(--pzk-evidenzia);
+  padding: 0 2px;
+}
+
+/* ── la nota e la privacy: il posto che avanza, riempito di cose utili ──────────────────────── */
+
+.lab-dlg[data-lab='voce'] .lab-voce__note {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 2px 2px 0;
+}
+.lab-dlg[data-lab='voce'] .lab-voce__note .lab-nota {
+  font: 400 11.5px/1.42 var(--pzk-mac);
+}
+.lab-dlg[data-lab='voce'] .lab-voce__privacy {
+  padding-top: 6px;
+  border-top: 1.5px dashed rgba(22, 22, 22, .22);
+  color: var(--pzk-matita);
+}
+
+/* ── il terremoto: trema anche la cornice, non solo la tela ─────────────────────────────────── */
+
+.lab-dlg[data-lab='voce'].lab-voce--scossa .lab-muro {
+  animation: voce-scuoti 1.35s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+/* ── il fuoco e la tastiera ─────────────────────────────────────────────────────────────────── */
+
+.lab-dlg[data-lab='voce'] :is(button, input, select):focus-visible {
+  outline: 3px solid var(--pzk-giallo);
+  outline-offset: 2px;
+}
+
+@keyframes voce-pulsa {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .35; transform: scale(.72); }
+}
+@keyframes voce-scuoti {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  12% { transform: translate(-4px, 2px) rotate(-.5deg); }
+  28% { transform: translate(4px, -3px) rotate(.6deg); }
+  44% { transform: translate(-3px, -2px) rotate(-.4deg); }
+  60% { transform: translate(3px, 2px) rotate(.35deg); }
+  76% { transform: translate(-2px, 1px) rotate(-.2deg); }
+  90% { transform: translate(1px, -1px) rotate(.1deg); }
+}
+
+/* ── i portatili stretti e i telefoni: una colonna, nell'ordine giusto ──────────────────────── */
+
+@media (max-width: 900px) {
+  .lab-dlg[data-lab='voce'] .lab-voce {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 13px;
+  }
+  .lab-dlg[data-lab='voce'] .lab-voce > .lab-colonna { display: contents; }
+  .lab-dlg[data-lab='voce'] .lab-muro { order: 1; }
+  .lab-dlg[data-lab='voce'] .lab-voce__microfono { order: 2; }
+  .lab-dlg[data-lab='voce'] .lab-voce__form { order: 3; }
+  .lab-dlg[data-lab='voce'] .lab-voce__blocco--colori { order: 4; }
+  .lab-dlg[data-lab='voce'] .lab-voce__blocco--esempi { order: 5; }
+  .lab-dlg[data-lab='voce'] .lab-voce__conversazione { order: 6; }
+  .lab-dlg[data-lab='voce'] .lab-voce__note { order: 7; }
+}
+
+@media (max-width: 900px) {
+  .lab-dlg[data-lab='voce'] .lab-voce__colori {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    justify-items: center;
+    gap: 5px;
+  }
+  .lab-dlg[data-lab='voce'] .lab-voce__esempi {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px 6px;
+  }
+  .lab-dlg[data-lab='voce'] .lab-voce__esempi .lab-tasto {
+    padding: 6px 2px 5px;
+    font-size: 12px;
+    letter-spacing: 0;
+    transform: rotate(-.6deg);
+  }
+  .lab-dlg[data-lab='voce'] .lab-voce__esempi .lab-tasto:nth-child(2n) { transform: rotate(.7deg); }
+  .lab-dlg[data-lab='voce'] .lab-trascrizione { max-height: 240px; }
+  .lab-dlg[data-lab='voce'] .lab-voce__riga .lab-campo { font-size: 16px; }
+}
+
+@media (max-width: 520px) {
+  .lab-dlg[data-lab='voce'] .lab-muro-tela { padding: 7px 7px 9px; }
+  .lab-dlg[data-lab='voce'] .lab-muro__cornice { aspect-ratio: 4 / 3; }
+  .lab-dlg[data-lab='voce'] .lab-muro-tela::before { width: 58px; height: 16px; top: -8px; right: -14px; }
+  .lab-dlg[data-lab='voce'] .lab-muro-tela::after { width: 58px; height: 16px; bottom: -7px; left: -14px; }
+  .lab-dlg[data-lab='voce'] .lab-muro__eti { left: 12px; gap: 5px; padding: 4px 10px 3px 6px; }
+  .lab-dlg[data-lab='voce'] .lab-muro__nome { font-size: 17px; }
+  .lab-dlg[data-lab='voce'] .lab-muro__dica { display: none; }
+  .lab-dlg[data-lab='voce'] .lab-voce__colori .lab-colore { width: 36px; height: 36px; }
+  .lab-dlg[data-lab='voce'] .lab-voce__mic { min-height: 48px; font-size: 25px; }
+  .lab-dlg[data-lab='voce'] .lab-voce__dice { font-size: 13px; }
+  .lab-dlg[data-lab='voce'] .lab-voce__riga .lab-tasto--pieno { font-size: 17px; padding-inline: 10px; }
+}
+
+/* ── niente movimento per chi lo chiede ────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-dlg[data-lab='voce'] .lab-voce__mic.is-on::before,
+  .lab-dlg[data-lab='voce'].lab-voce--ascolto .lab-voce__ascolto i,
+  .lab-dlg[data-lab='voce'].lab-voce--scossa .lab-muro {
+    animation: none;
+  }
+  .lab-dlg[data-lab='voce'] .lab-colore,
+  .lab-dlg[data-lab='voce'] .lab-voce__esempi .lab-tasto,
+  .lab-dlg[data-lab='voce'] .lab-voce__risponde::after,
+  .lab-dlg[data-lab='voce'] .lab-voce__mic::before {
+    transition: none;
+  }
+}

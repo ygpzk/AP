@@ -1,0 +1,656 @@
+/* battito.css — il corpo di «Battito» (la radio chiptune).
+ * Un mobile di lamiera verde con il vetro ai fosfori, la fascia di crema coi tasti e due manopole vere.
+ * Le regole comuni stanno in lab.css; qui tutto resta dentro la finestra di battito. */
+
+/* ── il mobile: una lamiera verde, avvitata agli angoli ───────────────────────────────────────────────────────── */
+.lab-dlg[data-lab='battito'] .lab-battito { height: 100%; min-height: 0; }
+
+.lab-dlg[data-lab='battito'] .bt-radio {
+  --bt-cassa: #384235;
+  --bt-bordo: #5b6453;
+  --bt-fosforo: #ccff00;
+  --bt-rosso: #b3121f;
+  --bt-tacca: .467;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.25fr);
+  grid-template-rows: minmax(0, 1.15fr) minmax(0, .85fr) auto;
+  grid-template-areas:
+    'display scope'
+    'fronte fronte'
+    'targhetta targhetta';
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+  padding: 14px;
+  border: 2px solid #141812;
+  border-radius: 6px;
+  background:
+    radial-gradient(130% 80% at 50% -20%, rgba(255, 255, 255, .16), transparent 55%),
+    repeating-linear-gradient(93deg, rgba(255, 255, 255, .022) 0 2px, transparent 2px 6px),
+    var(--bt-cassa);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, .07),
+    inset 0 -12px 20px rgba(0, 0, 0, .38),
+    0 12px 24px rgba(0, 0, 0, .35);
+  color: #2a241c;
+}
+
+.lab-dlg[data-lab='battito'] .bt-vite {
+  position: absolute;
+  z-index: 3;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #9aa091, #4d5446 50%, #171b14 78%);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .55), 0 1px 0 rgba(255, 255, 255, .1);
+}
+.lab-dlg[data-lab='battito'] .bt-vite--1 { left: 4px; top: 4px; }
+.lab-dlg[data-lab='battito'] .bt-vite--2 { right: 4px; top: 4px; }
+.lab-dlg[data-lab='battito'] .bt-vite--3 { left: 4px; bottom: 4px; }
+.lab-dlg[data-lab='battito'] .bt-vite--4 { right: 4px; bottom: 4px; }
+
+/* ── il vetro del display: bpm grande, tacca, i sedici passi, la spia ───────────────────────────────────────── */
+.lab-dlg[data-lab='battito'] .bt-display {
+  grid-area: display;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 7px;
+  min-width: 0;
+  min-height: 0;
+  padding: 10px 14px 9px;
+  border: 3px solid var(--bt-bordo);
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(0deg, rgba(204, 255, 0, .035) 0 1px, transparent 1px 3px),
+    radial-gradient(125% 100% at 50% 0, #1c2316, #0a0d07 75%);
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, .9), 0 1px 0 rgba(255, 255, 255, .14);
+  color: var(--bt-fosforo);
+  transition: box-shadow .3s;
+}
+.lab-dlg[data-lab='battito'] .bt-display__testa { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.lab-dlg[data-lab='battito'] .bt-marca {
+  font: 400 18px/1 var(--pzk-fa);
+  letter-spacing: .16em;
+  text-transform: lowercase;
+  color: rgba(204, 255, 0, .85);
+}
+.lab-dlg[data-lab='battito'] .bt-lampada {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: 400 9px/1 var(--pzk-mac);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(204, 255, 0, .5);
+}
+.lab-dlg[data-lab='battito'] .bt-lampada i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3b3028;
+  box-shadow: inset 0 0 0 1px #0c0f0a;
+}
+.lab-dlg[data-lab='battito'] .bt-display__bpm { display: flex; align-items: flex-end; gap: 10px; min-height: 0; margin: 0; }
+.lab-dlg[data-lab='battito'] .bt-display__bpm b {
+  font: 400 clamp(54px, 6.6vw, 92px)/.78 var(--pzk-fa);
+  letter-spacing: .01em;
+  color: var(--bt-fosforo);
+  text-shadow: 0 0 18px rgba(204, 255, 0, .45);
+}
+.lab-dlg[data-lab='battito'] .bt-display__bpm span {
+  padding-bottom: 4px;
+  font: 400 10px/1.2 var(--pzk-mac);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(204, 255, 0, .62);
+}
+
+/* la scala del tempo: una riga di tacche e la lancetta rossa che si muove con la manopola */
+.lab-dlg[data-lab='battito'] .bt-scala {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 17px;
+  margin: 1px 0;
+  padding: 0 1px;
+  font: 400 8.5px/1 var(--pzk-mac);
+  color: rgba(204, 255, 0, .42);
+}
+.lab-dlg[data-lab='battito'] .bt-scala::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  right: 22px;
+  top: 50%;
+  height: 5px;
+  background: repeating-linear-gradient(90deg, rgba(204, 255, 0, .38) 0 1px, transparent 1px 7px);
+}
+.lab-dlg[data-lab='battito'] .bt-scala i {
+  position: absolute;
+  top: 1px;
+  bottom: 0;
+  left: calc(20px + (100% - 48px) * var(--bt-tacca, .467));
+  width: 2px;
+  background: #ff5b4d;
+  box-shadow: 0 0 7px rgba(255, 60, 50, .8);
+}
+
+.lab-dlg[data-lab='battito'] .bt-passo-riga { display: flex; align-items: center; gap: 8px; }
+.lab-dlg[data-lab='battito'] .bt-passo-eti {
+  flex: none;
+  font: 400 8px/1 var(--pzk-mac);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(204, 255, 0, .45);
+}
+.lab-dlg[data-lab='battito'] .bt-passo {
+  display: grid;
+  grid-template-columns: repeat(16, minmax(0, 1fr));
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.lab-dlg[data-lab='battito'] .bt-passo i {
+  display: block;
+  height: clamp(7px, .85vw, 11px);
+  border: 1px solid rgba(204, 255, 0, .16);
+  border-radius: 1px;
+  background: #252c1d;
+}
+.lab-dlg[data-lab='battito'] .bt-passo i:nth-child(4n + 1) { border-color: rgba(255, 212, 0, .26); background: #38301b; }
+.lab-dlg[data-lab='battito'] .bt-passo i.is-on {
+  border-color: #eaff9a;
+  background: var(--bt-fosforo);
+  box-shadow: 0 0 9px rgba(204, 255, 0, .8), 0 0 2px #fff;
+}
+
+.lab-dlg[data-lab='battito'] .bt-display__piede {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font: 400 8.5px/1 var(--pzk-mac);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(204, 255, 0, .42);
+}
+.lab-dlg[data-lab='battito'] .bt-stato-radio { color: rgba(204, 255, 0, .68); }
+.lab-dlg[data-lab='battito'] .bt-onda { display: none; }
+.lab-dlg[data-lab='battito'] .bt-radio.is-on .bt-pronta { display: none; }
+.lab-dlg[data-lab='battito'] .bt-radio.is-on .bt-onda { display: inline; }
+.lab-dlg[data-lab='battito'] .bt-radio.is-on .bt-display {
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, .9), 0 0 18px rgba(204, 255, 0, .13), 0 1px 0 rgba(255, 255, 255, .14);
+}
+.lab-dlg[data-lab='battito'] .bt-radio.is-on .bt-marca { text-shadow: 0 0 12px rgba(204, 255, 0, .5); }
+.lab-dlg[data-lab='battito'] .bt-radio.is-on .bt-lampada { color: #ffb3a8; }
+.lab-dlg[data-lab='battito'] .bt-radio.is-on .bt-lampada i {
+  background: var(--bt-rosso);
+  box-shadow: 0 0 8px rgba(255, 60, 50, .9), inset 0 0 2px #fff;
+}
+
+/* ── lo schermo dell'oscilloscopio: la cornice, la targhetta, l'invito ──────────────────────────────────────── */
+.lab-dlg[data-lab='battito'] .bt-scope {
+  grid-area: scope;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: 8px 10px 9px;
+  border: 3px solid var(--bt-bordo);
+  border-radius: 4px;
+  background: radial-gradient(120% 100% at 50% 0, #1a2014, #080a06 72%);
+  box-shadow: inset 0 0 26px rgba(0, 0, 0, .9), 0 1px 0 rgba(255, 255, 255, .12);
+}
+.lab-dlg[data-lab='battito'] .bt-scope__testa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  font: 400 8.5px/1 var(--pzk-mac);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(204, 255, 0, .5);
+}
+.lab-dlg[data-lab='battito'] .bt-scope__vetro {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(204, 255, 0, .16);
+  background: #05070a;
+  box-shadow: inset 0 0 22px #000;
+}
+.lab-dlg[data-lab='battito'] .lab-scope { display: block; width: 100%; height: 100%; }
+.lab-dlg[data-lab='battito'] .bt-scope__vetro::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px);
+}
+.lab-dlg[data-lab='battito'] .bt-scope__invito {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 0;
+  padding: 12px;
+  text-align: center;
+  color: var(--bt-fosforo);
+  font: 400 clamp(14px, 1.5vw, 19px)/1.1 var(--pzk-marker);
+  text-shadow: 0 0 14px rgba(204, 255, 0, .35);
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+.lab-dlg[data-lab='battito'] .bt-scope__invito b { font-weight: 400; }
+.lab-dlg[data-lab='battito'] .bt-scope__invito small {
+  font: 400 9px/1.3 var(--pzk-mac);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(204, 255, 0, .6);
+}
+.lab-dlg[data-lab='battito'] .bt-radio.is-on .bt-scope__invito { opacity: 0; }
+
+/* ── la fascia di crema: il tasto di trasporto, le due manopole, i tasti della melodia ──────────────────────── */
+.lab-dlg[data-lab='battito'] .bt-fronte {
+  grid-area: fronte;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, .86fr) minmax(0, 1.14fr);
+  gap: 12px 22px;
+  align-items: stretch;
+  min-height: 0;
+  padding: 13px 16px;
+  border: 1px solid #b6a887;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #f3ecd9, #e5dac0 70%, #ddcfb2);
+  box-shadow: inset 0 1px 0 #fffaf0, inset 0 -4px 8px rgba(90, 70, 30, .16), 0 2px 0 rgba(0, 0, 0, .28);
+}
+.lab-dlg[data-lab='battito'] .bt-fronte::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--pzk-grana) 0 0 / 180px 90px;
+  opacity: .16;
+  pointer-events: none;
+}
+
+.lab-dlg[data-lab='battito'] .bt-comandi {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px 16px;
+  min-width: 0;
+}
+/* la griglia del piccolo altoparlante, fra le manopole e i tasti */
+.lab-dlg[data-lab='battito'] .bt-griglia {
+  align-self: center;
+  justify-self: end;
+  width: 100%;
+  max-width: 120px;
+  height: 92px;
+  border: 2px solid #918267;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 4px 4px, #443b2e 0 1.5px, transparent 2px) 0 0 / 11px 11px,
+    linear-gradient(180deg, #f1e8d4, #d9caac);
+  box-shadow: inset 0 1px 0 #fff8e8, inset 0 -4px 8px rgba(90, 70, 30, .18), 0 1px 0 rgba(255, 255, 255, .5);
+  opacity: .85;
+  pointer-events: none;
+}
+.lab-dlg[data-lab='battito'] .bt-trasporto { display: flex; flex-direction: column; gap: 7px; width: 140px; min-width: 0; }
+
+/* il tasto di trasporto: una vera chiave della radio, che va giù quando è in onda */
+.lab-dlg[data-lab='battito'] .bt-play {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 72px;
+  padding: 0 10px;
+  border: 2px solid #1c1710;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #fdf8ea 0%, #e9dfc8 65%, #d6c8a9 100%);
+  color: #1c1710;
+  box-shadow: 0 6px 0 #1c1710, 0 8px 12px rgba(0, 0, 0, .25), inset 0 1px 0 #fff;
+  font: 400 30px/1 var(--pzk-fa);
+  letter-spacing: .02em;
+  text-transform: lowercase;
+  transform: rotate(-.35deg);
+  transition: transform .08s, box-shadow .08s, background .1s, color .1s;
+}
+.lab-dlg[data-lab='battito'] .bt-play::before { content: '▶'; font-size: .62em; transform: translateY(-1px); }
+.lab-dlg[data-lab='battito'] .bt-play[aria-pressed='true']::before { content: '■'; }
+@media (hover: hover) {
+  .lab-dlg[data-lab='battito'] .bt-play:hover {
+    background: linear-gradient(180deg, #fffdf6 0%, #f1e8d4 65%, #dfd2b6 100%);
+    color: #1c1710;
+    transform: rotate(-.35deg) translateY(-2px);
+    box-shadow: 0 8px 0 #1c1710, 0 10px 14px rgba(0, 0, 0, .22), inset 0 1px 0 #fff;
+  }
+}
+.lab-dlg[data-lab='battito'] .bt-play:active {
+  transform: rotate(-.35deg) translateY(4px);
+  box-shadow: 0 2px 0 #1c1710, 0 3px 5px rgba(0, 0, 0, .2), inset 0 2px 5px rgba(0, 0, 0, .18);
+}
+.lab-dlg[data-lab='battito'] .bt-play[aria-pressed='true'],
+.lab-dlg[data-lab='battito'] .bt-play.lab-tasto--pericolo {
+  background: linear-gradient(180deg, #d4202f, #a50e1b 70%, #8b0b16);
+  border-color: #4b060c;
+  color: #fff5e6;
+  box-shadow: 0 2px 0 #4b060c, 0 3px 5px rgba(0, 0, 0, .3), inset 0 2px 8px rgba(0, 0, 0, .35);
+  transform: rotate(-.35deg) translateY(4px);
+}
+
+.lab-dlg[data-lab='battito'] .bt-tasti-secondari { display: flex; gap: 6px; }
+.lab-dlg[data-lab='battito'] .bt-secondario {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px 5px;
+  border-color: #4a4133;
+  background: #f8f0dd;
+  color: #3a3328;
+  box-shadow: 0 2px 0 #4a4133;
+  font-size: 11.5px;
+}
+@media (hover: hover) {
+  .lab-dlg[data-lab='battito'] .bt-secondario:hover { background: #fffdf5; color: #1c1710; }
+}
+
+/* le manopole: un range trasparente sopra un cerchio di lamiera, con la lancetta che gira */
+.lab-dlg[data-lab='battito'] .bt-manopole { display: flex; align-items: flex-start; justify-content: flex-start; gap: 16px; min-width: 0; }
+.lab-dlg[data-lab='battito'] .bt-manopola {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  width: 88px;
+  cursor: pointer;
+}
+.lab-dlg[data-lab='battito'] .bt-manopola__nome {
+  font: 400 9px/1 var(--pzk-mac);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: #655b49;
+}
+.lab-dlg[data-lab='battito'] .bt-manopola__ghiera {
+  position: relative;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from 225deg, #847a64 0 1.1deg, transparent 1.1deg 27deg);
+}
+.lab-dlg[data-lab='battito'] .bt-manopola__corpo {
+  position: absolute;
+  inset: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 30%, #707861 0%, #3c4434 52%, #191e15 100%);
+  box-shadow: 0 3px 4px rgba(0, 0, 0, .5), inset 0 1px 1px rgba(255, 255, 255, .3);
+}
+.lab-dlg[data-lab='battito'] .bt-manopola__corpo::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin: -3px;
+  border-radius: 50%;
+  background: #10130d;
+  box-shadow: inset 0 0 1px #8c927f;
+}
+.lab-dlg[data-lab='battito'] .bt-manopola__corpo i { position: absolute; inset: 0; transform: rotate(var(--bt-giro, -135deg)); }
+.lab-dlg[data-lab='battito'] .bt-manopola__corpo i::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  width: 3px;
+  height: 13px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: #f0e6cc;
+  box-shadow: 0 0 2px rgba(0, 0, 0, .6);
+}
+.lab-dlg[data-lab='battito'] .bt-manopola__valore { font: 400 10px/1 var(--pzk-mac); color: #655b49; }
+.lab-dlg[data-lab='battito'] .bt-manopola__valore b { font-weight: 400; color: #2a241c; }
+.lab-dlg[data-lab='battito'] .bt-range {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: grab;
+}
+.lab-dlg[data-lab='battito'] .bt-range:focus-visible { outline: none; }
+.lab-dlg[data-lab='battito'] .bt-manopola:focus-within .bt-manopola__ghiera {
+  outline: 3px solid var(--pzk-giallo);
+  outline-offset: 3px;
+}
+
+/* i tasti della melodia: otto chiavi di calcolatrice, con il numero grande e la nota */
+.lab-dlg[data-lab='battito'] .bt-tastiera { display: flex; flex-direction: column; justify-content: center; min-width: 0; min-height: 0; }
+.lab-dlg[data-lab='battito'] .lab-pads {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+}
+.lab-dlg[data-lab='battito'] .lab-pad {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  min-height: 0;
+  padding: 8px 8px 7px;
+  border: 1.5px solid #2b251c;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #fffdf4 0%, #f2e9d4 55%, #e2d5b8 100%);
+  color: var(--pzk-ink);
+  box-shadow: 0 5px 0 #2b251c, 0 7px 9px rgba(0, 0, 0, .18), inset 0 1px 0 #fff;
+  font: inherit;
+  text-align: center;
+  touch-action: manipulation;
+  transition: transform .06s, box-shadow .06s, background .08s, color .08s;
+}
+.lab-dlg[data-lab='battito'] .lab-pad b { font: 400 clamp(30px, 3.2vw, 44px)/.95 var(--pzk-fa); color: var(--pzk-ink); }
+.lab-dlg[data-lab='battito'] .lab-pad span { font: 400 12.5px/1 var(--pzk-mac); text-transform: lowercase; color: #6b6252; }
+.lab-dlg[data-lab='battito'] .lab-pad::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #cfc3a7;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .2);
+}
+@media (hover: hover) {
+  .lab-dlg[data-lab='battito'] .lab-pad:hover {
+    background: linear-gradient(180deg, #fffef8 0%, #f6eeda 55%, #e8dcc1 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 0 #2b251c, 0 8px 11px rgba(0, 0, 0, .18), inset 0 1px 0 #fff;
+  }
+}
+.lab-dlg[data-lab='battito'] .lab-pad:active,
+.lab-dlg[data-lab='battito'] .lab-pad.is-on {
+  border-color: #15120d;
+  background: linear-gradient(180deg, #2a2a1f, #15160f);
+  box-shadow: 0 1px 0 #15120d, inset 0 3px 8px rgba(0, 0, 0, .55);
+  transform: translateY(4px);
+}
+.lab-dlg[data-lab='battito'] .lab-pad.is-on { animation: bt-premi .13s ease-out; }
+.lab-dlg[data-lab='battito'] .lab-pad.is-on b { color: var(--bt-fosforo); text-shadow: 0 0 8px rgba(204, 255, 0, .45); }
+.lab-dlg[data-lab='battito'] .lab-pad.is-on span { color: rgba(204, 255, 0, .75); }
+.lab-dlg[data-lab='battito'] .lab-pad.is-on::after { background: #ff5b4d; box-shadow: 0 0 6px rgba(255, 80, 60, .9); }
+@keyframes bt-premi {
+  0% { transform: translateY(0); }
+  55% { transform: translateY(5px) scale(.985); }
+  100% { transform: translateY(4px); }
+}
+
+/* ── la targhetta di carta incollata sotto la radio: i comandi e il libretto ─────────────────────────────────── */
+.lab-dlg[data-lab='battito'] .bt-targhetta {
+  grid-area: targhetta;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 18px;
+  min-height: 0;
+  padding: 7px 14px 6px;
+  border: 1px solid #b9ab8c;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #f4ecd9, #e8ddc4);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, .28), inset 0 1px 0 #fff;
+  transform: rotate(-.3deg);
+}
+.lab-dlg[data-lab='battito'] .bt-targhetta::before,
+.lab-dlg[data-lab='battito'] .bt-targhetta::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: -7px;
+  width: 54px;
+  height: 13px;
+  background: var(--pzk-nastro);
+  clip-path: var(--pzk-code);
+  pointer-events: none;
+}
+.lab-dlg[data-lab='battito'] .bt-targhetta::before { left: -8px; rotate: -11deg; }
+.lab-dlg[data-lab='battito'] .bt-targhetta::after { right: -8px; rotate: 9deg; }
+.lab-dlg[data-lab='battito'] .bt-targhetta__serie {
+  flex: none;
+  font: 400 8.5px/1 var(--pzk-mac);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #7a7060;
+}
+.lab-dlg[data-lab='battito'] .bt-targhetta .lab-nota { margin: 0; font: 400 11.5px/1.35 var(--pzk-mac); color: #4c4437; }
+.lab-dlg[data-lab='battito'] .bt-targhetta__nota { flex: 1 1 280px; }
+.lab-dlg[data-lab='battito'] .bt-targhetta .bt-targhetta__libretto {
+  flex: 1 1 100%;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(22, 22, 22, .22);
+  font-size: 10.5px;
+  color: #6a6152;
+}
+
+/* la griglia dell'altoparlante è un lusso da scrivania larga: sotto i 1150 si toglie */
+@media (max-width: 1150px) {
+  .lab-dlg[data-lab='battito'] .bt-griglia { display: none; }
+}
+
+/* il foglio stretto (tablet in piedi): i comandi vanno in colonna accanto ai tasti, senza pestarsi */
+@media (min-width: 821px) and (max-width: 1000px) {
+  .lab-dlg[data-lab='battito'] .bt-comandi { grid-template-columns: 1fr; gap: 8px; }
+  .lab-dlg[data-lab='battito'] .bt-griglia { display: none; }
+  .lab-dlg[data-lab='battito'] .bt-trasporto { width: 124px; }
+  .lab-dlg[data-lab='battito'] .bt-play { min-height: 62px; font-size: 25px; }
+  .lab-dlg[data-lab='battito'] .bt-manopole { gap: 10px; }
+  .lab-dlg[data-lab='battito'] .bt-manopola { width: 68px; }
+  .lab-dlg[data-lab='battito'] .bt-manopola__ghiera { width: 60px; height: 60px; }
+  .lab-dlg[data-lab='battito'] .bt-manopola__corpo { inset: 8px; }
+  .lab-dlg[data-lab='battito'] .bt-manopola__nome { font-size: 8px; }
+  .lab-dlg[data-lab='battito'] .bt-manopola__valore { font-size: 9px; }
+  .lab-dlg[data-lab='battito'] .lab-pad b { font-size: 28px; }
+  .lab-dlg[data-lab='battito'] .lab-pad span { font-size: 11px; }
+}
+
+/* ── il telefono: si comanda prima, si guarda lo schermo dopo; il mobile resta intero ───────────────────────── */
+@media (max-width: 820px) {
+  .lab-dlg[data-lab='battito'] .bt-radio {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto minmax(120px, 1fr) auto;
+    grid-template-areas: 'display' 'fronte' 'scope' 'targhetta';
+    gap: 8px;
+    height: auto;
+    min-height: 100%;
+    padding: 10px;
+  }
+  .lab-dlg[data-lab='battito'] .bt-vite { display: none; }
+  .lab-dlg[data-lab='battito'] .bt-display { gap: 5px; padding: 8px 10px 7px; }
+  .lab-dlg[data-lab='battito'] .bt-marca { font-size: 16px; }
+  .lab-dlg[data-lab='battito'] .bt-display__bpm b { font-size: clamp(46px, 15vw, 62px); }
+  .lab-dlg[data-lab='battito'] .bt-scala { display: none; }
+  .lab-dlg[data-lab='battito'] .bt-passo i { height: 9px; }
+  .lab-dlg[data-lab='battito'] .bt-fronte { grid-template-columns: 1fr; gap: 10px; padding: 10px; }
+  .lab-dlg[data-lab='battito'] .bt-comandi { grid-template-columns: auto minmax(0, 1fr); gap: 10px 12px; }
+  .lab-dlg[data-lab='battito'] .bt-griglia { display: none; }
+  .lab-dlg[data-lab='battito'] .bt-trasporto { width: 124px; }
+  .lab-dlg[data-lab='battito'] .bt-play { min-height: 64px; font-size: 26px; }
+  .lab-dlg[data-lab='battito'] .bt-manopole { gap: 10px; }
+  .lab-dlg[data-lab='battito'] .bt-manopola { width: 68px; }
+  .lab-dlg[data-lab='battito'] .bt-manopola__ghiera { width: 60px; height: 60px; }
+  .lab-dlg[data-lab='battito'] .bt-manopola__corpo { inset: 8px; }
+  .lab-dlg[data-lab='battito'] .bt-tastiera { flex: none; }
+  .lab-dlg[data-lab='battito'] .lab-pads { flex: none; grid-auto-rows: minmax(62px, auto); gap: 8px; }
+  .lab-dlg[data-lab='battito'] .lab-pad { padding: 7px 9px 6px; }
+  .lab-dlg[data-lab='battito'] .lab-pad b { font-size: 26px; }
+  .lab-dlg[data-lab='battito'] .bt-scope { min-height: 120px; padding: 7px 8px 8px; }
+  .lab-dlg[data-lab='battito'] .bt-targhetta { gap: 3px 12px; padding: 7px 10px 6px; }
+  .lab-dlg[data-lab='battito'] .bt-targhetta__serie { display: none; }
+  .lab-dlg[data-lab='battito'] .bt-targhetta__nota { flex: 1 1 100%; }
+  .lab-dlg[data-lab='battito'] .bt-targhetta .bt-targhetta__libretto { font-size: 10px; }
+}
+
+/* i telefoni bassi (iPhone SE, landscape): si stringe tutto quel tanto che basta, senza coprire niente */
+@media (max-width: 820px) and (max-height: 760px) {
+  .lab-dlg[data-lab='battito'] .bt-display { gap: 4px; padding: 6px 9px; }
+  .lab-dlg[data-lab='battito'] .bt-marca { font-size: 14px; }
+  .lab-dlg[data-lab='battito'] .bt-display__bpm b { font-size: 46px; }
+  .lab-dlg[data-lab='battito'] .bt-passo i { height: 7px; }
+  .lab-dlg[data-lab='battito'] .bt-fronte { gap: 8px; padding: 8px; }
+  .lab-dlg[data-lab='battito'] .bt-trasporto { gap: 5px; }
+  .lab-dlg[data-lab='battito'] .bt-play { min-height: 56px; font-size: 24px; }
+  .lab-dlg[data-lab='battito'] .bt-secondario { padding: 4px 6px 3px; font-size: 10.5px; }
+  .lab-dlg[data-lab='battito'] .lab-pads { grid-auto-rows: minmax(52px, auto); gap: 7px; }
+  .lab-dlg[data-lab='battito'] .lab-pad { gap: 1px; padding: 5px 7px; }
+  .lab-dlg[data-lab='battito'] .lab-pad b { font-size: 24px; }
+  .lab-dlg[data-lab='battito'] .lab-pad span { font-size: 10px; }
+  .lab-dlg[data-lab='battito'] .bt-scope { min-height: 100px; padding: 6px 7px 7px; }
+  .lab-dlg[data-lab='battito'] .bt-targhetta { padding: 5px 8px 4px; }
+  .lab-dlg[data-lab='battito'] .bt-targhetta .lab-nota { font-size: 10.5px; }
+}
+
+@media (max-width: 520px) {
+  .lab-dlg[data-lab='battito'] .bt-display__piede { font-size: 7.5px; }
+  .lab-dlg[data-lab='battito'] .bt-targhetta__libretto { display: none; }
+}
+
+/* il foglio di battito prende l'altezza del muro, come un vero mobile appoggiato sopra */
+@media (min-width: 821px) and (min-height: 681px) {
+  .lab-dlg[data-lab='battito'] .lab-dentro { height: min(calc(100dvh - 110px), 800px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-dlg[data-lab='battito'] .bt-play,
+  .lab-dlg[data-lab='battito'] .lab-pad,
+  .lab-dlg[data-lab='battito'] .bt-display,
+  .lab-dlg[data-lab='battito'] .bt-scope__invito { transition: none; }
+  .lab-dlg[data-lab='battito'] .lab-pad.is-on { animation: none; }
+}

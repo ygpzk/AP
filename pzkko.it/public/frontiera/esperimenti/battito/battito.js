@@ -29,33 +29,80 @@ function costruisci() {
     larga: true,
     corpo: `
       <div class="lab-battito">
-        <section class="lab-colonna">
-          <div class="lab-pannello">
-            <div class="lab-riga">
-              <button type="button" class="lab-tasto lab-tasto--pieno" data-play data-focus>play</button>
-              <button type="button" class="lab-tasto lab-tasto--fantasma" data-genera>genera</button>
-              <button type="button" class="lab-tasto lab-tasto--fantasma" data-midi>MIDI</button>
+        <div class="bt-radio">
+          <i class="bt-vite bt-vite--1" aria-hidden="true"></i>
+          <i class="bt-vite bt-vite--2" aria-hidden="true"></i>
+          <i class="bt-vite bt-vite--3" aria-hidden="true"></i>
+          <i class="bt-vite bt-vite--4" aria-hidden="true"></i>
+
+          <section class="bt-display" aria-label="il display della radio">
+            <div class="bt-display__testa">
+              <span class="bt-marca">battito</span>
+              <span class="bt-lampada" aria-hidden="true"><i></i>onda</span>
             </div>
-            <div class="lab-divisore"></div>
-            <label class="lab-etichetta" for="bt-bpm">battiti al minuto · <b data-bpm>112</b></label>
-            <input id="bt-bpm" class="lab-range" type="range" min="70" max="160" step="1" value="112" data-bpm-range>
-            <label class="lab-etichetta" for="bt-vol">volume</label>
-            <input id="bt-vol" class="lab-range" type="range" min="0" max="100" step="1" value="72" data-vol>
-          </div>
-          <div class="lab-pannello">
-            <h3>I tasti</h3>
-            <div class="lab-pads" role="group" aria-label="i tasti della melodia">
-              ${PAD.map((f, i) => `<button type="button" class="lab-pad" data-nota="${i}" aria-label="${NOMI[i]}"><b>${i + 1}</b><span>${NOMI[i]}</span></button>`).join('')}
+            <p class="bt-display__bpm"><b data-bpm>112</b><span>battiti<br>al minuto</span></p>
+            <div class="bt-scala" aria-hidden="true"><span>70</span><i></i><span>160</span></div>
+            <div class="bt-passo-riga">
+              <span class="bt-passo-eti">passo</span>
+              <div class="bt-passo" data-passo aria-hidden="true">${'<i></i>'.repeat(16)}</div>
+              <span class="bt-passo-eti">16</span>
             </div>
-            <p class="lab-nota">Tastiera <b>1–8</b> · MIDI · <b>P</b> play/stop. Le note suonate a mano si sommano al giro.</p>
+            <div class="bt-display__piede" aria-hidden="true">
+              <span class="bt-stato-radio"><span class="bt-pronta">pronta</span><span class="bt-onda">in onda</span></span>
+              <span>la minore · 16 passi</span>
+            </div>
+          </section>
+
+          <div class="bt-fronte">
+            <div class="bt-comandi">
+              <div class="bt-trasporto">
+                <button type="button" class="lab-tasto lab-tasto--pieno bt-play" data-play data-focus aria-pressed="false">play</button>
+                <div class="bt-tasti-secondari">
+                  <button type="button" class="lab-tasto bt-secondario" data-genera>genera</button>
+                  <button type="button" class="lab-tasto bt-secondario" data-midi>MIDI</button>
+                </div>
+              </div>
+              <div class="bt-manopole">
+                <label class="bt-manopola">
+                  <span class="bt-manopola__nome">bpm</span>
+                  <span class="bt-manopola__ghiera">
+                    <span class="bt-manopola__corpo" aria-hidden="true"><i></i></span>
+                    <input id="bt-bpm" class="lab-range bt-range" type="range" min="70" max="160" step="1" value="112" data-bpm-range>
+                  </span>
+                  <span class="bt-manopola__valore" aria-hidden="true">70–160</span>
+                </label>
+                <label class="bt-manopola">
+                  <span class="bt-manopola__nome">volume</span>
+                  <span class="bt-manopola__ghiera">
+                    <span class="bt-manopola__corpo" aria-hidden="true"><i></i></span>
+                    <input id="bt-vol" class="lab-range bt-range" type="range" min="0" max="100" step="1" value="72" data-vol>
+                  </span>
+                  <span class="bt-manopola__valore" aria-hidden="true"><b data-vol-out>72</b>%</span>
+                </label>
+              </div>
+              <div class="bt-griglia" aria-hidden="true"></div>
+            </div>
+            <div class="bt-tastiera">
+              <div class="lab-pads" role="group" aria-label="i tasti della melodia">
+                ${PAD.map((f, i) => `<button type="button" class="lab-pad" data-nota="${i}" aria-label="${NOMI[i]}"><b>${i + 1}</b><span>${NOMI[i]}</span></button>`).join('')}
+              </div>
+            </div>
           </div>
-        </section>
-        <section class="lab-colonna">
-          <div class="lab-telecamera lab-scope-box">
-            <canvas class="lab-scope" width="960" height="320" aria-label="l'oscilloscopio"></canvas>
+
+          <section class="bt-scope">
+            <div class="bt-scope__testa"><span>oscilloscopio</span><span>960 × 320</span></div>
+            <div class="bt-scope__vetro">
+              <canvas class="lab-scope" width="960" height="320" aria-label="l'oscilloscopio"></canvas>
+              <p class="bt-scope__invito"><b>▶ premi play</b><small>e la radio si accende</small></p>
+            </div>
+          </section>
+
+          <div class="bt-targhetta">
+            <span class="bt-targhetta__serie" aria-hidden="true">pzk · radio a 16 passi</span>
+            <p class="lab-nota bt-targhetta__nota">Tastiera <b>1–8</b> · <b>P</b> play/stop · MIDI. Le note a mano si sommano al giro.</p>
+            <p class="lab-nota bt-targhetta__libretto"><b>Come funziona:</b> il sequencer è a 16 passi; la melodia pesca dalla scala pentatonica di la minore. La stanza è una convoluzione con una coda generata al volo. Niente file audio: tutto si calcola qui.</p>
           </div>
-          <p class="lab-nota"><b>Come funziona:</b> il sequencer è a 16 passi; la melodia pesca dalla scala pentatonica di la minore. La stanza è una convoluzione con una coda generata al volo. Niente file audio: tutto si calcola qui.</p>
-        </section>
+        </div>
       </div>`,
     onChiudi: () => { ui = null },
   })
@@ -67,6 +114,10 @@ function costruisci() {
   const bpmOut = q('[data-bpm]')
   const rangeBpm = q('[data-bpm-range]')
   const rangeVol = q('[data-vol]')
+  const volOut = q('[data-vol-out]')
+  const radio = q('.bt-radio')
+  const passoBox = q('[data-passo]')
+  const ledPasso = passoBox ? [...passoBox.children] : []
   const scope = q('.lab-scope')
   const ctx2d = scope.getContext('2d')
 
@@ -84,6 +135,27 @@ function costruisci() {
   let fermo = false
   let midi = null
   let pattern = generaPattern()
+
+  // La manopola è un range vero (resta usabile da tastiera): qui si calcola solo
+  // l'angolo della lancetta e, per il bpm, la posizione della tacca sul display.
+  function giraManopola(range) {
+    const min = Number(range.min)
+    const max = Number(range.max)
+    const t = max > min ? (Number(range.value) - min) / (max - min) : 0
+    range.closest('.bt-manopola')?.style.setProperty('--bt-giro', `${-135 + 270 * t}deg`)
+    if (range === rangeBpm) radio.style.setProperty('--bt-tacca', String(t))
+  }
+
+  function segnaPasso(n) {
+    for (let i = 0; i < ledPasso.length; i++) ledPasso[i].classList.toggle('is-on', i === n)
+  }
+
+  function spegniPasso() {
+    for (const l of ledPasso) l.classList.remove('is-on')
+  }
+
+  giraManopola(rangeBpm)
+  giraManopola(rangeVol)
 
   function generaPattern() {
     const kick = Array.from({ length: 16 }, (_, i) => i % 4 === 0 || (i === 10 && Math.random() < 0.35))
@@ -234,6 +306,7 @@ function costruisci() {
     if (!ctx || !suonando) return
     while (prossimo < ctx.currentTime + 0.12) {
       suonaPasso(passo, prossimo)
+      segnaPasso(passo)
       prossimo += 60 / bpm / 4
       passo = (passo + 1) % 16
     }
@@ -249,6 +322,9 @@ function costruisci() {
     timer = setInterval(pianifica, 25)
     bottonePlay.textContent = 'stop'
     bottonePlay.classList.add('lab-tasto--pericolo')
+    bottonePlay.setAttribute('aria-pressed', 'true')
+    radio.classList.add('is-on')
+    segnaPasso(0)
     d.nota('in onda · 16 passi', 'ok')
   }
 
@@ -257,7 +333,10 @@ function costruisci() {
     clearInterval(timer)
     bottonePlay.textContent = 'play'
     bottonePlay.classList.remove('lab-tasto--pericolo')
-    d.nota('in pausa')
+    bottonePlay.setAttribute('aria-pressed', 'false')
+    radio.classList.remove('is-on')
+    spegniPasso()
+    d.nota('in pausa · premi play')
   }
 
   function notaAMano(i) {
@@ -274,18 +353,29 @@ function costruisci() {
   rangeBpm.addEventListener('input', () => {
     bpm = Number(rangeBpm.value)
     bpmOut.textContent = String(bpm)
+    giraManopola(rangeBpm)
   })
   rangeVol.addEventListener('input', () => {
     volume = Number(rangeVol.value) / 100
+    if (volOut) volOut.textContent = String(rangeVol.value)
+    giraManopola(rangeVol)
     if (master) master.gain.setTargetAtTime(volume, ctx.currentTime, 0.02)
   })
+  function premi(p) {
+    notaAMano(Number(p.dataset.nota))
+    p.classList.add('is-on')
+    setTimeout(() => p.classList.remove('is-on'), 180)
+  }
+
   d.corpo.addEventListener('pointerdown', (e) => {
     const p = e.target.closest('[data-nota]')
-    if (!p) return
-    const i = Number(p.dataset.nota)
-    notaAMano(i)
-    p.classList.add('is-on')
-    setTimeout(() => p.classList.remove('is-on'), 130)
+    if (p) premi(p)
+  })
+  // Invio e barra spaziatrice su un tasto non passano dal pointerdown: il click da tastiera ha detail 0.
+  d.corpo.addEventListener('click', (e) => {
+    if (e.detail !== 0) return
+    const p = e.target.closest('[data-nota]')
+    if (p) premi(p)
   })
 
   bottoneMidi.addEventListener('click', async () => {
@@ -327,7 +417,7 @@ function costruisci() {
       notaAMano(Number(e.key) - 1)
       const p = d.corpo.querySelector(`[data-nota="${Number(e.key) - 1}"]`)
       p?.classList.add('is-on')
-      setTimeout(() => p?.classList.remove('is-on'), 130)
+      setTimeout(() => p?.classList.remove('is-on'), 180)
     } else if (e.key.toLowerCase() === 'p') {
       e.preventDefault()
       suonando ? ferma() : avvia()
@@ -353,12 +443,7 @@ function costruisci() {
     ctx2d.strokeStyle = 'rgba(255,255,255,.12)'
     ctx2d.beginPath(); ctx2d.moveTo(0, h / 2); ctx2d.lineTo(w, h / 2); ctx2d.stroke()
 
-    if (!analyser) {
-      ctx2d.fillStyle = 'rgba(167,179,166,.75)'
-      ctx2d.font = '13px "Lab Mono", monospace'
-      ctx2d.fillText('premi play per accendere la radio', 24, h / 2 - 14)
-      return
-    }
+    if (!analyser) return
     analyser.getByteTimeDomainData(dati)
     ctx2d.strokeStyle = '#ccff00'
     ctx2d.lineWidth = 2.4
@@ -389,6 +474,6 @@ function costruisci() {
 
   d.apri()
   raf = requestAnimationFrame(disegna)
-  d.nota('pronto · premi play')
+  d.nota('pronta · premi play')
   return d
 }

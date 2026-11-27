@@ -39,6 +39,11 @@ animazioni, e se manca un aggancio aggiungilo senza rompere quello che c'è.
 - `public/frontiera/lab.css` — il foglio comune: pagina, dialoghi, tasti,
   campi, tele, liste. Le variabili `--lab-*` e il reset sono **chiusi dentro
   `.lab-pagina` e `.lab-dlg`** (vedi «Il vincolo del CSS»).
+- `public/frontiera/esperimenti/<nome>/<nome>.css` — il foglio del singolo
+  esperimento, caricato **dopo** `lab.css` da `index.html` (come le vignette
+  dello Studio). Qui sta la grafica del corpo; si rifà un esperimento senza
+  toccare gli altri. Anche qui niente regole globali: tutto dentro
+  `.lab-dlg[data-lab="<nome>"]` (o `.lab-pagina` per la pagina).
 - `public/frontiera/shell.js` — il guscio dei dialoghi: `creaDialogo()`,
   `scarica()`, `copia()`, `byte()`, `quando()`, `caso()`. Ogni modulo esporta
   `apri()` e costruisce il suo `<dialog>` con questo guscio.
@@ -106,7 +111,9 @@ per la stanza e analyser per l'oscilloscopio; Web MIDI se c'è un controller.
 - Classi: `.lab-battito`, `.lab-pads`, `.lab-pad` (`is-on`), `.lab-scope`,
   `.lab-range`.
 - Agganci: `[data-play]`, `[data-genera]`, `[data-midi]`, `[data-bpm-range]`,
-  `[data-bpm]`, `[data-vol]`, `[data-nota="0…7"]`.
+  `[data-bpm]`, `[data-vol]`, `[data-vol-out]`, `[data-nota="0…7"]`,
+  `[data-passo]` (16 led, `aria-hidden`, `.is-on` sul passo corrente);
+  `[data-play]` porta `aria-pressed` (true in onda).
 - Tastiera `1–8`, `P` play/stop; MIDI note-on.
 - Cosa rifinire: fai sembrare la radio un oggetto vero (display, tasti,
   manopole), l'oscilloscopio e i pad. Non alzare il volume di default oltre il
@@ -120,6 +127,10 @@ BroadcastChannel: la prima scheda prende il campo e simula il Pong, la seconda
 - Classi: `.lab-due-tela`, `.lab-badge` (`--acceso`), `.lab-tasto`.
 - Agganci: `[data-ruolo]`, `[data-ospite]`, `[data-apri-scheda]`,
   `[data-copia]`, `[data-rigioca]`, `[data-prendi]`; pulsanti del dialogo.
+  Dal 27.11: `[data-velo]` (il foglietto d'attesa dentro il campo), `[data-punteggio="1|2"]`
+  e `[data-punteggio-etichetta="1|2"]` (il tabellone DOM che specchia il canvas),
+  `.lab-dlg[data-modo="attesa|host|ospite"]` e `.lab-dlg[data-ospite="si|no"]`.
+  `[data-apri-scheda]` può comparire due volte (barra e velo): stesso hook.
 - Stati: «in attesa…», «campo · gioca il muro», «campo · due giocatori»,
   «racchetta · sei a destra», «il campo non risponde».
 - Cosa rifinire: il campo, le racchette, il punteggio, il velo di attesa e il
@@ -139,7 +150,9 @@ basta. Il messaggio non passa da un server.
   `[data-uscita]`, `[data-link]`, `[data-copia-link]`, `[data-apri-link]`,
   `[data-link-in]`, `[data-password-in]`, `[data-apri-busta]`,
   `[data-avviso-busta]`, `[data-letto-box]`, `[data-letto]`,
-  `[data-copia-letto]`.
+  `[data-copia-letto]`, `[data-vuota]` (la lettera vuota in «Apri»).
+  `data-focus` su `#bu-messaggio`; quando si apre direttamente una busta,
+  il focus va su `#bu-link` o `#bu-password-in`.
 - Stati: vuoto, «sigillo…», «pronta · copia il link», «apro…», «busta aperta»,
   errore di password/link. Il link può essere lungo: mostralo con misura.
 - Cosa rifinire: la metafora della busta (ceralacca, filo, timbro), le due
@@ -159,7 +172,9 @@ sopra il video disegna solo i riquadri, il codice non viene copiato nel canvas.
   `[data-occhio-accendi]`, `[data-occhio-gira]`, `[data-occhio-torcia]`,
   `[data-occhio-spegni]`, `[data-occhio-file]`, `[data-occhio-motore]`,
   `[data-occhio-ultimo]`, `[data-occhio-form]`, `[data-occhio-mano]`,
-  `[data-occhio-lista]`, `[data-occhio-vuoto]`.
+  `[data-occhio-lista]`, `[data-occhio-vuoto]`, `[data-occhio-scegli]`
+  (il tasto «leggi un'immagine» che apre `[data-occhio-file]`), `[data-occhio-svuota]`
+  (svuota la lista); `[data-occhio-motore]` porta `data-stato="ok|no"`.
 - Stati: fotocamera spenta, permesso chiesto, permesso negato, lettore non
   disponibile («codice a mano»), codice letto, lista vuota.
 - Cosa rifinire: il mirino, il riquadro del codice, il tasto della torcia, la
@@ -178,6 +193,9 @@ Web Speech: SpeechRecognition per capire, SpeechSynthesis per rispondere, Canvas
   `[data-voce-lingua]`, `[data-voce-stato]`, `[data-voce-udito]`,
   `[data-voce-form]`, `[data-voce-input]`, `[data-voce-trascrizione]`;
   i colori e gli esempi usano `[data-colore]` / `[data-comando]`.
+  Dal 27.11 la trascrizione è `role="log"`; il dialogo prende
+  `.lab-voce--ascolto` mentre il microfono è acceso e `.lab-voce--scossa`
+  durante il terremoto (la cornice trema, oltre alla tela).
 - Comandi: colori (rosso, verde, blu, giallo, viola, lime, nero, bianco,
   arancio, rosa), «adesivo» (anche con colore), «pioggia», «smetti di piovere»,
   «terremoto», «che ore sono», «ciao», «aiuto», «pulisci», «spegni».
@@ -196,6 +214,10 @@ scaricano o si tolgono. `persist()` chiede che il browser non li cancelli.
 - Agganci: `[data-drop]`, `[data-file]`, `[data-lista]`, `[data-vuoto]`,
   `[data-quota]`, `[data-quota-barra]`, `[data-scegli]`, `[data-aggiorna]`,
   `[data-svuota]`, `[data-persisti]`.
+  Dal 27.11: `data-focus` sul drop; `[data-quota-track]` (`role=progressbar`),
+  `[data-quota-pct]`, `[data-conteggio]`, `[data-protetto]` (badge; e
+  `.lab-dlg[data-protetto="si"]`), `[data-vuoto-testo]`, `[data-promesse]`,
+  `[data-tipo]` sull'icona del file.
 - Stati: vuoto, salvataggio con percentuale, elenco, quota, «dati protetti»,
   errore di spazio.
 - Cosa rifinire: la zona di trascinamento, le righe dei file (icona, nome,
@@ -212,6 +234,10 @@ secondi di webcam con la cornice pzk, in loop, scaricabili.
 - Agganci: `[data-video]`, `[data-velo]`, `[data-accendi]`, `[data-spegni]`,
   `[data-registra]`, `[data-rifai]`, `[data-scarica]`, `[data-stato-cam]`,
   `[data-specchio]`, `[data-nota-boom]`.
+  Dal 27.11: `[data-velo-testo]` (la riga dentro il poster), `[data-accendi-velo]`
+  (il tasto del poster), `[data-conta]` + `[data-conta-rec]` + `[data-conta-num]`
+  + `[data-conta-via]` (il countdown DOM), `[data-lampo]`. Sono tutti fuori dal
+  canvas registrato.
 - Stati: webcam spenta, permesso, «registro · 3 secondi», «loop pronto»,
   download, specchio sì/no.
 - Cosa rifinire: la cabina, la cornice (lime/viola, adesivo, ora), il
@@ -228,6 +254,9 @@ scritto a mano. Nessuna rete.
   `.lab-corpus`.
 - Agganci: `[data-motto]`, `[data-genera]`, `[data-copia]`, `[data-modello]`,
   `[data-ia-stato]`, `[data-corpus]`.
+  Dal 27.11: `[data-copia-etichetta]` (lo `<span>` che diventa «copiato ✓»),
+  `[data-data]` (il `<time>` della firma), `.lab-dlg[data-ia="pronta|scaricare|markov"]`
+  (stato dell'IA locale, per il colore del riquadro).
 - Stati: «Markov locale», «IA del browser», «IA da scaricare», «scrivo…»;
   il motto entra con `is-nuovo`.
 - Cosa rifinire: il poster del motto, la firma, il badge del modello, il
@@ -247,6 +276,8 @@ attacca l'adesivo. Altrove un adesivo 3D in CSS e le istruzioni.
   stato `.lab-dlg.lab-ar-on` (la finestra diventa un vetro sopra la camera).
 - Stati: «controllo…», «pronto», «serve Android», «inquadra il pavimento»,
   «adesivo N attaccato», «AR finita», errore di permesso.
+  Dal 27.11 il focus iniziale va sul link «apri in una scheda» quando l'AR non
+  c'è, e su «entra in AR» quando è pronta; `[data-ar-stato]` è `role="status"`.
 - Cosa rifinire: l'adesivo 3D del ripiego, il mirino, il pannello dell'AR, il
   velo della sessione. Non cambiare le feature richieste (`hit-test`), non
   togliere il ripiego, non far partire la sessione senza un clic.
@@ -255,7 +286,9 @@ attacca l'adesivo. Altrove un adesivo 3D in CSS e le istruzioni.
 
 `lab.css` si carica **anche dentro il profilo**, quando si apre una finestra
 della Frontiera. Per questo il reset e le variabili sono chiusi dentro
-`.lab-pagina` e `.lab-dlg`:
+`.lab-pagina` e `.lab-dlg`. Lo stesso vale per i fogli dei corpi
+(`esperimenti/<nome>/<nome>.css`): le loro regole restano dentro
+`.lab-dlg[data-lab="<nome>"]`.
 
 ```css
 :where(.lab-pagina, .lab-dlg), :where(.lab-pagina, .lab-dlg) * { box-sizing: border-box; }

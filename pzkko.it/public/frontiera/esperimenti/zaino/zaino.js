@@ -25,30 +25,88 @@ function costruisci() {
     voce: 'Trascina dei file: restano nel browser, su questo dispositivo. Niente cloud, niente upload, niente account.',
     larga: true,
     corpo: `
-      <div class="lab-colonna">
-        <div class="lab-zaino-drop" data-drop tabindex="0" role="button" aria-label="trascina qui i file o scegli i file">
-          <b>Trascina qui i file</b>
-          <span>oppure <u>scegli dal disco</u> · restano in questo browser</span>
+      <div class="zn-scena">
+        <div class="lab-zaino-drop" data-drop data-focus tabindex="0" role="button"
+             aria-label="trascina qui i file, oppure premi invio per sceglierli dal disco">
+          <span class="zn-scatola" aria-hidden="true">
+            <i class="zn-gola"></i>
+            <i class="zn-flap zn-flap--sx"></i>
+            <i class="zn-flap zn-flap--dx"></i>
+            <i class="zn-fronte"></i>
+            <b class="zn-bollo" aria-hidden="true">pzkko</b>
+            <b class="zn-barcode" aria-hidden="true"></b>
+            <svg class="zn-freccia" viewBox="0 0 64 78" focusable="false">
+              <path d="M32 6c-6 17 6 27 0 44"/>
+              <path d="M17 40l15 18 15-18"/>
+            </svg>
+            <span class="zn-etichetta">
+              <b>trascina qui i file</b>
+              <span>oppure <u>scegli dal disco</u> · restano in questo browser</span>
+            </span>
+          </span>
           <input type="file" multiple data-file hidden>
         </div>
-        <div class="lab-riga lab-riga--tra">
-          <div class="lab-riga">
+
+        <div class="zn-comandi">
+          <div class="zn-comandi__tasti">
             <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-scegli>scegli file</button>
             <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-aggiorna>aggiorna</button>
             <button type="button" class="lab-tasto lab-tasto--pericolo lab-tasto--piccolo" data-svuota>svuota</button>
           </div>
-          <button type="button" class="lab-tasto lab-tasto--fantasma lab-tasto--piccolo" data-persisti>proteggi i dati</button>
+          <button type="button" class="zn-sigillo" data-persisti>proteggi i dati</button>
         </div>
-        <div class="lab-pannello">
-          <div class="lab-riga lab-riga--tra">
-            <h3 style="margin:0">Nello zaino</h3>
-            <span class="lab-nota" data-quota>calcolo lo spazio…</span>
+
+        <section class="lab-pannello zn-inventario" aria-labelledby="zn-titolo">
+          <div class="zn-inventario__testa">
+            <h3 id="zn-titolo">Nello zaino</h3>
+            <span class="zn-conteggio" data-conteggio>vuoto</span>
           </div>
-          <div class="lab-barra" style="margin:8px 0 12px"><i data-quota-barra></i></div>
+          <div class="zn-quota">
+            <div class="zn-quota__riga">
+              <span data-quota>calcolo lo spazio…</span>
+              <b data-quota-pct>—</b>
+            </div>
+            <div class="lab-barra" data-quota-track role="progressbar" aria-label="spazio usato nello zaino"
+                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i data-quota-barra></i></div>
+            <span class="zn-protetto" data-protetto hidden>✓ dati protetti</span>
+          </div>
           <ul class="lab-lista lab-zaino-lista" data-lista></ul>
-          <div class="lab-vuoto" data-vuoto hidden>lo zaino è vuoto: trascina qualcosa qui sopra.</div>
-        </div>
-        <p class="lab-nota"><b>Dove finiscono:</b> nella cartella privata del sito (OPFS), sul disco di questo dispositivo. Il browser può cancellarli se lo spazio finisce: «proteggi i dati» chiede di tenerli. Se svuoti i dati del sito, spariscono.</p>
+          <div class="lab-vuoto zn-vuoto" data-vuoto hidden>
+            <svg class="zn-vuoto-arte" viewBox="0 0 180 130" aria-hidden="true" focusable="false">
+              <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M47 58 95 41l47 17-47 17z"/>
+                <path d="M47 58v38l48 17V75"/>
+                <path d="M142 58v38l-47 17"/>
+                <path d="M47 58 36 45l43-16 16 12"/>
+                <path d="M142 58l11-13-42-16-16 12"/>
+                <path d="M62 66l33 12 33-12" stroke-dasharray="3 5" opacity=".55"/>
+                <path d="M70 8c-10 10-8 18 2 26" stroke-dasharray="4 6" opacity=".65"/>
+                <path d="M64 28l8 8 8-9" opacity=".65"/>
+              </g>
+            </svg>
+            <span class="zn-vuoto-zero" aria-hidden="true">0</span>
+            <span data-vuoto-testo>lo zaino è vuoto: trascina qualcosa nella scatola.</span>
+          </div>
+          <div class="zn-timbro-pannello" aria-hidden="true">sul disco<span>non nel cloud</span></div>
+          <div class="zn-promesse" data-promesse hidden aria-hidden="true">
+            <span>niente cloud</span>
+            <span>niente upload</span>
+            <span>niente account</span>
+          </div>
+          <div class="zn-inventario__fondo" aria-hidden="true"><span>cartella privata · OPFS</span></div>
+        </section>
+
+        <p class="zn-dove">
+          <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+            <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4.5" y="7" width="23" height="18" rx="2"/>
+              <path d="M8.5 20.5h15"/>
+              <circle cx="23" cy="12" r="1.4"/>
+              <path d="M10 12h7"/>
+            </g>
+          </svg>
+          <span><b>Dove finiscono:</b> nella cartella privata del sito (OPFS), sul disco di questo dispositivo. Il browser può cancellarli se lo spazio finisce: «proteggi i dati» chiede di tenerli. Se svuoti i dati del sito, spariscono.</span>
+        </p>
       </div>`,
     onChiudi: () => { ui = null },
   })
@@ -58,8 +116,14 @@ function costruisci() {
   const fileInput = q('[data-file]')
   const lista = q('[data-lista]')
   const vuoto = q('[data-vuoto]')
+  const vuotoTesto = q('[data-vuoto-testo]')
   const quota = q('[data-quota]')
+  const quotaPct = q('[data-quota-pct]')
+  const quotaTrack = q('[data-quota-track]')
   const quotaBarra = q('[data-quota-barra]')
+  const conteggio = q('[data-conteggio]')
+  const promesse = q('[data-promesse]')
+  const protetto = q('[data-protetto]')
   const bSvuota = q('[data-svuota]')
 
   const supporto = !!(navigator.storage?.getDirectory)
@@ -70,6 +134,17 @@ function costruisci() {
 
   function stato(testo, tipo = '') {
     d.nota(testo, tipo)
+  }
+
+  function segnaProtetto(ok) {
+    if (protetto) protetto.hidden = !ok
+    if (ok) d.dlg.dataset.protetto = 'si'
+    else delete d.dlg.dataset.protetto
+  }
+
+  function motivo(e) {
+    if (e?.name === 'QuotaExceededError') return 'spazio non disponibile'
+    return e?.message || String(e)
   }
 
   async function apriRadice() {
@@ -150,7 +225,7 @@ function costruisci() {
           ok++
         } catch (e) {
           console.error(e)
-          errori.push(`${f.name}: ${e?.message || e}`)
+          errori.push(`${f.name}: ${motivo(e)}`)
         }
       }
       await render()
@@ -158,7 +233,7 @@ function costruisci() {
       else stato(`salvati ${ok} file`, 'ok')
     } catch (e) {
       console.error(e)
-      stato(`non riesco a salvare: ${e?.message || e}`, 'male')
+      stato(`non riesco a salvare: ${motivo(e)}`, 'male')
     } finally {
       occupato = false
       fileInput.value = ''
@@ -169,9 +244,13 @@ function costruisci() {
     if (!supporto) {
       lista.replaceChildren()
       vuoto.hidden = false
-      vuoto.textContent = 'questo browser non ha OPFS: serve un browser recente.'
+      vuotoTesto.textContent = 'questo browser non ha OPFS: serve un browser recente.'
       quota.textContent = 'spazio non disponibile'
+      quotaPct.textContent = '—'
       quotaBarra.style.width = '0%'
+      quotaTrack?.setAttribute('aria-valuenow', '0')
+      conteggio.textContent = 'vuoto'
+      promesse.hidden = true
       return
     }
     let voci = []
@@ -196,26 +275,37 @@ function costruisci() {
       icona.className = 'lab-zaino-icona'
       const est = v.nome.includes('.') ? v.nome.split('.').pop().slice(0, 4).toUpperCase() : 'FILE'
       icona.textContent = est
+      icona.dataset.tipo = est
+      const testo = document.createElement('span')
+      testo.className = 'zn-riga__testo'
       const nome = document.createElement('strong')
       nome.textContent = v.nome
       nome.title = v.nome
       const meta = document.createElement('small')
       meta.textContent = `${byte(v.file.size)} · ${quando(v.file.lastModified)}`
+      testo.append(nome, meta)
+      const azioni = document.createElement('span')
+      azioni.className = 'zn-riga__azioni'
       const bScarica = document.createElement('button')
       bScarica.type = 'button'
       bScarica.className = 'lab-tasto lab-tasto--fantasma lab-tasto--piccolo'
       bScarica.textContent = 'apri'
+      bScarica.setAttribute('aria-label', `apri ${v.nome}`)
       bScarica.addEventListener('click', () => scaricaFile(v))
       const bTogli = document.createElement('button')
       bTogli.type = 'button'
       bTogli.className = 'lab-tasto lab-tasto--pericolo lab-tasto--piccolo'
       bTogli.textContent = 'togli'
+      bTogli.setAttribute('aria-label', `togli ${v.nome}`)
       bTogli.addEventListener('click', () => togli(v.nome))
-      li.append(icona, nome, meta, bScarica, bTogli)
+      azioni.append(bScarica, bTogli)
+      li.append(icona, testo, azioni)
       lista.append(li)
     }
     vuoto.hidden = voci.length > 0
-    if (!voci.length) vuoto.textContent = 'lo zaino è vuoto: trascina qualcosa qui sopra.'
+    if (!voci.length) vuotoTesto.textContent = 'lo zaino è vuoto: trascina qualcosa nella scatola.'
+    promesse.hidden = voci.length === 0
+    conteggio.textContent = voci.length ? `${voci.length} file` : 'vuoto'
     await aggiornaQuota()
   }
 
@@ -224,10 +314,22 @@ function costruisci() {
       const stima = await navigator.storage.estimate()
       const usati = stima.usage || 0
       const totale = stima.quota || 0
+      const pct = totale ? Math.min(100, (usati / totale) * 100) : 0
       quota.textContent = totale ? `${byte(usati)} di ${byte(totale)}` : `${byte(usati)} usati`
-      quotaBarra.style.width = totale ? `${Math.min(100, (usati / totale) * 100).toFixed(2)}%` : '0%'
+      quotaPct.textContent = totale
+        ? (usati > 0 && pct < 0.01 ? '< 0,01%' : `${pct.toFixed(2).replace('.', ',')}%`)
+        : '—'
+      // anche una manciata di byte deve lasciare un segno sul righello
+      quotaBarra.style.width = totale && usati ? `${Math.max(0.6, pct)}%` : '0%'
+      if (quotaTrack) {
+        quotaTrack.setAttribute('aria-valuenow', pct.toFixed(2))
+        quotaTrack.setAttribute('aria-valuetext', totale ? `${byte(usati)} di ${byte(totale)}` : `${byte(usati)} usati`)
+      }
     } catch {
       quota.textContent = 'spazio non disponibile'
+      quotaPct.textContent = '—'
+      quotaBarra.style.width = '0%'
+      quotaTrack?.setAttribute('aria-valuenow', '0')
     }
   }
 
@@ -269,7 +371,7 @@ function costruisci() {
       const nomi = []
       for await (const [nome, h] of r.entries()) if (h.kind === 'file') nomi.push(nome)
       for (const nome of nomi) await r.removeEntry(nome)
-      stato(`tolti ${nomi.length} file`, 'ok')
+      stato(nomi.length ? `tolti ${nomi.length} file` : 'zaino vuoto', 'ok')
       await render()
     } catch (e) {
       console.error(e)
@@ -281,8 +383,12 @@ function costruisci() {
     if (!navigator.storage?.persist) return stato('questo browser non sa proteggere i dati', 'male')
     try {
       const già = await navigator.storage.persisted?.()
-      if (già) return stato('i dati sono già protetti', 'ok')
+      if (già) {
+        segnaProtetto(true)
+        return stato('i dati sono già protetti', 'ok')
+      }
       const ok = await navigator.storage.persist()
+      segnaProtetto(ok)
       stato(ok ? 'dati protetti: il browser non li cancella per fare spazio' : 'il browser non ha dato la protezione', ok ? 'ok' : 'attesa')
     } catch (e) {
       console.error(e)
@@ -332,9 +438,11 @@ function costruisci() {
   if (!supporto) {
     stato('questo browser non ha OPFS', 'male')
     drop.classList.add('is-off')
+    render()
   } else {
     stato('pronto · trascina i file')
     navigator.storage.persisted?.().then((ok) => {
+      if (ok) segnaProtetto(true)
       if (ok && !fermo) stato('dati protetti · trascina i file', 'ok')
     }).catch(() => {})
     render()
