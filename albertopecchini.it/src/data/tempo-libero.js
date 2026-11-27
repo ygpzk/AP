@@ -1,9 +1,12 @@
 // /studio/, l’ultima sezione: le domande personali.
 //
 // Le risposte le scrive Alberto nel documento «Studio — tempo libero e FAQ
-// personali (da compilare)» e si copiano qui così come sono. Una risposta vuota
-// non compare; un gruppo tutto vuoto sparisce, e con lui la sezione. Finché ne
-// mancano, la build le conta tra i segnaposto (vedi `tempoLiberoTodo`).
+// personali» e si copiano qui così come sono. Una risposta vuota non compare;
+// un gruppo tutto vuoto sparisce, e con lui la sezione.
+//
+// La sezione è facoltativa: finché non c'è nemmeno una risposta non compare e la
+// build non la segnala. Quando Alberto scrive le risposte, la sezione torna da
+// sola, senza toccare i template.
 //
 // Le domande personali, nell'ordine del documento. Si pubblicano solo le risposte scritte.
 export const faqPersonali = {
@@ -61,12 +64,3 @@ export const faqPersonali = {
   ],
 }
 
-const vuote = (voci) => voci.filter((v) => !v.a.trim()).length
-
-/** Per la build: quante risposte mancano ancora (elenco dei segnaposto). */
-export function tempoLiberoTodo() {
-  const todo = []
-  const faq = faqPersonali.gruppi.reduce((n, g) => n + vuote(g.voci), 0)
-  if (faq) todo.push(`/studio/ · domande personali: ${faq} risposte da compilare (src/data/tempo-libero.js)`)
-  return todo
-}

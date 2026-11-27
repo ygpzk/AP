@@ -23,7 +23,6 @@ import { sicurezzaPage, sicurezzaLd } from './pages/sicurezza.js'
 import { sicurezza } from '../data/sicurezza.js'
 import { unimore, materiaPath, bloccoPath, esercizioPath } from '../data/unimore.js'
 import { unimorePage, materiaPage, bloccoPage, esercizioPage } from './pages/unimore.js'
-import { tempoLiberoTodo } from '../data/tempo-libero.js'
 
 const websiteLd = () => ({
   '@context': 'https://schema.org',
@@ -324,7 +323,7 @@ export function renderSitemap() {
 
 export const renderRobots = () => `User-agent: *\nAllow: /\nDisallow: /404.html\n\nSitemap: ${abs('/sitemap.xml')}\n`
 
-export const placeholderReport = () => [...placeholders, ...tempoLiberoTodo()]
+export const placeholderReport = () => placeholders
 
 // ── Miniature /art/<slug>.svg ────────────────────────────────────────────────
 // Le copertine generate vengono esportate anche come file SVG autonomi, usati
